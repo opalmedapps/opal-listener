@@ -1,9 +1,9 @@
 var exports = module.exports = {};
 var Q = require('q');
 var sqlInterface = require('./sqlInterface.js');
-var utility = require('./utility.js');
-var validate = require('./validate.js');
-var queries = require('./queries.js');
+var utility = require('./../utility/utility.js');
+var validate = require('./../utility/validate.js');
+var queries = require('./../sql/queries.js');
 
 /*
  *@name login
