@@ -1,31 +1,15 @@
-var mysql       = require('mysql');
-var filesystem  =require('fs');
-var Q           =require('q');
-var utility = require('./utility.js');
-var queries=require('./queries.js');
-var config=require('./config.json');
-var CryptoJS=require('crypto-js');
-var buffer=require('buffer');
-var http = require('http');
-var request = require('request');
-var questionnaires = require('./patientQuestionnaires.js');
-var timeEstimate = require('./timeEstimate.js');
-var exec = require('child_process').exec;
+var mysql           =   require('mysql');
+var filesystem      =   require('fs');
+var Q               =   require('q');
+var queries         =   require('./../sql/queries.js');
+var config          =   require('./../config.json');
+var CryptoJS        =   require('crypto-js');
+var buffer          =   require('buffer');
+var http            =   require('http');
+var request         =   require('request');
+var questionnaires  =   require('./../questionnaires/patientQuestionnaires.js');
+// var exec            =   require('child_process').exec;
 
-
-
-
-
-/*var sqlConfig={
- port:'/Applications/MAMP/tmp/mysql/mysql.sock',
- user:'root',
- password:'root',
- database:'QPlusApp',
- dateStrings:true
- };
- /*
- *Connecting to mysql database
- */
 var sqlConfig={
     host:config.HOST,
     user:config.MYSQL_USERNAME,
@@ -121,9 +105,9 @@ var requestMappings=
          numberOfLastUpdated:0
          },*/
         /*'LabTests':{
-            sql:queries.patientTestResultsTableFields(),
-            numberOfLastUpdated:1
-        },*/
+         sql:queries.patientTestResultsTableFields(),
+         numberOfLastUpdated:1
+         },*/
         'TxTeamMessages':{
             sql:queries.patientTeamMessagesTableFields(),
             numberOfLastUpdated:2,
@@ -323,6 +307,8 @@ exports.checkCheckinInAria = function(requestObject)
     });
     return r.promise;
 };
+
+/*
 exports.checkinUpdate = function(requestObject)
 {
     var r = Q.defer();
@@ -351,6 +337,7 @@ exports.checkinUpdate = function(requestObject)
     //});
     return r.promise;
 };
+*/
 
 
 //Api call to checkin to an Appointment (Implementation in Aria is yet to be done)
@@ -847,25 +834,25 @@ function checkIntoAria(patientId, serNum, username)
     // getAppointmentAriaSer(username, serNum).then(function(res){
     //     console.log(res);
     //     var ariaSerNum = res[0].AppointmentAriaSer;
-        request(url,function(error, response, body)
+    request(url,function(error, response, body)
+    {
+        console.log(response);
+        if(error){console.log('line770,sqlInterface',error);r.reject(error);}
+        if(!error&&response.statusCode=='200')
         {
-            console.log(response);
-            if(error){console.log('line770,sqlInterface',error);r.reject(error);}
-            if(!error&&response.statusCode=='200')
-            {
-                var promises = [];
-                for (var i=0; i!=serNum.length; ++i){
-                    promises.push(checkIfCheckedIntoAriaHelper(serNum[i]));
-                }
-                Q.all(promises).then(function(response){
-                    r.resolve(response);
-                }).catch(function(error){
-                    console.log('line778',error);
-                    r.reject(error);
-                });
-                //r.resolve(true);
+            var promises = [];
+            for (var i=0; i!=serNum.length; ++i){
+                promises.push(checkIfCheckedIntoAriaHelper(serNum[i]));
             }
-        });
+            Q.all(promises).then(function(response){
+                r.resolve(response);
+            }).catch(function(error){
+                console.log('line778',error);
+                r.reject(error);
+            });
+            //r.resolve(true);
+        }
+    });
     // }).catch(function(error){
     //     console.log('line778',error);
     //     r.reject(error);
@@ -963,7 +950,7 @@ function combineResources(rows)
     return r.promise;
 }
 
-function planningStepsAndEstimates (userId, timestamp)
+/*function planningStepsAndEstimates (userId, timestamp)
 {
     var r = Q.defer();
     //Obtaing patient aria ser num
@@ -988,7 +975,7 @@ function planningStepsAndEstimates (userId, timestamp)
         });
     });
     return r.promise;
-}
+}*/
 
 exports.getLabResults = function(requestObject)
 {

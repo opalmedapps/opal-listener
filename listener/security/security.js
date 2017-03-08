@@ -1,6 +1,6 @@
-var sqlInterface=require('./sqlInterface.js');
+var sqlInterface=require('./../api/sqlInterface.js');
 var q=require('q');
-var utility=require('./utility.js');
+var utility=require('./../utility/utility.js');
 var CryptoJS=require('crypto-js');
 var exports=module.exports={};
 

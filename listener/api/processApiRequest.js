@@ -2,7 +2,7 @@ var exports=module.exports={};
 var Q=require('q');
 var apiPatientUpdate=require('./apiPatientUpdate.js');
 var apiHospitalUpdate=require('./apiHospitalUpdate.js');
-var validate=require('./validate.js');
+var validate=require('./../utility/validate.js');
 var API = {
     'Login':apiPatientUpdate.login,
     'Resume':apiPatientUpdate.resume,

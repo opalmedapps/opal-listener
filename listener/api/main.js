@@ -1,11 +1,7 @@
-var Firebase    =require('firebase'),
-    utility=require('./utility.js'),
-    credentials=require('./config.json'),
-    sqlInterface=require('./sqlInterface.js'),
-    resetPasswordApi=require('./security.js'),
-    CryptoJS=require('crypto-js'),
-    q=require('q'),
-    processApiRequest=require('./processApiRequest.js');
+var utility             =   require('./../utility/utility.js'),
+    sqlInterface        =   require('./sqlInterface.js'),
+    q                   =   require('q'),
+    processApiRequest   =   require('./processApiRequest.js');
 
 //This handles the api requests by formating the response obtain from the API
 exports.apiRequestFormatter=function(requestKey,requestObject)
