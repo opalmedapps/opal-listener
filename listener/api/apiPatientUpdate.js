@@ -13,7 +13,6 @@ var logger = require('./../logs/logger.js');
  *@description Grabs all the tables for the user and updates them to firebase
  */
 exports.login = function (requestObject) {
-    logger.log('debug', 'Getting patient fields');
     return sqlInterface.getPatientTableFields(requestObject.UserID, requestObject.Parameters.timestamp, requestObject.Parameters.Fields );
 };
 
@@ -43,7 +42,6 @@ exports.refresh = function (requestObject) {
     if(fields=='All'){
       sqlInterface.getPatientTableFields(UserId,timestamp).then(function(objectToFirebase){
         objectToFirebase.Data = utility.resolveEmptyResponse(objectToFirebase.Data);
-        //console.log('Hello World');
         r.resolve(objectToFirebase);
       }).catch(function(error){
         r.reject(error);

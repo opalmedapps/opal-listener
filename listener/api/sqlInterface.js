@@ -139,7 +139,6 @@ exports.runSqlQuery = function(query, parameters, processRawFunction) {
     let r = Q.defer();
 
     pool.getConnection(function(err, connection) {
-
         if(err) logger.log('error', err);
         logger.log('debug', 'grabbed connection: ' + connection);
         logger.log('info', 'Successfully grabbed connection from pool and about to perform following query: ', {query: query});
@@ -179,11 +178,7 @@ exports.getPatientTableFields = function(userId,timestamp,arrayTables) {
     var timestp = (timestamp)?timestamp:0;
     const objectToFirebase = {};
     let index = 0;
-    logger.log('debug', 'Preparing all promises for getting patient data: ' + JSON.stringify(arrayTables));
     Q.all(preparePromiseArrayFields(userId,timestp,arrayTables)).then(function(response){
-
-        logger.log('debug', 'Successfully finished all queries: ' + JSON.stringify(response));
-
         if(arrayTables) {
             for (let i = 0; i < arrayTables.length; i++) {
                 objectToFirebase[arrayTables[i]]=response[index];
@@ -303,66 +298,11 @@ exports.sendMessage=function(requestObject) {
 	return exports.runSqlQuery(queries.sendMessage(requestObject));
 };
 
+
 /**
- * checkCheckinInAria
- * @desc Check if user is already checkedin
- * @param requestObject
+ * CHECKIN FUNCTIONALITY
+ * ============================================================
  */
-exports.checkCheckinInAria = function(requestObject) {
-    const r = Q.defer();
-    const serNum = requestObject.Parameters.AppointmentSerNum;
-    const username = requestObject.UserID;
-
-    //Get the appointment aria ser
-    getAppointmentAriaSer(username, serNum).then(function(response){
-        const ariaSerNum = response[0].AppointmentAriaSer;
-
-        //Check using Ackeem's script whether the patient has checked in at the kiosk
-        checkIfCheckedIntoAriaHelper(ariaSerNum).then(function(success){
-
-            //TODO: THIS SHOULD HANDLED IN THE CASE CHECKIN QUERY DOES NOT SUCCEED???
-            //Check in the user into mysql if they have indeed checkedin at kiosk
-            if(success) exports.runSqlQuery(queries.checkin(),['Kiosk', serNum, username]);
-            r.resolve({Response:'success', Data:{'CheckedIn':success, AppointmentSerNum:serNum}});
-
-        }).catch(function(error){
-            //Error occur while checking patient status
-            r.reject({Response:'error', Reason:error});
-        });
-    });
-    return r.promise;
-};
-
-/*
-exports.checkinUpdate = function(requestObject)
-{
-    var r = Q.defer();
-    connection.query(queries.getAppointmentAriaSer(),[requestObject.UserID,requestObject.Parameters.AppointmentSerNum],function(error,rows,fields)
-    {
-        if(error||rows.length==0) r.reject({'Response':'error'});
-        //console.log('AppAriaSerNums',rows);
-        var appointmentAriaSer = rows[0].AppointmentAriaSer;
-        exports.getTimeEstimate(appointmentAriaSer).then(function(data)
-        {
-            r.resolve(data);
-        }).catch(function(error)
-        {
-            r.reject({'Response':'Problem resolving time estimate.'});
-        });
-    });
-    // exports.runSqlQuery(queries.getAppointmentAriaSer(),[requestObject.UserID,requestObject.Parameters.AppointmentSerNum], exports.getTimeEstimate).then(
-    // function(response)
-    // {
-    //   //console.log(response);
-    //   r.resolve({Response:'success',Data:response});
-    // }).catch(function(error)
-    // {
-    //   r.reject({Response:'error',Reason:'Checkin update error due to '+error});
-    //});
-    return r.promise;
-};
-*/
-
 
 /**
  * checkIn
@@ -372,48 +312,76 @@ exports.checkinUpdate = function(requestObject)
  */
 exports.checkIn=function(requestObject) {
     const r = Q.defer();
-    const serNum = requestObject.Parameters.AppointmentSerNum;
-    const latitude = requestObject.Parameters.Latitude;
-    const longitude = requestObject.Parameters.Longitude;
-    const accuracy = requestObject.Parameters.Accuracy;
-    const username = requestObject.UserID;
-    const session = requestObject.Token;
-    const deviceId = requestObject.DeviceId;
+    const patientId = requestObject.Parameters.PatientId;
+    const patientSerNum = requestObject.Parameters.PatientSerNum;
 
-    //Getting the appointment ariaSer to checkin to aria
-    getAriaPatientId(username).then(function(response){
-        const patientId = response[0].PatientId;
-
-        //Check in to aria using Johns script
-        checkIntoAria(patientId,serNum, username).then(function(response){
-            if(response) {
-                //If successfully checked in change field in mysql
-                let promises = [];
-
-                for (let i=0; i!==serNum.length; ++i){
-                    promises.push(
-                        exports.runSqlQuery(queries.checkin(),[session, serNum[i], username])
-                            .then(exports.runSqlQuery(queries.logCheckin(),[serNum[i], deviceId,latitude, longitude, accuracy, new Date()])));
-                }
-
-                Q.all(promises)
-                    .then(function(response){
-                        r.resolve({Response:'success'});
-                    })
-                    .catch(function(error){
-                        r.reject({Response:'error',Reason:'CheckIn error due to '+error});
-                    });
-            }else{
-                r.reject({Response:'error', Reason:'Unable to checkin Aria'});
-            }
-        }).catch(function(error){
-            r.reject({Response:'error', Reason:error});
-        });
-    }).catch(function(error){
-        r.reject({Response:'error', Reason:'Error grabbing aria ser num from aria '+ error});
-    });
+    hasAlreadyAttemptedCheckin(patientSerNum)
+        .then(result => {
+            if(result === false){
+                //Check in to aria using Johns script
+                checkIntoAriaAndMedi(patientId).then(() => {
+                    //If successfully checked in, grab all the appointments that have been checked into in order to notify app
+                    getCheckedInAppointments(patientSerNum)
+                        .then(appts => r.resolve(appts))
+                        .catch(err => r.reject({Response:'error', Reason:'CheckIn error due to '+ err}));
+                }).catch(error => r.reject({Response:'error', Reason:error}));
+            } else r.resolve([]);
+        }).catch(err=> r.reject({Response:'error', Reason:'Error determining whether this patient has checked in or not due to : '+ error}));
     return r.promise;
 };
+
+
+/**
+ * Calls John's PHP script in order to check in patient on Aria and Medivisit
+ * @param patientId
+ * @param apptSerNum
+ * @returns {Promise}
+ */
+function checkIntoAriaAndMedi(patientId) {
+    let r = Q.defer();
+    let url = config.CHECKIN_PATH.replace('{ID}', patientId);
+
+    request(url,function(error, response, body) {
+        logger.log('debug', 'checked into aria and medi response: ' + JSON.stringify(response));
+        logger.log('debug', 'checked into aria and medi body: ' + JSON.stringify(body));
+
+        if(error) r.reject(error);
+        else r.resolve(response);
+    });
+    return r.promise;
+}
+
+/**
+ * Queries the database to see if any patient push notifications exist for the user today, hence whether or not they have attempted to check in already
+ * @param patientSerNum
+ * @returns {Promise}
+ */
+function hasAlreadyAttemptedCheckin(patientSerNum){
+    return new Promise((resolve, reject) => {
+        if(!patientSerNum) reject("No Patient SerNum Provided");
+        else {
+            exports.runSqlQuery(queries.getPatientCheckinPushNotifications(), [patientSerNum]).then((rows) => {
+                if (rows.length === 0) resolve(false);
+                else resolve(true);
+            }).catch((err) => {
+                reject({Response: 'error', Reason: err});
+            })
+        }
+    });
+}
+
+/**
+ * Gets and returns all of a patients appointments on today's date
+ * @param patientSerNum
+ * @return {Promise}
+ */
+function getCheckedInAppointments(patientSerNum){
+    return new Promise((resolve, reject) => {
+        exports.runSqlQuery(queries.getTodaysCheckedInAppointments(), [patientSerNum])
+            .then(rows => resolve(rows))
+            .catch(err => reject({Response: 'error', Reason: err}));
+    })
+}
 
 /**
  * getDocumentsContent
@@ -535,11 +503,6 @@ exports.updateDeviceIdentifier = function(requestObject, parameters) {
     let r = Q.defer();
 
     logger.log('debug', 'in update device id with : ' + JSON.stringify(requestObject));
-    //Validating parameters
-    // if(!requestObject.Parameters || !requestObject.Parameters.registrationId) {
-    //     r.reject({Response:'error', Reason:'Invalid parameters'});
-    //     return r.promise;
-    // }
 
     let identifiers = parameters || requestObject.Parameters;
     let deviceType = null;
@@ -971,63 +934,17 @@ function getAppointmentAriaSer(username, appSerNum) {
     return exports.runSqlQuery(queries.getAppointmentAriaSer(),[username, appSerNum]);
 }
 
-function getAriaPatientId(username) {
+/**
+ * @name getPatientId
+ * @desc gets the patients Aria sernum from DB
+ * @param username
+ * @return {Promise}
+ */
+function getPatientId(username) {
     return exports.runSqlQuery(queries.getPatientId(),[username]);
 }
 
-//Checks user into Aria
-function checkIntoAria(patientId, serNum, username) {
-    var r = Q.defer();
-    var url = config.CHECKIN_PATH+patientId;
-    //making request to checkin
-    //console.log(url, username, serNum);
-    // getAppointmentAriaSer(username, serNum).then(function(res){
-    //     //console.log(res);
-    //     var ariaSerNum = res[0].AppointmentAriaSer;
-    request(url,function(error, response, body)
-    {
-        //console.log(response);
-        if(error){}//console.log('line770,sqlInterface',error);r.reject(error);}
-        if(!error&&response.statusCode=='200')
-        {
-            var promises = [];
-            for (var i=0; i!=serNum.length; ++i){
-                promises.push(checkIfCheckedIntoAriaHelper(serNum[i]));
-            }
-            Q.all(promises).then(function(response){
-                r.resolve(response);
-            }).catch(function(error){
-                //console.log('line778',error);
-                r.reject(error);
-            });
-            //r.resolve(true);
-        }
-    });
-    // }).catch(function(error){
-    //     //console.log('line778',error);
-    //     r.reject(error);
-    // });
-    return r.promise;
-}
 
-//Check if checked in for an appointment in aria
-function checkIfCheckedIntoAriaHelper(patientActivitySerNum)
-{
-    var r = Q.defer();
-    var url = config.VERIFYCHECKIN_PATH+patientActivitySerNum;
-    request(url,function(error, response, body)
-    {
-        if(error){}//console.log('line811,sqlInterface',error);r.reject(error);}
-        if(!error&&response.statusCode=='200')
-        {
-            body = JSON.parse(body);
-            //console.log("checkin checks bro", body);
-            if(body.length>0 && body[0].CheckedInFlag == 1) r.resolve(true);
-            else r.resolve(false);
-        }
-    });
-    return r.promise;
-}
 //Get time estimate from Ackeem's scripts
 exports.getTimeEstimate = function(appointmentAriaSer)
 {
@@ -1215,24 +1132,102 @@ exports.getQuestionnaires = function(requestObject){
 };
 
 /**
+ * NOTIFICATIONS FUNCTIONALITY
+ * =====================================
+ */
+
+/**
  * Returns a promise containing all the notifications
  * @param {object} requestObject the request
  * @returns {Promise} Returns a promise that contains the notification data
  */
 
 exports.getAllNotifications = function(requestObject){
-    "use strict";
-    var r = Q.defer();
-    exports.runSqlQuery(queries.getAllNotifications(), [requestObject.UserID,requestObject.Timestamp,requestObject.Timestamp])
-        .then(function (queryRows) {
-            //console.log(queryRows);
-            var obj = {};
-            obj.Data = queryRows;
-            r.resolve(obj);
+    let r = Q.defer();
+    exports.runSqlQuery(queries.getAllNotifications(), [requestObject.UserID])
+        .then(rows => r.resolve({Data: rows})
+        .catch(err => r.reject(err)));
+    return r.promise
+};
+
+/**
+ * Returns a promise containing all new notifications
+ * @param {object} requestObject the request
+ * @returns {Promise} Returns a promise that contains the notification data
+ */
+
+exports.getNewNotifications = function(requestObject){
+    let r = Q.defer();
+    exports.runSqlQuery(queries.getNewNotifications(), [requestObject.UserID, requestObject.Parameters.LastUpdated, requestObject.Parameters.LastUpdated])
+        .then(rows => {
+
+            logger.log('debug', 'new notifications: ' + JSON.stringify(rows));
+
+            if(rows.length > 0){
+                assocNotificationsWithItems(rows, requestObject)
+                    .then(tuples => r.resolve({Data:tuples}))
+                    .catch(err => r.reject(err))
+            } else r.resolve({Data: rows});
         })
-        .catch(function (error) {
+        .catch(error => {
             r.reject(error);
         });
 
     return r.promise
 };
+
+function assocNotificationsWithItems(notifications, requestObject){
+
+    return new Promise((resolve, reject) => {
+        const itemList = ['Document', 'Announcement', 'TxTeamMessage', 'EducationalMaterial'];
+
+        let fields = [];
+        fields = notifications.map(notif => {
+            if(itemList.includes(notif.NotificationType) && !fields.includes(notif.NotificationType)) return notif.NotificationType + 's'
+        });
+
+        if(fields.length > 0) {
+            refresh(fields, requestObject)
+                .then(results => {
+                    logger.log('debug', 'results: ' + JSON.stringify(results));
+                    if(!!results.Data){
+                        results = results.Data;
+
+                        let resultsArray = [];
+                        Object.keys(results).map(key => resultsArray = resultsArray.concat(results[key]));
+
+                        let tuples = notifications.map(notif => {
+                            let tuple = [];
+                            let item = resultsArray.find(result => {
+                                logger.log('debug', 'result: ' + JSON.stringify(result));
+                                let serNumField = notif.NotificationType + "SerNum";
+                                if(result.hasOwnProperty(serNumField)) return result[serNumField] === notif.RefTableRowSerNum;
+                                return false;
+                            });
+                            tuple.push(notif);
+                            tuple.push(item);
+                            return tuple;
+                        });
+                        resolve(tuples);
+                    }
+                    reject({Response:'error', Reason:'Could not associate any notifications to its content'});
+                })
+                .catch(err => resolve(err))
+        } else resolve(notifications)
+    })
+}
+
+function refresh (fields, requestObject) {
+    let r = Q.defer();
+    let UserId=requestObject.UserID;
+    let today = new Date();
+    let timestamp = today.setHours(0,0,0,0);
+
+    exports.getPatientTableFields(UserId, timestamp, fields).then(rows => {
+            rows.Data= utility.resolveEmptyResponse(rows.Data);
+            r.resolve(rows);
+        })
+        .catch(err => r.reject(err));
+
+    return r.promise;
+}
