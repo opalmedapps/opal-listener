@@ -23,6 +23,9 @@ module.exports = {
  * @returns {Promise}
  */
 function requestFormatter({key,request}) {
+
+	logger.log('debug', 'request object in request formatter: ' + JSON.stringify(request));
+
 	return RequestValidator.validate(key, request)
 		.then( opalReq => { //opalReq of type, OpalRequest
 			return processApiRequest.processRequest(opalReq.toLegacy()).then((data)=>
@@ -34,7 +37,7 @@ function requestFormatter({key,request}) {
 				return response.toLegacy();
 			}).catch((err)=>{
 				logger.log('error', 'Error processing request', err);
-				let response = new OpalResponseError( 2, 'Server error, report the error to the hospital', opalReq, err);
+				let response = new OpalResponseError( 2, 'Server error, report the error to the hospital', opalReq, JSON.stringify(err));
 				return response.toLegacy();
 			});
 		}).catch( err => {
@@ -64,7 +67,6 @@ function requestLegacyWrapper(requestKey, requestObject) {
  * @returns {Promise}
  */
 function apiRequestFormatter(requestKey,requestObject) {
-    logger.log('debug', 'Reached API request formatter');
 	return  requestLegacyWrapper(requestKey, requestObject);
 }
 
