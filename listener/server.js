@@ -6,6 +6,15 @@
  * Copyright    :   Copyright 2016, HIG, All rights reserved.
  * Licence      :   This file is subject to the terms and conditions defined in
  *                  file 'LICENSE.txt', which is part of this source code package.
+ *
+ * *********************************************
+ * Modified By    	: Yick Mo
+ * Modified Date	: 2017-12-15
+ * NOTES				: Added the Heart Beat Database
+ * 
+ * Important		: Do not forget to change "/dev3" back to "/dev2" before merging
+ * *********************************************
+ *
  */
 
 const mainRequestApi    = require('./api/main.js');
@@ -35,8 +44,8 @@ if(FIREBASE_DEBUG) admin.database.enableLogging(true);
 
 // Get reference to correct data element
 const db = admin.database();
-const ref = db.ref("/dev2");
-const heartbeatRef = db.ref("/dev2/users/heartbeat");
+const ref = db.ref("/dev3");
+const heartbeatRef = db.ref("/dev3/users/heartbeat");
 
 logger.log('debug', 'INITIALIZED APP IN DEBUG MODE');
 
@@ -292,11 +301,18 @@ function handleHeartBeat(data){
  *  1) clearRequest: clears request from firebase that have not been handled within 5 minute period
  *  2) clearResponses: clears responses from firebase that have not been handled within 5 minute period
  *  3) heartbeat: sends heartbeat request to firebase every 30 secs to get information about listener
- */
+  *
+ * 4) ClearDBRequest: clears the heart beat db request from firebase every 2 minutes
+ * 5) HeartbeatDB: checks if firebase is connected and then get the stats of the MySQL every 30 seconds
+ *
+*/
 function spawnCronJobs(){
     spawnClearRequest();
     spawnClearResponses();
     spawnHeartBeat();
+
+	spawnClearDBRequest();
+	spawnHeartBeatDB();
 }
 
 /**
@@ -325,6 +341,37 @@ function spawnClearRequest(){
 }
 
 /**
+ * @name spawnClearDBRequest
+ * @desc creates clearDBRequest process that clears requests from firebase every 5 minutes
+ *
+ * By    	: Yick Mo
+ * Date	: 2017-12-15 
+ * NOTES	: This is a copy from spawnClearRequest and modified for clearDBRequest
+ *
+ */
+function spawnClearDBRequest(){
+    let clearDBRequests = cp.fork(`${__dirname}/cron/clearDBRequests.js`);
+
+    // Handles clearRequest cron events
+    clearDBRequests.on('message', (m) => {
+        logger.log('info', 'PARENT got message:', m);
+    });
+
+    clearDBRequests.on('error', (m) => {
+        logger.log('error','clearRequest cron error:', m);
+        clearDBRequests.kill();
+        if(clearDBRequests.killed){
+            clearDBRequests = cp.fork(`${__dirname}/cron/clearDBRequests.js`);
+        }
+    });
+
+    process.on('exit', function () {
+        clearDBRequests.kill();
+    });
+}
+
+
+/**
  * @name spawnClearResponse
  * @desc creates clearResponse process that clears responses from firebase every 5 minutes
  */
@@ -350,7 +397,6 @@ function spawnClearResponses(){
     });
 }
 
-
 function spawnHeartBeat(){
     // create new Node child processs
     let heartBeat = cp.fork(`${__dirname}/cron/heartBeat.js`);
@@ -371,6 +417,36 @@ function spawnHeartBeat(){
 
     process.on('exit', function () {
         heartBeat.kill();
+    });
+
+}
+
+/*********************************************
+ * By    	: Yick Mo
+ * Date	: 2017-12-15 
+ * NOTES	: This is a copy from spawnHeartBeat and modified for spawnHeartBeatDB
+ *
+ *********************************************/
+function spawnHeartBeatDB(){
+    // create new Node child processs
+    let heartBeatDB = cp.fork(`${__dirname}/cron/heartBeatDB.js`);
+
+    // Handles heartBeat cron events
+    heartBeatDB.on('message', (m) => {
+        logger.log('info','PARENT DB got message:', m);
+    });
+
+    heartBeatDB.on('error', (m) => {
+        logger.log('error','heartBeatDB cron error:', m);
+
+        heartBeatDB.kill();
+        if(heartBeatDB.killed){
+            heartBeatDB = cp.fork(`${__dirname}/cron/heartBeatDB.js`);
+        }
+    });
+
+    process.on('exit', function () {
+        heartBeatDB.kill();
     });
 
 }
