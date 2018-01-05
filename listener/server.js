@@ -99,8 +99,10 @@ function handleRequest(requestType, snapshot){
 
     const headers = {key: snapshot.key, objectRequest: snapshot.val()};
     processRequest(headers).then(function(response){
+
+        console.log("response", response);
         // Log before uploading to Firebase. Check that it was not a simple log
-        if (response.Headers.RequestObject.Request !== 'Log') logResponse(response);
+        // if (response.Headers.RequestObject.Request !== 'Log') logResponse(response);
         uploadToFirebase(response, requestType);
     });
 }
