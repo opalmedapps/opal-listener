@@ -8,6 +8,8 @@
 const logger            = require('../logs/logger.js');
 const config            = require('../config.json');
 const admin             = require("firebase-admin");
+const gTimestamp	= 300000;
+// const gTimestamp	= 30000; // For Testing
 
 // Initialize firebase connection
 const serviceAccount = require(config.FIREBASE_ADMIN_KEY);
@@ -25,7 +27,7 @@ process.send('Clear Response Cron Successfully Initialized');
 // Periodically clear requests that are still on Firebase
 setInterval(function(){
     clearResponses();
-}, 300000);
+}, gTimestamp);
 
 /**
  * clearTimeoutRequests
@@ -38,7 +40,7 @@ function clearResponses() {
         for (const user in usersData) {
             for(const requestKey in usersData[user])
             {
-                if(usersData[user][requestKey].hasOwnProperty('Timestamp')&&now-usersData[user][requestKey].Timestamp>300000)
+                if(usersData[user][requestKey].hasOwnProperty('Timestamp')&&now-usersData[user][requestKey].Timestamp>gTimestamp)
                 {
                     logger.log('info','Deleting leftover response on firebase', {
                         request: requestKey
