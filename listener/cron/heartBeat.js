@@ -27,7 +27,7 @@ admin.initializeApp({
     databaseURL: config.DATABASE_URL
 });
 const db = admin.database();
-const ref = db.ref("/dev3/requests");
+const ref = db.ref("/dev2/requests");
 
 
 /**
