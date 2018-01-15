@@ -28,7 +28,7 @@ admin.initializeApp({
 
 // Get reference to correct data element
 const db = admin.database();
-const ref = db.ref("/dev3");
+const ref = db.ref("/dev2");
 
 process.send('Clear DB Request Cron Successfully Initialized');
 
