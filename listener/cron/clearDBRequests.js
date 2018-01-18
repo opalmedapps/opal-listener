@@ -16,8 +16,6 @@
 const logger            = require('../logs/logger.js');
 const config             = require('../config.json');
 const admin             = require("firebase-admin");
-const gTimestamp	= 300000;
-// const gTimestamp	= 30000; // For Testing
 
 // Initialize firebase connection
 const serviceAccount = require(config.FIREBASE_ADMIN_KEY);
@@ -37,7 +35,7 @@ process.send('Clear DB Request Cron Successfully Initialized');
 // The intervals are in ms, so 120000 is 120 seconds which is 2 minutes
 setInterval(function(){
     clearRequests();
-}, gTimestamp);
+}, 300000);
 
 /**
  * clearRequests
@@ -51,7 +49,7 @@ function clearRequests(){
         const now = (new Date()).getTime();
         const requestData = snapshot.val();
         for (const requestKey in requestData) {
-            if(requestData[requestKey].hasOwnProperty('Timestamp')&&now-requestData[requestKey].Timestamp>gTimestamp) {
+            if(requestData[requestKey].hasOwnProperty('Timestamp')&&now-requestData[requestKey].Timestamp>300000) {
                 logger.log('info', 'Deleting leftover DB request on firebase', {
                     requestKey: requestKey
                 });
