@@ -14,8 +14,6 @@ const admin    = require("firebase-admin");
 const config   = require('./../config.json');
 const logger   = require('./../logs/logger');
 
-const gTimestamp	= 600000;
-// const gTimestamp	= 60000; // For Testing
 
 /**
  * FIREBASE INITIALIZATION
@@ -56,7 +54,7 @@ function init(){
 
     setInterval(() => {
         startHeartBeat()
-    }, gTimestamp)
+    }, 600000)
 
 }
 
