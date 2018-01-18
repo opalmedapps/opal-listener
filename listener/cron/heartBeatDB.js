@@ -18,9 +18,6 @@ const logger	= require('./../logs/logger');
 const mysql		= require('mysql');
 const q			= require("q");
 
-const gTimestamp	= 600000;
-// const gTimestamp	= 60000; // For Testing
-
 
 /**
  * FIREBASE INITIALIZATION
@@ -112,7 +109,7 @@ function init(){
 
 	setInterval(() => {
         startHeartBeatDB()
-    }, gTimestamp);
+    }, 600000);
 }
 
 /**
