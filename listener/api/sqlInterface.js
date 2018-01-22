@@ -1210,7 +1210,7 @@ function assocNotificationsWithItems(notifications, requestObject){
             }
         });
 
-        
+
         if(fields.length > 0) {
             refresh(fields, requestObject)
                 .then(results => {
