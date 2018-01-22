@@ -65,7 +65,13 @@ exports.refresh = function (requestObject) {
 //Check checkin API call
 exports.checkCheckin = function(requestObject)
 {
-  return sqlInterface.checkCheckinInAria(requestObject);
+    var r = Q.defer();
+
+    sqlInterface.checkCheckin(requestObject.Parameters.PatientSerNum)
+        .then(function(hasAttempted){ r.resolve({Data: { AttemptedCheckin: hasAttempted}}) })
+        .catch(function(err){ r.reject(err) });
+
+    return r.promise;
 };
 
 //Get checkin update API call
