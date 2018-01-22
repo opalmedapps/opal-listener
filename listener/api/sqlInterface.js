@@ -288,7 +288,7 @@ exports.updateReadStatus=function(userId, parameters)
     }else{
 	    r.reject({Response:'error',Reason:'Invalid read status field'});
     }
-	exports.runSqlQuery(queries.updateReadStatus(),[table, table, serNum, parameters.Id, table, userId])
+	exports.runSqlQuery(queries.updateReadStatus(),[table, table, serNum])
     .then(()=>{
 	    r.resolve({Response:'success'});
     }).catch((err)=>{
