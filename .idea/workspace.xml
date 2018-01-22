@@ -1,0 +1,719 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project version="4">
+  <component name="ChangeListManager">
+    <list default="true" id="d59ef117-463d-4a5a-945b-009109a6b14e" name="Default" comment="">
+      <change beforePath="" afterPath="$PROJECT_DIR$/.idea/misc.xml" />
+      <change beforePath="$PROJECT_DIR$/listener/api/sqlInterface.js" afterPath="$PROJECT_DIR$/listener/api/sqlInterface.js" />
+    </list>
+    <ignored path="$PROJECT_DIR$/.tmp/" />
+    <ignored path="$PROJECT_DIR$/temp/" />
+    <ignored path="$PROJECT_DIR$/tmp/" />
+    <option name="EXCLUDED_CONVERTED_TO_IGNORED" value="true" />
+    <option name="TRACKING_ENABLED" value="true" />
+    <option name="SHOW_DIALOG" value="false" />
+    <option name="HIGHLIGHT_CONFLICTS" value="true" />
+    <option name="HIGHLIGHT_NON_ACTIVE_CHANGELIST" value="false" />
+    <option name="LAST_RESOLUTION" value="IGNORE" />
+  </component>
+  <component name="FileEditorManager">
+    <leaf SIDE_TABS_SIZE_LIMIT_KEY="300">
+      <file leaf-file-name="server.js" pinned="false" current-in-tab="false">
+        <entry file="file://$PROJECT_DIR$/listener/server.js">
+          <provider selected="true" editor-type-id="text-editor">
+            <state relative-caret-position="2745">
+              <caret line="191" column="8" lean-forward="false" selection-start-line="191" selection-start-column="8" selection-end-line="191" selection-end-column="8" />
+              <folding>
+                <marker date="1516380553673" expanded="false" signature="0:478" ph="/*...*/" />
+                <marker date="1516380553673" expanded="true" signature="1001:1109" ph="/** INITIALIZE ...*/" />
+                <marker date="1516380553673" expanded="true" signature="1224:1313" ph="{&quot;databaseURL&quot;: config.DATABASE_URL...}" />
+                <marker date="1516380553673" expanded="true" signature="1669:1742" ph="{...}" />
+                <marker date="1516380553673" expanded="true" signature="1718:1738" ph="{&quot;error&quot;: error...}" />
+                <marker date="1516380553673" expanded="true" signature="1884:1991" ph="/** FUNCTIONS ...*/" />
+                <marker date="1516380553673" expanded="true" signature="1993:2111" ph="/** listenForRequest ...*/" />
+                <marker date="1516380553673" expanded="true" signature="2150:2893" ph="{...}" />
+                <marker date="1516380553673" expanded="true" signature="2363:2827" ph="{...}" />
+                <marker date="1516380553673" expanded="true" signature="2613:2743" ph="{...}" />
+                <marker date="1516380553673" expanded="true" signature="2749:2817" ph="{...}" />
+                <marker date="1516380553673" expanded="true" signature="2852:2889" ph="{...}" />
+                <marker date="1516380553673" expanded="true" signature="2895:3009" ph="/** handleRequest ...*/" />
+                <marker date="1516380553673" expanded="true" signature="3055:3454" ph="{...}" />
+                <marker date="1516380553673" expanded="true" signature="3226:3450" ph="{...}" />
+                <marker date="1516380553673" expanded="true" signature="3236:3395" ph="//..." />
+                <marker date="1516380553673" expanded="true" signature="3456:3558" ph="/** logResponse ...*/" />
+                <marker date="1516380553673" expanded="true" signature="3589:4199" ph="{...}" />
+                <marker date="1516380553673" expanded="true" signature="3719:4197" ph="{...}" />
+                <marker date="1516380553673" expanded="true" signature="3765:4102" ph="{&quot;deviceID&quot;: response.Headers.RequestObject.DeviceId...}" />
+                <marker date="1516380553673" expanded="true" signature="4201:4329" ph="/** logError ...*/" />
+                <marker date="1516380553673" expanded="true" signature="4380:4638" ph="{...}" />
+                <marker date="1516380553673" expanded="true" signature="4459:4634" ph="{&quot;error&quot;: err...}" />
+                <marker date="1516380553673" expanded="true" signature="4640:4773" ph="/** processRequest ...*/" />
+                <marker date="1516380553673" expanded="true" signature="4806:6001" ph="{...}" />
+                <marker date="1516380553673" expanded="true" signature="5167:5669" ph="{...}" />
+                <marker date="1516380553673" expanded="true" signature="5348:5514" ph="{...}" />
+                <marker date="1516380553673" expanded="true" signature="5552:5661" ph="{...}" />
+                <marker date="1516380553673" expanded="true" signature="5675:5977" ph="{...}" />
+                <marker date="1516380553673" expanded="true" signature="5842:5970" ph="{...}" />
+                <marker date="1516380553673" expanded="true" signature="6003:6141" ph="/** encryptResponse ...*/" />
+                <marker date="1516380553673" expanded="true" signature="6177:6477" ph="{...}" />
+                <marker date="1516380553673" expanded="true" signature="6370:6431" ph="{...}" />
+                <marker date="1516380553673" expanded="true" signature="6435:6475" ph="{...}" />
+                <marker date="1516380553673" expanded="true" signature="6479:6592" ph="/** uploadToFirebase ...*/" />
+                <marker date="1516380553673" expanded="true" signature="6634:7778" ph="{...}" />
+                <marker date="1516380553673" expanded="true" signature="6723:6873" ph="{...}" />
+                <marker date="1516380553673" expanded="true" signature="6974:6987" ph="{...}" />
+                <marker date="1516380553673" expanded="true" signature="7101:7223" ph="{...}" />
+                <marker date="1516380553673" expanded="true" signature="7266:7321" ph="{...}" />
+                <marker date="1516380553673" expanded="true" signature="7445:7556" ph="{...}" />
+                <marker date="1516380553673" expanded="true" signature="7581:7668" ph="{...}" />
+                <marker date="1516380553673" expanded="true" signature="7689:7700" ph="{...}" />
+                <marker date="1516380553673" expanded="true" signature="7780:7903" ph="/** Sets the request reference to null after uploading response ...*/" />
+                <marker date="1516380553673" expanded="true" signature="7943:8192" ph="{...}" />
+                <marker date="1516380553673" expanded="true" signature="8122:8188" ph="{...}" />
+                <marker date="1516380553673" expanded="true" signature="8224:8572" ph="{...}" />
+                <marker date="1516380553673" expanded="true" signature="8491:8511" ph="{...}" />
+                <marker date="1516380553673" expanded="true" signature="8575:8677" ph="/** CRON ...*/" />
+                <marker date="1516380553673" expanded="true" signature="8679:9019" ph="/** Spawns three cron jobs: ...*/" />
+                <marker date="1516380553673" expanded="true" signature="9044:9121" ph="{...}" />
+                <marker date="1516380553673" expanded="true" signature="9123:9246" ph="/** @name spawnClearRequest ...*/" />
+                <marker date="1516380553673" expanded="true" signature="9275:9825" ph="{...}" />
+                <marker date="1516380553673" expanded="true" signature="9428:9444" ph="{...}" />
+                <marker date="1516380553673" expanded="true" signature="9530:9546" ph="{...}" />
+                <marker date="1516380553673" expanded="true" signature="9653:9739" ph="{...}" />
+                <marker date="1516380553673" expanded="true" signature="9784:9821" ph="{...}" />
+                <marker date="1516380553673" expanded="true" signature="9827:9953" ph="/** @name spawnClearResponse ...*/" />
+                <marker date="1516380553673" expanded="true" signature="9984:10546" ph="{...}" />
+                <marker date="1516380553673" expanded="true" signature="10142:10158" ph="{...}" />
+                <marker date="1516380553673" expanded="true" signature="10244:10260" ph="{...}" />
+                <marker date="1516380553673" expanded="true" signature="10371:10459" ph="{...}" />
+                <marker date="1516380553673" expanded="true" signature="10504:10542" ph="{...}" />
+                <marker date="1516380553673" expanded="true" signature="10574:11121" ph="{...}" />
+                <marker date="1516380553673" expanded="true" signature="10750:10766" ph="{...}" />
+                <marker date="1516380553673" expanded="true" signature="10847:10863" ph="{...}" />
+                <marker date="1516380553673" expanded="true" signature="10960:11038" ph="{...}" />
+                <marker date="1516380553673" expanded="true" signature="11083:11116" ph="{...}" />
+              </folding>
+            </state>
+          </provider>
+        </entry>
+      </file>
+      <file leaf-file-name="sqlInterface.js" pinned="false" current-in-tab="true">
+        <entry file="file://$PROJECT_DIR$/listener/api/sqlInterface.js">
+          <provider selected="true" editor-type-id="text-editor">
+            <state relative-caret-position="1136">
+              <caret line="384" column="0" lean-forward="true" selection-start-line="384" selection-start-column="0" selection-end-line="384" selection-end-column="0" />
+              <folding />
+            </state>
+          </provider>
+        </entry>
+      </file>
+      <file leaf-file-name="main.js" pinned="false" current-in-tab="false">
+        <entry file="file://$PROJECT_DIR$/listener/api/main.js">
+          <provider selected="true" editor-type-id="text-editor">
+            <state relative-caret-position="-129">
+              <caret line="0" column="0" lean-forward="false" selection-start-line="0" selection-start-column="0" selection-end-line="0" selection-end-column="0" />
+              <folding />
+            </state>
+          </provider>
+        </entry>
+      </file>
+      <file leaf-file-name="queries.js" pinned="false" current-in-tab="false">
+        <entry file="file://$PROJECT_DIR$/listener/sql/queries.js">
+          <provider selected="true" editor-type-id="text-editor">
+            <state relative-caret-position="-911">
+              <caret line="0" column="0" lean-forward="false" selection-start-line="0" selection-start-column="0" selection-end-line="0" selection-end-column="0" />
+              <folding />
+            </state>
+          </provider>
+        </entry>
+      </file>
+    </leaf>
+  </component>
+  <component name="Git.Settings">
+    <option name="RECENT_GIT_ROOT_PATH" value="$PROJECT_DIR$" />
+  </component>
+  <component name="IdeDocumentHistory">
+    <option name="CHANGED_PATHS">
+      <list>
+        <option value="$PROJECT_DIR$/listener/api/sqlInterface.js" />
+      </list>
+    </option>
+  </component>
+  <component name="JsBuildToolGruntFileManager" detection-done="true" sorting="DEFINITION_ORDER" />
+  <component name="JsBuildToolPackageJson" detection-done="true" sorting="DEFINITION_ORDER" />
+  <component name="JsFlowSettings">
+    <service-enabled>true</service-enabled>
+    <exe-path />
+    <other-services-enabled>true</other-services-enabled>
+    <auto-save>true</auto-save>
+  </component>
+  <component name="JsGulpfileManager">
+    <detection-done>true</detection-done>
+    <sorting>DEFINITION_ORDER</sorting>
+  </component>
+  <component name="ProjectFrameBounds" fullScreen="true">
+    <option name="width" value="1280" />
+    <option name="height" value="800" />
+  </component>
+  <component name="ProjectLevelVcsManager" settingsEditedManually="true" />
+  <component name="ProjectView">
+    <navigator currentView="ProjectPane" proportions="" version="1">
+      <flattenPackages />
+      <showMembers />
+      <showModules />
+      <showLibraryContents />
+      <hideEmptyPackages />
+      <abbreviatePackageNames />
+      <autoscrollToSource />
+      <autoscrollFromSource />
+      <sortByType />
+      <manualOrder />
+      <foldersAlwaysOnTop value="true" />
+    </navigator>
+    <panes>
+      <pane id="Scratches" />
+      <pane id="Scope" />
+      <pane id="ProjectPane">
+        <subPane>
+          <expand>
+            <path>
+              <item name="opal-listener" type="b2602c69:ProjectViewProjectNode" />
+              <item name="opal-listener" type="462c0819:PsiDirectoryNode" />
+            </path>
+            <path>
+              <item name="opal-listener" type="b2602c69:ProjectViewProjectNode" />
+              <item name="opal-listener" type="462c0819:PsiDirectoryNode" />
+              <item name="listener" type="462c0819:PsiDirectoryNode" />
+            </path>
+            <path>
+              <item name="opal-listener" type="b2602c69:ProjectViewProjectNode" />
+              <item name="opal-listener" type="462c0819:PsiDirectoryNode" />
+              <item name="listener" type="462c0819:PsiDirectoryNode" />
+              <item name="api" type="462c0819:PsiDirectoryNode" />
+            </path>
+            <path>
+              <item name="opal-listener" type="b2602c69:ProjectViewProjectNode" />
+              <item name="opal-listener" type="462c0819:PsiDirectoryNode" />
+              <item name="listener" type="462c0819:PsiDirectoryNode" />
+              <item name="sql" type="462c0819:PsiDirectoryNode" />
+            </path>
+          </expand>
+          <select />
+        </subPane>
+      </pane>
+    </panes>
+  </component>
+  <component name="PropertiesComponent">
+    <property name="WebServerToolWindowFactoryState" value="false" />
+    <property name="settings.editor.selected.configurable" value="Settings.JavaScript" />
+    <property name="JavaScriptWeakerCompletionTypeGuess" value="true" />
+  </component>
+  <component name="RunDashboard">
+    <option name="ruleStates">
+      <list>
+        <RuleState>
+          <option name="name" value="ConfigurationTypeDashboardGroupingRule" />
+        </RuleState>
+        <RuleState>
+          <option name="name" value="StatusDashboardGroupingRule" />
+        </RuleState>
+      </list>
+    </option>
+  </component>
+  <component name="ShelveChangesManager" show_recycled="false">
+    <option name="remove_strategy" value="false" />
+  </component>
+  <component name="SvnConfiguration">
+    <configuration />
+  </component>
+  <component name="TaskManager">
+    <task active="true" id="Default" summary="Default task">
+      <changelist id="d59ef117-463d-4a5a-945b-009109a6b14e" name="Default" comment="" />
+      <created>1516380586910</created>
+      <option name="number" value="Default" />
+      <option name="presentableId" value="Default" />
+      <updated>1516380586910</updated>
+      <workItem from="1516380589151" duration="1813000" />
+    </task>
+    <servers />
+  </component>
+  <component name="TimeTrackingManager">
+    <option name="totallyTimeSpent" value="1821000" />
+  </component>
+  <component name="ToolWindowManager">
+    <frame x="0" y="0" width="1280" height="800" extended-state="0" />
+    <layout>
+      <window_info id="Project" active="false" anchor="left" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="true" show_stripe_button="true" weight="0.2494043" sideWeight="0.5" order="0" side_tool="false" content_ui="combo" />
+      <window_info id="TODO" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.33" sideWeight="0.5" order="6" side_tool="false" content_ui="tabs" />
+      <window_info id="Docker" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="false" weight="0.33" sideWeight="0.5" order="7" side_tool="false" content_ui="tabs" />
+      <window_info id="Event Log" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.33" sideWeight="0.5" order="7" side_tool="true" content_ui="tabs" />
+      <window_info id="Run" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.33" sideWeight="0.5" order="2" side_tool="false" content_ui="tabs" />
+      <window_info id="Version Control" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.33" sideWeight="0.5" order="7" side_tool="false" content_ui="tabs" />
+      <window_info id="Structure" active="false" anchor="left" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.25" sideWeight="0.5" order="1" side_tool="false" content_ui="tabs" />
+      <window_info id="Terminal" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.33" sideWeight="0.5" order="7" side_tool="false" content_ui="tabs" />
+      <window_info id="Debug" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.4" sideWeight="0.5" order="3" side_tool="false" content_ui="tabs" />
+      <window_info id="Favorites" active="false" anchor="left" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.33" sideWeight="0.5" order="2" side_tool="true" content_ui="tabs" />
+      <window_info id="Cvs" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.25" sideWeight="0.5" order="4" side_tool="false" content_ui="tabs" />
+      <window_info id="Message" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.33" sideWeight="0.5" order="0" side_tool="false" content_ui="tabs" />
+      <window_info id="Commander" active="false" anchor="right" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.4" sideWeight="0.5" order="0" side_tool="false" content_ui="tabs" />
+      <window_info id="Inspection" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.4" sideWeight="0.5" order="5" side_tool="false" content_ui="tabs" />
+      <window_info id="Hierarchy" active="false" anchor="right" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.25" sideWeight="0.5" order="2" side_tool="false" content_ui="combo" />
+      <window_info id="Find" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.33" sideWeight="0.5" order="1" side_tool="false" content_ui="tabs" />
+      <window_info id="Ant Build" active="false" anchor="right" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.25" sideWeight="0.5" order="1" side_tool="false" content_ui="tabs" />
+    </layout>
+  </component>
+  <component name="TypeScriptGeneratedFilesManager">
+    <option name="version" value="1" />
+  </component>
+  <component name="VcsContentAnnotationSettings">
+    <option name="myLimit" value="2678400000" />
+  </component>
+  <component name="XDebuggerManager">
+    <breakpoint-manager />
+    <watches-manager />
+  </component>
+  <component name="editorHistoryManager">
+    <entry file="file://$PROJECT_DIR$/listener/api/sqlInterface.js">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="7020">
+          <caret line="468" column="13" lean-forward="false" selection-start-line="468" selection-start-column="13" selection-end-line="468" selection-end-column="13" />
+          <folding />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/listener/server.js">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="2745">
+          <caret line="191" column="8" lean-forward="false" selection-start-line="191" selection-start-column="8" selection-end-line="191" selection-end-column="8" />
+          <folding>
+            <marker date="1516380553673" expanded="false" signature="0:478" ph="/*...*/" />
+            <marker date="1516380553673" expanded="true" signature="1001:1109" ph="/** INITIALIZE ...*/" />
+            <marker date="1516380553673" expanded="true" signature="1224:1313" ph="{&quot;databaseURL&quot;: config.DATABASE_URL...}" />
+            <marker date="1516380553673" expanded="true" signature="1669:1742" ph="{...}" />
+            <marker date="1516380553673" expanded="true" signature="1718:1738" ph="{&quot;error&quot;: error...}" />
+            <marker date="1516380553673" expanded="true" signature="1884:1991" ph="/** FUNCTIONS ...*/" />
+            <marker date="1516380553673" expanded="true" signature="1993:2111" ph="/** listenForRequest ...*/" />
+            <marker date="1516380553673" expanded="true" signature="2150:2893" ph="{...}" />
+            <marker date="1516380553673" expanded="true" signature="2363:2827" ph="{...}" />
+            <marker date="1516380553673" expanded="true" signature="2613:2743" ph="{...}" />
+            <marker date="1516380553673" expanded="true" signature="2749:2817" ph="{...}" />
+            <marker date="1516380553673" expanded="true" signature="2852:2889" ph="{...}" />
+            <marker date="1516380553673" expanded="true" signature="2895:3009" ph="/** handleRequest ...*/" />
+            <marker date="1516380553673" expanded="true" signature="3055:3454" ph="{...}" />
+            <marker date="1516380553673" expanded="true" signature="3226:3450" ph="{...}" />
+            <marker date="1516380553673" expanded="true" signature="3236:3395" ph="//..." />
+            <marker date="1516380553673" expanded="true" signature="3456:3558" ph="/** logResponse ...*/" />
+            <marker date="1516380553673" expanded="true" signature="3589:4199" ph="{...}" />
+            <marker date="1516380553673" expanded="true" signature="3719:4197" ph="{...}" />
+            <marker date="1516380553673" expanded="true" signature="3765:4102" ph="{&quot;deviceID&quot;: response.Headers.RequestObject.DeviceId...}" />
+            <marker date="1516380553673" expanded="true" signature="4201:4329" ph="/** logError ...*/" />
+            <marker date="1516380553673" expanded="true" signature="4380:4638" ph="{...}" />
+            <marker date="1516380553673" expanded="true" signature="4459:4634" ph="{&quot;error&quot;: err...}" />
+            <marker date="1516380553673" expanded="true" signature="4640:4773" ph="/** processRequest ...*/" />
+            <marker date="1516380553673" expanded="true" signature="4806:6001" ph="{...}" />
+            <marker date="1516380553673" expanded="true" signature="5167:5669" ph="{...}" />
+            <marker date="1516380553673" expanded="true" signature="5348:5514" ph="{...}" />
+            <marker date="1516380553673" expanded="true" signature="5552:5661" ph="{...}" />
+            <marker date="1516380553673" expanded="true" signature="5675:5977" ph="{...}" />
+            <marker date="1516380553673" expanded="true" signature="5842:5970" ph="{...}" />
+            <marker date="1516380553673" expanded="true" signature="6003:6141" ph="/** encryptResponse ...*/" />
+            <marker date="1516380553673" expanded="true" signature="6177:6477" ph="{...}" />
+            <marker date="1516380553673" expanded="true" signature="6370:6431" ph="{...}" />
+            <marker date="1516380553673" expanded="true" signature="6435:6475" ph="{...}" />
+            <marker date="1516380553673" expanded="true" signature="6479:6592" ph="/** uploadToFirebase ...*/" />
+            <marker date="1516380553673" expanded="true" signature="6634:7778" ph="{...}" />
+            <marker date="1516380553673" expanded="true" signature="6723:6873" ph="{...}" />
+            <marker date="1516380553673" expanded="true" signature="6974:6987" ph="{...}" />
+            <marker date="1516380553673" expanded="true" signature="7101:7223" ph="{...}" />
+            <marker date="1516380553673" expanded="true" signature="7266:7321" ph="{...}" />
+            <marker date="1516380553673" expanded="true" signature="7445:7556" ph="{...}" />
+            <marker date="1516380553673" expanded="true" signature="7581:7668" ph="{...}" />
+            <marker date="1516380553673" expanded="true" signature="7689:7700" ph="{...}" />
+            <marker date="1516380553673" expanded="true" signature="7780:7903" ph="/** Sets the request reference to null after uploading response ...*/" />
+            <marker date="1516380553673" expanded="true" signature="7943:8192" ph="{...}" />
+            <marker date="1516380553673" expanded="true" signature="8122:8188" ph="{...}" />
+            <marker date="1516380553673" expanded="true" signature="8224:8572" ph="{...}" />
+            <marker date="1516380553673" expanded="true" signature="8491:8511" ph="{...}" />
+            <marker date="1516380553673" expanded="true" signature="8575:8677" ph="/** CRON ...*/" />
+            <marker date="1516380553673" expanded="true" signature="8679:9019" ph="/** Spawns three cron jobs: ...*/" />
+            <marker date="1516380553673" expanded="true" signature="9044:9121" ph="{...}" />
+            <marker date="1516380553673" expanded="true" signature="9123:9246" ph="/** @name spawnClearRequest ...*/" />
+            <marker date="1516380553673" expanded="true" signature="9275:9825" ph="{...}" />
+            <marker date="1516380553673" expanded="true" signature="9428:9444" ph="{...}" />
+            <marker date="1516380553673" expanded="true" signature="9530:9546" ph="{...}" />
+            <marker date="1516380553673" expanded="true" signature="9653:9739" ph="{...}" />
+            <marker date="1516380553673" expanded="true" signature="9784:9821" ph="{...}" />
+            <marker date="1516380553673" expanded="true" signature="9827:9953" ph="/** @name spawnClearResponse ...*/" />
+            <marker date="1516380553673" expanded="true" signature="9984:10546" ph="{...}" />
+            <marker date="1516380553673" expanded="true" signature="10142:10158" ph="{...}" />
+            <marker date="1516380553673" expanded="true" signature="10244:10260" ph="{...}" />
+            <marker date="1516380553673" expanded="true" signature="10371:10459" ph="{...}" />
+            <marker date="1516380553673" expanded="true" signature="10504:10542" ph="{...}" />
+            <marker date="1516380553673" expanded="true" signature="10574:11121" ph="{...}" />
+            <marker date="1516380553673" expanded="true" signature="10750:10766" ph="{...}" />
+            <marker date="1516380553673" expanded="true" signature="10847:10863" ph="{...}" />
+            <marker date="1516380553673" expanded="true" signature="10960:11038" ph="{...}" />
+            <marker date="1516380553673" expanded="true" signature="11083:11116" ph="{...}" />
+          </folding>
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/listener/api/sqlInterface.js">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="7500">
+          <caret line="500" column="13" lean-forward="false" selection-start-line="500" selection-start-column="8" selection-end-line="500" selection-end-column="13" />
+          <folding />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/listener/server.js">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="2835">
+          <caret line="206" column="8" lean-forward="false" selection-start-line="206" selection-start-column="8" selection-end-line="206" selection-end-column="8" />
+          <folding>
+            <marker date="1516380553673" expanded="false" signature="0:478" ph="/*...*/" />
+            <marker date="1516380553673" expanded="true" signature="1001:1109" ph="/** INITIALIZE ...*/" />
+            <marker date="1516380553673" expanded="true" signature="1224:1313" ph="{&quot;databaseURL&quot;: config.DATABASE_URL...}" />
+            <marker date="1516380553673" expanded="true" signature="1669:1742" ph="{...}" />
+            <marker date="1516380553673" expanded="true" signature="1718:1738" ph="{&quot;error&quot;: error...}" />
+            <marker date="1516380553673" expanded="true" signature="1884:1991" ph="/** FUNCTIONS ...*/" />
+            <marker date="1516380553673" expanded="true" signature="1993:2111" ph="/** listenForRequest ...*/" />
+            <marker date="1516380553673" expanded="true" signature="2150:2893" ph="{...}" />
+            <marker date="1516380553673" expanded="true" signature="2363:2827" ph="{...}" />
+            <marker date="1516380553673" expanded="true" signature="2613:2743" ph="{...}" />
+            <marker date="1516380553673" expanded="true" signature="2749:2817" ph="{...}" />
+            <marker date="1516380553673" expanded="true" signature="2852:2889" ph="{...}" />
+            <marker date="1516380553673" expanded="true" signature="2895:3009" ph="/** handleRequest ...*/" />
+            <marker date="1516380553673" expanded="true" signature="3055:3454" ph="{...}" />
+            <marker date="1516380553673" expanded="true" signature="3226:3450" ph="{...}" />
+            <marker date="1516380553673" expanded="true" signature="3236:3395" ph="//..." />
+            <marker date="1516380553673" expanded="true" signature="3456:3558" ph="/** logResponse ...*/" />
+            <marker date="1516380553673" expanded="true" signature="3589:4199" ph="{...}" />
+            <marker date="1516380553673" expanded="true" signature="3719:4197" ph="{...}" />
+            <marker date="1516380553673" expanded="true" signature="3765:4102" ph="{&quot;deviceID&quot;: response.Headers.RequestObject.DeviceId...}" />
+            <marker date="1516380553673" expanded="true" signature="4201:4329" ph="/** logError ...*/" />
+            <marker date="1516380553673" expanded="true" signature="4380:4638" ph="{...}" />
+            <marker date="1516380553673" expanded="true" signature="4459:4634" ph="{&quot;error&quot;: err...}" />
+            <marker date="1516380553673" expanded="true" signature="4640:4773" ph="/** processRequest ...*/" />
+            <marker date="1516380553673" expanded="true" signature="4806:6001" ph="{...}" />
+            <marker date="1516380553673" expanded="true" signature="5167:5669" ph="{...}" />
+            <marker date="1516380553673" expanded="true" signature="5348:5514" ph="{...}" />
+            <marker date="1516380553673" expanded="true" signature="5552:5661" ph="{...}" />
+            <marker date="1516380553673" expanded="true" signature="5675:5977" ph="{...}" />
+            <marker date="1516380553673" expanded="true" signature="5842:5970" ph="{...}" />
+            <marker date="1516380553673" expanded="true" signature="6003:6141" ph="/** encryptResponse ...*/" />
+            <marker date="1516380553673" expanded="true" signature="6177:6477" ph="{...}" />
+            <marker date="1516380553673" expanded="true" signature="6370:6431" ph="{...}" />
+            <marker date="1516380553673" expanded="true" signature="6435:6475" ph="{...}" />
+            <marker date="1516380553673" expanded="true" signature="6479:6592" ph="/** uploadToFirebase ...*/" />
+            <marker date="1516380553673" expanded="true" signature="6634:7778" ph="{...}" />
+            <marker date="1516380553673" expanded="true" signature="6723:6873" ph="{...}" />
+            <marker date="1516380553673" expanded="true" signature="6974:6987" ph="{...}" />
+            <marker date="1516380553673" expanded="true" signature="7101:7223" ph="{...}" />
+            <marker date="1516380553673" expanded="true" signature="7266:7321" ph="{...}" />
+            <marker date="1516380553673" expanded="true" signature="7445:7556" ph="{...}" />
+            <marker date="1516380553673" expanded="true" signature="7581:7668" ph="{...}" />
+            <marker date="1516380553673" expanded="true" signature="7689:7700" ph="{...}" />
+            <marker date="1516380553673" expanded="true" signature="7780:7903" ph="/** Sets the request reference to null after uploading response ...*/" />
+            <marker date="1516380553673" expanded="true" signature="7943:8192" ph="{...}" />
+            <marker date="1516380553673" expanded="true" signature="8122:8188" ph="{...}" />
+            <marker date="1516380553673" expanded="true" signature="8224:8572" ph="{...}" />
+            <marker date="1516380553673" expanded="true" signature="8491:8511" ph="{...}" />
+            <marker date="1516380553673" expanded="true" signature="8575:8677" ph="/** CRON ...*/" />
+            <marker date="1516380553673" expanded="true" signature="8679:9019" ph="/** Spawns three cron jobs: ...*/" />
+            <marker date="1516380553673" expanded="true" signature="9044:9121" ph="{...}" />
+            <marker date="1516380553673" expanded="true" signature="9123:9246" ph="/** @name spawnClearRequest ...*/" />
+            <marker date="1516380553673" expanded="true" signature="9275:9825" ph="{...}" />
+            <marker date="1516380553673" expanded="true" signature="9428:9444" ph="{...}" />
+            <marker date="1516380553673" expanded="true" signature="9530:9546" ph="{...}" />
+            <marker date="1516380553673" expanded="true" signature="9653:9739" ph="{...}" />
+            <marker date="1516380553673" expanded="true" signature="9784:9821" ph="{...}" />
+            <marker date="1516380553673" expanded="true" signature="9827:9953" ph="/** @name spawnClearResponse ...*/" />
+            <marker date="1516380553673" expanded="true" signature="9984:10546" ph="{...}" />
+            <marker date="1516380553673" expanded="true" signature="10142:10158" ph="{...}" />
+            <marker date="1516380553673" expanded="true" signature="10244:10260" ph="{...}" />
+            <marker date="1516380553673" expanded="true" signature="10371:10459" ph="{...}" />
+            <marker date="1516380553673" expanded="true" signature="10504:10542" ph="{...}" />
+            <marker date="1516380553673" expanded="true" signature="10574:11121" ph="{...}" />
+            <marker date="1516380553673" expanded="true" signature="10750:10766" ph="{...}" />
+            <marker date="1516380553673" expanded="true" signature="10847:10863" ph="{...}" />
+            <marker date="1516380553673" expanded="true" signature="10960:11038" ph="{...}" />
+            <marker date="1516380553673" expanded="true" signature="11083:11116" ph="{...}" />
+          </folding>
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/php/Checkin/OpalCheckIn.php" />
+    <entry file="file://$PROJECT_DIR$/listener/server.js">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="3090">
+          <caret line="206" column="8" lean-forward="false" selection-start-line="206" selection-start-column="8" selection-end-line="206" selection-end-column="8" />
+          <folding>
+            <marker date="1516380553673" expanded="false" signature="0:478" ph="/*...*/" />
+            <marker date="1516380553673" expanded="true" signature="1001:1109" ph="/** INITIALIZE ...*/" />
+            <marker date="1516380553673" expanded="true" signature="1224:1313" ph="{&quot;databaseURL&quot;: config.DATABASE_URL...}" />
+            <marker date="1516380553673" expanded="true" signature="1669:1742" ph="{...}" />
+            <marker date="1516380553673" expanded="true" signature="1718:1738" ph="{&quot;error&quot;: error...}" />
+            <marker date="1516380553673" expanded="true" signature="1884:1991" ph="/** FUNCTIONS ...*/" />
+            <marker date="1516380553673" expanded="true" signature="1993:2111" ph="/** listenForRequest ...*/" />
+            <marker date="1516380553673" expanded="true" signature="2150:2893" ph="{...}" />
+            <marker date="1516380553673" expanded="true" signature="2363:2827" ph="{...}" />
+            <marker date="1516380553673" expanded="true" signature="2613:2743" ph="{...}" />
+            <marker date="1516380553673" expanded="true" signature="2749:2817" ph="{...}" />
+            <marker date="1516380553673" expanded="true" signature="2852:2889" ph="{...}" />
+            <marker date="1516380553673" expanded="true" signature="2895:3009" ph="/** handleRequest ...*/" />
+            <marker date="1516380553673" expanded="true" signature="3055:3454" ph="{...}" />
+            <marker date="1516380553673" expanded="true" signature="3226:3450" ph="{...}" />
+            <marker date="1516380553673" expanded="true" signature="3236:3395" ph="//..." />
+            <marker date="1516380553673" expanded="true" signature="3456:3558" ph="/** logResponse ...*/" />
+            <marker date="1516380553673" expanded="true" signature="3589:4199" ph="{...}" />
+            <marker date="1516380553673" expanded="true" signature="3719:4197" ph="{...}" />
+            <marker date="1516380553673" expanded="true" signature="3765:4102" ph="{&quot;deviceID&quot;: response.Headers.RequestObject.DeviceId...}" />
+            <marker date="1516380553673" expanded="true" signature="4201:4329" ph="/** logError ...*/" />
+            <marker date="1516380553673" expanded="true" signature="4380:4638" ph="{...}" />
+            <marker date="1516380553673" expanded="true" signature="4459:4634" ph="{&quot;error&quot;: err...}" />
+            <marker date="1516380553673" expanded="true" signature="4640:4773" ph="/** processRequest ...*/" />
+            <marker date="1516380553673" expanded="true" signature="4806:6001" ph="{...}" />
+            <marker date="1516380553673" expanded="true" signature="5167:5669" ph="{...}" />
+            <marker date="1516380553673" expanded="true" signature="5348:5514" ph="{...}" />
+            <marker date="1516380553673" expanded="true" signature="5552:5661" ph="{...}" />
+            <marker date="1516380553673" expanded="true" signature="5675:5977" ph="{...}" />
+            <marker date="1516380553673" expanded="true" signature="5842:5970" ph="{...}" />
+            <marker date="1516380553673" expanded="true" signature="6003:6141" ph="/** encryptResponse ...*/" />
+            <marker date="1516380553673" expanded="true" signature="6177:6477" ph="{...}" />
+            <marker date="1516380553673" expanded="true" signature="6370:6431" ph="{...}" />
+            <marker date="1516380553673" expanded="true" signature="6435:6475" ph="{...}" />
+            <marker date="1516380553673" expanded="true" signature="6479:6592" ph="/** uploadToFirebase ...*/" />
+            <marker date="1516380553673" expanded="true" signature="6634:7778" ph="{...}" />
+            <marker date="1516380553673" expanded="true" signature="6723:6873" ph="{...}" />
+            <marker date="1516380553673" expanded="true" signature="6974:6987" ph="{...}" />
+            <marker date="1516380553673" expanded="true" signature="7101:7223" ph="{...}" />
+            <marker date="1516380553673" expanded="true" signature="7266:7321" ph="{...}" />
+            <marker date="1516380553673" expanded="true" signature="7445:7556" ph="{...}" />
+            <marker date="1516380553673" expanded="true" signature="7581:7668" ph="{...}" />
+            <marker date="1516380553673" expanded="true" signature="7689:7700" ph="{...}" />
+            <marker date="1516380553673" expanded="true" signature="7780:7903" ph="/** Sets the request reference to null after uploading response ...*/" />
+            <marker date="1516380553673" expanded="true" signature="7943:8192" ph="{...}" />
+            <marker date="1516380553673" expanded="true" signature="8122:8188" ph="{...}" />
+            <marker date="1516380553673" expanded="true" signature="8224:8572" ph="{...}" />
+            <marker date="1516380553673" expanded="true" signature="8491:8511" ph="{...}" />
+            <marker date="1516380553673" expanded="true" signature="8575:8677" ph="/** CRON ...*/" />
+            <marker date="1516380553673" expanded="true" signature="8679:9019" ph="/** Spawns three cron jobs: ...*/" />
+            <marker date="1516380553673" expanded="true" signature="9044:9121" ph="{...}" />
+            <marker date="1516380553673" expanded="true" signature="9123:9246" ph="/** @name spawnClearRequest ...*/" />
+            <marker date="1516380553673" expanded="true" signature="9275:9825" ph="{...}" />
+            <marker date="1516380553673" expanded="true" signature="9428:9444" ph="{...}" />
+            <marker date="1516380553673" expanded="true" signature="9530:9546" ph="{...}" />
+            <marker date="1516380553673" expanded="true" signature="9653:9739" ph="{...}" />
+            <marker date="1516380553673" expanded="true" signature="9784:9821" ph="{...}" />
+            <marker date="1516380553673" expanded="true" signature="9827:9953" ph="/** @name spawnClearResponse ...*/" />
+            <marker date="1516380553673" expanded="true" signature="9984:10546" ph="{...}" />
+            <marker date="1516380553673" expanded="true" signature="10142:10158" ph="{...}" />
+            <marker date="1516380553673" expanded="true" signature="10244:10260" ph="{...}" />
+            <marker date="1516380553673" expanded="true" signature="10371:10459" ph="{...}" />
+            <marker date="1516380553673" expanded="true" signature="10504:10542" ph="{...}" />
+            <marker date="1516380553673" expanded="true" signature="10574:11121" ph="{...}" />
+            <marker date="1516380553673" expanded="true" signature="10750:10766" ph="{...}" />
+            <marker date="1516380553673" expanded="true" signature="10847:10863" ph="{...}" />
+            <marker date="1516380553673" expanded="true" signature="10960:11038" ph="{...}" />
+            <marker date="1516380553673" expanded="true" signature="11083:11116" ph="{...}" />
+          </folding>
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/listener/api/sqlInterface.js">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="7500">
+          <caret line="500" column="13" lean-forward="false" selection-start-line="500" selection-start-column="8" selection-end-line="500" selection-end-column="13" />
+          <folding />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/listener/server.js">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="2835">
+          <caret line="197" column="8" lean-forward="false" selection-start-line="197" selection-start-column="4" selection-end-line="197" selection-end-column="8" />
+          <folding>
+            <marker date="1516380553673" expanded="false" signature="0:478" ph="/*...*/" />
+            <marker date="1516380553673" expanded="true" signature="1001:1109" ph="/** INITIALIZE ...*/" />
+            <marker date="1516380553673" expanded="true" signature="1224:1313" ph="{&quot;databaseURL&quot;: config.DATABASE_URL...}" />
+            <marker date="1516380553673" expanded="true" signature="1669:1742" ph="{...}" />
+            <marker date="1516380553673" expanded="true" signature="1718:1738" ph="{&quot;error&quot;: error...}" />
+            <marker date="1516380553673" expanded="true" signature="1884:1991" ph="/** FUNCTIONS ...*/" />
+            <marker date="1516380553673" expanded="true" signature="1993:2111" ph="/** listenForRequest ...*/" />
+            <marker date="1516380553673" expanded="true" signature="2150:2893" ph="{...}" />
+            <marker date="1516380553673" expanded="true" signature="2363:2827" ph="{...}" />
+            <marker date="1516380553673" expanded="true" signature="2613:2743" ph="{...}" />
+            <marker date="1516380553673" expanded="true" signature="2749:2817" ph="{...}" />
+            <marker date="1516380553673" expanded="true" signature="2852:2889" ph="{...}" />
+            <marker date="1516380553673" expanded="true" signature="2895:3009" ph="/** handleRequest ...*/" />
+            <marker date="1516380553673" expanded="true" signature="3055:3454" ph="{...}" />
+            <marker date="1516380553673" expanded="true" signature="3226:3450" ph="{...}" />
+            <marker date="1516380553673" expanded="true" signature="3236:3395" ph="//..." />
+            <marker date="1516380553673" expanded="true" signature="3456:3558" ph="/** logResponse ...*/" />
+            <marker date="1516380553673" expanded="true" signature="3589:4199" ph="{...}" />
+            <marker date="1516380553673" expanded="true" signature="3719:4197" ph="{...}" />
+            <marker date="1516380553673" expanded="true" signature="3765:4102" ph="{&quot;deviceID&quot;: response.Headers.RequestObject.DeviceId...}" />
+            <marker date="1516380553673" expanded="true" signature="4201:4329" ph="/** logError ...*/" />
+            <marker date="1516380553673" expanded="true" signature="4380:4638" ph="{...}" />
+            <marker date="1516380553673" expanded="true" signature="4459:4634" ph="{&quot;error&quot;: err...}" />
+            <marker date="1516380553673" expanded="true" signature="4640:4773" ph="/** processRequest ...*/" />
+            <marker date="1516380553673" expanded="true" signature="4806:6001" ph="{...}" />
+            <marker date="1516380553673" expanded="true" signature="5167:5669" ph="{...}" />
+            <marker date="1516380553673" expanded="true" signature="5348:5514" ph="{...}" />
+            <marker date="1516380553673" expanded="true" signature="5552:5661" ph="{...}" />
+            <marker date="1516380553673" expanded="true" signature="5675:5977" ph="{...}" />
+            <marker date="1516380553673" expanded="true" signature="5842:5970" ph="{...}" />
+            <marker date="1516380553673" expanded="true" signature="6003:6141" ph="/** encryptResponse ...*/" />
+            <marker date="1516380553673" expanded="true" signature="6177:6477" ph="{...}" />
+            <marker date="1516380553673" expanded="true" signature="6370:6431" ph="{...}" />
+            <marker date="1516380553673" expanded="true" signature="6435:6475" ph="{...}" />
+            <marker date="1516380553673" expanded="true" signature="6479:6592" ph="/** uploadToFirebase ...*/" />
+            <marker date="1516380553673" expanded="true" signature="6634:7778" ph="{...}" />
+            <marker date="1516380553673" expanded="true" signature="6723:6873" ph="{...}" />
+            <marker date="1516380553673" expanded="true" signature="6974:6987" ph="{...}" />
+            <marker date="1516380553673" expanded="true" signature="7101:7223" ph="{...}" />
+            <marker date="1516380553673" expanded="true" signature="7266:7321" ph="{...}" />
+            <marker date="1516380553673" expanded="true" signature="7445:7556" ph="{...}" />
+            <marker date="1516380553673" expanded="true" signature="7581:7668" ph="{...}" />
+            <marker date="1516380553673" expanded="true" signature="7689:7700" ph="{...}" />
+            <marker date="1516380553673" expanded="true" signature="7780:7903" ph="/** Sets the request reference to null after uploading response ...*/" />
+            <marker date="1516380553673" expanded="true" signature="7943:8192" ph="{...}" />
+            <marker date="1516380553673" expanded="true" signature="8122:8188" ph="{...}" />
+            <marker date="1516380553673" expanded="true" signature="8224:8572" ph="{...}" />
+            <marker date="1516380553673" expanded="true" signature="8491:8511" ph="{...}" />
+            <marker date="1516380553673" expanded="true" signature="8575:8677" ph="/** CRON ...*/" />
+            <marker date="1516380553673" expanded="true" signature="8679:9019" ph="/** Spawns three cron jobs: ...*/" />
+            <marker date="1516380553673" expanded="true" signature="9044:9121" ph="{...}" />
+            <marker date="1516380553673" expanded="true" signature="9123:9246" ph="/** @name spawnClearRequest ...*/" />
+            <marker date="1516380553673" expanded="true" signature="9275:9825" ph="{...}" />
+            <marker date="1516380553673" expanded="true" signature="9428:9444" ph="{...}" />
+            <marker date="1516380553673" expanded="true" signature="9530:9546" ph="{...}" />
+            <marker date="1516380553673" expanded="true" signature="9653:9739" ph="{...}" />
+            <marker date="1516380553673" expanded="true" signature="9784:9821" ph="{...}" />
+            <marker date="1516380553673" expanded="true" signature="9827:9953" ph="/** @name spawnClearResponse ...*/" />
+            <marker date="1516380553673" expanded="true" signature="9984:10546" ph="{...}" />
+            <marker date="1516380553673" expanded="true" signature="10142:10158" ph="{...}" />
+            <marker date="1516380553673" expanded="true" signature="10244:10260" ph="{...}" />
+            <marker date="1516380553673" expanded="true" signature="10371:10459" ph="{...}" />
+            <marker date="1516380553673" expanded="true" signature="10504:10542" ph="{...}" />
+            <marker date="1516380553673" expanded="true" signature="10574:11121" ph="{...}" />
+            <marker date="1516380553673" expanded="true" signature="10750:10766" ph="{...}" />
+            <marker date="1516380553673" expanded="true" signature="10847:10863" ph="{...}" />
+            <marker date="1516380553673" expanded="true" signature="10960:11038" ph="{...}" />
+            <marker date="1516380553673" expanded="true" signature="11083:11116" ph="{...}" />
+          </folding>
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/listener/api/sqlInterface.js">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="7500">
+          <caret line="500" column="13" lean-forward="false" selection-start-line="500" selection-start-column="8" selection-end-line="500" selection-end-column="13" />
+          <folding />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/listener/server.js">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="2745">
+          <caret line="191" column="8" lean-forward="false" selection-start-line="191" selection-start-column="8" selection-end-line="191" selection-end-column="8" />
+          <folding>
+            <marker date="1516380553673" expanded="false" signature="0:478" ph="/*...*/" />
+            <marker date="1516380553673" expanded="true" signature="1001:1109" ph="/** INITIALIZE ...*/" />
+            <marker date="1516380553673" expanded="true" signature="1224:1313" ph="{&quot;databaseURL&quot;: config.DATABASE_URL...}" />
+            <marker date="1516380553673" expanded="true" signature="1669:1742" ph="{...}" />
+            <marker date="1516380553673" expanded="true" signature="1718:1738" ph="{&quot;error&quot;: error...}" />
+            <marker date="1516380553673" expanded="true" signature="1884:1991" ph="/** FUNCTIONS ...*/" />
+            <marker date="1516380553673" expanded="true" signature="1993:2111" ph="/** listenForRequest ...*/" />
+            <marker date="1516380553673" expanded="true" signature="2150:2893" ph="{...}" />
+            <marker date="1516380553673" expanded="true" signature="2363:2827" ph="{...}" />
+            <marker date="1516380553673" expanded="true" signature="2613:2743" ph="{...}" />
+            <marker date="1516380553673" expanded="true" signature="2749:2817" ph="{...}" />
+            <marker date="1516380553673" expanded="true" signature="2852:2889" ph="{...}" />
+            <marker date="1516380553673" expanded="true" signature="2895:3009" ph="/** handleRequest ...*/" />
+            <marker date="1516380553673" expanded="true" signature="3055:3454" ph="{...}" />
+            <marker date="1516380553673" expanded="true" signature="3226:3450" ph="{...}" />
+            <marker date="1516380553673" expanded="true" signature="3236:3395" ph="//..." />
+            <marker date="1516380553673" expanded="true" signature="3456:3558" ph="/** logResponse ...*/" />
+            <marker date="1516380553673" expanded="true" signature="3589:4199" ph="{...}" />
+            <marker date="1516380553673" expanded="true" signature="3719:4197" ph="{...}" />
+            <marker date="1516380553673" expanded="true" signature="3765:4102" ph="{&quot;deviceID&quot;: response.Headers.RequestObject.DeviceId...}" />
+            <marker date="1516380553673" expanded="true" signature="4201:4329" ph="/** logError ...*/" />
+            <marker date="1516380553673" expanded="true" signature="4380:4638" ph="{...}" />
+            <marker date="1516380553673" expanded="true" signature="4459:4634" ph="{&quot;error&quot;: err...}" />
+            <marker date="1516380553673" expanded="true" signature="4640:4773" ph="/** processRequest ...*/" />
+            <marker date="1516380553673" expanded="true" signature="4806:6001" ph="{...}" />
+            <marker date="1516380553673" expanded="true" signature="5167:5669" ph="{...}" />
+            <marker date="1516380553673" expanded="true" signature="5348:5514" ph="{...}" />
+            <marker date="1516380553673" expanded="true" signature="5552:5661" ph="{...}" />
+            <marker date="1516380553673" expanded="true" signature="5675:5977" ph="{...}" />
+            <marker date="1516380553673" expanded="true" signature="5842:5970" ph="{...}" />
+            <marker date="1516380553673" expanded="true" signature="6003:6141" ph="/** encryptResponse ...*/" />
+            <marker date="1516380553673" expanded="true" signature="6177:6477" ph="{...}" />
+            <marker date="1516380553673" expanded="true" signature="6370:6431" ph="{...}" />
+            <marker date="1516380553673" expanded="true" signature="6435:6475" ph="{...}" />
+            <marker date="1516380553673" expanded="true" signature="6479:6592" ph="/** uploadToFirebase ...*/" />
+            <marker date="1516380553673" expanded="true" signature="6634:7778" ph="{...}" />
+            <marker date="1516380553673" expanded="true" signature="6723:6873" ph="{...}" />
+            <marker date="1516380553673" expanded="true" signature="6974:6987" ph="{...}" />
+            <marker date="1516380553673" expanded="true" signature="7101:7223" ph="{...}" />
+            <marker date="1516380553673" expanded="true" signature="7266:7321" ph="{...}" />
+            <marker date="1516380553673" expanded="true" signature="7445:7556" ph="{...}" />
+            <marker date="1516380553673" expanded="true" signature="7581:7668" ph="{...}" />
+            <marker date="1516380553673" expanded="true" signature="7689:7700" ph="{...}" />
+            <marker date="1516380553673" expanded="true" signature="7780:7903" ph="/** Sets the request reference to null after uploading response ...*/" />
+            <marker date="1516380553673" expanded="true" signature="7943:8192" ph="{...}" />
+            <marker date="1516380553673" expanded="true" signature="8122:8188" ph="{...}" />
+            <marker date="1516380553673" expanded="true" signature="8224:8572" ph="{...}" />
+            <marker date="1516380553673" expanded="true" signature="8491:8511" ph="{...}" />
+            <marker date="1516380553673" expanded="true" signature="8575:8677" ph="/** CRON ...*/" />
+            <marker date="1516380553673" expanded="true" signature="8679:9019" ph="/** Spawns three cron jobs: ...*/" />
+            <marker date="1516380553673" expanded="true" signature="9044:9121" ph="{...}" />
+            <marker date="1516380553673" expanded="true" signature="9123:9246" ph="/** @name spawnClearRequest ...*/" />
+            <marker date="1516380553673" expanded="true" signature="9275:9825" ph="{...}" />
+            <marker date="1516380553673" expanded="true" signature="9428:9444" ph="{...}" />
+            <marker date="1516380553673" expanded="true" signature="9530:9546" ph="{...}" />
+            <marker date="1516380553673" expanded="true" signature="9653:9739" ph="{...}" />
+            <marker date="1516380553673" expanded="true" signature="9784:9821" ph="{...}" />
+            <marker date="1516380553673" expanded="true" signature="9827:9953" ph="/** @name spawnClearResponse ...*/" />
+            <marker date="1516380553673" expanded="true" signature="9984:10546" ph="{...}" />
+            <marker date="1516380553673" expanded="true" signature="10142:10158" ph="{...}" />
+            <marker date="1516380553673" expanded="true" signature="10244:10260" ph="{...}" />
+            <marker date="1516380553673" expanded="true" signature="10371:10459" ph="{...}" />
+            <marker date="1516380553673" expanded="true" signature="10504:10542" ph="{...}" />
+            <marker date="1516380553673" expanded="true" signature="10574:11121" ph="{...}" />
+            <marker date="1516380553673" expanded="true" signature="10750:10766" ph="{...}" />
+            <marker date="1516380553673" expanded="true" signature="10847:10863" ph="{...}" />
+            <marker date="1516380553673" expanded="true" signature="10960:11038" ph="{...}" />
+            <marker date="1516380553673" expanded="true" signature="11083:11116" ph="{...}" />
+          </folding>
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/php/Checkin/OpalCheckIn.php" />
+    <entry file="file://$PROJECT_DIR$/listener/api/main.js">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="-129">
+          <caret line="0" column="0" lean-forward="false" selection-start-line="0" selection-start-column="0" selection-end-line="0" selection-end-column="0" />
+          <folding />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/listener/sql/queries.js">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="-911">
+          <caret line="0" column="0" lean-forward="false" selection-start-line="0" selection-start-column="0" selection-end-line="0" selection-end-column="0" />
+          <folding />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/listener/api/sqlInterface.js">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="1136">
+          <caret line="384" column="0" lean-forward="true" selection-start-line="384" selection-start-column="0" selection-end-line="384" selection-end-column="0" />
+          <folding />
+        </state>
+      </provider>
+    </entry>
+  </component>
+</project>
