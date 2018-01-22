@@ -346,7 +346,7 @@ function checkIntoAriaAndMedi(patientId) {
         logger.log('debug', 'checked into aria and medi body: ' + JSON.stringify(body));
 
         if(error) r.reject(error);
-        else r.resolve(response);
+        else r.resolve();
     });
     return r.promise;
 }
@@ -378,7 +378,7 @@ function hasAlreadyAttemptedCheckin(patientSerNum){
 function getCheckedInAppointments(patientSerNum){
     return new Promise((resolve, reject) => {
         exports.runSqlQuery(queries.getTodaysCheckedInAppointments(), [patientSerNum])
-            .then(rows => resolve(rows))
+            .then(rows => resolve({Response:'success', Data: rows}))
             .catch(err => reject({Response: 'error', Reason: err}));
     })
 }
