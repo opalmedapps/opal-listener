@@ -277,6 +277,11 @@ function preparePromiseArrayFields(userId,timestamp,arrayTables) {
 exports.updateReadStatus=function(userId, parameters)
 {
     let r = Q.defer();
+
+
+    console.log("parameters", parameters);
+
+
     let table, tableSerNum;
     if(parameters && parameters.Field && parameters.Id && requestMappings.hasOwnProperty(parameters.Field) ) {
         ({table, tableSerNum} = requestMappings[parameters.Field]);
@@ -289,6 +294,7 @@ exports.updateReadStatus=function(userId, parameters)
     }).catch((err)=>{
 		r.reject({Response:'error',Reason:err});
     });
+
     return r.promise;
 };
 
