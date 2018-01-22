@@ -60,8 +60,6 @@ typings/
 .env
 
 .idea/
-heartbeat.log*
-heartbeatdb.log*
 node_modules
 credentials.js
 *.swp
