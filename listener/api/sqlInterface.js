@@ -208,6 +208,10 @@ exports.getPatientTableFields = function(userId,timestamp,arrayTables) {
  */
 function processSelectRequest(table, userId, timestamp) {
     const r = Q.defer();
+
+
+    logger.log("table: " + table);
+
     const requestMappingObject = requestMappings[table];
 
     let date = new Date(0);
