@@ -278,10 +278,6 @@ exports.updateReadStatus=function(userId, parameters)
 {
     let r = Q.defer();
 
-
-    console.log("parameters", parameters);
-
-
     let table, serNum;
     if(parameters && parameters.Field && parameters.Id && requestMappings.hasOwnProperty(parameters.Field) ) {
         ({table, serNum} = requestMappings[parameters.Field]);
