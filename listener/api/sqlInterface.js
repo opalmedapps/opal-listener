@@ -434,11 +434,11 @@ exports.updateAccountField=function(requestObject) {
     getPatientFromEmail(email).then(function(patient) {
         //Valid fields
         let validFields = ['Email', 'TelNum', 'Language'];
-        let { field, newValue } = requestObject.Parameters;
+        let field = requestObject.Parameters.FieldToChange;
+        let newValue = requestObject.Parameters.NewValue;
         if ( !field || !newValue || typeof field !== 'string' || typeof newValue !== 'string')
                 r.resolve({Response:'error',Reason:'Invalid Parameters'});
-        if(field === 'Password')
-        {
+        if(field === 'Password') {
             //Hash the password before storing
             let hashedPassword = utility.hash(newValue);
             //Update database
