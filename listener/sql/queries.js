@@ -289,7 +289,11 @@ exports.getMapLocation=function()
 
 exports.updateReadStatus=function()
 {
-    return "UPDATE ?? , Patient, Users SET ReadStatus = 1 WHERE ??.?? = ? AND Patient.PatientSerNum = ??.PatientSerNum AND Patient.PatientSerNum = Users.UserTypeSerNum AND Users.Username = ?;";
+    return `
+        UPDATE ??
+        SET ReadStatus = 1 
+        WHERE ??.?? = ? 
+    `;
 };
 
 exports.getPatientDeviceLastActivity=function()
