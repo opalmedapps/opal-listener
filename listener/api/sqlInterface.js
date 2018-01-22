@@ -282,13 +282,13 @@ exports.updateReadStatus=function(userId, parameters)
     console.log("parameters", parameters);
 
 
-    let table, tableSerNum;
+    let table, serNum;
     if(parameters && parameters.Field && parameters.Id && requestMappings.hasOwnProperty(parameters.Field) ) {
-        ({table, tableSerNum} = requestMappings[parameters.Field]);
+        ({table, serNum} = requestMappings[parameters.Field]);
     }else{
 	    r.reject({Response:'error',Reason:'Invalid read status field'});
     }
-	exports.runSqlQuery(queries.updateReadStatus(),[table,table, tableSerNum, id, table, userId])
+	exports.runSqlQuery(queries.updateReadStatus(),[table, table, serNum, parameters.Id, table, userId])
     .then(()=>{
 	    r.resolve({Response:'success'});
     }).catch((err)=>{
