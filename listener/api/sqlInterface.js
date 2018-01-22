@@ -210,7 +210,7 @@ function processSelectRequest(table, userId, timestamp) {
     const r = Q.defer();
 
 
-    logger.log("table: " + table);
+    logger.log('debug', "table: " + table);
 
     const requestMappingObject = requestMappings[table];
 
