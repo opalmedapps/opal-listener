@@ -1203,13 +1203,14 @@ function assocNotificationsWithItems(notifications, requestObject){
 
 
         let fields = [];
-        fields = notifications.map(notif => {
-            if(itemList.includes(notif.NotificationType) && !fields.includes(notif.NotificationType)) return notif.NotificationType + 's'
+        notifications.forEach(notif => {
+            if(itemList.includes(notif.NotificationType) && !fields.includes(notif.NotificationType)) {
+                let string = notif.NotificationType + 's';
+                fields.push(string);
+            }
         });
 
-        logger.log('debug', 'fields length: ' + fields.length);
-        logger.log('debug', 'fields array: ' + fields);
-
+        
         if(fields.length > 0) {
             refresh(fields, requestObject)
                 .then(results => {
