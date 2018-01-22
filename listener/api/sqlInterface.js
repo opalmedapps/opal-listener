@@ -254,6 +254,9 @@ function processSelectRequest(table, userId, timestamp) {
  */
 function preparePromiseArrayFields(userId,timestamp,arrayTables) {
     const array = [];
+
+    logger.log('debug', 'array tables: ' + arrayTables);
+
     if(typeof arrayTables!=='undefined')
     {
         for (let i = 0; i < arrayTables.length; i++) {
@@ -261,6 +264,9 @@ function preparePromiseArrayFields(userId,timestamp,arrayTables) {
         }
     }else{
         for (const key in requestMappings) {
+
+            logger.log('debug', key);
+
             array.push(processSelectRequest(key,userId,timestamp));
         }
     }
