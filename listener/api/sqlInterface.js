@@ -1201,6 +1201,8 @@ function assocNotificationsWithItems(notifications, requestObject){
     return new Promise((resolve, reject) => {
         const itemList = ['Document', 'Announcement', 'TxTeamMessage', 'EducationalMaterial'];
 
+        logger.log('debug', 'notifications: ' + JSON.stringify(notifications));
+
         let fields = [];
         fields = notifications.map(notif => {
             if(itemList.includes(notif.NotificationType) && !fields.includes(notif.NotificationType)) return notif.NotificationType + 's'
@@ -1242,6 +1244,8 @@ function refresh (fields, requestObject) {
     let UserId=requestObject.UserID;
     let today = new Date();
     let timestamp = today.setHours(0,0,0,0);
+    
+    logger.log('debug', "fields: " + fields);
 
     exports.getPatientTableFields(UserId, timestamp, fields).then(rows => {
             rows.Data= utility.resolveEmptyResponse(rows.Data);
