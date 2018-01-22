@@ -1208,6 +1208,7 @@ function assocNotificationsWithItems(notifications, requestObject){
         });
 
         logger.log('debug', 'fields length: ' + fields.length);
+        logger.log('debug', 'fields array: ' + fields);
 
         if(fields.length > 0) {
             refresh(fields, requestObject)
