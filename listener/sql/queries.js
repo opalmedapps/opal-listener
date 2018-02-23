@@ -147,6 +147,19 @@ exports.patientTasksTableFields=function()
 };
 exports.patientTestResultsTableFields=function()
 {
+
+	return 'SELECT ComponentName, FacComponentName, AbnormalFlag, MaxNorm, MinNorm, TestValue, TestValueString, UnitDescription, CAST(TestDate AS char(30)) as `TestDate`, ' +
+					'IfNull((Select EMC.URL_EN From EducationalMaterialControl EMC, TestResultControl TRC ' +
+									'Where EMC.EducationalMaterialControlSerNum = TRC.EducationalMaterialControlSerNum ' +
+											'and TRC.TestResultControlSerNum = TR.TestResultControlSerNum), "") as URL_EN, ' +
+					'IfNull((Select EMC.URL_FR From EducationalMaterialControl EMC, TestResultControl TRC ' +
+									'Where EMC.EducationalMaterialControlSerNum = TRC.EducationalMaterialControlSerNum ' +
+											'and TRC.TestResultControlSerNum = TR.TestResultControlSerNum), "") as URL_FR ' +
+				'FROM TestResult TR, Users U, Patient P ' +
+				'WHERE P.AccessLevel = 3 AND U.UserTypeSerNum=P.PatientSerNum AND TR.PatientSerNum = P.PatientSerNum AND U.Username LIKE ? AND TR.LastUpdated > ? AND TR.ValidEntry = "Y";';
+/**/
+	
+/*
 return 'SELECT ComponentName, FacComponentName, AbnormalFlag, MaxNorm, MinNorm, TestValue, TestValueString, UnitDescription, CAST(TestDate AS char(30)) as `TestDate`, ' +
 				'IfNull((Select TC.URL_EN From TestResultExpression TRE, TestResultControl TC ' +
 					'Where TRE.ExpressionName = TR.ComponentName), "") as URL_EN, ' +
@@ -154,7 +167,7 @@ return 'SELECT ComponentName, FacComponentName, AbnormalFlag, MaxNorm, MinNorm, 
 					'Where TRE.ExpressionName = TR.ComponentName), "") as URL_FR ' +
 				'FROM TestResult TR, Users U, Patient P ' +
 				'WHERE P.AccessLevel = 3 AND U.UserTypeSerNum=P.PatientSerNum AND TR.PatientSerNum = P.PatientSerNum AND U.Username LIKE ? AND TR.LastUpdated > ? AND TR.ValidEntry = "Y";';
-/*
+
     return 'SELECT ComponentName, FacComponentName, AbnormalFlag, MaxNorm, MinNorm, TestValue, TestValueString, UnitDescription, CAST(TestDate AS char(30)) as `TestDate` ' +
         'FROM TestResult, Users, Patient ' +
         'WHERE Patient.AccessLevel = 3 AND Users.UserTypeSerNum=Patient.PatientSerNum AND TestResult.PatientSerNum = Patient.PatientSerNum AND Users.Username LIKE ? AND TestResult.LastUpdated > ? AND TestResult.ValidEntry = "Y";';
