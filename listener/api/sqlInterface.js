@@ -1205,14 +1205,15 @@ exports.getNewNotifications = function(requestObject){
 function assocNotificationsWithItems(notifications, requestObject){
 
     return new Promise((resolve, reject) => {
-        const itemList = ['Document', 'Announcement', 'TxTeamMessage', 'EducationalMaterial'];
+        const itemList = ['Document', 'Announcement', 'TxTeamMessage', 'EducationalMaterial', 'LegacyQuestionnaire'];
 		
 		logger.log('debug', 'new notifications: ' + JSON.stringify(notifications));
 
         let fields = [];
         notifications.forEach(notif => {
             if(itemList.includes(notif.NotificationType) && !fields.includes(notif.NotificationType)) {
-                let string = notif.NotificationType + 's';
+				if(notif.NotfificationType === 'LegacyQuestionnaire') notif.NotificationType = 'Questionnaire';
+                let string =(notif.NotificationType !== 'EducationalMaterial') ? notif.NotificationType + 's' : notif.NotificationType;
                 fields.push(string);
             }
         });
