@@ -1246,15 +1246,11 @@ function assocNotificationsWithItems(notifications, requestObject){
                             if (key === 'Questionnaires') {
                                 let qArray = [];
                                 let questionnaires = results[key]['Questionnaires'];
-
+                                
                                 // Convert questionnaire object to array
-                                Object.keys(questionnaires).map(ser => {
-                                    let q = questionnaires[ser];
-                                    questionnaires[ser]['QuestionnaireSerNum'] = ser;
-                                    qArray = qArray.concat(q);
-                                });
+                                Object.keys(questionnaires).map(ser => qArray = qArray.concat(questionnaires[ser]));
 
-                                logger.log('debug', "converted qs: " + JSON.stringify(qArray))
+                                logger.log('debug', "converted qs: " + JSON.stringify(qArray));
                             }
 
                             resultsArray = resultsArray.concat(results[key])
