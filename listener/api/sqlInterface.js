@@ -1232,9 +1232,6 @@ function assocNotificationsWithItems(notifications, requestObject){
             // Refresh all the new data (should only be data that needs to be associated with notification)
             refresh(fields, requestObject)
                 .then(results => {
-
-                    logger.log('debug', 'results: ' + JSON.stringify(results));
-
                     if(!!results.Data){
                         results = results.Data;
 
@@ -1256,8 +1253,10 @@ function assocNotificationsWithItems(notifications, requestObject){
 
                                     let q_obj ={
                                         QuestionnaireSerNum: ser,
-                                        PatientQuestionnaire: patient_questionnaires[ser],
-                                        Questionnaire: raw_q
+                                        Questionnaire: {
+                                            PatientQuestionnaire: patient_questionnaires[ser],
+                                            Questionnaire: raw_q
+                                        }
                                     };
 
                                     resultsArray = resultsArray.concat(q_obj);
@@ -1268,23 +1267,11 @@ function assocNotificationsWithItems(notifications, requestObject){
                             }
                         });
 
-                        logger.log('debug', "results array: " + JSON.stringify(resultsArray));
-
                         let tuples = notifications.map(notif => {
                             let tuple = [];
                             let item = resultsArray.find(result => {
                                 let serNumField = notif.NotificationType + "SerNum";
-
-                                if(notif.NotificationType === "Questionnaire"){
-                                    logger.log('debug', "serNumField: " + serNumField);
-                                    logger.log('debug', "result serNumField value: " + parseInt(result[serNumField]));
-                                    logger.log('debug', 'ref row: ' + parseInt(notif.RefTableRowSerNum));
-                                }
-
-                                if(result.hasOwnProperty(serNumField)) {
-                                    logger.log("made it!!");
-                                    return parseInt(result[serNumField]) === parseInt(notif.RefTableRowSerNum);
-                                }
+                                if(result.hasOwnProperty(serNumField)) return parseInt(result[serNumField]) === parseInt(notif.RefTableRowSerNum);
                                 return false;
                             });
                             tuple.push(notif);
