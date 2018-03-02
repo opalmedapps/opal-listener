@@ -1268,6 +1268,8 @@ function assocNotificationsWithItems(notifications, requestObject){
                             }
                         });
 
+                        logger.log('debug', "results array: " + JSON.stringify(resultsArray));
+
                         let tuples = notifications.map(notif => {
                             let tuple = [];
                             let item = resultsArray.find(result => {
