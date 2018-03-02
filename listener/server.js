@@ -25,7 +25,6 @@ const q                 = require("q");
 const config            = require('./config.json');
 const logger            = require('./logs/logger.js');
 const cp                = require('child_process');
-const os                = require('os');
 
 const FIREBASE_DEBUG = !!process.env.FIREBASE_DEBUG;
 
