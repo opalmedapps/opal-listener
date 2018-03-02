@@ -41,10 +41,7 @@ handleDisconnect(connection);
 
 //Queries to obtain the questions and question choices for questionnaires
 var queryQuestions = `SELECT DISTINCT Questionnaire.QuestionnaireSerNum as QuestionnaireDBSerNum, 
-                                      Questionnaire.QuestionnaireName, 
-                                          case when length(OrderNum) = 1 
-                                            then concat('0', OrderNum) 
-                                          else OrderNum end as OrderNum, 
+                                      Questionnaire.QuestionnaireName,                           
                                       QuestionnaireQuestion.QuestionnaireQuestionSerNum, 
                                       Question.QuestionSerNum,
                                       Question.isPositiveQuestion, 
