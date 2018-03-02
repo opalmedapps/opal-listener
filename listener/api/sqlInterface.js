@@ -486,7 +486,13 @@ exports.inputFeedback = function(requestObject) {
     let email = requestObject.UserEmail;
 	if(!email) r.reject({Response:'error',Reason:`Invalid parameter email`});
 	getPatientFromEmail(email).then((patient)=> {
-        let {type, feedback, appRating} = requestObject.Parameters;
+//        let {type, feedback, appRating} = requestObject.Parameters;
+//		logger.log('debug', 'Request Object Parameters: ' + JSON.stringify(requestObject.Parameters));
+		let feedback = requestObject.Parameters.FeedbackContent;
+		let appRating = requestObject.Parameters.AppRating;
+		let type = requestObject.Parameters.Type;
+		// {"AppRating":"3","FeedbackContent":"test","Type":"opal"}
+
         if((!type||!feedback)) r.reject({Response:'error',Reason:`Invalid parameter type`});
         exports.runSqlQuery(queries.inputFeedback(),[ patient.PatientSerNum, feedback, appRating, requestObject.Token ])
             .then(()=>{
@@ -1112,7 +1118,7 @@ exports.getSecurityQuestion = function (requestObject){
 
 exports.setTrusted = function(requestObject)
 {
-
+	
     var r = Q.defer();
     exports.runSqlQuery(queries.setTrusted(),[requestObject.DeviceId])
         .then(function (queryRows) {
@@ -1199,13 +1205,15 @@ exports.getNewNotifications = function(requestObject){
 function assocNotificationsWithItems(notifications, requestObject){
 
     return new Promise((resolve, reject) => {
-        const itemList = ['Document', 'Announcement', 'TxTeamMessage', 'EducationalMaterial'];
-
+        const itemList = ['Document', 'Announcement', 'TxTeamMessage', 'EducationalMaterial', 'LegacyQuestionnaire'];
+		
+		logger.log('debug', 'new notifications: ' + JSON.stringify(notifications));
 
         let fields = [];
         notifications.forEach(notif => {
             if(itemList.includes(notif.NotificationType) && !fields.includes(notif.NotificationType)) {
-                let string = notif.NotificationType + 's';
+				if(notif.NotfificationType === 'LegacyQuestionnaire') notif.NotificationType = 'Questionnaire';
+                let string =(notif.NotificationType !== 'EducationalMaterial') ? notif.NotificationType + 's' : notif.NotificationType;
                 fields.push(string);
             }
         });
