@@ -1254,7 +1254,7 @@ function assocNotificationsWithItems(notifications, requestObject){
 
                                     let db_ser = patient_questionnaires[ser].QuestionnaireDBSerNum;
 
-                                    let raw_q = Object.keys(raw_questionnaires).filter(key => raw_q[key].QuestionnaireDBSerNum === db_ser);
+                                    let raw_q = Object.keys(raw_questionnaires).filter(key => raw_questionnaires[key].QuestionnaireDBSerNum === db_ser);
 
                                     let q_obj ={
                                         QuestionnaireSerNum: ser,
