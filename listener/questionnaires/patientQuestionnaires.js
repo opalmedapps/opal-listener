@@ -94,6 +94,9 @@ exports.getPatientQuestionnaires = function (rows) {
                   let patientQuestionnaires = {};
                   attachingQuestionnaireAnswers(rows).then(function(paQuestionnaires) {
                       patientQuestionnaires = paQuestionnaires;
+
+                      logger.log('debug', 'PatientQuestionnaires: ' + JSON.stringify(patientQuestionnaires));
+
                       resolve({'Questionnaires':questionnaires, 'PatientQuestionnaires':patientQuestionnaires});
                   }).catch(function(error) {
                       reject(error);
