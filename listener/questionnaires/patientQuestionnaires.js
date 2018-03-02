@@ -77,9 +77,6 @@ exports.getPatientQuestionnaires = function (rows)
 
   return new Promise(((resolve, reject) => {
 
-      let serNums = rows.map(q => q.QuestionnaireSerNum);
-      let dbSerNums = rows.map(q => q.QuestionnaireDBSerNum);
-
       if(rows.length!== 0)
       {
           let questionnaireDBSerNumArray = getQuestionnaireDBSerNums(rows);
