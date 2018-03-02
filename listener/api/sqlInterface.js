@@ -1246,12 +1246,24 @@ function assocNotificationsWithItems(notifications, requestObject){
                             // Need to do special work for questionnaires since it is returned as an object rather than an array
                             if (key === 'Questionnaires') {
                                 let qArray = [];
-                                let questionnaires = results[key]['PatientQuestionnaires'];
+                                let patient_questionnaires = results[key]['PatientQuestionnaires'];
+                                let raw_questionnaires = results[key]['Questionnaires'];
 
                                 // Convert questionnaire object to array
-                                Object.keys(questionnaires).map(ser => qArray = qArray.concat(questionnaires[ser]));
+                                Object.keys(patient_questionnaires).map(ser => {
 
-                                logger.log('debug', "converted qs: " + JSON.stringify(qArray));
+                                    let db_ser = patient_questionnaires[ser].QuestionnaireDBSerNum;
+
+                                    let raw_q = raw_questionnaires.filter(q => q.QuestionnaireDBSerNum === db_ser);
+
+                                    let q_obj ={
+                                        QuestionnaireSerNum: ser,
+                                        PatientQuestionnaire: patient_questionnaires[ser],
+                                        Questionnaire: raw_q[0]
+                                    };
+
+                                    qArray = qArray.concat(q_obj)
+                                });
 
                                 resultsArray = resultsArray.concat(qArray)
 
@@ -1286,8 +1298,6 @@ function refresh (fields, requestObject) {
     let UserId=requestObject.UserID;
     let today = new Date();
     let timestamp = today.setHours(0,0,0,0);
-
-    logger.log('debug', "fields: " + fields);
 
     exports.getPatientTableFields(UserId, timestamp, fields).then(rows => {
             rows.Data= utility.resolveEmptyResponse(rows.Data);
