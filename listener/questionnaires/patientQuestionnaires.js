@@ -39,9 +39,34 @@ function handleDisconnect(myconnection) {
 
 handleDisconnect(connection);
 
-//Queties to obtain the questions and question choices for questionnaires
-// var queryQuestions = "SELECT DISTINCT Questionnaire.QuestionnaireSerNum as QuestionnaireDBSerNum, Questionnaire.QuestionnaireName, QuestionnaireQuestion.OrderNum, QuestionnaireQuestion.QuestionnaireQuestionSerNum, Question.QuestionSerNum, Question.isPositiveQuestion, Question.QuestionQuestion as QuestionText_EN, Question.QuestionName as Asseses_EN, Question.QuestionName_FR as Asseses_FR, Question.QuestionQuestion_FR as QuestionText_FR, QuestionType.QuestionType, QuestionType.QuestionTypeSerNum FROM Questionnaire, Question, QuestionType, Patient, QuestionnaireQuestion WHERE QuestionnaireQuestion.QuestionnaireSerNum = Questionnaire.QuestionnaireSerNum AND QuestionnaireQuestion.QuestionSerNum = Question.QuestionSerNum AND Question.QuestionTypeSerNum = QuestionType.QuestionTypeSerNum AND Questionnaire.QuestionnaireSerNum IN ? ORDER BY QuestionnaireDBSerNum, OrderNum";
-var queryQuestions = "SELECT DISTINCT Questionnaire.QuestionnaireSerNum as QuestionnaireDBSerNum, Questionnaire.QuestionnaireName, case when length(OrderNum) = 1 then concat('0', OrderNum) else OrderNum end as OrderNum, QuestionnaireQuestion.QuestionnaireQuestionSerNum, Question.QuestionSerNum, Question.isPositiveQuestion, Question.QuestionQuestion as QuestionText_EN, Question.QuestionName as Asseses_EN, Question.QuestionName_FR as Asseses_FR, Question.QuestionQuestion_FR as QuestionText_FR, QuestionType.QuestionType, QuestionType.QuestionTypeSerNum FROM Questionnaire, Question, QuestionType, Patient, QuestionnaireQuestion WHERE QuestionnaireQuestion.QuestionnaireSerNum = Questionnaire.QuestionnaireSerNum AND QuestionnaireQuestion.QuestionSerNum = Question.QuestionSerNum AND Question.QuestionTypeSerNum = QuestionType.QuestionTypeSerNum AND Questionnaire.QuestionnaireSerNum IN ? ORDER BY QuestionnaireDBSerNum, case when length(OrderNum) = 1 then concat('0', OrderNum) else OrderNum end";
+//Queries to obtain the questions and question choices for questionnaires
+var queryQuestions = `SELECT DISTINCT Questionnaire.QuestionnaireSerNum as QuestionnaireDBSerNum, 
+                                      Questionnaire.QuestionnaireName, 
+                                          case when length(OrderNum) = 1 
+                                            then concat('0', OrderNum) 
+                                          else OrderNum end as OrderNum, 
+                                      QuestionnaireQuestion.QuestionnaireQuestionSerNum, 
+                                      Question.QuestionSerNum,
+                                      Question.isPositiveQuestion, 
+                                      Question.QuestionQuestion as QuestionText_EN, 
+                                      Question.QuestionName as Asseses_EN, 
+                                      Question.QuestionName_FR as Asseses_FR, 
+                                      Question.QuestionQuestion_FR as QuestionText_FR, 
+                                      QuestionType.QuestionType, 
+                                      QuestionType.QuestionTypeSerNum 
+                      FROM Questionnaire, 
+                           Question, 
+                           QuestionType, 
+                           Patient, 
+                           QuestionnaireQuestion 
+                     WHERE QuestionnaireQuestion.QuestionnaireSerNum = Questionnaire.QuestionnaireSerNum 
+                         AND QuestionnaireQuestion.QuestionSerNum = Question.QuestionSerNum 
+                         AND Question.QuestionTypeSerNum = QuestionType.QuestionTypeSerNum 
+                         AND Questionnaire.QuestionnaireSerNum IN ? 
+                     ORDER BY QuestionnaireDBSerNum, case when length(OrderNum) = 1 then concat('0', OrderNum) else OrderNum end`;
+
+
+
 var queryQuestionChoices = "SELECT QuestionSerNum, MCSerNum as OrderNum, MCDescription as ChoiceDescription_EN, MCDescription_FR as ChoiceDescription_FR  FROM QuestionMC WHERE QuestionSerNum IN ? UNION ALL SELECT * FROM QuestionCheckbox WHERE QuestionSerNum IN ? UNION ALL SELECT * FROM QuestionMinMax WHERE QuestionSerNum IN ? ORDER BY QuestionSerNum, OrderNum DESC";
 var queryAnswersPatientQuestionnaire = "SELECT QuestionnaireQuestionSerNum, Answer.Answer, PatientQuestionnaireSerNum as PatientQuestionnaireDBSerNum FROM Answer WHERE PatientQuestionnaireSerNum IN ? ORDER BY PatientQuestionnaireDBSerNum;"
 
@@ -49,37 +74,55 @@ var queryAnswersPatientQuestionnaire = "SELECT QuestionnaireQuestionSerNum, Answ
 /*SELECT QuestionnaireQuestionSerNum,  GROUP_CONCAT(Answer SEPARATOR ', ') as Answer, PatientQuestionnaireSerNum as PatientQuestionnaireDBSerNum FROM Answer WHERE PatientQuestionnaireSerNum IN ? GROUP BY QuestionnaireQuestionSerNum ORDER BY PatientQuestionnaireDBSerNum;"*/
 exports.getPatientQuestionnaires = function (rows)
 {
-  
-  var r = q.defer();
-  //console.log('QUESTIONNAIRE ROWS=====================================================',rows);
+
+  return new Promise(((resolve, reject) => {
+
+      let serNums = rows.map(q => q.QuestionnaireSerNum);
+      let dbSerNums = rows.map(q => q.QuestionnaireDBSerNum);
   if(rows.length!== 0)
   {
     var questionnaireDBSerNumArray = getQuestionnaireDBSerNums(rows);
-    var r = q.defer();
     var quer = connection.query(queryQuestions, [[questionnaireDBSerNumArray]], function(err,  questions, fields){
       if(err) r.reject(err);
 
-      //console.log(questions);
-      getQuestionChoices(questions).then(function(questionsChoices){
-        var questionnaires = prepareQuestionnaireObject(questionsChoices,rows);
-        var patientQuestionnaires = {};
-        attachingQuestionnaireAnswers(rows).then(function(paQuestionnaires)
-        {
-          patientQuestionnaires = paQuestionnaires;
-          r.resolve({'Questionnaires':questionnaires, 'PatientQuestionnaires':patientQuestionnaires});
-        }).catch(function(error)
-        {
-          //console.log(error);
-          r.reject(error);
-        });
-      }).catch(function(err){
-        r.reject(err);
-      })
-    });  
-  }else{
-    r.resolve([]);
-  }
-  return r.promise;
+      logger.log('debug', "sernums: " + JSON.stringify(serNums));
+      logger.log('debug', "dbSernums: " + JSON.stringify(dbSerNums));
+
+
+      //console.log('QUESTIONNAIRE ROWS=====================================================',rows);
+      if(rows.length!== 0)
+      {
+          var questionnaireDBSerNumArray = getQuestionnaireDBSerNums(rows);
+          var r = q.defer();
+          var quer = connection.query(queryQuestions, [[questionnaireDBSerNumArray]], function(err,  questions, fields){
+              if(err) reject(err);
+
+              let serNums = questions.map(q => q.QuestionnaireSerNum);
+              let dbSerNums = questions.map(q => q.QuestionnaireDBSerNum);
+
+              logger.log('debug', "sernums after query: " + JSON.stringify(serNums));
+              logger.log('debug', "dbSernums after quert: " + JSON.stringify(dbSerNums));
+
+              getQuestionChoices(questions).then(function(questionsChoices){
+                  var questionnaires = prepareQuestionnaireObject(questionsChoices,rows);
+                  var patientQuestionnaires = {};
+                  attachingQuestionnaireAnswers(rows).then(function(paQuestionnaires)
+                  {
+                      patientQuestionnaires = paQuestionnaires;
+                      resolve({'Questionnaires':questionnaires, 'PatientQuestionnaires':patientQuestionnaires});
+                  }).catch(function(error)
+                  {
+                      //console.log(error);
+                      reject(error);
+                  });
+              }).catch(function(err){
+                  reject(err);
+              })
+          });
+      }else{
+          resolve([]);
+      }
+  }));
 };
 
 //Formats questionnaire object to be ready for the app.
@@ -110,13 +153,8 @@ function prepareQuestionnaireObject(questionnaires, opalDB)
   
 }
 //Extracts only questionnaireSerNum for query injection
-function getQuestionnaireDBSerNums(rows)
-{
-  var array = [];
-  for (var i = 0; i < rows.length; i++) {
-    array.push(rows[i].QuestionnaireDBSerNum);
-  };
-  return array;
+function getQuestionnaireDBSerNums(rows) {
+  return rows.map(q => q.QuestionnaireDBSerNum)
 }
 
 //Gets the choices for  questions
