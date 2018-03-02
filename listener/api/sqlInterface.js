@@ -1218,7 +1218,7 @@ function assocNotificationsWithItems(notifications, requestObject){
             // Due to the mess that is questionnaires, we have to map LegacyQuestionnaire to Questionnaire since that how's it named everywhere on the listener
             if(notif.NotificationType === 'LegacyQuestionnaire') notif.NotificationType = 'Questionnaire';
 
-            if(itemList.includes(notif.NotificationType) && !fields.includes(notif.NotificationType)) {
+            if(itemList.includes(notif.NotificationType) && (!fields.includes(notif.NotificationType) || !fields.includes(notif.NotificationType + 's'))) {
 
 				// Eduational material mapping is singular... otherwise add 's' to end of key
                 let string =(notif.NotificationType !== 'EducationalMaterial') ? notif.NotificationType + 's' : notif.NotificationType;
