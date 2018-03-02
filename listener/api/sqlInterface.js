@@ -1265,7 +1265,9 @@ function assocNotificationsWithItems(notifications, requestObject){
                                     qArray = qArray.concat(q_obj)
                                 });
 
-                                resultsArray = resultsArray.concat(qArray)
+                                resultsArray = resultsArray.concat(qArray);
+
+                                logger.log('debug', 'q array: ' + JSON.stringify(qArray))
 
                             } else {
                                 resultsArray = resultsArray.concat(results[key])
