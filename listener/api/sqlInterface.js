@@ -1245,7 +1245,6 @@ function assocNotificationsWithItems(notifications, requestObject){
 
                             // Need to do special work for questionnaires since it is returned as an object rather than an array
                             if (key === 'Questionnaires') {
-                                let qArray = [];
                                 let patient_questionnaires = results[key]['PatientQuestionnaires'];
                                 let raw_questionnaires = results[key]['Questionnaires'];
 
@@ -1253,27 +1252,21 @@ function assocNotificationsWithItems(notifications, requestObject){
                                 Object.keys(patient_questionnaires).map(ser => {
 
                                     let db_ser = patient_questionnaires[ser].QuestionnaireDBSerNum;
-
-                                    let raw_q = Object.keys(raw_questionnaires).filter(key => raw_questionnaires[key].QuestionnaireDBSerNum === db_ser);
+                                    let raw_q = raw_questionnaires[db_ser];
 
                                     let q_obj ={
                                         QuestionnaireSerNum: ser,
                                         PatientQuestionnaire: patient_questionnaires[ser],
-                                        Questionnaire: raw_q[0]
+                                        Questionnaire: raw_q
                                     };
 
-                                    qArray = qArray.concat(q_obj)
+                                    resultsArray = resultsArray.concat(q_obj);
                                 });
-
-                                resultsArray = resultsArray.concat(qArray);
-
-                                logger.log('debug', 'q array: ' + JSON.stringify(qArray))
 
                             } else {
                                 resultsArray = resultsArray.concat(results[key])
                             }
                         });
-
 
                         let tuples = notifications.map(notif => {
                             let tuple = [];
