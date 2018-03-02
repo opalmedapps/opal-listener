@@ -79,22 +79,12 @@ exports.getPatientQuestionnaires = function (rows)
 
       let serNums = rows.map(q => q.QuestionnaireSerNum);
       let dbSerNums = rows.map(q => q.QuestionnaireDBSerNum);
-  if(rows.length!== 0)
-  {
-    var questionnaireDBSerNumArray = getQuestionnaireDBSerNums(rows);
-    var quer = connection.query(queryQuestions, [[questionnaireDBSerNumArray]], function(err,  questions, fields){
-      if(err) r.reject(err);
 
-      logger.log('debug', "sernums: " + JSON.stringify(serNums));
-      logger.log('debug', "dbSernums: " + JSON.stringify(dbSerNums));
-
-
-      //console.log('QUESTIONNAIRE ROWS=====================================================',rows);
       if(rows.length!== 0)
       {
-          var questionnaireDBSerNumArray = getQuestionnaireDBSerNums(rows);
-          var r = q.defer();
-          var quer = connection.query(queryQuestions, [[questionnaireDBSerNumArray]], function(err,  questions, fields){
+          let questionnaireDBSerNumArray = getQuestionnaireDBSerNums(rows);
+
+          connection.query(queryQuestions, [[questionnaireDBSerNumArray]], function(err,  questions, fields){
               if(err) reject(err);
 
               let serNums = questions.map(q => q.QuestionnaireSerNum);
@@ -104,15 +94,12 @@ exports.getPatientQuestionnaires = function (rows)
               logger.log('debug', "dbSernums after quert: " + JSON.stringify(dbSerNums));
 
               getQuestionChoices(questions).then(function(questionsChoices){
-                  var questionnaires = prepareQuestionnaireObject(questionsChoices,rows);
-                  var patientQuestionnaires = {};
-                  attachingQuestionnaireAnswers(rows).then(function(paQuestionnaires)
-                  {
+                  let questionnaires = prepareQuestionnaireObject(questionsChoices,rows);
+                  let patientQuestionnaires = {};
+                  attachingQuestionnaireAnswers(rows).then(function(paQuestionnaires) {
                       patientQuestionnaires = paQuestionnaires;
                       resolve({'Questionnaires':questionnaires, 'PatientQuestionnaires':patientQuestionnaires});
-                  }).catch(function(error)
-                  {
-                      //console.log(error);
+                  }).catch(function(error) {
                       reject(error);
                   });
               }).catch(function(err){
