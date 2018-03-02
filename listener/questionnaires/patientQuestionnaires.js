@@ -2,6 +2,7 @@ var exports = module.exports = {};
 var mysql = require('mysql');
 var q = require('q');
 var credentials = require('./../config.json');
+const logger            = require('./../logs/logger');
 
 /*var sqlConfig={
   port:'/Applications/MAMP/tmp/mysql/mysql.sock',
@@ -48,7 +49,7 @@ var queryAnswersPatientQuestionnaire = "SELECT QuestionnaireQuestionSerNum, Answ
 /*SELECT QuestionnaireQuestionSerNum,  GROUP_CONCAT(Answer SEPARATOR ', ') as Answer, PatientQuestionnaireSerNum as PatientQuestionnaireDBSerNum FROM Answer WHERE PatientQuestionnaireSerNum IN ? GROUP BY QuestionnaireQuestionSerNum ORDER BY PatientQuestionnaireDBSerNum;"*/
 exports.getPatientQuestionnaires = function (rows)
 {
-  
+
   logger.log('debug', "rows from questionnaire query: " + JSON.stringify(rows));
 
   var r = q.defer();
