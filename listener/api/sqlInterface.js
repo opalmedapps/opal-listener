@@ -1252,9 +1252,12 @@ function assocNotificationsWithItems(notifications, requestObject){
                                 Object.keys(questionnaires).map(ser => qArray = qArray.concat(questionnaires[ser]));
 
                                 logger.log('debug', "converted qs: " + JSON.stringify(qArray));
-                            }
 
-                            resultsArray = resultsArray.concat(results[key])
+                                resultsArray = resultsArray.concat(qArray)
+
+                            } else {
+                                resultsArray = resultsArray.concat(results[key])
+                            }
                         });
 
 
