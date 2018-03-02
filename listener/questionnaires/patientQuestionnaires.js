@@ -74,29 +74,14 @@ exports.getPatientQuestionnaires = function (rows) {
       if(rows.length!== 0) {
           let questionnaireDBSerNumArray = getQuestionnaireDBSerNums(rows);
 
-          let serNums = rows.map(q => q.QuestionnaireSerNum);
-          let dbSerNums = rows.map(q => q.QuestionnaireDBSerNum);
-
-          logger.log('debug', "sernums before query: " + JSON.stringify(serNums));
-          logger.log('debug', "dbSernums before quert: " + JSON.stringify(dbSerNums));
-
           connection.query(queryQuestions, [[questionnaireDBSerNumArray]], function(err,  questions, fields){
               if(err) reject(err);
-
-              let serNums = questions.map(q => q.QuestionnaireSerNum);
-              let dbSerNums = questions.map(q => q.QuestionnaireDBSerNum);
-
-              logger.log('debug', "sernums after query: " + JSON.stringify(serNums));
-              logger.log('debug', "dbSernums after quert: " + JSON.stringify(dbSerNums));
 
               getQuestionChoices(questions).then(function(questionsChoices){
                   let questionnaires = prepareQuestionnaireObject(questionsChoices,rows);
                   let patientQuestionnaires = {};
                   attachingQuestionnaireAnswers(rows).then(function(paQuestionnaires) {
                       patientQuestionnaires = paQuestionnaires;
-
-                      logger.log('debug', 'PatientQuestionnaires: ' + JSON.stringify(patientQuestionnaires));
-
                       resolve({'Questionnaires':questionnaires, 'PatientQuestionnaires':patientQuestionnaires});
                   }).catch(function(error) {
                       reject(error);

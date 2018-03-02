@@ -1246,7 +1246,7 @@ function assocNotificationsWithItems(notifications, requestObject){
                             // Need to do special work for questionnaires since it is returned as an object rather than an array
                             if (key === 'Questionnaires') {
                                 let qArray = [];
-                                let questionnaires = results[key]['Questionnaires'];
+                                let questionnaires = results[key]['PatientQuestionnaires'];
 
                                 // Convert questionnaire object to array
                                 Object.keys(questionnaires).map(ser => qArray = qArray.concat(questionnaires[ser]));
