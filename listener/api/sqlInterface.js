@@ -1204,7 +1204,7 @@ function assocNotificationsWithItems(notifications, requestObject){
         let fields = [];
         notifications.forEach(notif => {
             if(itemList.includes(notif.NotificationType) && !fields.includes(notif.NotificationType)) {
-				if(notif.NotfificationType === 'LegacyQuestionnaire') notif.NotificationType = 'Questionnaire';
+				if(notif.NotificationType === 'LegacyQuestionnaire') notif.NotificationType = 'Questionnaire';
                 let string =(notif.NotificationType !== 'EducationalMaterial') ? notif.NotificationType + 's' : notif.NotificationType;
                 fields.push(string);
             }
