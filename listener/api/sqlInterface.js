@@ -1274,6 +1274,13 @@ function assocNotificationsWithItems(notifications, requestObject){
                             let tuple = [];
                             let item = resultsArray.find(result => {
                                 let serNumField = notif.NotificationType + "SerNum";
+                                
+                                if(notif.NotificationType === "Questionnaire"){
+                                    logger.log('debug', "serNumField: " + serNumField);
+                                    logger.log('debug', "result serNumField value: " + result[serNumField]);
+                                    logger.log('debug', 'ref row: ' + notif.RefTableRowSerNum);
+                                }
+
                                 if(result.hasOwnProperty(serNumField)) return result[serNumField] === notif.RefTableRowSerNum;
                                 return false;
                             });
