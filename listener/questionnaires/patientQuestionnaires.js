@@ -62,8 +62,7 @@ var queryQuestions = `SELECT DISTINCT Questionnaire.QuestionnaireSerNum as Quest
                      WHERE QuestionnaireQuestion.QuestionnaireSerNum = Questionnaire.QuestionnaireSerNum 
                          AND QuestionnaireQuestion.QuestionSerNum = Question.QuestionSerNum 
                          AND Question.QuestionTypeSerNum = QuestionType.QuestionTypeSerNum 
-                         AND Questionnaire.QuestionnaireSerNum IN ? 
-                     ORDER BY QuestionnaireDBSerNum, case when length(OrderNum) = 1 then concat('0', OrderNum) else OrderNum end`;
+                         AND Questionnaire.QuestionnaireSerNum IN ?`;
 
 
 
@@ -72,13 +71,10 @@ var queryAnswersPatientQuestionnaire = "SELECT QuestionnaireQuestionSerNum, Answ
 
 
 /*SELECT QuestionnaireQuestionSerNum,  GROUP_CONCAT(Answer SEPARATOR ', ') as Answer, PatientQuestionnaireSerNum as PatientQuestionnaireDBSerNum FROM Answer WHERE PatientQuestionnaireSerNum IN ? GROUP BY QuestionnaireQuestionSerNum ORDER BY PatientQuestionnaireDBSerNum;"*/
-exports.getPatientQuestionnaires = function (rows)
-{
-
+exports.getPatientQuestionnaires = function (rows) {
   return new Promise(((resolve, reject) => {
 
-      if(rows.length!== 0)
-      {
+      if(rows.length!== 0) {
           let questionnaireDBSerNumArray = getQuestionnaireDBSerNums(rows);
 
           connection.query(queryQuestions, [[questionnaireDBSerNumArray]], function(err,  questions, fields){
