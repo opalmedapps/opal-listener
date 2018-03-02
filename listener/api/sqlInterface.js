@@ -1208,16 +1208,17 @@ function assocNotificationsWithItems(notifications, requestObject){
     return new Promise((resolve, reject) => {
 
         // A list containing all possible notification types
-        const itemList = ['Document', 'Announcement', 'TxTeamMessage', 'EducationalMaterial', 'LegacyQuestionnaire'];
+        const itemList = ['Document', 'Announcement', 'TxTeamMessage', 'EducationalMaterial', 'Questionnaire'];
 
         let fields = [];
 
         // For each notification, build a list of content-types that need to be refreshed to be paired with the notification(s)
         notifications.forEach(notif => {
-            if(itemList.includes(notif.NotificationType) && !fields.includes(notif.NotificationType)) {
 
-                // Due to the mess that is questionnaires, we have to map LegacyQuestionnaire to Questionnaire since that how's it named everywhere on the listener
-				if(notif.NotificationType === 'LegacyQuestionnaire') notif.NotificationType = 'Questionnaire';
+            // Due to the mess that is questionnaires, we have to map LegacyQuestionnaire to Questionnaire since that how's it named everywhere on the listener
+            if(notif.NotificationType === 'LegacyQuestionnaire') notif.NotificationType = 'Questionnaire';
+
+            if(itemList.includes(notif.NotificationType) && !fields.includes(notif.NotificationType)) {
 
 				// Eduational material mapping is singular... otherwise add 's' to end of key
                 let string =(notif.NotificationType !== 'EducationalMaterial') ? notif.NotificationType + 's' : notif.NotificationType;
@@ -1246,7 +1247,7 @@ function assocNotificationsWithItems(notifications, requestObject){
                             if (key === 'Questionnaires') {
                                 let qArray = [];
                                 let questionnaires = results[key]['Questionnaires'];
-                                
+
                                 // Convert questionnaire object to array
                                 Object.keys(questionnaires).map(ser => qArray = qArray.concat(questionnaires[ser]));
 
