@@ -1274,14 +1274,17 @@ function assocNotificationsWithItems(notifications, requestObject){
                             let tuple = [];
                             let item = resultsArray.find(result => {
                                 let serNumField = notif.NotificationType + "SerNum";
-                                
+
                                 if(notif.NotificationType === "Questionnaire"){
                                     logger.log('debug', "serNumField: " + serNumField);
-                                    logger.log('debug', "result serNumField value: " + result[serNumField]);
-                                    logger.log('debug', 'ref row: ' + notif.RefTableRowSerNum);
+                                    logger.log('debug', "result serNumField value: " + parseInt(result[serNumField]));
+                                    logger.log('debug', 'ref row: ' + parseInt(notif.RefTableRowSerNum));
                                 }
 
-                                if(result.hasOwnProperty(serNumField)) return result[serNumField] === notif.RefTableRowSerNum;
+                                if(result.hasOwnProperty(serNumField)) {
+                                    logger.log("made it!!");
+                                    return parseInt(result[serNumField]) === parseInt(notif.RefTableRowSerNum);
+                                }
                                 return false;
                             });
                             tuple.push(notif);
