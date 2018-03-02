@@ -179,6 +179,7 @@
     <property name="settings.editor.selected.configurable" value="Settings.JavaScript" />
     <property name="JavaScriptWeakerCompletionTypeGuess" value="true" />
     <property name="SearchEverywhereHistoryKey" value="feedbac&#9;null&#9;null" />
+    <property name="HbShouldOpenHtmlAsHb" value="" />
   </component>
   <component name="RunDashboard">
     <option name="ruleStates">
@@ -211,7 +212,7 @@
       <workItem from="1516645702210" duration="563000" />
       <workItem from="1516646721456" duration="6232000" />
       <workItem from="1516676401366" duration="204000" />
-      <workItem from="1520013449385" duration="4604000" />
+      <workItem from="1520013449385" duration="5854000" />
     </task>
     <servers />
   </component>
