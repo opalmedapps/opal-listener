@@ -77,6 +77,12 @@ exports.getPatientQuestionnaires = function (rows) {
       if(rows.length!== 0) {
           let questionnaireDBSerNumArray = getQuestionnaireDBSerNums(rows);
 
+          let serNums = rows.map(q => q.QuestionnaireSerNum);
+          let dbSerNums = rows.map(q => q.QuestionnaireDBSerNum);
+
+          logger.log('debug', "sernums before query: " + JSON.stringify(serNums));
+          logger.log('debug', "dbSernums before quert: " + JSON.stringify(dbSerNums));
+
           connection.query(queryQuestions, [[questionnaireDBSerNumArray]], function(err,  questions, fields){
               if(err) reject(err);
 
