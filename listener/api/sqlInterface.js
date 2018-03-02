@@ -1196,15 +1196,30 @@ exports.getNewNotifications = function(requestObject){
     return r.promise
 };
 
+/**
+ * Takes in a list of notifications and the original requestObject and returns a list of tuples that contains the notifications
+ * and their associated content
+ * @param notifications
+ * @param requestObject
+ * @returns {Promise<any>}
+ */
 function assocNotificationsWithItems(notifications, requestObject){
 
     return new Promise((resolve, reject) => {
+
+        // A list containing all possible notification types
         const itemList = ['Document', 'Announcement', 'TxTeamMessage', 'EducationalMaterial', 'LegacyQuestionnaire'];
 
         let fields = [];
+
+        // For each notification, build a list of content-types that need to be refreshed to be paired with the notification(s)
         notifications.forEach(notif => {
             if(itemList.includes(notif.NotificationType) && !fields.includes(notif.NotificationType)) {
+
+                // Due to the mess that is questionnaires, we have to map LegacyQuestionnaire to Questionnaire since that how's it named everywhere on the listener
 				if(notif.NotificationType === 'LegacyQuestionnaire') notif.NotificationType = 'Questionnaire';
+
+				// Eduational material mapping is singular... otherwise add 's' to end of key
                 let string =(notif.NotificationType !== 'EducationalMaterial') ? notif.NotificationType + 's' : notif.NotificationType;
                 fields.push(string);
             }
@@ -1212,6 +1227,8 @@ function assocNotificationsWithItems(notifications, requestObject){
 
 
         if(fields.length > 0) {
+
+            // Refresh all the new data (should only be data that needs to be associated with notification)
             refresh(fields, requestObject)
                 .then(results => {
 
@@ -1221,7 +1238,24 @@ function assocNotificationsWithItems(notifications, requestObject){
                         results = results.Data;
 
                         let resultsArray = [];
-                        Object.keys(results).map(key => resultsArray = resultsArray.concat(results[key]));
+
+                        // Convert the object to an array
+                        Object.keys(results).map(key => {
+
+                            // Need to do special work for questionnaires since it is returned as an object rather than an array
+                            if (key === 'Questionnaires') {
+                                let qArray = [];
+                                let questionnaires = results['Questionnaires'];
+
+                                // Convert questionnaire object to array
+                                Object.key(results[key]).map(ser => qArray = qArray.concat(questionnaires[ser]));
+
+                                logger.log('debug', "converted qs: " + JSON.stringify(qArray))
+                            }
+
+                            resultsArray = resultsArray.concat(results[key])
+                        });
+
 
                         let tuples = notifications.map(notif => {
                             let tuple = [];
