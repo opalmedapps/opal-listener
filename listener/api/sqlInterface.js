@@ -209,9 +209,6 @@ exports.getPatientTableFields = function(userId,timestamp,arrayTables) {
 function processSelectRequest(table, userId, timestamp) {
     const r = Q.defer();
 
-
-    logger.log('debug', "table: " + table);
-
     const requestMappingObject = requestMappings[table];
 
     let date = new Date(0);
@@ -228,7 +225,6 @@ function processSelectRequest(table, userId, timestamp) {
 
     if(requestMappingObject.hasOwnProperty('sql')) {
         exports.runSqlQuery(requestMappingObject.sql,paramArray, requestMappingObject.processFunction).then(function(rows) {
-            if (table === 'Questionnaires'){  }
             r.resolve(rows);
         },function(err) {
             r.reject(err);
@@ -254,8 +250,6 @@ function processSelectRequest(table, userId, timestamp) {
  */
 function preparePromiseArrayFields(userId,timestamp,arrayTables) {
     const array = [];
-
-    logger.log('debug', 'array tables: ' + arrayTables);
 
     if(typeof arrayTables!=='undefined')
     {
@@ -1206,8 +1200,6 @@ function assocNotificationsWithItems(notifications, requestObject){
 
     return new Promise((resolve, reject) => {
         const itemList = ['Document', 'Announcement', 'TxTeamMessage', 'EducationalMaterial', 'LegacyQuestionnaire'];
-		
-		logger.log('debug', 'new notifications: ' + JSON.stringify(notifications));
 
         let fields = [];
         notifications.forEach(notif => {
@@ -1222,7 +1214,9 @@ function assocNotificationsWithItems(notifications, requestObject){
         if(fields.length > 0) {
             refresh(fields, requestObject)
                 .then(results => {
+
                     logger.log('debug', 'results: ' + JSON.stringify(results));
+
                     if(!!results.Data){
                         results = results.Data;
 
@@ -1232,7 +1226,6 @@ function assocNotificationsWithItems(notifications, requestObject){
                         let tuples = notifications.map(notif => {
                             let tuple = [];
                             let item = resultsArray.find(result => {
-                                logger.log('debug', 'result: ' + JSON.stringify(result));
                                 let serNumField = notif.NotificationType + "SerNum";
                                 if(result.hasOwnProperty(serNumField)) return result[serNumField] === notif.RefTableRowSerNum;
                                 return false;
