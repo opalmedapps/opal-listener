@@ -1234,7 +1234,7 @@ function assocNotificationsWithItems(notifications, requestObject){
                     if(!!results.Data){
 
                         // If we successfully were able to grab all the new data, then map them to their notification in tuple-form
-                        let tuples = mapRefreshedDataToNotifications(results, notifications);
+                        let tuples = mapRefreshedDataToNotifications(results.Data, notifications);
                         resolve(tuples);
                     }
                     reject({Response:'error', Reason:'Could not associate any notifications to its content'});
