@@ -1298,8 +1298,8 @@ function createQuestionnaireNotificationObject(patient_questionnaires, raw_quest
         let q_obj ={
             QuestionnaireSerNum: ser,
             Questionnaire: {
-                PatientQuestionnaire: patient_questionnaires[ser],
-                Questionnaire: raw_q
+                PatientQuestionnaires: patient_questionnaires[ser],
+                Questionnaires: raw_q
             }
         };
 
