@@ -1266,6 +1266,8 @@ function mapRefreshedDataToNotifications(results, notifications) {
         }
     });
 
+    logger.log('debug', 'results array: ' + JSON.stringify(resultsArray));
+
     // For each notification, find it's associated item in the results array and create a tuple
     return notifications.map(notif => {
 
@@ -1274,12 +1276,12 @@ function mapRefreshedDataToNotifications(results, notifications) {
 
         // Attempts to find the notifications associated content
         let item = resultsArray.find(result => {
-
             // TODO: This is really not the best way to handle this... should be a mapping
             let serNumField = notif.NotificationType + "SerNum";
             if(result.hasOwnProperty(serNumField)) return parseInt(result[serNumField]) === parseInt(notif.RefTableRowSerNum);
             return false;
         });
+
         tuple.push(notif);
         tuple.push(item);
         return tuple;
