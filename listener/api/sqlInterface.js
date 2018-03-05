@@ -1180,9 +1180,6 @@ exports.getNewNotifications = function(requestObject){
     let r = Q.defer();
     exports.runSqlQuery(queries.getNewNotifications(), [requestObject.UserID, requestObject.Parameters.LastUpdated, requestObject.Parameters.LastUpdated])
         .then(rows => {
-
-            logger.log('debug', 'new notifications: ' + JSON.stringify(rows));
-
             if(rows.length > 0){
                 assocNotificationsWithItems(rows, requestObject)
                     .then(tuples => r.resolve({Data:tuples}))
@@ -1208,6 +1205,7 @@ function assocNotificationsWithItems(notifications, requestObject){
     return new Promise((resolve, reject) => {
 
         // A list containing all possible notification types
+        // TODO: not an elegant way to do this... should create a mapping
         const itemList = ['Document', 'Announcement', 'TxTeamMessage', 'EducationalMaterial', 'Questionnaire'];
 
         let fields = [];
@@ -1220,7 +1218,8 @@ function assocNotificationsWithItems(notifications, requestObject){
 
             if(itemList.includes(notif.NotificationType) && (!fields.includes(notif.NotificationType) || !fields.includes(notif.NotificationType + 's'))) {
 
-				// Eduational material mapping is singular... otherwise add 's' to end of key
+				// Educational material mapping is singular... otherwise add 's' to end of key
+                // TODO: This is a pretty bad way to handle this... should create a mapping
                 let string =(notif.NotificationType !== 'EducationalMaterial') ? notif.NotificationType + 's' : notif.NotificationType;
                 fields.push(string);
             }
@@ -1233,51 +1232,9 @@ function assocNotificationsWithItems(notifications, requestObject){
             refresh(fields, requestObject)
                 .then(results => {
                     if(!!results.Data){
-                        results = results.Data;
 
-                        let resultsArray = [];
-
-                        // Convert the object to an array
-                        Object.keys(results).map(key => {
-
-                            // Need to do special work for questionnaires since it is returned as an object rather than an array
-                            if (key === 'Questionnaires') {
-                                let patient_questionnaires = results[key]['PatientQuestionnaires'];
-                                let raw_questionnaires = results[key]['Questionnaires'];
-
-                                // Convert questionnaire object to array
-                                Object.keys(patient_questionnaires).map(ser => {
-
-                                    let db_ser = patient_questionnaires[ser].QuestionnaireDBSerNum;
-                                    let raw_q = raw_questionnaires[db_ser];
-
-                                    let q_obj ={
-                                        QuestionnaireSerNum: ser,
-                                        Questionnaire: {
-                                            PatientQuestionnaire: patient_questionnaires[ser],
-                                            Questionnaire: raw_q
-                                        }
-                                    };
-
-                                    resultsArray = resultsArray.concat(q_obj);
-                                });
-
-                            } else {
-                                resultsArray = resultsArray.concat(results[key])
-                            }
-                        });
-
-                        let tuples = notifications.map(notif => {
-                            let tuple = [];
-                            let item = resultsArray.find(result => {
-                                let serNumField = notif.NotificationType + "SerNum";
-                                if(result.hasOwnProperty(serNumField)) return parseInt(result[serNumField]) === parseInt(notif.RefTableRowSerNum);
-                                return false;
-                            });
-                            tuple.push(notif);
-                            tuple.push(item);
-                            return tuple;
-                        });
+                        // If we successfully were able to grab all the new data, then map them to their notification in tuple-form
+                        let tuples = mapRefreshedDataToNotifications(results, notifications);
                         resolve(tuples);
                     }
                     reject({Response:'error', Reason:'Could not associate any notifications to its content'});
@@ -1285,6 +1242,71 @@ function assocNotificationsWithItems(notifications, requestObject){
                 .catch(err => resolve(err))
         } else resolve(notifications)
     })
+}
+
+function mapRefreshedDataToNotifications(results, notifications) {
+
+    let resultsArray = [];
+
+    // Iterate through refreshed data object via its keys
+    Object.keys(results).map(key => {
+
+        // Need to do special work for questionnaires since it is returned as an object rather than an array
+        if (key === 'Questionnaires') {
+
+            // Extract the patient and raw questionnaire from the object
+            let patient_questionnaires = results[key]['PatientQuestionnaires'];
+            let raw_questionnaires = results[key]['Questionnaires'];
+
+            // convert the questionnaire object into a more manageable object for the next steps of notification mapping
+            resultsArray = createQuestionnaireNotificationObject(patient_questionnaires, raw_questionnaires, resultsArray)
+
+        } else {
+            resultsArray = resultsArray.concat(results[key])
+        }
+    });
+
+    // For each notification, find it's associated item in the results array and create a tuple
+    return notifications.map(notif => {
+
+        // TODO: It was a pretty bad idea to create an array, should later be changed to an object shaped in the following: {notification: {}, content: {}}
+        let tuple = [];
+
+        // Attempts to find the notifications associated content
+        let item = resultsArray.find(result => {
+
+            // TODO: This is really not the best way to handle this... should be a mapping
+            let serNumField = notif.NotificationType + "SerNum";
+            if(result.hasOwnProperty(serNumField)) return parseInt(result[serNumField]) === parseInt(notif.RefTableRowSerNum);
+            return false;
+        });
+        tuple.push(notif);
+        tuple.push(item);
+        return tuple;
+    });
+}
+
+function createQuestionnaireNotificationObject(patient_questionnaires, raw_questionnaires, resultsArray){
+    // Iterate through refreshed questionnaire data by serNum
+    Object.keys(patient_questionnaires).map(ser => {
+
+        // Grab the DB ser num from patient questionnaire object + it's associated raw questionnaire
+        let db_ser = patient_questionnaires[ser].QuestionnaireDBSerNum;
+        let raw_q = raw_questionnaires[db_ser];
+
+        // Create an object that can be referenced by it's questionnareSerNum in order to get Questionnaire objects
+        let q_obj ={
+            QuestionnaireSerNum: ser,
+            Questionnaire: {
+                PatientQuestionnaire: patient_questionnaires[ser],
+                Questionnaire: raw_q
+            }
+        };
+
+        resultsArray = resultsArray.concat(q_obj);
+    });
+
+    return resultsArray
 }
 
 function refresh (fields, requestObject) {
