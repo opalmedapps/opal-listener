@@ -2,7 +2,6 @@
 <project version="4">
   <component name="ChangeListManager">
     <list default="true" id="d59ef117-463d-4a5a-945b-009109a6b14e" name="Default" comment="">
-      <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" afterPath="$PROJECT_DIR$/.idea/workspace.xml" />
       <change beforePath="$PROJECT_DIR$/listener/api/sqlInterface.js" afterPath="$PROJECT_DIR$/listener/api/sqlInterface.js" />
     </list>
     <ignored path="$PROJECT_DIR$/.tmp/" />
@@ -214,12 +213,12 @@
       <workItem from="1516676401366" duration="204000" />
       <workItem from="1520013449385" duration="5854000" />
       <workItem from="1520027793631" duration="4884000" />
-      <workItem from="1520264017000" duration="1458000" />
+      <workItem from="1520264017000" duration="1572000" />
     </task>
     <servers />
   </component>
   <component name="TimeTrackingManager">
-    <option name="totallyTimeSpent" value="20185000" />
+    <option name="totallyTimeSpent" value="20299000" />
   </component>
   <component name="ToolWindowManager">
     <frame x="0" y="0" width="1280" height="800" extended-state="0" />
