@@ -1153,7 +1153,7 @@ exports.getQuestionnaires = function(requestObject){
 
 /**
  * NOTIFICATIONS FUNCTIONALITY
- * =====================================
+ * ========================================================================
  */
 
 /**
@@ -1245,6 +1245,9 @@ function assocNotificationsWithItems(notifications, requestObject){
 }
 
 function mapRefreshedDataToNotifications(results, notifications) {
+
+    logger.log('debug', 'notifications: ' + JSON.stringify(notifications));
+    logger.log('debug', 'results: ' + JSON.stringify(results));
 
     let resultsArray = [];
 
