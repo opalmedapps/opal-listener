@@ -114,11 +114,15 @@ function prepareQuestionnaireObject(questionnaires, opalDB)
 		questionnairesObject[questionnaires[i].QuestionnaireDBSerNum].QuestionnaireDBSerNum = questionnaires[i].QuestionnaireDBSerNum;
 		questionnairesObject[questionnaires[i].QuestionnaireDBSerNum].QuestionnaireName = questionnaires[i].QuestionnaireName;
 		questionnairesObject[questionnaires[i].QuestionnaireDBSerNum].QuestionnaireName_EN = questionnaires[i].QuestionnaireName_EN;
+		questionnairesObject[questionnaires[i].QuestionnaireDBSerNum].Intro_EN = questionnaires[i].Intro_EN;
 		questionnairesObject[questionnaires[i].QuestionnaireDBSerNum].QuestionnaireName_FR = questionnaires[i].QuestionnaireName_FR;
+		questionnairesObject[questionnaires[i].QuestionnaireDBSerNum].Intro_FR = questionnaires[i].Intro_FR;
 		questionnairesObject[questionnaires[i].QuestionnaireDBSerNum].QuestionnaireSerNum = questionnaires[i].QuestionnaireSerNum;
 		delete questionnaires[i].QuestionnaireName;
 		delete questionnaires[i].QuestionnaireName_EN;
+		delete questionnaires[i].Intro_EN;
 		delete questionnaires[i].QuestionnaireName_FR;
+		delete questionnaires[i].Intro_FR;
 		delete questionnaires[i].QuestionnaireDBSerNum;
 		questionnairesObject[questionnaireSerNum].Questions = {};
 		questionnairesObject[questionnaireSerNum].Questions[questionnaires[i].QuestionnaireQuestionSerNum]=questionnaires[i];
