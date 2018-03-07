@@ -156,7 +156,7 @@ exports.patientTestResultsTableFields=function()
 									'Where EMC.EducationalMaterialControlSerNum = TRC.EducationalMaterialControlSerNum ' +
 											'and TRC.TestResultControlSerNum = TR.TestResultControlSerNum), "") as URL_FR ' +
 				'FROM TestResult TR, Users U, Patient P ' +
-				'WHERE P.AccessLevel = 3 AND U.UserTypeSerNum=P.PatientSerNum AND TR.PatientSerNum = P.PatientSerNum AND U.Username LIKE ? AND TR.LastUpdated > ? AND TR.ValidEntry = "Y";';
+				'WHERE P.AccessLevel = 3 AND U.UserTypeSerNum=P.PatientSerNum AND TR.PatientSerNum = P.PatientSerNum AND TR.TestDate >= "1970-01-01" AND U.Username LIKE ? AND TR.LastUpdated > ? AND TR.ValidEntry = "Y";';
 /**/
 	
 /*
