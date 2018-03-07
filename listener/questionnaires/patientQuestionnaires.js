@@ -110,18 +110,22 @@ function prepareQuestionnaireObject(questionnaires, opalDB)
     var questionnaireSerNum = questionnaires[i].QuestionnaireDBSerNum;
     if(!questionnairesObject.hasOwnProperty(questionnaires[i].QuestionnaireDBSerNum))
     {
-      questionnairesObject[questionnaires[i].QuestionnaireDBSerNum] = {};
-      questionnairesObject[questionnaires[i].QuestionnaireDBSerNum].QuestionnaireDBSerNum = questionnaires[i].QuestionnaireDBSerNum;
-      questionnairesObject[questionnaires[i].QuestionnaireDBSerNum].QuestionnaireName = questionnaires[i].QuestionnaireName;
-        questionnairesObject[questionnaires[i].QuestionnaireDBSerNum].QuestionnaireSerNum = questionnaires[i].QuestionnaireSerNum;
-        delete questionnaires[i].QuestionnaireName;
-      delete questionnaires[i].QuestionnaireDBSerNum;
-      questionnairesObject[questionnaireSerNum].Questions = {};
-      questionnairesObject[questionnaireSerNum].Questions[questionnaires[i].QuestionnaireQuestionSerNum]=questionnaires[i];
+		questionnairesObject[questionnaires[i].QuestionnaireDBSerNum] = {};
+		questionnairesObject[questionnaires[i].QuestionnaireDBSerNum].QuestionnaireDBSerNum = questionnaires[i].QuestionnaireDBSerNum;
+		questionnairesObject[questionnaires[i].QuestionnaireDBSerNum].QuestionnaireName = questionnaires[i].QuestionnaireName;
+		questionnairesObject[questionnaires[i].QuestionnaireDBSerNum].QuestionnaireName_EN = questionnaires[i].QuestionnaireName_EN;
+		questionnairesObject[questionnaires[i].QuestionnaireDBSerNum].QuestionnaireName_FR = questionnaires[i].QuestionnaireName_FR;
+		questionnairesObject[questionnaires[i].QuestionnaireDBSerNum].QuestionnaireSerNum = questionnaires[i].QuestionnaireSerNum;
+		delete questionnaires[i].QuestionnaireName;
+		delete questionnaires[i].QuestionnaireName_EN;
+		delete questionnaires[i].QuestionnaireName_FR;
+		delete questionnaires[i].QuestionnaireDBSerNum;
+		questionnairesObject[questionnaireSerNum].Questions = {};
+		questionnairesObject[questionnaireSerNum].Questions[questionnaires[i].QuestionnaireQuestionSerNum]=questionnaires[i];
     }else{
-      delete questionnaires[i].QuestionnaireName;
-      delete questionnaires[i].QuestionnaireDBSerNum;
-      questionnairesObject[questionnaireSerNum].Questions[questionnaires[i].QuestionnaireQuestionSerNum]=questionnaires[i];
+		delete questionnaires[i].QuestionnaireName;
+		delete questionnaires[i].QuestionnaireDBSerNum;
+		questionnairesObject[questionnaireSerNum].Questions[questionnaires[i].QuestionnaireQuestionSerNum]=questionnaires[i];
     }
   }
   
