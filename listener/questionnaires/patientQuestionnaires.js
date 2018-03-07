@@ -39,9 +39,14 @@ function handleDisconnect(myconnection) {
 
 handleDisconnect(connection);
 
+
 //Queries to obtain the questions and question choices for questionnaires
 var queryQuestions = `SELECT DISTINCT Questionnaire.QuestionnaireSerNum as QuestionnaireDBSerNum, 
                                       Questionnaire.QuestionnaireName,                           
+									  QC.QuestionnaireName_EN,
+									  QC.Intro_EN,
+									  QC.QuestionnaireName_FR,
+									  QC.Intro_FR,
                                       QuestionnaireQuestion.QuestionnaireQuestionSerNum, 
                                       Question.QuestionSerNum,
                                       Question.isPositiveQuestion, 
@@ -55,13 +60,13 @@ var queryQuestions = `SELECT DISTINCT Questionnaire.QuestionnaireSerNum as Quest
                            Question, 
                            QuestionType, 
                            Patient, 
-                           QuestionnaireQuestion 
+                           QuestionnaireQuestion, 
+						   OpalDB_PREPROD.QuestionnaireControl QC
                      WHERE QuestionnaireQuestion.QuestionnaireSerNum = Questionnaire.QuestionnaireSerNum 
                          AND QuestionnaireQuestion.QuestionSerNum = Question.QuestionSerNum 
                          AND Question.QuestionTypeSerNum = QuestionType.QuestionTypeSerNum 
+						 AND QC.QuestionnaireDBSerNum = Questionnaire.QuestionnaireSerNum
                          AND Questionnaire.QuestionnaireSerNum IN ?`;
-
-
 
 var queryQuestionChoices = "SELECT QuestionSerNum, MCSerNum as OrderNum, MCDescription as ChoiceDescription_EN, MCDescription_FR as ChoiceDescription_FR  FROM QuestionMC WHERE QuestionSerNum IN ? UNION ALL SELECT * FROM QuestionCheckbox WHERE QuestionSerNum IN ? UNION ALL SELECT * FROM QuestionMinMax WHERE QuestionSerNum IN ? ORDER BY QuestionSerNum, OrderNum DESC";
 var queryAnswersPatientQuestionnaire = "SELECT QuestionnaireQuestionSerNum, Answer.Answer, PatientQuestionnaireSerNum as PatientQuestionnaireDBSerNum FROM Answer WHERE PatientQuestionnaireSerNum IN ? ORDER BY PatientQuestionnaireDBSerNum;"
