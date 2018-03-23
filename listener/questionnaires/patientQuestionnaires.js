@@ -41,30 +41,30 @@ handleDisconnect(connection);
 
 
 //Queries to obtain the questions and question choices for questionnaires
-var queryQuestions = `SELECT DISTINCT Questionnaire.QuestionnaireSerNum as QuestionnaireDBSerNum, 
-                                      Questionnaire.QuestionnaireName,                           
+var queryQuestions = `SELECT DISTINCT Questionnaire.QuestionnaireSerNum as QuestionnaireDBSerNum,
+                                      Questionnaire.QuestionnaireName,
 									  QC.QuestionnaireName_EN,
 									  QC.Intro_EN,
 									  QC.QuestionnaireName_FR,
 									  QC.Intro_FR,
-                                      QuestionnaireQuestion.QuestionnaireQuestionSerNum, 
+                                      QuestionnaireQuestion.QuestionnaireQuestionSerNum,
                                       Question.QuestionSerNum,
-                                      Question.isPositiveQuestion, 
-                                      Question.QuestionQuestion as QuestionText_EN, 
-                                      Question.QuestionName as Asseses_EN, 
-                                      Question.QuestionName_FR as Asseses_FR, 
-                                      Question.QuestionQuestion_FR as QuestionText_FR, 
-                                      QuestionType.QuestionType, 
-                                      QuestionType.QuestionTypeSerNum 
-                      FROM Questionnaire, 
-                           Question, 
-                           QuestionType, 
-                           Patient, 
-                           QuestionnaireQuestion, 
+                                      Question.isPositiveQuestion,
+                                      Question.QuestionQuestion as QuestionText_EN,
+                                      Question.QuestionName as Asseses_EN,
+                                      Question.QuestionName_FR as Asseses_FR,
+                                      Question.QuestionQuestion_FR as QuestionText_FR,
+                                      QuestionType.QuestionType,
+                                      QuestionType.QuestionTypeSerNum
+                      FROM Questionnaire,
+                           Question,
+                           QuestionType,
+                           Patient,
+                           QuestionnaireQuestion,
 						   OpalDB_PREPROD.QuestionnaireControl QC
-                     WHERE QuestionnaireQuestion.QuestionnaireSerNum = Questionnaire.QuestionnaireSerNum 
-                         AND QuestionnaireQuestion.QuestionSerNum = Question.QuestionSerNum 
-                         AND Question.QuestionTypeSerNum = QuestionType.QuestionTypeSerNum 
+                     WHERE QuestionnaireQuestion.QuestionnaireSerNum = Questionnaire.QuestionnaireSerNum
+                         AND QuestionnaireQuestion.QuestionSerNum = Question.QuestionSerNum
+                         AND Question.QuestionTypeSerNum = QuestionType.QuestionTypeSerNum
 						 AND QC.QuestionnaireDBSerNum = Questionnaire.QuestionnaireSerNum
                          AND Questionnaire.QuestionnaireSerNum IN ?`;
 
@@ -132,9 +132,9 @@ function prepareQuestionnaireObject(questionnaires, opalDB)
 		questionnairesObject[questionnaireSerNum].Questions[questionnaires[i].QuestionnaireQuestionSerNum]=questionnaires[i];
     }
   }
-  
+
   return questionnairesObject;
-  
+
 }
 //Extracts only questionnaireSerNum for query injection
 function getQuestionnaireDBSerNums(rows) {
@@ -189,7 +189,7 @@ function attachingQuestionnaireAnswers(opalDB)
     patientQuestionnaires[opalDB[i].QuestionnaireSerNum] = opalDB[i];
     if(opalDB[i].CompletedFlag == 1 || opalDB[i].CompletedFlag == '1')
     {
-      
+
       patientQuestionnaireSerNumArray.push(opalDB[i].PatientQuestionnaireDBSerNum);
     }
   }
@@ -213,14 +213,14 @@ function attachingQuestionnaireAnswers(opalDB)
       }
 
       r.resolve(patientQuestionnaires);
-      
-    }); 
+
+    });
   }else{
     //console.log('Hello World');
     r.resolve(patientQuestionnaires);
   }
   return r.promise;
-  
+
 }
 //Query answers table
 function getAnswersQuestionnaires()
@@ -271,10 +271,13 @@ function inputAnswersHelper(id,patientSerNum, answers)
   //console.log(answers);
   for (var i in answers) {
     var objectAnswer = answers[i].Answer;
+
+    logger.log('debug', answers[i].Answer);
+
     if(answers[i].QuestionType == 'Checkbox')
     {
       for(var key in objectAnswer)
-      { 
+      {
         if(objectAnswer[key]!=='')
         {
           arrayPromises.push(promisifyQuery(inputAnswersQuery, [answers[i].QuestionnaireQuestionSerNum,objectAnswer[key], patientSerNum,id]));
@@ -292,7 +295,7 @@ function inputAnswersHelper(id,patientSerNum, answers)
     //console.log(err);
     r.reject(err);
   });
-  
+
   return r.promise;
 }
 //Turns a callback query function into a promise
