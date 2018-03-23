@@ -31,7 +31,7 @@ exports.patientAppointmentsTableFields=function()
         "Appointment.ScheduledStartTime, " +
         "Appointment.ScheduledEndTime, " +
         "Appointment.Checkin, " +
-        "Appointment.AppointmentAriaSer, " + 
+        "Appointment.AppointmentAriaSer, " +
         "Appointment.ReadStatus, " +
         "Resource.ResourceName, " +
         "Resource.ResourceType, " +
@@ -158,7 +158,7 @@ exports.patientTestResultsTableFields=function()
 				'FROM TestResult TR, Users U, Patient P ' +
 				'WHERE P.AccessLevel = 3 AND U.UserTypeSerNum=P.PatientSerNum AND TR.PatientSerNum = P.PatientSerNum AND TR.TestDate >= "1970-01-01" AND U.Username LIKE ? AND TR.LastUpdated > ? AND TR.ValidEntry = "Y";';
 /**/
-	
+
 /*
 return 'SELECT ComponentName, FacComponentName, AbnormalFlag, MaxNorm, MinNorm, TestValue, TestValueString, UnitDescription, CAST(TestDate AS char(30)) as `TestDate`, ' +
 				'IfNull((Select TC.URL_EN From TestResultExpression TRE, TestResultControl TC ' +
@@ -177,10 +177,11 @@ exports.patientQuestionnaireTableFields = function()
 {
     return "SELECT Q.CompletedFlag, CAST(DATE_FORMAT(Q.DateAdded, '%Y-%m-%d') AS char(30)) as DateAdded, Q.PatientQuestionnaireDBSerNum, " +
 //		"Q.CompletionDate, " +
-		"CAST(DATE_FORMAT(Q.CompletionDate, '%Y-%m-%d %H:%i') AS char(30)) as CompletionDate, " +
+//		"CAST(DATE_FORMAT(Q.CompletionDate, '%Y-%m-%d %H:%i') AS char(30)) as CompletionDate, " +
+    "CAST(DATE_FORMAT(Q.CompletionDate, '%Y-%m-%d') AS char(30)) as CompletionDate, " +
 		"Q.QuestionnaireSerNum, QC.QuestionnaireDBSerNum " +
 		"FROM QuestionnaireControl QC, Questionnaire Q, Patient P, Users U " +
-		"WHERE QC.QuestionnaireControlSerNum = Q.QuestionnaireControlSerNum " + 
+		"WHERE QC.QuestionnaireControlSerNum = Q.QuestionnaireControlSerNum " +
 		"AND Q.PatientSerNum = P.PatientSerNum AND U.UserTypeSerNum = P.PatientSerNum and " +
 		"U.Username = ? order by CAST(DATE_FORMAT(Q.DateAdded, '%Y-%m-%d') AS char(30)) desc";
 //    return "SELECT Questionnaire.CompletedFlag, Questionnaire.DateAdded, Questionnaire.PatientQuestionnaireDBSerNum, Questionnaire.CompletionDate, Questionnaire.QuestionnaireSerNum, QuestionnaireControl.QuestionnaireDBSerNum FROM QuestionnaireControl, Questionnaire, Patient, Users WHERE QuestionnaireControl.QuestionnaireControlSerNum = Questionnaire.QuestionnaireControlSerNum AND Questionnaire.PatientSerNum = Patient.PatientSerNum AND Users.UserTypeSerNum = Patient.PatientSerNum AND Users.Username = ?";
@@ -200,7 +201,7 @@ exports.getPatientPasswordForVerification = function()
 
  exports.getPatientFieldsForPasswordReset = function()
  {
-    return `SELECT DISTINCT pat.SSN, pat.Email, u.Password, u.UserTypeSerNum, sa.AnswerText, pdi.Attempt, pdi.TimeoutTimestamp   
+    return `SELECT DISTINCT pat.SSN, pat.Email, u.Password, u.UserTypeSerNum, sa.AnswerText, pdi.Attempt, pdi.TimeoutTimestamp
             FROM Users u, Patient pat, SecurityAnswer sa, PatientDeviceIdentifier pdi
             WHERE pat.Email= ? AND pat.PatientSerNum = u.UserTypeSerNum AND pdi.DeviceId = ?
             AND sa.SecurityAnswerSerNum = pdi.SecurityAnswerSerNum AND sa.PatientSerNum = pat.PatientSerNum`;
@@ -264,9 +265,9 @@ exports.getPatientFromEmail=function()
 };
 exports.logActivity=function(requestObject)
 {
-	return `INSERT INTO PatientActivityLog 
+	return `INSERT INTO PatientActivityLog
                 (\`ActivitySerNum\`,\`Request\`,\`Username\`, \`DeviceId\`,\`SessionId\`,
-                \`DateTime\`, \`LastUpdated\`) 
+                \`DateTime\`, \`LastUpdated\`)
 	        VALUES (NULL, ?, ?, ?, ?, CURRENT_TIMESTAMP ,CURRENT_TIMESTAMP )`;
 
     return "INSERT INTO PatientActivityLog (`ActivitySerNum`,`Request`,`Username`, `DeviceId`,`SessionId`,`DateTime`,`LastUpdated`) VALUES (NULL,'"+requestObject.Request+ "', '"+requestObject.UserID+ "', '"+requestObject.DeviceId+"','"+requestObject.Token+"', CURRENT_TIMESTAMP ,CURRENT_TIMESTAMP )";
@@ -312,8 +313,8 @@ exports.updateReadStatus=function()
 {
     return `
         UPDATE ??
-        SET ReadStatus = 1 
-        WHERE ??.?? = ? 
+        SET ReadStatus = 1
+        WHERE ??.?? = ?
     `;
 };
 
@@ -398,11 +399,11 @@ exports.getPatientCheckinPushNotifications = function() {
  */
 exports.getTodaysCheckedInAppointments = function() {
    return `
-        SELECT Appointment.AppointmentSerNum 
-        FROM Appointment 
-        WHERE Appointment.PatientSerNum = ? 
+        SELECT Appointment.AppointmentSerNum
+        FROM Appointment
+        WHERE Appointment.PatientSerNum = ?
             AND Appointment.Checkin = 1
-            AND DATE_FORMAT(Appointment.ScheduledStartTime, '%Y-%m-%d') = DATE_FORMAT(NOW(), '%Y-%m-%d');     
+            AND DATE_FORMAT(Appointment.ScheduledStartTime, '%Y-%m-%d') = DATE_FORMAT(NOW(), '%Y-%m-%d');
    `
 };
 
