@@ -65,7 +65,7 @@ class RequestValidator {
 		return r.promise;
 	}
 
-	/***
+	/**
 	 * @name validateRequestCredentials
 	 * @description Validates the credentials of a request
 	 * @param request
