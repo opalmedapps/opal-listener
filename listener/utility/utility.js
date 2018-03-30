@@ -169,7 +169,7 @@ exports.encryptObject=function(object,secret,nonce)
 
       } else
       {
-        if (typeof object[key] !=='string') {
+        if (typeof object[key] !== 'string') {
           object[key]=String(object[key]);
         }
         object[key] = stablelibbase64.encode(exports.concatUTF8Array(nonce,nacl.secretbox(stablelibutf8.encode(object[key]),nonce,secret)));
