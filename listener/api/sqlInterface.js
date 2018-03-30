@@ -499,7 +499,7 @@ exports.inputFeedback = function(requestObject) {
 		            title = "New Suggestion - Opal";
 		            replyTo = email;
 	            } else {
-		            email = "muhc.app.mobile@gmail.com";
+		            email = "opal@muhc.mcgill.ca";
 		            title = "New Feedback - Opal";
 	            }
                 (new Mail()).sendMail(email, title, feedback, replyTo);
@@ -1112,7 +1112,7 @@ exports.getSecurityQuestion = function (requestObject){
 
 exports.setTrusted = function(requestObject)
 {
-	
+
     var r = Q.defer();
     exports.runSqlQuery(queries.setTrusted(),[requestObject.DeviceId])
         .then(function (queryRows) {
