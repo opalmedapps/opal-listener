@@ -203,7 +203,7 @@ function encryptResponse(response)
 	let salt = response.Salt;
 	delete response.EncryptionKey;
 	delete response.Salt;
-	
+
 	if(encryptionKey)
 	{
 		return utility.encrypt(response, encryptionKey, salt);
