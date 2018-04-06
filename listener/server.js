@@ -205,8 +205,7 @@ function encryptResponse(response)
 	delete response.EncryptionKey;
 	delete response.Salt;
 
-	if(encryptionKey)
-	{
+    if(typeof encryptionKey!=='undefined' && encryptionKey!=='') {
 		return utility.encrypt(response, encryptionKey, salt);
 	}else{
 		return Promise.resolve(response);
