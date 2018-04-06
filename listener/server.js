@@ -34,6 +34,7 @@ const FIREBASE_DEBUG = !!process.env.FIREBASE_DEBUG;
 
 // Initialize firebase connection
 const serviceAccount = require(config.FIREBASE_ADMIN_KEY);
+
 admin.initializeApp({
 	credential: admin.credential.cert(serviceAccount),
 	databaseURL: config.DATABASE_URL
@@ -218,9 +219,8 @@ function encryptResponse(response)
  * @param key
  * @desc Encrypt and upload the response to Firebase
  */
-function uploadToFirebase(response, key)
-{
-  logger.log('debug', 'Uploading to Firebase');
+function uploadToFirebase(response, key) {
+    logger.log('debug', 'Uploading to Firebase');
 	return new Promise((resolve, reject)=>{
 
 		//Need to make a copy of the data, since the encryption key needs to be read
