@@ -1156,12 +1156,17 @@ exports.getQuestionnaires = function(requestObject){
  * ========================================================================
  */
 
+
+
 /**
  * Returns a promise containing all the notifications
  * @param {object} requestObject the request
  * @returns {Promise} Returns a promise that contains the notification data
  */
 
+/**
+ * DEPRECATED
+ */
 exports.getAllNotifications = function(requestObject){
     let r = Q.defer();
     exports.runSqlQuery(queries.getAllNotifications(), [requestObject.UserID])
