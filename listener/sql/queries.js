@@ -415,10 +415,12 @@ exports.getTodaysCheckedInAppointments = function() {
 exports.patientNotificationsTableFields=function()
 {
     return "SELECT Notification.NotificationSerNum, " +
-        "Notification.DateAdded, Notification.ReadStatus, " +
+        "Notification.DateAdded, " +
+        "Notification.ReadStatus, " +
         "Notification.RefTableRowSerNum, " +
         "NotificationControl.NotificationType, " +
-        "NotificationControl.Name_EN, NotificationControl.Name_FR, " +
+        "NotificationControl.Name_EN, " +
+        "NotificationControl.Name_FR, " +
         "NotificationControl.Description_EN, " +
         "NotificationControl.Description_FR " +
         "" +
@@ -437,10 +439,12 @@ exports.patientNotificationsTableFields=function()
 
 exports.getNewNotifications=function() {
     return "SELECT Notification.NotificationSerNum, " +
-        "Notification.DateAdded, Notification.ReadStatus, " +
+        "Notification.DateAdded," +
+        " Notification.ReadStatus, " +
         "Notification.RefTableRowSerNum, " +
         "NotificationControl.NotificationType, " +
-        "NotificationControl.Name_EN, NotificationControl.Name_FR, " +
+        "NotificationControl.Name_EN, " +
+        "NotificationControl.Name_FR, " +
         "NotificationControl.Description_EN, " +
         "NotificationControl.Description_FR " +
         "" +
