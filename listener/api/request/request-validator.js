@@ -6,6 +6,8 @@ const OpalResponseError = require('../response/response-error');
 const sqlInterface = require('../sqlInterface');
 const utility = require('../../utility/utility');
 const logger = require('../../logs/logger');
+const config = require('../../config.json');
+
 /**
  * Library imports
  */
@@ -29,7 +31,13 @@ class RequestValidator {
 		let validation = this.validateRequestCredentials(request);
 
 		if(validation.isValid) {
-			//Gets user password for decrypting
+
+            if (!this.versionIsSecure(request)) {
+                logger.log('error', 'Invalid version: ' + request.meta.AppVersion);
+                r.reject(new OpalResponseError(5, 'Received request from unsafe app version', request, 'Unsafe App Version'));
+            }
+
+            //Gets user password for decrypting
 			sqlInterface.getEncryption(requestObject).then(function(rows) {
 				if (rows.length > 1 || rows.length === 0) {
 					//Rejects requests if username returns more than one password
@@ -66,8 +74,8 @@ class RequestValidator {
 	static validateRequestCredentials(request){
 		if(!request.meta || !request.type) return false;
 		//Must have all the properties of a request
-		let prop = ['DeviceId', 'Token', 'UserID','Timestamp','UserEmail'];
-		let errors = [];
+        let prop = ['DeviceId', 'Token', 'UserID','Timestamp','UserEmail', 'AppVersion'];
+        let errors = [];
 
 		let isValid = prop.reduce((valid, property)=>{
 			if(!valid) return false;
@@ -79,5 +87,39 @@ class RequestValidator {
 
 		return {isValid: isValid, errors: errors}
 	}
+
+    /**
+     * Checks to see if the version of the incoming request is equal or greater than the latest stable version.
+     * The idea is to block access to data if the app is not deemed safe.
+     * @param request
+     * @returns {boolean}
+     */
+    static versionIsSecure(request){
+        let app_version = request.meta.AppVersion;
+        let stable_version = config.LATEST_STABLE_VERSION;
+
+        app_version = app_version.split('.');
+        stable_version = stable_version.split('.');
+
+        function isValidPart(x) {
+            return  /^\d+$/.test(x);
+        }
+
+        if (!app_version.every(isValidPart) || !stable_version.every(isValidPart)) {
+            return false;
+        }
+
+        for (let i = 0; i < app_version.length; ++i) {
+            if (app_version[i] > stable_version[i]) {
+                return true;
+            }
+
+            if (app_version[i] < stable_version[i]) {
+                return false
+            }
+        }
+
+        return true
+    }
 }
 module.exports = RequestValidator;
