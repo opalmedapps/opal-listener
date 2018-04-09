@@ -2,9 +2,7 @@
 <project version="4">
   <component name="ChangeListManager">
     <list default="true" id="d59ef117-463d-4a5a-945b-009109a6b14e" name="Default" comment="">
-      <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/listener/api/request/request-validator.js" beforeDir="false" afterPath="$PROJECT_DIR$/listener/api/request/request-validator.js" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/listener/config.json" beforeDir="false" afterPath="$PROJECT_DIR$/listener/config.json" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/listener/utility/utility.js" beforeDir="false" afterPath="$PROJECT_DIR$/listener/utility/utility.js" afterDir="false" />
     </list>
     <ignored path="$PROJECT_DIR$/.tmp/" />
     <ignored path="$PROJECT_DIR$/temp/" />
@@ -27,11 +25,27 @@
           </provider>
         </entry>
       </file>
-      <file leaf-file-name="request-validator.js" pinned="false" current-in-tab="true">
+      <file leaf-file-name="request-validator.js" pinned="false" current-in-tab="false">
         <entry file="file://$PROJECT_DIR$/listener/api/request/request-validator.js">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="93">
-              <caret line="91" column="14" selection-start-line="91" selection-start-column="14" selection-end-line="91" selection-end-column="14" />
+            <state relative-caret-position="399">
+              <caret line="46" column="22" lean-forward="true" selection-start-line="46" selection-start-column="22" selection-end-line="46" selection-end-column="22" />
+            </state>
+          </provider>
+        </entry>
+      </file>
+      <file leaf-file-name="security.js" pinned="false" current-in-tab="false">
+        <entry file="file://$PROJECT_DIR$/listener/security/security.js">
+          <provider selected="true" editor-type-id="text-editor">
+            <state relative-caret-position="-1720" />
+          </provider>
+        </entry>
+      </file>
+      <file leaf-file-name="utility.js" pinned="false" current-in-tab="true">
+        <entry file="file://$PROJECT_DIR$/listener/utility/utility.js">
+          <provider selected="true" editor-type-id="text-editor">
+            <state relative-caret-position="184">
+              <caret line="153" column="8" lean-forward="true" selection-start-line="153" selection-start-column="8" selection-end-line="153" selection-end-column="8" />
             </state>
           </provider>
         </entry>
@@ -61,6 +75,7 @@
         <option value="$PROJECT_DIR$/listener/api/sqlInterface.js" />
         <option value="$PROJECT_DIR$/listener/config.json" />
         <option value="$PROJECT_DIR$/listener/api/request/request-validator.js" />
+        <option value="$PROJECT_DIR$/listener/utility/utility.js" />
       </list>
     </option>
   </component>
@@ -109,20 +124,25 @@
               <item name="opal-listener" type="b2602c69:ProjectViewProjectNode" />
               <item name="opal-listener" type="462c0819:PsiDirectoryNode" />
               <item name="listener" type="462c0819:PsiDirectoryNode" />
-              <item name="api" type="462c0819:PsiDirectoryNode" />
-              <item name="request" type="462c0819:PsiDirectoryNode" />
-            </path>
-            <path>
-              <item name="opal-listener" type="b2602c69:ProjectViewProjectNode" />
-              <item name="opal-listener" type="462c0819:PsiDirectoryNode" />
-              <item name="listener" type="462c0819:PsiDirectoryNode" />
               <item name="questionnaires" type="462c0819:PsiDirectoryNode" />
             </path>
             <path>
               <item name="opal-listener" type="b2602c69:ProjectViewProjectNode" />
               <item name="opal-listener" type="462c0819:PsiDirectoryNode" />
               <item name="listener" type="462c0819:PsiDirectoryNode" />
+              <item name="security" type="462c0819:PsiDirectoryNode" />
+            </path>
+            <path>
+              <item name="opal-listener" type="b2602c69:ProjectViewProjectNode" />
+              <item name="opal-listener" type="462c0819:PsiDirectoryNode" />
+              <item name="listener" type="462c0819:PsiDirectoryNode" />
               <item name="sql" type="462c0819:PsiDirectoryNode" />
+            </path>
+            <path>
+              <item name="opal-listener" type="b2602c69:ProjectViewProjectNode" />
+              <item name="opal-listener" type="462c0819:PsiDirectoryNode" />
+              <item name="listener" type="462c0819:PsiDirectoryNode" />
+              <item name="utility" type="462c0819:PsiDirectoryNode" />
             </path>
           </expand>
           <select />
@@ -171,12 +191,12 @@
       <workItem from="1520013449385" duration="5854000" />
       <workItem from="1520027793631" duration="4884000" />
       <workItem from="1520264017000" duration="2347000" />
-      <workItem from="1523293279428" duration="152000" />
+      <workItem from="1523293279428" duration="1029000" />
     </task>
     <servers />
   </component>
   <component name="TimeTrackingManager">
-    <option name="totallyTimeSpent" value="21226000" />
+    <option name="totallyTimeSpent" value="22103000" />
   </component>
   <component name="ToolWindowManager">
     <frame x="0" y="0" width="1280" height="800" extended-state="0" />
@@ -208,21 +228,19 @@
   <component name="VcsContentAnnotationSettings">
     <option name="myLimit" value="2678400000" />
   </component>
+  <component name="XDebuggerManager">
+    <breakpoint-manager>
+      <breakpoints>
+        <line-breakpoint enabled="true" type="javascript">
+          <url>file://$PROJECT_DIR$/listener/api/request/request-validator.js</url>
+          <line>27</line>
+          <properties lambdaOrdinal="-1" />
+        </line-breakpoint>
+      </breakpoints>
+      <option name="time" value="1" />
+    </breakpoint-manager>
+  </component>
   <component name="editorHistoryManager">
-    <entry file="file://$PROJECT_DIR$/listener/config.json">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="105">
-          <caret line="7" column="92" selection-start-line="7" selection-start-column="92" selection-end-line="7" selection-end-column="92" />
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/listener/api/apiPatientUpdate.js">
-      <provider selected="true" editor-type-id="text-editor">
-        <state>
-          <caret line="19" column="14" selection-start-line="19" selection-start-column="7" selection-end-line="19" selection-end-column="14" />
-        </state>
-      </provider>
-    </entry>
     <entry file="file://$PROJECT_DIR$/listener/server.js">
       <provider selected="true" editor-type-id="text-editor">
         <state relative-caret-position="180">
@@ -503,8 +521,20 @@
     </entry>
     <entry file="file://$PROJECT_DIR$/listener/api/request/request-validator.js">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="93">
-          <caret line="91" column="14" selection-start-line="91" selection-start-column="14" selection-end-line="91" selection-end-column="14" />
+        <state relative-caret-position="399">
+          <caret line="46" column="22" lean-forward="true" selection-start-line="46" selection-start-column="22" selection-end-line="46" selection-end-column="22" />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/listener/security/security.js">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="-1720" />
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/listener/utility/utility.js">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="184">
+          <caret line="153" column="8" lean-forward="true" selection-start-line="153" selection-start-column="8" selection-end-line="153" selection-end-column="8" />
         </state>
       </provider>
     </entry>

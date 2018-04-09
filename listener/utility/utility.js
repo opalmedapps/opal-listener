@@ -152,8 +152,10 @@ exports.encryptObject=function(object,secret,nonce)
     object = stablelibbase64.encode(exports.concatUTF8Array(nonce, nacl.secretbox(stablelibutf8.encode(object),nonce,secret)));
     return object;
   }else{
-    for (let key in object)
-    {
+    for (let key in object) {
+
+        // Don't encrypt the response code
+        if (key === 'Code') continue;
 
       if (typeof object[key] === 'object')
       {
