@@ -63,4 +63,5 @@ credentials.js
 *.swp
 .DS_Store
 
-
+# Atom ftp configuration
+.ftpconfig
