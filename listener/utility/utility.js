@@ -152,20 +152,26 @@ exports.encryptObject=function(object,secret,nonce)
     object = stablelibbase64.encode(exports.concatUTF8Array(nonce, nacl.secretbox(stablelibutf8.encode(object),nonce,secret)));
     return object;
   }else{
-    for (let key in object)
-    {
-      if (typeof object[key] === 'object') {
+    for (let key in object) {
 
-        if(object[key] instanceof Date ) {
+        // Don't encrypt the response code
+        if (key === 'Code') continue;
+
+      if (typeof object[key] === 'object')
+      {
+
+        if(object[key] instanceof Date )
+        {
           object[key]=object[key].toISOString();
           object[key] = stablelibbase64.encode(exports.concatUTF8Array(nonce, nacl.secretbox(stablelibutf8.encode(object[key]),nonce,secret)));
 
-        } else {
+        }else{
             exports.encryptObject(object[key],secret,nonce);
         }
 
-      } else {
-        if (typeof object[key] !== 'string') {
+      } else
+      {
+        if (typeof object[key] !=='string') {
           object[key]=String(object[key]);
         }
         object[key] = stablelibbase64.encode(exports.concatUTF8Array(nonce,nacl.secretbox(stablelibutf8.encode(object[key]),nonce,secret)));
