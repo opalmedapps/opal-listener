@@ -154,8 +154,8 @@ exports.encryptObject=function(object,secret,nonce)
   }else{
     for (let key in object) {
 
-        // Don't encrypt the response code
-        if (key === 'Code') continue;
+      // Don't encrypt the response code
+      if (key === 'Code') continue;
 
       if (typeof object[key] === 'object')
       {
