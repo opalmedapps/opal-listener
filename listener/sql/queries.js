@@ -28,6 +28,7 @@ exports.patientAppointmentsTableFields=function()
         "Alias.AliasName_FR AS AppointmentType_FR, " +
         "Alias.AliasDescription_EN AS AppointmentDescription_EN, " +
         "Alias.AliasDescription_FR AS AppointmentDescription_FR, " +
+        "AliasExpression.Description AS ResourceDescription, " +
         "Appointment.ScheduledStartTime, " +
         "Appointment.ScheduledEndTime, " +
         "Appointment.Checkin, " +
