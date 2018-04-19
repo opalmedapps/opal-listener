@@ -28,7 +28,7 @@ admin.initializeApp({
     databaseURL: config.DATABASE_URL
 });
 const db = admin.database();
-const ref = db.ref("/dev3/DBrequest");
+const ref = db.ref("/dev2/DBrequest");
 
 /******************************
  * Set the request for firebase to identify as HearBeatDB

@@ -44,8 +44,8 @@ if(FIREBASE_DEBUG) admin.database.enableLogging(true);
 
 // Get reference to correct data element
 const db = admin.database();
-const ref = db.ref("/dev3");
-const heartbeatRef = db.ref("/dev3/users/heartbeat");
+const ref = db.ref("/dev2");
+const heartbeatRef = db.ref("/dev2/users/heartbeat");
 
 logger.log('debug', 'INITIALIZED APP IN DEBUG MODE');
 
@@ -175,8 +175,6 @@ function processRequest(headers){
 
         processApi.securityAPI[requestObject.Request](requestKey, requestObject)
             .then(function (response) {
-
-                logger.log('debug', 'processed request successfully with response: ' + JSON.stringify(response));
 
                 r.resolve(response);
             })
