@@ -151,10 +151,11 @@ function getQuestionChoices(rows)
   };
   connection.query(queryQuestionChoices,[[array],[array],[array]],function(err,choices,fields){
     //console.log(err);
+    logger.log('error', err);
     if(err) r.reject(err);
     var questions = attachChoicesToQuestions(rows,choices);
     // console.log(questions);
-    logger.log('debug', questions);
+    // logger.log('debug', questions);
     r.resolve(questions);
   });
   return r.promise;
