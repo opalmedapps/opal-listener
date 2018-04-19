@@ -153,7 +153,8 @@ function getQuestionChoices(rows)
     //console.log(err);
     if(err) r.reject(err);
     var questions = attachChoicesToQuestions(rows,choices);
-    console.log(questions);
+    // console.log(questions);
+    logger.log('debug', questions);
     r.resolve(questions);
   });
   return r.promise;
