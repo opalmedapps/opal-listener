@@ -151,11 +151,7 @@ function getQuestionChoices(rows)
   };
   connection.query(queryQuestionChoices,[[array],[array],[array]],function(err,choices,fields){
     //console.log(err);
-<<<<<<< HEAD
     // logger.log('error', err);
-=======
-    logger.log('error', err);
->>>>>>> 9b65041bd239c483b86aa1d0b1ba8eb3762827c5
     if(err) r.reject(err);
     var questions = attachChoicesToQuestions(rows,choices);
     // console.log(questions);
