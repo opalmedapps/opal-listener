@@ -11,7 +11,7 @@
  * Modified By    	: Yick Mo
  * Modified Date	: 2017-12-15
  * NOTES				: Added the Heart Beat Database
- * 
+ *
  * Important		: Do not forget to change "/dev3" back to "/dev2" before merging
  * *********************************************
  *
@@ -40,7 +40,10 @@ admin.initializeApp({
 	databaseURL: config.DATABASE_URL
 });
 
-if(FIREBASE_DEBUG) admin.database.enableLogging(true);
+// if(FIREBASE_DEBUG) admin.database.enableLogging(true);
+
+// Enable firebase logging
+admin.database.enableLogging(true);
 
 // Get reference to correct data element
 const db = admin.database();
@@ -272,7 +275,7 @@ function completeRequest(headers, key)
 
 function handleHeartBeat(data){
     "use strict";
-	
+
 	// Where to write the log file
 	const filename = 'logs/heartbeat.log';
 	var fs = require('fs');
@@ -292,7 +295,7 @@ function handleHeartBeat(data){
 			logger.log('error', err);
 	  }
 	});
-			
+
     heartbeatRef.set(HeartBeat)
         .catch(err => {
             logger.log('error', 'Error reporting heartbeat', err)
@@ -354,7 +357,7 @@ function spawnClearRequest(){
  * @desc creates clearDBRequest process that clears requests from firebase every 5 minutes
  *
  * By    	: Yick Mo
- * Date	: 2017-12-15 
+ * Date	: 2017-12-15
  * NOTES	: This is a copy from spawnClearRequest and modified for clearDBRequest
  *
  */
@@ -432,7 +435,7 @@ function spawnHeartBeat(){
 
 /*********************************************
  * By    	: Yick Mo
- * Date	: 2017-12-15 
+ * Date	: 2017-12-15
  * NOTES	: This is a copy from spawnHeartBeat and modified for spawnHeartBeatDB
  *
  *********************************************/
