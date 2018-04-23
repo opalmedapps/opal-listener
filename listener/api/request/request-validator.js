@@ -77,8 +77,6 @@ class RequestValidator {
 		let prop = ['DeviceId', 'Token', 'UserID','Timestamp','UserEmail', 'AppVersion'];
 		let errors = [];
 
-		response.send(prop);
-
 		let isValid = prop.reduce((valid, property)=>{
 			if(!valid) return false;
 			else {
