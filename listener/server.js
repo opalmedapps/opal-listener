@@ -43,7 +43,7 @@ admin.initializeApp({
 // if(FIREBASE_DEBUG) admin.database.enableLogging(true);
 
 // Enable firebase logging
-admin.database.enableLogging(true);
+// admin.database.enableLogging(true);
 
 // Get reference to correct data element
 const db = admin.database();
