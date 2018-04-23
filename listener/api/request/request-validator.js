@@ -85,7 +85,6 @@ class RequestValidator {
 			}
 		},true);
 
-	 	response.send('test');
 		return {isValid: isValid, errors: errors}
 	}
 
