@@ -10,5 +10,5 @@
     "WT_PATH" : "http://172.26.66.41/devDocuments/WTSim/api/getEstimate.php?appt_aria_ser=",
     "FIREBASE_ADMIN_KEY": "/home/robert/firebase_account/opal-pre-prod.json",
     "DATABASE_URL": "https://brilliant-inferno-7679.firebaseio.com/",
-    "LATEST_STABLE_VERSION": "0.9.9"
+    "LATEST_STABLE_VERSION": "0.10.9"
 }
