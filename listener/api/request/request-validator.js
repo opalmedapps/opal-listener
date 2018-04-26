@@ -110,11 +110,11 @@ class RequestValidator {
 		}
 
 		for (let i = 0; i < app_version.length; ++i) {
-			if (app_version[i] > stable_version[i]) {
+			if (Number(app_version[i]) > Number(stable_version[i])) {
 				return true;
 			}
 
-			if (app_version[i] < stable_version[i]) {
+			if (Number(app_version[i]) < Number(stable_version[i])) {
 				return false
 			}
 		}
