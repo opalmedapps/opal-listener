@@ -2,6 +2,7 @@ var exports = module.exports = {};
 var mysql = require('mysql');
 var q = require('q');
 var credentials = require('./../config.json');
+const logger            = require('./../logs/logger');
 
 /*var sqlConfig={
   port:'/Applications/MAMP/tmp/mysql/mysql.sock',
@@ -38,45 +39,66 @@ function handleDisconnect(myconnection) {
 
 handleDisconnect(connection);
 
-//Queties to obtain the questions and question choices for questionnaires
-var queryQuestions = "SELECT DISTINCT Questionnaire.QuestionnaireSerNum as QuestionnaireDBSerNum, Questionnaire.QuestionnaireName, QuestionnaireQuestion.OrderNum, QuestionnaireQuestion.QuestionnaireQuestionSerNum, Question.QuestionSerNum, Question.isPositiveQuestion, Question.QuestionQuestion as QuestionText_EN, Question.QuestionName as Asseses_EN, Question.QuestionName_FR as Asseses_FR, Question.QuestionQuestion_FR as QuestionText_FR, QuestionType.QuestionType, QuestionType.QuestionTypeSerNum FROM Questionnaire, Question, QuestionType, Patient, QuestionnaireQuestion WHERE QuestionnaireQuestion.QuestionnaireSerNum = Questionnaire.QuestionnaireSerNum AND QuestionnaireQuestion.QuestionSerNum = Question.QuestionSerNum AND Question.QuestionTypeSerNum = QuestionType.QuestionTypeSerNum AND Questionnaire.QuestionnaireSerNum IN ? ORDER BY QuestionnaireDBSerNum, OrderNum";
+
+//Queries to obtain the questions and question choices for questionnaires
+var queryQuestions = `SELECT DISTINCT Questionnaire.QuestionnaireSerNum as QuestionnaireDBSerNum,
+                                      Questionnaire.QuestionnaireName,
+									  QC.QuestionnaireName_EN,
+									  QC.Intro_EN,
+									  QC.QuestionnaireName_FR,
+									  QC.Intro_FR,
+                                      QuestionnaireQuestion.QuestionnaireQuestionSerNum,
+                                      Question.QuestionSerNum,
+                                      Question.isPositiveQuestion,
+                                      Question.QuestionQuestion as QuestionText_EN,
+                                      Question.QuestionName as Asseses_EN,
+                                      Question.QuestionName_FR as Asseses_FR,
+                                      Question.QuestionQuestion_FR as QuestionText_FR,
+                                      QuestionType.QuestionType,
+                                      QuestionType.QuestionTypeSerNum
+                      FROM Questionnaire,
+                           Question,
+                           QuestionType,
+                           Patient,
+                           QuestionnaireQuestion,
+						   OpalDB_PREPROD.QuestionnaireControl QC
+                     WHERE QuestionnaireQuestion.QuestionnaireSerNum = Questionnaire.QuestionnaireSerNum
+                         AND QuestionnaireQuestion.QuestionSerNum = Question.QuestionSerNum
+                         AND Question.QuestionTypeSerNum = QuestionType.QuestionTypeSerNum
+						 AND QC.QuestionnaireDBSerNum = Questionnaire.QuestionnaireSerNum
+                         AND Questionnaire.QuestionnaireSerNum IN ?`;
+
 var queryQuestionChoices = "SELECT QuestionSerNum, MCSerNum as OrderNum, MCDescription as ChoiceDescription_EN, MCDescription_FR as ChoiceDescription_FR  FROM QuestionMC WHERE QuestionSerNum IN ? UNION ALL SELECT * FROM QuestionCheckbox WHERE QuestionSerNum IN ? UNION ALL SELECT * FROM QuestionMinMax WHERE QuestionSerNum IN ? ORDER BY QuestionSerNum, OrderNum DESC";
 var queryAnswersPatientQuestionnaire = "SELECT QuestionnaireQuestionSerNum, Answer.Answer, PatientQuestionnaireSerNum as PatientQuestionnaireDBSerNum FROM Answer WHERE PatientQuestionnaireSerNum IN ? ORDER BY PatientQuestionnaireDBSerNum;"
 
 
 /*SELECT QuestionnaireQuestionSerNum,  GROUP_CONCAT(Answer SEPARATOR ', ') as Answer, PatientQuestionnaireSerNum as PatientQuestionnaireDBSerNum FROM Answer WHERE PatientQuestionnaireSerNum IN ? GROUP BY QuestionnaireQuestionSerNum ORDER BY PatientQuestionnaireDBSerNum;"*/
-exports.getPatientQuestionnaires = function (rows)
-{
-  var r = q.defer();
-  //console.log('QUESTIONNAIRE ROWS=====================================================',rows);
-  if(rows.length!== 0)
-  {
-    var questionnaireDBSerNumArray = getQuestionnaireDBSerNums(rows);
-    var r = q.defer();
-    var quer = connection.query(queryQuestions, [[questionnaireDBSerNumArray]], function(err,  questions, fields){
-      if(err) r.reject(err);
+exports.getPatientQuestionnaires = function (rows) {
+  return new Promise(((resolve, reject) => {
 
-      //console.log(questions);
-      getQuestionChoices(questions).then(function(questionsChoices){
-        var questionnaires = prepareQuestionnaireObject(questionsChoices,rows);
-        var patientQuestionnaires = {};
-        attachingQuestionnaireAnswers(rows).then(function(paQuestionnaires)
-        {
-          patientQuestionnaires = paQuestionnaires;
-          r.resolve({'Questionnaires':questionnaires, 'PatientQuestionnaires':patientQuestionnaires});
-        }).catch(function(error)
-        {
-          //console.log(error);
-          r.reject(error);
-        });
-      }).catch(function(err){
-        r.reject(err);
-      })
-    });  
-  }else{
-    r.resolve([]);
-  }
-  return r.promise;
+      if(rows.length!== 0) {
+          let questionnaireDBSerNumArray = getQuestionnaireDBSerNums(rows);
+
+          connection.query(queryQuestions, [[questionnaireDBSerNumArray]], function(err,  questions, fields){
+              if(err) reject(err);
+
+              getQuestionChoices(questions).then(function(questionsChoices){
+                  let questionnaires = prepareQuestionnaireObject(questionsChoices,rows);
+                  let patientQuestionnaires = {};
+                  attachingQuestionnaireAnswers(rows).then(function(paQuestionnaires) {
+                      patientQuestionnaires = paQuestionnaires;
+                      resolve({'Questionnaires':questionnaires, 'PatientQuestionnaires':patientQuestionnaires});
+                  }).catch(function(error) {
+                      reject(error);
+                  });
+              }).catch(function(err){
+                  reject(err);
+              })
+          });
+      }else{
+          resolve([]);
+      }
+  }));
 };
 
 //Formats questionnaire object to be ready for the app.
@@ -88,31 +110,35 @@ function prepareQuestionnaireObject(questionnaires, opalDB)
     var questionnaireSerNum = questionnaires[i].QuestionnaireDBSerNum;
     if(!questionnairesObject.hasOwnProperty(questionnaires[i].QuestionnaireDBSerNum))
     {
-      questionnairesObject[questionnaires[i].QuestionnaireDBSerNum] = {};
-      questionnairesObject[questionnaires[i].QuestionnaireDBSerNum].QuestionnaireDBSerNum = questionnaires[i].QuestionnaireDBSerNum;
-      questionnairesObject[questionnaires[i].QuestionnaireDBSerNum].QuestionnaireName = questionnaires[i].QuestionnaireName;
-      delete questionnaires[i].QuestionnaireName;
-      delete questionnaires[i].QuestionnaireDBSerNum;
-      questionnairesObject[questionnaireSerNum].Questions = {};
-      questionnairesObject[questionnaireSerNum].Questions[questionnaires[i].QuestionnaireQuestionSerNum]=questionnaires[i];
+		questionnairesObject[questionnaires[i].QuestionnaireDBSerNum] = {};
+		questionnairesObject[questionnaires[i].QuestionnaireDBSerNum].QuestionnaireDBSerNum = questionnaires[i].QuestionnaireDBSerNum;
+		questionnairesObject[questionnaires[i].QuestionnaireDBSerNum].QuestionnaireName = questionnaires[i].QuestionnaireName;
+		questionnairesObject[questionnaires[i].QuestionnaireDBSerNum].QuestionnaireName_EN = questionnaires[i].QuestionnaireName_EN;
+		questionnairesObject[questionnaires[i].QuestionnaireDBSerNum].Intro_EN = questionnaires[i].Intro_EN;
+		questionnairesObject[questionnaires[i].QuestionnaireDBSerNum].QuestionnaireName_FR = questionnaires[i].QuestionnaireName_FR;
+		questionnairesObject[questionnaires[i].QuestionnaireDBSerNum].Intro_FR = questionnaires[i].Intro_FR;
+		questionnairesObject[questionnaires[i].QuestionnaireDBSerNum].QuestionnaireSerNum = questionnaires[i].QuestionnaireSerNum;
+		delete questionnaires[i].QuestionnaireName;
+		delete questionnaires[i].QuestionnaireName_EN;
+		delete questionnaires[i].Intro_EN;
+		delete questionnaires[i].QuestionnaireName_FR;
+		delete questionnaires[i].Intro_FR;
+		delete questionnaires[i].QuestionnaireDBSerNum;
+		questionnairesObject[questionnaireSerNum].Questions = {};
+		questionnairesObject[questionnaireSerNum].Questions[questionnaires[i].QuestionnaireQuestionSerNum]=questionnaires[i];
     }else{
-      delete questionnaires[i].QuestionnaireName;
-      delete questionnaires[i].QuestionnaireDBSerNum;
-      questionnairesObject[questionnaireSerNum].Questions[questionnaires[i].QuestionnaireQuestionSerNum]=questionnaires[i];
+		delete questionnaires[i].QuestionnaireName;
+		delete questionnaires[i].QuestionnaireDBSerNum;
+		questionnairesObject[questionnaireSerNum].Questions[questionnaires[i].QuestionnaireQuestionSerNum]=questionnaires[i];
     }
   }
-  
+
   return questionnairesObject;
-  
+
 }
 //Extracts only questionnaireSerNum for query injection
-function getQuestionnaireDBSerNums(rows)
-{
-  var array = [];
-  for (var i = 0; i < rows.length; i++) {
-    array.push(rows[i].QuestionnaireDBSerNum);
-  };
-  return array;
+function getQuestionnaireDBSerNums(rows) {
+  return rows.map(q => q.QuestionnaireDBSerNum)
 }
 
 //Gets the choices for  questions
@@ -125,9 +151,11 @@ function getQuestionChoices(rows)
   };
   connection.query(queryQuestionChoices,[[array],[array],[array]],function(err,choices,fields){
     //console.log(err);
+    // logger.log('error', err);
     if(err) r.reject(err);
     var questions = attachChoicesToQuestions(rows,choices);
-    ////console.log(questions);
+    // console.log(questions);
+    // logger.log('debug', questions);
     r.resolve(questions);
   });
   return r.promise;
@@ -163,7 +191,7 @@ function attachingQuestionnaireAnswers(opalDB)
     patientQuestionnaires[opalDB[i].QuestionnaireSerNum] = opalDB[i];
     if(opalDB[i].CompletedFlag == 1 || opalDB[i].CompletedFlag == '1')
     {
-      
+
       patientQuestionnaireSerNumArray.push(opalDB[i].PatientQuestionnaireDBSerNum);
     }
   }
@@ -187,14 +215,14 @@ function attachingQuestionnaireAnswers(opalDB)
       }
 
       r.resolve(patientQuestionnaires);
-      
-    }); 
+
+    });
   }else{
     //console.log('Hello World');
     r.resolve(patientQuestionnaires);
   }
   return r.promise;
-  
+
 }
 //Query answers table
 function getAnswersQuestionnaires()
@@ -245,10 +273,13 @@ function inputAnswersHelper(id,patientSerNum, answers)
   //console.log(answers);
   for (var i in answers) {
     var objectAnswer = answers[i].Answer;
+
+    logger.log('debug', answers[i].Answer);
+
     if(answers[i].QuestionType == 'Checkbox')
     {
       for(var key in objectAnswer)
-      { 
+      {
         if(objectAnswer[key]!=='')
         {
           arrayPromises.push(promisifyQuery(inputAnswersQuery, [answers[i].QuestionnaireQuestionSerNum,objectAnswer[key], patientSerNum,id]));
@@ -266,7 +297,7 @@ function inputAnswersHelper(id,patientSerNum, answers)
     //console.log(err);
     r.reject(err);
   });
-  
+
   return r.promise;
 }
 //Turns a callback query function into a promise
