@@ -28,10 +28,11 @@ exports.patientAppointmentsTableFields=function()
         "Alias.AliasName_FR AS AppointmentType_FR, " +
         "Alias.AliasDescription_EN AS AppointmentDescription_EN, " +
         "Alias.AliasDescription_FR AS AppointmentDescription_FR, " +
+        "AliasExpression.Description AS ResourceDescription, " +
         "Appointment.ScheduledStartTime, " +
         "Appointment.ScheduledEndTime, " +
         "Appointment.Checkin, " +
-        "Appointment.AppointmentAriaSer, " + 
+        "Appointment.AppointmentAriaSer, " +
         "Appointment.ReadStatus, " +
         "Resource.ResourceName, " +
         "Resource.ResourceType, " +
@@ -103,51 +104,7 @@ exports.getDocumentsContentQuery = function()
     return "SELECT Document.DocumentSerNum, Document.FinalFileName FROM Document, Patient, Users WHERE Document.DocumentSerNum IN ? AND Document.PatientSerNum = Patient.PatientSerNum AND Patient.PatientSerNum = Users.UserTypeSerNum AND Users.Username = ?";
 };
 
-exports.patientNotificationsTableFields=function()
-{
-    return "SELECT Notification.NotificationSerNum, " +
-        "Notification.DateAdded, Notification.ReadStatus, " +
-        "Notification.RefTableRowSerNum, " +
-        "NotificationControl.NotificationType, " +
-        "NotificationControl.Name_EN, NotificationControl.Name_FR, " +
-        "NotificationControl.Description_EN, " +
-        "NotificationControl.Description_FR " +
-        "" +
-        "FROM Notification, " +
-        "NotificationControl, " +
-        "Patient, " +
-        "Users " +
-        "" +
-        "WHERE " +
-        "NotificationControl.NotificationControlSerNum = Notification.NotificationControlSerNum " +
-        "AND Notification.PatientSerNum=Patient.PatientSerNum " +
-        "AND Patient.PatientSerNum=Users.UserTypeSerNum " +
-        "AND Users.Username= ? " +
-        "AND Notification.ReadStatus = 0 " +
-        "AND (Notification.LastUpdated > ? OR NotificationControl.LastUpdated > ?);";
-};
 
-exports.getAllNotifications = function () {
-    return "SELECT Notification.NotificationSerNum, " +
-        "Notification.DateAdded, Notification.ReadStatus, " +
-        "Notification.RefTableRowSerNum, " +
-        "NotificationControl.NotificationType, " +
-        "NotificationControl.Name_EN, NotificationControl.Name_FR, " +
-        "NotificationControl.Description_EN, " +
-        "NotificationControl.Description_FR " +
-        "" +
-        "FROM Notification, " +
-        "NotificationControl, " +
-        "Patient, " +
-        "Users " +
-        "" +
-        "WHERE " +
-        "NotificationControl.NotificationControlSerNum = Notification.NotificationControlSerNum " +
-        "AND Notification.PatientSerNum=Patient.PatientSerNum " +
-        "AND Patient.PatientSerNum=Users.UserTypeSerNum " +
-        "AND Users.Username= ? " +
-        "AND (Notification.LastUpdated > ? OR NotificationControl.LastUpdated > ?);";
-};
 
 exports.patientTeamMessagesTableFields=function()
 {
@@ -191,22 +148,44 @@ exports.patientTasksTableFields=function()
 };
 exports.patientTestResultsTableFields=function()
 {
-return 'SELECT ComponentName, FacComponentName, AbnormalFlag, MaxNorm, MinNorm, TestValue, TestValueString, UnitDescription, CAST(TestDate AS char(30)) as `TestDate`, ' +
-				'IfNull((Select TC.URL_EN From TestResultExpression TRE, TestResultControl TC ' +
-					'Where TRE.ExpressionName = TR.ComponentName), "") as URL_EN, ' +
-				'IfNull((Select TC.URL_FR From TestResultExpression TRE, TestResultControl TC ' +
-					'Where TRE.ExpressionName = TR.ComponentName), "") as URL_FR ' +
+
+	return 'SELECT ComponentName, FacComponentName, AbnormalFlag, MaxNorm, MinNorm, TestValue, TestValueString, UnitDescription, CAST(TestDate AS char(30)) as `TestDate`, ' +
+				'IfNull((Select EMC.URL_EN From EducationalMaterialControl EMC, TestResultExpression TRE, TestResultControl TRC ' +
+					'Where EMC.EducationalMaterialControlSerNum = TRC.EducationalMaterialControlSerNum ' +
+						'and TRE.TestResultControlSerNum = TRC.TestResultControlSerNum ' +
+						'and TRE.TestResultExpressionSerNum = TR.TestResultExpressionSerNum), "") as URL_EN, ' +
+				'IfNull((Select EMC.URL_FR From EducationalMaterialControl EMC, TestResultExpression TRE, TestResultControl TRC ' +
+					'Where EMC.EducationalMaterialControlSerNum = TRC.EducationalMaterialControlSerNum ' +
+						'and TRE.TestResultControlSerNum = TRC.TestResultControlSerNum ' +
+						'and TRE.TestResultExpressionSerNum = TR.TestResultExpressionSerNum), "") as URL_FR ' +
 				'FROM TestResult TR, Users U, Patient P ' +
-				'WHERE P.AccessLevel = 3 AND U.UserTypeSerNum=P.PatientSerNum AND TR.PatientSerNum = P.PatientSerNum AND U.Username LIKE ? AND TR.LastUpdated > ? AND TR.ValidEntry = "Y";';
+				'WHERE P.AccessLevel = 3 AND U.UserTypeSerNum=P.PatientSerNum AND TR.PatientSerNum = P.PatientSerNum AND TR.TestDate >= "1970-01-01" AND U.Username LIKE ? AND TR.LastUpdated > ? AND TR.ValidEntry = "Y";';
+
 /*
-    return 'SELECT ComponentName, FacComponentName, AbnormalFlag, MaxNorm, MinNorm, TestValue, TestValueString, UnitDescription, CAST(TestDate AS char(30)) as `TestDate` ' +
-        'FROM TestResult, Users, Patient ' +
-        'WHERE Patient.AccessLevel = 3 AND Users.UserTypeSerNum=Patient.PatientSerNum AND TestResult.PatientSerNum = Patient.PatientSerNum AND Users.Username LIKE ? AND TestResult.LastUpdated > ? AND TestResult.ValidEntry = "Y";';
+	return 'SELECT ComponentName, FacComponentName, AbnormalFlag, MaxNorm, MinNorm, TestValue, TestValueString, UnitDescription, CAST(TestDate AS char(30)) as `TestDate`, ' +
+					'IfNull((Select EMC.URL_EN From EducationalMaterialControl EMC, TestResultControl TRC ' +
+									'Where EMC.EducationalMaterialControlSerNum = TRC.EducationalMaterialControlSerNum ' +
+											'and TRC.TestResultControlSerNum = TR.TestResultControlSerNum), "") as URL_EN, ' +
+					'IfNull((Select EMC.URL_FR From EducationalMaterialControl EMC, TestResultControl TRC ' +
+									'Where EMC.EducationalMaterialControlSerNum = TRC.EducationalMaterialControlSerNum ' +
+											'and TRC.TestResultControlSerNum = TR.TestResultControlSerNum), "") as URL_FR ' +
+				'FROM TestResult TR, Users U, Patient P ' +
+				'WHERE P.AccessLevel = 3 AND U.UserTypeSerNum=P.PatientSerNum AND TR.PatientSerNum = P.PatientSerNum AND TR.TestDate >= "1970-01-01" AND U.Username LIKE ? AND TR.LastUpdated > ? AND TR.ValidEntry = "Y";';
 */
+
 };
 exports.patientQuestionnaireTableFields = function()
 {
-    return "SELECT Questionnaire.CompletedFlag, Questionnaire.DateAdded, Questionnaire.PatientQuestionnaireDBSerNum, Questionnaire.CompletionDate, Questionnaire.QuestionnaireSerNum, QuestionnaireControl.QuestionnaireDBSerNum FROM QuestionnaireControl, Questionnaire, Patient, Users WHERE QuestionnaireControl.QuestionnaireControlSerNum = Questionnaire.QuestionnaireControlSerNum AND Questionnaire.PatientSerNum = Patient.PatientSerNum AND Users.UserTypeSerNum = Patient.PatientSerNum AND Users.Username = ?";
+    return "SELECT Q.CompletedFlag, CAST(DATE_FORMAT(Q.DateAdded, '%Y-%m-%d') AS char(30)) as DateAdded, Q.PatientQuestionnaireDBSerNum, " +
+//		"Q.CompletionDate, " +
+//		"CAST(DATE_FORMAT(Q.CompletionDate, '%Y-%m-%d %H:%i') AS char(30)) as CompletionDate, " +
+    "CAST(DATE_FORMAT(Q.CompletionDate, '%Y-%m-%d') AS char(30)) as CompletionDate, " +
+		"Q.QuestionnaireSerNum, QC.QuestionnaireDBSerNum " +
+		"FROM QuestionnaireControl QC, Questionnaire Q, Patient P, Users U " +
+		"WHERE QC.QuestionnaireControlSerNum = Q.QuestionnaireControlSerNum " +
+		"AND Q.PatientSerNum = P.PatientSerNum AND U.UserTypeSerNum = P.PatientSerNum and " +
+		"U.Username = ? order by CAST(DATE_FORMAT(Q.DateAdded, '%Y-%m-%d') AS char(30)) desc";
+//    return "SELECT Questionnaire.CompletedFlag, Questionnaire.DateAdded, Questionnaire.PatientQuestionnaireDBSerNum, Questionnaire.CompletionDate, Questionnaire.QuestionnaireSerNum, QuestionnaireControl.QuestionnaireDBSerNum FROM QuestionnaireControl, Questionnaire, Patient, Users WHERE QuestionnaireControl.QuestionnaireControlSerNum = Questionnaire.QuestionnaireControlSerNum AND Questionnaire.PatientSerNum = Patient.PatientSerNum AND Users.UserTypeSerNum = Patient.PatientSerNum AND Users.Username = ?";
 };
 /*exports.getPatientFieldsForPasswordReset=function(userID)
  {
@@ -223,7 +202,7 @@ exports.getPatientPasswordForVerification = function()
 
  exports.getPatientFieldsForPasswordReset = function()
  {
-    return `SELECT DISTINCT pat.SSN, pat.Email, u.Password, u.UserTypeSerNum, sa.AnswerText, pdi.Attempt, pdi.TimeoutTimestamp   
+    return `SELECT DISTINCT pat.SSN, pat.Email, u.Password, u.UserTypeSerNum, sa.AnswerText, pdi.Attempt, pdi.TimeoutTimestamp
             FROM Users u, Patient pat, SecurityAnswer sa, PatientDeviceIdentifier pdi
             WHERE pat.Email= ? AND pat.PatientSerNum = u.UserTypeSerNum AND pdi.DeviceId = ?
             AND sa.SecurityAnswerSerNum = pdi.SecurityAnswerSerNum AND sa.PatientSerNum = pat.PatientSerNum`;
@@ -287,9 +266,9 @@ exports.getPatientFromEmail=function()
 };
 exports.logActivity=function(requestObject)
 {
-	return `INSERT INTO PatientActivityLog 
+	return `INSERT INTO PatientActivityLog
                 (\`ActivitySerNum\`,\`Request\`,\`Username\`, \`DeviceId\`,\`SessionId\`,
-                \`DateTime\`, \`LastUpdated\`) 
+                \`DateTime\`, \`LastUpdated\`)
 	        VALUES (NULL, ?, ?, ?, ?, CURRENT_TIMESTAMP ,CURRENT_TIMESTAMP )`;
 
     return "INSERT INTO PatientActivityLog (`ActivitySerNum`,`Request`,`Username`, `DeviceId`,`SessionId`,`DateTime`,`LastUpdated`) VALUES (NULL,'"+requestObject.Request+ "', '"+requestObject.UserID+ "', '"+requestObject.DeviceId+"','"+requestObject.Token+"', CURRENT_TIMESTAMP ,CURRENT_TIMESTAMP )";
@@ -333,7 +312,11 @@ exports.getMapLocation=function()
 
 exports.updateReadStatus=function()
 {
-    return "UPDATE ?? , Patient, Users SET ReadStatus = 1 WHERE ??.?? = ? AND Patient.PatientSerNum = ??.PatientSerNum AND Patient.PatientSerNum = Users.UserTypeSerNum AND Users.Username = ?;";
+    return `
+        UPDATE ??
+        SET ReadStatus = 1
+        WHERE ??.?? = ?
+    `;
 };
 
 exports.getPatientDeviceLastActivity=function()
@@ -351,12 +334,28 @@ exports.setQuestionnaireCompletedQuery = function()
 
 exports.getPatientAriaSerQuery = function()
 {
-    return "SELECT Patient.PatientAriaSer FROM Patient, Users WHERE Patient.PatientSerNum = Users.UserTypeSerNum && Users.Username = ?"
+    return "SELECT Patient.PatientAriaSer, Patient.PatientId FROM Patient, Users WHERE Patient.PatientSerNum = Users.UserTypeSerNum && Users.Username = ?"
 };
 
 exports.getPatientId= function()
 {
     return "SELECT Patient.PatientId FROM Patient, Users WHERE Patient.PatientSerNum = Users.UserTypeSerNum && Users.Username = ?"
+};
+
+exports.getPatientId= function()
+{
+    return "SELECT Patient.PatientId FROM Patient, Users WHERE Patient.PatientSerNum = Users.UserTypeSerNum && Users.Username = ?"
+};
+
+/**
+ * Returns the query needed to get a patient's serNum
+ * @return {string}
+ */
+exports.getPatientSerNum = function()
+{
+    return `Select Patient.PatientSerNum
+            From Patient
+            Where Patient.PatientId = ?`
 };
 
 exports.getTrustedDevice = function () {
@@ -373,4 +372,93 @@ exports.setTrusted = function () {
 
 exports.getPatientForPatientMembers = function() {
     return "SELECT FirstName, LastName, Email, Website, ProfileImage, Bio_EN, Bio_FR  FROM PatientsForPatientsPersonnel;";
+};
+
+
+/**
+ * CHECKIN QUERIES
+ * ============================
+ */
+
+/**
+ * Queries PushNotifications to get notifications that correspond to a patient on today's date
+ * @return {string}
+ */
+exports.getPatientCheckinPushNotifications = function() {
+   return `
+        Select PushNotification.PushNotificationSerNum
+        From PushNotification
+        Where PushNotification.PatientSerNum = ?
+            And PushNotification.NotificationControlSerNum in (12, 14)
+            And DATE_FORMAT(PushNotification.DateAdded, '%Y-%m-%d') = DATE_FORMAT(NOW(), '%Y-%m-%d');
+   `
+};
+
+/**
+ * Get all of a user's checked in appointments on today's date
+ * @return {string}
+ */
+exports.getTodaysCheckedInAppointments = function() {
+   return `
+        SELECT Appointment.AppointmentSerNum
+        FROM Appointment
+        WHERE Appointment.PatientSerNum = ?
+            AND Appointment.Checkin = 1
+            AND DATE_FORMAT(Appointment.ScheduledStartTime, '%Y-%m-%d') = DATE_FORMAT(NOW(), '%Y-%m-%d');
+   `
+};
+
+/**
+ * NOTIFICATION QUERIES
+ * ================================
+ */
+
+exports.patientNotificationsTableFields=function()
+{
+    return "SELECT Notification.NotificationSerNum, " +
+        "Notification.DateAdded, " +
+        "Notification.ReadStatus, " +
+        "Notification.RefTableRowSerNum, " +
+        "NotificationControl.NotificationType, " +
+        "NotificationControl.Name_EN, " +
+        "NotificationControl.Name_FR, " +
+        "NotificationControl.Description_EN, " +
+        "NotificationControl.Description_FR " +
+        "" +
+        "FROM Notification, " +
+        "NotificationControl, " +
+        "Patient, " +
+        "Users " +
+        "" +
+        "WHERE " +
+        "NotificationControl.NotificationControlSerNum = Notification.NotificationControlSerNum " +
+        "AND Notification.PatientSerNum=Patient.PatientSerNum " +
+        "AND Patient.PatientSerNum=Users.UserTypeSerNum " +
+        "AND Users.Username= ? ";
+};
+
+
+exports.getNewNotifications=function() {
+    return "SELECT Notification.NotificationSerNum, " +
+        "Notification.DateAdded," +
+        " Notification.ReadStatus, " +
+        "Notification.RefTableRowSerNum, " +
+        "NotificationControl.NotificationType, " +
+        "NotificationControl.Name_EN, " +
+        "NotificationControl.Name_FR, " +
+        "NotificationControl.Description_EN, " +
+        "NotificationControl.Description_FR " +
+        "" +
+        "FROM Notification, " +
+        "NotificationControl, " +
+        "Patient, " +
+        "Users " +
+        "" +
+        "WHERE " +
+        "NotificationControl.NotificationControlSerNum = Notification.NotificationControlSerNum " +
+        "AND Notification.PatientSerNum=Patient.PatientSerNum " +
+        "AND Patient.PatientSerNum=Users.UserTypeSerNum " +
+        "AND Users.Username= ? " +
+        "AND Notification.ReadStatus = 0 " +
+        "AND (Notification.DateAdded > ? OR NotificationControl.DateAdded > ?);";
 };
