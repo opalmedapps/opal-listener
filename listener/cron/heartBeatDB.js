@@ -18,6 +18,7 @@ const logger	= require('./../logs/logger');
 const mysql		= require('mysql');
 const q			= require("q");
 
+
 /**
  * FIREBASE INITIALIZATION
  **/

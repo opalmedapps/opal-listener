@@ -11,7 +11,7 @@
  * Modified By    	: Yick Mo
  * Modified Date	: 2017-12-15
  * NOTES				: Added the Heart Beat Database
- * 
+ *
  * Important		: Do not forget to change "/dev3" back to "/dev2" before merging
  * *********************************************
  *
@@ -25,7 +25,6 @@ const q                 = require("q");
 const config            = require('./config.json');
 const logger            = require('./logs/logger.js');
 const cp                = require('child_process');
-const os                = require('os');
 
 const FIREBASE_DEBUG = !!process.env.FIREBASE_DEBUG;
 
@@ -35,12 +34,16 @@ const FIREBASE_DEBUG = !!process.env.FIREBASE_DEBUG;
 
 // Initialize firebase connection
 const serviceAccount = require(config.FIREBASE_ADMIN_KEY);
+
 admin.initializeApp({
 	credential: admin.credential.cert(serviceAccount),
 	databaseURL: config.DATABASE_URL
 });
 
-if(FIREBASE_DEBUG) admin.database.enableLogging(true);
+// if(FIREBASE_DEBUG) admin.database.enableLogging(true);
+
+// Enable firebase logging
+admin.database.enableLogging(true);
 
 // Get reference to correct data element
 const db = admin.database();
@@ -56,7 +59,6 @@ ref.set(null)
 			error:error
 		})
 	});
-
 
 
 logger.log('info','Initialize listeners: ');
@@ -161,7 +163,7 @@ function logError(err, requestObject, requestKey)
  */
 function processRequest(headers){
 
-    logger.log('debug', 'Processing request: ' + JSON.stringify(headers));
+    // logger.log('debug', 'Processing request: ' + JSON.stringify(headers));
     logger.log('info', 'Processing request');
 
     const r = q.defer();
@@ -170,9 +172,7 @@ function processRequest(headers){
 
     // Separate security requests from main requests
     if(processApi.securityAPI.hasOwnProperty(requestObject.Request)) {
-
         logger.log('debug', 'Processing security request');
-
         processApi.securityAPI[requestObject.Request](requestKey, requestObject)
             .then(function (response) {
 
@@ -185,9 +185,10 @@ function processRequest(headers){
     } else {
 
         logger.log('debug', 'Processing general request');
-
         mainRequestApi.apiRequestFormatter(requestKey, requestObject)
             .then(function(results){
+
+                logger.log('debug', 'results: ' + JSON.stringify(results));
                 r.resolve(results);
             })
     }
@@ -207,8 +208,7 @@ function encryptResponse(response)
 	delete response.EncryptionKey;
 	delete response.Salt;
 
-	if(typeof encryptionKey!=='undefined' && encryptionKey!=='')
-	{
+    if(typeof encryptionKey!=='undefined' && encryptionKey!=='') {
 		return utility.encrypt(response, encryptionKey, salt);
 	}else{
 		return Promise.resolve(response);
@@ -221,9 +221,8 @@ function encryptResponse(response)
  * @param key
  * @desc Encrypt and upload the response to Firebase
  */
-function uploadToFirebase(response, key)
-{
-  logger.log('debug', 'Uploading to Firebase');
+function uploadToFirebase(response, key) {
+    logger.log('debug', 'Uploading to Firebase');
 	return new Promise((resolve, reject)=>{
 
 		//Need to make a copy of the data, since the encryption key needs to be read
@@ -276,7 +275,7 @@ function completeRequest(headers, key)
 
 function handleHeartBeat(data){
     "use strict";
-	
+
 	// Where to write the log file
 	const filename = 'logs/heartbeat.log';
 	var fs = require('fs');
@@ -296,7 +295,7 @@ function handleHeartBeat(data){
 			logger.log('error', err);
 	  }
 	});
-			
+
     heartbeatRef.set(HeartBeat)
         .catch(err => {
             logger.log('error', 'Error reporting heartbeat', err)
@@ -358,7 +357,7 @@ function spawnClearRequest(){
  * @desc creates clearDBRequest process that clears requests from firebase every 5 minutes
  *
  * By    	: Yick Mo
- * Date	: 2017-12-15 
+ * Date	: 2017-12-15
  * NOTES	: This is a copy from spawnClearRequest and modified for clearDBRequest
  *
  */
@@ -436,7 +435,7 @@ function spawnHeartBeat(){
 
 /*********************************************
  * By    	: Yick Mo
- * Date	: 2017-12-15 
+ * Date	: 2017-12-15
  * NOTES	: This is a copy from spawnHeartBeat and modified for spawnHeartBeatDB
  *
  *********************************************/
