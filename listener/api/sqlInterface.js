@@ -139,7 +139,6 @@ exports.runSqlQuery = function(query, parameters, processRawFunction) {
     let r = Q.defer();
 
     pool.getConnection(function(err, connection) {
-
         if(err) logger.log('error', err);
         logger.log('debug', 'grabbed connection: ' + connection);
         logger.log('info', 'Successfully grabbed connection from pool and about to perform following query: ', {query: query});
@@ -179,11 +178,7 @@ exports.getPatientTableFields = function(userId,timestamp,arrayTables) {
     var timestp = (timestamp)?timestamp:0;
     const objectToFirebase = {};
     let index = 0;
-    logger.log('debug', 'Preparing all promises for getting patient data: ' + JSON.stringify(arrayTables));
     Q.all(preparePromiseArrayFields(userId,timestp,arrayTables)).then(function(response){
-
-        logger.log('debug', 'Successfully finished all queries: ' + JSON.stringify(response));
-
         if(arrayTables) {
             for (let i = 0; i < arrayTables.length; i++) {
                 objectToFirebase[arrayTables[i]]=response[index];
@@ -213,6 +208,7 @@ exports.getPatientTableFields = function(userId,timestamp,arrayTables) {
  */
 function processSelectRequest(table, userId, timestamp) {
     const r = Q.defer();
+
     const requestMappingObject = requestMappings[table];
 
     let date = new Date(0);
@@ -229,7 +225,6 @@ function processSelectRequest(table, userId, timestamp) {
 
     if(requestMappingObject.hasOwnProperty('sql')) {
         exports.runSqlQuery(requestMappingObject.sql,paramArray, requestMappingObject.processFunction).then(function(rows) {
-            if (table === 'Questionnaires'){  }
             r.resolve(rows);
         },function(err) {
             r.reject(err);
@@ -255,6 +250,7 @@ function processSelectRequest(table, userId, timestamp) {
  */
 function preparePromiseArrayFields(userId,timestamp,arrayTables) {
     const array = [];
+
     if(typeof arrayTables!=='undefined')
     {
         for (let i = 0; i < arrayTables.length; i++) {
@@ -262,6 +258,9 @@ function preparePromiseArrayFields(userId,timestamp,arrayTables) {
         }
     }else{
         for (const key in requestMappings) {
+
+            logger.log('debug', key);
+
             array.push(processSelectRequest(key,userId,timestamp));
         }
     }
@@ -278,18 +277,20 @@ function preparePromiseArrayFields(userId,timestamp,arrayTables) {
 exports.updateReadStatus=function(userId, parameters)
 {
     let r = Q.defer();
-    let table, tableSerNum;
+
+    let table, serNum;
     if(parameters && parameters.Field && parameters.Id && requestMappings.hasOwnProperty(parameters.Field) ) {
-        ({table, tableSerNum} = requestMappings[parameters.Field]);
+        ({table, serNum} = requestMappings[parameters.Field]);
     }else{
 	    r.reject({Response:'error',Reason:'Invalid read status field'});
     }
-	exports.runSqlQuery(queries.updateReadStatus(),[table,table, tableSerNum, id, table, userId])
+	exports.runSqlQuery(queries.updateReadStatus(),[table, table, serNum, parameters.Id])
     .then(()=>{
 	    r.resolve({Response:'success'});
     }).catch((err)=>{
 		r.reject({Response:'error',Reason:err});
     });
+
     return r.promise;
 };
 
@@ -303,66 +304,11 @@ exports.sendMessage=function(requestObject) {
 	return exports.runSqlQuery(queries.sendMessage(requestObject));
 };
 
+
 /**
- * checkCheckinInAria
- * @desc Check if user is already checkedin
- * @param requestObject
+ * CHECKIN FUNCTIONALITY
+ * ============================================================
  */
-exports.checkCheckinInAria = function(requestObject) {
-    const r = Q.defer();
-    const serNum = requestObject.Parameters.AppointmentSerNum;
-    const username = requestObject.UserID;
-
-    //Get the appointment aria ser
-    getAppointmentAriaSer(username, serNum).then(function(response){
-        const ariaSerNum = response[0].AppointmentAriaSer;
-
-        //Check using Ackeem's script whether the patient has checked in at the kiosk
-        checkIfCheckedIntoAriaHelper(ariaSerNum).then(function(success){
-
-            //TODO: THIS SHOULD HANDLED IN THE CASE CHECKIN QUERY DOES NOT SUCCEED???
-            //Check in the user into mysql if they have indeed checkedin at kiosk
-            if(success) exports.runSqlQuery(queries.checkin(),['Kiosk', serNum, username]);
-            r.resolve({Response:'success', Data:{'CheckedIn':success, AppointmentSerNum:serNum}});
-
-        }).catch(function(error){
-            //Error occur while checking patient status
-            r.reject({Response:'error', Reason:error});
-        });
-    });
-    return r.promise;
-};
-
-/*
-exports.checkinUpdate = function(requestObject)
-{
-    var r = Q.defer();
-    connection.query(queries.getAppointmentAriaSer(),[requestObject.UserID,requestObject.Parameters.AppointmentSerNum],function(error,rows,fields)
-    {
-        if(error||rows.length==0) r.reject({'Response':'error'});
-        //console.log('AppAriaSerNums',rows);
-        var appointmentAriaSer = rows[0].AppointmentAriaSer;
-        exports.getTimeEstimate(appointmentAriaSer).then(function(data)
-        {
-            r.resolve(data);
-        }).catch(function(error)
-        {
-            r.reject({'Response':'Problem resolving time estimate.'});
-        });
-    });
-    // exports.runSqlQuery(queries.getAppointmentAriaSer(),[requestObject.UserID,requestObject.Parameters.AppointmentSerNum], exports.getTimeEstimate).then(
-    // function(response)
-    // {
-    //   //console.log(response);
-    //   r.resolve({Response:'success',Data:response});
-    // }).catch(function(error)
-    // {
-    //   r.reject({Response:'error',Reason:'Checkin update error due to '+error});
-    //});
-    return r.promise;
-};
-*/
-
 
 /**
  * checkIn
@@ -372,48 +318,84 @@ exports.checkinUpdate = function(requestObject)
  */
 exports.checkIn=function(requestObject) {
     const r = Q.defer();
-    const serNum = requestObject.Parameters.AppointmentSerNum;
-    const latitude = requestObject.Parameters.Latitude;
-    const longitude = requestObject.Parameters.Longitude;
-    const accuracy = requestObject.Parameters.Accuracy;
-    const username = requestObject.UserID;
-    const session = requestObject.Token;
-    const deviceId = requestObject.DeviceId;
+    const patientId = requestObject.Parameters.PatientId;
+    const patientSerNum = requestObject.Parameters.PatientSerNum;
 
-    //Getting the appointment ariaSer to checkin to aria
-    getAriaPatientId(username).then(function(response){
-        const patientId = response[0].PatientId;
-
-        //Check in to aria using Johns script
-        checkIntoAria(patientId,serNum, username).then(function(response){
-            if(response) {
-                //If successfully checked in change field in mysql
-                let promises = [];
-
-                for (let i=0; i!==serNum.length; ++i){
-                    promises.push(
-                        exports.runSqlQuery(queries.checkin(),[session, serNum[i], username])
-                            .then(exports.runSqlQuery(queries.logCheckin(),[serNum[i], deviceId,latitude, longitude, accuracy, new Date()])));
-                }
-
-                Q.all(promises)
-                    .then(function(response){
-                        r.resolve({Response:'success'});
-                    })
-                    .catch(function(error){
-                        r.reject({Response:'error',Reason:'CheckIn error due to '+error});
-                    });
-            }else{
-                r.reject({Response:'error', Reason:'Unable to checkin Aria'});
-            }
-        }).catch(function(error){
-            r.reject({Response:'error', Reason:error});
-        });
-    }).catch(function(error){
-        r.reject({Response:'error', Reason:'Error grabbing aria ser num from aria '+ error});
-    });
+    hasAlreadyAttemptedCheckin(patientSerNum)
+        .then(result => {
+            if(result === false){
+                //Check in to aria using Johns script
+                checkIntoAriaAndMedi(patientId).then(() => {
+                    //If successfully checked in, grab all the appointments that have been checked into in order to notify app
+                    getCheckedInAppointments(patientSerNum)
+                        .then(appts => r.resolve(appts))
+                        .catch(err => r.reject({Response:'error', Reason:'CheckIn error due to '+ err}));
+                }).catch(error => r.reject({Response:'error', Reason:error}));
+            } else r.resolve([]);
+        }).catch(err=> r.reject({Response:'error', Reason:'Error determining whether this patient has checked in or not due to : '+ error}));
     return r.promise;
 };
+
+
+/**
+ * Calls John's PHP script in order to check in patient on Aria and Medivisit
+ * @param patientId
+ * @param apptSerNum
+ * @returns {Promise}
+ */
+function checkIntoAriaAndMedi(patientId) {
+    let r = Q.defer();
+    let url = config.CHECKIN_PATH.replace('{ID}', patientId);
+
+    request(url,function(error, response, body) {
+        logger.log('debug', 'checked into aria and medi response: ' + JSON.stringify(response));
+        logger.log('debug', 'checked into aria and medi body: ' + JSON.stringify(body));
+
+        if(error) r.reject(error);
+        else r.resolve();
+    });
+    return r.promise;
+}
+
+/**
+ * Queries the database to see if any patient push notifications exist for the user today, hence whether or not they have attempted to check in already
+ * @param patientSerNum
+ * @returns {Promise}
+ */
+function hasAlreadyAttemptedCheckin(patientSerNum){
+    return new Promise((resolve, reject) => {
+        if(!patientSerNum) reject("No Patient SerNum Provided");
+        else {
+            exports.runSqlQuery(queries.getPatientCheckinPushNotifications(), [patientSerNum]).then((rows) => {
+                if (rows.length === 0) resolve(false);
+                else resolve(true);
+            }).catch((err) => {
+                reject({Response: 'error', Reason: err});
+            })
+        }
+    });
+}
+
+exports.checkCheckin = hasAlreadyAttemptedCheckin;
+
+/**
+ * Gets and returns all of a patients appointments on today's date
+ * @param patientSerNum
+ * @return {Promise}
+ */
+function getCheckedInAppointments(patientSerNum){
+    return new Promise((resolve, reject) => {
+        exports.runSqlQuery(queries.getTodaysCheckedInAppointments(), [patientSerNum])
+            .then(rows => resolve({Response:'success', Data: rows}))
+            .catch(err => reject({Response: 'error', Reason: err}));
+    })
+}
+
+
+/**
+ * ============================================================
+ */
+
 
 /**
  * getDocumentsContent
@@ -498,7 +480,13 @@ exports.inputFeedback = function(requestObject) {
     let email = requestObject.UserEmail;
 	if(!email) r.reject({Response:'error',Reason:`Invalid parameter email`});
 	getPatientFromEmail(email).then((patient)=> {
-        let {type, feedback, appRating} = requestObject.Parameters;
+//        let {type, feedback, appRating} = requestObject.Parameters;
+//		logger.log('debug', 'Request Object Parameters: ' + JSON.stringify(requestObject.Parameters));
+		let feedback = requestObject.Parameters.FeedbackContent;
+		let appRating = requestObject.Parameters.AppRating;
+		let type = requestObject.Parameters.Type;
+		// {"AppRating":"3","FeedbackContent":"test","Type":"opal"}
+
         if((!type||!feedback)) r.reject({Response:'error',Reason:`Invalid parameter type`});
         exports.runSqlQuery(queries.inputFeedback(),[ patient.PatientSerNum, feedback, appRating, requestObject.Token ])
             .then(()=>{
@@ -511,7 +499,7 @@ exports.inputFeedback = function(requestObject) {
 		            title = "New Suggestion - Opal";
 		            replyTo = email;
 	            } else {
-		            email = "muhc.app.mobile@gmail.com";
+		            email = "opal@muhc.mcgill.ca";
 		            title = "New Feedback - Opal";
 	            }
                 (new Mail()).sendMail(email, title, feedback, replyTo);
@@ -535,11 +523,6 @@ exports.updateDeviceIdentifier = function(requestObject, parameters) {
     let r = Q.defer();
 
     logger.log('debug', 'in update device id with : ' + JSON.stringify(requestObject));
-    //Validating parameters
-    // if(!requestObject.Parameters || !requestObject.Parameters.registrationId) {
-    //     r.reject({Response:'error', Reason:'Invalid parameters'});
-    //     return r.promise;
-    // }
 
     let identifiers = parameters || requestObject.Parameters;
     let deviceType = null;
@@ -971,63 +954,17 @@ function getAppointmentAriaSer(username, appSerNum) {
     return exports.runSqlQuery(queries.getAppointmentAriaSer(),[username, appSerNum]);
 }
 
-function getAriaPatientId(username) {
+/**
+ * @name getPatientId
+ * @desc gets the patients Aria sernum from DB
+ * @param username
+ * @return {Promise}
+ */
+function getPatientId(username) {
     return exports.runSqlQuery(queries.getPatientId(),[username]);
 }
 
-//Checks user into Aria
-function checkIntoAria(patientId, serNum, username) {
-    var r = Q.defer();
-    var url = config.CHECKIN_PATH+patientId;
-    //making request to checkin
-    //console.log(url, username, serNum);
-    // getAppointmentAriaSer(username, serNum).then(function(res){
-    //     //console.log(res);
-    //     var ariaSerNum = res[0].AppointmentAriaSer;
-    request(url,function(error, response, body)
-    {
-        //console.log(response);
-        if(error){}//console.log('line770,sqlInterface',error);r.reject(error);}
-        if(!error&&response.statusCode=='200')
-        {
-            var promises = [];
-            for (var i=0; i!=serNum.length; ++i){
-                promises.push(checkIfCheckedIntoAriaHelper(serNum[i]));
-            }
-            Q.all(promises).then(function(response){
-                r.resolve(response);
-            }).catch(function(error){
-                //console.log('line778',error);
-                r.reject(error);
-            });
-            //r.resolve(true);
-        }
-    });
-    // }).catch(function(error){
-    //     //console.log('line778',error);
-    //     r.reject(error);
-    // });
-    return r.promise;
-}
 
-//Check if checked in for an appointment in aria
-function checkIfCheckedIntoAriaHelper(patientActivitySerNum)
-{
-    var r = Q.defer();
-    var url = config.VERIFYCHECKIN_PATH+patientActivitySerNum;
-    request(url,function(error, response, body)
-    {
-        if(error){}//console.log('line811,sqlInterface',error);r.reject(error);}
-        if(!error&&response.statusCode=='200')
-        {
-            body = JSON.parse(body);
-            //console.log("checkin checks bro", body);
-            if(body.length>0 && body[0].CheckedInFlag == 1) r.resolve(true);
-            else r.resolve(false);
-        }
-    });
-    return r.promise;
-}
 //Get time estimate from Ackeem's scripts
 exports.getTimeEstimate = function(appointmentAriaSer)
 {
@@ -1215,24 +1152,184 @@ exports.getQuestionnaires = function(requestObject){
 };
 
 /**
+ * NOTIFICATIONS FUNCTIONALITY
+ * ========================================================================
+ */
+
+
+
+/**
  * Returns a promise containing all the notifications
  * @param {object} requestObject the request
  * @returns {Promise} Returns a promise that contains the notification data
  */
 
+/**
+ * DEPRECATED
+ */
 exports.getAllNotifications = function(requestObject){
-    "use strict";
-    var r = Q.defer();
-    exports.runSqlQuery(queries.getAllNotifications(), [requestObject.UserID,requestObject.Timestamp,requestObject.Timestamp])
-        .then(function (queryRows) {
-            //console.log(queryRows);
-            var obj = {};
-            obj.Data = queryRows;
-            r.resolve(obj);
+    let r = Q.defer();
+    exports.runSqlQuery(queries.getAllNotifications(), [requestObject.UserID])
+        .then(rows => r.resolve({Data: rows})
+        .catch(err => r.reject(err)));
+    return r.promise
+};
+
+/**
+ * Returns a promise containing all new notifications
+ * @param {object} requestObject the request
+ * @returns {Promise} Returns a promise that contains the notification data
+ */
+
+exports.getNewNotifications = function(requestObject){
+    let r = Q.defer();
+    exports.runSqlQuery(queries.getNewNotifications(), [requestObject.UserID, requestObject.Parameters.LastUpdated, requestObject.Parameters.LastUpdated])
+        .then(rows => {
+            if(rows.length > 0){
+                assocNotificationsWithItems(rows, requestObject)
+                    .then(tuples => r.resolve({Data:tuples}))
+                    .catch(err => r.reject(err))
+            } else r.resolve({Data: rows});
         })
-        .catch(function (error) {
+        .catch(error => {
             r.reject(error);
         });
 
     return r.promise
 };
+
+/**
+ * Takes in a list of notifications and the original requestObject and returns a list of tuples that contains the notifications
+ * and their associated content
+ * @param notifications
+ * @param requestObject
+ * @returns {Promise<any>}
+ */
+function assocNotificationsWithItems(notifications, requestObject){
+
+    return new Promise((resolve, reject) => {
+
+        // A list containing all possible notification types
+        // TODO: not an elegant way to do this... should create a mapping
+        const itemList = ['Document', 'Announcement', 'TxTeamMessage', 'EducationalMaterial', 'Questionnaire'];
+
+        let fields = [];
+
+        // For each notification, build a list of content-types that need to be refreshed to be paired with the notification(s)
+        notifications.forEach(notif => {
+
+            // Due to the mess that is questionnaires, we have to map LegacyQuestionnaire to Questionnaire since that how's it named everywhere on the listener
+            if(notif.NotificationType === 'LegacyQuestionnaire') notif.NotificationType = 'Questionnaire';
+
+            if(itemList.includes(notif.NotificationType) && (!fields.includes(notif.NotificationType) || !fields.includes(notif.NotificationType + 's'))) {
+
+				// Educational material mapping is singular... otherwise add 's' to end of key
+                // TODO: This is a pretty bad way to handle this... should create a mapping
+                let string =(notif.NotificationType !== 'EducationalMaterial') ? notif.NotificationType + 's' : notif.NotificationType;
+                fields.push(string);
+            }
+        });
+
+
+        if(fields.length > 0) {
+
+            // Refresh all the new data (should only be data that needs to be associated with notification)
+            refresh(fields, requestObject)
+                .then(results => {
+                    if(!!results.Data){
+
+                        // If we successfully were able to grab all the new data, then map them to their notification in tuple-form
+                        let tuples = mapRefreshedDataToNotifications(results.Data, notifications);
+                        resolve(tuples);
+                    }
+                    reject({Response:'error', Reason:'Could not associate any notifications to its content'});
+                })
+                .catch(err => resolve(err))
+        } else resolve(notifications)
+    })
+}
+
+function mapRefreshedDataToNotifications(results, notifications) {
+
+    logger.log('debug', 'notifications: ' + JSON.stringify(notifications));
+    logger.log('debug', 'results: ' + JSON.stringify(results));
+
+    let resultsArray = [];
+
+    // Iterate through refreshed data object via its keys
+    Object.keys(results).map(key => {
+
+        // Need to do special work for questionnaires since it is returned as an object rather than an array
+        if (key === 'Questionnaires') {
+
+            // Extract the patient and raw questionnaire from the object
+            let patient_questionnaires = results[key]['PatientQuestionnaires'];
+            let raw_questionnaires = results[key]['Questionnaires'];
+
+            // convert the questionnaire object into a more manageable object for the next steps of notification mapping
+            resultsArray = createQuestionnaireNotificationObject(patient_questionnaires, raw_questionnaires, resultsArray)
+
+        } else {
+            resultsArray = resultsArray.concat(results[key])
+        }
+    });
+
+    logger.log('debug', 'results array: ' + JSON.stringify(resultsArray));
+
+    // For each notification, find it's associated item in the results array and create a tuple
+    return notifications.map(notif => {
+
+        // TODO: It was a pretty bad idea to create an array, should later be changed to an object shaped in the following: {notification: {}, content: {}}
+        let tuple = [];
+
+        // Attempts to find the notifications associated content
+        let item = resultsArray.find(result => {
+            // TODO: This is really not the best way to handle this... should be a mapping
+            let serNumField = notif.NotificationType + "SerNum";
+            if(result.hasOwnProperty(serNumField)) return parseInt(result[serNumField]) === parseInt(notif.RefTableRowSerNum);
+            return false;
+        });
+
+        tuple.push(notif);
+        tuple.push(item);
+        return tuple;
+    });
+}
+
+function createQuestionnaireNotificationObject(patient_questionnaires, raw_questionnaires, resultsArray){
+    // Iterate through refreshed questionnaire data by serNum
+    Object.keys(patient_questionnaires).map(ser => {
+
+        // Grab the DB ser num from patient questionnaire object + it's associated raw questionnaire
+        let db_ser = patient_questionnaires[ser].QuestionnaireDBSerNum;
+        let raw_q = raw_questionnaires[db_ser];
+
+        // Create an object that can be referenced by it's questionnareSerNum in order to get Questionnaire objects
+        let q_obj ={
+            QuestionnaireSerNum: ser,
+            Questionnaire: {
+                PatientQuestionnaires: patient_questionnaires[ser],
+                Questionnaires: raw_q
+            }
+        };
+
+        resultsArray = resultsArray.concat(q_obj);
+    });
+
+    return resultsArray
+}
+
+function refresh (fields, requestObject) {
+    let r = Q.defer();
+    let UserId=requestObject.UserID;
+    let today = new Date();
+    let timestamp = today.setHours(0,0,0,0);
+
+    exports.getPatientTableFields(UserId, timestamp, fields).then(rows => {
+            rows.Data= utility.resolveEmptyResponse(rows.Data);
+            r.resolve(rows);
+        })
+        .catch(err => r.reject(err));
+
+    return r.promise;
+}
