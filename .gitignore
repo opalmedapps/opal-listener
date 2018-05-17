@@ -63,3 +63,11 @@ typings/
 # dotenv environment variables file
 .env
 
+.idea/
+node_modules
+credentials.js
+*.swp
+.DS_Store
+
+# Atom ftp configuration
+.ftpconfig
