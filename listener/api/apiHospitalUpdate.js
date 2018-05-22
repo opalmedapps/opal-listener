@@ -64,3 +64,9 @@ exports.getAllNotifications = function (requestObject) {
 exports.getNewNotifications = function (requestObject) {
     return sqlInterface.getNewNotifications(requestObject);
 };
+
+//get educational material log
+exports.getEducationalLog = function(requestObject){
+    console.log("in the apiHospitalUpdate");
+    return sqlInterface.getEducationalLog(requestObject);
+}
