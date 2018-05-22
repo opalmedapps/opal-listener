@@ -31,7 +31,8 @@ const API = {
     'QuestionnaireRating': apiHospitalUpdate.inputEducationalMaterialRating,
     'QuestionnaireAnswers': apiHospitalUpdate.inputQuestionnaireAnswers,
     'Read': apiHospitalUpdate.updateReadStatus,
-    'PFPMembers': apiPatientUpdate.getPatientsForPatientsMembers
+    'PFPMembers': apiPatientUpdate.getPatientsForPatientsMembers,
+    'GetEducationalLog': apiHospitalUpdate.getEducationalLog
 };
 
 /**

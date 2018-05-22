@@ -19,6 +19,7 @@ const dbCredentials = {
 	connectionLimit: 10,
 	host: config.HOST,
 	user: config.MYSQL_USERNAME,
+    port: config.PORT,
 	password: config.MYSQL_PASSWORD,
 	database: config.MYSQL_DATABASE,
 	dateStrings: true
@@ -1137,7 +1138,8 @@ exports.getQuestionnaires = function(requestObject){
     var r = Q.defer();
     exports.runSqlQuery(queries.patientQuestionnaireTableFields(), [requestObject.UserID, null, null])
         .then(function (queryRows) {
-            return questionnaires.getPatientQuestionnaires(queryRows)
+            // return questionnaires.getPatientQuestionnaires(queryRows)
+            return [];
         })
         .then(function (result) {
             var obj = {};
@@ -1196,6 +1198,16 @@ exports.getNewNotifications = function(requestObject){
         });
 
     return r.promise
+};
+
+//get educational material logs
+
+exports.getEducationalLog = function (requestObject) {
+    console.log("in sqlInterface");
+    return exports.runSqlQuery(queries.getEducationalLog(),[]).then(
+        function(rows){
+            return rows;
+    });
 };
 
 /**
