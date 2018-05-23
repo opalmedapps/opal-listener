@@ -320,8 +320,9 @@ exports.checkIn=function(requestObject) {
     const r = Q.defer();
     const patientId = requestObject.Parameters.PatientId;
     const patientSerNum = requestObject.Parameters.PatientSerNum;
+		logger.log('debug', 'Begin of the check-in into aria and medi');
 
-    hasAlreadyAttemptedCheckin(patientSerNum)
+		hasAlreadyAttemptedCheckin(patientSerNum)
         .then(result => {
             if(result === false){
                 //Check in to aria using Johns script
