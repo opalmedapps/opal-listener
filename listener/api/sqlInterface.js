@@ -320,7 +320,6 @@ exports.checkIn=function(requestObject) {
     const r = Q.defer();
     const patientId = requestObject.Parameters.PatientId;
     const patientSerNum = requestObject.Parameters.PatientSerNum;
-		logger.log('debug', 'Begin of the check-in into aria and medi');
 
 		hasAlreadyAttemptedCheckin(patientSerNum)
         .then(result => {
@@ -369,7 +368,9 @@ function hasAlreadyAttemptedCheckin(patientSerNum){
         else {
             exports.runSqlQuery(queries.getPatientCheckinPushNotifications(), [patientSerNum]).then((rows) => {
                 if (rows.length === 0) resolve(false);
-                else resolve(true);
+								// YM 2018-05-25 - Temporary putting as false for now to bypass the checking of notification table.
+								//		Technically, it should be checking the appointment table.
+                else resolve(false);
             }).catch((err) => {
                 reject({Response: 'error', Reason: err});
             })
