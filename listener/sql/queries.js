@@ -22,49 +22,54 @@ exports.patientMessageTableFields=function()
 
 exports.patientAppointmentsTableFields=function()
 {
-    return "SELECT DISTINCT Appointment.AppointmentSerNum, " +
-        "Alias.AliasSerNum, " +
-        "Alias.AliasName_EN AS AppointmentType_EN, " +
-        "Alias.AliasName_FR AS AppointmentType_FR, " +
-        "Alias.AliasDescription_EN AS AppointmentDescription_EN, " +
-        "Alias.AliasDescription_FR AS AppointmentDescription_FR, " +
-        "AliasExpression.Description AS ResourceDescription, " +
-        "Appointment.ScheduledStartTime, " +
-        "Appointment.ScheduledEndTime, " +
-        "Appointment.Checkin, " +
-        "Appointment.AppointmentAriaSer, " +
-        "Appointment.ReadStatus, " +
-        "Resource.ResourceName, " +
-        "Resource.ResourceType, " +
-        "HospitalMap.MapUrl, " +
-        "HospitalMap.MapName_EN, " +
-        "HospitalMap.MapName_FR, " +
-        "HospitalMap.MapDescription_EN, " +
-        "HospitalMap.MapDescription_FR, " +
-        "Appointment.Status, " +
-        "Appointment.RoomLocation_EN, " +
-        "Appointment.RoomLocation_FR, " +
-        "Appointment.LastUpdated, " +
+    return "SELECT DISTINCT Appt.AppointmentSerNum, " +
+        "A.AliasSerNum, " +
+        "A.AliasName_EN AS AppointmentType_EN, " +
+        "A.AliasName_FR AS AppointmentType_FR, " +
+        "A.AliasDescription_EN AS AppointmentDescription_EN, " +
+        "A.AliasDescription_FR AS AppointmentDescription_FR, " +
+        "AE.Description AS ResourceDescription, " +
+        "Appt.ScheduledStartTime, " +
+        "Appt.ScheduledEndTime, " +
+        "Appt.Checkin, " +
+        "Appt.AppointmentAriaSer, " +
+        "Appt.ReadStatus, " +
+        "R.ResourceName, " +
+        "R.ResourceType, " +
+        "HM.MapUrl, " +
+        "HM.MapName_EN, " +
+        "HM.MapName_FR, " +
+        "HM.MapDescription_EN, " +
+        "HM.MapDescription_FR, " +
+        "Appt.Status, " +
+        "Appt.RoomLocation_EN, " +
+        "Appt.RoomLocation_FR, " +
+        "Appt.LastUpdated, " +
         "emc.URL_EN, " +
-        "emc.URL_FR " +
+        "emc.URL_FR, " +
+        "AC.CheckinPossible, " +
+        "AC.CheckinInstruction_EN, " +
+        "AC.CheckinInstruction_FR " +
         "" +
-        "FROM Patient " +
+        "FROM Patient P " +
         "" +
-        "INNER JOIN Users ON Users.UserTypeSerNum = Patient.PatientSerNum " +
-        "INNER JOIN Appointment ON Appointment.PatientSerNum = Patient.PatientSerNum " +
-        "INNER JOIN HospitalMap ON HospitalMap.HospitalMapSerNum = Appointment.Location " +
-        "INNER JOIN ResourceAppointment ON ResourceAppointment.AppointmentSerNum = Appointment.AppointmentSerNum " +
-        "INNER JOIN Resource ON ResourceAppointment.ResourceSerNum = Resource.ResourceSerNum " +
-        "INNER JOIN AliasExpression ON AliasExpression.AliasExpressionSerNum=Appointment.AliasExpressionSerNum " +
-        "INNER JOIN Alias ON AliasExpression.AliasSerNum=Alias.AliasSerNum " +
-        "LEFT JOIN EducationalMaterialControl emc ON emc.EducationalMaterialControlSerNum = Alias.EducationalMaterialControlSerNum " +
+        "INNER JOIN Users U ON U.UserTypeSerNum = P.PatientSerNum " +
+        "INNER JOIN Appointment Appt ON Appt.PatientSerNum = P.PatientSerNum " +
+        "INNER JOIN HospitalMap HM ON HM.HospitalMapSerNum = Appt.Location " +
+        "INNER JOIN ResourceAppointment RA ON RA.AppointmentSerNum = Appt.AppointmentSerNum " +
+        "INNER JOIN Resource R ON RA.ResourceSerNum = R.ResourceSerNum " +
+        "INNER JOIN AliasExpression AE ON AE.AliasExpressionSerNum=Appt.AliasExpressionSerNum " +
+        "INNER JOIN AppointmentCheckin AC ON AE.AliasSerNum=AC.AliasSerNum ",
+        "INNER JOIN Alias A ON AE.AliasSerNum=A.AliasSerNum " +
+        // LEFT JOIN HospitalMap HM ON HM.HospitalMapSerNum=A.HospitalMapSerNum
+        "LEFT JOIN EducationalMaterialControl emc ON emc.EducationalMaterialControlSerNum = A.EducationalMaterialControlSerNum "+
         "" +
         "WHERE " +
-        "Users.Username = ? " +
-        "AND Appointment.State = 'Active' " +
-        "AND (Appointment.LastUpdated > ? OR Alias.LastUpdated > ? OR AliasExpression.LastUpdated > ? OR Resource.LastUpdated > ? OR HospitalMap.LastUpdated > ?) " +
+        "U.Username = ? " +
+        "AND Appt.State = 'Active' " +
+        "AND (Appt.LastUpdated > ? OR A.LastUpdated > ? OR AE.LastUpdated > ? OR R.LastUpdated > ? OR HM.LastUpdated > ?) " +
         "" +
-        "ORDER BY Appointment.AppointmentSerNum, ScheduledStartTime;";
+        "ORDER BY Appt.AppointmentSerNum, ScheduledStartTime;";
 };
 
 exports.patientDocumentTableFields=function()
