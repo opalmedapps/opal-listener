@@ -59,10 +59,10 @@ exports.patientAppointmentsTableFields=function()
         "INNER JOIN ResourceAppointment RA ON RA.AppointmentSerNum = Appt.AppointmentSerNum " +
         "INNER JOIN Resource R ON RA.ResourceSerNum = R.ResourceSerNum " +
         "INNER JOIN AliasExpression AE ON AE.AliasExpressionSerNum=Appt.AliasExpressionSerNum " +
-        "INNER JOIN AppointmentCheckin AC ON AE.AliasSerNum=AC.AliasSerNum ",
+        "INNER JOIN AppointmentCheckin AC ON AE.AliasSerNum=AC.AliasSerNum " +
         "INNER JOIN Alias A ON AE.AliasSerNum=A.AliasSerNum " +
         // LEFT JOIN HospitalMap HM ON HM.HospitalMapSerNum=A.HospitalMapSerNum
-        "LEFT JOIN EducationalMaterialControl emc ON emc.EducationalMaterialControlSerNum = A.EducationalMaterialControlSerNum "+
+        "LEFT JOIN EducationalMaterialControl emc ON emc.EducationalMaterialControlSerNum = A.EducationalMaterialControlSerNum " +
         "" +
         "WHERE " +
         "U.Username = ? " +
