@@ -24,11 +24,11 @@ exports.patientAppointmentsTableFields=function()
 {
     return "SELECT DISTINCT Appt.AppointmentSerNum, " +
         "A.AliasSerNum, " +
-        "A.AliasName_EN AS AppointmentType_EN, " +
-        "A.AliasName_FR AS AppointmentType_FR, " +
-        "A.AliasDescription_EN AS AppointmentDescription_EN, " +
-        "A.AliasDescription_FR AS AppointmentDescription_FR, " +
-        "AE.Description AS ResourceDescription, " +
+        "IfNull(A.AliasName_EN, '') AS AppointmentType_EN, " +
+        "IfNull(A.AliasName_FR, '') AS AppointmentType_FR, " +
+        "IfNull(A.AliasDescription_EN, '') AS AppointmentDescription_EN, " +
+        "IfNull(A.AliasDescription_FR, '') AS AppointmentDescription_FR, " +
+        "IfNull(AE.Description, '') AS ResourceDescription, " +
         "Appt.ScheduledStartTime, " +
         "Appt.ScheduledEndTime, " +
         "Appt.Checkin, " +
@@ -36,32 +36,32 @@ exports.patientAppointmentsTableFields=function()
         "Appt.ReadStatus, " +
         "R.ResourceName, " +
         "R.ResourceType, " +
-        "HM.MapUrl, " +
-        "HM.MapName_EN, " +
-        "HM.MapName_FR, " +
-        "HM.MapDescription_EN, " +
-        "HM.MapDescription_FR, " +
+        "IfNull(HM.MapUrl, '') AS MapUrl, " +
+        "IfNull(HM.MapName_EN, '') AS MapName_EN, " +
+        "IfNull(HM.MapName_FR, '') AS MapName_FR, " +
+        "IfNull(HM.MapDescription_EN, '') AS MapDescription_EN, " +
+        "IfNull(HM.MapDescription_FR, '') AS MapDescription_FR, " +
         "Appt.Status, " +
-        "Appt.RoomLocation_EN, " +
-        "Appt.RoomLocation_FR, " +
+        "IfNull(Appt.RoomLocation_EN, '') AS RoomLocation_EN, " +
+        "IfNull(Appt.RoomLocation_FR, '') AS RoomLocation_FR, " +
         "Appt.LastUpdated, " +
-        "emc.URL_EN, " +
-        "emc.URL_FR, " +
-        "AC.CheckinPossible, " +
-        "AC.CheckinInstruction_EN, " +
-        "AC.CheckinInstruction_FR " +
+        "IfNull(emc.URL_EN, '') AS URL_EN, " +
+        "IfNull(emc.URL_FR, '') AS URL_FR, " +
+        "IfNull(AC.CheckinPossible, 0) AS CheckinPossible, " +
+        "IfNull(AC.CheckinInstruction_EN, '') AS CheckinInstruction_EN, " +
+        "IfNull(AC.CheckinInstruction_FR, '') AS CheckinInstruction_FR " +
         "" +
         "FROM Patient P " +
         "" +
         "INNER JOIN Users U ON U.UserTypeSerNum = P.PatientSerNum " +
         "INNER JOIN Appointment Appt ON Appt.PatientSerNum = P.PatientSerNum " +
-        "INNER JOIN HospitalMap HM ON HM.HospitalMapSerNum = Appt.Location " +
+        // "INNER JOIN HospitalMap HM ON HM.HospitalMapSerNum = Appt.Location " +
         "INNER JOIN ResourceAppointment RA ON RA.AppointmentSerNum = Appt.AppointmentSerNum " +
         "INNER JOIN Resource R ON RA.ResourceSerNum = R.ResourceSerNum " +
         "INNER JOIN AliasExpression AE ON AE.AliasExpressionSerNum=Appt.AliasExpressionSerNum " +
-        "INNER JOIN AppointmentCheckin AC ON AE.AliasSerNum=AC.AliasSerNum " +
         "INNER JOIN Alias A ON AE.AliasSerNum=A.AliasSerNum " +
-        // LEFT JOIN HospitalMap HM ON HM.HospitalMapSerNum=A.HospitalMapSerNum
+        "LEFT JOIN HospitalMap HM ON HM.HospitalMapSerNum=A.HospitalMapSerNum " +
+        "INNER JOIN AppointmentCheckin AC ON AE.AliasSerNum=AC.AliasSerNum " +
         "LEFT JOIN EducationalMaterialControl emc ON emc.EducationalMaterialControlSerNum = A.EducationalMaterialControlSerNum " +
         "" +
         "WHERE " +
