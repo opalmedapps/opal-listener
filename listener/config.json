@@ -10,5 +10,5 @@
     "PFP_PATH" : "/var/www/html/opalAdmin/publisher/clinical/",
     "FIREBASE_ADMIN_KEY": "/home/integrator/opal-prod.json",
     "DATABASE_URL": "https://opal-prod.firebaseio.com",
-    "LATEST_STABLE_VERSION": "1.0.0"
+    "LATEST_STABLE_VERSION": "1.6.0"
 }
