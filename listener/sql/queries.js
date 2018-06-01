@@ -22,8 +22,8 @@ exports.patientMessageTableFields=function()
 
 exports.patientAppointmentsTableFields=function()
 {
-//  return "CALL getPatientAppointmentsTableFields(?, ?, ?, ?, ?, ?);";
-
+  return "CALL getPatientAppointmentsTableFields(?, ?, ?, ?, ?, ?);";
+/*
     return "SELECT DISTINCT Appt.AppointmentSerNum, " +
         "A.AliasSerNum, " +
         "IfNull(A.AliasName_EN, '') AS AppointmentType_EN, " +
@@ -72,7 +72,7 @@ exports.patientAppointmentsTableFields=function()
         "AND (Appt.LastUpdated > ? OR A.LastUpdated > ? OR AE.LastUpdated > ? OR R.LastUpdated > ? OR HM.LastUpdated > ?) " +
         "" +
         "ORDER BY Appt.AppointmentSerNum, ScheduledStartTime;";
-
+*/
 };
 
 exports.patientDocumentTableFields=function()
