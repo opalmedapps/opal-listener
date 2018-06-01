@@ -463,7 +463,7 @@ exports.getNewNotifications=function() {
         "AND (Notification.DateAdded > ? OR NotificationControl.DateAdded > ?);";
 };
 
-//get educational material log
+//newly added get educational material log
 
 exports.getEducationalLog = function(){
     console.log("in the queries");
@@ -479,4 +479,13 @@ exports.getEducationalLog = function(){
         "where m.ReadStatus = 0\n" +
         "group by m.EducationalMaterialSerNum) r\n" +
         "on v.SerNumViewed = r.SerNumReceived;";
-}
+};
+
+exports.updateScrollToBottom=function()
+{
+    return `
+        UPDATE ??
+        SET ScrolledToBottom = 1
+        WHERE ??.?? = ?
+    `;
+};
