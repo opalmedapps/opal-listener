@@ -65,8 +65,17 @@ exports.getNewNotifications = function (requestObject) {
     return sqlInterface.getNewNotifications(requestObject);
 };
 
+//newly added
+
 //get educational material log
 exports.getEducationalLog = function(requestObject){
     console.log("in the apiHospitalUpdate");
     return sqlInterface.getEducationalLog(requestObject);
 }
+
+//update scroll to bottom
+exports.updateScrollToBottom=function(requestObject)
+{
+
+    return sqlInterface.updateScrollToBottom(requestObject.UserID,requestObject.Parameters);
+};

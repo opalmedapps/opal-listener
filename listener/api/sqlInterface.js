@@ -285,6 +285,7 @@ exports.updateReadStatus=function(userId, parameters)
     }else{
 	    r.reject({Response:'error',Reason:'Invalid read status field'});
     }
+
 	exports.runSqlQuery(queries.updateReadStatus(),[table, table, serNum, parameters.Id])
     .then(()=>{
 	    r.resolve({Response:'success'});
@@ -294,6 +295,28 @@ exports.updateReadStatus=function(userId, parameters)
 
     return r.promise;
 };
+
+//update scroll To Bottom field in educationMH table
+exports.updateScrollToBottom=function(userId, parameters){
+
+    let r = Q.defer();
+
+    let table, serNum;
+    if(parameters && parameters.Field && parameters.Id && requestMappings.hasOwnProperty(parameters.Field) ) {
+        ({table, serNum} = requestMappings[parameters.Field]);
+    }else{
+        r.reject({Response:'error',Reason:'Invalid read status field'});
+    }
+
+    exports.runSqlQuery(queries.updateScrollToBottom(),[table, table, serNum, parameters.Id])
+        .then(()=>{
+            r.resolve({Response:'success'});
+        }).catch((err)=>{
+        r.reject({Response:'error',Reason:err});
+    });
+
+    return r.promise;
+}
 
 /**
  * sendMessage
@@ -1200,7 +1223,7 @@ exports.getNewNotifications = function(requestObject){
     return r.promise
 };
 
-//get educational material logs
+//newly added, get educational material logs
 
 exports.getEducationalLog = function (requestObject) {
     console.log("in sqlInterface");
