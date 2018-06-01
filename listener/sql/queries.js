@@ -22,7 +22,6 @@ exports.patientMessageTableFields=function()
 
 exports.patientAppointmentsTableFields=function()
 {
-//  return "CALL getPatientAppointmentsTableFields(?, ?, ?, ?, ?, ?);";
 
     return "SELECT DISTINCT Appt.AppointmentSerNum, " +
         "A.AliasSerNum, " +
