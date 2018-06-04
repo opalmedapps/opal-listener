@@ -68,7 +68,7 @@ exports.patientAppointmentsTableFields=function()
         "WHERE " +
         "U.Username = ? " +
         "AND Appt.State = 'Active' " +
-        "AND (Appt.LastUpdated > ? OR A.LastUpdated > ? OR AE.LastUpdated > ? OR R.LastUpdated > ? OR HM.LastUpdated > ?) " +
+        // "AND (Appt.LastUpdated > ? OR A.LastUpdated > ? OR AE.LastUpdated > ? OR R.LastUpdated > ? OR HM.LastUpdated > ?) " +
         "" +
         "ORDER BY Appt.AppointmentSerNum, ScheduledStartTime;";
 
