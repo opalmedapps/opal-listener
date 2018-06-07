@@ -37,11 +37,16 @@ exports.patientAppointmentsTableFields=function()
         "Appt.ReadStatus, " +
         "R.ResourceName, " +
         "R.ResourceType, " +
-        "IfNull(HM.MapUrl, '') AS MapUrl, " +
-        "IfNull(HM.MapName_EN, '') AS MapName_EN, " +
-        "IfNull(HM.MapName_FR, '') AS MapName_FR, " +
-        "IfNull(HM.MapDescription_EN, '') AS MapDescription_EN, " +
-        "IfNull(HM.MapDescription_FR, '') AS MapDescription_FR, " +
+        // "IfNull(HM.MapUrl, '') AS MapUrl, " +
+        // "IfNull(HM.MapName_EN, '') AS MapName_EN, " +
+        // "IfNull(HM.MapName_FR, '') AS MapName_FR, " +
+        // "IfNull(HM.MapDescription_EN, '') AS MapDescription_EN, " +
+        // "IfNull(HM.MapDescription_FR, '') AS MapDescription_FR, " +
+        "(select IfNull(HM2.MapUrl, '') from HospitalMap HM2 where HM2.HospitalMapSerNum = getLevel(Appt.ScheduledStartTime, AE.Description, A.HospitalMapSerNum))  AS MapUrl, " +
+        "(select IfNull(HM2.MapName_EN, '') from HospitalMap HM2 where HM2.HospitalMapSerNum = getLevel(Appt.ScheduledStartTime, AE.Description, A.HospitalMapSerNum))  AS MapName_EN, " +
+        "(select IfNull(HM2.MapName_FR, '') from HospitalMap HM2 where HM2.HospitalMapSerNum = getLevel(Appt.ScheduledStartTime, AE.Description, A.HospitalMapSerNum))  AS MapName_FR, " +
+        "(select IfNull(HM2.MapDescription_EN, '') from HospitalMap HM2 where HM2.HospitalMapSerNum = getLevel(Appt.ScheduledStartTime, AE.Description, A.HospitalMapSerNum))  AS MapDescription_EN, " +
+        "(select IfNull(HM2.MapDescription_FR, '') from HospitalMap HM2 where HM2.HospitalMapSerNum = getLevel(Appt.ScheduledStartTime, AE.Description, A.HospitalMapSerNum))  AS MapDescription_FR, " +
         "Appt.Status, " +
         "IfNull(Appt.RoomLocation_EN, '') AS RoomLocation_EN, " +
         "IfNull(Appt.RoomLocation_FR, '') AS RoomLocation_FR, " +
