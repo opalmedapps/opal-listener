@@ -321,7 +321,7 @@ exports.checkIn=function(requestObject) {
     const patientId = requestObject.Parameters.PatientId;
     const patientSerNum = requestObject.Parameters.PatientSerNum;
 
-    hasAlreadyAttemptedCheckin(patientSerNum)
+		hasAlreadyAttemptedCheckin(patientSerNum)
         .then(result => {
             if(result === false){
                 //Check in to aria using Johns script
@@ -368,7 +368,9 @@ function hasAlreadyAttemptedCheckin(patientSerNum){
         else {
             exports.runSqlQuery(queries.getPatientCheckinPushNotifications(), [patientSerNum]).then((rows) => {
                 if (rows.length === 0) resolve(false);
-                else resolve(true);
+								// YM 2018-05-25 - Temporary putting as false for now to bypass the checking of notification table.
+								//		Technically, it should be checking the appointment table.
+                else resolve(false);
             }).catch((err) => {
                 reject({Response: 'error', Reason: err});
             })
