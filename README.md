@@ -4,6 +4,13 @@ This is the Opal app's backend listener that sits between Firebase and OpalDB.
 ## Getting Started
 
 These instructions will get you a copy of the project up and running on your local machine for development and testing purposes. See deployment for notes on how to deploy the project on a live system.
+- **NOTE:** These instructions are incomplete, and only
+ concerned themselves with running the backend quickly,
+  and assuming that all the dependencies and config files
+  are already ready and configured.
+  There is a more complete
+tutorial on how to get Opal-backend development environment at
+[Opal Backend Tutorial](https://github.com/Opal-teaching/opal-backend-wiki.git)
 
 ### Prerequisites
 
