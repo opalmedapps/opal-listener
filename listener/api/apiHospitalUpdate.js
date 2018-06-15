@@ -32,9 +32,9 @@ exports.accountChange = function (requestObject) {
 };
 
 //Update Read Status
-exports.updateReadStatus=function(requestObject)
+exports.updateClicked=function(requestObject)
 {
-  return sqlInterface.updateReadStatus(requestObject.UserID,requestObject.Parameters);
+  return sqlInterface.updateClicked(requestObject.UserID,requestObject.Parameters);
 };
 
 //Update checkin
