@@ -275,7 +275,7 @@ function preparePromiseArrayFields(userId,timestamp,arrayTables) {
  * @param parameters
  * @return {Promise}
  */
-exports.updateReadStatus=function(userId, parameters)
+exports.updateClicked=function(userId, parameters)
 {
     let r = Q.defer();
 
@@ -286,7 +286,7 @@ exports.updateReadStatus=function(userId, parameters)
 	    r.reject({Response:'error',Reason:'Invalid read status field'});
     }
 
-	exports.runSqlQuery(queries.updateReadStatus(),[table, table, serNum, parameters.Id])
+	exports.runSqlQuery(queries.updateClicked(),[table, table, serNum, parameters.Id])
     .then(()=>{
 	    r.resolve({Response:'success'});
     }).catch((err)=>{
