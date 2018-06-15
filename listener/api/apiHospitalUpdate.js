@@ -79,3 +79,8 @@ exports.updateScrollToBottom=function(requestObject)
 
     return sqlInterface.updateScrollToBottom(requestObject.UserID,requestObject.Parameters);
 };
+
+exports.updateSubScrollToBottom = function(requestObject){
+    console.log("in updateSubScrollToBottom function api hospital");
+    return sqlInterface.updateSubScrollToBottom(requestObject.UserID, requestObject.Parameters);
+}
