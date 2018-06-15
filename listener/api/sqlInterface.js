@@ -305,7 +305,7 @@ exports.updateScrollToBottom=function(userId, parameters){
     if(parameters && parameters.Field && parameters.Id && requestMappings.hasOwnProperty(parameters.Field) ) {
         ({table, serNum} = requestMappings[parameters.Field]);
     }else{
-        r.reject({Response:'error',Reason:'Invalid read status field'});
+        r.reject({Response:'error',Reason:'Invalid scroll to bottom field'});
     }
 
     exports.runSqlQuery(queries.updateScrollToBottom(),[table, table, serNum, parameters.Id])
@@ -316,7 +316,24 @@ exports.updateScrollToBottom=function(userId, parameters){
     });
 
     return r.promise;
-}
+};
+
+exports.updateSubScrollToBottom = function(userId, parameters){
+    console.log("in updateSubScrollToBottom function sqlInterface");
+    let r = Q.defer();
+
+    var table = 'EducationalMaterialTOC';
+    var OrderNumField = 'OrderNum';
+    var parSerNumField = 'ParentSerNum';
+    exports.runSqlQuery(queries.updateSubScrollToBottom(),[table, table, OrderNumField, parameters.order, table, parSerNumField, parameters.Id])
+        .then(()=>{
+            r.resolve({Response:'just write to database'});
+        }).catch((err)=>{
+        r.reject({Response:'error',Reason:err});
+    });
+
+    return r.promise;
+};
 
 /**
  * sendMessage

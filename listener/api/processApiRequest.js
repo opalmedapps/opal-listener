@@ -33,7 +33,8 @@ const API = {
     'Read': apiHospitalUpdate.updateReadStatus,
     'PFPMembers': apiPatientUpdate.getPatientsForPatientsMembers,
     'GetEducationalLog': apiHospitalUpdate.getEducationalLog,
-    'WriteScrollToBottom': apiHospitalUpdate.updateScrollToBottom
+    'WriteScrollToBottom': apiHospitalUpdate.updateScrollToBottom,
+    'WriteSubScrollToBottom' : apiHospitalUpdate.updateSubScrollToBottom
 };
 
 /**
