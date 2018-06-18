@@ -120,7 +120,7 @@ exports.patientEducationalMaterialTableFields=function()
 };
 exports.patientEducationalMaterialContents=function()
 {
-    return "SELECT EducationalMaterialTOC.OrderNum, EducationalMaterialTOC.ParentSerNum, EducationalMaterialTOC.EducationalMaterialControlSerNum, EduControl.EducationalMaterialType_EN, EduControl.EducationalMaterialType_FR, EduControl.Name_EN, EduControl.Name_FR, EduControl.URL_FR, EduControl.URL_EN, EducationalMaterialTOC.SubScrolledToBottom  FROM EducationalMaterialControl as EduControl, EducationalMaterialTOC WHERE EduControl.EducationalMaterialControlSerNum = EducationalMaterialTOC.EducationalMaterialControlSerNum AND EducationalMaterialTOC.ParentSerNum = ? ORDER BY OrderNum;";
+    return "SELECT EducationalMaterialTOC.OrderNum, EducationalMaterialTOC.ParentSerNum, EducationalMaterialTOC.EducationalMaterialControlSerNum, EduControl.EducationalMaterialType_EN, EduControl.EducationalMaterialType_FR, EduControl.Name_EN, EduControl.Name_FR, EduControl.URL_FR, EduControl.URL_EN, EducationalMaterialTOC.SubScrolledToBottom, EducationalMaterialTOC.SubClicked FROM EducationalMaterialControl as EduControl, EducationalMaterialTOC WHERE EduControl.EducationalMaterialControlSerNum = EducationalMaterialTOC.EducationalMaterialControlSerNum AND EducationalMaterialTOC.ParentSerNum = ? ORDER BY OrderNum;";
 };
 exports.patientTasksTableFields=function()
 {
@@ -493,5 +493,11 @@ exports.updateScrollToBottom=function()
 exports.updateSubScrollToBottom = function(){
     return `UPDATE ?? 
             SET SubScrolledToBottom = 1
+            WHERE ??.?? = ? AND ??.?? = ?`;
+};
+
+exports.updateSubClicked = function () {
+    return `UPDATE ?? 
+            SET SubClicked = 1
             WHERE ??.?? = ? AND ??.?? = ?`;
 };

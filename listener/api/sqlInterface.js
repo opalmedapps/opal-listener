@@ -335,6 +335,23 @@ exports.updateSubScrollToBottom = function(userId, parameters){
     return r.promise;
 };
 
+exports.updateSubClicked = function(userId, parameters){
+    console.log("in updateSubClicked function sqlInterface");
+    let r = Q.defer();
+
+    var table = 'EducationalMaterialTOC';
+    var OrderNumField = 'OrderNum';
+    var parSerNumField = 'ParentSerNum';
+    exports.runSqlQuery(queries.updateSubClicked(),[table, table, OrderNumField, parameters.order, table, parSerNumField, parameters.Id])
+        .then(()=>{
+            r.resolve({Response:'just write to database'});
+        }).catch((err)=>{
+        r.reject({Response:'error',Reason:err});
+    });
+
+    return r.promise;
+};
+
 /**
  * sendMessage
  * @desc inserts a message into messages table

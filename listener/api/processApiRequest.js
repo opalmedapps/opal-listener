@@ -34,7 +34,8 @@ const API = {
     'PFPMembers': apiPatientUpdate.getPatientsForPatientsMembers,
     'GetEducationalLog': apiHospitalUpdate.getEducationalLog,
     'WriteScrollToBottom': apiHospitalUpdate.updateScrollToBottom,
-    'WriteSubScrollToBottom' : apiHospitalUpdate.updateSubScrollToBottom
+    'WriteSubScrollToBottom' : apiHospitalUpdate.updateSubScrollToBottom,
+    'WriteSubClicked' : apiHospitalUpdate.updateSubClicked
 };
 
 /**
