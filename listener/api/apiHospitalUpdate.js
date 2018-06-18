@@ -84,3 +84,8 @@ exports.updateSubScrollToBottom = function(requestObject){
     console.log("in updateSubScrollToBottom function api hospital");
     return sqlInterface.updateSubScrollToBottom(requestObject.UserID, requestObject.Parameters);
 }
+
+exports.updateSubClicked = function (requestObject) {
+    console.log("in updateSubClicked function api hospital");
+    return sqlInterface.updateSubClicked(requestObject.UserID, requestObject.Parameters);
+}
