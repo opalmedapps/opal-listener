@@ -12,7 +12,8 @@ exports.patientDoctorTableFields=function()
 
 exports.patientDiagnosisTableFields=function()
 {
-    return "SELECT Diagnosis.CreationDate, Diagnosis.Description_EN, Diagnosis.Description_FR FROM Diagnosis, Patient, Users WHERE Users.UserTypeSerNum=Patient.PatientSerNum AND Diagnosis.PatientSerNum = Patient.PatientSerNum AND Users.Username Like ? AND Diagnosis.LastUpdated > ?;";
+   return "SELECT D.CreationDate, getDiagnosisDescription(D.DiagnosisCode,'EN') Description_EN, getDiagnosisDescription(D.DiagnosisCode,'FR') Description_FR FROM Diagnosis D, Patient P, Users U WHERE U.UserTypeSerNum=P.PatientSerNum AND D.PatientSerNum = P.PatientSerNum AND U.Username Like ? AND D.LastUpdated > ?;";
+    // return "SELECT Diagnosis.CreationDate, Diagnosis.Description_EN, Diagnosis.Description_FR FROM Diagnosis, Patient, Users WHERE Users.UserTypeSerNum=Patient.PatientSerNum AND Diagnosis.PatientSerNum = Patient.PatientSerNum AND Users.Username Like ? AND Diagnosis.LastUpdated > ?;";
 };
 
 exports.patientMessageTableFields=function()
