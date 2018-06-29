@@ -346,7 +346,6 @@ exports.checkIn=function(requestObject) {
 function checkIntoAriaAndMedi(patientId) {
     let r = Q.defer();
     let url = config.CHECKIN_PATH.replace('{ID}', patientId);
-		url = url.repalce('{PushNotification}', 1);
 
     request(url,function(error, response, body) {
         logger.log('debug', 'checked into aria and medi response: ' + JSON.stringify(response));
