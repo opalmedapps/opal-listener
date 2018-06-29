@@ -5,7 +5,7 @@
   "HOST" : "172.26.66.41",
   "DOCUMENTS_PATH" : "/var/www/Documents/opalAdmin/publisher/clinical/documents/",
   "PFP_PATH" : "/var/www/Documents/opalAdmin/publisher/clinical/pfpmembers/",
-  "CHECKIN_PATH" : "http://172.26.66.41/devDocuments/screens/php/checkInPatientAriaMedi.php?CheckinVenue=OPAL%20PHONE%20APP&PatientId={ID}&PushNotification={PushNotification}",
+  "CHECKIN_PATH" : "http://172.26.66.41/devDocuments/screens/php/checkInPatientAriaMedi.php?CheckinVenue=OPAL%20PHONE%20APP&PatientId={ID}&PushNotification=1",
   "VERIFYCHECKIN_PATH" : "http://172.26.66.41/devDocuments/ackeem/getCheckins.php?AppointmentAriaSer=",
   "WT_PATH" : "http://172.26.66.41/devDocuments/WTSim/api/getEstimate.php?appt_aria_ser=",
   "FIREBASE_ADMIN_KEY": "/home/robert/firebase_account/opal-pre-prod.json",
