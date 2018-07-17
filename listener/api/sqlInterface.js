@@ -296,7 +296,7 @@ exports.updateClicked=function(userId, parameters)
     return r.promise;
 };
 
-//update scroll To Bottom field in educationMH table
+//update scroll To Bottom field in education material table
 exports.updateScrollToBottom=function(userId, parameters){
 
     let r = Q.defer();
@@ -352,6 +352,43 @@ exports.updateSubClicked = function(userId, parameters){
     return r.promise;
 };
 
+exports.updateClickedBack = function(userId, parameters){
+    console.log("in updateClickedBack function sqlInterface");
+    let r = Q.defer();
+
+    let table, serNum;
+    if(parameters && parameters.Field && parameters.Id && requestMappings.hasOwnProperty(parameters.Field) ) {
+        ({table, serNum} = requestMappings[parameters.Field]);
+    }else{
+        r.reject({Response:'error',Reason:'Invalid clicked back field'});
+    }
+
+    exports.runSqlQuery(queries.updateClickedBack(),[table, table, serNum, parameters.Id])
+        .then(()=>{
+            r.resolve({Response:'success'});
+        }).catch((err)=>{
+        r.reject({Response:'error',Reason:err});
+    });
+
+    return r.promise;
+};
+
+exports.updateSubClickedBack = function(userId, parameters){
+    console.log("in updateSubClickedBack function sqlInterface");
+    let r = Q.defer();
+
+    var table = 'EducationalMaterialTOC';
+    var OrderNumField = 'OrderNum';
+    var parSerNumField = 'ParentSerNum';
+    exports.runSqlQuery(queries.updateSubClickedBack(),[table, table, OrderNumField, parameters.order, table, parSerNumField, parameters.Id])
+        .then(()=>{
+            r.resolve({Response:'just write to sub clicked back'});
+        }).catch((err)=>{
+        r.reject({Response:'error',Reason:err});
+    });
+
+    return r.promise;
+};
 /**
  * sendMessage
  * @desc inserts a message into messages table

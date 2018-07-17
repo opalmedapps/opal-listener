@@ -35,7 +35,9 @@ const API = {
     'GetEducationalLog': apiHospitalUpdate.getEducationalLog,
     'WriteScrollToBottom': apiHospitalUpdate.updateScrollToBottom,
     'WriteSubScrollToBottom' : apiHospitalUpdate.updateSubScrollToBottom,
-    'WriteSubClicked' : apiHospitalUpdate.updateSubClicked
+    'WriteSubClicked' : apiHospitalUpdate.updateSubClicked,
+    'WriteClickedBack': apiHospitalUpdate.updateClickedBack,
+    'writeSubClickedBackRequest': apiHospitalUpdate.updateSubClickedBack
 };
 
 /**
