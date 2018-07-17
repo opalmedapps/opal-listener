@@ -89,3 +89,13 @@ exports.updateSubClicked = function (requestObject) {
     console.log("in updateSubClicked function api hospital");
     return sqlInterface.updateSubClicked(requestObject.UserID, requestObject.Parameters);
 }
+
+exports.updateClickedBack = function(requestObject){
+    console.log("in updateClickedBack function api hospital");
+    return sqlInterface.updateClickedBack(requestObject.UserID,requestObject.Parameters);
+}
+
+exports.updateSubClickedBack = function(requestObject){
+    console.log("in updateSubClickedBack function api hospital");
+    return sqlInterface.updateSubClickedBack(requestObject.UserID, requestObject.Parameters);
+}
