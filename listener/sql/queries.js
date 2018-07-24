@@ -122,6 +122,17 @@ exports.patientEducationalMaterialContents=function()
 {
     return "SELECT EducationalMaterialTOC.OrderNum, EducationalMaterialTOC.ParentSerNum, EducationalMaterialTOC.EducationalMaterialControlSerNum, EduControl.EducationalMaterialType_EN, EduControl.EducationalMaterialType_FR, EduControl.Name_EN, EduControl.Name_FR, EduControl.URL_FR, EduControl.URL_EN, EducationalMaterialTOC.SubScrolledToBottom, EducationalMaterialTOC.SubClicked, EducationalMaterialTOC.SubClickedBack FROM EducationalMaterialControl as EduControl, EducationalMaterialTOC WHERE EduControl.EducationalMaterialControlSerNum = EducationalMaterialTOC.EducationalMaterialControlSerNum AND EducationalMaterialTOC.ParentSerNum = ? ORDER BY OrderNum;";
 };
+
+exports.patientEducationalMaterialPackageContents=function()
+{
+    return "Select EduControl.EducationalMaterialType_EN, EduControl.EducationalMaterialType_FR, EduControl.Name_EN, EduControl.Name_FR, EduControl.URL_FR, EduControl.URL_EN,\n" +
+        "EduControl.ShareURL_EN, EduControl.ShareURL_FR, EduControl.EducationalMaterialControlSerNum, PMC.PackageSerNum PackageSerNum\n" +
+        "from EducationalMaterialControl as EduControl, PackageMaterialsControl as PMC\n" +
+        "where EduControl.EducationalMaterialControlSerNum = PMC.MaterialsSerNum\n" +
+        "and PMC.PackageSerNum = ?\n" +
+        "order by PMC.MaterialOrder;"
+};
+
 exports.patientTasksTableFields=function()
 {
     return "SELECT DISTINCT Patient.PatientAriaSer, " +
