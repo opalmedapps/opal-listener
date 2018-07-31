@@ -31,11 +31,6 @@ exports.accountChange = function (requestObject) {
    return sqlInterface.updateAccountField(requestObject);
 };
 
-//Update Read Status
-exports.updateClicked=function(requestObject)
-{
-  return sqlInterface.updateClicked(requestObject.UserID,requestObject.Parameters);
-};
 
 //Update checkin
 exports.checkIn = function (requestObject) {
@@ -67,35 +62,44 @@ exports.getNewNotifications = function (requestObject) {
 
 //newly added
 
+exports.readMaterial = function(requestObject){
+    return sqlInterface.readMaterial(requestObject.UserID,requestObject.Parameters);
+};
+
+//Update Read Status
+exports.updateClicked=function(requestObject)
+{
+    return sqlInterface.updateClicked(requestObject.UserID,requestObject.Parameters);
+};
+
 //get educational material log
 exports.getEducationalLog = function(requestObject){
     console.log("in the apiHospitalUpdate");
     return sqlInterface.getEducationalLog(requestObject);
-}
+};
 
 //update scroll to bottom
 exports.updateScrollToBottom=function(requestObject)
 {
-
     return sqlInterface.updateScrollToBottom(requestObject.UserID,requestObject.Parameters);
 };
 
 exports.updateSubScrollToBottom = function(requestObject){
     console.log("in updateSubScrollToBottom function api hospital");
     return sqlInterface.updateSubScrollToBottom(requestObject.UserID, requestObject.Parameters);
-}
+};
 
 exports.updateSubClicked = function (requestObject) {
     console.log("in updateSubClicked function api hospital");
     return sqlInterface.updateSubClicked(requestObject.UserID, requestObject.Parameters);
-}
+};
 
 exports.updateClickedBack = function(requestObject){
     console.log("in updateClickedBack function api hospital");
     return sqlInterface.updateClickedBack(requestObject.UserID,requestObject.Parameters);
-}
+};
 
 exports.updateSubClickedBack = function(requestObject){
     console.log("in updateSubClickedBack function api hospital");
     return sqlInterface.updateSubClickedBack(requestObject.UserID, requestObject.Parameters);
-}
+};
