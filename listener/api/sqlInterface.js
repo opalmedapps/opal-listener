@@ -275,6 +275,20 @@ function preparePromiseArrayFields(userId,timestamp,arrayTables) {
  * @param parameters
  * @return {Promise}
  */
+exports.readMaterial = function(userId, parameters){
+    let r = Q.defer();
+
+    var table = 'EducationalMaterial';
+    exports.runSqlQuery(queries.readMaterial(),[table, parameters.Id])
+        .then(()=>{
+            r.resolve({Response:'just write to database'});
+        }).catch((err)=>{
+        r.reject({Response:'error',Reason:err});
+    });
+
+    return r.promise;
+};
+
 exports.updateClicked=function(userId, parameters)
 {
     let r = Q.defer();
@@ -286,7 +300,7 @@ exports.updateClicked=function(userId, parameters)
 	    r.reject({Response:'error',Reason:'Invalid read status field'});
     }
 
-	exports.runSqlQuery(queries.updateClicked(),[table, table, serNum, parameters.Id])
+	exports.runSqlQuery(queries.updateClicked(),[parameters.UserId, table, parameters.Id])
     .then(()=>{
 	    r.resolve({Response:'success'});
     }).catch((err)=>{
@@ -308,7 +322,7 @@ exports.updateScrollToBottom=function(userId, parameters){
         r.reject({Response:'error',Reason:'Invalid scroll to bottom field'});
     }
 
-    exports.runSqlQuery(queries.updateScrollToBottom(),[table, table, serNum, parameters.Id])
+    exports.runSqlQuery(queries.updateScrollToBottom(),[parameters.UserId, table, parameters.Id])
         .then(()=>{
             r.resolve({Response:'success'});
         }).catch((err)=>{
@@ -323,9 +337,7 @@ exports.updateSubScrollToBottom = function(userId, parameters){
     let r = Q.defer();
 
     var table = 'EducationalMaterialTOC';
-    var OrderNumField = 'OrderNum';
-    var parSerNumField = 'ParentSerNum';
-    exports.runSqlQuery(queries.updateSubScrollToBottom(),[table, table, OrderNumField, parameters.order, table, parSerNumField, parameters.Id])
+    exports.runSqlQuery(queries.updateSubScrollToBottom(),[parameters.patientId, table, parameters.TocSerNum])
         .then(()=>{
             r.resolve({Response:'just write to database'});
         }).catch((err)=>{
@@ -340,9 +352,7 @@ exports.updateSubClicked = function(userId, parameters){
     let r = Q.defer();
 
     var table = 'EducationalMaterialTOC';
-    var OrderNumField = 'OrderNum';
-    var parSerNumField = 'ParentSerNum';
-    exports.runSqlQuery(queries.updateSubClicked(),[table, table, OrderNumField, parameters.order, table, parSerNumField, parameters.Id])
+    exports.runSqlQuery(queries.updateSubClicked(),[parameters.patientId, table, parameters.TocSerNum])
         .then(()=>{
             r.resolve({Response:'just write to database'});
         }).catch((err)=>{
@@ -363,7 +373,7 @@ exports.updateClickedBack = function(userId, parameters){
         r.reject({Response:'error',Reason:'Invalid clicked back field'});
     }
 
-    exports.runSqlQuery(queries.updateClickedBack(),[table, table, serNum, parameters.Id])
+    exports.runSqlQuery(queries.updateClickedBack(),[parameters.UserId, table, parameters.Id])
         .then(()=>{
             r.resolve({Response:'success'});
         }).catch((err)=>{
@@ -378,9 +388,7 @@ exports.updateSubClickedBack = function(userId, parameters){
     let r = Q.defer();
 
     var table = 'EducationalMaterialTOC';
-    var OrderNumField = 'OrderNum';
-    var parSerNumField = 'ParentSerNum';
-    exports.runSqlQuery(queries.updateSubClickedBack(),[table, table, OrderNumField, parameters.order, table, parSerNumField, parameters.Id])
+    exports.runSqlQuery(queries.updateSubClickedBack(),[parameters.patientId, table, parameters.TocSerNum])
         .then(()=>{
             r.resolve({Response:'just write to sub clicked back'});
         }).catch((err)=>{

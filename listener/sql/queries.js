@@ -114,11 +114,11 @@ exports.patientAnnouncementsTableFields=function()
 };
 exports.patientEducationalMaterialTableFields=function()
 {
-    return "SELECT DISTINCT EduMat.EducationalMaterialSerNum, EduControl.ShareURL_EN, EduControl.ShareURL_FR, EduControl.EducationalMaterialControlSerNum, EduMat.DateAdded, EduMat.Clicked, EduControl.EducationalMaterialType_EN, EduControl.EducationalMaterialType_FR, EduControl.Name_EN, EduControl.Name_FR, EduControl.URL_EN, EduControl.URL_FR, Phase.Name_EN as PhaseName_EN, Phase.Name_FR as PhaseName_FR,EduMat.ScrolledToBottom as ScrolledToBottom, EduMat.ClickedBack as ClickedBack FROM Users, Patient, EducationalMaterialControl as EduControl, EducationalMaterial as EduMat, PhaseInTreatment as Phase, EducationalMaterialTOC as TOC WHERE (EduMat.EducationalMaterialControlSerNum = EduControl.EducationalMaterialControlSerNum OR (TOC.ParentSerNum = EduMat.EducationalMaterialControlSerNum AND TOC.EducationalMaterialControlSerNum = EduControl.EducationalMaterialControlSerNum)) AND Phase.PhaseInTreatmentSerNum = EduControl.PhaseInTreatmentSerNum AND  EduMat.PatientSerNum = Patient.PatientSerNum AND Patient.PatientSerNum = Users.UserTypeSerNum AND Users.Username = ? AND (EduMat.LastUpdated > ? OR EduControl.LastUpdated > ? OR Phase.LastUpdated > ? OR TOC.LastUpdated > ?) order by FIELD(PhaseName_EN,'Prior To Treatment','During Treatment','After Treatment') ;";
+    return "SELECT DISTINCT EduMat.EducationalMaterialSerNum, EduControl.ShareURL_EN, EduControl.ShareURL_FR, EduControl.EducationalMaterialControlSerNum, EduMat.DateAdded, EduMat.ReadStatus, EduControl.EducationalMaterialType_EN, EduControl.EducationalMaterialType_FR, EduControl.Name_EN, EduControl.Name_FR, EduControl.URL_EN, EduControl.URL_FR, Phase.Name_EN as PhaseName_EN, Phase.Name_FR as PhaseName_FR FROM Users, Patient, EducationalMaterialControl as EduControl, EducationalMaterial as EduMat, PhaseInTreatment as Phase, EducationalMaterialTOC as TOC WHERE (EduMat.EducationalMaterialControlSerNum = EduControl.EducationalMaterialControlSerNum OR (TOC.ParentSerNum = EduMat.EducationalMaterialControlSerNum AND TOC.EducationalMaterialControlSerNum = EduControl.EducationalMaterialControlSerNum)) AND Phase.PhaseInTreatmentSerNum = EduControl.PhaseInTreatmentSerNum AND  EduMat.PatientSerNum = Patient.PatientSerNum AND Patient.PatientSerNum = Users.UserTypeSerNum AND Users.Username = ? AND (EduMat.LastUpdated > ? OR EduControl.LastUpdated > ? OR Phase.LastUpdated > ? OR TOC.LastUpdated > ?) order by FIELD(PhaseName_EN,'Prior To Treatment','During Treatment','After Treatment') ;";
 };
 exports.patientEducationalMaterialContents=function()
 {
-    return "SELECT EducationalMaterialTOC.OrderNum, EducationalMaterialTOC.ParentSerNum, EducationalMaterialTOC.EducationalMaterialControlSerNum, EduControl.EducationalMaterialType_EN, EduControl.EducationalMaterialType_FR, EduControl.Name_EN, EduControl.Name_FR, EduControl.URL_FR, EduControl.URL_EN, EducationalMaterialTOC.SubScrolledToBottom, EducationalMaterialTOC.SubClicked, EducationalMaterialTOC.SubClickedBack FROM EducationalMaterialControl as EduControl, EducationalMaterialTOC WHERE EduControl.EducationalMaterialControlSerNum = EducationalMaterialTOC.EducationalMaterialControlSerNum AND EducationalMaterialTOC.ParentSerNum = ? ORDER BY OrderNum;";
+    return "SELECT EducationalMaterialTOC.EducationalMaterialTOCSerNum ,EducationalMaterialTOC.OrderNum, EducationalMaterialTOC.ParentSerNum, EducationalMaterialTOC.EducationalMaterialControlSerNum, EduControl.EducationalMaterialType_EN, EduControl.EducationalMaterialType_FR, EduControl.Name_EN, EduControl.Name_FR, EduControl.URL_FR, EduControl.URL_EN FROM EducationalMaterialControl as EduControl, EducationalMaterialTOC WHERE EduControl.EducationalMaterialControlSerNum = EducationalMaterialTOC.EducationalMaterialControlSerNum AND EducationalMaterialTOC.ParentSerNum = ? ORDER BY OrderNum;";
 };
 
 exports.patientEducationalMaterialPackageContents=function()
@@ -319,15 +319,6 @@ exports.getMapLocation=function()
     return "SELECT * FROM HospitalMap WHERE QRMapAlias = ?;";
 };
 
-exports.updateClicked=function()
-{
-    return `
-        UPDATE ??
-        SET Clicked = 1
-        WHERE ??.?? = ?
-    `;
-};
-
 exports.getPatientDeviceLastActivity=function()
 {
     return "SELECT * FROM PatientActivityLog WHERE Username=? AND DeviceId=? ORDER BY ActivitySerNum DESC LIMIT 1;";
@@ -480,49 +471,55 @@ exports.getEducationalLog = function(){
         "from \n" +
         "(SELECT m.EducationalMaterialSerNum SerNumViewed, count(*) viewed \n" +
         "from EducationalMaterialMH m\n" +
-        "where m.Clicked = 1\n" +
+        "where m.ReadStatus = 1\n" +
         "group by m.EducationalMaterialSerNum) v\n" +
         "right outer join \n" +
         "(SELECT m.EducationalMaterialSerNum SerNumReceived, count(*) received \n" +
         "from EducationalMaterialMH m\n" +
-        "where m.Clicked = 0\n" +
+        "where m.ReadStatus = 0\n" +
         "group by m.EducationalMaterialSerNum) r\n" +
         "on v.SerNumViewed = r.SerNumReceived;";
 };
 
+exports.updateClicked=function()
+{
+
+    return `INSERT INTO PatientLog (UserId, UserAction, TableName, RefTableSerNum) 
+            VALUES (?, "CLICK", ?, ?)`;
+};
+
 exports.updateScrollToBottom=function()
 {
-    return `
-        UPDATE ??
-        SET ScrolledToBottom = 1
-        WHERE ??.?? = ?
-    `;
+
+    return `INSERT INTO PatientLog (UserId, UserAction, TableName, RefTableSerNum) 
+            VALUES (?, "SCROLLTOBOTTOM", ?, ?)`;
 };
 
 exports.updateSubScrollToBottom = function(){
-    return `UPDATE ?? 
-            SET SubScrolledToBottom = 1
-            WHERE ??.?? = ? AND ??.?? = ?`;
+    return `INSERT INTO PatientLog (UserId, UserAction, TableName, RefTableSerNum) 
+            VALUES (?, "SUBSCROLLTOBOTTOM", ?, ?)`;
 };
 
 exports.updateSubClicked = function () {
-    return `UPDATE ?? 
-            SET SubClicked = 1
-            WHERE ??.?? = ? AND ??.?? = ?`;
+    return `INSERT INTO PatientLog (UserId, UserAction, TableName, RefTableSerNum) 
+            VALUES (?, "SUBCLICK", ?, ?)`;
 };
 
 exports.updateClickedBack=function()
 {
-    return `
-        UPDATE ??
-        SET ClickedBack = 1
-        WHERE ??.?? = ?
-    `;
+
+    return `INSERT INTO PatientLog (UserId, UserAction, TableName, RefTableSerNum) 
+            VALUES (?, "CLICKBACK", ?, ?)`;
 };
 
 exports.updateSubClickedBack = function()
 {
-    return `UPDATE ?? 
-            SET SubClickedBack = 1
-            WHERE ??.?? = ? AND ??.?? = ?`;
-}
+    return `INSERT INTO PatientLog (UserId, UserAction, TableName, RefTableSerNum) 
+            VALUES (?, "SUBCLICKBACK", ?, ?)`;
+};
+
+exports.readMaterial = function(){
+    return `UPDATE ??
+            SET ReadStatus = 1
+            WHERE EducationalMaterialSerNum = ?`;
+};
