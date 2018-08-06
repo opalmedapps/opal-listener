@@ -451,7 +451,9 @@ exports.patientNotificationsTableFields=function()
         "NotificationControl.Name_EN, " +
         "NotificationControl.Name_FR, " +
         "NotificationControl.Description_EN, " +
-        "NotificationControl.Description_FR " +
+        "NotificationControl.Description_FR, " +
+        "Notification.RefTableRowTitle_EN, " +
+        "Notification.RefTableRowTitle_FR " +
         "" +
         "FROM Notification, " +
         "NotificationControl, " +
@@ -475,7 +477,9 @@ exports.getNewNotifications=function() {
         "NotificationControl.Name_EN, " +
         "NotificationControl.Name_FR, " +
         "NotificationControl.Description_EN, " +
-        "NotificationControl.Description_FR " +
+        "NotificationControl.Description_FR, " +
+        "Notification.RefTableRowTitle_EN, " +
+        "Notification.RefTableRowTitle_FR " +
         "" +
         "FROM Notification, " +
         "NotificationControl, " +
