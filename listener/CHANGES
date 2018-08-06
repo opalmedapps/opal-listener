@@ -1,3 +1,10 @@
+Version 1.0.0.2:
+ - Merge branch 'PreProdDev'
+ - Add Version script and file
+ - Merge branch 'PreProd'
+ - Merge branch 'PreProdDev' into PreProd
+ -    --- Remove config.json from tracking
+
 Version 1.0.0.1:
 
 
