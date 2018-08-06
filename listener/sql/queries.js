@@ -38,9 +38,11 @@ exports.patientAppointmentsTableFields=function()
         "Appt.ReadStatus, " +
         "R.ResourceName, " +
         "R.ResourceType, " +
+        // Use regular map location because the getLevel() function is not available in Production
+        // Need to figure out how to link to ORMS
         // "IfNull(HM.MapUrl, '') AS MapUrl, " +
-        // IfNull(HM.MapUrl_EN, '') AS MapUrl_EN,
-        // IfNull(HM.MapUrl_FR, '') AS MapUrl_FR,
+        // "IfNull(HM.MapUrl_EN, '') AS MapUrl_EN, " +
+        // "IfNull(HM.MapUrl_FR, '') AS MapUrl_FR, " +
         // "IfNull(HM.MapName_EN, '') AS MapName_EN, " +
         // "IfNull(HM.MapName_FR, '') AS MapName_FR, " +
         // "IfNull(HM.MapDescription_EN, '') AS MapDescription_EN, " +
