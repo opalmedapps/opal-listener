@@ -38,16 +38,22 @@ exports.patientAppointmentsTableFields=function()
         "Appt.ReadStatus, " +
         "R.ResourceName, " +
         "R.ResourceType, " +
-        // "IfNull(HM.MapUrl, '') AS MapUrl, " +
-        // "IfNull(HM.MapName_EN, '') AS MapName_EN, " +
-        // "IfNull(HM.MapName_FR, '') AS MapName_FR, " +
-        // "IfNull(HM.MapDescription_EN, '') AS MapDescription_EN, " +
-        // "IfNull(HM.MapDescription_FR, '') AS MapDescription_FR, " +
-        "(select IfNull(HM2.MapUrl, '') from HospitalMap HM2 where HM2.HospitalMapSerNum = getLevel(Appt.ScheduledStartTime, AE.Description, A.HospitalMapSerNum))  AS MapUrl, " +
-        "(select IfNull(HM2.MapName_EN, '') from HospitalMap HM2 where HM2.HospitalMapSerNum = getLevel(Appt.ScheduledStartTime, AE.Description, A.HospitalMapSerNum))  AS MapName_EN, " +
-        "(select IfNull(HM2.MapName_FR, '') from HospitalMap HM2 where HM2.HospitalMapSerNum = getLevel(Appt.ScheduledStartTime, AE.Description, A.HospitalMapSerNum))  AS MapName_FR, " +
-        "(select IfNull(HM2.MapDescription_EN, '') from HospitalMap HM2 where HM2.HospitalMapSerNum = getLevel(Appt.ScheduledStartTime, AE.Description, A.HospitalMapSerNum))  AS MapDescription_EN, " +
-        "(select IfNull(HM2.MapDescription_FR, '') from HospitalMap HM2 where HM2.HospitalMapSerNum = getLevel(Appt.ScheduledStartTime, AE.Description, A.HospitalMapSerNum))  AS MapDescription_FR, " +
+        // Use regular map location because the getLevel() function is not available in Production
+        // Need to figure out how to link to ORMS
+        "IfNull(HM.MapUrl, '') AS MapUrl, " +
+        "IfNull(HM.MapUrl_EN, '') AS MapUrl_EN, " +
+        "IfNull(HM.MapUrl_FR, '') AS MapUrl_FR, " +
+        "IfNull(HM.MapName_EN, '') AS MapName_EN, " +
+        "IfNull(HM.MapName_FR, '') AS MapName_FR, " +
+        "IfNull(HM.MapDescription_EN, '') AS MapDescription_EN, " +
+        "IfNull(HM.MapDescription_FR, '') AS MapDescription_FR, " +
+        // "(select IfNull(HM2.MapUrl, '') from HospitalMap HM2 where HM2.HospitalMapSerNum = getLevel(Appt.ScheduledStartTime, AE.Description, A.HospitalMapSerNum))  AS MapUrl, " +
+        // "(select IfNull(HM2.MapUrl_EN, '') from HospitalMap HM2 where HM2.HospitalMapSerNum = getLevel(Appt.ScheduledStartTime, AE.Description, A.HospitalMapSerNum))  AS MapUrl_EN, " +
+        // "(select IfNull(HM2.MapUrl_FR, '') from HospitalMap HM2 where HM2.HospitalMapSerNum = getLevel(Appt.ScheduledStartTime, AE.Description, A.HospitalMapSerNum))  AS MapUrl_FR, " +
+        // "(select IfNull(HM2.MapName_EN, '') from HospitalMap HM2 where HM2.HospitalMapSerNum = getLevel(Appt.ScheduledStartTime, AE.Description, A.HospitalMapSerNum))  AS MapName_EN, " +
+        // "(select IfNull(HM2.MapName_FR, '') from HospitalMap HM2 where HM2.HospitalMapSerNum = getLevel(Appt.ScheduledStartTime, AE.Description, A.HospitalMapSerNum))  AS MapName_FR, " +
+        // "(select IfNull(HM2.MapDescription_EN, '') from HospitalMap HM2 where HM2.HospitalMapSerNum = getLevel(Appt.ScheduledStartTime, AE.Description, A.HospitalMapSerNum))  AS MapDescription_EN, " +
+        // "(select IfNull(HM2.MapDescription_FR, '') from HospitalMap HM2 where HM2.HospitalMapSerNum = getLevel(Appt.ScheduledStartTime, AE.Description, A.HospitalMapSerNum))  AS MapDescription_FR, " +
         "Appt.Status, " +
         "IfNull(Appt.RoomLocation_EN, '') AS RoomLocation_EN, " +
         "IfNull(Appt.RoomLocation_FR, '') AS RoomLocation_FR, " +
@@ -129,7 +135,16 @@ exports.patientAnnouncementsTableFields=function()
 };
 exports.patientEducationalMaterialTableFields=function()
 {
-    return "SELECT DISTINCT EduMat.EducationalMaterialSerNum, EduControl.ShareURL_EN, EduControl.ShareURL_FR, EduControl.EducationalMaterialControlSerNum, EduMat.DateAdded, EduMat.ReadStatus, EduControl.EducationalMaterialType_EN, EduControl.EducationalMaterialType_FR, EduControl.Name_EN, EduControl.Name_FR, EduControl.URL_EN, EduControl.URL_FR, Phase.Name_EN as PhaseName_EN, Phase.Name_FR as PhaseName_FR FROM Users, Patient, EducationalMaterialControl as EduControl, EducationalMaterial as EduMat, PhaseInTreatment as Phase, EducationalMaterialTOC as TOC WHERE (EduMat.EducationalMaterialControlSerNum = EduControl.EducationalMaterialControlSerNum OR (TOC.ParentSerNum = EduMat.EducationalMaterialControlSerNum AND TOC.EducationalMaterialControlSerNum = EduControl.EducationalMaterialControlSerNum)) AND Phase.PhaseInTreatmentSerNum = EduControl.PhaseInTreatmentSerNum AND  EduMat.PatientSerNum = Patient.PatientSerNum AND Patient.PatientSerNum = Users.UserTypeSerNum AND Users.Username = ? AND (EduMat.LastUpdated > ? OR EduControl.LastUpdated > ? OR Phase.LastUpdated > ? OR TOC.LastUpdated > ?) order by FIELD(PhaseName_EN,'Prior To Treatment','During Treatment','After Treatment') ;";
+    return "SELECT DISTINCT EduMat.EducationalMaterialSerNum, EduControl.ShareURL_EN, EduControl.ShareURL_FR, EduControl.EducationalMaterialControlSerNum, " +
+    " EduMat.DateAdded, EduMat.ReadStatus, EduControl.EducationalMaterialType_EN, EduControl.EducationalMaterialType_FR, EduControl.Name_EN, EduControl.Name_FR, " +
+    " EduControl.URL_EN, EduControl.URL_FR, Phase.Name_EN as PhaseName_EN, Phase.Name_FR as PhaseName_FR " +
+    " FROM Users, Patient, EducationalMaterialControl as EduControl, EducationalMaterial as EduMat, PhaseInTreatment as Phase, EducationalMaterialTOC as TOC " +
+    " WHERE (EduMat.EducationalMaterialControlSerNum = EduControl.EducationalMaterialControlSerNum OR " +
+    " (TOC.ParentSerNum = EduMat.EducationalMaterialControlSerNum AND TOC.EducationalMaterialControlSerNum = EduControl.EducationalMaterialControlSerNum)) " +
+    " AND Phase.PhaseInTreatmentSerNum = EduControl.PhaseInTreatmentSerNum AND  EduMat.PatientSerNum = Patient.PatientSerNum AND Patient.PatientSerNum = Users.UserTypeSerNum " +
+    " AND EduControl.EducationalMaterialType_EN in ('Booklet', 'Factsheet', 'Treatment Guidelines', 'Video') " +
+    " AND Users.Username = ? AND (EduMat.LastUpdated > ? OR EduControl.LastUpdated > ? OR Phase.LastUpdated > ? OR TOC.LastUpdated > ?) " +
+    " order by FIELD(PhaseName_EN,'Prior To Treatment','During Treatment','After Treatment') ;";
 };
 exports.patientEducationalMaterialContents=function()
 {
