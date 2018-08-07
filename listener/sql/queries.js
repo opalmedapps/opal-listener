@@ -463,23 +463,6 @@ exports.getNewNotifications=function() {
         "AND (Notification.DateAdded > ? OR NotificationControl.DateAdded > ?);";
 };
 
-//newly added get educational material log
-
-exports.getEducationalLog = function(){
-    console.log("in the queries");
-    return "select SerNumReceived, COALESCE(viewed,0) viewed, COALESCE(received,0) received\n" +
-        "from \n" +
-        "(SELECT m.EducationalMaterialSerNum SerNumViewed, count(*) viewed \n" +
-        "from EducationalMaterialMH m\n" +
-        "where m.ReadStatus = 1\n" +
-        "group by m.EducationalMaterialSerNum) v\n" +
-        "right outer join \n" +
-        "(SELECT m.EducationalMaterialSerNum SerNumReceived, count(*) received \n" +
-        "from EducationalMaterialMH m\n" +
-        "where m.ReadStatus = 0\n" +
-        "group by m.EducationalMaterialSerNum) r\n" +
-        "on v.SerNumViewed = r.SerNumReceived;";
-};
 
 exports.updateClicked=function()
 {
