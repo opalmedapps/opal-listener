@@ -487,6 +487,7 @@ exports.inputFeedback = function(requestObject) {
 		let feedback = requestObject.Parameters.FeedbackContent;
 		let appRating = requestObject.Parameters.AppRating;
 		let type = requestObject.Parameters.Type;
+		let patientSerNum = patient.PatientSerNum;
 		// {"AppRating":"3","FeedbackContent":"test","Type":"opal"}
 
         if((!type||!feedback)) r.reject({Response:'error',Reason:`Invalid parameter type`});
@@ -494,17 +495,17 @@ exports.inputFeedback = function(requestObject) {
             .then(()=>{
 	            let replyTo = null;
 	            let email;
-                let title;
+                let subject;
 	            // Determine if the feedback is for the app or patients committee
 	            if (type === 'pfp'){
 		            email = "patients4patients.contact@gmail.com";
-		            title = "New Suggestion - Opal";
+		            subject = "New Suggestion - Opal";
 		            replyTo = email;
 	            } else {
 		            email = "opal@muhc.mcgill.ca";
-		            title = "New Feedback - Opal";
+		            subject = "New Feedback - Opal - From PatientSerNum: " + patientSerNum;
 	            }
-                (new Mail()).sendMail(email, title, feedback, replyTo);
+                (new Mail()).sendMail(email, subject, feedback, replyTo);
 	            r.resolve({Response:'success'});
             }).catch((err)=>{
 	            r.reject({Response:'error',Reason:err});
