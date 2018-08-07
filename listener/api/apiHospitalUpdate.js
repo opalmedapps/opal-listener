@@ -72,12 +72,6 @@ exports.updateClicked=function(requestObject)
     return sqlInterface.updateClicked(requestObject.UserID,requestObject.Parameters);
 };
 
-//get educational material log
-exports.getEducationalLog = function(requestObject){
-    console.log("in the apiHospitalUpdate");
-    return sqlInterface.getEducationalLog(requestObject);
-};
-
 //update scroll to bottom
 exports.updateScrollToBottom=function(requestObject)
 {
