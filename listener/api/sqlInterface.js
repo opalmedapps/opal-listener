@@ -495,17 +495,17 @@ exports.inputFeedback = function(requestObject) {
             .then(()=>{
 	            let replyTo = null;
 	            let email;
-                let title;
+                let subject;
 	            // Determine if the feedback is for the app or patients committee
 	            if (type === 'pfp'){
 		            email = "patients4patients.contact@gmail.com";
-		            title = "New Suggestion - Opal";
+		            subject = "New Suggestion - Opal";
 		            replyTo = email;
 	            } else {
 		            email = "opal@muhc.mcgill.ca";
-		            title = "New Feedback - Opal - From PatientSerNum: " + patientSerNum;
+		            subject = "New Feedback - Opal - From PatientSerNum: " + patientSerNum;
 	            }
-                (new Mail()).sendMail(email, title, feedback, replyTo);
+                (new Mail()).sendMail(email, subject, feedback, replyTo);
 	            r.resolve({Response:'success'});
             }).catch((err)=>{
 	            r.reject({Response:'error',Reason:err});
