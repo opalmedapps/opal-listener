@@ -487,6 +487,7 @@ exports.inputFeedback = function(requestObject) {
 		let feedback = requestObject.Parameters.FeedbackContent;
 		let appRating = requestObject.Parameters.AppRating;
 		let type = requestObject.Parameters.Type;
+		let patientSerNum = patient.PatientSerNum;
 		// {"AppRating":"3","FeedbackContent":"test","Type":"opal"}
 
         if((!type||!feedback)) r.reject({Response:'error',Reason:`Invalid parameter type`});
@@ -502,7 +503,7 @@ exports.inputFeedback = function(requestObject) {
 		            replyTo = email;
 	            } else {
 		            email = "opal@muhc.mcgill.ca";
-		            title = "New Feedback - Opal";
+		            title = "New Feedback - Opal - From PatientSerNum: " + patientSerNum;
 	            }
                 (new Mail()).sendMail(email, title, feedback, replyTo);
 	            r.resolve({Response:'success'});
