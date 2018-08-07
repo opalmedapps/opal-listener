@@ -1311,16 +1311,6 @@ exports.getNewNotifications = function(requestObject){
     return r.promise
 };
 
-//newly added, get educational material logs
-
-exports.getEducationalLog = function (requestObject) {
-    console.log("in sqlInterface");
-    return exports.runSqlQuery(queries.getEducationalLog(),[]).then(
-        function(rows){
-            return rows;
-    });
-};
-
 /**
  * Takes in a list of notifications and the original requestObject and returns a list of tuples that contains the notifications
  * and their associated content

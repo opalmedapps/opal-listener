@@ -31,7 +31,6 @@ const API = {
     'QuestionnaireRating': apiHospitalUpdate.inputEducationalMaterialRating,
     'QuestionnaireAnswers': apiHospitalUpdate.inputQuestionnaireAnswers,
     'PFPMembers': apiPatientUpdate.getPatientsForPatientsMembers,
-    'GetEducationalLog': apiHospitalUpdate.getEducationalLog,
     'Clicked': apiHospitalUpdate.updateClicked,
     'WriteScrollToBottom': apiHospitalUpdate.updateScrollToBottom,
     'WriteSubScrollToBottom' : apiHospitalUpdate.updateSubScrollToBottom,
