@@ -18,7 +18,7 @@ var sqlConfig={
   host:credentials.HOST,
   user:credentials.MYSQL_USERNAME,
   password:credentials.MYSQL_PASSWORD,
-  database:'QuestionnaireDB',
+  database:credentials.MYSQL_DATABASE_QUESTIONNAIRE,
   dateStrings:true
 };
 /*
@@ -61,7 +61,7 @@ var queryQuestions = `SELECT DISTINCT Questionnaire.QuestionnaireSerNum as Quest
                            QuestionType,
                            Patient,
                            QuestionnaireQuestion,
-						   OpalDB_PREPROD.QuestionnaireControl QC
+						   ` + credentials.MYSQL_DATABASE + `.QuestionnaireControl QC
                      WHERE QuestionnaireQuestion.QuestionnaireSerNum = Questionnaire.QuestionnaireSerNum
                          AND QuestionnaireQuestion.QuestionSerNum = Question.QuestionSerNum
                          AND Question.QuestionTypeSerNum = QuestionType.QuestionTypeSerNum
