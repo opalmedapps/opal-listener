@@ -1,3 +1,6 @@
+Version 1.0.0.4:
+ - Merge branch 'hotfix-1.0.0.3'
+
 Version 1.0.0.3:
  - Move the version file to the root
  - Merge branch 'PreProd'
