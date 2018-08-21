@@ -123,8 +123,6 @@ exports.getDocumentsContentQuery = function()
     return "SELECT Document.DocumentSerNum, Document.FinalFileName FROM Document, Patient, Users WHERE Document.DocumentSerNum IN ? AND Document.PatientSerNum = Patient.PatientSerNum AND Patient.PatientSerNum = Users.UserTypeSerNum AND Users.Username = ?";
 };
 
-
-
 exports.patientTeamMessagesTableFields=function()
 {
     return "SELECT TxRecords.TxTeamMessageSerNum, TxRecords.DateAdded, TxRecords.ReadStatus, Post.PostType, Post.Body_EN, Post.Body_FR, Post.PostName_EN, Post.PostName_FR FROM PostControl as Post, TxTeamMessage as TxRecords, Patient, Users WHERE Post.PostControlSerNum=TxRecords.PostControlSerNum AND TxRecords.PatientSerNum=Patient.PatientSerNum AND Patient.PatientSerNum=Users.UserTypeSerNum AND Users.Username= ? AND (TxRecords.LastUpdated > ? OR Post.LastUpdated > ?);";
@@ -149,6 +147,7 @@ exports.patientEducationalMaterialTableFields=function()
 exports.patientEducationalMaterialContents=function()
 {
     return "SELECT EducationalMaterialTOC.EducationalMaterialTOCSerNum ,EducationalMaterialTOC.OrderNum, EducationalMaterialTOC.ParentSerNum, EducationalMaterialTOC.EducationalMaterialControlSerNum, EduControl.EducationalMaterialType_EN, EduControl.EducationalMaterialType_FR, EduControl.Name_EN, EduControl.Name_FR, EduControl.URL_FR, EduControl.URL_EN FROM EducationalMaterialControl as EduControl, EducationalMaterialTOC WHERE EduControl.EducationalMaterialControlSerNum = EducationalMaterialTOC.EducationalMaterialControlSerNum AND EducationalMaterialTOC.ParentSerNum = ? ORDER BY OrderNum;";
+
 };
 
 exports.patientEducationalMaterialPackageContents=function()
@@ -496,37 +495,37 @@ exports.getNewNotifications=function() {
 exports.updateClicked=function()
 {
 
-    return `INSERT INTO PatientLog (UserId, UserAction, TableName, RefTableSerNum) 
+    return `INSERT INTO PatientLog (UserId, UserAction, TableName, RefTableSerNum)
             VALUES (?, "CLICK", ?, ?)`;
 };
 
 exports.updateScrollToBottom=function()
 {
 
-    return `INSERT INTO PatientLog (UserId, UserAction, TableName, RefTableSerNum) 
+    return `INSERT INTO PatientLog (UserId, UserAction, TableName, RefTableSerNum)
             VALUES (?, "SCROLLTOBOTTOM", ?, ?)`;
 };
 
 exports.updateSubScrollToBottom = function(){
-    return `INSERT INTO PatientLog (UserId, UserAction, TableName, RefTableSerNum) 
+    return `INSERT INTO PatientLog (UserId, UserAction, TableName, RefTableSerNum)
             VALUES (?, "SUBSCROLLTOBOTTOM", ?, ?)`;
 };
 
 exports.updateSubClicked = function () {
-    return `INSERT INTO PatientLog (UserId, UserAction, TableName, RefTableSerNum) 
+    return `INSERT INTO PatientLog (UserId, UserAction, TableName, RefTableSerNum)
             VALUES (?, "SUBCLICK", ?, ?)`;
 };
 
 exports.updateClickedBack=function()
 {
 
-    return `INSERT INTO PatientLog (UserId, UserAction, TableName, RefTableSerNum) 
+    return `INSERT INTO PatientLog (UserId, UserAction, TableName, RefTableSerNum)
             VALUES (?, "CLICKBACK", ?, ?)`;
 };
 
 exports.updateSubClickedBack = function()
 {
-    return `INSERT INTO PatientLog (UserId, UserAction, TableName, RefTableSerNum) 
+    return `INSERT INTO PatientLog (UserId, UserAction, TableName, RefTableSerNum)
             VALUES (?, "SUBCLICKBACK", ?, ?)`;
 };
 
