@@ -1249,8 +1249,8 @@ exports.getQuestionnaires = function(requestObject){
     var r = Q.defer();
     exports.runSqlQuery(queries.patientQuestionnaireTableFields(), [requestObject.UserID, null, null])
         .then(function (queryRows) {
-            return questionnaires.getPatientQuestionnaires(queryRows);
-            // return [];
+            // return questionnaires.getPatientQuestionnaires(queryRows)
+            return [];
         })
         .then(function (result) {
             var obj = {};
