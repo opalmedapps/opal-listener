@@ -16,12 +16,13 @@ var exports = module.exports = {};
  * CONFIGURATIONS
  ******************************/
 const dbCredentials = {
-	connectionLimit: 10,
-	host: config.HOST,
-	user: config.MYSQL_USERNAME,
-	password: config.MYSQL_PASSWORD,
-	database: config.MYSQL_DATABASE,
-	dateStrings: true
+    connectionLimit: 10,
+    host: config.HOST,
+    user: config.MYSQL_USERNAME,
+    port: config.PORT,
+    password: config.MYSQL_PASSWORD,
+    database: config.MYSQL_DATABASE,
+    dateStrings: true
 };
 
 /**
@@ -38,7 +39,7 @@ const pool = mysql.createPool(dbCredentials);
 
 /**
  * Table mappings and process data functions for results obtained from the database. Exporting function for testing purposes.
- * @type {{Patient: {sql, processFunction: loadProfileImagePatient, numberOfLastUpdated: number}, Documents: {sql, numberOfLastUpdated: number, table: string, serNum: string}, Doctors: {sql, processFunction: loadImageDoctor, numberOfLastUpdated: number}, Diagnosis: {sql, numberOfLastUpdated: number}, Questionnaires: {sql, numberOfLastUpdated: number, processFunction: *}, Appointments: {sql, numberOfLastUpdated: number, processFunction: combineResources, table: string, serNum: string}, Notifications: {sql, numberOfLastUpdated: number, table: string, serNum: string}, Tasks: {sql, numberOfLastUpdated: number}, LabTests: {sql, numberOfLastUpdated: number}, TxTeamMessages: {sql, numberOfLastUpdated: number, table: string, serNum: string}, EducationalMaterial: {sql, processFunction: getEducationTableOfContents, numberOfLastUpdated: number, table: string, serNum: string}, Announcements: {sql, numberOfLastUpdated: number, table: string, serNum: string}}}
+ * @type {{Patient: {sql, processFunction: loadProfileImagePatient, numberOfLastUpdated: number}, Documents: {sql, numberOfLastUpdated: number, table: string, serNum: string}, Doctors: {sql, processFunction: loadImageDoctor, numberOfLastUpdated: number}, Diagnosis: {sql, numberOfLastUpdated: number}, Questionnaires: {sql, numberOfLastUpdated: number, processFunction: *}, Appointments: {sql, numberOfLastUpdated: number, processFunction: combineResources, table: string, serNum: string}, Notifications: {sql, numberOfLastUpdated: number, table: string, serNum: string}, Tasks: {sql, numberOfLastUpdated: number}, LabTests: {sql, numberOfLastUpdated: number}, TxTeamMessages: {sql, numberOfLastUpdated: number, table: string, serNum: string}, EducationalMaterial: {sql, processFunction: getEducationTableOfContentsAndPackages, numberOfLastUpdated: number, table: string, serNum: string}, Announcements: {sql, numberOfLastUpdated: number, table: string, serNum: string}}}
  */
 const requestMappings =
     {
@@ -98,7 +99,7 @@ const requestMappings =
         },
         'EducationalMaterial': {
             sql: queries.patientEducationalMaterialTableFields(),
-            processFunction: getEducationTableOfContents,
+            processFunction: getEducationTableOfContentsAndPackages,
             numberOfLastUpdated: 5,
             table: 'EducationalMaterial',
             serNum: 'EducationalMaterialSerNum'
@@ -120,7 +121,7 @@ const requestMappings =
 
 /**
  * getSqlApiMapping
- * @return {{Patient: {sql, processFunction: loadProfileImagePatient, numberOfLastUpdated: number}, Documents: {sql, numberOfLastUpdated: number, table: string, serNum: string}, Doctors: {sql, processFunction: loadImageDoctor, numberOfLastUpdated: number}, Diagnosis: {sql, numberOfLastUpdated: number}, Questionnaires: {sql, numberOfLastUpdated: number, processFunction: *}, Appointments: {sql, numberOfLastUpdated: number, processFunction: combineResources, table: string, serNum: string}, Notifications: {sql, numberOfLastUpdated: number, table: string, serNum: string}, Tasks: {sql, numberOfLastUpdated: number}, LabTests: {sql, numberOfLastUpdated: number}, TxTeamMessages: {sql, numberOfLastUpdated: number, table: string, serNum: string}, EducationalMaterial: {sql, processFunction: getEducationTableOfContents, numberOfLastUpdated: number, table: string, serNum: string}, Announcements: {sql, numberOfLastUpdated: number, table: string, serNum: string}}}
+ * @return {{Patient: {sql, processFunction: loadProfileImagePatient, numberOfLastUpdated: number}, Documents: {sql, numberOfLastUpdated: number, table: string, serNum: string}, Doctors: {sql, processFunction: loadImageDoctor, numberOfLastUpdated: number}, Diagnosis: {sql, numberOfLastUpdated: number}, Questionnaires: {sql, numberOfLastUpdated: number, processFunction: *}, Appointments: {sql, numberOfLastUpdated: number, processFunction: combineResources, table: string, serNum: string}, Notifications: {sql, numberOfLastUpdated: number, table: string, serNum: string}, Tasks: {sql, numberOfLastUpdated: number}, LabTests: {sql, numberOfLastUpdated: number}, TxTeamMessages: {sql, numberOfLastUpdated: number, table: string, serNum: string}, EducationalMaterial: {sql, processFunction: getEducationTableOfContentsAndPackages, numberOfLastUpdated: number, table: string, serNum: string}, Announcements: {sql, numberOfLastUpdated: number, table: string, serNum: string}}}
  */
 exports.getSqlApiMappings = function() {
     return requestMappings;
@@ -274,7 +275,21 @@ function preparePromiseArrayFields(userId,timestamp,arrayTables) {
  * @param parameters
  * @return {Promise}
  */
-exports.updateReadStatus=function(userId, parameters)
+exports.readMaterial = function(userId, parameters){
+    let r = Q.defer();
+
+    var table = 'EducationalMaterial';
+    exports.runSqlQuery(queries.readMaterial(),[table, parameters.Id])
+        .then(()=>{
+            r.resolve({Response:'just write to database'});
+        }).catch((err)=>{
+        r.reject({Response:'error',Reason:err});
+    });
+
+    return r.promise;
+};
+
+exports.updateClicked=function(userId, parameters)
 {
     let r = Q.defer();
 
@@ -282,18 +297,106 @@ exports.updateReadStatus=function(userId, parameters)
     if(parameters && parameters.Field && parameters.Id && requestMappings.hasOwnProperty(parameters.Field) ) {
         ({table, serNum} = requestMappings[parameters.Field]);
     }else{
-	    r.reject({Response:'error',Reason:'Invalid read status field'});
+        r.reject({Response:'error',Reason:'Invalid read status field'});
     }
-	exports.runSqlQuery(queries.updateReadStatus(),[table, table, serNum, parameters.Id])
-    .then(()=>{
-	    r.resolve({Response:'success'});
-    }).catch((err)=>{
-		r.reject({Response:'error',Reason:err});
+
+    exports.runSqlQuery(queries.updateClicked(),[parameters.UserId, table, parameters.Id])
+        .then(()=>{
+            r.resolve({Response:'success'});
+        }).catch((err)=>{
+        r.reject({Response:'error',Reason:err});
     });
 
     return r.promise;
 };
 
+//update scroll To Bottom field in education material table
+exports.updateScrollToBottom=function(userId, parameters){
+
+    let r = Q.defer();
+
+    let table, serNum;
+    if(parameters && parameters.Field && parameters.Id && requestMappings.hasOwnProperty(parameters.Field) ) {
+        ({table, serNum} = requestMappings[parameters.Field]);
+    }else{
+        r.reject({Response:'error',Reason:'Invalid scroll to bottom field'});
+    }
+
+    exports.runSqlQuery(queries.updateScrollToBottom(),[parameters.UserId, table, parameters.Id])
+        .then(()=>{
+            r.resolve({Response:'success'});
+        }).catch((err)=>{
+        r.reject({Response:'error',Reason:err});
+    });
+
+    return r.promise;
+};
+
+exports.updateSubScrollToBottom = function(userId, parameters){
+    console.log("in updateSubScrollToBottom function sqlInterface");
+    let r = Q.defer();
+
+    var table = 'EducationalMaterialTOC';
+    exports.runSqlQuery(queries.updateSubScrollToBottom(),[parameters.patientId, table, parameters.TocSerNum])
+        .then(()=>{
+            r.resolve({Response:'just write to database'});
+        }).catch((err)=>{
+        r.reject({Response:'error',Reason:err});
+    });
+
+    return r.promise;
+};
+
+exports.updateSubClicked = function(userId, parameters){
+    console.log("in updateSubClicked function sqlInterface");
+    let r = Q.defer();
+
+    var table = 'EducationalMaterialTOC';
+    exports.runSqlQuery(queries.updateSubClicked(),[parameters.patientId, table, parameters.TocSerNum])
+        .then(()=>{
+            r.resolve({Response:'just write to database'});
+        }).catch((err)=>{
+        r.reject({Response:'error',Reason:err});
+    });
+
+    return r.promise;
+};
+
+exports.updateClickedBack = function(userId, parameters){
+    console.log("in updateClickedBack function sqlInterface");
+    let r = Q.defer();
+
+    let table, serNum;
+    if(parameters && parameters.Field && parameters.Id && requestMappings.hasOwnProperty(parameters.Field) ) {
+        ({table, serNum} = requestMappings[parameters.Field]);
+    }else{
+        r.reject({Response:'error',Reason:'Invalid clicked back field'});
+    }
+
+    exports.runSqlQuery(queries.updateClickedBack(),[parameters.UserId, table, parameters.Id])
+        .then(()=>{
+            r.resolve({Response:'success'});
+        }).catch((err)=>{
+        r.reject({Response:'error',Reason:err});
+    });
+
+    return r.promise;
+};
+
+exports.updateSubClickedBack = function(userId, parameters){
+    console.log("in updateSubClickedBack function sqlInterface");
+    let r = Q.defer();
+
+    var table = 'EducationalMaterialTOC';
+    exports.runSqlQuery(queries.updateSubClickedBack(),[parameters.patientId, table, parameters.TocSerNum])
+        .then(()=>{
+            r.resolve({Response:'just write to sub clicked back'});
+        }).catch((err)=>{
+        r.reject({Response:'error',Reason:err});
+    });
+
+    return r.promise;
+};
 /**
  * sendMessage
  * @desc inserts a message into messages table
@@ -301,7 +404,7 @@ exports.updateReadStatus=function(userId, parameters)
  * @return {Promise}
  */
 exports.sendMessage=function(requestObject) {
-	return exports.runSqlQuery(queries.sendMessage(requestObject));
+    return exports.runSqlQuery(queries.sendMessage(requestObject));
 };
 
 
@@ -321,7 +424,7 @@ exports.checkIn=function(requestObject) {
     const patientId = requestObject.Parameters.PatientId;
     const patientSerNum = requestObject.Parameters.PatientSerNum;
 
-		hasAlreadyAttemptedCheckin(patientSerNum)
+    hasAlreadyAttemptedCheckin(patientSerNum)
         .then(result => {
             if(result === false){
                 //Check in to aria using Johns script
@@ -368,9 +471,7 @@ function hasAlreadyAttemptedCheckin(patientSerNum){
         else {
             exports.runSqlQuery(queries.getPatientCheckinPushNotifications(), [patientSerNum]).then((rows) => {
                 if (rows.length === 0) resolve(false);
-								// YM 2018-05-25 - Temporary putting as false for now to bypass the checking of notification table.
-								//		Technically, it should be checking the appointment table.
-                else resolve(false);
+                else resolve(true);
             }).catch((err) => {
                 reject({Response: 'error', Reason: err});
             })
@@ -414,18 +515,18 @@ exports.getDocumentsContent = function(requestObject) {
         r.reject({Response:'error',Reason:'Not an array'});
     }else{
         exports.runSqlQuery(queries.getDocumentsContentQuery(), [[documents],userID]).then((rows)=>{
-	        if(rows.length === 0) {
-		        r.resolve({Response:'success',Data:'DocumentNotFound'});
-	        } else {
-		        LoadDocuments(rows).then(function(documents) {
-			        if(documents.length === 1) r.resolve({Response:'success',Data:documents[0]});
-			        else r.resolve({Response:'success',Data:documents});
-		        }).catch(function (err) {
-			        r.reject({Response:'error', Reason:err});
-		        });
-	        }
+            if(rows.length === 0) {
+                r.resolve({Response:'success',Data:'DocumentNotFound'});
+            } else {
+                LoadDocuments(rows).then(function(documents) {
+                    if(documents.length === 1) r.resolve({Response:'success',Data:documents[0]});
+                    else r.resolve({Response:'success',Data:documents});
+                }).catch(function (err) {
+                    r.reject({Response:'error', Reason:err});
+                });
+            }
         }).catch((err)=>{
-	        r.reject({Response:'error',Reason:err});
+            r.reject({Response:'error',Reason:err});
         });
     }
     return r.promise;
@@ -447,25 +548,25 @@ exports.updateAccountField=function(requestObject) {
         let field = requestObject.Parameters.FieldToChange;
         let newValue = requestObject.Parameters.NewValue;
         if ( !field || !newValue || typeof field !== 'string' || typeof newValue !== 'string')
-                r.resolve({Response:'error',Reason:'Invalid Parameters'});
+            r.resolve({Response:'error',Reason:'Invalid Parameters'});
         if(field === 'Password') {
             //Hash the password before storing
             let hashedPassword = utility.hash(newValue);
             //Update database
             exports.runSqlQuery(queries.setNewPassword(), [hashedPassword, patient.PatientSerNum])
                 .then(()=>{
-	                delete requestObject.Parameters.NewValue;
-	                r.resolve({Response:'success'});
+                    delete requestObject.Parameters.NewValue;
+                    r.resolve({Response:'success'});
                 }).catch((err)=>{
-	                r.reject({Response:'error',Reason:err});
-                });
+                r.reject({Response:'error',Reason:err});
+            });
             //If not a password field update
         }else if(validFields.includes(field)){
             exports.runSqlQuery(queries.accountChange(), [field, newValue, requestObject.Token, patient.PatientSerNum])
-	            .then(()=>{
-		            r.resolve({Response:'success'});
-	            }).catch((err)=>{
-	            r.reject({Response:'error',Reason:err});
+                .then(()=>{
+                    r.resolve({Response:'success'});
+                }).catch((err)=>{
+                r.reject({Response:'error',Reason:err});
             });
         }
     });
@@ -480,35 +581,35 @@ exports.updateAccountField=function(requestObject) {
 exports.inputFeedback = function(requestObject) {
     let r = Q.defer();
     let email = requestObject.UserEmail;
-	if(!email) r.reject({Response:'error',Reason:`Invalid parameter email`});
-	getPatientFromEmail(email).then((patient)=> {
+    if(!email) r.reject({Response:'error',Reason:`Invalid parameter email`});
+    getPatientFromEmail(email).then((patient)=> {
 //        let {type, feedback, appRating} = requestObject.Parameters;
 //		logger.log('debug', 'Request Object Parameters: ' + JSON.stringify(requestObject.Parameters));
-		let feedback = requestObject.Parameters.FeedbackContent;
-		let appRating = requestObject.Parameters.AppRating;
-		let type = requestObject.Parameters.Type;
-		// {"AppRating":"3","FeedbackContent":"test","Type":"opal"}
+        let feedback = requestObject.Parameters.FeedbackContent;
+        let appRating = requestObject.Parameters.AppRating;
+        let type = requestObject.Parameters.Type;
+        // {"AppRating":"3","FeedbackContent":"test","Type":"opal"}
 
         if((!type||!feedback)) r.reject({Response:'error',Reason:`Invalid parameter type`});
         exports.runSqlQuery(queries.inputFeedback(),[ patient.PatientSerNum, feedback, appRating, requestObject.Token ])
             .then(()=>{
-	            let replyTo = null;
-	            let email;
+                let replyTo = null;
+                let email;
                 let title;
-	            // Determine if the feedback is for the app or patients committee
-	            if (type === 'pfp'){
-		            email = "patients4patients.contact@gmail.com";
-		            title = "New Suggestion - Opal";
-		            replyTo = email;
-	            } else {
-		            email = "opal@muhc.mcgill.ca";
-		            title = "New Feedback - Opal";
-	            }
+                // Determine if the feedback is for the app or patients committee
+                if (type === 'pfp'){
+                    email = "patients4patients.contact@gmail.com";
+                    title = "New Suggestion - Opal";
+                    replyTo = email;
+                } else {
+                    email = "opal@muhc.mcgill.ca";
+                    title = "New Feedback - Opal";
+                }
                 (new Mail()).sendMail(email, title, feedback, replyTo);
-	            r.resolve({Response:'success'});
+                r.resolve({Response:'success'});
             }).catch((err)=>{
-	            r.reject({Response:'error',Reason:err});
-            });
+            r.reject({Response:'error',Reason:err});
+        });
     });
     return r.promise;
 };
@@ -548,9 +649,9 @@ exports.updateDeviceIdentifier = function(requestObject, parameters) {
 
         exports.runSqlQuery(queries.updateDeviceIdentifiers(),[user.PatientSerNum, requestObject.DeviceId, identifiers.registrationId, deviceType,requestObject.Token, identifiers.registrationId, requestObject.Token])
             .then(()=>{
-            logger.log('debug', 'successfully updated device identifiers');
-            r.resolve({Response:'success'});
-        }).catch((error)=>{
+                logger.log('debug', 'successfully updated device identifiers');
+                r.resolve({Response:'success'});
+            }).catch((error)=>{
             logger.log('error', 'Error updating device identifiers due to '+ error);
             r.reject({Response:'error', Reason:'Error updating device identifiers due to '+error});
         });
@@ -572,10 +673,10 @@ exports.addToActivityLog=function(requestObject)
     let {Request, UserID, DeviceId, Token} = requestObject;
     exports.runSqlQuery(queries.logActivity(),[Request, UserID, DeviceId, Token])
         .then(()=>{
-	        r.resolve({Response:'success'});
+            r.resolve({Response:'success'});
         }).catch((err)=>{
-	        r.reject({Response:'error', Reason:err});
-        });
+        r.reject({Response:'error', Reason:err});
+    });
     return r.promise;
 };
 
@@ -585,12 +686,12 @@ exports.addToActivityLog=function(requestObject)
  */
 exports.getFirstEncryption=function(requestObject) {
     let r=Q.defer();
-	exports.runSqlQuery(queries.securityQuestionEncryption(),[requestObject.UserID])
-		.then((rows)=>{
-			r.resolve(rows);
-		}).catch((err)=>{
-		r.reject({Response:'error', Reason:err});
-	});
+    exports.runSqlQuery(queries.securityQuestionEncryption(),[requestObject.UserID])
+        .then((rows)=>{
+            r.resolve(rows);
+        }).catch((err)=>{
+        r.reject({Response:'error', Reason:err});
+    });
     return r.promise;
 };
 
@@ -603,7 +704,7 @@ exports.getFirstEncryption=function(requestObject) {
  */
 exports.getEncryption=function(requestObject)
 {
-	return exports.runSqlQuery(queries.userEncryption(),[requestObject.UserID, requestObject.DeviceId]);
+    return exports.runSqlQuery(queries.userEncryption(),[requestObject.UserID, requestObject.DeviceId]);
 };
 
 /**
@@ -619,7 +720,7 @@ exports.inputQuestionnaireAnswers = function(requestObject) {
         exports.runSqlQuery(queries.setQuestionnaireCompletedQuery(),
             [patientQuestionnaireSerNum, parameters.DateCompleted, requestObject.Token,parameters.QuestionnaireSerNum])
             .then(()=>{
-	            r.resolve({Response:'success'});
+                r.resolve({Response:'success'});
             });
     }).catch(function(err){
         r.reject({Response:'error',Reason:err});
@@ -641,9 +742,9 @@ exports.getMapLocation=function(requestObject) {
     }
 
     exports.runSqlQuery(queries.getMapLocation(),[requestObject.Parameters.QRCode]).then((rows)=>{
-       r.resolve({Response:'success', Data:{MapLocation:rows[0]}});
+        r.resolve({Response:'success', Data:{MapLocation:rows[0]}});
     }).catch((err)=>{
-	    r.reject({Response:'error', Reason:err});
+        r.reject({Response:'error', Reason:err});
     });
 
     return r.promise;
@@ -664,7 +765,7 @@ exports.increaseSecurityAnswerAttempt = function(requestObject) {
  * @param requestObject
  */
 exports.resetSecurityAnswerAttempt = function(requestObject) {
-	return exports.runSqlQuery(queries.resetSecurityAnswerAttempt(),[requestObject.DeviceId]);
+    return exports.runSqlQuery(queries.resetSecurityAnswerAttempt(),[requestObject.DeviceId]);
 };
 
 /**
@@ -674,7 +775,7 @@ exports.resetSecurityAnswerAttempt = function(requestObject) {
  * @param timestamp
  */
 exports.setTimeoutSecurityAnswer = function(requestObject, timestamp) {
-	return exports.runSqlQuery(queries.setTimeoutSecurityAnswer(),[new Date(timestamp), requestObject.DeviceId]);
+    return exports.runSqlQuery(queries.setTimeoutSecurityAnswer(),[new Date(timestamp), requestObject.DeviceId]);
 };
 
 /**
@@ -746,10 +847,10 @@ exports.inputEducationalMaterialRating = function(requestObject)
     exports.runSqlQuery(queries.insertEducationalMaterialRatingQuery(),
         [ EducationalMaterialControlSerNum, PatientSerNum, RatingValue, requestObject.Token])
         .then(()=>{
-	        r.resolve({Response:'success'});
+            r.resolve({Response:'success'});
         }).catch((err)=>{
-            r.reject({Response:'error',Reason:err});
-        });
+        r.reject({Response:'error',Reason:err});
+    });
     return r.promise;
 };
 
@@ -770,13 +871,13 @@ exports.updateLogout = function(fields) {
  */
 function getPatientFromEmail(email) {
     let r = Q.defer();
-	exports.runSqlQuery(queries.getPatientFromEmail(),[email])
+    exports.runSqlQuery(queries.getPatientFromEmail(),[email])
         .then((rows)=>{
-	        if(rows.length === 0) r.reject({Response:'error',Reason:"No User match in DB"});
-	        r.resolve(rows[0]);
+            if(rows.length === 0) r.reject({Response:'error',Reason:"No User match in DB"});
+            r.resolve(rows[0]);
         }).catch((err)=>{
-		    r.reject(err);
-        });
+        r.reject(err);
+    });
     return r.promise;
 }
 
@@ -789,12 +890,12 @@ function getPatientFromEmail(email) {
 exports.getPasswordForVerification = function(email) {
     let r=Q.defer();
     exports.runSqlQuery(queries.getPatientPasswordForVerification(), [email])
-	    .then((rows)=>{
-		    if(rows.length === 0) r.reject({Response:'error',Reason:"No User match in DB"});
-		    r.resolve(rows[0]);
-	    }).catch((err)=> {
-	        r.reject({Response: err, Reason:"Problem Fetching Password for verification"});
-        });
+        .then((rows)=>{
+            if(rows.length === 0) r.reject({Response:'error',Reason:"No User match in DB"});
+            r.resolve(rows[0]);
+        }).catch((err)=> {
+        r.reject({Response: err, Reason:"Problem Fetching Password for verification"});
+    });
     return r.promise;
 };
 
@@ -896,7 +997,7 @@ function getEducationalMaterialTableOfContents(rows)
 }
 
 //Obtains the educational material table of contents and adds it to the pertinent materials
-function getEducationTableOfContents(rows)
+function getEducationTableOfContentsAndPackages(rows)
 {
     var r = Q.defer();
     var indexes = [];
@@ -922,16 +1023,25 @@ function getEducationTableOfContents(rows)
     }
     for (var l = 0; l < rows.length; l++) {
         promises.push(exports.runSqlQuery(queries.patientEducationalMaterialContents(),[rows[l].EducationalMaterialControlSerNum] ));
+        promises.push(exports.runSqlQuery(queries.patientEducationalMaterialPackageContents(),[rows[l].EducationalMaterialControlSerNum]));
     }
     Q.all(promises).then(
         function(results){
             for (var i = 0; i < results.length; i++) {
+                var pContentList = [];
                 if(results[i].length !== 0)
                 {
                     for (var j = 0; j < rows.length; j++) {
-                        if(rows[j].EducationalMaterialControlSerNum ==results[i][0].ParentSerNum)
+                        if(rows[j].EducationalMaterialControlSerNum == results[i][0].ParentSerNum)
                         {
                             rows[j].TableContents = results[i];
+                        }
+                        for (var k = 0; k<results[i].length; k++){
+                            if(rows[j].EducationalMaterialControlSerNum == results[i][k].PackageSerNum)
+                            {
+                                pContentList.push(results[i][k]);
+                                rows[j].PackageContents = pContentList;
+                            }
                         }
                     }
                 }
@@ -1139,7 +1249,8 @@ exports.getQuestionnaires = function(requestObject){
     var r = Q.defer();
     exports.runSqlQuery(queries.patientQuestionnaireTableFields(), [requestObject.UserID, null, null])
         .then(function (queryRows) {
-            return questionnaires.getPatientQuestionnaires(queryRows)
+            return questionnaires.getPatientQuestionnaires(queryRows);
+            // return [];
         })
         .then(function (result) {
             var obj = {};
@@ -1173,7 +1284,7 @@ exports.getAllNotifications = function(requestObject){
     let r = Q.defer();
     exports.runSqlQuery(queries.getAllNotifications(), [requestObject.UserID])
         .then(rows => r.resolve({Data: rows})
-        .catch(err => r.reject(err)));
+            .catch(err => r.reject(err)));
     return r.promise
 };
 
@@ -1225,7 +1336,7 @@ function assocNotificationsWithItems(notifications, requestObject){
 
             if(itemList.includes(notif.NotificationType) && (!fields.includes(notif.NotificationType) || !fields.includes(notif.NotificationType + 's'))) {
 
-				// Educational material mapping is singular... otherwise add 's' to end of key
+                // Educational material mapping is singular... otherwise add 's' to end of key
                 // TODO: This is a pretty bad way to handle this... should create a mapping
                 let string =(notif.NotificationType !== 'EducationalMaterial') ? notif.NotificationType + 's' : notif.NotificationType;
                 fields.push(string);
@@ -1328,9 +1439,9 @@ function refresh (fields, requestObject) {
     let timestamp = today.setHours(0,0,0,0);
 
     exports.getPatientTableFields(UserId, timestamp, fields).then(rows => {
-            rows.Data= utility.resolveEmptyResponse(rows.Data);
-            r.resolve(rows);
-        })
+        rows.Data= utility.resolveEmptyResponse(rows.Data);
+        r.resolve(rows);
+    })
         .catch(err => r.reject(err));
 
     return r.promise;
