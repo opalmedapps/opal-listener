@@ -148,8 +148,19 @@ exports.patientEducationalMaterialTableFields=function()
 };
 exports.patientEducationalMaterialContents=function()
 {
-    return "SELECT EducationalMaterialTOC.OrderNum, EducationalMaterialTOC.ParentSerNum, EducationalMaterialTOC.EducationalMaterialControlSerNum, EduControl.EducationalMaterialType_EN, EduControl.EducationalMaterialType_FR, EduControl.Name_EN, EduControl.Name_FR, EduControl.URL_FR, EduControl.URL_EN FROM EducationalMaterialControl as EduControl, EducationalMaterialTOC WHERE EduControl.EducationalMaterialControlSerNum = EducationalMaterialTOC.EducationalMaterialControlSerNum AND EducationalMaterialTOC.ParentSerNum = ? ORDER BY OrderNum;";
+    return "SELECT EducationalMaterialTOC.EducationalMaterialTOCSerNum ,EducationalMaterialTOC.OrderNum, EducationalMaterialTOC.ParentSerNum, EducationalMaterialTOC.EducationalMaterialControlSerNum, EduControl.EducationalMaterialType_EN, EduControl.EducationalMaterialType_FR, EduControl.Name_EN, EduControl.Name_FR, EduControl.URL_FR, EduControl.URL_EN FROM EducationalMaterialControl as EduControl, EducationalMaterialTOC WHERE EduControl.EducationalMaterialControlSerNum = EducationalMaterialTOC.EducationalMaterialControlSerNum AND EducationalMaterialTOC.ParentSerNum = ? ORDER BY OrderNum;";
 };
+
+exports.patientEducationalMaterialPackageContents=function()
+{
+    return "Select EduControl.EducationalMaterialType_EN, EduControl.EducationalMaterialType_FR, EduControl.Name_EN, EduControl.Name_FR, EduControl.URL_FR, EduControl.URL_EN,\n" +
+        "EduControl.ShareURL_EN, EduControl.ShareURL_FR, EduControl.EducationalMaterialControlSerNum, PMC.PackageSerNum PackageSerNum\n" +
+        "from EducationalMaterialControl as EduControl, PackageMaterialsControl as PMC\n" +
+        "where EduControl.EducationalMaterialControlSerNum = PMC.MaterialsSerNum\n" +
+        "and PMC.PackageSerNum = ?\n" +
+        "order by PMC.MaterialOrder;"
+};
+
 exports.patientTasksTableFields=function()
 {
     return "SELECT DISTINCT Patient.PatientAriaSer, " +
@@ -338,15 +349,6 @@ exports.getMapLocation=function()
     return "SELECT * FROM HospitalMap WHERE QRMapAlias = ?;";
 };
 
-exports.updateReadStatus=function()
-{
-    return `
-        UPDATE ??
-        SET ReadStatus = 1
-        WHERE ??.?? = ?
-    `;
-};
-
 exports.getPatientDeviceLastActivity=function()
 {
     return "SELECT * FROM PatientActivityLog WHERE Username=? AND DeviceId=? ORDER BY ActivitySerNum DESC LIMIT 1;";
@@ -489,4 +491,47 @@ exports.getNewNotifications=function() {
         "AND Users.Username= ? " +
         "AND Notification.ReadStatus = 0 " +
         "AND (Notification.DateAdded > ? OR NotificationControl.DateAdded > ?);";
+};
+
+exports.updateClicked=function()
+{
+
+    return `INSERT INTO PatientLog (UserId, UserAction, TableName, RefTableSerNum) 
+            VALUES (?, "CLICK", ?, ?)`;
+};
+
+exports.updateScrollToBottom=function()
+{
+
+    return `INSERT INTO PatientLog (UserId, UserAction, TableName, RefTableSerNum) 
+            VALUES (?, "SCROLLTOBOTTOM", ?, ?)`;
+};
+
+exports.updateSubScrollToBottom = function(){
+    return `INSERT INTO PatientLog (UserId, UserAction, TableName, RefTableSerNum) 
+            VALUES (?, "SUBSCROLLTOBOTTOM", ?, ?)`;
+};
+
+exports.updateSubClicked = function () {
+    return `INSERT INTO PatientLog (UserId, UserAction, TableName, RefTableSerNum) 
+            VALUES (?, "SUBCLICK", ?, ?)`;
+};
+
+exports.updateClickedBack=function()
+{
+
+    return `INSERT INTO PatientLog (UserId, UserAction, TableName, RefTableSerNum) 
+            VALUES (?, "CLICKBACK", ?, ?)`;
+};
+
+exports.updateSubClickedBack = function()
+{
+    return `INSERT INTO PatientLog (UserId, UserAction, TableName, RefTableSerNum) 
+            VALUES (?, "SUBCLICKBACK", ?, ?)`;
+};
+
+exports.readMaterial = function(){
+    return `UPDATE ??
+            SET ReadStatus = 1
+            WHERE EducationalMaterialSerNum = ?`;
 };

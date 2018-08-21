@@ -30,8 +30,14 @@ const API = {
     'Questionnaires': apiPatientUpdate.getQuestionnaires,
     'QuestionnaireRating': apiHospitalUpdate.inputEducationalMaterialRating,
     'QuestionnaireAnswers': apiHospitalUpdate.inputQuestionnaireAnswers,
-    'Read': apiHospitalUpdate.updateReadStatus,
-    'PFPMembers': apiPatientUpdate.getPatientsForPatientsMembers
+    'PFPMembers': apiPatientUpdate.getPatientsForPatientsMembers,
+    'Clicked': apiHospitalUpdate.updateClicked,
+    'WriteScrollToBottom': apiHospitalUpdate.updateScrollToBottom,
+    'WriteSubScrollToBottom' : apiHospitalUpdate.updateSubScrollToBottom,
+    'WriteSubClicked' : apiHospitalUpdate.updateSubClicked,
+    'WriteClickedBack': apiHospitalUpdate.updateClickedBack,
+    'writeSubClickedBackRequest': apiHospitalUpdate.updateSubClickedBack,
+    'readMaterial': apiHospitalUpdate.readMaterial
 };
 
 /**

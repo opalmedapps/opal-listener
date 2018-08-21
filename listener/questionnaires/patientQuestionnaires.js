@@ -18,7 +18,7 @@ var sqlConfig={
   host:credentials.HOST,
   user:credentials.MYSQL_USERNAME,
   password:credentials.MYSQL_PASSWORD,
-  database:'QuestionnaireDB',
+  database:'OpalDB',
   dateStrings:true
 };
 /*
@@ -146,18 +146,24 @@ function getQuestionChoices(rows)
 {
   var r = q.defer();
   var array = [];
-  for (var i = 0; i < rows.length; i++) {
-    array.push(rows[i].QuestionSerNum);
-  };
-  connection.query(queryQuestionChoices,[[array],[array],[array]],function(err,choices,fields){
-    //console.log(err);
-    // logger.log('error', err);
-    if(err) r.reject(err);
-    var questions = attachChoicesToQuestions(rows,choices);
-    // console.log(questions);
-    // logger.log('debug', questions);
-    r.resolve(questions);
-  });
+  if(rows) {
+      for (var i = 0; i < rows.length; i++) {
+          array.push(rows[i].QuestionSerNum);
+      }
+      ;
+      connection.query(queryQuestionChoices, [[array], [array], [array]], function (err, choices, fields) {
+          //console.log(err);
+          // logger.log('error', err);
+          if (err) r.reject(err);
+          var questions = attachChoicesToQuestions(rows, choices);
+          // console.log(questions);
+          // logger.log('debug', questions);
+          r.resolve(questions);
+      });
+  }else{
+      r.resolve([]);
+  }
+
   return r.promise;
 }
 
