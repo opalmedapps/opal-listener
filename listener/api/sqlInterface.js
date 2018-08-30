@@ -24,11 +24,22 @@ const dbCredentials = {
 	dateStrings: true
 };
 
+const waitingRoomDbCredentials = {
+	connectionLimit: 10,
+    host: config.WAITING_ROOM_MANAGEMENT_SYSTEM_MYSQL.HOST,
+    port: config.WAITING_ROOM_MANAGEMENT_SYSTEM_MYSQL.PORT,
+	user: config.WAITING_ROOM_MANAGEMENT_SYSTEM_MYSQL.MYSQL_USERNAME,
+	password: config.WAITING_ROOM_MANAGEMENT_SYSTEM_MYSQL.MYSQL_PASSWORD,
+	database: config.WAITING_ROOM_MANAGEMENT_SYSTEM_MYSQL.MYSQL_DATABASE,
+	dateStrings: true
+};
+
 /**
  * SQL POOL CONFIGURATION
  * @type {Pool}
  */
 const pool = mysql.createPool(dbCredentials);
+const waitingRoomPool = mysql.createPool(waitingRoomDbCredentials);
 
 /////////////////////////////////////////////////////
 

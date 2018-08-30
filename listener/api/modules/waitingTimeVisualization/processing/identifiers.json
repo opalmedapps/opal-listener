@@ -1,0 +1,10 @@
+{
+	"waitingRooms": [
+		".*waiting(?:\\s?room)?.*"
+	],
+	"appointmentTypes": {
+		"CHM": [
+			".*tx(?:\\s?area)?.*"
+		]
+	}
+}
