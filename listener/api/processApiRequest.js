@@ -4,10 +4,11 @@ const apiPatientUpdate      = require('./apiPatientUpdate.js');
 const apiHospitalUpdate     = require('./apiHospitalUpdate.js');
 const security              = require('./../security/security');
 const logger                = require('./../logs/logger');
+const modules               = require('./modules')
 
 /**
  * API HANDLERS FOR GENERAL REQUESTS
- * @type {{DeviceIdentifier: *, Log: *, Login: *, Logout: *, Resume: *, Refresh: *, AccountChange: *, CheckCheckin: *, Checkin: *, CheckinUpdate: *, DocumentContent: *, Feedback: *, LabResults: *, MapLocation: *, Message: *, NotificationsAll: *, Questionnaires: *, QuestionnaireRating: *, QuestionnaireAnswers: *, Read: *, PFPMembers: *}}
+ * @type {{DeviceIdentifier: *, Log: *, Login: *, Logout: *, Resume: *, Refresh: *, AccountChange: *, CheckCheckin: *, Checkin: *, CheckinUpdate: *, DocumentContent: *, Feedback: *, LabResults: *, MapLocation: *, Message: *, NotificationsAll: *, Questionnaires: *, QuestionnaireRating: *, QuestionnaireAnswers: *, Read: *, PFPMembers: *, WaitingTimeVisualization: *}}
  */
 const API = {
     'DeviceIdentifier': apiHospitalUpdate.updateDeviceIdentifier,
@@ -31,7 +32,8 @@ const API = {
     'QuestionnaireRating': apiHospitalUpdate.inputEducationalMaterialRating,
     'QuestionnaireAnswers': apiHospitalUpdate.inputQuestionnaireAnswers,
     'Read': apiHospitalUpdate.updateReadStatus,
-    'PFPMembers': apiPatientUpdate.getPatientsForPatientsMembers
+    'PFPMembers': apiPatientUpdate.getPatientsForPatientsMembers,
+    'WaitingTimeVisualization': modules.waitingTimeVisualization.requestHandler
 };
 
 /**
