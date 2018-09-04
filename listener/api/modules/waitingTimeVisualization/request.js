@@ -1,3 +1,7 @@
 module.exports = function (requestObject) {
-  // TODO
+  return new Promise((resolve, reject) => {
+    console.log('WaitingTimeVisualization requested!')
+    console.log(requestObject)
+    resolve({hello: 'world'})
+  })
 }
