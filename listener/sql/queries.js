@@ -34,6 +34,7 @@ exports.patientAppointmentsTableFields=function()
         "Appt.ScheduledStartTime, " +
         "Appt.ScheduledEndTime, " +
         "Appt.Checkin, " +
+        "Appt.SourceDatabaseSerNum, " +
         "Appt.AppointmentAriaSer, " +
         "Appt.ReadStatus, " +
         "R.ResourceName, " +
