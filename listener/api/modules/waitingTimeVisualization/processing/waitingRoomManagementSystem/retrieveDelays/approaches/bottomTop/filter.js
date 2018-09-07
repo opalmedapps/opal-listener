@@ -1,4 +1,4 @@
-const identifiers = require('../../../identifiers.json')
+const identifiers = require('../../../../common/identifiers.json')
 const identifierTester = require('../common/identifierTester')
 const isWaitingRoom = require('../common/isWaitingRoom')
 const emptyResponse = []

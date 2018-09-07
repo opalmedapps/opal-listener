@@ -177,6 +177,40 @@ exports.runSqlQuery = function(query, parameters, processRawFunction) {
 };
 
 /**
+ * runWaitingRoomSqlQuery
+ * @desc runs inputted query against SQL mapping by grabbing an available connection from connection pool
+ * @param query
+ * @param parameters
+ * @param processRawFunction
+ * @return {Promise}
+ */
+exports.runWaitingRoomSqlQuery = function(query, parameters, processRawFunction) {
+    return new Promise((resolve, reject) => {
+        waitingRoomPool.getConnection((err, connection) => {
+            if (err) {
+                logger.log('error', err)
+                return reject(err)
+            }
+            logger.log('debug', `grabbed waiting room connection: ${connection}`)
+            logger.log('info', 'Successfully grabbed connection from waiting room pool and about to perform following query: ', {query: query})
+            const que = connection.query(query, parameters, (err, rows, fields) => {
+                connection.release();
+                if (err) {
+                    logger.log('error', err)
+                    return reject(err)
+                }
+                logger.log('info', 'Successfully performed query on waiting room database', {query: que.sql, response: JSON.stringify(rows)});
+                if (processRawFunction) {
+                    processRawFunction(rows).then(resolve)
+                } else {
+                    resolve(rows)
+                }
+            })
+        })
+    })
+}
+
+/**
  * getPatientTableFields
  * @desc Gets Patient tables based on userID,  if timestamp defined sends requests that are only updated after timestamp, third parameter is an array of table names, if not present all tables are gathered
  * @param userId
