@@ -1,4 +1,15 @@
 const _default = {
+    retrieveAppointmentById: (appointmentId) => `
+    SELECT
+        AppointmentCode
+        , UNIX_TIMESTAMP(ScheduledDateTime) AS ScheduledDateTime
+        , WEEKDAY(ScheduledDateTime) AS ScheduledDay
+        , HOUR(ScheduledDateTime) AS ScheduledHour
+        , MINUTE(ScheduledDateTime) AS ScheduledMinutes
+    FROM MediVisitAppointmentList
+    WHERE
+        AppointmentSerNum = ${appointmentId};
+  `,
   retrieveAppointmentsHistory: (appointmentType, scheduledDay, scheduledHour, scheduledMinutes) => `
     SELECT
         AppointmentsList.PatientSerNum AS PatientSerNum
@@ -33,9 +44,10 @@ const _default = {
         , UNIX_TIMESTAMP(PatientLocationHistory.DichargeThisLocationDateTime) AS DichargeThisLocationDateTime
     FROM MediVisitAppointmentList AS AppointmentsList
     INNER JOIN PatientLocationMH AS PatientLocationHistory
-        ON PatientLocationHistory.AppointmentSerNum = AppointmentsList.AppointmentSerNum
-    LEFT JOIN MediVisitAppointmentList AS CurrentAppointment
-        ON CurrentAppointment.AppointmentSerNum = ${appointmentId}
+        ON PatientLocationHistory.AppointmentSerNum = AppointmentsList.AppointmentSerNum,
+    (
+        SELECT AppointmentCode, ScheduledDateTime FROM MediVisitAppointmentList WHERE AppointmentSerNum = ${appointmentId}
+    ) AS CurrentAppointment
     WHERE
         AppointmentsList.AppointmentCode = CurrentAppointment.AppointmentCode
         AND WEEKDAY(AppointmentsList.ScheduledDateTime) = WEEKDAY(CurrentAppointment.ScheduledDateTime)
