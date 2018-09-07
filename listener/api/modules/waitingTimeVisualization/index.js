@@ -1,7 +1,9 @@
 const requestHandler = require('./request')
+const getProcessorBySource = require('./processor')
 
 const _default = {
-  requestHandler
+  requestHandler,
+  getProcessorBySource
 }
 
 module.exports = _default
