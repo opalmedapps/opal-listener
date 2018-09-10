@@ -1,3 +1,7 @@
+Version 1.0.0.5:
+ - Merge branch 'hotfix-1.0.0.4'
+ - Removed the hard coding of database
+
 Version 1.0.0.4:
  - Merge branch 'hotfix-1.0.0.3'
 
