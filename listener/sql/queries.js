@@ -24,66 +24,53 @@ exports.patientMessageTableFields=function()
 exports.patientAppointmentsTableFields=function()
 {
 
-    return "SELECT DISTINCT Appt.AppointmentSerNum, " +
-        "A.AliasSerNum, " +
-        "IfNull(A.AliasName_EN, '') AS AppointmentType_EN, " +
-        "IfNull(A.AliasName_FR, '') AS AppointmentType_FR, " +
-        "IfNull(A.AliasDescription_EN, '') AS AppointmentDescription_EN, " +
-        "IfNull(A.AliasDescription_FR, '') AS AppointmentDescription_FR, " +
-        "IfNull(AE.Description, '') AS ResourceDescription, " +
-        "Appt.ScheduledStartTime, " +
-        "Appt.ScheduledEndTime, " +
-        "Appt.Checkin, " +
-        "Appt.AppointmentAriaSer, " +
-        "Appt.ReadStatus, " +
-        "R.ResourceName, " +
-        "R.ResourceType, " +
-        // Use regular map location because the getLevel() function is not available in Production
-        // Need to figure out how to link to ORMS
-        // "IfNull(HM.MapUrl, '') AS MapUrl, " +
-        // "IfNull(HM.MapUrl_EN, '') AS MapUrl_EN, " +
-        // "IfNull(HM.MapUrl_FR, '') AS MapUrl_FR, " +
-        // "IfNull(HM.MapName_EN, '') AS MapName_EN, " +
-        // "IfNull(HM.MapName_FR, '') AS MapName_FR, " +
-        // "IfNull(HM.MapDescription_EN, '') AS MapDescription_EN, " +
-        // "IfNull(HM.MapDescription_FR, '') AS MapDescription_FR, " +
-        "(select IfNull(HM2.MapUrl, '') from HospitalMap HM2 where HM2.HospitalMapSerNum = getLevel(Appt.ScheduledStartTime, AE.Description, A.HospitalMapSerNum))  AS MapUrl, " +
-        "(select IfNull(HM2.MapUrl_EN, '') from HospitalMap HM2 where HM2.HospitalMapSerNum = getLevel(Appt.ScheduledStartTime, AE.Description, A.HospitalMapSerNum))  AS MapUrl_EN, " +
-        "(select IfNull(HM2.MapUrl_FR, '') from HospitalMap HM2 where HM2.HospitalMapSerNum = getLevel(Appt.ScheduledStartTime, AE.Description, A.HospitalMapSerNum))  AS MapUrl_FR, " +
-        "(select IfNull(HM2.MapName_EN, '') from HospitalMap HM2 where HM2.HospitalMapSerNum = getLevel(Appt.ScheduledStartTime, AE.Description, A.HospitalMapSerNum))  AS MapName_EN, " +
-        "(select IfNull(HM2.MapName_FR, '') from HospitalMap HM2 where HM2.HospitalMapSerNum = getLevel(Appt.ScheduledStartTime, AE.Description, A.HospitalMapSerNum))  AS MapName_FR, " +
-        "(select IfNull(HM2.MapDescription_EN, '') from HospitalMap HM2 where HM2.HospitalMapSerNum = getLevel(Appt.ScheduledStartTime, AE.Description, A.HospitalMapSerNum))  AS MapDescription_EN, " +
-        "(select IfNull(HM2.MapDescription_FR, '') from HospitalMap HM2 where HM2.HospitalMapSerNum = getLevel(Appt.ScheduledStartTime, AE.Description, A.HospitalMapSerNum))  AS MapDescription_FR, " +
-        "Appt.Status, " +
-        "IfNull(Appt.RoomLocation_EN, '') AS RoomLocation_EN, " +
-        "IfNull(Appt.RoomLocation_FR, '') AS RoomLocation_FR, " +
-        "Appt.LastUpdated, " +
-        "IfNull(emc.URL_EN, '') AS URL_EN, " +
-        "IfNull(emc.URL_FR, '') AS URL_FR, " +
-        "IfNull(AC.CheckinPossible, 0) AS CheckinPossible, " +
-        "IfNull(AC.CheckinInstruction_EN, '') AS CheckinInstruction_EN, " +
-        "IfNull(AC.CheckinInstruction_FR, '') AS CheckinInstruction_FR " +
-        "" +
-        "FROM Patient P " +
-        "" +
-        "INNER JOIN Users U ON U.UserTypeSerNum = P.PatientSerNum " +
-        "INNER JOIN Appointment Appt ON Appt.PatientSerNum = P.PatientSerNum " +
-        "INNER JOIN ResourceAppointment RA ON RA.AppointmentSerNum = Appt.AppointmentSerNum " +
-        "INNER JOIN Resource R ON RA.ResourceSerNum = R.ResourceSerNum " +
-        "INNER JOIN AliasExpression AE ON AE.AliasExpressionSerNum=Appt.AliasExpressionSerNum " +
-        "INNER JOIN Alias A ON AE.AliasSerNum=A.AliasSerNum " +
-        "LEFT JOIN HospitalMap HM ON HM.HospitalMapSerNum=A.HospitalMapSerNum " +
-        "INNER JOIN AppointmentCheckin AC ON AE.AliasSerNum=AC.AliasSerNum " +
-        "LEFT JOIN EducationalMaterialControl emc ON emc.EducationalMaterialControlSerNum = A.EducationalMaterialControlSerNum " +
-        "" +
-        "WHERE " +
-        "U.Username = ? " +
-        "AND Appt.State = 'Active' " +
-        "AND Appt.Status <> 'Deleted' " +
-        "AND (Appt.LastUpdated > ? OR A.LastUpdated > ? OR AE.LastUpdated > ? OR R.LastUpdated > ? OR HM.LastUpdated > ?) " +
-        "" +
-        "ORDER BY Appt.AppointmentSerNum, ScheduledStartTime;";
-
+  return  "select 	IfNull(HM2.MapUrl, '') AS MapUrl, " +
+          	"IfNull(HM2.MapUrl_EN, '') AS MapUrl_EN, " +
+      			"IfNull(HM2.MapUrl_FR, '') AS MapUrl_FR, " +
+      			"IfNull(HM2.MapName_EN, '') AS MapName_EN, " +
+      			"IfNull(HM2.MapName_FR, '') AS MapName_FR, " +
+      			"IfNull(HM2.MapDescription_EN, '') AS MapDescription_EN, " +
+      			"IfNull(HM2.MapDescription_FR, '') AS MapDescription_FR, " +
+      			"A2.* " +
+          "from HospitalMap HM2, " +
+  	         "( SELECT Appt.AppointmentSerNum, " +
+                  "A.AliasSerNum, " +
+                  "IfNull(A.AliasName_EN, '') AS AppointmentType_EN, " +
+                  "IfNull(A.AliasName_FR, '') AS AppointmentType_FR, " +
+                  "IfNull(A.AliasDescription_EN, '') AS AppointmentDescription_EN, " +
+                  "IfNull(A.AliasDescription_FR, '') AS AppointmentDescription_FR, " +
+                  "IfNull(AE.Description, '') AS ResourceDescription, " +
+                  "Appt.ScheduledStartTime, " +
+                  "Appt.ScheduledEndTime, " +
+                  "Appt.Checkin, " +
+                  "Appt.AppointmentAriaSer, " +
+                  "Appt.ReadStatus, " +
+                  "R.ResourceName, " +
+                  "R.ResourceType, " +
+                  "Appt.Status, " +
+                  "IfNull(Appt.RoomLocation_EN, '') AS RoomLocation_EN, " +
+                  "IfNull(Appt.RoomLocation_FR, '') AS RoomLocation_FR, " +
+                  "Appt.LastUpdated, " +
+                  "IfNull(emc.URL_EN, '') AS URL_EN, " +
+                  "IfNull(emc.URL_FR, '') AS URL_FR, " +
+                  "IfNull(AC.CheckinPossible, 0) AS CheckinPossible, " +
+                  "IfNull(AC.CheckinInstruction_EN, '') AS CheckinInstruction_EN, " +
+                  "IfNull(AC.CheckinInstruction_FR, '') AS CheckinInstruction_FR, " +
+                  "A.HospitalMapSerNum " +
+              "FROM Appointment Appt  " +
+                "INNER JOIN ResourceAppointment RA ON RA.AppointmentSerNum = Appt.AppointmentSerNum " +
+                "INNER JOIN Resource R ON RA.ResourceSerNum = R.ResourceSerNum " +
+                "INNER JOIN AliasExpression AE ON AE.AliasExpressionSerNum=Appt.AliasExpressionSerNum " +
+                "INNER JOIN Alias A ON AE.AliasSerNum=A.AliasSerNum " +
+                "LEFT JOIN HospitalMap HM ON HM.HospitalMapSerNum=A.HospitalMapSerNum " +
+                "INNER JOIN AppointmentCheckin AC ON AE.AliasSerNum=AC.AliasSerNum " +
+                "LEFT JOIN EducationalMaterialControl emc ON emc.EducationalMaterialControlSerNum = A.EducationalMaterialControlSerNum " +
+              "WHERE Appt.PatientSerNum = (select P.PatientSerNum from Patient P,  Users U where U.Username = ? and U.UserTypeSerNum = P.PatientSerNum) " +
+                "AND Appt.State = 'Active' " +
+                "AND Appt.Status <> 'Deleted' " +
+                "AND (Appt.LastUpdated > ? OR A.LastUpdated > ? OR AE.LastUpdated > ? OR R.LastUpdated > ? OR HM.LastUpdated > ?) " +
+              "ORDER BY Appt.AppointmentSerNum, ScheduledStartTime ) as A2 " +
+          "where HM2.HospitalMapSerNum = getLevel(A2.ScheduledStartTime, A2.ResourceDescription, A2.HospitalMapSerNum);";
 };
 
 exports.patientDocumentTableFields=function()
