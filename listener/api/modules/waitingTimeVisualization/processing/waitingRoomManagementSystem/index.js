@@ -10,7 +10,6 @@ module.exports = {
     return new Promise((resolve, reject) => {
       runWaitingRoomSqlQuery(waitingRoomQueries.retrieveAppointmentById(appointmentId))
       .then((results) => {
-        console.log('results from waiting room get appointment: ', results)
         if (results && results.length > 0) {
           const result = results[0]
           resolve({
@@ -33,8 +32,11 @@ module.exports = {
         .then((results) => {
           groupify(results)
           .then(usersAppointments)
+          .catch(reject)
           .then(retrieveDelays)
+          .catch(reject)
           .then(delayGroups)
+          .catch(reject)
           .then(resolve)
         })
         .catch(reject)
