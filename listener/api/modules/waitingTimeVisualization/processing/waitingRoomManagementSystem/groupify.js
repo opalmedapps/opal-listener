@@ -35,7 +35,6 @@ function groupify (dataArr, isNewGroup, onDone) {
 }
 
 module.exports = function (results) {
-  console.log(results.length)
   return new Promise((resolve) => {
     linearGroupify(
       results,
