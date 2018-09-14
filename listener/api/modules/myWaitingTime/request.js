@@ -13,7 +13,7 @@ function createDefaultErrorLogger (cb) {
 function onDataReady (cb) {
   return (results) => {
     console.log('sending results...')
-    cb({data: {timestamps: JSON.stringify(results)}})
+    cb({data: {results: JSON.stringify(results)}})
   }
 }
 
