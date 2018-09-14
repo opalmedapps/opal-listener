@@ -14,10 +14,10 @@ const _default = {
   `,
   getTimestamps: (patientId) => `
     SELECT
-      AppointmentSerNum,
-      FirstCheckinTime,
-      ScheduledTime,
-      ActualStartTime
+      AppointmentSerNum
+      , UNIX_TIMESTAMP(FirstCheckinTime) AS FirstCheckinTime
+      , UNIX_TIMESTAMP(ScheduledTime) AS ScheduledTime
+      , UNIX_TIMESTAMP(ActualStartTime) AS ActualStartTime
     FROM UsersAppointmentsTimestamps
     WHERE
       PatientSerNum = ${patientId}
@@ -34,17 +34,16 @@ const _default = {
     ) VALUES (
       ${patientId}
       , ${appointmentId}
-      , FROM_UNIXTIME(${firstCheckin.getTime() / 1000})
-      , FROM_UNIXTIME(${scheduledTime.getTime() / 1000})
-      , FROM_UNIXTIME(${actualStartTime.getTime() / 1000})
+      , FROM_UNIXTIME(${firstCheckin})
+      , FROM_UNIXTIME(${scheduledTime})
+      , FROM_UNIXTIME(${actualStartTime})
     );
   `,
   getAppointments: (patientId, knownAppointments) => `
     SELECT
-      AppointmentSerNum,
-      SourceDatabaseSerNum,
-      AppointmentAriaSer,
-      ScheduledStartTime
+      AppointmentSerNum
+      , SourceDatabaseSerNum
+      , AppointmentAriaSer
     FROM Appointment
     WHERE
       PatientSerNum = ${patientId}

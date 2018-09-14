@@ -1,5 +1,4 @@
 const filter = require('./filter')
-const diffMinutes = require('../common/diffMinutes')
 
 module.exports = function (appointment) {
   try {
@@ -9,9 +8,9 @@ module.exports = function (appointment) {
       const firstTime = first ? first.ArrivalDateTime : scheduledTime
       const lastTime = last.ArrivalDateTime
       return {
-        ScheduledTime: scheduledTime,
-        FirstCheckinTime: firstTime,
-        ActualStartTime: lastTime
+        ScheduledTime: scheduledTime.getTime() / 1000,
+        FirstCheckinTime: firstTime.getTime() / 1000,
+        ActualStartTime: lastTime.getTime() / 1000
       }
     }
   } catch (e) {
