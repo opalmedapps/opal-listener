@@ -1,7 +1,9 @@
-const waitingTimeVisualization = require('./waitingTimeVisualization')
+const myWaitingTime = require('./myWaitingTime')
+const appointmentDelays = require('./waitingTimeVisualization')
 
 const _default = {
-  waitingTimeVisualization
+  myWaitingTime,
+  appointmentDelays
 }
 
 module.exports = _default

@@ -33,7 +33,8 @@ const API = {
     'QuestionnaireAnswers': apiHospitalUpdate.inputQuestionnaireAnswers,
     'Read': apiHospitalUpdate.updateReadStatus,
     'PFPMembers': apiPatientUpdate.getPatientsForPatientsMembers,
-    'WaitingTimeVisualization': modules.waitingTimeVisualization.requestHandler
+    'AppointmentDelays': modules.appointmentDelays.requestHandler,
+    'MyWaitingTime': modules.myWaitingTime.requestHandler
 };
 
 /**
