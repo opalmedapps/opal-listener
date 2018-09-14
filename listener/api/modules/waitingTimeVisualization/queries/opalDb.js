@@ -10,7 +10,7 @@ const _default = {
       , Set2 int(11) NOT NULL DEFAULT 0
       , Set3 int(11) NOT NULL DEFAULT 0
       , Set4 int(11) NOT NULL DEFAULT 0
-      , LastUpdate timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
+      , LastUpdate datetime NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
       , PRIMARY KEY (AppointmentDelaySerNum)
       , UNIQUE KEY AppointmentKeys (AppointmentType, AppointmentScheduledTimeDay, AppointmentScheduledTimeHour, AppointmentScheduledTimeMinutes)
     );
