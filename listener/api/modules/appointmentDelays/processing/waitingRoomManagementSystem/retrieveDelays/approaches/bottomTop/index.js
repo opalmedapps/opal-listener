@@ -1,5 +1,5 @@
 const filter = require('./filter')
-const diffMinutes = require('../common/diffMinutes')
+const { getTimeDifferenceInMinutes } = require('../../../../../../common/utils')
 
 module.exports = function (appointment) {
   try {
@@ -10,7 +10,7 @@ module.exports = function (appointment) {
       const lastTime = last.ArrivalDateTime
       if (scheduledTime >= firstTime) { // check if patient was on time for his appointment, otherwise we don't check for delays
         return {
-          Value: diffMinutes(scheduledTime, lastTime),
+          Value: getTimeDifferenceInMinutes(scheduledTime, lastTime),
           Entries: [{ ArrivalDateTime: scheduledTime }, last]
         }
       }

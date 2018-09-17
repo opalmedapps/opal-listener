@@ -11,10 +11,7 @@ function createDefaultErrorLogger (cb) {
 }
 
 function onDataReady (cb) {
-  return (results) => {
-    console.log('sending results...')
-    cb({data: {results: JSON.stringify(results)}})
-  }
+  return (results) => cb({data: {results: JSON.stringify(results)}})
 }
 
 module.exports = function (requestObject) {
