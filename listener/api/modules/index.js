@@ -1,5 +1,5 @@
 const myWaitingTime = require('./myWaitingTime')
-const appointmentDelays = require('./waitingTimeVisualization')
+const appointmentDelays = require('./appointmentDelays')
 
 const _default = {
   myWaitingTime,

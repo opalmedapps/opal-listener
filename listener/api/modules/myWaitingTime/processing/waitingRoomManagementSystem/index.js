@@ -7,7 +7,6 @@ const timestampsGroups = require('./timestampsGroups')
 
 module.exports = function (appointment) {
   return new Promise((resolve, reject) => {
-    console.log('querying for ' + appointment.AppointmentAriaSer + '...')
     runWaitingRoomSqlQuery(waitingRoomQueries.retrieveAppointmentsHistoryOfAppointment(appointment.AppointmentAriaSer))
       .then((results) => {
         groupify(results)
