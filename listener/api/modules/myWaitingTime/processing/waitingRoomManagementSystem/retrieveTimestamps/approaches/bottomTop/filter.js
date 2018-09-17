@@ -1,6 +1,4 @@
-const identifiers = require('../../../../common/identifiers.json')
-const identifierTester = require('../common/identifierTester')
-const isWaitingRoom = require('../common/isWaitingRoom')
+const identifierTester = require('../../../../../../common/schedules/identifierTester')
 const emptyResponse = []
 
 function retrieveArea (appointmentTypeTester, history) {
@@ -13,7 +11,11 @@ function retrieveArea (appointmentTypeTester, history) {
   return emptyResponse
 }
 
-function retrieveWaitingRoom (fromAreaIndex, history) {
+function retrieveWaitingRoom (appointmentType, fromAreaIndex, history) {
+  const isWaitingRoom = identifierTester(appointmentType, 'waitingRooms')
+  if (typeof isWaitingRoom !== 'function') {
+    throw isWaitingRoom
+  }
   let waitingRoomNode
   while (--fromAreaIndex >= 0) {
     const historyNode = history[fromAreaIndex]
@@ -29,14 +31,13 @@ function retrieveWaitingRoom (fromAreaIndex, history) {
 }
 
 module.exports = function (appointmentType, scheduledTime, history) {
-  const appointmentTypeIdentifiers = identifiers.appointmentTypes[appointmentType]
-  if (!appointmentTypeIdentifiers) {
-    throw new Error(`Unknown appointment type: ${appointmentType}`)
+  const appointmentTypeTester = identifierTester(appointmentType, 'examRooms')
+  if (typeof appointmentTypeTester !== 'function') {
+    throw appointmentTypeTester
   }
-  const appointmentTypeTester = identifierTester(appointmentTypeIdentifiers)
   const [area, areaIndex] = retrieveArea(appointmentTypeTester, history)
   if (area) {
-    return [area, retrieveWaitingRoom(areaIndex, history)]
+    return [area, retrieveWaitingRoom(appointmentType, areaIndex, history)]
   }
   return emptyResponse
 }
