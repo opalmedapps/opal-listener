@@ -1,3 +1,8 @@
+Version 1.0.1.0:
+ - Fix bug #520
+   * Replace missing ResourceType with 'Unknown'
+   * Check all object keys before uploading to Firebase
+
 Version 1.0.0.5:
  - Merge branch 'hotfix-1.0.0.4'
  - Removed the hard coding of database
