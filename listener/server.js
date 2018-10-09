@@ -266,6 +266,7 @@ function uploadToFirebase(response, key) {
 /**
  * validateKeysForFirebase
  * @author Stacey Beard
+ * @date 2018-10-05
  * @desc Validates all keys in an object intended to be pushed to Firebase.
  *       Empty keys are replaced with 'MISSING_KEY' and illegal characters are replaced with '_'.
  *       This function edits the object directly (does not return a copy).
@@ -328,6 +329,7 @@ function validateKeysForFirebase(objectToValidate) {
 /**
  * incrementStringParenthesisNumber
  * @author Stacey Beard
+ * @date 2018-10-05
  * @desc Utility function that takes as input a string and increments its ending number (in parenthesis),
  *       like when saving a file of the same name as another in Windows.
  *       Examples:
