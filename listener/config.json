@@ -1,14 +1,14 @@
 {
   "MYSQL_USERNAME":"root",
-  "MYSQL_PASSWORD":"root",
-  "MYSQL_DATABASE":"OpalDB",
+  "MYSQL_PASSWORD":"",
+  "MYSQL_DATABASE":"FILL_THIS_IN",
   "HOST" : "localhost",
-  "PORT" : 8889,
-  "DOCUMENTS_PATH" : "",
-  "CHECKIN_PATH" : "",
-  "VERIFYCHECKIN_PATH" : "",
-  "WT_PATH" : "",
-  "FIREBASE_ADMIN_KEY": "/Users/eason/Downloads/messenger-601ed-firebase-adminsdk-ixn8e-8cd4f2312e.json",
-  "DATABASE_URL": "https://messenger-601ed.firebaseio.com/",
+  "PORT" : 3306,
+  "DOCUMENTS_PATH" : "http://172.26.120.179/Documents/opalAdmin/publisher/clinical/documents/",
+  "CHECKIN_PATH" : "http://172.26.66.41/devDocuments/screens/php/checkInPatientAriaMedi.php?CheckinVenue=OPAL%20PHONE%20APP&PatientId=",
+  "VERIFYCHECKIN_PATH" : "http://172.26.66.41/devDocuments/ackeem/getCheckins.php?AppointmentAriaSer=",
+  "WT_PATH" : "http://172.26.66.41/devDocuments/ackeem/getCheckins.php?AppointmentAriaSer=",
+  "FIREBASE_ADMIN_KEY": "D:\Opal\Student Install\opal-test-35d3d-firebase-adminsdk-88wqa-6844d703ae.json",
+  "DATABASE_URL": "https://opal-test-35d3d.firebaseio.com",
   "LATEST_STABLE_VERSION":"0.9.9"
 }
