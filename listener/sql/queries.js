@@ -34,7 +34,7 @@ exports.patientAppointmentsTableFields=function()
           "from HospitalMap HM2, " +
   	         "( SELECT Appt.AppointmentSerNum, " +
                   "A.AliasSerNum, " +
-                  "IfNull(A.AliasName_EN, '') AS AppointmentType_EN, " +
+                  "getTranslation('Alias', 'AliasName_EN', IfNull(A.AliasName_EN, '')) AS AppointmentType_EN, " +
                   "IfNull(A.AliasName_FR, '') AS AppointmentType_FR, " +
                   "IfNull(A.AliasDescription_EN, '') AS AppointmentDescription_EN, " +
                   "IfNull(A.AliasDescription_FR, '') AS AppointmentDescription_FR, " +
@@ -174,33 +174,18 @@ exports.patientTestResultsTableFields=function()
 						'and TRE.TestResultExpressionSerNum = TR.TestResultExpressionSerNum), "") as URL_FR ' +
 				'FROM TestResult TR, Users U, Patient P ' +
 				'WHERE P.AccessLevel = 3 AND U.UserTypeSerNum=P.PatientSerNum AND TR.PatientSerNum = P.PatientSerNum AND TR.TestDate >= "1970-01-01" AND U.Username LIKE ? AND TR.LastUpdated > ? AND TR.ValidEntry = "Y";';
-
-/*
-	return 'SELECT ComponentName, FacComponentName, AbnormalFlag, MaxNorm, MinNorm, TestValue, TestValueString, UnitDescription, CAST(TestDate AS char(30)) as `TestDate`, ' +
-					'IfNull((Select EMC.URL_EN From EducationalMaterialControl EMC, TestResultControl TRC ' +
-									'Where EMC.EducationalMaterialControlSerNum = TRC.EducationalMaterialControlSerNum ' +
-											'and TRC.TestResultControlSerNum = TR.TestResultControlSerNum), "") as URL_EN, ' +
-					'IfNull((Select EMC.URL_FR From EducationalMaterialControl EMC, TestResultControl TRC ' +
-									'Where EMC.EducationalMaterialControlSerNum = TRC.EducationalMaterialControlSerNum ' +
-											'and TRC.TestResultControlSerNum = TR.TestResultControlSerNum), "") as URL_FR ' +
-				'FROM TestResult TR, Users U, Patient P ' +
-				'WHERE P.AccessLevel = 3 AND U.UserTypeSerNum=P.PatientSerNum AND TR.PatientSerNum = P.PatientSerNum AND TR.TestDate >= "1970-01-01" AND U.Username LIKE ? AND TR.LastUpdated > ? AND TR.ValidEntry = "Y";';
-*/
-
 };
 exports.patientQuestionnaireTableFields = function()
 {
     return "SELECT Q.CompletedFlag, CAST(DATE_FORMAT(Q.DateAdded, '%Y-%m-%d') AS char(30)) as DateAdded, Q.PatientQuestionnaireDBSerNum, " +
-//		"Q.CompletionDate, " +
-//		"CAST(DATE_FORMAT(Q.CompletionDate, '%Y-%m-%d %H:%i') AS char(30)) as CompletionDate, " +
     "CAST(DATE_FORMAT(Q.CompletionDate, '%Y-%m-%d') AS char(30)) as CompletionDate, " +
 		"Q.QuestionnaireSerNum, QC.QuestionnaireDBSerNum " +
 		"FROM QuestionnaireControl QC, Questionnaire Q, Patient P, Users U " +
 		"WHERE QC.QuestionnaireControlSerNum = Q.QuestionnaireControlSerNum " +
 		"AND Q.PatientSerNum = P.PatientSerNum AND U.UserTypeSerNum = P.PatientSerNum and " +
 		"U.Username = ? order by CAST(DATE_FORMAT(Q.DateAdded, '%Y-%m-%d') AS char(30)) desc";
-//    return "SELECT Questionnaire.CompletedFlag, Questionnaire.DateAdded, Questionnaire.PatientQuestionnaireDBSerNum, Questionnaire.CompletionDate, Questionnaire.QuestionnaireSerNum, QuestionnaireControl.QuestionnaireDBSerNum FROM QuestionnaireControl, Questionnaire, Patient, Users WHERE QuestionnaireControl.QuestionnaireControlSerNum = Questionnaire.QuestionnaireControlSerNum AND Questionnaire.PatientSerNum = Patient.PatientSerNum AND Users.UserTypeSerNum = Patient.PatientSerNum AND Users.Username = ?";
 };
+
 /*exports.getPatientFieldsForPasswordReset=function(userID)
  {
  return 'SELECT Patient.SSN, Patient.PatientSerNum FROM Patient, Users WHERE Users.Username LIKE '+"\'"+ userID+"\'"+'AND Users.UserTypeSerNum = Patient.PatientSerNum';
