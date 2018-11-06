@@ -275,6 +275,33 @@ function preparePromiseArrayFields(userId,timestamp,arrayTables) {
  * @param parameters
  * @return {Promise}
  */
+exports.updateReadStatus=function(userId, parameters)
+{
+    let r = Q.defer();
+
+    let table, serNum;
+    if(parameters && parameters.Field && parameters.Id && requestMappings.hasOwnProperty(parameters.Field) ) {
+        ({table, serNum} = requestMappings[parameters.Field]);
+
+        exports.runSqlQuery(queries.updateReadStatus(),[table, table, serNum, parameters.Id]).then(()=>{
+            r.resolve({Response:'success'});
+        }).catch((err)=>{
+            r.reject({Response:'error', Reason:err});
+        });
+
+    }else {
+        r.reject({Response: 'error', Reason: 'Invalid read status field'});
+    }
+    return r.promise;
+};
+
+/**
+ * readMaterial
+ * @desc Update read status for a piece of educational material
+ * @param userId
+ * @param parameters
+ * @return {Promise}
+ */
 exports.readMaterial = function(userId, parameters){
     let r = Q.defer();
 
