@@ -309,6 +309,15 @@ exports.getMapLocation=function()
     return "SELECT * FROM HospitalMap WHERE QRMapAlias = ?;";
 };
 
+exports.updateReadStatus=function()
+{
+    return `
+        UPDATE ??
+        SET ReadStatus = 1
+        WHERE ??.?? = ?
+    `;
+};
+
 exports.getPatientDeviceLastActivity=function()
 {
     return "SELECT * FROM PatientActivityLog WHERE Username=? AND DeviceId=? ORDER BY ActivitySerNum DESC LIMIT 1;";
