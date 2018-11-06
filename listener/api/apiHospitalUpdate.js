@@ -67,10 +67,6 @@ exports.getNewNotifications = function (requestObject) {
 
 //newly added
 
-exports.readMaterial = function(requestObject){
-    return sqlInterface.readMaterial(requestObject.UserID,requestObject.Parameters);
-};
-
 //Update Read Status
 exports.updateClicked=function(requestObject)
 {
