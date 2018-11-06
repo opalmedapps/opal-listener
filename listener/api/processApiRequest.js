@@ -38,7 +38,6 @@ const API = {
     'WriteSubClicked' : apiHospitalUpdate.updateSubClicked,
     'WriteClickedBack': apiHospitalUpdate.updateClickedBack,
     'writeSubClickedBackRequest': apiHospitalUpdate.updateSubClickedBack,
-    'readMaterial': apiHospitalUpdate.readMaterial
 };
 
 /**
