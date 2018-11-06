@@ -502,9 +502,3 @@ exports.updateSubClickedBack = function()
     return `INSERT INTO PatientLog (UserId, UserAction, TableName, RefTableSerNum) 
             VALUES (?, "SUBCLICKBACK", ?, ?)`;
 };
-
-exports.readMaterial = function(){
-    return `UPDATE ??
-            SET ReadStatus = 1
-            WHERE EducationalMaterialSerNum = ?`;
-};

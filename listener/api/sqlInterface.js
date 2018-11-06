@@ -295,27 +295,6 @@ exports.updateReadStatus=function(userId, parameters)
     return r.promise;
 };
 
-/**
- * readMaterial
- * @desc Update read status for a piece of educational material
- * @param userId
- * @param parameters
- * @return {Promise}
- */
-exports.readMaterial = function(userId, parameters){
-    let r = Q.defer();
-
-    var table = 'EducationalMaterial';
-    exports.runSqlQuery(queries.readMaterial(),[table, parameters.Id])
-        .then(()=>{
-            r.resolve({Response:'just write to database'});
-        }).catch((err)=>{
-        r.reject({Response:'error',Reason:err});
-    });
-
-    return r.promise;
-};
-
 exports.updateClicked=function(userId, parameters)
 {
     let r = Q.defer();
