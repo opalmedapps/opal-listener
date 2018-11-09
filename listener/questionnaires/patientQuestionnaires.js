@@ -80,7 +80,6 @@ exports.getPatientQuestionnaires = function (rows) {
           let questionnaireDBSerNumArray = getQuestionnaireDBSerNums(rows);
 
           connection.query(queryQuestions, [[questionnaireDBSerNumArray]], function(err,  questions, fields){
-              console.log(questions);
               if(err) reject(err);
 
               getQuestionChoices(questions).then(function(questionsChoices){

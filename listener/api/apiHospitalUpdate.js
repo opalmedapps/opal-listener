@@ -65,7 +65,7 @@ exports.getNewNotifications = function (requestObject) {
     return sqlInterface.getNewNotifications(requestObject);
 };
 
-//newly added
+// Functions below added by Tongyou (Eason) Yang
 
 //Update Read Status
 exports.updateClicked=function(requestObject)
@@ -98,3 +98,5 @@ exports.updateSubClickedBack = function(requestObject){
     console.log("in updateSubClickedBack function api hospital");
     return sqlInterface.updateSubClickedBack(requestObject.UserID, requestObject.Parameters);
 };
+
+// End of functions added by Tongyou (Eason) Yang
