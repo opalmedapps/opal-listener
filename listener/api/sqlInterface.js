@@ -295,13 +295,15 @@ exports.updateReadStatus=function(userId, parameters)
     return r.promise;
 };
 
+// Logs when a user clicks on an item.
+// Author: Tongyou (Eason) Yang
 exports.updateClicked=function(userId, parameters)
 {
     let r = Q.defer();
 
-    let table, serNum;
+    let table;
     if(parameters && parameters.Field && parameters.Id && requestMappings.hasOwnProperty(parameters.Field) ) {
-        ({table, serNum} = requestMappings[parameters.Field]);
+        ({table} = requestMappings[parameters.Field]);
     }else{
         r.reject({Response:'error',Reason:'Invalid read status field'});
     }
@@ -310,20 +312,21 @@ exports.updateClicked=function(userId, parameters)
         .then(()=>{
             r.resolve({Response:'success'});
         }).catch((err)=>{
-        r.reject({Response:'error',Reason:err});
-    });
+            r.reject({Response:'error',Reason:err});
+        });
 
     return r.promise;
 };
 
-//update scroll To Bottom field in education material table
+// Logs when a user scrolls to the bottom of an item.
+// Author: Tongyou (Eason) Yang
 exports.updateScrollToBottom=function(userId, parameters){
 
     let r = Q.defer();
 
-    let table, serNum;
+    let table;
     if(parameters && parameters.Field && parameters.Id && requestMappings.hasOwnProperty(parameters.Field) ) {
-        ({table, serNum} = requestMappings[parameters.Field]);
+        ({table} = requestMappings[parameters.Field]);
     }else{
         r.reject({Response:'error',Reason:'Invalid scroll to bottom field'});
     }
@@ -332,49 +335,52 @@ exports.updateScrollToBottom=function(userId, parameters){
         .then(()=>{
             r.resolve({Response:'success'});
         }).catch((err)=>{
-        r.reject({Response:'error',Reason:err});
-    });
+            r.reject({Response:'error',Reason:err});
+        });
 
     return r.promise;
 };
 
+// Logs when a user scrolls to the bottom of a sub-item.
+// Author: Tongyou (Eason) Yang
 exports.updateSubScrollToBottom = function(userId, parameters){
-    console.log("in updateSubScrollToBottom function sqlInterface");
     let r = Q.defer();
 
     var table = 'EducationalMaterialTOC';
     exports.runSqlQuery(queries.updateSubScrollToBottom(),[parameters.patientId, table, parameters.TocSerNum])
         .then(()=>{
-            r.resolve({Response:'just write to database'});
+            r.resolve({Response:'success'});
         }).catch((err)=>{
-        r.reject({Response:'error',Reason:err});
-    });
+            r.reject({Response:'error',Reason:err});
+        });
 
     return r.promise;
 };
 
+// Logs when a user clicks on a sub-item.
+// Author: Tongyou (Eason) Yang
 exports.updateSubClicked = function(userId, parameters){
-    console.log("in updateSubClicked function sqlInterface");
     let r = Q.defer();
 
     var table = 'EducationalMaterialTOC';
     exports.runSqlQuery(queries.updateSubClicked(),[parameters.patientId, table, parameters.TocSerNum])
         .then(()=>{
-            r.resolve({Response:'just write to database'});
+            r.resolve({Response:'success'});
         }).catch((err)=>{
-        r.reject({Response:'error',Reason:err});
-    });
+            r.reject({Response:'error',Reason:err});
+        });
 
     return r.promise;
 };
 
+// Logs when a user clicks back from an item.
+// Author: Tongyou (Eason) Yang
 exports.updateClickedBack = function(userId, parameters){
-    console.log("in updateClickedBack function sqlInterface");
     let r = Q.defer();
 
-    let table, serNum;
+    let table;
     if(parameters && parameters.Field && parameters.Id && requestMappings.hasOwnProperty(parameters.Field) ) {
-        ({table, serNum} = requestMappings[parameters.Field]);
+        ({table} = requestMappings[parameters.Field]);
     }else{
         r.reject({Response:'error',Reason:'Invalid clicked back field'});
     }
@@ -383,23 +389,24 @@ exports.updateClickedBack = function(userId, parameters){
         .then(()=>{
             r.resolve({Response:'success'});
         }).catch((err)=>{
-        r.reject({Response:'error',Reason:err});
-    });
+            r.reject({Response:'error',Reason:err});
+        });
 
     return r.promise;
 };
 
+// Logs when a user clicks back from a sub-item.
+// Author: Tongyou (Eason) Yang
 exports.updateSubClickedBack = function(userId, parameters){
-    console.log("in updateSubClickedBack function sqlInterface");
     let r = Q.defer();
 
     var table = 'EducationalMaterialTOC';
     exports.runSqlQuery(queries.updateSubClickedBack(),[parameters.patientId, table, parameters.TocSerNum])
         .then(()=>{
-            r.resolve({Response:'just write to sub clicked back'});
+            r.resolve({Response:'success'});
         }).catch((err)=>{
-        r.reject({Response:'error',Reason:err});
-    });
+            r.reject({Response:'error',Reason:err});
+        });
 
     return r.promise;
 };
@@ -477,7 +484,9 @@ function hasAlreadyAttemptedCheckin(patientSerNum){
         else {
             exports.runSqlQuery(queries.getPatientCheckinPushNotifications(), [patientSerNum]).then((rows) => {
                 if (rows.length === 0) resolve(false);
-                else resolve(true);
+                // YM 2018-05-25 - Temporary putting as false for now to bypass the checking of notification table.
+                //                 Technically, it should be checking the appointment table.
+                else resolve(false);
             }).catch((err) => {
                 reject({Response: 'error', Reason: err});
             })
@@ -564,16 +573,16 @@ exports.updateAccountField=function(requestObject) {
                     delete requestObject.Parameters.NewValue;
                     r.resolve({Response:'success'});
                 }).catch((err)=>{
-                r.reject({Response:'error',Reason:err});
-            });
+	                r.reject({Response:'error',Reason:err});
+                });
             //If not a password field update
         }else if(validFields.includes(field)){
             exports.runSqlQuery(queries.accountChange(), [field, newValue, requestObject.Token, patient.PatientSerNum])
                 .then(()=>{
                     r.resolve({Response:'success'});
                 }).catch((err)=>{
-                r.reject({Response:'error',Reason:err});
-            });
+                    r.reject({Response:'error',Reason:err});
+                });
         }
     });
     return r.promise;
@@ -615,8 +624,8 @@ exports.inputFeedback = function(requestObject) {
                 (new Mail()).sendMail(email, subject, feedback, replyTo);
 	            r.resolve({Response:'success'});
             }).catch((err)=>{
-            r.reject({Response:'error',Reason:err});
-        });
+                r.reject({Response:'error',Reason:err});
+            });
     });
     return r.promise;
 };
@@ -659,9 +668,9 @@ exports.updateDeviceIdentifier = function(requestObject, parameters) {
                 logger.log('debug', 'successfully updated device identifiers');
                 r.resolve({Response:'success'});
             }).catch((error)=>{
-            logger.log('error', 'Error updating device identifiers due to '+ error);
-            r.reject({Response:'error', Reason:'Error updating device identifiers due to '+error});
-        });
+                logger.log('error', 'Error updating device identifiers due to '+ error);
+                r.reject({Response:'error', Reason:'Error updating device identifiers due to '+error});
+            });
     }).catch((error)=>{
         logger.log('error', 'Error getting patient fields due to '+ error);
         r.reject({Response:'error', Reason:'Error getting patient fields due to '+error});
@@ -682,8 +691,8 @@ exports.addToActivityLog=function(requestObject)
         .then(()=>{
             r.resolve({Response:'success'});
         }).catch((err)=>{
-        r.reject({Response:'error', Reason:err});
-    });
+            r.reject({Response:'error', Reason:err});
+        });
     return r.promise;
 };
 
@@ -697,8 +706,8 @@ exports.getFirstEncryption=function(requestObject) {
         .then((rows)=>{
             r.resolve(rows);
         }).catch((err)=>{
-        r.reject({Response:'error', Reason:err});
-    });
+            r.reject({Response:'error', Reason:err});
+        });
     return r.promise;
 };
 
@@ -852,12 +861,12 @@ exports.inputEducationalMaterialRating = function(requestObject)
     }
 
     exports.runSqlQuery(queries.insertEducationalMaterialRatingQuery(),
-        [ EducationalMaterialControlSerNum, PatientSerNum, RatingValue, requestObject.Token])
+        [EducationalMaterialControlSerNum, PatientSerNum, RatingValue, requestObject.Token])
         .then(()=>{
             r.resolve({Response:'success'});
         }).catch((err)=>{
-        r.reject({Response:'error',Reason:err});
-    });
+            r.reject({Response:'error',Reason:err});
+        });
     return r.promise;
 };
 
@@ -883,8 +892,8 @@ function getPatientFromEmail(email) {
             if(rows.length === 0) r.reject({Response:'error',Reason:"No User match in DB"});
             r.resolve(rows[0]);
         }).catch((err)=>{
-        r.reject(err);
-    });
+            r.reject(err);
+        });
     return r.promise;
 }
 
@@ -901,8 +910,8 @@ exports.getPasswordForVerification = function(email) {
             if(rows.length === 0) r.reject({Response:'error',Reason:"No User match in DB"});
             r.resolve(rows[0]);
         }).catch((err)=> {
-        r.reject({Response: err, Reason:"Problem Fetching Password for verification"});
-    });
+            r.reject({Response: err, Reason:"Problem Fetching Password for verification"});
+        });
     return r.promise;
 };
 
@@ -1003,7 +1012,15 @@ function getEducationalMaterialTableOfContents(rows)
     return r.promise;
 }
 
-//Obtains the educational material table of contents and adds it to the pertinent materials
+/**
+ * getEducationTableOfContentsAndPackages
+ * @desc Obtains the educational material table of contents and adds it to the pertinent materials.
+ *       Obtains package contents and adds it to the package.
+ *
+ *       Original function getEducationTableOfContents modified by Tongyou (Eason) Yang to manage packages.
+ * @param rows
+ * @returns {*}
+ */
 function getEducationTableOfContentsAndPackages(rows)
 {
     var r = Q.defer();
@@ -1266,8 +1283,7 @@ exports.getQuestionnaires = function(requestObject){
     var r = Q.defer();
     exports.runSqlQuery(queries.patientQuestionnaireTableFields(), [requestObject.UserID, null, null])
         .then(function (queryRows) {
-            // return questionnaires.getPatientQuestionnaires(queryRows)
-            return [];
+            return questionnaires.getPatientQuestionnaires(queryRows);
         })
         .then(function (result) {
             var obj = {};
@@ -1301,7 +1317,7 @@ exports.getAllNotifications = function(requestObject){
     let r = Q.defer();
     exports.runSqlQuery(queries.getAllNotifications(), [requestObject.UserID])
         .then(rows => r.resolve({Data: rows})
-            .catch(err => r.reject(err)));
+        .catch(err => r.reject(err)));
     return r.promise
 };
 
@@ -1458,8 +1474,7 @@ function refresh (fields, requestObject) {
     exports.getPatientTableFields(UserId, timestamp, fields).then(rows => {
         rows.Data= utility.resolveEmptyResponse(rows.Data);
         r.resolve(rows);
-    })
-        .catch(err => r.reject(err));
+    }).catch(err => r.reject(err));
 
     return r.promise;
 }
