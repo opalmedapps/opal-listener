@@ -12,6 +12,7 @@ const logger                = require('./../logs/logger');
 const API = {
     'DeviceIdentifier': apiHospitalUpdate.updateDeviceIdentifier,
     'Log': apiPatientUpdate.logActivity,
+    'LogPatientAction': apiPatientUpdate.logPatientAction,
     'Login': apiPatientUpdate.login,
     'Logout': apiHospitalUpdate.logout,
     'Resume': apiPatientUpdate.resume,
