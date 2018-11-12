@@ -117,6 +117,10 @@ exports.logActivity = function (requestObject) {
     return Q.resolve({Response:'success'});
 };
 
+exports.logPatientAction = function(requestObject){
+    return sqlInterface.logPatientAction(requestObject);
+};
+
 exports.getQuestionnaires = function (requestObject) {
     return sqlInterface.getQuestionnaires(requestObject);
 };

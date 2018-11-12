@@ -285,6 +285,21 @@ exports.logActivity=function(requestObject)
     return "INSERT INTO PatientActivityLog (`ActivitySerNum`,`Request`,`Username`, `DeviceId`,`SessionId`,`DateTime`,`LastUpdated`) VALUES (NULL,'"+requestObject.Request+ "', '"+requestObject.UserID+ "', '"+requestObject.DeviceId+"','"+requestObject.Token+"', CURRENT_TIMESTAMP ,CURRENT_TIMESTAMP )";
 };
 
+/**
+ * logPatientAction
+ * @author Stacey Beard
+ * @desc Query that logs a patient action (CLICK, SCROLLTOBOTTOM, etc.) in the database table PatientActionLog.
+ *       The database entry for the item that was acted upon (such as a piece of educational material) is specified
+ *       by the fields RefTable and RefTableSerNum. ActionTime indicates the time of the action as reported by the app.
+ * @returns {string}
+ */
+exports.logPatientAction = function(){
+    return `INSERT INTO PatientActionLog
+               (\`PatientSerNum\`, \`Action\`, \`RefTable\`, \`RefTableSerNum\`, \`ActionTime\`)
+               VALUES (?, ?, ?, ?, ?)
+            ;`
+};
+
 exports.securityQuestionEncryption=function(){
     return "SELECT Password FROM Users WHERE Username = ?";
 };
