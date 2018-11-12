@@ -295,6 +295,79 @@ exports.updateReadStatus=function(userId, parameters)
     return r.promise;
 };
 
+/**
+ * logPatientAction
+ * @author Stacey Beard, based on work by Tongyou (Eason) Yang
+ * @desc Logs a patient action in the table PatientActionLog.
+ *
+ * requestObject must include the following fields:
+ * @param requestObject
+ * @param requestObject.Parameters
+ * @param requestObject.Parameters.Action The action taken by the user (ex: CLICK, SCROLLTOBOTTOM, etc.).
+ * @param requestObject.Parameters.RefTable The table containing the item the user acted upon
+ *                                          (ex: EducationalMaterialControl).
+ * @param requestObject.Parameters.RefTableSerNum The SerNum identifying the item the user acted upon in RefTable
+ *                                                (ex: SerNum of a row in EducationalMaterialControl).
+ * @param requestObject.Parameters.ActionTime The time at which the action occurred, in format 'yyyy-MM-dd HH:mm:ss',
+ *                                            as reported by the app.
+ * @returns {*}
+ */
+exports.logPatientAction = function(requestObject){
+
+    let r = Q.defer();
+
+    // Check that the correct parameters are given.
+    let {Action, RefTable, RefTableSerNum, ActionTime} = requestObject.Parameters;
+    if(!Action) {
+        r.reject({Response:'error',Reason:'Missing parameter Action for request LogPatientAction.'});
+    }
+    else if(!RefTable) {
+        r.reject({Response:'error',Reason:'Missing parameter RefTable for request LogPatientAction.'});
+    }
+    else if(!RefTableSerNum) {
+        r.reject({Response:'error',Reason:'Missing parameter RefTableSerNum for request LogPatientAction.'});
+    }
+    else if(!ActionTime) {
+        r.reject({Response:'error',Reason:'Missing parameter ActionTime for request LogPatientAction.'});
+    }
+    else{
+        // If the correct parameters were given, look up the user's PatientSerNum.
+        getPatientFromEmail(requestObject.UserEmail).then((patient)=> {
+
+            // Check that the response produced a patientSerNum.
+            if (patient.PatientSerNum) {
+                let patientSerNum = patient.PatientSerNum;
+
+                // Log the patient action in the database.
+                let queryParameters = [patientSerNum, Action, RefTable, RefTableSerNum, ActionTime];
+                exports.runSqlQuery(queries.logPatientAction(),queryParameters).then(()=>{
+
+                    // Done logging the action successfully.
+                    r.resolve({Response:'success'});
+
+                }).catch((err)=>{
+                    let errorReason3 = 'Error logging the patient action in the database.';
+                    logger.log('error', errorReason3);
+                    logger.log('error', JSON.stringify(err));
+                    r.reject({Response:'error',Reason:errorReason3});
+                });
+            }
+            else {
+                let errorReason2 = 'No PatientSerNum found when looking up the user in the database.';
+                logger.log('error', errorReason2);
+                logger.log('error', JSON.stringify(err));
+                r.reject({Response:'error',Reason:errorReason2});
+            }
+        }).catch((err) => {
+            let errorReason1 = 'Error looking up the user\'s PatientSerNum in the database.';
+            logger.log('error', errorReason1);
+            logger.log('error', JSON.stringify(err));
+            r.reject({Response:'error',Reason:errorReason1});
+        });
+    }
+    return r.promise;
+};
+
 // Logs when a user clicks on an item.
 // Author: Tongyou (Eason) Yang
 exports.updateClicked=function(userId, parameters)
