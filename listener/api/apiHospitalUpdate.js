@@ -64,39 +64,3 @@ exports.getAllNotifications = function (requestObject) {
 exports.getNewNotifications = function (requestObject) {
     return sqlInterface.getNewNotifications(requestObject);
 };
-
-// Functions below added by Tongyou (Eason) Yang
-
-//Update Read Status
-exports.updateClicked=function(requestObject)
-{
-    return sqlInterface.updateClicked(requestObject.UserID,requestObject.Parameters);
-};
-
-//update scroll to bottom
-exports.updateScrollToBottom=function(requestObject)
-{
-    return sqlInterface.updateScrollToBottom(requestObject.UserID,requestObject.Parameters);
-};
-
-exports.updateSubScrollToBottom = function(requestObject){
-    console.log("in updateSubScrollToBottom function api hospital");
-    return sqlInterface.updateSubScrollToBottom(requestObject.UserID, requestObject.Parameters);
-};
-
-exports.updateSubClicked = function (requestObject) {
-    console.log("in updateSubClicked function api hospital");
-    return sqlInterface.updateSubClicked(requestObject.UserID, requestObject.Parameters);
-};
-
-exports.updateClickedBack = function(requestObject){
-    console.log("in updateClickedBack function api hospital");
-    return sqlInterface.updateClickedBack(requestObject.UserID,requestObject.Parameters);
-};
-
-exports.updateSubClickedBack = function(requestObject){
-    console.log("in updateSubClickedBack function api hospital");
-    return sqlInterface.updateSubClickedBack(requestObject.UserID, requestObject.Parameters);
-};
-
-// End of functions added by Tongyou (Eason) Yang
