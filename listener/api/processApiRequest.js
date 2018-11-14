@@ -33,12 +33,6 @@ const API = {
     'QuestionnaireAnswers': apiHospitalUpdate.inputQuestionnaireAnswers,
     'Read': apiHospitalUpdate.updateReadStatus,
     'PFPMembers': apiPatientUpdate.getPatientsForPatientsMembers,
-    'Clicked': apiHospitalUpdate.updateClicked,
-    'WriteScrollToBottom': apiHospitalUpdate.updateScrollToBottom,
-    'WriteSubScrollToBottom' : apiHospitalUpdate.updateSubScrollToBottom,
-    'WriteSubClicked' : apiHospitalUpdate.updateSubClicked,
-    'WriteClickedBack': apiHospitalUpdate.updateClickedBack,
-    'writeSubClickedBackRequest': apiHospitalUpdate.updateSubClickedBack,
 };
 
 /**
