@@ -1,3 +1,6 @@
+Version 1.0.1.2:
+ - Merge branch 'hotfix-1.0.1.1'
+
 Version 1.0.1.1:
  - Modified the patient appointment query to use the getTranslation functino
  -    --- Merging the changes from PreProdDev Merge branch 'PreProdDev'
