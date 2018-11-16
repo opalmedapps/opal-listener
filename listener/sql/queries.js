@@ -35,7 +35,7 @@ exports.patientAppointmentsTableFields=function()
           "from HospitalMap HM2, " +
   	         "( SELECT Appt.AppointmentSerNum, " +
                   "A.AliasSerNum, " +
-                  "getTranslation('Alias', 'AliasName_EN', IfNull(A.AliasName_EN, '')) AS AppointmentType_EN, " +
+                  "getTranslation('Alias', 'AliasName_EN', IfNull(A.AliasName_EN, ''), A.AliasSerNum) AS AppointmentType_EN, " +
                   "IfNull(A.AliasName_FR, '') AS AppointmentType_FR, " +
                   "IfNull(A.AliasDescription_EN, '') AS AppointmentDescription_EN, " +
                   "IfNull(A.AliasDescription_FR, '') AS AppointmentDescription_FR, " +
