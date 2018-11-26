@@ -336,6 +336,29 @@ exports.getMapLocation=function()
     return "SELECT * FROM HospitalMap WHERE QRMapAlias = ?;";
 };
 
+/**
+ * getPackageContents
+ * @author Stacey Beard
+ * @date 2018-11-19
+ * @desc Query that returns the contents of a specified education material package, at a single level of depth.
+ * @returns {string}
+ */
+exports.getPackageContents = function(){
+    return `SELECT EducationalMaterialPackageContent.OrderNum, EducationalMaterialControl.EducationalMaterialControlSerNum,
+                   EducationalMaterialControl.ShareURL_EN, EducationalMaterialControl.ShareURL_FR,
+                   EducationalMaterialControl.EducationalMaterialType_EN, EducationalMaterialControl.EducationalMaterialType_FR,
+                   EducationalMaterialControl.Name_EN, EducationalMaterialControl.Name_FR,  
+                   EducationalMaterialControl.URL_EN, EducationalMaterialControl.URL_FR 
+    
+            FROM EducationalMaterialPackageContent, EducationalMaterialControl
+     
+            WHERE EducationalMaterialPackageContent.EducationalMaterialControlSerNum = EducationalMaterialControl.EducationalMaterialControlSerNum
+              AND EducationalMaterialPackageContent.ParentSerNum = ?
+     
+            ORDER BY EducationalMaterialPackageContent.OrderNum
+            ;`
+};
+
 exports.updateReadStatus=function()
 {
     return `

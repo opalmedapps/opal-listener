@@ -87,6 +87,11 @@ exports.getMapLocation=function(requestObject)
    return sqlInterface.getMapLocation(requestObject);
 };
 
+// Get the contents of an educational material package.
+exports.getPackageContents = function(requestObject){
+    return sqlInterface.getPackageContents(requestObject);
+};
+
 //Get Document Content
 exports.getDocumentsContent=function(requestObject)
 {

@@ -39,7 +39,7 @@ const pool = mysql.createPool(dbCredentials);
 
 /**
  * Table mappings and process data functions for results obtained from the database. Exporting function for testing purposes.
- * @type {{Patient: {sql, processFunction: loadProfileImagePatient, numberOfLastUpdated: number}, Documents: {sql, numberOfLastUpdated: number, table: string, serNum: string}, Doctors: {sql, processFunction: loadImageDoctor, numberOfLastUpdated: number}, Diagnosis: {sql, numberOfLastUpdated: number}, Questionnaires: {sql, numberOfLastUpdated: number, processFunction: *}, Appointments: {sql, numberOfLastUpdated: number, processFunction: combineResources, table: string, serNum: string}, Notifications: {sql, numberOfLastUpdated: number, table: string, serNum: string}, Tasks: {sql, numberOfLastUpdated: number}, LabTests: {sql, numberOfLastUpdated: number}, TxTeamMessages: {sql, numberOfLastUpdated: number, table: string, serNum: string}, EducationalMaterial: {sql, processFunction: getEducationTableOfContentsAndPackages, numberOfLastUpdated: number, table: string, serNum: string}, Announcements: {sql, numberOfLastUpdated: number, table: string, serNum: string}}}
+ * @type {{Patient: {sql, processFunction: loadProfileImagePatient, numberOfLastUpdated: number}, Documents: {sql, numberOfLastUpdated: number, table: string, serNum: string}, Doctors: {sql, processFunction: loadImageDoctor, numberOfLastUpdated: number}, Diagnosis: {sql, numberOfLastUpdated: number}, Questionnaires: {sql, numberOfLastUpdated: number, processFunction: *}, Appointments: {sql, numberOfLastUpdated: number, processFunction: combineResources, table: string, serNum: string}, Notifications: {sql, numberOfLastUpdated: number, table: string, serNum: string}, Tasks: {sql, numberOfLastUpdated: number}, LabTests: {sql, numberOfLastUpdated: number}, TxTeamMessages: {sql, numberOfLastUpdated: number, table: string, serNum: string}, EducationalMaterial: {sql, processFunction: getEducationTableOfContents, numberOfLastUpdated: number, table: string, serNum: string}, Announcements: {sql, numberOfLastUpdated: number, table: string, serNum: string}}}
  */
 const requestMappings =
     {
@@ -99,7 +99,7 @@ const requestMappings =
         },
         'EducationalMaterial': {
             sql: queries.patientEducationalMaterialTableFields(),
-            processFunction: getEducationTableOfContentsAndPackages,
+            processFunction: getEducationTableOfContents,
             numberOfLastUpdated: 5,
             table: 'EducationalMaterial',
             serNum: 'EducationalMaterialSerNum'
@@ -121,7 +121,7 @@ const requestMappings =
 
 /**
  * getSqlApiMapping
- * @return {{Patient: {sql, processFunction: loadProfileImagePatient, numberOfLastUpdated: number}, Documents: {sql, numberOfLastUpdated: number, table: string, serNum: string}, Doctors: {sql, processFunction: loadImageDoctor, numberOfLastUpdated: number}, Diagnosis: {sql, numberOfLastUpdated: number}, Questionnaires: {sql, numberOfLastUpdated: number, processFunction: *}, Appointments: {sql, numberOfLastUpdated: number, processFunction: combineResources, table: string, serNum: string}, Notifications: {sql, numberOfLastUpdated: number, table: string, serNum: string}, Tasks: {sql, numberOfLastUpdated: number}, LabTests: {sql, numberOfLastUpdated: number}, TxTeamMessages: {sql, numberOfLastUpdated: number, table: string, serNum: string}, EducationalMaterial: {sql, processFunction: getEducationTableOfContentsAndPackages, numberOfLastUpdated: number, table: string, serNum: string}, Announcements: {sql, numberOfLastUpdated: number, table: string, serNum: string}}}
+ * @return {{Patient: {sql, processFunction: loadProfileImagePatient, numberOfLastUpdated: number}, Documents: {sql, numberOfLastUpdated: number, table: string, serNum: string}, Doctors: {sql, processFunction: loadImageDoctor, numberOfLastUpdated: number}, Diagnosis: {sql, numberOfLastUpdated: number}, Questionnaires: {sql, numberOfLastUpdated: number, processFunction: *}, Appointments: {sql, numberOfLastUpdated: number, processFunction: combineResources, table: string, serNum: string}, Notifications: {sql, numberOfLastUpdated: number, table: string, serNum: string}, Tasks: {sql, numberOfLastUpdated: number}, LabTests: {sql, numberOfLastUpdated: number}, TxTeamMessages: {sql, numberOfLastUpdated: number, table: string, serNum: string}, EducationalMaterial: {sql, processFunction: getEducationTableOfContents, numberOfLastUpdated: number, table: string, serNum: string}, Announcements: {sql, numberOfLastUpdated: number, table: string, serNum: string}}}
  */
 exports.getSqlApiMappings = function() {
     return requestMappings;
@@ -725,6 +725,57 @@ exports.getMapLocation=function(requestObject) {
 };
 
 /**
+ * getPackageContents
+ * @author Stacey Beard
+ * @date 2018-11-15
+ * @desc Gets and returns the contents of a specified package, at a single level of depth.
+ *       For example, if the function is called to get the contents of Package 1, which includes a booklet and
+ *       Package 2, the function will return an array containing the full contents of the booklet, and the identifying
+ *       information of Package 2, not the full contents of Package 2. This function must be called again to get the
+ *       contents of Package 2 (which itself may contain other packages).
+ *
+ * requestObject must include the following fields:
+ * @param requestObject
+ * @param requestObject.Parameters
+ * @param requestObject.Parameters.EducationalMaterialControlSerNum The SerNum of the package for which to get
+ *                                                                  the contents.
+ * @returns {*}
+ */
+exports.getPackageContents = function(requestObject){
+    let r = Q.defer();
+
+    // Check that the correct parameters are given.
+    let {EducationalMaterialControlSerNum} = requestObject.Parameters;
+    if(!EducationalMaterialControlSerNum) {
+        r.reject({Response:'error',Reason:'Missing parameter EducationalMaterialControlSerNum for request EducationalPackageContents.'});
+    }
+    else{
+        // If the correct parameters were given, get the package contents.
+        let queryParameters = [EducationalMaterialControlSerNum];
+        exports.runSqlQuery(queries.getPackageContents(),queryParameters).then((rows)=>{
+
+            // Done getting the package contents.
+            // Now, the contents must be processed like any other educational material to attach the tables of contents.
+            getEducationalMaterialTableOfContents(rows).then((processedRows)=>{
+                r.resolve({Response:'success',Data:processedRows});
+
+            }).catch((err)=>{
+                let errorReason2 = 'Error attaching tables of contents to package materials.';
+                logger.log('error', errorReason2);
+                logger.log('error', JSON.stringify(err));
+                r.reject({Response:'error',Reason:errorReason2});
+            });
+        }).catch((err)=>{
+            let errorReason1 = 'Error getting package contents from the database.';
+            logger.log('error', errorReason1);
+            logger.log('error', JSON.stringify(err));
+            r.reject({Response:'error',Reason:errorReason1});
+        });
+    }
+    return r.promise;
+};
+
+/**
  * @name increaseSecurityAnswerAttempt
  * @description Increase security answer attempt by one
  * @param requestObject
@@ -970,16 +1021,8 @@ function getEducationalMaterialTableOfContents(rows)
     return r.promise;
 }
 
-/**
- * getEducationTableOfContentsAndPackages
- * @desc Obtains the educational material table of contents and adds it to the pertinent materials.
- *       Obtains package contents and adds it to the package.
- *
- *       Original function getEducationTableOfContents modified by Tongyou (Eason) Yang to manage packages.
- * @param rows
- * @returns {*}
- */
-function getEducationTableOfContentsAndPackages(rows)
+//Obtains the educational material table of contents and adds it to the pertinent materials
+function getEducationTableOfContents(rows)
 {
     var r = Q.defer();
     var indexes = [];
@@ -1005,25 +1048,16 @@ function getEducationTableOfContentsAndPackages(rows)
     }
     for (var l = 0; l < rows.length; l++) {
         promises.push(exports.runSqlQuery(queries.patientEducationalMaterialContents(),[rows[l].EducationalMaterialControlSerNum] ));
-        promises.push(exports.runSqlQuery(queries.patientEducationalMaterialPackageContents(),[rows[l].EducationalMaterialControlSerNum]));
     }
     Q.all(promises).then(
         function(results){
             for (var i = 0; i < results.length; i++) {
-                var pContentList = [];
                 if(results[i].length !== 0)
                 {
                     for (var j = 0; j < rows.length; j++) {
-                        if(rows[j].EducationalMaterialControlSerNum == results[i][0].ParentSerNum)
+                        if(rows[j].EducationalMaterialControlSerNum ==results[i][0].ParentSerNum)
                         {
                             rows[j].TableContents = results[i];
-                        }
-                        for (var k = 0; k<results[i].length; k++){
-                            if(rows[j].EducationalMaterialControlSerNum == results[i][k].PackageSerNum)
-                            {
-                                pContentList.push(results[i][k]);
-                                rows[j].PackageContents = pContentList;
-                            }
                         }
                     }
                 }
