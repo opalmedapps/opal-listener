@@ -295,7 +295,7 @@ exports.logActivity=function(requestObject)
  */
 exports.logPatientAction = function(){
     return `INSERT INTO PatientActionLog
-               (\`PatientSerNum\`, \`Action\`, \`RefTable\`, \`RefTableSerNum\`, \`ActionTime\`)
+               (PatientSerNum, Action, RefTable, RefTableSerNum, ActionTime)
                VALUES (?, ?, ?, ?, ?)
             ;`
 };
