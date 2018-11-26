@@ -117,6 +117,7 @@ exports.logActivity = function (requestObject) {
     return Q.resolve({Response:'success'});
 };
 
+// Log a patient action (clicked, scrolled to bottom, etc.).
 exports.logPatientAction = function(requestObject){
     return sqlInterface.logPatientAction(requestObject);
 };

@@ -303,7 +303,7 @@ exports.updateReadStatus=function(userId, parameters)
  * requestObject must include the following fields:
  * @param requestObject
  * @param requestObject.Parameters
- * @param requestObject.Parameters.Action The action taken by the user (ex: CLICK, SCROLLTOBOTTOM, etc.).
+ * @param requestObject.Parameters.Action The action taken by the user (ex: CLICKED, SCROLLED_TO_BOTTOM, etc.).
  * @param requestObject.Parameters.RefTable The table containing the item the user acted upon
  *                                          (ex: EducationalMaterialControl).
  * @param requestObject.Parameters.RefTableSerNum The SerNum identifying the item the user acted upon in RefTable
