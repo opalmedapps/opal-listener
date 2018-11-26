@@ -28,6 +28,7 @@ const API = {
     'Message': apiHospitalUpdate.sendMessage,
     'NotificationsAll': apiHospitalUpdate.getAllNotifications,
     'NotificationsNew': apiHospitalUpdate.getNewNotifications,
+    'EducationalPackageContents': apiPatientUpdate.getPackageContents,
     'Questionnaires': apiPatientUpdate.getQuestionnaires,
     'QuestionnaireRating': apiHospitalUpdate.inputEducationalMaterialRating,
     'QuestionnaireAnswers': apiHospitalUpdate.inputQuestionnaireAnswers,
