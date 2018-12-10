@@ -12,6 +12,7 @@ const logger                = require('./../logs/logger');
 const API = {
     'DeviceIdentifier': apiHospitalUpdate.updateDeviceIdentifier,
     'Log': apiPatientUpdate.logActivity,
+    'LogPatientAction': apiPatientUpdate.logPatientAction,
     'Login': apiPatientUpdate.login,
     'Logout': apiHospitalUpdate.logout,
     'Resume': apiPatientUpdate.resume,
@@ -27,11 +28,12 @@ const API = {
     'Message': apiHospitalUpdate.sendMessage,
     'NotificationsAll': apiHospitalUpdate.getAllNotifications,
     'NotificationsNew': apiHospitalUpdate.getNewNotifications,
+    'EducationalPackageContents': apiPatientUpdate.getPackageContents,
     'Questionnaires': apiPatientUpdate.getQuestionnaires,
     'QuestionnaireRating': apiHospitalUpdate.inputEducationalMaterialRating,
     'QuestionnaireAnswers': apiHospitalUpdate.inputQuestionnaireAnswers,
     'Read': apiHospitalUpdate.updateReadStatus,
-    'PFPMembers': apiPatientUpdate.getPatientsForPatientsMembers
+    'PFPMembers': apiPatientUpdate.getPatientsForPatientsMembers,
 };
 
 /**
