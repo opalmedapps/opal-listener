@@ -49,7 +49,7 @@ exports.updateDeviceIdentifier= function(requestObject)
     return sqlInterface.updateDeviceIdentifier(requestObject);
 };
 
-//Input rating for 
+//Input rating for
 exports.inputEducationalMaterialRating= function(requestObject)
 {
   return sqlInterface.inputEducationalMaterialRating(requestObject);
