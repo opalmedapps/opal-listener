@@ -1,3 +1,39 @@
+Version 1.0.2.0:
+ -     --- Change permission bumpversion.sh to chmod 755
+ - Merge branch 'fertility_logging_packages' into PreProdDev
+ - Remove old unused query for fetching package contents
+ - Remove the type restriction in the Educational Materials query
+ - Merge branch 'master' into fertility_logging_packages
+ - Add a new function to get package contents from the DB
+ - Add comments, remove back quotes from the logPatientAction query
+ - Merge branch 'hotfix-1.0.1.2' into PreProdDev
+ - Merge branch 'hotfix-1.0.1.2'
+ - Modified the getTranslation function to include the record number
+ - Merge-fix: remove redundant logging requests
+ - Merge-fix: add new request LogPatientAction
+ - Merge-fix: clean up code (style, comments)
+ - Merge-fix: remove readMaterial request & function
+ - Merge-fix: restore the function updateReadStatus
+ - Merge remote-tracking branch 'origin/master' into fertility_logging_packages
+ - Add checks to prevent patientQuestionnaires.js from crashing when it can't get questionnaires
+ - Merge branch 'hotfix-1.0.1.1' into PreProdDev
+ - Configure for local database
+ - Configure for local Firebase
+ - Merge branch 'ListenerEason' into fertility_logging_packages
+ - backend merged
+ - merge1
+ -  quick review of changes
+ - db redesign
+ - PatientLog
+ - 9
+ - add package
+ - 9
+ - finished all logging system, click and scroll for doc and subdoc
+ - change ReadStatus to Clicked in educationmaterial
+ - add backend function for scroll to bottom
+ - scrolled to bottom not added to patientEducationalMaterialTableFields
+ - add request for logging, and query
+
 Version 1.0.1.2:
  - Merge branch 'hotfix-1.0.1.1'
 
