@@ -110,8 +110,6 @@ exports.getDocumentsContentQuery = function()
     return "SELECT Document.DocumentSerNum, Document.FinalFileName FROM Document, Patient, Users WHERE Document.DocumentSerNum IN ? AND Document.PatientSerNum = Patient.PatientSerNum AND Patient.PatientSerNum = Users.UserTypeSerNum AND Users.Username = ?";
 };
 
-
-
 exports.patientTeamMessagesTableFields=function()
 {
     return "SELECT TxRecords.TxTeamMessageSerNum, TxRecords.DateAdded, TxRecords.ReadStatus, Post.PostType, Post.Body_EN, Post.Body_FR, Post.PostName_EN, Post.PostName_FR FROM PostControl as Post, TxTeamMessage as TxRecords, Patient, Users WHERE Post.PostControlSerNum=TxRecords.PostControlSerNum AND TxRecords.PatientSerNum=Patient.PatientSerNum AND Patient.PatientSerNum=Users.UserTypeSerNum AND Users.Username= ? AND (TxRecords.LastUpdated > ? OR Post.LastUpdated > ?);";
@@ -129,14 +127,15 @@ exports.patientEducationalMaterialTableFields=function()
     " WHERE (EduMat.EducationalMaterialControlSerNum = EduControl.EducationalMaterialControlSerNum OR " +
     " (TOC.ParentSerNum = EduMat.EducationalMaterialControlSerNum AND TOC.EducationalMaterialControlSerNum = EduControl.EducationalMaterialControlSerNum)) " +
     " AND Phase.PhaseInTreatmentSerNum = EduControl.PhaseInTreatmentSerNum AND  EduMat.PatientSerNum = Patient.PatientSerNum AND Patient.PatientSerNum = Users.UserTypeSerNum " +
-    " AND EduControl.EducationalMaterialType_EN in ('Booklet', 'Factsheet', 'Treatment Guidelines', 'Video') " +
     " AND Users.Username = ? AND (EduMat.LastUpdated > ? OR EduControl.LastUpdated > ? OR Phase.LastUpdated > ? OR TOC.LastUpdated > ?) " +
     " order by FIELD(PhaseName_EN,'Prior To Treatment','During Treatment','After Treatment') ;";
 };
+
 exports.patientEducationalMaterialContents=function()
 {
-    return "SELECT EducationalMaterialTOC.OrderNum, EducationalMaterialTOC.ParentSerNum, EducationalMaterialTOC.EducationalMaterialControlSerNum, EduControl.EducationalMaterialType_EN, EduControl.EducationalMaterialType_FR, EduControl.Name_EN, EduControl.Name_FR, EduControl.URL_FR, EduControl.URL_EN FROM EducationalMaterialControl as EduControl, EducationalMaterialTOC WHERE EduControl.EducationalMaterialControlSerNum = EducationalMaterialTOC.EducationalMaterialControlSerNum AND EducationalMaterialTOC.ParentSerNum = ? ORDER BY OrderNum;";
+    return "SELECT EducationalMaterialTOC.EducationalMaterialTOCSerNum ,EducationalMaterialTOC.OrderNum, EducationalMaterialTOC.ParentSerNum, EducationalMaterialTOC.EducationalMaterialControlSerNum, EduControl.EducationalMaterialType_EN, EduControl.EducationalMaterialType_FR, EduControl.Name_EN, EduControl.Name_FR, EduControl.URL_FR, EduControl.URL_EN FROM EducationalMaterialControl as EduControl, EducationalMaterialTOC WHERE EduControl.EducationalMaterialControlSerNum = EducationalMaterialTOC.EducationalMaterialControlSerNum AND EducationalMaterialTOC.ParentSerNum = ? ORDER BY OrderNum;";
 };
+
 exports.patientTasksTableFields=function()
 {
     return "SELECT DISTINCT Patient.PatientAriaSer, " +
@@ -274,6 +273,21 @@ exports.logActivity=function(requestObject)
     return "INSERT INTO PatientActivityLog (`ActivitySerNum`,`Request`,`Username`, `DeviceId`,`SessionId`,`DateTime`,`LastUpdated`) VALUES (NULL,'"+requestObject.Request+ "', '"+requestObject.UserID+ "', '"+requestObject.DeviceId+"','"+requestObject.Token+"', CURRENT_TIMESTAMP ,CURRENT_TIMESTAMP )";
 };
 
+/**
+ * logPatientAction
+ * @author Stacey Beard
+ * @desc Query that logs a patient action (CLICK, SCROLLTOBOTTOM, etc.) in the database table PatientActionLog.
+ *       The database entry for the item that was acted upon (such as a piece of educational material) is specified
+ *       by the fields RefTable and RefTableSerNum. ActionTime indicates the time of the action as reported by the app.
+ * @returns {string}
+ */
+exports.logPatientAction = function(){
+    return `INSERT INTO PatientActionLog
+               (PatientSerNum, Action, RefTable, RefTableSerNum, ActionTime)
+               VALUES (?, ?, ?, ?, ?)
+            ;`
+};
+
 exports.securityQuestionEncryption=function(){
     return "SELECT Password FROM Users WHERE Username = ?";
 };
@@ -308,6 +322,29 @@ exports.updateDeviceIdentifiers = function()
 exports.getMapLocation=function()
 {
     return "SELECT * FROM HospitalMap WHERE QRMapAlias = ?;";
+};
+
+/**
+ * getPackageContents
+ * @author Stacey Beard
+ * @date 2018-11-19
+ * @desc Query that returns the contents of a specified education material package, at a single level of depth.
+ * @returns {string}
+ */
+exports.getPackageContents = function(){
+    return `SELECT EducationalMaterialPackageContent.OrderNum, EducationalMaterialControl.EducationalMaterialControlSerNum,
+                   EducationalMaterialControl.ShareURL_EN, EducationalMaterialControl.ShareURL_FR,
+                   EducationalMaterialControl.EducationalMaterialType_EN, EducationalMaterialControl.EducationalMaterialType_FR,
+                   EducationalMaterialControl.Name_EN, EducationalMaterialControl.Name_FR,  
+                   EducationalMaterialControl.URL_EN, EducationalMaterialControl.URL_FR 
+    
+            FROM EducationalMaterialPackageContent, EducationalMaterialControl
+     
+            WHERE EducationalMaterialPackageContent.EducationalMaterialControlSerNum = EducationalMaterialControl.EducationalMaterialControlSerNum
+              AND EducationalMaterialPackageContent.ParentSerNum = ?
+     
+            ORDER BY EducationalMaterialPackageContent.OrderNum
+            ;`
 };
 
 exports.updateReadStatus=function()
