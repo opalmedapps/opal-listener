@@ -968,7 +968,13 @@ function loadImageDoctor(rows){
         if((typeof rows[key].ProfileImage !=="undefined" )&&rows[key].ProfileImage){
             const n = rows[key].ProfileImage.lastIndexOf(".");
             rows[key].DocumentType=rows[key].ProfileImage.substring(n + 1, rows[key].ProfileImage.length);
-            rows[key].ProfileImage=filesystem.readFileSync('./Doctors/'+rows[key].ProfileImage,'base64' );
+			/* Try to load the image file and if no image then return empty image string */
+			try {
+				rows[key].ProfileImage=filesystem.readFileSync(config.DOCTOR_PATH + rows[key].ProfileImage,'base64' );
+			} catch(err) {
+				rows[key].ProfileImage= '';
+			}
+
         }
     }
     deferred.resolve(rows);
