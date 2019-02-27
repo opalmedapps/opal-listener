@@ -1,3 +1,15 @@
+Version 1.0.2.1:
+ -     ---- modified gitignore to exclude listener/Doctors folder     ---- added DOCTOR_PATH to config.json     ---- added a try statement when trying to load doctor's image
+ - Merge branch 'PreProd'
+ - Merge branch 'PreProdDev' into PreProd
+ - Merge branch 'hotfix-1.0.1.2' into PreProd
+ - Merge branch 'hotfix-1.0.1.1' into PreProd
+ -    --- Merging PreProdDev Merge branch 'PreProdDev' into PreProd
+ -    --- Merging Merge branch 'PreProdDev' into PreProd
+ - Merge branch 'hotfix-1.0.0.5' into PreProd
+ - Merge branch 'hotfix-1.0.0.4' into PreProd
+ - Merge branch 'hotfix-1.0.0.3' into PreProd
+
 Version 1.0.2.0:
  -     --- Change permission bumpversion.sh to chmod 755
  - Merge branch 'fertility_logging_packages' into PreProdDev
