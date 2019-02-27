@@ -146,18 +146,23 @@ function getQuestionChoices(rows)
 {
   var r = q.defer();
   var array = [];
-  for (var i = 0; i < rows.length; i++) {
-    array.push(rows[i].QuestionSerNum);
-  };
-  connection.query(queryQuestionChoices,[[array],[array],[array]],function(err,choices,fields){
-    //console.log(err);
-    // logger.log('error', err);
-    if(err) r.reject(err);
-    var questions = attachChoicesToQuestions(rows,choices);
-    // console.log(questions);
-    // logger.log('debug', questions);
-    r.resolve(questions);
-  });
+  if (rows) {
+      for (var i = 0; i < rows.length; i++) {
+          array.push(rows[i].QuestionSerNum);
+      }
+      ;
+      connection.query(queryQuestionChoices, [[array], [array], [array]], function (err, choices, fields) {
+          //console.log(err);
+          // logger.log('error', err);
+          if (err) r.reject(err);
+          var questions = attachChoicesToQuestions(rows, choices);
+          // console.log(questions);
+          // logger.log('debug', questions);
+          r.resolve(questions);
+      });
+  } else {
+      r.resolve([]);
+  }
   return r.promise;
 }
 
@@ -204,7 +209,7 @@ function attachingQuestionnaireAnswers(opalDB)
       //console.log('line 169', err);
       if(err) r.reject(err);
       var answersQuestionnaires = {};
-      for (var i = 0; i < rows.length; i++) {
+      for (var i = 0; rows && i < rows.length; i++) {
         if(!answersQuestionnaires.hasOwnProperty(rows[i].PatientQuestionnaireDBSerNum))answersQuestionnaires[rows[i].PatientQuestionnaireDBSerNum] = [];
         answersQuestionnaires[rows[i].PatientQuestionnaireDBSerNum].push(rows[i]);
       }
