@@ -87,6 +87,11 @@ exports.getMapLocation=function(requestObject)
    return sqlInterface.getMapLocation(requestObject);
 };
 
+// Get the contents of an educational material package.
+exports.getPackageContents = function(requestObject){
+    return sqlInterface.getPackageContents(requestObject);
+};
+
 //Get Document Content
 exports.getDocumentsContent=function(requestObject)
 {
@@ -115,6 +120,11 @@ exports.logActivity = function (requestObject) {
         activityDetails: requestObject.Parameters.ActivityDetails
     });
     return Q.resolve({Response:'success'});
+};
+
+// Log a patient action (clicked, scrolled to bottom, etc.).
+exports.logPatientAction = function(requestObject){
+    return sqlInterface.logPatientAction(requestObject);
 };
 
 exports.getQuestionnaires = function (requestObject) {
