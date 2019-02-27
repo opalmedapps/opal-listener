@@ -281,16 +281,89 @@ exports.updateReadStatus=function(userId, parameters)
     let table, serNum;
     if(parameters && parameters.Field && parameters.Id && requestMappings.hasOwnProperty(parameters.Field) ) {
         ({table, serNum} = requestMappings[parameters.Field]);
-    }else{
-	    r.reject({Response:'error',Reason:'Invalid read status field'});
-    }
-	exports.runSqlQuery(queries.updateReadStatus(),[table, table, serNum, parameters.Id])
-    .then(()=>{
-	    r.resolve({Response:'success'});
-    }).catch((err)=>{
-		r.reject({Response:'error',Reason:err});
-    });
 
+        exports.runSqlQuery(queries.updateReadStatus(),[table, table, serNum, parameters.Id]).then(()=>{
+            r.resolve({Response:'success'});
+        }).catch((err)=>{
+            r.reject({Response:'error', Reason:err});
+        });
+
+    }else {
+        r.reject({Response: 'error', Reason: 'Invalid read status field'});
+    }
+    return r.promise;
+};
+
+/**
+ * logPatientAction
+ * @author Stacey Beard, based on work by Tongyou (Eason) Yang
+ * @desc Logs a patient action in the table PatientActionLog.
+ *
+ * requestObject must include the following fields:
+ * @param requestObject
+ * @param requestObject.Parameters
+ * @param requestObject.Parameters.Action The action taken by the user (ex: CLICKED, SCROLLED_TO_BOTTOM, etc.).
+ * @param requestObject.Parameters.RefTable The table containing the item the user acted upon
+ *                                          (ex: EducationalMaterialControl).
+ * @param requestObject.Parameters.RefTableSerNum The SerNum identifying the item the user acted upon in RefTable
+ *                                                (ex: SerNum of a row in EducationalMaterialControl).
+ * @param requestObject.Parameters.ActionTime The time at which the action occurred, in format 'yyyy-MM-dd HH:mm:ss',
+ *                                            as reported by the app.
+ * @returns {*}
+ */
+exports.logPatientAction = function(requestObject){
+
+    let r = Q.defer();
+
+    // Check that the correct parameters are given.
+    let {Action, RefTable, RefTableSerNum, ActionTime} = requestObject.Parameters;
+    if(!Action) {
+        r.reject({Response:'error',Reason:'Missing parameter Action for request LogPatientAction.'});
+    }
+    else if(!RefTable) {
+        r.reject({Response:'error',Reason:'Missing parameter RefTable for request LogPatientAction.'});
+    }
+    else if(!RefTableSerNum) {
+        r.reject({Response:'error',Reason:'Missing parameter RefTableSerNum for request LogPatientAction.'});
+    }
+    else if(!ActionTime) {
+        r.reject({Response:'error',Reason:'Missing parameter ActionTime for request LogPatientAction.'});
+    }
+    else{
+        // If the correct parameters were given, look up the user's PatientSerNum.
+        getPatientFromEmail(requestObject.UserEmail).then((patient)=> {
+
+            // Check that the response produced a patientSerNum.
+            if (patient.PatientSerNum) {
+                let patientSerNum = patient.PatientSerNum;
+
+                // Log the patient action in the database.
+                let queryParameters = [patientSerNum, Action, RefTable, RefTableSerNum, ActionTime];
+                exports.runSqlQuery(queries.logPatientAction(),queryParameters).then(()=>{
+
+                    // Done logging the action successfully.
+                    r.resolve({Response:'success'});
+
+                }).catch((err)=>{
+                    let errorReason3 = 'Error logging the patient action in the database.';
+                    logger.log('error', errorReason3);
+                    logger.log('error', JSON.stringify(err));
+                    r.reject({Response:'error',Reason:errorReason3});
+                });
+            }
+            else {
+                let errorReason2 = 'No PatientSerNum found when looking up the user in the database.';
+                logger.log('error', errorReason2);
+                logger.log('error', JSON.stringify(err));
+                r.reject({Response:'error',Reason:errorReason2});
+            }
+        }).catch((err) => {
+            let errorReason1 = 'Error looking up the user\'s PatientSerNum in the database.';
+            logger.log('error', errorReason1);
+            logger.log('error', JSON.stringify(err));
+            r.reject({Response:'error',Reason:errorReason1});
+        });
+    }
     return r.promise;
 };
 
@@ -301,7 +374,7 @@ exports.updateReadStatus=function(userId, parameters)
  * @return {Promise}
  */
 exports.sendMessage=function(requestObject) {
-	return exports.runSqlQuery(queries.sendMessage(requestObject));
+    return exports.runSqlQuery(queries.sendMessage(requestObject));
 };
 
 
@@ -321,7 +394,7 @@ exports.checkIn=function(requestObject) {
     const patientId = requestObject.Parameters.PatientId;
     const patientSerNum = requestObject.Parameters.PatientSerNum;
 
-		hasAlreadyAttemptedCheckin(patientSerNum)
+    hasAlreadyAttemptedCheckin(patientSerNum)
         .then(result => {
             if(result === false){
                 //Check in to aria using Johns script
@@ -368,8 +441,8 @@ function hasAlreadyAttemptedCheckin(patientSerNum){
         else {
             exports.runSqlQuery(queries.getPatientCheckinPushNotifications(), [patientSerNum]).then((rows) => {
                 if (rows.length === 0) resolve(false);
-								// YM 2018-05-25 - Temporary putting as false for now to bypass the checking of notification table.
-								//		Technically, it should be checking the appointment table.
+                // YM 2018-05-25 - Temporary putting as false for now to bypass the checking of notification table.
+                //                 Technically, it should be checking the appointment table.
                 else resolve(false);
             }).catch((err) => {
                 reject({Response: 'error', Reason: err});
@@ -414,18 +487,18 @@ exports.getDocumentsContent = function(requestObject) {
         r.reject({Response:'error',Reason:'Not an array'});
     }else{
         exports.runSqlQuery(queries.getDocumentsContentQuery(), [[documents],userID]).then((rows)=>{
-	        if(rows.length === 0) {
-		        r.resolve({Response:'success',Data:'DocumentNotFound'});
-	        } else {
-		        LoadDocuments(rows).then(function(documents) {
-			        if(documents.length === 1) r.resolve({Response:'success',Data:documents[0]});
-			        else r.resolve({Response:'success',Data:documents});
-		        }).catch(function (err) {
-			        r.reject({Response:'error', Reason:err});
-		        });
-	        }
+            if(rows.length === 0) {
+                r.resolve({Response:'success',Data:'DocumentNotFound'});
+            } else {
+                LoadDocuments(rows).then(function(documents) {
+                    if(documents.length === 1) r.resolve({Response:'success',Data:documents[0]});
+                    else r.resolve({Response:'success',Data:documents});
+                }).catch(function (err) {
+                    r.reject({Response:'error', Reason:err});
+                });
+            }
         }).catch((err)=>{
-	        r.reject({Response:'error',Reason:err});
+            r.reject({Response:'error',Reason:err});
         });
     }
     return r.promise;
@@ -447,26 +520,26 @@ exports.updateAccountField=function(requestObject) {
         let field = requestObject.Parameters.FieldToChange;
         let newValue = requestObject.Parameters.NewValue;
         if ( !field || !newValue || typeof field !== 'string' || typeof newValue !== 'string')
-                r.resolve({Response:'error',Reason:'Invalid Parameters'});
+            r.resolve({Response:'error',Reason:'Invalid Parameters'});
         if(field === 'Password') {
             //Hash the password before storing
             let hashedPassword = utility.hash(newValue);
             //Update database
             exports.runSqlQuery(queries.setNewPassword(), [hashedPassword, patient.PatientSerNum])
                 .then(()=>{
-	                delete requestObject.Parameters.NewValue;
-	                r.resolve({Response:'success'});
+                    delete requestObject.Parameters.NewValue;
+                    r.resolve({Response:'success'});
                 }).catch((err)=>{
 	                r.reject({Response:'error',Reason:err});
                 });
             //If not a password field update
         }else if(validFields.includes(field)){
             exports.runSqlQuery(queries.accountChange(), [field, newValue, requestObject.Token, patient.PatientSerNum])
-	            .then(()=>{
-		            r.resolve({Response:'success'});
-	            }).catch((err)=>{
-	            r.reject({Response:'error',Reason:err});
-            });
+                .then(()=>{
+                    r.resolve({Response:'success'});
+                }).catch((err)=>{
+                    r.reject({Response:'error',Reason:err});
+                });
         }
     });
     return r.promise;
@@ -480,8 +553,8 @@ exports.updateAccountField=function(requestObject) {
 exports.inputFeedback = function(requestObject) {
     let r = Q.defer();
     let email = requestObject.UserEmail;
-	if(!email) r.reject({Response:'error',Reason:`Invalid parameter email`});
-	getPatientFromEmail(email).then((patient)=> {
+    if(!email) r.reject({Response:'error',Reason:`Invalid parameter email`});
+    getPatientFromEmail(email).then((patient)=> {
 //        let {type, feedback, appRating} = requestObject.Parameters;
 //		logger.log('debug', 'Request Object Parameters: ' + JSON.stringify(requestObject.Parameters));
 		let feedback = requestObject.Parameters.FeedbackContent;
@@ -508,7 +581,7 @@ exports.inputFeedback = function(requestObject) {
                 (new Mail()).sendMail(email, subject, feedback, replyTo);
 	            r.resolve({Response:'success'});
             }).catch((err)=>{
-	            r.reject({Response:'error',Reason:err});
+                r.reject({Response:'error',Reason:err});
             });
     });
     return r.promise;
@@ -549,12 +622,12 @@ exports.updateDeviceIdentifier = function(requestObject, parameters) {
 
         exports.runSqlQuery(queries.updateDeviceIdentifiers(),[user.PatientSerNum, requestObject.DeviceId, identifiers.registrationId, deviceType,requestObject.Token, identifiers.registrationId, requestObject.Token])
             .then(()=>{
-            logger.log('debug', 'successfully updated device identifiers');
-            r.resolve({Response:'success'});
-        }).catch((error)=>{
-            logger.log('error', 'Error updating device identifiers due to '+ error);
-            r.reject({Response:'error', Reason:'Error updating device identifiers due to '+error});
-        });
+                logger.log('debug', 'successfully updated device identifiers');
+                r.resolve({Response:'success'});
+            }).catch((error)=>{
+                logger.log('error', 'Error updating device identifiers due to '+ error);
+                r.reject({Response:'error', Reason:'Error updating device identifiers due to '+error});
+            });
     }).catch((error)=>{
         logger.log('error', 'Error getting patient fields due to '+ error);
         r.reject({Response:'error', Reason:'Error getting patient fields due to '+error});
@@ -573,9 +646,9 @@ exports.addToActivityLog=function(requestObject)
     let {Request, UserID, DeviceId, Token} = requestObject;
     exports.runSqlQuery(queries.logActivity(),[Request, UserID, DeviceId, Token])
         .then(()=>{
-	        r.resolve({Response:'success'});
+            r.resolve({Response:'success'});
         }).catch((err)=>{
-	        r.reject({Response:'error', Reason:err});
+            r.reject({Response:'error', Reason:err});
         });
     return r.promise;
 };
@@ -586,12 +659,12 @@ exports.addToActivityLog=function(requestObject)
  */
 exports.getFirstEncryption=function(requestObject) {
     let r=Q.defer();
-	exports.runSqlQuery(queries.securityQuestionEncryption(),[requestObject.UserID])
-		.then((rows)=>{
-			r.resolve(rows);
-		}).catch((err)=>{
-		r.reject({Response:'error', Reason:err});
-	});
+    exports.runSqlQuery(queries.securityQuestionEncryption(),[requestObject.UserID])
+        .then((rows)=>{
+            r.resolve(rows);
+        }).catch((err)=>{
+            r.reject({Response:'error', Reason:err});
+        });
     return r.promise;
 };
 
@@ -604,7 +677,7 @@ exports.getFirstEncryption=function(requestObject) {
  */
 exports.getEncryption=function(requestObject)
 {
-	return exports.runSqlQuery(queries.userEncryption(),[requestObject.UserID, requestObject.DeviceId]);
+    return exports.runSqlQuery(queries.userEncryption(),[requestObject.UserID, requestObject.DeviceId]);
 };
 
 /**
@@ -620,7 +693,7 @@ exports.inputQuestionnaireAnswers = function(requestObject) {
         exports.runSqlQuery(queries.setQuestionnaireCompletedQuery(),
             [patientQuestionnaireSerNum, parameters.DateCompleted, requestObject.Token,parameters.QuestionnaireSerNum])
             .then(()=>{
-	            r.resolve({Response:'success'});
+                r.resolve({Response:'success'});
             });
     }).catch(function(err){
         r.reject({Response:'error',Reason:err});
@@ -642,11 +715,62 @@ exports.getMapLocation=function(requestObject) {
     }
 
     exports.runSqlQuery(queries.getMapLocation(),[requestObject.Parameters.QRCode]).then((rows)=>{
-       r.resolve({Response:'success', Data:{MapLocation:rows[0]}});
+        r.resolve({Response:'success', Data:{MapLocation:rows[0]}});
     }).catch((err)=>{
-	    r.reject({Response:'error', Reason:err});
+        r.reject({Response:'error', Reason:err});
     });
 
+    return r.promise;
+};
+
+/**
+ * getPackageContents
+ * @author Stacey Beard
+ * @date 2018-11-15
+ * @desc Gets and returns the contents of a specified package, at a single level of depth.
+ *       For example, if the function is called to get the contents of Package 1, which includes a booklet and
+ *       Package 2, the function will return an array containing the full contents of the booklet, and the identifying
+ *       information of Package 2, not the full contents of Package 2. This function must be called again to get the
+ *       contents of Package 2 (which itself may contain other packages).
+ *
+ * requestObject must include the following fields:
+ * @param requestObject
+ * @param requestObject.Parameters
+ * @param requestObject.Parameters.EducationalMaterialControlSerNum The SerNum of the package for which to get
+ *                                                                  the contents.
+ * @returns {*}
+ */
+exports.getPackageContents = function(requestObject){
+    let r = Q.defer();
+
+    // Check that the correct parameters are given.
+    let {EducationalMaterialControlSerNum} = requestObject.Parameters;
+    if(!EducationalMaterialControlSerNum) {
+        r.reject({Response:'error',Reason:'Missing parameter EducationalMaterialControlSerNum for request EducationalPackageContents.'});
+    }
+    else{
+        // If the correct parameters were given, get the package contents.
+        let queryParameters = [EducationalMaterialControlSerNum];
+        exports.runSqlQuery(queries.getPackageContents(),queryParameters).then((rows)=>{
+
+            // Done getting the package contents.
+            // Now, the contents must be processed like any other educational material to attach the tables of contents.
+            getEducationalMaterialTableOfContents(rows).then((processedRows)=>{
+                r.resolve({Response:'success',Data:processedRows});
+
+            }).catch((err)=>{
+                let errorReason2 = 'Error attaching tables of contents to package materials.';
+                logger.log('error', errorReason2);
+                logger.log('error', JSON.stringify(err));
+                r.reject({Response:'error',Reason:errorReason2});
+            });
+        }).catch((err)=>{
+            let errorReason1 = 'Error getting package contents from the database.';
+            logger.log('error', errorReason1);
+            logger.log('error', JSON.stringify(err));
+            r.reject({Response:'error',Reason:errorReason1});
+        });
+    }
     return r.promise;
 };
 
@@ -665,7 +789,7 @@ exports.increaseSecurityAnswerAttempt = function(requestObject) {
  * @param requestObject
  */
 exports.resetSecurityAnswerAttempt = function(requestObject) {
-	return exports.runSqlQuery(queries.resetSecurityAnswerAttempt(),[requestObject.DeviceId]);
+    return exports.runSqlQuery(queries.resetSecurityAnswerAttempt(),[requestObject.DeviceId]);
 };
 
 /**
@@ -675,7 +799,7 @@ exports.resetSecurityAnswerAttempt = function(requestObject) {
  * @param timestamp
  */
 exports.setTimeoutSecurityAnswer = function(requestObject, timestamp) {
-	return exports.runSqlQuery(queries.setTimeoutSecurityAnswer(),[new Date(timestamp), requestObject.DeviceId]);
+    return exports.runSqlQuery(queries.setTimeoutSecurityAnswer(),[new Date(timestamp), requestObject.DeviceId]);
 };
 
 /**
@@ -745,9 +869,9 @@ exports.inputEducationalMaterialRating = function(requestObject)
     }
 
     exports.runSqlQuery(queries.insertEducationalMaterialRatingQuery(),
-        [ EducationalMaterialControlSerNum, PatientSerNum, RatingValue, requestObject.Token])
+        [EducationalMaterialControlSerNum, PatientSerNum, RatingValue, requestObject.Token])
         .then(()=>{
-	        r.resolve({Response:'success'});
+            r.resolve({Response:'success'});
         }).catch((err)=>{
             r.reject({Response:'error',Reason:err});
         });
@@ -771,12 +895,12 @@ exports.updateLogout = function(fields) {
  */
 function getPatientFromEmail(email) {
     let r = Q.defer();
-	exports.runSqlQuery(queries.getPatientFromEmail(),[email])
+    exports.runSqlQuery(queries.getPatientFromEmail(),[email])
         .then((rows)=>{
-	        if(rows.length === 0) r.reject({Response:'error',Reason:"No User match in DB"});
-	        r.resolve(rows[0]);
+            if(rows.length === 0) r.reject({Response:'error',Reason:"No User match in DB"});
+            r.resolve(rows[0]);
         }).catch((err)=>{
-		    r.reject(err);
+            r.reject(err);
         });
     return r.promise;
 }
@@ -790,11 +914,11 @@ function getPatientFromEmail(email) {
 exports.getPasswordForVerification = function(email) {
     let r=Q.defer();
     exports.runSqlQuery(queries.getPatientPasswordForVerification(), [email])
-	    .then((rows)=>{
-		    if(rows.length === 0) r.reject({Response:'error',Reason:"No User match in DB"});
-		    r.resolve(rows[0]);
-	    }).catch((err)=> {
-	        r.reject({Response: err, Reason:"Problem Fetching Password for verification"});
+        .then((rows)=>{
+            if(rows.length === 0) r.reject({Response:'error',Reason:"No User match in DB"});
+            r.resolve(rows[0]);
+        }).catch((err)=> {
+            r.reject({Response: err, Reason:"Problem Fetching Password for verification"});
         });
     return r.promise;
 };
@@ -844,7 +968,13 @@ function loadImageDoctor(rows){
         if((typeof rows[key].ProfileImage !=="undefined" )&&rows[key].ProfileImage){
             const n = rows[key].ProfileImage.lastIndexOf(".");
             rows[key].DocumentType=rows[key].ProfileImage.substring(n + 1, rows[key].ProfileImage.length);
-            rows[key].ProfileImage=filesystem.readFileSync('./Doctors/'+rows[key].ProfileImage,'base64' );
+			/* Try to load the image file and if no image then return empty image string */
+			try {
+				rows[key].ProfileImage=filesystem.readFileSync(config.DOCTOR_PATH + rows[key].ProfileImage,'base64' );
+			} catch(err) {
+				rows[key].ProfileImage= '';
+			}
+
         }
     }
     deferred.resolve(rows);
@@ -1150,7 +1280,7 @@ exports.getQuestionnaires = function(requestObject){
     var r = Q.defer();
     exports.runSqlQuery(queries.patientQuestionnaireTableFields(), [requestObject.UserID, null, null])
         .then(function (queryRows) {
-            return questionnaires.getPatientQuestionnaires(queryRows)
+            return questionnaires.getPatientQuestionnaires(queryRows);
         })
         .then(function (result) {
             var obj = {};
@@ -1236,7 +1366,7 @@ function assocNotificationsWithItems(notifications, requestObject){
 
             if(itemList.includes(notif.NotificationType) && (!fields.includes(notif.NotificationType) || !fields.includes(notif.NotificationType + 's'))) {
 
-				// Educational material mapping is singular... otherwise add 's' to end of key
+                // Educational material mapping is singular... otherwise add 's' to end of key
                 // TODO: This is a pretty bad way to handle this... should create a mapping
                 let string =(notif.NotificationType !== 'EducationalMaterial') ? notif.NotificationType + 's' : notif.NotificationType;
                 fields.push(string);
@@ -1339,10 +1469,9 @@ function refresh (fields, requestObject) {
     let timestamp = today.setHours(0,0,0,0);
 
     exports.getPatientTableFields(UserId, timestamp, fields).then(rows => {
-            rows.Data= utility.resolveEmptyResponse(rows.Data);
-            r.resolve(rows);
-        })
-        .catch(err => r.reject(err));
+        rows.Data= utility.resolveEmptyResponse(rows.Data);
+        r.resolve(rows);
+    }).catch(err => r.reject(err));
 
     return r.promise;
 }
