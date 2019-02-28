@@ -1,3 +1,7 @@
+Version 1.0.2.2:
+ - Modified default-config.json for the path of the doctor's images
+ - Merge branch 'master' into staging
+
 Version 1.0.2.1:
  -     ---- modified gitignore to exclude listener/Doctors folder     ---- added DOCTOR_PATH to config.json     ---- added a try statement when trying to load doctor's image
  - Merge branch 'PreProd'
