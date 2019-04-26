@@ -643,11 +643,20 @@ exports.updateDeviceIdentifier = function(requestObject, parameters) {
 exports.addToActivityLog=function(requestObject)
 {
     let r = Q.defer();
+
     let {Request, UserID, DeviceId, Token} = requestObject;
+
+    if (typeof Request === "undefined") Request = requestObject.type;
+    if (typeof UserID === "undefined") UserID = requestObject.meta.UserID;
+    if (typeof DeviceId === "undefined") DeviceId = requestObject.meta.DeviceId;
+    if (typeof Token === "undefined") Token = requestObject.meta.Token;
+
     exports.runSqlQuery(queries.logActivity(),[Request, UserID, DeviceId, Token])
         .then(()=>{
+            logger.log('verbose', "Success logging request of type: "+Request);
             r.resolve({Response:'success'});
         }).catch((err)=>{
+            logger.log('error', "Error logging request of type: "+Request);
             r.reject({Response:'error', Reason:err});
         });
     return r.promise;

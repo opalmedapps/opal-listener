@@ -263,14 +263,12 @@ exports.getPatientFromEmail=function()
 {
     return "SELECT PatientSerNum FROM Patient WHERE Email = ?";
 };
-exports.logActivity=function(requestObject)
+
+exports.logActivity=function()
 {
 	return `INSERT INTO PatientActivityLog
-                (\`ActivitySerNum\`,\`Request\`,\`Username\`, \`DeviceId\`,\`SessionId\`,
-                \`DateTime\`, \`LastUpdated\`)
-	        VALUES (NULL, ?, ?, ?, ?, CURRENT_TIMESTAMP ,CURRENT_TIMESTAMP )`;
-
-    return "INSERT INTO PatientActivityLog (`ActivitySerNum`,`Request`,`Username`, `DeviceId`,`SessionId`,`DateTime`,`LastUpdated`) VALUES (NULL,'"+requestObject.Request+ "', '"+requestObject.UserID+ "', '"+requestObject.DeviceId+"','"+requestObject.Token+"', CURRENT_TIMESTAMP ,CURRENT_TIMESTAMP )";
+                (\`ActivitySerNum\`,\`Request\`,\`Username\`,\`DeviceId\`,\`SessionId\`,\`DateTime\`,\`LastUpdated\`)
+	        VALUES (NULL, ?, ?, ?, ?, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP)`;
 };
 
 /**

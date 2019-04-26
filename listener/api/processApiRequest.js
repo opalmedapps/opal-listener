@@ -65,3 +65,7 @@ exports.processRequest=function(requestObject) {
     }
     return r.promise;
 };
+
+exports.logPatientRequest = function(requestObject) {
+    return apiPatientUpdate.logPatientRequest(requestObject);
+};
