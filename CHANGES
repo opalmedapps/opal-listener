@@ -1,3 +1,6 @@
+Version 1.0.3.0:
+ - Log all requests in the PatientActivityLog
+
 Version 1.0.2.2:
  - Modified default-config.json for the path of the doctor's images
  - Merge branch 'master' into staging
