@@ -644,14 +644,17 @@ exports.addToActivityLog=function(requestObject)
 {
     let r = Q.defer();
 
-    let {Request, UserID, DeviceId, Token} = requestObject;
+    let {Request, UserID, DeviceId, Token, AppVersion} = requestObject;
 
     if (typeof Request === "undefined") Request = requestObject.type;
     if (typeof UserID === "undefined") UserID = requestObject.meta.UserID;
     if (typeof DeviceId === "undefined") DeviceId = requestObject.meta.DeviceId;
     if (typeof Token === "undefined") Token = requestObject.meta.Token;
+    if (typeof AppVersion === "undefined") AppVersion = requestObject.meta.AppVersion;
 
-    exports.runSqlQuery(queries.logActivity(),[Request, UserID, DeviceId, Token])
+	// Ignore LogPatientAction to avoid double-logging -->> Refer to table PatientActionLog
+	if (Request !== "LogPatientAction") {
+    exports.runSqlQuery(queries.logActivity(),[Request, UserID, DeviceId, Token, AppVersion])
         .then(()=>{
             logger.log('verbose', "Success logging request of type: "+Request);
             r.resolve({Response:'success'});
@@ -659,6 +662,10 @@ exports.addToActivityLog=function(requestObject)
             logger.log('error', "Error logging request of type: "+Request);
             r.reject({Response:'error', Reason:err});
         });
+	}
+	else {
+		r.resolve({Response:'success', Reason:'Skip logging; already logged'});
+	}
     return r.promise;
 };
 
