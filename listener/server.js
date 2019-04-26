@@ -172,6 +172,10 @@ function processRequest(headers){
 
     // Separate security requests from main requests
     if(processApi.securityAPI.hasOwnProperty(requestObject.Request)) {
+
+        // Log all requests in the table PatientActivityLog. -SB
+        processApi.logPatientRequest(requestObject);
+
         logger.log('debug', 'Processing security request');
         processApi.securityAPI[requestObject.Request](requestKey, requestObject)
             .then(function (response) {

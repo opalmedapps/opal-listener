@@ -28,6 +28,10 @@ function requestFormatter({key,request}) {
 
 	return RequestValidator.validate(key, request)
 		.then( opalReq => { //opalReq of type, OpalRequest
+
+            // After they have been decrypted, log all main requests in the table PatientActivityLog. -SB
+            processApiRequest.logPatientRequest(opalReq);
+
 			return processApiRequest.processRequest(opalReq.toLegacy()).then((data)=>
 			{
 				logger.log('debug', 'Successfully processed request: ' + data);
