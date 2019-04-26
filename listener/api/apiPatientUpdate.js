@@ -127,6 +127,10 @@ exports.logPatientAction = function(requestObject){
     return sqlInterface.logPatientAction(requestObject);
 };
 
+exports.logPatientRequest = function(requestObject) {
+    return sqlInterface.addToActivityLog(requestObject);
+};
+
 exports.getQuestionnaires = function (requestObject) {
     return sqlInterface.getQuestionnaires(requestObject);
 };
