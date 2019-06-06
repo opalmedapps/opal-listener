@@ -1,3 +1,6 @@
+Version 1.0.3.4:
+ - Modified the appointment to include CANCELLED in the title
+
 Version 1.0.3.3:
  -     ---- Fixed questions order sequestion Merge branch 'questionnaire_order_fix' into staging
  - Quick Patch to questionnaire order number
