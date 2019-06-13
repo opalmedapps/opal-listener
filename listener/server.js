@@ -1,6 +1,7 @@
 /*
  * Filename     :   server.js
- * Description  :   This script listens for changes on dev2/ in firebase, reads those changes and writes a response back to firebase.
+ * Description  :   This script listens for changes to config.FIREBASE_ROOT_BRANCH in firebase, reads those changes and
+ *                  writes a response back to firebase.
  * Created by   :   David Herrera, Robert Maglieri
  * Date         :   07 Mar 2017
  * Copyright    :   Copyright 2016, HIG, All rights reserved.
@@ -10,9 +11,9 @@
  * *********************************************
  * Modified By    	: Yick Mo
  * Modified Date	: 2017-12-15
- * NOTES				: Added the Heart Beat Database
+ * NOTES			: Added the Heart Beat Database
  *
- * Important		: Do not forget to change "/dev3" back to "/dev2" before merging
+ * Important		: Do not forget to change "/dev3" back to "/dev2" before merging. [Done]
  * *********************************************
  *
  */
@@ -47,12 +48,12 @@ admin.database.enableLogging(false);
 
 // Get reference to correct data element
 const db = admin.database();
-const ref = db.ref("/dev2");
-const heartbeatRef = db.ref("/dev2/users/heartbeat");
+const ref = db.ref(config.FIREBASE_ROOT_BRANCH);
+const heartbeatRef = ref.child('/users/heartbeat');
 
 logger.log('debug', 'INITIALIZED APP IN DEBUG MODE');
 
-// Ensure there is no leftover data on firebase
+// Ensure there is no leftover data on the firebase root branch
 ref.set(null)
 	.catch(function (error) {
 		logger.log('error', 'Cannot reset firebase', {
