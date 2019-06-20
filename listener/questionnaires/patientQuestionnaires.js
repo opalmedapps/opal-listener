@@ -41,35 +41,93 @@ handleDisconnect(connection);
 
 
 //Queries to obtain the questions and question choices for questionnaires
-var queryQuestions = `SELECT DISTINCT Questionnaire.QuestionnaireSerNum as QuestionnaireDBSerNum,
-                        Questionnaire.QuestionnaireName,
-                        QC.QuestionnaireName_EN,
-                        QC.Intro_EN,
-                        QC.QuestionnaireName_FR,
-                        QC.Intro_FR,
-                        QuestionnaireQuestion.QuestionnaireQuestionSerNum,
-                        Question.QuestionSerNum,
-                        Question.isPositiveQuestion,
-                        Question.QuestionQuestion as QuestionText_EN,
-                        Question.QuestionName as Asseses_EN,
-                        Question.QuestionName_FR as Asseses_FR,
-                        Question.QuestionQuestion_FR as QuestionText_FR,
-                        QuestionType.QuestionType,
-                        QuestionType.QuestionTypeSerNum,
-                        QuestionnaireQuestion.OrderNum
-                      FROM Questionnaire,
-                        Question,
-                        QuestionType,
-                        Patient,
-                        QuestionnaireQuestion,
-                        ` + credentials.MYSQL_DATABASE + `.QuestionnaireControl QC
-                      WHERE QuestionnaireQuestion.QuestionnaireSerNum = Questionnaire.QuestionnaireSerNum
-                        AND QuestionnaireQuestion.QuestionSerNum = Question.QuestionSerNum
-                        AND Question.QuestionTypeSerNum = QuestionType.QuestionTypeSerNum
-                        AND QC.QuestionnaireDBSerNum = Questionnaire.QuestionnaireSerNum
-                        AND Questionnaire.QuestionnaireSerNum IN ?`;
+// var queryQuestions = `SELECT DISTINCT Questionnaire.QuestionnaireSerNum as QuestionnaireDBSerNum,
+//                         Questionnaire.QuestionnaireName,
+//                         QC.QuestionnaireName_EN,
+//                         QC.Intro_EN,
+//                         QC.QuestionnaireName_FR,
+//                         QC.Intro_FR,
+//                         QuestionnaireQuestion.QuestionnaireQuestionSerNum,
+//                         Question.QuestionSerNum,
+//                         Question.isPositiveQuestion,
+//                         Question.QuestionQuestion as QuestionText_EN,
+//                         Question.QuestionName as Asseses_EN,
+//                         Question.QuestionName_FR as Asseses_FR,
+//                         Question.QuestionQuestion_FR as QuestionText_FR,
+//                         QuestionType.QuestionType,
+//                         QuestionType.QuestionTypeSerNum,
+//                         QuestionnaireQuestion.OrderNum
+//                       FROM Questionnaire,
+//                         Question,
+//                         QuestionType,
+//                         Patient,
+//                         QuestionnaireQuestion,
+//                         ` + credentials.MYSQL_DATABASE + `.QuestionnaireControl QC
+//                       WHERE QuestionnaireQuestion.QuestionnaireSerNum = Questionnaire.QuestionnaireSerNum
+//                         AND QuestionnaireQuestion.QuestionSerNum = Question.QuestionSerNum
+//                         AND Question.QuestionTypeSerNum = QuestionType.QuestionTypeSerNum
+//                         AND QC.QuestionnaireDBSerNum = Questionnaire.QuestionnaireSerNum
+//                         AND Questionnaire.QuestionnaireSerNum IN ?`;
 
-var queryQuestionChoices = "SELECT QuestionSerNum, MCSerNum as OrderNum, MCDescription as ChoiceDescription_EN, MCDescription_FR as ChoiceDescription_FR  FROM QuestionMC WHERE QuestionSerNum IN ? UNION ALL SELECT * FROM QuestionCheckbox WHERE QuestionSerNum IN ? UNION ALL SELECT * FROM QuestionMinMax WHERE QuestionSerNum IN ? ORDER BY QuestionSerNum, OrderNum DESC";
+var queryQuestions = `SELECT questionnaire.ID AS QuestionnaireDBSerNum,
+	questionnaire.legacyName AS QuestionnaireName,
+	IF (questionnaire.nickname <> -1, questionnaire.nickname, questionnaire.title) AS QuestionnaireName_,
+	questionnaire.description AS Intro_,
+	sec.ID AS sectionId,
+	sec.\`order\` AS secOrder,
+	qSec.ID AS QuestionnaireQuestionSerNum,
+	qSec.questionId AS QuestionSerNum,
+	q.polarity AS isPositiveQuestion,
+	q.question AS QuestionText_,
+	legacyType.legacyName AS QuestionType,
+	q.legacyTypeId AS QuestionTypeSerNum,
+	qSec.\`order\` AS qOrder
+FROM questionnaire
+	LEFT JOIN section sec ON (sec.questionnaireId = questionnaire.ID)
+	LEFT JOIN questionSection qSec ON (qSec.sectionId = sec.ID)
+	LEFT JOIN question q ON (qSec.questionId = q.ID)
+	LEFT JOIN legacyType ON (q.legacyTypeId = legacyType.ID)
+WHERE questionnaire.ID IN ?
+	AND questionnaire.deleted <> 1
+	AND sec.deleted <> 1
+	AND q.deleted <> 1; `;
+
+// var queryQuestionChoices = "SELECT QuestionSerNum, MCSerNum as OrderNum, MCDescription as ChoiceDescription_EN, MCDescription_FR as ChoiceDescription_FR  FROM QuestionMC WHERE QuestionSerNum IN ? UNION ALL SELECT * FROM QuestionCheckbox WHERE QuestionSerNum IN ? UNION ALL SELECT * FROM QuestionMinMax WHERE QuestionSerNum IN ? ORDER BY QuestionSerNum, OrderNum DESC";
+
+var queryQuestionChoices = `SELECT rb.questionId AS QuestionSerNum,
+	rbOpt.\`order\` AS OrderNum,
+	rbOpt.description AS ChoiceDescription_
+FROM radioButton rb, radioButtonOption rbOpt
+WHERE rb.Id = rbOpt.parentTableId
+	AND rb.questionId IN ?
+UNION ALL 
+SELECT c.questionId,
+	cOpt.\`order\`,
+	cOpt.description 
+FROM checkbox c, checkboxOption cOpt
+WHERE c.ID = cOpt.parentTableId
+	AND c.questionId IN ?
+UNION ALL 
+SELECT slider.questionId,
+	slider.minValue - 1 AS OrderNum,
+	slider.minCaption
+FROM slider
+WHERE slider.questionId IN ?
+UNION ALL 
+SELECT slider.questionId,
+	slider.\`maxValue\` AS OrderNum,
+	slider.maxCaption
+FROM slider
+WHERE slider.questionId IN ?
+UNION ALL 
+SELECT l.questionId,
+	lOpt.\`order\`,
+	lOpt.description
+FROM label l, labelOption lOpt
+WHERE l.ID = lOpt.parentTableId
+	AND l.questionId IN ?
+ORDER BY QuestionSerNum, OrderNum DESC;`;
+
 var queryAnswersPatientQuestionnaire = "SELECT QuestionnaireQuestionSerNum, Answer.Answer, PatientQuestionnaireSerNum as PatientQuestionnaireDBSerNum FROM Answer WHERE PatientQuestionnaireSerNum IN ? ORDER BY PatientQuestionnaireDBSerNum;"
 
 
@@ -84,6 +142,7 @@ exports.getPatientQuestionnaires = function (rows) {
               if(err) reject(err);
 
               getQuestionChoices(questions).then(function(questionsChoices){
+                // TODO: in prepareQuestionnaireObject, translate
                   let questionnaires = prepareQuestionnaireObject(questionsChoices,rows);
                   let patientQuestionnaires = {};
                   attachingQuestionnaireAnswers(rows).then(function(paQuestionnaires) {
@@ -152,7 +211,7 @@ function getQuestionChoices(rows)
           array.push(rows[i].QuestionSerNum);
       }
       ;
-      connection.query(queryQuestionChoices, [[array], [array], [array]], function (err, choices, fields) {
+      connection.query(queryQuestionChoices, [[array], [[array], [[array], [array], [array]], function (err, choices, fields) {
           //console.log(err);
           // logger.log('error', err);
           if (err) r.reject(err);
