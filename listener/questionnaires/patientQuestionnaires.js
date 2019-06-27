@@ -71,6 +71,8 @@ handleDisconnect(connection);
 //                         AND Questionnaire.QuestionnaireSerNum IN ?`;
 
 // new one
+// since a section can only be contained in one questionnaire,
+// questionSection.ID can be thought as QuestionnaireQuestionSerNum because there is only one per combination of sectionId and questionId
 var queryQuestions = `SELECT questionnaire.ID AS QuestionnaireDBSerNum,
 	questionnaire.legacyName AS QuestionnaireName,
 	IF (questionnaire.nickname <> -1, getDisplayName(questionnaire.nickname,2), getDisplayName(questionnaire.title,2)) AS QuestionnaireName_EN,
@@ -361,7 +363,6 @@ function attachingQuestionnaireAnswers(opalDB)
 
     });
   }else{
-    //console.log('Hello World');
     r.resolve(patientQuestionnaires);
   }
   return r.promise;
