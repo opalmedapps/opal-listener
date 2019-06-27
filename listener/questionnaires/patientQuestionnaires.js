@@ -19,7 +19,8 @@ var sqlConfig={
   user:credentials.MYSQL_USERNAME,
   password:credentials.MYSQL_PASSWORD,
   database:credentials.MYSQL_DATABASE_QUESTIONNAIRE,
-  dateStrings:true
+  dateStrings:true,
+  port: credentials.MYSQL_DATABASE_PORT
 };
 /*
 *Re-connecting the sql database, NodeJS has problems and disconnects if inactive,
@@ -69,16 +70,20 @@ handleDisconnect(connection);
 //                         AND QC.QuestionnaireDBSerNum = Questionnaire.QuestionnaireSerNum
 //                         AND Questionnaire.QuestionnaireSerNum IN ?`;
 
+// new one
 var queryQuestions = `SELECT questionnaire.ID AS QuestionnaireDBSerNum,
 	questionnaire.legacyName AS QuestionnaireName,
-	IF (questionnaire.nickname <> -1, questionnaire.nickname, questionnaire.title) AS QuestionnaireName_,
-	questionnaire.description AS Intro_,
+	IF (questionnaire.nickname <> -1, getDisplayName(questionnaire.nickname,2), getDisplayName(questionnaire.title,2)) AS QuestionnaireName_EN,
+	IF (questionnaire.nickname <> -1, getDisplayName(questionnaire.nickname,1), getDisplayName(questionnaire.title,1)) AS QuestionnaireName_FR,
+	getDisplayName(questionnaire.description,2) AS Intro_EN,
+	getDisplayName(questionnaire.description,1) AS Intro_FR,
 	sec.ID AS sectionId,
 	sec.\`order\` AS secOrder,
 	qSec.ID AS QuestionnaireQuestionSerNum,
 	qSec.questionId AS QuestionSerNum,
 	q.polarity AS isPositiveQuestion,
-	q.question AS QuestionText_,
+	getDisplayName(q.question,2) AS QuestionText_EN,
+	getDisplayName(q.question,1) AS QuestionText_FR,
 	legacyType.legacyName AS QuestionType,
 	q.legacyTypeId AS QuestionTypeSerNum,
 	qSec.\`order\` AS qOrder
@@ -94,35 +99,41 @@ WHERE questionnaire.ID IN ?
 
 // var queryQuestionChoices = "SELECT QuestionSerNum, MCSerNum as OrderNum, MCDescription as ChoiceDescription_EN, MCDescription_FR as ChoiceDescription_FR  FROM QuestionMC WHERE QuestionSerNum IN ? UNION ALL SELECT * FROM QuestionCheckbox WHERE QuestionSerNum IN ? UNION ALL SELECT * FROM QuestionMinMax WHERE QuestionSerNum IN ? ORDER BY QuestionSerNum, OrderNum DESC";
 
+// new one
 var queryQuestionChoices = `SELECT rb.questionId AS QuestionSerNum,
 	rbOpt.\`order\` AS OrderNum,
-	rbOpt.description AS ChoiceDescription_
+	getDisplayName(rbOpt.description, 2) AS ChoiceDescription_EN,
+	getDisplayName(rbOpt.description, 1) AS ChoiceDescription_FR
 FROM radioButton rb, radioButtonOption rbOpt
 WHERE rb.Id = rbOpt.parentTableId
 	AND rb.questionId IN ?
 UNION ALL 
 SELECT c.questionId,
 	cOpt.\`order\`,
-	cOpt.description 
+	getDisplayName(cOpt.description, 2) AS ChoiceDescription_EN,
+	getDisplayName(cOpt.description, 1) AS ChoiceDescription_FR
 FROM checkbox c, checkboxOption cOpt
 WHERE c.ID = cOpt.parentTableId
 	AND c.questionId IN ?
 UNION ALL 
 SELECT slider.questionId,
 	slider.minValue - 1 AS OrderNum,
-	slider.minCaption
+	getDisplayName(slider.minCaption, 2) AS ChoiceDescription_EN,
+	getDisplayName(slider.minCaption, 1) AS ChoiceDescription_FR
 FROM slider
 WHERE slider.questionId IN ?
 UNION ALL 
 SELECT slider.questionId,
 	slider.\`maxValue\` AS OrderNum,
-	slider.maxCaption
+	getDisplayName(slider.maxCaption, 2) AS ChoiceDescription_EN,
+	getDisplayName(slider.maxCaption, 1) AS ChoiceDescription_FR
 FROM slider
 WHERE slider.questionId IN ?
 UNION ALL 
 SELECT l.questionId,
 	lOpt.\`order\`,
-	lOpt.description
+	getDisplayName(lOpt.description, 2) AS ChoiceDescription_EN,
+	getDisplayName(lOpt.description, 1) AS ChoiceDescription_FR
 FROM label l, labelOption lOpt
 WHERE l.ID = lOpt.parentTableId
 	AND l.questionId IN ?
@@ -141,8 +152,16 @@ exports.getPatientQuestionnaires = function (rows) {
           connection.query(queryQuestions, [[questionnaireDBSerNumArray]], function(err,  questions, fields){
               if(err) reject(err);
 
-              getQuestionChoices(questions).then(function(questionsChoices){
-                // TODO: in prepareQuestionnaireObject, translate
+              console.log("\n******** in getPatientQuestionnaires, after queryQuestions: ***********\n", questions);
+
+              let questionsOrdered = setQuestionOrder(questions);
+
+              console.log("\n******** in getPatientQuestionnaires, after ordering questions: ***********\n", questionsOrdered);
+
+              getQuestionChoices(questionsOrdered).then(function(questionsChoices){
+
+                  // console.log("\n******** in getPatientQuestionnaires, after getQuestionChoices: ***********\n", questionsChoices);
+
                   let questionnaires = prepareQuestionnaireObject(questionsChoices,rows);
                   let patientQuestionnaires = {};
                   attachingQuestionnaireAnswers(rows).then(function(paQuestionnaires) {
@@ -194,8 +213,62 @@ function prepareQuestionnaireObject(questionnaires, opalDB)
   }
 
   return questionnairesObject;
-
 }
+
+// from section order and questions' order inside that section, transform the data into a single ordering of questions
+function setQuestionOrder(questions){
+
+    var numberOfQuestionsInPrevSections = {};
+    var currSecOrder = 0;
+    var thereIsMoreSec = 1;
+
+    while (thereIsMoreSec){
+
+        thereIsMoreSec = 0;
+
+        var numberOfQuestionsInThisSection = {};
+
+        for (var i = 0; i < questions.length; i++){
+
+            // set up numberOfQuestionsInThisSection and numberOfQuestionsInPrevSections
+            // one entry in numberOfQuestionsInThisSection and numberOfQuestionsInPrevSections for one questionnaire
+            if(!numberOfQuestionsInThisSection.hasOwnProperty(questions[i].QuestionnaireDBSerNum)){
+                numberOfQuestionsInThisSection[questions[i].QuestionnaireDBSerNum] = 0;
+            }
+
+            if(!numberOfQuestionsInPrevSections.hasOwnProperty(questions[i].QuestionnaireDBSerNum)){
+                numberOfQuestionsInPrevSections[questions[i].QuestionnaireDBSerNum] = 0;
+            }
+
+            // if this question has already the right orderNum then skip this question
+            if (questions[i].hasOwnProperty('OrderNum')){
+                continue;
+            }
+
+            // if this question is in the current section level,
+            // then we adjust its orderNum according to (how many questions are there in the previous sections + what is its order in the current section)
+            if (questions[i].secOrder == currSecOrder){
+                questions[i].OrderNum = questions[i].qOrder + numberOfQuestionsInPrevSections[questions[i].QuestionnaireDBSerNum];
+
+                // there is one more question dealt with in this section level for this questionnaire
+                numberOfQuestionsInThisSection[questions[i].QuestionnaireDBSerNum]++;
+
+            }else if (questions[i].secOrder > currSecOrder){
+                // this question belongs to sections after the current section level, need another loop
+                thereIsMoreSec = 1;
+            }
+        }
+
+        // increment the section level
+        currSecOrder ++;
+
+        // this is the end of this section level, we add the number of questions in this section level to the previous total
+        numberOfQuestionsInPrevSections[questions[i].QuestionnaireDBSerNum] += numberOfQuestionsInThisSection;
+    }
+
+    return questions;
+}
+
 //Extracts only questionnaireSerNum for query injection
 function getQuestionnaireDBSerNums(rows) {
   return rows.map(q => q.QuestionnaireDBSerNum)
@@ -210,15 +283,20 @@ function getQuestionChoices(rows)
       for (var i = 0; i < rows.length; i++) {
           array.push(rows[i].QuestionSerNum);
       }
-      ;
-      connection.query(queryQuestionChoices, [[array], [[array], [[array], [array], [array]], function (err, choices, fields) {
-          //console.log(err);
-          // logger.log('error', err);
-          if (err) r.reject(err);
-          var questions = attachChoicesToQuestions(rows, choices);
-          // console.log(questions);
-          // logger.log('debug', questions);
-          r.resolve(questions);
+
+      connection.query(queryQuestionChoices, [[array], [array], [array], [array], [array]], function (err, choices, fields) {
+
+      // connection.query(queryQuestionChoices, [[array], [array], [array]], function (err, choices, fields) {
+        //console.log(err);
+        // logger.log('error', err);
+        if (err) r.reject(err);
+
+
+        console.log("\n******** in getQuestionChoices, after queryQuestionChoices: ***********\n", choices);
+        var questions = attachChoicesToQuestions(rows, choices);
+        // console.log(questions);
+        // logger.log('debug', questions);
+        r.resolve(questions);
       });
   } else {
       r.resolve([]);
@@ -375,5 +453,4 @@ function promisifyQuery(query, parameters)
     else r.resolve(rows);
   });
   return r.promise;
-
 }
