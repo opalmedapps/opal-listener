@@ -1295,9 +1295,10 @@ exports.setTrusted = function(requestObject)
 exports.getQuestionnaires = function(requestObject){
     "use strict";
     var r = Q.defer();
-    exports.runSqlQuery(queries.patientQuestionnaireTableFields(), [requestObject.UserID, null, null])
+    var lang = requestObject.Parameters.Language;
+    exports.runSqlQuery(queries.getPatientId(), [requestObject.UserID, null, null])
         .then(function (queryRows) {
-            return questionnaires.getPatientQuestionnaires(queryRows);
+            return questionnaires.getPatientQuestionnaires(queryRows,lang);
         })
         .then(function (result) {
             var obj = {};
