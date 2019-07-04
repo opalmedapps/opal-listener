@@ -101,6 +101,8 @@ var queryQuestions = `SELECT questionnaire.ID AS QuestionnaireDBSerNum,
 	q.polarity AS isPositiveQuestion,
 	getDisplayName(q.question,2) AS QuestionText_EN,
 	getDisplayName(q.question,1) AS QuestionText_FR,
+	getDisplayName(display, 2) AS Asseses_EN,
+	getDisplayName(display, 1) AS Asseses_FR,
 	legacyType.legacyName AS QuestionType,
 	q.legacyTypeId AS QuestionTypeSerNum,
 	qSec.\`order\` AS qOrder
