@@ -40,6 +40,21 @@ function handleDisconnect(myconnection) {
 
 handleDisconnect(connection);
 
+// new
+// query to emulate patientQuestionnaireTableFields in the new Database
+var queryPatientQuestionnaireInfo = `SELECT IF(\`status\` <> 2, 0, 1) AS CompletedFlag,
+    creationDate AS DateAdded,
+    IF(\`status\` <> 2, NULL, lastUpdated) AS CompletionDate,
+    ID AS QuestionnaireSerNum,
+    questionnaireId AS QuestionnaireDBSerNum
+FROM answerQuestionnaire
+WHERE deleted <> 1
+AND patientId IN (
+    SELECT ID
+FROM patient
+WHERE externalId = ?
+AND deleted <> 1
+);`;
 
 //Queries to obtain the questions and question choices for questionnaires
 // var queryQuestions = `SELECT DISTINCT Questionnaire.QuestionnaireSerNum as QuestionnaireDBSerNum,
@@ -97,7 +112,7 @@ FROM questionnaire
 WHERE questionnaire.ID IN ?
 	AND questionnaire.deleted <> 1
 	AND sec.deleted <> 1
-	AND q.deleted <> 1; `;
+	AND q.deleted <> 1;`;
 
 // var queryQuestionChoices = "SELECT QuestionSerNum, MCSerNum as OrderNum, MCDescription as ChoiceDescription_EN, MCDescription_FR as ChoiceDescription_FR  FROM QuestionMC WHERE QuestionSerNum IN ? UNION ALL SELECT * FROM QuestionCheckbox WHERE QuestionSerNum IN ? UNION ALL SELECT * FROM QuestionMinMax WHERE QuestionSerNum IN ? ORDER BY QuestionSerNum, OrderNum DESC";
 
@@ -145,40 +160,57 @@ var queryAnswersPatientQuestionnaire = "SELECT QuestionnaireQuestionSerNum, Answ
 
 
 /*SELECT QuestionnaireQuestionSerNum,  GROUP_CONCAT(Answer SEPARATOR ', ') as Answer, PatientQuestionnaireSerNum as PatientQuestionnaireDBSerNum FROM Answer WHERE PatientQuestionnaireSerNum IN ? GROUP BY QuestionnaireQuestionSerNum ORDER BY PatientQuestionnaireDBSerNum;"*/
-exports.getPatientQuestionnaires = function (rows) {
+exports.getPatientQuestionnaires = function (patientId, lang) {
   return new Promise(((resolve, reject) => {
 
-      if(rows.length!== 0) {
-          let questionnaireDBSerNumArray = getQuestionnaireDBSerNums(rows);
+      // console.log("\n******** in getPatientQuestionnaires, before queryPatientQuestionnaireInfo: ***********\n", patientId[0].PatientId);
 
-          connection.query(queryQuestions, [[questionnaireDBSerNumArray]], function(err,  questions, fields){
-              if(err) reject(err);
+      connection.query(queryPatientQuestionnaireInfo, [patientId[0].PatientId], function(err, rows, fields){
+          if(rows.length!== 0) {
+              // console.log("\n******** in getPatientQuestionnaires, after queryPatientQuestionnaireInfo: ***********\n", rows);
 
-              console.log("\n******** in getPatientQuestionnaires, after queryQuestions: ***********\n", questions);
+              let questionnaireDBSerNumArray = getQuestionnaireDBSerNums(rows);
 
-              let questionsOrdered = setQuestionOrder(questions);
+              console.log("\n******** in getPatientQuestionnaires, before queryQuestions: ***********\n", questionnaireDBSerNumArray);
 
-              console.log("\n******** in getPatientQuestionnaires, after ordering questions: ***********\n", questionsOrdered);
+              connection.query(queryQuestions, [[questionnaireDBSerNumArray]], function(err, questions, fields){
+                  if(err) reject(err);
 
-              getQuestionChoices(questionsOrdered).then(function(questionsChoices){
+                  console.log("\n******** in getPatientQuestionnaires, after queryQuestions: ***********\n", questions);
 
-                  // console.log("\n******** in getPatientQuestionnaires, after getQuestionChoices: ***********\n", questionsChoices);
+                  let questionsOrdered = setQuestionOrder(questions);
 
-                  let questionnaires = prepareQuestionnaireObject(questionsChoices,rows);
-                  let patientQuestionnaires = {};
-                  attachingQuestionnaireAnswers(rows).then(function(paQuestionnaires) {
-                      patientQuestionnaires = paQuestionnaires;
-                      resolve({'Questionnaires':questionnaires, 'PatientQuestionnaires':patientQuestionnaires});
-                  }).catch(function(error) {
-                      reject(error);
-                  });
-              }).catch(function(err){
-                  reject(err);
-              })
-          });
-      }else{
-          resolve([]);
-      }
+                  console.log("\n******** in getPatientQuestionnaires, after ordering questions: ***********\n", questionsOrdered);
+
+                  getQuestionChoices(questionsOrdered).then(function(questionsChoices){
+
+                      // console.log("\n******** in getPatientQuestionnaires, after getQuestionChoices: ***********\n", questionsChoices);
+
+                      let questionnaires = prepareQuestionnaireObject(questionsChoices,rows);
+                      let patientQuestionnaires = {};
+
+                      let languageInDB;
+                      if (lang === 'EN'){
+                          languageInDB = 2;
+                      }else{
+                          // default is French
+                          languageInDB = 1;
+                      }
+
+                      attachingQuestionnaireAnswers(rows, languageInDB).then(function(paQuestionnaires) {
+                          patientQuestionnaires = paQuestionnaires;
+                          resolve({'Questionnaires':questionnaires, 'PatientQuestionnaires':patientQuestionnaires});
+                      }).catch(function(error) {
+                          reject(error);
+                      });
+                  }).catch(function(err){
+                      reject(err);
+                  })
+              });
+          }else{
+              resolve([]);
+          }
+      });
   }));
 };
 
@@ -218,8 +250,10 @@ function prepareQuestionnaireObject(questionnaires, opalDB)
 }
 
 // from section order and questions' order inside that section, transform the data into a single ordering of questions
+// TODO: this needs testing by having multiple sections for 1 questionnaire
 function setQuestionOrder(questions){
 
+    console.log('******** in setQuestionsOrder *************', questions);
     var numberOfQuestionsInPrevSections = {};
     var currSecOrder = 0;
     var thereIsMoreSec = 1;
@@ -265,7 +299,11 @@ function setQuestionOrder(questions){
         currSecOrder ++;
 
         // this is the end of this section level, we add the number of questions in this section level to the previous total
-        numberOfQuestionsInPrevSections[questions[i].QuestionnaireDBSerNum] += numberOfQuestionsInThisSection;
+        for (var k in Object.keys(numberOfQuestionsInThisSection)){
+            if (numberOfQuestionsInPrevSections.hasOwnProperty(k)){
+                numberOfQuestionsInPrevSections[k] += numberOfQuestionsInThisSection[k];
+            }
+        }
     }
 
     return questions;
@@ -294,7 +332,7 @@ function getQuestionChoices(rows)
         if (err) r.reject(err);
 
 
-        console.log("\n******** in getQuestionChoices, after queryQuestionChoices: ***********\n", choices);
+        // console.log("\n******** in getQuestionChoices, after queryQuestionChoices: ***********\n", choices);
         var questions = attachChoicesToQuestions(rows, choices);
         // console.log(questions);
         // logger.log('debug', questions);
@@ -327,7 +365,7 @@ function attachChoicesToQuestions(questions,choices)
 }
 
 //Attaching answers to answered questionnaires
-function attachingQuestionnaireAnswers(opalDB)
+function attachingQuestionnaireAnswers(opalDB, lang)
 {
   var r = q.defer();
   var patientQuestionnaires = {};

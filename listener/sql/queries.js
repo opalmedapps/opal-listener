@@ -377,11 +377,6 @@ exports.getPatientId= function()
     return "SELECT Patient.PatientId FROM Patient, Users WHERE Patient.PatientSerNum = Users.UserTypeSerNum && Users.Username = ?"
 };
 
-exports.getPatientId= function()
-{
-    return "SELECT Patient.PatientId FROM Patient, Users WHERE Patient.PatientSerNum = Users.UserTypeSerNum && Users.Username = ?"
-};
-
 /**
  * Returns the query needed to get a patient's serNum
  * @return {string}
