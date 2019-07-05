@@ -161,6 +161,8 @@ ORDER BY QuestionSerNum, OrderNum DESC;`;
 // var queryAnswersPatientQuestionnaire = "SELECT QuestionnaireQuestionSerNum, Answer.Answer, PatientQuestionnaireSerNum as PatientQuestionnaireDBSerNum FROM Answer WHERE PatientQuestionnaireSerNum IN ? ORDER BY PatientQuestionnaireDBSerNum;"
 
 // new one, require getAnswerText function in DB
+// note that this query does not take answered and skipped answers into account since these functionnalities do not exist yet in the qplus
+// if not answered or skipped, since there won't be an entry in the answer(Type) tables, the query will return NULL
 var queryAnswersPatientQuestionnaire = `SELECT aSec.answerQuestionnaireId AS QuestionnaireSerNum,
 if (a.languageId <> -1, getAnswerText(a.ID, a.languageId), getAnswerText(a.ID, ?)) AS Answer,
     qSec.ID AS QuestionnaireQuestionSerNum
@@ -203,15 +205,7 @@ exports.getPatientQuestionnaires = function (patientId, lang) {
                         let questionnaires = prepareQuestionnaireObject(questionsChoices, rows);
                         let patientQuestionnaires = {};
 
-                        let languageInDB;
-                        if (lang === 'EN') {
-                            languageInDB = 2;
-                        } else {
-                            // default is French
-                            languageInDB = 1;
-                        }
-
-                        attachingQuestionnaireAnswers(rows, languageInDB).then(function (paQuestionnaires) {
+                        attachingQuestionnaireAnswers(rows, lang).then(function (paQuestionnaires) {
                             console.log("\n******** in getPatientQuestionnaires, after attachingQuestionnaireAnswers: ***********\n", paQuestionnaires);
                             patientQuestionnaires = paQuestionnaires;
                             resolve({'Questionnaires': questionnaires, 'PatientQuestionnaires': patientQuestionnaires});
@@ -423,11 +417,24 @@ function attachingQuestionnaireAnswers(opalDB, lang) {
  * Inserting questionnaire answers
  *
  **/
-var inputAnswersQuery = "INSERT INTO `Answer`(`AnswerSerNum`, `QuestionnaireQuestionSerNum`, `Answer`, `LastUpdated`, `PatientSerNum`, `PatientQuestionnaireSerNum`) VALUES (NULL,?,?,NULL,?,?)"
-var patientSerNumQuery = "SELECT PatientSerNum FROM Patient WHERE Patient.PatientId = ?;"
-var inputPatientQuestionnaireQuery = "INSERT INTO `PatientQuestionnaire`(`PatientQuestionnaireSerNum`, `PatientSerNum`, `DateTimeAnswered`, `QuestionnaireSerNum`) VALUES (NULL,?,?,?)"
+var inputAnswersQuery = "INSERT INTO `Answer`(`AnswerSerNum`, `QuestionnaireQuestionSerNum`, `Answer`, `LastUpdated`, `PatientSerNum`, `PatientQuestionnaireSerNum`) VALUES (NULL,?,?,NULL,?,?)";
+var patientSerNumQuery = "SELECT PatientSerNum FROM Patient WHERE Patient.PatientId = ?;";
+var inputPatientQuestionnaireQuery = "INSERT INTO `PatientQuestionnaire`(`PatientQuestionnaireSerNum`, `PatientSerNum`, `DateTimeAnswered`, `QuestionnaireSerNum`) VALUES (NULL,?,?,?)";
+
+// new
+var patientIdInQuestionnaireDBQuery = `SELECT ID FROM patient WHERE externalId = ?;`;
+var getQuestionSectionInfoFromQuestionnaireQuestionSerNumQuery = `SELECT qSec.questionId, qSec.sectionId, q.typeId 
+FROM question q, (SELECT questionId, sectionId FROM questionSection WHERE ID = ?) qSec
+WHERE q.deleted <> 1 AND q.ID = qSec.questionId
+;`;
+var getPatientIdFromQuestionnaireSerNumQuery = `SELECT patientId
+FROM answerQuestionnaire
+WHERE ID = ? AND deleted <> 1 AND \`status\` <> 2
+;`;
+
 exports.inputQuestionnaireAnswers = function (parameters) {
     var r = q.defer();
+
     getPatientSerNum(parameters.PatientId).then(function (serNum) {
         var sa = connection.query(inputPatientQuestionnaireQuery, [serNum, parameters.DateCompleted, parameters.QuestionnaireDBSerNum], function (err, result) {
             //console.log(sa.sql);
@@ -442,16 +449,16 @@ exports.inputQuestionnaireAnswers = function (parameters) {
     });
     return r.promise;
 };
-
-//Get PatientSerNum for that part
-function getPatientSerNum(patientId) {
-    var r = q.defer();
-    connection.query(patientSerNumQuery, [patientId], function (err, rows, fields) {
-        if (err) r.reject(err);
-        else r.resolve(rows[0].PatientSerNum);
-    });
-    return r.promise;
-}
+//
+// //Get PatientSerNum for that part
+// function getPatientSerNum(patientId) {
+//     var r = q.defer();
+//     connection.query(patientSerNumQuery, [patientId], function (err, rows, fields) {
+//         if (err) r.reject(err);
+//         else r.resolve(rows[0].PatientSerNum);
+//     });
+//     return r.promise;
+// }
 
 //Helper processes most of the work to insert query.
 function inputAnswersHelper(id, patientSerNum, answers) {
@@ -482,6 +489,45 @@ function inputAnswersHelper(id, patientSerNum, answers) {
     });
 
     return r.promise;
+}
+
+// TODO: Think about this now the parameters.Answers is an array containing a lot of answers
+
+/**
+ * getInfoForInsertAnswer
+ * @desc this function get required information for inserting answers into the questionnaireDB2019.
+ *       It also verifies if the patientId matches
+ * @param parameters
+ * @return questionId, sectionId, typeId, and patientIdInQuestionnaireDB
+ */
+function getInfoForInsertAnswer(parameters){
+    var r = q.defer();
+
+    var questionId;
+    var sectionId;
+    var patientIdInQuestionnaireDB;
+
+    var patientExternalId = -1;
+    var promiseArray = [];
+
+    promiseArray.push(promisifyQuery(getQuestionSectionInfoFromQuestionnaireQuestionSerNumQuery, [parameters.Answers.QuestionnaireQuestionSerNum]));
+    promiseArray.push(promisifyQuery(getPatientIdFromQuestionnaireSerNumQuery, [parameters.QuestionnaireSerNum ]));
+
+    if (parameters.hasOwnProperty('PatientId') && parameters.PatientId !== undefined){
+        patientExternalId = parameters.PatientId;
+        promiseArray.push(promisifyQuery(patientIdInQuestionnaireDBQuery, [patientExternalId]));
+    }
+
+    q.all(promiseArray)
+        .then(function(promiseArrayReturn){
+            // the first item in the promiseArrayReturn should contain information about questionId
+            promiseArrayReturn[0][0]
+        })
+
+
+
+
+
 }
 
 //Turns a callback query function into a promise
