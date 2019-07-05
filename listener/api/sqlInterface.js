@@ -706,6 +706,46 @@ exports.getEncryption=function(requestObject)
 exports.inputQuestionnaireAnswers = function(requestObject) {
     let r = Q.defer();
     let parameters = requestObject.Parameters;
+
+    // check input: these are required properties.
+    // The non required properties is: parameters.PatientId
+    if (!parameters.hasOwnProperty('QuestionnaireDBSerNum') || parameters.QuestionnaireDBSerNum === undefined
+        || !parameters.hasOwnProperty('DateCompleted') || parameters.DateCompleted === undefined
+        || !parameters.hasOwnProperty('Answers') || parameters.Answers === undefined
+        // TODO: this should not be checked here, since Answers is an array of object containing answers
+        // || !parameters.Answers.hasOwnProperty('QuestionnaireQuestionSerNum') || parameters.Answers.QuestionnaireQuestionSerNum === undefined
+        // || !parameters.Answers.hasOwnProperty('QuestionType') || parameters.Answers.QuestionType === undefined
+        // || !parameters.Answers.hasOwnProperty('Answer')
+        || !parameters.hasOwnProperty('QuestionnaireSerNum') || parameters.QuestionnaireSerNum === undefined) {
+
+        r.reject('Error inputting questionnaire answers: Lack of required parameters');
+    }
+
+    console.log("------------ in inputQuestionnaireAnswers, check input questionnaireDBSerNum --------------\n", parameters.QuestionnaireDBSerNum, typeof(parameters.QuestionnaireDBSerNum));
+    console.log("------------ in inputQuestionnaireAnswers, check input answer --------------\n", parameters.Answers, typeof(parameters.Answers));
+    console.log("------------ in inputQuestionnaireAnswers, check input dateCompleted --------------\n", parameters.DateCompleted, typeof(parameters.DateCompleted));
+    console.log("------------ in inputQuestionnaireAnswers, check input CompletedFlag --------------\n", parameters.CompletedFlag, typeof(parameters.CompletedFlag));
+
+    // check input: the questionnaire should be completed to send answer to the DB
+    // TODO: Check if != make sense or need !== or need != '1' || != 1
+    if (parameters.hasOwnProperty('CompletedFlag') && parameters.CompletedFlag != 1){
+        r.reject('Error inputting questionnaire answers: The questionnaire has not been completed');
+    }
+
+    // check input: format language
+    if (parameters.hasOwnProperty('Language')){
+        if (parameters.Language === 'EN'){
+            parameters.Language = 2;
+        }else{
+            // the default is French
+            parameters.Language = 1;
+        }
+    }else{
+        // the default is French
+        parameters.Language = 1;
+    }
+
+    // not touched yet
     questionnaires.inputQuestionnaireAnswers(parameters).then(function(patientQuestionnaireSerNum) {
         exports.runSqlQuery(queries.setQuestionnaireCompletedQuery(),
             [patientQuestionnaireSerNum, parameters.DateCompleted, requestObject.Token,parameters.QuestionnaireSerNum])
@@ -1295,7 +1335,20 @@ exports.setTrusted = function(requestObject)
 exports.getQuestionnaires = function(requestObject){
     "use strict";
     var r = Q.defer();
-    var lang = requestObject.Parameters.Language;
+    var lang;
+
+    // check and pre-process argument
+    if (requestObject.hasOwnProperty('Parameters') && requestObject.Parameters.hasOwnProperty('Language') && requestObject.Parameters.Language !== undefined){
+        if (requestObject.Parameters.Language === 'EN') {
+            lang = 2;
+        } else if (requestObject.Parameters.Language === 'FR'){
+            lang = 1;
+        }
+    }else{
+        // the default is French
+        lang = 1;
+    }
+
     exports.runSqlQuery(queries.getPatientId(), [requestObject.UserID, null, null])
         .then(function (queryRows) {
             return questionnaires.getPatientQuestionnaires(queryRows,lang);
