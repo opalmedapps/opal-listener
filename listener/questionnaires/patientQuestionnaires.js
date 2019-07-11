@@ -164,7 +164,8 @@ ORDER BY QuestionSerNum, OrderNum DESC;`;
 // note that this query does not take answered and skipped answers into account since these functionnalities do not exist yet in the qplus
 // if not answered or skipped, since there won't be an entry in the answer(Type) tables, the query will return NULL
 var queryAnswersPatientQuestionnaire = `SELECT aSec.answerQuestionnaireId AS QuestionnaireSerNum,
-if (a.languageId <> -1, getAnswerText(a.ID, a.languageId), getAnswerText(a.ID, ?)) AS Answer,
+	a.ID,
+	a.languageId,
     qSec.ID AS QuestionnaireQuestionSerNum
 FROM (answerSection aSec
 LEFT JOIN answer a ON (a.answerSectionId = aSec.ID)),
@@ -174,6 +175,20 @@ WHERE aSec.answerQuestionnaireId IN ?
 AND qSec.questionId = a.questionId
 AND qSec.sectionId = a.sectionId
 ;`;
+
+//     `SELECT aSec.answerQuestionnaireId AS QuestionnaireSerNum,
+// if (a.languageId <> -1, getAnswerText(a.ID, a.languageId), getAnswerText(a.ID, ?)) AS Answer,
+//     qSec.ID AS QuestionnaireQuestionSerNum
+// FROM (answerSection aSec
+// LEFT JOIN answer a ON (a.answerSectionId = aSec.ID)),
+// questionSection qSec
+// WHERE aSec.answerQuestionnaireId IN ?
+//     AND a.deleted <> 1
+// AND qSec.questionId = a.questionId
+// AND qSec.sectionId = a.sectionId
+// ;`;
+
+var queryAnswerText = `CALL getAnswerText(?,?);`;
 
 /*SELECT QuestionnaireQuestionSerNum,  GROUP_CONCAT(Answer SEPARATOR ', ') as Answer, PatientQuestionnaireSerNum as PatientQuestionnaireDBSerNum FROM Answer WHERE PatientQuestionnaireSerNum IN ? GROUP BY QuestionnaireQuestionSerNum ORDER BY PatientQuestionnaireDBSerNum;"*/
 exports.getPatientQuestionnaires = function (patientId, lang) {
@@ -372,6 +387,7 @@ function attachingQuestionnaireAnswers(opalDB, lang) {
     var r = q.defer();
     var patientQuestionnaires = {};
     var questionnaireSerNumArray = [];
+    var rowsOfAnswers = [];
     for (var i = 0; i < opalDB.length; i++) {
         patientQuestionnaires[opalDB[i].QuestionnaireSerNum] = opalDB[i];
 
@@ -380,32 +396,86 @@ function attachingQuestionnaireAnswers(opalDB, lang) {
         }
     }
     if (questionnaireSerNumArray.length > 0) {
-        var quer = connection.query(queryAnswersPatientQuestionnaire, [lang, [questionnaireSerNumArray]], function (err, rows, fields) {
+        var quer = connection.query(queryAnswersPatientQuestionnaire, [[questionnaireSerNumArray]], function (err, rows, fields) {
             console.log("QUESTIONNAIRE ANSWERS======================================================", rows);
+
+            logger.log('debug', "QUESTIONNAIRE ANSWERS======================================================\n" + JSON.stringify(rows));
             //console.log(quer.sql);
             //console.log('line 169', err);
             if (err) r.reject(err);
 
-            // inserting the answers according to the questionnaire
-            // this is for when a question can have multiple answers
-            var answersQuestionnaires = {};
-            for (var i = 0; rows && i < rows.length; i++) {
-                if (!answersQuestionnaires.hasOwnProperty(rows[i].QuestionnaireSerNum)){
-                    answersQuestionnaires[rows[i].QuestionnaireSerNum] = [];
+            var promiseArray = [];
+            var languageId = 1;
+
+            for (var i = 0; i < rows.length; i++){
+                if (rows[i].languageId !== -1){
+                    languageId = rows[i].languageId;
                 }
-                answersQuestionnaires[rows[i].QuestionnaireSerNum].push(rows[i]);
+                rowsOfAnswers.push(rows[i]);
+                promiseArray.push(promisifyQuery(queryAnswerText, [rows[i].ID, languageId]));
             }
 
-            // putting the answers into patientQuestionnaires object
-            for (var i = 0; i < opalDB.length; i++) {
+            q.all(promiseArray).then(function(translatedAnswerArray){
 
-                if (opalDB[i].CompletedFlag == 1 || opalDB[i].CompletedFlag == '1'){
-                    patientQuestionnaires[opalDB[i].QuestionnaireSerNum].Answers = answersQuestionnaires[opalDB[i].QuestionnaireSerNum];
+                logger.log('debug', "translatedAnswerArray: \n" + JSON.stringify(translatedAnswerArray));
+
+                // inserting the answers according to the questionnaire
+                // this is for when a question can have multiple answers
+                var answersQuestionnaires = {};
+
+                for (var i = 0; i < rowsOfAnswers.length; i++){
+                    if (!answersQuestionnaires.hasOwnProperty(rows[i].QuestionnaireSerNum)){
+                        answersQuestionnaires[rows[i].QuestionnaireSerNum] = [];
+                    }
+
+                    // add translated answer into answers
+                    // this is for loop is for checkbox questions which can have multiple answers
+                    for (var j = 0; j < translatedAnswerArray[i][0].length; j++){
+                        // this is for cloning rowsOfAnswers to avoid pass by reference
+                        var answerCopy = {};
+
+                        logger.log('debug', "translatedAnswerArray next: " + JSON.stringify(translatedAnswerArray[i][0]));
+
+                        if (translatedAnswerArray[i][0][j].hasOwnProperty('value')){
+                            rowsOfAnswers[i].Answer = translatedAnswerArray[i][0][j].value;
+
+                            if (translatedAnswerArray[i][0].length === 2){
+                                logger.log('debug', "rowsOfAnswers[i].Answer: " + JSON.stringify(rowsOfAnswers[i].Answer));
+                            }
+
+                        }else{
+                            rowsOfAnswers[i].Answer = null;
+                        }
+
+                        answerCopy = Object.assign(answerCopy, rowsOfAnswers[i]);
+                        answersQuestionnaires[rows[i].QuestionnaireSerNum].push(answerCopy);
+
+                        if (translatedAnswerArray[i][0].length === 2){
+                            logger.log('debug', "answersQuestionnaires[rows[i].QuestionnaireSerNum]: " + JSON.stringify(answersQuestionnaires[rows[i].QuestionnaireSerNum]));
+                        }
+                    }
+                    delete rowsOfAnswers[i].ID;
+                    delete rowsOfAnswers[i].languageId;
                 }
-                //console.log(patientQuestionnaires[opalDB[i].QuestionnaireSerNum]);
-            }
 
-            r.resolve(patientQuestionnaires);
+                // putting the answers into patientQuestionnaires object
+                for (var i = 0; i < opalDB.length; i++) {
+
+                    if (opalDB[i].CompletedFlag == 1 || opalDB[i].CompletedFlag == '1'){
+                        patientQuestionnaires[opalDB[i].QuestionnaireSerNum].Answers = answersQuestionnaires[opalDB[i].QuestionnaireSerNum];
+
+                        if (opalDB[i].QuestionnaireSerNum === 391){
+                            logger.log('debug', "patientQuestionnaires[opalDB[i].QuestionnaireSerNum].Answers: " + JSON.stringify(patientQuestionnaires[opalDB[i].QuestionnaireSerNum].Answers));
+                        }
+                    }
+                    //console.log(patientQuestionnaires[opalDB[i].QuestionnaireSerNum]);
+                }
+
+                r.resolve(patientQuestionnaires);
+
+            }).catch(function(err){
+                r.reject(err);
+            });
         });
     } else {
         r.resolve(patientQuestionnaires);
@@ -417,6 +487,7 @@ function attachingQuestionnaireAnswers(opalDB, lang) {
  * Inserting questionnaire answers
  *
  **/
+// old
 var inputAnswersQuery = "INSERT INTO `Answer`(`AnswerSerNum`, `QuestionnaireQuestionSerNum`, `Answer`, `LastUpdated`, `PatientSerNum`, `PatientQuestionnaireSerNum`) VALUES (NULL,?,?,NULL,?,?)";
 var patientSerNumQuery = "SELECT PatientSerNum FROM Patient WHERE Patient.PatientId = ?;";
 var inputPatientQuestionnaireQuery = "INSERT INTO `PatientQuestionnaire`(`PatientQuestionnaireSerNum`, `PatientSerNum`, `DateTimeAnswered`, `QuestionnaireSerNum`) VALUES (NULL,?,?,?)";
@@ -431,22 +502,64 @@ var getPatientIdFromQuestionnaireSerNumQuery = `SELECT patientId
 FROM answerQuestionnaire
 WHERE ID = ? AND deleted <> 1 AND \`status\` <> 2
 ;`;
+var updateStatusCompletedInAnswerQuestionnaireQuery = `UPDATE \`answerquestionnaire\` SET \`status\`='2', \`lastUpdated\`=?, \`updatedBy\`=? WHERE  \`ID\`=?;`;
+var insertSectionIntoAnswerSectionQuery = `REPLACE INTO answersection(answerQuestionnaireId, sectionId) VALUES (?, ?);`;
 
-exports.inputQuestionnaireAnswers = function (parameters) {
+exports.inputQuestionnaireAnswers = function (parameters, appVersion) {
     var r = q.defer();
 
-    getPatientSerNum(parameters.PatientId).then(function (serNum) {
-        var sa = connection.query(inputPatientQuestionnaireQuery, [serNum, parameters.DateCompleted, parameters.QuestionnaireDBSerNum], function (err, result) {
-            //console.log(sa.sql);
-            if (err) r.reject(err);
-            //console.log(result);
-            inputAnswersHelper(result.insertId, serNum, parameters.Answers).then(function (res) {
-                r.resolve(result.insertId);
-            }).catch(function (err) {
-                r.reject(err);
-            });
-        });
-    });
+    console.log("------------ in inputQuestionnaireAnswers, before doing anything --------------\n");
+
+    var authorOfUpdate = 'QPLUS_' + appVersion;
+    var patientId;
+
+   getPatientIdInQuestionnaireDB(parameters)
+       .then(function(verifiedPatientId){
+           patientId = verifiedPatientId;
+
+           console.log("------------ in inputQuestionnaireAnswers, after verifying patientID --------------\n");
+
+           // update the status in `answerQuestionnaire` table
+           return promisifyQuery(updateStatusCompletedInAnswerQuestionnaireQuery, [parameters.DateCompleted, authorOfUpdate, parameters.QuestionnaireSerNum]);
+       }).then(function(){
+
+            console.log("------------ in inputQuestionnaireAnswers, after updating status in `answerQuestionnaire` --------------\n");
+
+           // gets the questionId, sectionId and type of question from the questionnaireQuestionSerNum of one answer, also the answerSectionId
+            // transform the object parameters.Answers into an array to ensure order
+           return inputAnswerSection(parameters.QuestionnaireSerNum, Object.values(parameters.Answers));
+       }).then(function(formattedAnswers){
+
+           console.log("------------ in inputQuestionnaireAnswers, after getting necessary IDs -------------- formattedAnswers: \n", formattedAnswers);
+
+           var promiseArray = [];
+
+           for (var i = 0; i < formattedAnswers.length; i++){
+               console.log("------------ in inputQuestionnaireAnswers, sending ans to inputAnswer -------------- ansObj: \n", formattedAnswers[i]);
+               promiseArray.push(inputAnswer(parameters.QuestionnaireDBSerNum, formattedAnswers[i], parameters.Language, patientId, parameters.DateCompleted, authorOfUpdate));
+           }
+
+           return q.all(promiseArray);
+       }).then(function(result){
+            console.log("------------ in inputQuestionnaireAnswers, after inserting answers --------------\n");
+
+           r.resolve(result);
+       }).catch(function(err){
+           r.reject(err);
+       });
+
+    // getPatientSerNum(parameters.PatientId).then(function (serNum) {
+    //     var sa = connection.query(inputPatientQuestionnaireQuery, [serNum, parameters.DateCompleted, parameters.QuestionnaireDBSerNum], function (err, result) {
+    //         //console.log(sa.sql);
+    //         if (err) r.reject(err);
+    //         //console.log(result);
+    //         inputAnswersHelper(result.insertId, serNum, parameters.Answers).then(function (res) {
+    //             r.resolve(result.insertId);
+    //         }).catch(function (err) {
+    //             r.reject(err);
+    //         });
+    //     });
+    // });
     return r.promise;
 };
 //
@@ -491,43 +604,285 @@ function inputAnswersHelper(id, patientSerNum, answers) {
     return r.promise;
 }
 
-// TODO: Think about this now the parameters.Answers is an array containing a lot of answers
-
 /**
- * getInfoForInsertAnswer
- * @desc this function get required information for inserting answers into the questionnaireDB2019.
- *       It also verifies if the patientId matches
- * @param parameters
- * @return questionId, sectionId, typeId, and patientIdInQuestionnaireDB
+ * inputAnswerSection
+ * @desc inputAnswerSection verifies the format of the answers input
+ *      It gets the questionId, sectionId and type of question from the questionnaireQuestionSerNum of one answer
+ *      It then put the sectionId into `answerSection` table if an entry does not exist yet for that section
+ * @param answerQuestionnaireId: questionnaireSerNum sent from qplus
+ *        answers: {array} answers where each element is an object
+ * @return {promise} containing questionId, sectionId, typeId, and answerSectionID
  */
-function getInfoForInsertAnswer(parameters){
+function inputAnswerSection(answerQuestionnaireId, answers){
     var r = q.defer();
 
-    var questionId;
-    var sectionId;
-    var patientIdInQuestionnaireDB;
+    console.log("------------ in inputAnswerSection, begin --------------\n");
 
-    var patientExternalId = -1;
     var promiseArray = [];
+    var sectionAndAnswerSection = {};
+    var sectionArray = [];
+    var promiseArray2 =[];
 
-    promiseArray.push(promisifyQuery(getQuestionSectionInfoFromQuestionnaireQuestionSerNumQuery, [parameters.Answers.QuestionnaireQuestionSerNum]));
-    promiseArray.push(promisifyQuery(getPatientIdFromQuestionnaireSerNumQuery, [parameters.QuestionnaireSerNum ]));
+    console.log("------------ in inputAnswerSection, answers.length is: --------------\n", answers.length);
+    console.log("------------ in inputAnswerSection, answers is: --------------\n", answers);
+
+    for (var i = 0; i < answers.length; i++){
+        // verify the input
+        if (!answers[i].hasOwnProperty('QuestionnaireQuestionSerNum') || answers[i].QuestionnaireQuestionSerNum === undefined
+        || !answers[i].hasOwnProperty('QuestionType') || answers[i].QuestionType === undefined
+        || !answers[i].hasOwnProperty('Answer')){
+            console.log("------------ in inputAnswerSection, verify input, answers[i] is: --------------\n", answers[i]);
+            throw new Error('Error inputting questionnaire answers: Answers array do not have required properties');
+        }
+
+        // if the input is fine, find out the questionId, sectionId and typeId from answers[i].QuestionnaireQuestionSerNum
+        promiseArray.push(promisifyQuery(getQuestionSectionInfoFromQuestionnaireQuestionSerNumQuery, [answers[i].QuestionnaireQuestionSerNum]));
+    }
+
+    console.log("------------ in inputAnswerSection, before 1st q.all --------------\n");
+
+    q.all(promiseArray)
+        .then(function(promiseArrayReturned){
+            console.log("------------ in inputAnswerSection, after 1st q.all --------------\n");
+
+            for (var i = 0; i < answers.length; i++){
+                // add the questionId, sectionId, typeId found into the object
+                answers[i].questionId = promiseArrayReturned[i][0].questionId;
+                answers[i].sectionId = promiseArrayReturned[i][0].sectionId;
+                answers[i].typeId = promiseArrayReturned[i][0].typeId;
+
+                // add the sectionId into the sectionAndAnswerSection as keys, used for inserting into `answerSection` table
+                if (!sectionAndAnswerSection.hasOwnProperty(answers[i].sectionId)){
+                    sectionAndAnswerSection[answers[i].sectionId] = 0;  // object is used to ensure distinctiveness of sectionId
+                    sectionArray.push(answers[i].sectionId);    // array is used to ensure order
+                    promiseArray2.push(promisifyQuery(insertSectionIntoAnswerSectionQuery, [answerQuestionnaireId, answers[i].sectionId]));
+                }
+            }
+
+            console.log("------------ in inputAnswerSection, before 2nd q.all, insert into `answerSection` --------------\n answers: ", answers);
+
+            // insert all the sectionId into `answerSection` table
+            return q.all(promiseArray2);
+
+        }).then(function(promiseArrayReturned2){
+
+            console.log("------------ in inputAnswerSection, after 2nd q.all --------------\n");
+
+            for (var j = 0; j < sectionArray.length; j++){
+                sectionAndAnswerSection[sectionArray[j]] = promiseArrayReturned2[j].insertId;
+            }
+
+            for (var i = 0; i < answers.length; i++){
+                answers[i].answerSectionId = sectionAndAnswerSection[answers[i].sectionId];
+            }
+
+            console.log("------------ in inputAnswerSection, before resolve --------------answers: \n", answers);
+
+            r.resolve(answers);
+
+        }).catch(function(err){
+            console.log("------------ in inputAnswerSection, before reject -------------- \n");
+
+            r.reject('Error inputting questionnaire answers: ', err);
+
+        });
+
+    return r.promise;
+}
+
+/**
+ * getPatientIdInQuestionnaireDB
+ * @desc getPatientIdInQuestionnaireDB gets the patientId in the QuestionnaireDB. If parameters contain the property patientId, it also checks if both IDs match
+ * @param parameters
+ * @return {promise}
+ */
+function getPatientIdInQuestionnaireDB(parameters) {
+    var r = q.defer();
+
+    console.log("------------ in getPatientIdInQuestionnaireDB, begin --------------\n");
+
+    var promiseArray = [];
+    var hasExternalPatientId = 0;
+    var patientId;
+
+    // the existance of parameters.QuestionnaireSerNum was already checked beforehand in inputQuestionnaireAnswers
+    promiseArray.push(promisifyQuery(getPatientIdFromQuestionnaireSerNumQuery, [parameters.QuestionnaireSerNum]));
 
     if (parameters.hasOwnProperty('PatientId') && parameters.PatientId !== undefined){
-        patientExternalId = parameters.PatientId;
-        promiseArray.push(promisifyQuery(patientIdInQuestionnaireDBQuery, [patientExternalId]));
+        hasExternalPatientId = 1;
+        promiseArray.push(promisifyQuery(patientIdInQuestionnaireDBQuery, [parameters.PatientId]))
     }
+
+    console.log("------------ in getPatientIdInQuestionnaireDB, before 1st q.all --------------\n");
 
     q.all(promiseArray)
         .then(function(promiseArrayReturn){
-            // the first item in the promiseArrayReturn should contain information about questionId
-            promiseArrayReturn[0][0]
+
+            console.log("------------ in getPatientIdInQuestionnaireDB, after 1st q.all returns --------------\n");
+
+            // the first item in the promiseArrayReturn should contain 1 patientId from answerQuestionnaire table
+            if (promiseArrayReturn[0].length === 0){
+                // there is no questionnaire that is incomplete and not deleted
+                // note that throw will stop the code here and go to catch
+                throw new Error('Error inputting questionnaire answers: there is no incomplete questionnaire matching the QuestionnaireSerNum');
+            }
+
+            patientId = promiseArrayReturn[0][0].patientId;
+
+            // check if both patientId matches if the parameters.PatientId was given
+            if (hasExternalPatientId === 1){
+                if (patientId !== promiseArrayReturn[1][0].ID){
+                    // note that throw will stop the code here and go to catch
+                    throw new Error('Error inputting questionnaire answers: the patientId given does not match to the patientId retrieved using QuestionnaireSerNum');
+                }
+            }
+
+            console.log("------------ in getPatientIdInQuestionnaireDB, before resolve --------------\n");
+
+            r.resolve(patientId);
         })
+        .catch(function(err){
+            r.reject('Error inputting questionnaire answers: ', err);
+        });
+
+    return r.promise;
+}
 
 
+var insertIntoAnswerQuery = `REPLACE INTO 
+answer(questionnaireId, sectionId, questionId, typeId, answerSectionId, languageId, patientId, answered, skipped, creationDate, createdBy, lastUpdated, updatedBy)
+VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?);
+`;
+var insertTextBox = `INSERT INTO \`answerTextBox\` (\`answerId\`, \`value\`) VALUES (?, ?)`;
+var insertSlider = `INSERT INTO \`answerSlider\` (\`answerId\`, \`value\`) VALUES (?, ?)`;
+var insertRadioButton = `REPLACE INTO answerRadioButton (answerId, \`value\`)
+VALUES (?, 
+(SELECT rbOpt.ID
+FROM radioButton rb, radioButtonOption rbOpt
+WHERE rb.questionId = ?
+ AND rbOpt.parentTableId = rb.ID
+ AND rbOpt.description IN (
+  SELECT contentId
+  FROM dictionary
+  WHERE content = ?
+   AND deleted <> 1 
+	AND tableId IN (12, 31, 17) -- where 12, 17, 31 are checkboxOption, labelOption, radioButtonOption tables resp., you can check in definitionTable
+  )
+LIMIT 1)
+);`;
 
+var insertCheckbox = `REPLACE INTO answerCheckbox (answerId, \`value\`)
+VALUES (?, 
+(SELECT cbOpt.ID
+FROM checkbox cb, checkboxOption cbOpt
+WHERE cb.questionId = ?
+ AND cb.ID = cbOpt.parentTableId
+ AND cbOpt.description IN (
+  SELECT contentId
+  FROM dictionary
+  WHERE content = ?
+   AND deleted <> 1 
+	AND tableId IN (12, 31, 17) -- where 12, 17, 31 are checkboxOption, labelOption, radioButtonOption tables resp., you can check in definitionTable
+  )
+LIMIT 1)
+);`;
 
+/**
+ * inputAnswer
+ * @desc inputAnswer inserts into the DB the answer for a single question
+ * @param questionnaireId
+ * @param answer {object}
+ * @param languageId
+ * @param patientId
+ * @param dateCompleted
+ * @param updateAuthor
+ * @return {promise}
+ */
 
+function inputAnswer(questionnaireId, answer, languageId, patientId, dateCompleted, updateAuthor){
+    var r = q.defer();
+
+    console.log("------------ in inputAnswer, begin --------------\n");
+
+    var answered = 1; // default for answered is 1 unless the answer is undefined
+    var skipped = 0; // there is no option on the front-end right now to skip a question
+    var answerId;
+    
+    // in the qplus, if the answer has been chosen but not filled in, the answer is undefined. In this new version of DB, this is not answered
+    if (answer.Answer === undefined){
+        answered = 0;
+    }
+
+    console.log("------------ in inputAnswer, before inserting into `answer` query -------------- answer is: \n", answer);
+
+    promisifyQuery(insertIntoAnswerQuery, [questionnaireId, answer.sectionId, answer.questionId, answer.typeId, answer.answerSectionId,
+        languageId, patientId, answered, skipped, dateCompleted, updateAuthor, dateCompleted, updateAuthor])
+    .then(function(result){
+
+        console.log("------------ in inputAnswer, after inserting into `answer` query --------------\n result.insertId: ", result.insertId);
+
+        answerId = result.insertId;
+
+        var promiseArray = [];
+
+        // see Questionnaire Migration document for matching the old types to new types
+        switch (answer.QuestionType) {
+            case ('yes'):
+                // this matches to radio buttons in Questionnaire2019DB
+                // we treat this the same way as MC type using a fall-through
+            case ('MC'):
+                // this matches to radio buttons in Questionnaire2019DB
+                // get the radioButtonOption.ID from the answer text (need to search in the dictionary table)
+                // insert into answerRadioButton table
+                promiseArray.push(promisifyQuery(insertRadioButton, [answerId, answer.questionId, answer.Answer]));
+
+                break;
+            case ('Checkbox'):
+                // this matches checkboxes in Questionnaire2019DB
+                // get the checkboxOption.ID from the answer text (need to search in the dictionary table)
+                // insert into answerCheckbox table
+
+                // in case of a checkbox, there are multiple answers per one question
+                // the front-end send an array inside answer.Answer each containing an answer
+                if (!(answer.Answer instanceof Array)){
+                    throw new Error('Error inputting questionnaire answers: there is no array of answers for checkbox');
+                }
+
+                for (var i = 0; i < answer.Answer.length; i++){
+                    promiseArray.push(promisifyQuery(insertCheckbox, [answerId, answer.questionId, answer.Answer[i]]));
+                }
+
+                break;
+            case ('MinMax'):
+                // this matches sliders in Questionnaire2019DB
+                // insert the value directly into answerSlider table
+                promiseArray.push(promisifyQuery(insertSlider, [answerId, answer.Answer]));
+
+                break;
+            case ('SA'):
+                // this matches the text boxes in Questionnaire2019DB
+                // insert the value directly into answerTextBox table
+                // since we treat any other type same as text box, we use a fall-through here
+            default:
+                // there should not be any other type in the legacy questionnaire, but just in case, we treat them as text box
+                promiseArray.push(promisifyQuery(insertTextBox, [answerId, answer.Answer]));
+
+                break;
+        }
+
+        console.log("------------ in inputAnswer, after case switching and before q.all --------------\n");
+
+        return q.all(promiseArray)
+    }).then(function(result){
+
+        console.log("------------ in inputAnswer, before resolve --------------\n");
+
+        r.resolve(result);
+    }).catch(function(err){
+        r.reject('Error inputting questionnaire answers: ', err);
+    });
+
+    return r.promise;
 }
 
 //Turns a callback query function into a promise

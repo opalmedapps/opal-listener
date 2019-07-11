@@ -496,3 +496,7 @@ exports.getNewNotifications=function() {
         "AND Notification.ReadStatus = 0 " +
         "AND (Notification.DateAdded > ? OR NotificationControl.DateAdded > ?);";
 };
+
+exports.updateQuestionnaireStatus = function () {
+    return `UPDATE \`questionnaire\` SET \`CompletedFlag\`= ?, \`CompletionDate\`= ? WHERE PatientQuestionnaireDBSerNum = ?;`;
+};
