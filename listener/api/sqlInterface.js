@@ -706,31 +706,31 @@ exports.getEncryption=function(requestObject)
 exports.inputQuestionnaireAnswers = function(requestObject) {
     let r = Q.defer();
     let parameters = requestObject.Parameters;
+    let appVersion = requestObject.AppVersion;
 
     // check input: these are required properties.
     // The non required properties is: parameters.PatientId
     if (!parameters.hasOwnProperty('QuestionnaireDBSerNum') || parameters.QuestionnaireDBSerNum === undefined
         || !parameters.hasOwnProperty('DateCompleted') || parameters.DateCompleted === undefined
         || !parameters.hasOwnProperty('Answers') || parameters.Answers === undefined
-        // TODO: this should not be checked here, since Answers is an array of object containing answers
-        // || !parameters.Answers.hasOwnProperty('QuestionnaireQuestionSerNum') || parameters.Answers.QuestionnaireQuestionSerNum === undefined
-        // || !parameters.Answers.hasOwnProperty('QuestionType') || parameters.Answers.QuestionType === undefined
-        // || !parameters.Answers.hasOwnProperty('Answer')
         || !parameters.hasOwnProperty('QuestionnaireSerNum') || parameters.QuestionnaireSerNum === undefined) {
 
-        r.reject('Error inputting questionnaire answers: Lack of required parameters');
+        throw new Error('Error inputting questionnaire answers: Lack of required parameters');
     }
 
-    console.log("------------ in inputQuestionnaireAnswers, check input questionnaireDBSerNum --------------\n", parameters.QuestionnaireDBSerNum, typeof(parameters.QuestionnaireDBSerNum));
+    console.log("------------ in inputQuestionnaireAnswers, check input questionnaireDBSerNum --------------\n", parameters.QuestionnaireDBSerNum, typeof(parameters.QuestionnaireDBSerNum)); // string
     console.log("------------ in inputQuestionnaireAnswers, check input answer --------------\n", parameters.Answers, typeof(parameters.Answers));
-    console.log("------------ in inputQuestionnaireAnswers, check input dateCompleted --------------\n", parameters.DateCompleted, typeof(parameters.DateCompleted));
-    console.log("------------ in inputQuestionnaireAnswers, check input CompletedFlag --------------\n", parameters.CompletedFlag, typeof(parameters.CompletedFlag));
+    // Answer: string, QuestionType: string, QuestionnaireQuestionSerNum: string;   object
+    console.log("------------ in inputQuestionnaireAnswers, check input dateCompleted --------------\n", parameters.DateCompleted, typeof(parameters.DateCompleted)); // string
+    console.log("------------ in inputQuestionnaireAnswers, check input CompletedFlag --------------\n", parameters.CompletedFlag, typeof(parameters.CompletedFlag)); // string
 
     // check input: the questionnaire should be completed to send answer to the DB
     // TODO: Check if != make sense or need !== or need != '1' || != 1
-    if (parameters.hasOwnProperty('CompletedFlag') && parameters.CompletedFlag != 1){
-        r.reject('Error inputting questionnaire answers: The questionnaire has not been completed');
+    if (!parameters.hasOwnProperty('CompletedFlag') || (parameters.CompletedFlag !== 1 && parameters.CompletedFlag !== '1')){
+        throw new Error('Error inputting questionnaire answers: The questionnaire has not been completed');
     }
+
+    console.log("------------ in inputQuestionnaireAnswers, check input Language --------------\n");
 
     // check input: format language
     if (parameters.hasOwnProperty('Language')){
@@ -745,17 +745,33 @@ exports.inputQuestionnaireAnswers = function(requestObject) {
         parameters.Language = 1;
     }
 
-    // not touched yet
-    questionnaires.inputQuestionnaireAnswers(parameters).then(function(patientQuestionnaireSerNum) {
-        exports.runSqlQuery(queries.setQuestionnaireCompletedQuery(),
-            [patientQuestionnaireSerNum, parameters.DateCompleted, requestObject.Token,parameters.QuestionnaireSerNum])
-            .then(()=>{
-                r.resolve({Response:'success'});
-            });
-    }).catch(function(err){
-        r.reject({Response:'error',Reason:err});
-    });
+    console.log("------------ in inputQuestionnaireAnswers, before questionnaires.inputQuestionnaireAnswers --------------\n");
+
+    questionnaires.inputQuestionnaireAnswers(parameters, appVersion)
+        .then(function(){
+            console.log("------------ in inputQuestionnaireAnswers, before marking completed in opalDB --------------\n");
+
+            // mark, in opalDB.Questionnaire, that this particular questionnaire is completed
+            return exports.runSqlQuery(queries.updateQuestionnaireStatus(), [parameters.CompletedFlag, parameters.DateCompleted, parameters.QuestionnaireSerNum]);
+
+        }).then(function(){
+            r.resolve({Response:'success'});
+
+        }).catch(function(err){
+            r.reject({Response:'error',Reason:err});
+        });
     return r.promise;
+
+    // questionnaires.inputQuestionnaireAnswers(parameters).then(function(patientQuestionnaireSerNum) {
+    //     exports.runSqlQuery(queries.setQuestionnaireCompletedQuery(),
+    //         [patientQuestionnaireSerNum, parameters.DateCompleted, requestObject.Token,parameters.QuestionnaireSerNum])
+    //         .then(()=>{
+    //             r.resolve({Response:'success'});
+    //         });
+    // }).catch(function(err){
+    //     r.reject({Response:'error',Reason:err});
+    // });
+    // return r.promise;
 };
 
 /**
@@ -1348,6 +1364,8 @@ exports.getQuestionnaires = function(requestObject){
         // the default is French
         lang = 1;
     }
+
+    console.log("what does requestObject look like: \n", requestObject);
 
     exports.runSqlQuery(queries.getPatientId(), [requestObject.UserID, null, null])
         .then(function (queryRows) {
