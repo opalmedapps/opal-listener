@@ -197,6 +197,7 @@ exports.getPatientQuestionnaires = function (patientId, lang) {
         // console.log("\n******** in getPatientQuestionnaires, before queryPatientQuestionnaireInfo: ***********\n", patientId[0].PatientId);
 
         connection.query(queryPatientQuestionnaireInfo, [patientId[0].PatientId], function (err, rows, fields) {
+            console.log("\n******** in getPatientQuestionnaires, after queryPatientQuestionnaireInfo: ***********\n", rows);
             if (rows.length !== 0) {
                 // console.log("\n******** in getPatientQuestionnaires, after queryPatientQuestionnaireInfo: ***********\n", rows);
 
@@ -211,11 +212,15 @@ exports.getPatientQuestionnaires = function (patientId, lang) {
 
                     let questionsOrdered = setQuestionOrder(questions);
 
-                    console.log("\n******** in getPatientQuestionnaires, after ordering questions: ***********\n", questionsOrdered);
+                    // console.log("\n******** in getPatientQuestionnaires, after ordering questions: ***********\n", questionsOrdered);
+
+                    logger.log('debug', "******** in getPatientQuestionnaires, after ordering questions: ***********\n" + JSON.stringify(questionsOrdered));
 
                     getQuestionChoices(questionsOrdered).then(function (questionsChoices) {
 
                         // console.log("\n******** in getPatientQuestionnaires, after getQuestionChoices: ***********\n", questionsChoices);
+
+                        logger.log('debug', "******** in getPatientQuestionnaires, after getQuestionChoices: ***********\n" + JSON.stringify(questionsChoices));
 
                         let questionnaires = prepareQuestionnaireObject(questionsChoices, rows);
                         let patientQuestionnaires = {};
@@ -369,12 +374,14 @@ function attachChoicesToQuestions(questions, choices) {
 
     for (var i = 0; i < questions.length; i++) {
         for (var j = choices.length - 1; j >= 0; j--) {
-            if (questions[i].QuestionSerNum == choices[j].QuestionSerNum) {
+            if (questions[i].QuestionSerNum === choices[j].QuestionSerNum) {
                 if (!questions[i].hasOwnProperty('Choices')) {
                     questions[i].Choices = [];
                 }
-                questions[i].Choices.push(choices[j]);
-                choices.splice(j, 1);
+                var choiceCopy = {};
+                choiceCopy = Object.assign(choiceCopy, choices[j]);
+                questions[i].Choices.push(choiceCopy);
+                // choices.splice(j, 1);
             }
         }
     }
