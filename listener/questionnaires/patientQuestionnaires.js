@@ -194,6 +194,11 @@ var queryAnswerText = `CALL getAnswerText(?,?);`;
 exports.getPatientQuestionnaires = function (patientId, lang) {
     return new Promise(((resolve, reject) => {
 
+        // connection.query(`CALL getAnswerText(138,2);`, [], function (err, rows, fields) {
+        //    console.log("---------- test test CALL getAnswerText(138,2); \n", rows);
+        //    throw new Error('break');
+        // });
+
         // console.log("\n******** in getPatientQuestionnaires, before queryPatientQuestionnaireInfo: ***********\n", patientId[0].PatientId);
 
         connection.query(queryPatientQuestionnaireInfo, [patientId[0].PatientId], function (err, rows, fields) {
@@ -435,11 +440,28 @@ function attachingQuestionnaireAnswers(opalDB, lang) {
                         answersQuestionnaires[rows[i].QuestionnaireSerNum] = [];
                     }
 
+                    if (!rowsOfAnswers[i].hasOwnProperty('Answer')){
+                        // the Answer will be '' to denote the case where there is no real answer text, since null and undefined makes qplus give an error
+                        rowsOfAnswers[i].Answer = '';
+                    }
+
+                    if (rowsOfAnswers[i].QuestionnaireSerNum == 168){
+                        logger.log('debug', "QuestionnaireSerNum = 168: rowsOfAnswers: " + JSON.stringify(rowsOfAnswers[i]));
+                        logger.log('debug', "QuestionnaireSerNum = 168: translatedAnswerArray: " + JSON.stringify(translatedAnswerArray[i]));
+                    }
+
+                    // this case is for when the database has the entry in the `Answer` table
+                    // but does not contain anything in subtables (e.g. AnswerRadioButton) that further give the answer text
+                    // without this, those type of answers will be skipped, and the answer will not be displayed for the correct question in the 'Completed' tab
+                    if (translatedAnswerArray[i][0].length === 0){
+                        // the Answer will be '' to denote this case (no real answer text), since null and undefined makes qplus give an error
+                        rowsOfAnswers[i].Answer = '';
+                        logger.log('debug', "translatedAnswerArray[i][0].length === 0: " + JSON.stringify(rowsOfAnswers[i]));
+                    }
+
                     // add translated answer into answers
                     // this is for loop is for checkbox questions which can have multiple answers
                     for (var j = 0; j < translatedAnswerArray[i][0].length; j++){
-                        // this is for cloning rowsOfAnswers to avoid pass by reference
-                        var answerCopy = {};
 
                         logger.log('debug', "translatedAnswerArray next: " + JSON.stringify(translatedAnswerArray[i][0]));
 
@@ -447,22 +469,28 @@ function attachingQuestionnaireAnswers(opalDB, lang) {
                             rowsOfAnswers[i].Answer = translatedAnswerArray[i][0][j].value;
 
                             if (translatedAnswerArray[i][0].length === 2){
-                                logger.log('debug', "rowsOfAnswers[i].Answer: " + JSON.stringify(rowsOfAnswers[i].Answer));
+                                logger.log('debug', "rowsOfAnswers[i]: " + JSON.stringify(rowsOfAnswers[i]));
                             }
 
                         }else{
-                            rowsOfAnswers[i].Answer = null;
+                            // this part is not actually used, but just in case
+                            // the Answer will be '' to denote this case (no real answer text), since null and undefined makes qplus give an error
+                            rowsOfAnswers[i].Answer = '';
                         }
 
-                        answerCopy = Object.assign(answerCopy, rowsOfAnswers[i]);
-                        answersQuestionnaires[rows[i].QuestionnaireSerNum].push(answerCopy);
-
-                        if (translatedAnswerArray[i][0].length === 2){
-                            logger.log('debug', "answersQuestionnaires[rows[i].QuestionnaireSerNum]: " + JSON.stringify(answersQuestionnaires[rows[i].QuestionnaireSerNum]));
-                        }
                     }
-                    delete rowsOfAnswers[i].ID;
-                    delete rowsOfAnswers[i].languageId;
+
+                    // this is for cloning rowsOfAnswers to avoid pass by reference
+                    var answerCopy = {};
+                    answerCopy = Object.assign(answerCopy, rowsOfAnswers[i]);
+                    answersQuestionnaires[rows[i].QuestionnaireSerNum].push(answerCopy);
+
+                    if (translatedAnswerArray[i][0].length === 2){
+                        logger.log('debug', "answersQuestionnaires[rows[i].QuestionnaireSerNum]: " + JSON.stringify(answersQuestionnaires[rows[i].QuestionnaireSerNum]));
+                    }
+
+                    // delete rowsOfAnswers[i].ID;
+                    // delete rowsOfAnswers[i].languageId;
                 }
 
                 // putting the answers into patientQuestionnaires object
