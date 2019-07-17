@@ -38,7 +38,8 @@ module.exports = function (results) {
   return new Promise((resolve) => {
     linearGroupify(
       results,
-      (currentValue, previousValue) => previousValue === null || currentValue.PatientLocationRevCount >= previousValue.PatientLocationRevCount,
+      (currentValue, previousValue) => previousValue === null ||
+          currentValue.PatientLocationRevCount >= previousValue.PatientLocationRevCount,
       resolve
     )
   })

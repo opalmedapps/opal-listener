@@ -14,7 +14,12 @@ function process (groupsArr, dataArr, currentIndex, previousValue, currentGroup,
 }
 
 function linearGroupify (dataArr, isNewGroup, onDone) {
-  const dataAmount = dataArr.length
+  var dataAmount
+  if (dataArr == null){
+    return null
+  } else {
+    dataAmount = dataArr.length
+  }
   const groupsArr = []
   let currentGroup = []
   for (let currentIndex = dataAmount - 1; currentIndex >= 0; --currentIndex) {

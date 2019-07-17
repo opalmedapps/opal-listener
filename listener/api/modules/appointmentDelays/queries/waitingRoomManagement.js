@@ -26,7 +26,7 @@ const _default = {
     WHERE
         AppointmentsList.AppointmentCode = '${appointmentType}'
         AND WEEKDAY(AppointmentsList.ScheduledDateTime) = ${scheduledDay}
-        AND HOUR(AppointmentsList.ScheduledDateTime) = ${scheduledHour}
+        AND HOUR(AppointmentsList.ScheduledDateTime) BETWEEN (${scheduledHour}-1) AND (${scheduledHour} +1)
         AND MINUTE(AppointmentsList.ScheduledDateTime) = ${scheduledMinutes}
         AND TIMESTAMPDIFF(DAY, NOW(), AppointmentsList.ScheduledDateTime) < 0
     ORDER BY

@@ -22,7 +22,8 @@ function formatAppointment (users, group, index, max, onDone) {
     PatientLocationRevCount,
     CheckinVenueName,
     ArrivalDateTime,
-    DichargeThisLocationDateTime
+    ActualStartDate
+   // DichargeThisLocationDateTime
   } = group[index]
   const user = users[PatientSerNum] || (users[PatientSerNum] = {})
   const scheduledDate = getDate(ScheduledDateTime)
@@ -32,15 +33,20 @@ function formatAppointment (users, group, index, max, onDone) {
   if (PatientLocationRevCount > appointmentObj.MaxPatientLocationRevCount) {
     appointmentObj.MaxPatientLocationRevCount = PatientLocationRevCount
   }
-  appointmentObj.History.unshift({ PatientLocationRevCount, ArrivalDateTime: getDate(ArrivalDateTime), DichargeThisLocationDateTime: getDate(DichargeThisLocationDateTime), CheckinVenueName })
+  appointmentObj.History.unshift({ PatientLocationRevCount, ArrivalDateTime: getDate(ArrivalDateTime), ActualStartDate: getDate(ActualStartDate), CheckinVenueName })
   formatAppointment(users, group, index + 1, max, onDone)
 }
-
+//Tessa: Removed ', DichargeThisLocationDateTime: getDate(DichargeThisLocationDateTime,' from Line 35
 module.exports = function (groups) {
   return new Promise((resolve) => {
     const users = {}
     const max = groups.length
+    var index = 0
+    if (max == 0){
+      resolve(users)
+    }
     let count = 0
+
     const check = () => {
       if (++count === max) {
         resolve(users)
@@ -48,6 +54,7 @@ module.exports = function (groups) {
     }
     groups.forEach((group) => {
       formatAppointment(users, group, 0, group.length, check)
+      //was group.length instead of groups.length
     })
   })
 }
