@@ -1,6 +1,8 @@
 const retrieveProcessor = require('./processor')
 const logger = require('../../../logs/logger');
 const cacheOf = require('./cache')
+const { opalDb : opalDbQueries} = require('./queries')
+const { runSqlQuery } = require('../../sqlInterface')
 
 function createDefaultErrorLogger (cb) {
   return (err) => {
@@ -13,7 +15,14 @@ function onDataReady (cb, appointmentType, scheduledDay, scheduledHour, schedule
   return (sets) => cb({data: {delays: JSON.stringify({sets, appointmentType, scheduledDay, scheduledHour, scheduledMinutes})}})
 }
 
+function auxFunction(sets){
+    return new Promise((resolve)=>{
+        resolve(sets)
+    })
+}
+
 module.exports = function (requestObject) {
+    runSqlQuery(opalDbQueries.createTable())
   return new Promise((resolve) => {
     const { refId, refSource } = requestObject.Parameters
     const onError = createDefaultErrorLogger(resolve)

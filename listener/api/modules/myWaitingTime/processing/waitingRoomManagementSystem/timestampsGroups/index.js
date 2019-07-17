@@ -12,14 +12,14 @@ module.exports = function (opalAppointmentId) {
           for (const appointmentId of appointments) {
             const appointment = userAppointments[appointmentId]
             const timestamps = appointment.Timestamps
-            if (timestamps) {
-              response.push({
-                AppointmentSerNum: opalAppointmentId,
-                ScheduledTime: timestamps.ScheduledTime,
-                FirstCheckinTime: timestamps.FirstCheckinTime,
-                ActualStartTime: timestamps.ActualStartTime
-              })
-            }
+              if (timestamps) {
+                response.push({
+                  AppointmentSerNum: opalAppointmentId,
+                  ScheduledTime: timestamps.ScheduledTime,
+                  FirstCheckinTime: timestamps.FirstCheckinTime,
+                  ActualStartTime: timestamps.ActualStartTime
+                })
+              }
           }
         }
       }

@@ -45,7 +45,9 @@ const request = {
  * Query to retrieve stats from the database
  * The procedure is currently located on 172.26.66.39 (Listener) in table "mysql" and the procedure is "my_memory()
  ******************************/
-const dbQuery = "call mysql.my_memory();";
+//const dbQuery = "call mysql.my_memory();";
+const dbQuery ='SELECT * FROM Appointment WHERE AppointmentAriaSer = 9999998';
+//Tessa I changed this
 
 /******************************
  * Use for POOL connection to MySQL.  Not being used now since
@@ -90,7 +92,7 @@ logger.log('info','Initialize SQL configuration');
 /**
  * START THE HEARTBEAT DB
  */
-init();
+//init();
 
 
 //////////////////////////////////////////////////////////////////////////
@@ -109,7 +111,7 @@ function init(){
 
 	setInterval(() => {
         startHeartBeatDB()
-    }, 600000);
+    }, 60000);
 }
 
 /**
