@@ -67,7 +67,10 @@ module.exports = function (patientId) {
               }
               response.waitingTimes.push(responseWaitingTime)
             }
-            response.waitingTimes = response.waitingTimes.sort((a, b) => a.ScheduledTime > b.ScheduledTime)
+
+            response.waitingTimes = response.waitingTimes.sort((a, b) => a.scheduledTime > b.scheduledTime)
+
+
             resolve(response)
           })
           .catch(reject)

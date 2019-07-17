@@ -75,31 +75,29 @@ var queryAnswersPatientQuestionnaire = "SELECT QuestionnaireQuestionSerNum, Answ
 /*SELECT QuestionnaireQuestionSerNum,  GROUP_CONCAT(Answer SEPARATOR ', ') as Answer, PatientQuestionnaireSerNum as PatientQuestionnaireDBSerNum FROM Answer WHERE PatientQuestionnaireSerNum IN ? GROUP BY QuestionnaireQuestionSerNum ORDER BY PatientQuestionnaireDBSerNum;"*/
 exports.getPatientQuestionnaires = function (rows) {
   return new Promise(((resolve, reject) => {
-
       if(rows.length!== 0) {
           let questionnaireDBSerNumArray = getQuestionnaireDBSerNums(rows);
-
-          connection.query(queryQuestions, [[questionnaireDBSerNumArray]], function(err,  questions, fields){
-              if(err) reject(err);
-
-              getQuestionChoices(questions).then(function(questionsChoices){
-                  let questionnaires = prepareQuestionnaireObject(questionsChoices,rows);
-                  let patientQuestionnaires = {};
-                  attachingQuestionnaireAnswers(rows).then(function(paQuestionnaires) {
-                      patientQuestionnaires = paQuestionnaires;
-                      resolve({'Questionnaires':questionnaires, 'PatientQuestionnaires':patientQuestionnaires});
-                  }).catch(function(error) {
-                      reject(error);
-                  });
-              }).catch(function(err){
-                  reject(err);
-              })
-          });
-      }else{
-          resolve([]);
-      }
+          connection.query(queryQuestions, [[questionnaireDBSerNumArray]], function(err,  questions, fields) {
+            if (err) reject(err);
+            /*getQuestionChoices(questions).then(function(questionsChoices){
+                let questionnaires = prepareQuestionnaireObject(questionsChoices,rows);
+                let patientQuestionnaires = {};
+                attachingQuestionnaireAnswers(rows).then(function(paQuestionnaires) {
+                    patientQuestionnaires = paQuestionnaires;
+                    resolve({'Questionnaires':questionnaires, 'PatientQuestionnaires':patientQuestionnaires});
+                }).catch(function(error) {
+                    reject(error);*/
+            //Tessa
+            /*.catch(function(err){
+                        reject(err);
+                    })*/
+            //}else{
+          })}
+        console.log("resolving blank response")
+          resolve([]); //TESSA
+    //  }
   }));
-};
+}
 
 //Formats questionnaire object to be ready for the app.
 function prepareQuestionnaireObject(questionnaires, opalDB)

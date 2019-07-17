@@ -44,6 +44,7 @@ const _default = {
       AppointmentSerNum
       , SourceDatabaseSerNum
       , AppointmentAriaSer
+      , ActualStartDate
     FROM Appointment
     WHERE
       PatientSerNum = ${patientId}

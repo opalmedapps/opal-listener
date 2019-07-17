@@ -40,6 +40,10 @@ module.exports = function (groups) {
   return new Promise((resolve) => {
     const users = {}
     const max = groups.length
+    if (max === 0){
+      var finalResults = []
+      resolve(finalResults)
+    }
     let count = 0
     const check = () => {
       if (++count === max) {

@@ -25,8 +25,25 @@ const q                 = require("q");
 const config            = require('./config.json');
 const logger            = require('./logs/logger.js');
 const cp                = require('child_process');
+const mysql             = require('mysql');
 
 const FIREBASE_DEBUG = !!process.env.FIREBASE_DEBUG;
+
+//Tessa
+
+
+
+//const getTessTest = require('./api/modules/myWaitingTime/getTestTessa.js')
+//const cacheOf = require('./api/modules/myWaitingTime/cache.js')
+//const { runSqlQuery } = require('./api/sqlInterface')
+//const {opalDb: opalDbQueries} = require('./api/modules/myWaitingTime/queries')
+//const processing = require('./api/modules/myWaitingTime/processor')
+//const getAppointments = require('./api/modules/myWaitingTime/getAppointments')
+//const getTestTessa = require('./api/modules/myWaitingTime/getTestTessa')
+//const request = require('./api/modules/appointmentDelays/request')
+//End Tessa
+
+
 
 /*********************************************
  * INITIALIZE
@@ -106,6 +123,7 @@ function listenForRequest(requestType){
  * @param snapshot
  */
 function handleRequest(requestType, snapshot){
+    console.log("This is the requestType: ", requestType)
     logger.log('debug', 'Handling request');
 
     const headers = {key: snapshot.key, objectRequest: snapshot.val()};
@@ -229,7 +247,12 @@ function uploadToFirebase(response, key) {
         const headers = JSON.parse(JSON.stringify(response.Headers));
         const requestKey = headers.RequestKey;
 
-        encryptResponse(response).then((response)=>{
+        /* The last step before encrypting and uploading is checking that all keys are non-empty and contain
+         * no illegal characters. Otherwise, Firebase will throw an error. -SB
+         */
+        const validResponse = validateKeysForFirebase(response);
+
+        encryptResponse(validResponse).then((response)=>{
 			response.Timestamp = admin.database.ServerValue.TIMESTAMP;
             let path = '';
             if (key === "requests") {
@@ -256,6 +279,114 @@ function uploadToFirebase(response, key) {
 			reject(err);
 		});
 	});
+}
+
+/**
+ * validateKeysForFirebase
+ * @author Stacey Beard
+ * @desc Validates all keys in an object intended to be pushed to Firebase.
+ *       Empty keys are replaced with 'MISSING_KEY' and illegal characters are replaced with '_'.
+ *       This function edits the object directly (does not return a copy).
+ *       Note: recursion would have been neater but calling recursion multiple times in a for loop doesn't work in
+ *       JavaScript.
+ * @param objectToValidate
+ * @returns {*} objectToValidate with keys modified to be acceptable to Firebase
+ */
+function validateKeysForFirebase(objectToValidate) {
+
+    // Create an array of objects to validate. This will contain the sub-objects within objectToValidate.
+    let toValidate = [];
+    toValidate.push(objectToValidate);
+
+    // So long as there are sub-objects to validate, keep validating them
+    while (toValidate.length > 0) {
+        let obj = toValidate.pop();
+
+        // Only do the validation if obj is an object with keys
+        if (obj && typeof obj === "object" && Object.keys(obj).length > 0) {
+
+            for (let key in obj) {
+                // Replace empty keys with 'MISSING_KEY'
+                if (key === "") {
+                    obj["MISSING_KEY"] = obj[key];
+                    delete obj[key];
+                    // Add the sub-object to the stack to be processed
+                    toValidate.push(obj["MISSING_KEY"]);
+                }
+                else {
+                    /* Replace any of the following:
+                       . # $ / [ ]
+                       with an underscore
+                    */
+                    let newKey = key.replace(/[\.#\$\/\[\]]/g, '_');
+
+                    // Only replace with the new key if the new key is different from the old
+                    if (newKey !== key) {
+
+                        // Also make sure that the new key isn't already being used in the object.
+                        // If it is, increment it until we get a new unique key.
+                        while (obj.hasOwnProperty(newKey)) newKey = incrementStringParenthesisNumber(newKey);
+
+                        obj[newKey] = obj[key];
+                        delete obj[key];
+                        // Add the sub-object to the stack to be processed
+                        toValidate.push(obj[newKey]);
+                    }
+                    else {
+                        // Add the sub-object to the stack to be processed
+                        toValidate.push(obj[key]);
+                    }
+                }
+            } // Validate the next key in the sub-object
+        }
+    } // Validate the next sub-object in the stack until there are none left
+    return objectToValidate;
+}
+
+/**
+ * incrementStringParenthesisNumber
+ * @author Stacey Beard
+ * @desc Utility function that takes as input a string and increments its ending number (in parenthesis),
+ *       like when saving a file of the same name as another in Windows.
+ *       Examples:
+ *         hello --> hello (1)
+ *         hello (1) --> hello (2)
+ *         hello 1 --> hello 1 (1)
+ *         hello 1 (1) --> hello 1 (2)
+ *       To use: call this function in a while loop:
+ *         while(inputString is found in a list) inputString = incrementStringParenthesisNumber(inputString)
+ * @param {string} stringToIncrement
+ * @returns {string} copy of stringToIncrement with an incremented parenthesis number at the end
+ */
+function incrementStringParenthesisNumber(stringToIncrement) {
+
+    if (!stringToIncrement) return stringToIncrement;
+    else {
+        // Make sure we have a string to work with
+        let str = stringToIncrement.toString();
+
+        let newStr = "";
+
+        // Search for a space followed by a parenthesis number
+        let positionSpace = str.search(/\s\(\d+\)$/);
+        // It was found
+        if (positionSpace > -1) {
+            // Get the position of the opening parenthesis
+            let positionOpenParen = positionSpace + 1;
+            // Get the position of the closing parenthesis
+            let positionCloseParen = str.search(/\)$/);
+            // Get the number in between parentheses
+            let number = parseInt(str.substring(positionOpenParen + 1, positionCloseParen));
+            // Create the incremented string
+            let incrementedNumber = number + 1;
+            newStr = str.substring(0, positionOpenParen + 1) + incrementedNumber + ")";
+        }
+        // It was not found
+        else {
+            newStr = str + " (1)";
+        }
+        return newStr;
+    }
 }
 
 /**
@@ -456,6 +587,120 @@ function spawnHeartBeatDB(){
             heartBeatDB = cp.fork(`${__dirname}/cron/heartBeatDB.js`);
         }
     });
+
+/*
+
+
+    function tessArtTest(){
+        return new Promise((resolve, reject) => {
+            var obj = {
+                'Parameters' : {
+                    'refId' : 12,
+                    'refSource' : 2
+                }
+            }
+            request(obj).catch(reject)
+        })
+    }
+
+    tessArtTest()
+    //Tessa
+
+
+
+    function tessArtTest() {
+        return new Promise((resolve, reject) => {
+            var obj = {
+                'Parameters': {
+                    'patientId': 2020
+                }
+            }
+            var obj2 = {
+                'Parameters': {
+                    'patientId': 1313
+                }
+            }
+
+
+            request(obj).catch(reject)
+            request(obj2).catch(reject)
+                })
+    }
+
+
+    tessArtTest();
+
+    function partTwo(patientId) {
+        return function (cached) {
+            return new Promise((resolve, reject) => {
+                console.log("This is happening");
+                runSqlQuery(opalDbQueries.getTimestamps(patientId))
+                    .then(console.log("This is working correctly"))
+                    .then(result => resolve(result&& result.length > 0 ? result : []))
+                    //.then(console.log(result))
+                    .catch(reject);
+            })
+        }
+
+    function second() {
+            cacheOf(patientID).partTwo(patID)).then("we made it")
+                .then(function(result){
+                    firstCheckIN = result[0].FirstCheckinTime;
+                    console.log(firstCheckIN);
+                }).catch(e => console.log(`.catch(${e})`)).catch(e => console.log(`.catch(${e})`))
+                .catch(e => console.log(`.catch(${e})`));
+        })
+    }*/
+
+   // tessArtTest();
+
+    /**
+     * tessTessaTest
+     * @desc Proof of the existence of tables and the ability to create and add to them
+     */
+/*
+    function tessTessaTest() {
+        return new Promise((resolve) => {
+
+            const patientID = 1234567;
+
+            const patID = parseInt(patientID, 10);
+            cacheOf(patientID).then(getTestTessa(patientID))
+                .then(function(result){
+                    console.log("This is where I successfully access the database");
+                firstName = result[0].FirstName;
+                lastName = result[0].LastName;
+                number = result[0].PatientSerNum;
+                console.log(firstName);
+                console.log(lastName);
+                console.log(number);
+            })
+
+                .catch(e => console.log(`.catch(${e})`)).catch(e => console.log(`.catch(${e})`))
+                .catch(e => console.log(`.catch(${e})`));
+
+        })
+    }
+
+
+    /**
+     * @name async1
+     * @desc Dumb async function, prints "async1" randomly
+     */
+/*
+    function async1()
+    {
+        setTimeout(function(){
+            tessTessaTest();
+            },2000);
+    }
+*/
+   // console.log(async1());
+
+
+
+
+    //EndTessa
 
     process.on('exit', function () {
         heartBeatDB.kill();
