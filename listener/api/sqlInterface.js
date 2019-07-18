@@ -725,30 +725,51 @@ exports.inputQuestionnaireAnswers = function(requestObject) {
     console.log("------------ in inputQuestionnaireAnswers, check input CompletedFlag --------------\n", parameters.CompletedFlag, typeof(parameters.CompletedFlag)); // string
 
     // check input: the questionnaire should be completed to send answer to the DB
-    // TODO: Check if != make sense or need !== or need != '1' || != 1
     if (!parameters.hasOwnProperty('CompletedFlag') || (parameters.CompletedFlag !== 1 && parameters.CompletedFlag !== '1')){
         throw new Error('Error inputting questionnaire answers: The questionnaire has not been completed');
     }
 
     console.log("------------ in inputQuestionnaireAnswers, check input Language --------------\n");
 
-    // check input: format language
-    if (parameters.hasOwnProperty('Language')){
-        if (parameters.Language === 'EN'){
-            parameters.Language = 2;
-        }else{
-            // the default is French
-            parameters.Language = 1;
-        }
-    }else{
-        // the default is French
-        parameters.Language = 1;
-    }
+    // the following query is simply for getting the language from the opalDB, there is no other use of it.
+    // But since there might be the possibility of the front end not sending any language, this is necessary
+    exports.runSqlQuery(queries.getPatientIdAndLanguage(), [requestObject.UserID, null, null])
+        .then(function (queryRows) {
 
-    console.log("------------ in inputQuestionnaireAnswers, before questionnaires.inputQuestionnaireAnswers --------------\n");
+            var dbLang = -1;
+            // ask the opalDB for the language
+            if (queryRows[0].hasOwnProperty('Language') && queryRows[0].Language){
+                switch (queryRows[0].Language){
+                    case ('EN'):
+                        dbLang = 2;
+                        break;
+                    case ('FR'):
+                        dbLang = 1;
+                        break;
+                    default:
+                        dbLang = -1;
+                }
+            }
 
-    questionnaires.inputQuestionnaireAnswers(parameters, appVersion)
-        .then(function(){
+            // check input: format language
+            if (parameters.hasOwnProperty('Language')){
+                if (parameters.Language === 'EN'){
+                    parameters.Language = 2;
+                }else if (parameters.Language === 'FR'){
+                    parameters.Language = 1;
+                }else{
+                    // the default is French, but we do not have, as of July 2019, any other language in the DB, therefore we will ask the opalDB for the language
+                    parameters.Language = dbLang;
+                }
+            }else{
+                // if the app does not send a language, we will ask the opalDB for the language
+                parameters.Language = dbLang;
+            }
+
+            console.log("------------ in inputQuestionnaireAnswers, before questionnaires.inputQuestionnaireAnswers --------------\n");
+            return questionnaires.inputQuestionnaireAnswers(parameters, appVersion);
+
+        }).then(function(){
             console.log("------------ in inputQuestionnaireAnswers, before marking completed in opalDB --------------\n");
 
             // mark, in opalDB.Questionnaire, that this particular questionnaire is completed
@@ -1351,7 +1372,7 @@ exports.setTrusted = function(requestObject)
 exports.getQuestionnaires = function(requestObject){
     "use strict";
     var r = Q.defer();
-    var lang;
+    var lang = -1;
 
     // check and pre-process argument
     if (requestObject.hasOwnProperty('Parameters') && requestObject.Parameters.hasOwnProperty('Language') && requestObject.Parameters.Language !== undefined){
@@ -1360,14 +1381,11 @@ exports.getQuestionnaires = function(requestObject){
         } else if (requestObject.Parameters.Language === 'FR'){
             lang = 1;
         }
-    }else{
-        // the default is French
-        lang = 1;
     }
 
     console.log("what does requestObject look like: \n", requestObject);
 
-    exports.runSqlQuery(queries.getPatientId(), [requestObject.UserID, null, null])
+    exports.runSqlQuery(queries.getPatientIdAndLanguage(), [requestObject.UserID, null, null])
         .then(function (queryRows) {
             return questionnaires.getPatientQuestionnaires(queryRows,lang);
         })
