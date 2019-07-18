@@ -162,7 +162,6 @@ ORDER BY QuestionSerNum, OrderNum DESC;`;
 
 // new one, require getAnswerText function in DB
 // note that this query does not take answered and skipped answers into account since these functionnalities do not exist yet in the qplus
-// if not answered or skipped, since there won't be an entry in the answer(Type) tables, the query will return NULL
 var queryAnswersPatientQuestionnaire = `SELECT aSec.answerQuestionnaireId AS QuestionnaireSerNum,
 	a.ID,
 	a.languageId,
@@ -191,7 +190,7 @@ AND qSec.sectionId = a.sectionId
 var queryAnswerText = `CALL getAnswerText(?,?);`;
 
 /*SELECT QuestionnaireQuestionSerNum,  GROUP_CONCAT(Answer SEPARATOR ', ') as Answer, PatientQuestionnaireSerNum as PatientQuestionnaireDBSerNum FROM Answer WHERE PatientQuestionnaireSerNum IN ? GROUP BY QuestionnaireQuestionSerNum ORDER BY PatientQuestionnaireDBSerNum;"*/
-exports.getPatientQuestionnaires = function (patientId, lang) {
+exports.getPatientQuestionnaires = function (patientIdAndLang, lang) {
     return new Promise(((resolve, reject) => {
 
         // connection.query(`CALL getAnswerText(138,2);`, [], function (err, rows, fields) {
@@ -201,7 +200,28 @@ exports.getPatientQuestionnaires = function (patientId, lang) {
 
         // console.log("\n******** in getPatientQuestionnaires, before queryPatientQuestionnaireInfo: ***********\n", patientId[0].PatientId);
 
-        connection.query(queryPatientQuestionnaireInfo, [patientId[0].PatientId], function (err, rows, fields) {
+        // check argument
+        // if the front-end did not send a language, then we get the language in the opalDB. If that too does not exist, then we default to French
+        if (lang === -1){
+            if(patientIdAndLang[0].hasOwnProperty('Language') && patientIdAndLang[0].Language !== undefined){
+                switch (patientIdAndLang[0].Language) {
+                    case ('EN'):
+                        lang = 2;
+                        break;
+                    case ('FR'):
+                        lang = 1;
+                        break;
+                    default:
+                        // the default is French
+                        lang = 1;
+                }
+            }else{
+                // the default is French
+                lang = 1;
+            }
+        }
+
+        connection.query(queryPatientQuestionnaireInfo, [patientIdAndLang[0].PatientId], function (err, rows, fields) {
             console.log("\n******** in getPatientQuestionnaires, after queryPatientQuestionnaireInfo: ***********\n", rows);
             if (rows.length !== 0) {
                 // console.log("\n******** in getPatientQuestionnaires, after queryPatientQuestionnaireInfo: ***********\n", rows);
@@ -412,18 +432,22 @@ function attachingQuestionnaireAnswers(opalDB, lang) {
             console.log("QUESTIONNAIRE ANSWERS======================================================", rows);
 
             logger.log('debug', "QUESTIONNAIRE ANSWERS======================================================\n" + JSON.stringify(rows));
-            //console.log(quer.sql);
-            //console.log('line 169', err);
+
             if (err) r.reject(err);
 
             var promiseArray = [];
-            var languageId = 1;
+            var languageId = lang; // we use the device's or the DB language to retrieve the answers if the language when the answer was entered is not defined
 
             for (var i = 0; i < rows.length; i++){
                 if (rows[i].languageId !== -1){
+                    // if the language when the answer was entered is defined, we display using that language
                     languageId = rows[i].languageId;
                 }
+
                 rowsOfAnswers.push(rows[i]);
+
+                // before this we can also check for if the answer is skipped or not answered,
+                // but since there won't be an entry in the answer(Type) tables, the query will return NULL, this step is skipped
                 promiseArray.push(promisifyQuery(queryAnswerText, [rows[i].ID, languageId]));
             }
 
@@ -440,15 +464,8 @@ function attachingQuestionnaireAnswers(opalDB, lang) {
                         answersQuestionnaires[rows[i].QuestionnaireSerNum] = [];
                     }
 
-                    if (!rowsOfAnswers[i].hasOwnProperty('Answer')){
-                        // the Answer will be '' to denote the case where there is no real answer text, since null and undefined makes qplus give an error
-                        rowsOfAnswers[i].Answer = '';
-                    }
-
-                    if (rowsOfAnswers[i].QuestionnaireSerNum == 168){
-                        logger.log('debug', "QuestionnaireSerNum = 168: rowsOfAnswers: " + JSON.stringify(rowsOfAnswers[i]));
-                        logger.log('debug', "QuestionnaireSerNum = 168: translatedAnswerArray: " + JSON.stringify(translatedAnswerArray[i]));
-                    }
+                    // this is for cloning rowsOfAnswers to avoid pass by reference
+                    var answerCopy = {};
 
                     // this case is for when the database has the entry in the `Answer` table
                     // but does not contain anything in subtables (e.g. AnswerRadioButton) that further give the answer text
@@ -456,21 +473,28 @@ function attachingQuestionnaireAnswers(opalDB, lang) {
                     if (translatedAnswerArray[i][0].length === 0){
                         // the Answer will be '' to denote this case (no real answer text), since null and undefined makes qplus give an error
                         rowsOfAnswers[i].Answer = '';
+
                         logger.log('debug', "translatedAnswerArray[i][0].length === 0: " + JSON.stringify(rowsOfAnswers[i]));
+
+                        // this is for cloning rowsOfAnswers to avoid pass by reference
+                        answerCopy = Object.assign(answerCopy, rowsOfAnswers[i]);
+                        answersQuestionnaires[rows[i].QuestionnaireSerNum].push(answerCopy);
                     }
 
                     // add translated answer into answers
                     // this is for loop is for checkbox questions which can have multiple answers
+                    // if the previous if statement was evaluated to True, this loop will not be entered
                     for (var j = 0; j < translatedAnswerArray[i][0].length; j++){
+
+                        if (!rowsOfAnswers[i].hasOwnProperty('Answer')){
+                            // the Answer will be '' to denote the case where there is no real answer text, since null and undefined makes qplus give an error
+                            rowsOfAnswers[i].Answer = '';
+                        }
 
                         logger.log('debug', "translatedAnswerArray next: " + JSON.stringify(translatedAnswerArray[i][0]));
 
                         if (translatedAnswerArray[i][0][j].hasOwnProperty('value')){
                             rowsOfAnswers[i].Answer = translatedAnswerArray[i][0][j].value;
-
-                            if (translatedAnswerArray[i][0].length === 2){
-                                logger.log('debug', "rowsOfAnswers[i]: " + JSON.stringify(rowsOfAnswers[i]));
-                            }
 
                         }else{
                             // this part is not actually used, but just in case
@@ -478,17 +502,12 @@ function attachingQuestionnaireAnswers(opalDB, lang) {
                             rowsOfAnswers[i].Answer = '';
                         }
 
+                        // this is for cloning rowsOfAnswers to avoid pass by reference
+                        answerCopy = {};
+                        answerCopy = Object.assign(answerCopy, rowsOfAnswers[i]);
+                        answersQuestionnaires[rows[i].QuestionnaireSerNum].push(answerCopy);
+
                     }
-
-                    // this is for cloning rowsOfAnswers to avoid pass by reference
-                    var answerCopy = {};
-                    answerCopy = Object.assign(answerCopy, rowsOfAnswers[i]);
-                    answersQuestionnaires[rows[i].QuestionnaireSerNum].push(answerCopy);
-
-                    if (translatedAnswerArray[i][0].length === 2){
-                        logger.log('debug', "answersQuestionnaires[rows[i].QuestionnaireSerNum]: " + JSON.stringify(answersQuestionnaires[rows[i].QuestionnaireSerNum]));
-                    }
-
                     // delete rowsOfAnswers[i].ID;
                     // delete rowsOfAnswers[i].languageId;
                 }
@@ -498,12 +517,7 @@ function attachingQuestionnaireAnswers(opalDB, lang) {
 
                     if (opalDB[i].CompletedFlag == 1 || opalDB[i].CompletedFlag == '1'){
                         patientQuestionnaires[opalDB[i].QuestionnaireSerNum].Answers = answersQuestionnaires[opalDB[i].QuestionnaireSerNum];
-
-                        if (opalDB[i].QuestionnaireSerNum === 391){
-                            logger.log('debug', "patientQuestionnaires[opalDB[i].QuestionnaireSerNum].Answers: " + JSON.stringify(patientQuestionnaires[opalDB[i].QuestionnaireSerNum].Answers));
-                        }
                     }
-                    //console.log(patientQuestionnaires[opalDB[i].QuestionnaireSerNum]);
                 }
 
                 r.resolve(patientQuestionnaires);
@@ -844,7 +858,9 @@ function inputAnswer(questionnaireId, answer, languageId, patientId, dateComplet
     var answerId;
     
     // in the qplus, if the answer has been chosen but not filled in, the answer is undefined. In this new version of DB, this is not answered
-    if (answer.Answer === undefined){
+    // the front end, in case of space only answer, sends Answer: 'undefined' as a string, thus the following check will make the Answer as not answered if the user inputs undefined in a textbox question
+    // this can be solved by using trim() (javascript) on the front end (qplus)
+    if (answer.Answer === undefined || !answer.Answer || typeof answer.Answer === "undefined" || answer.Answer === 'undefined' || answer.Answer === null){
         answered = 0;
     }
 
@@ -860,49 +876,61 @@ function inputAnswer(questionnaireId, answer, languageId, patientId, dateComplet
 
         var promiseArray = [];
 
-        // see Questionnaire Migration document for matching the old types to new types
-        switch (answer.QuestionType) {
-            case ('yes'):
+        if (answered !== 0){
+            // see Questionnaire Migration document for matching the old types to new types
+            switch (answer.QuestionType) {
+                case ('yes'):
                 // this matches to radio buttons in Questionnaire2019DB
                 // we treat this the same way as MC type using a fall-through
-            case ('MC'):
-                // this matches to radio buttons in Questionnaire2019DB
-                // get the radioButtonOption.ID from the answer text (need to search in the dictionary table)
-                // insert into answerRadioButton table
-                promiseArray.push(promisifyQuery(insertRadioButton, [answerId, answer.questionId, answer.Answer]));
+                case ('MC'):
+                    // this matches to radio buttons in Questionnaire2019DB
+                    // get the radioButtonOption.ID from the answer text (need to search in the dictionary table)
+                    // insert into answerRadioButton table
+                    console.log("------------ in inputAnswer, in MC case --------------\n", answerId, answer.questionId, answer.Answer);
+                    promiseArray.push(promisifyQuery(insertRadioButton, [answerId, answer.questionId, answer.Answer]));
 
-                break;
-            case ('Checkbox'):
-                // this matches checkboxes in Questionnaire2019DB
-                // get the checkboxOption.ID from the answer text (need to search in the dictionary table)
-                // insert into answerCheckbox table
+                    break;
+                case ('Checkbox'):
+                    // this matches checkboxes in Questionnaire2019DB
+                    // get the checkboxOption.ID from the answer text (need to search in the dictionary table)
+                    // insert into answerCheckbox table
 
-                // in case of a checkbox, there are multiple answers per one question
-                // the front-end send an array inside answer.Answer each containing an answer
-                if (!(answer.Answer instanceof Array)){
-                    throw new Error('Error inputting questionnaire answers: there is no array of answers for checkbox');
-                }
+                    // in case of a checkbox, there are multiple answers per one question
+                    // the front-end send an array inside answer.Answer each containing an answer
+                    console.log("------------ in inputAnswer, in checkbox case --------------\n", answerId, answer.questionId, answer.Answer);
 
-                for (var i = 0; i < answer.Answer.length; i++){
-                    promiseArray.push(promisifyQuery(insertCheckbox, [answerId, answer.questionId, answer.Answer[i]]));
-                }
+                    if (!(answer.Answer instanceof Array)){
+                        console.log("------------ in inputAnswer, in checkbox case, error: answer.Answer is not an array --------------\n");
 
-                break;
-            case ('MinMax'):
-                // this matches sliders in Questionnaire2019DB
-                // insert the value directly into answerSlider table
-                promiseArray.push(promisifyQuery(insertSlider, [answerId, answer.Answer]));
+                        answer.Answer = Object.values(answer.Answer);
+                    }
 
-                break;
-            case ('SA'):
+                    console.log("------------ in inputAnswer, in checkbox case --------------\n", answerId, answer.questionId, answer.Answer);
+
+                    for (var i = 0; i < answer.Answer.length; i++){
+                        console.log("------------ in inputAnswer, in checkbox case loop--------------\n", answerId, answer.questionId, answer.Answer[i]);
+                        promiseArray.push(promisifyQuery(insertCheckbox, [answerId, answer.questionId, answer.Answer[i]]));
+                    }
+
+                    break;
+                case ('MinMax'):
+                    // this matches sliders in Questionnaire2019DB
+                    // insert the value directly into answerSlider table
+                    console.log("------------ in inputAnswer, in minMax case --------------\n", answerId, answer.Answer);
+                    promiseArray.push(promisifyQuery(insertSlider, [answerId, answer.Answer]));
+
+                    break;
+                case ('SA'):
                 // this matches the text boxes in Questionnaire2019DB
                 // insert the value directly into answerTextBox table
                 // since we treat any other type same as text box, we use a fall-through here
-            default:
-                // there should not be any other type in the legacy questionnaire, but just in case, we treat them as text box
-                promiseArray.push(promisifyQuery(insertTextBox, [answerId, answer.Answer]));
+                default:
+                    // there should not be any other type in the legacy questionnaire, but just in case, we treat them as text box
+                    console.log("------------ in inputAnswer, in textbox case --------------\n", answerId, answer.Answer);
+                    promiseArray.push(promisifyQuery(insertTextBox, [answerId, answer.Answer]));
 
-                break;
+                    break;
+            }
         }
 
         console.log("------------ in inputAnswer, after case switching and before q.all --------------\n");
