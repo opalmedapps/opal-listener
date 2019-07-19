@@ -733,7 +733,7 @@ exports.inputQuestionnaireAnswers = function(requestObject) {
 
     // the following query is simply for getting the language from the opalDB, there is no other use of it.
     // But since there might be the possibility of the front end not sending any language, this is necessary
-    exports.runSqlQuery(queries.getPatientIdAndLanguage(), [requestObject.UserID, null, null])
+    exports.runSqlQuery(queries.getPatientSerNumAndLanguage(), [requestObject.UserID, null, null])
         .then(function (queryRows) {
 
             var dbLang = -1;
@@ -779,7 +779,7 @@ exports.inputQuestionnaireAnswers = function(requestObject) {
             r.resolve({Response:'success'});
 
         }).catch(function(err){
-            r.reject({Response:'error',Reason:err});
+            r.reject({Response:'error', Reason:err});
         });
     return r.promise;
 
@@ -1385,7 +1385,7 @@ exports.getQuestionnaires = function(requestObject){
 
     console.log("what does requestObject look like: \n", requestObject);
 
-    exports.runSqlQuery(queries.getPatientIdAndLanguage(), [requestObject.UserID, null, null])
+    exports.runSqlQuery(queries.getPatientSerNumAndLanguage(), [requestObject.UserID, null, null])
         .then(function (queryRows) {
             return questionnaires.getPatientQuestionnaires(queryRows,lang);
         })
