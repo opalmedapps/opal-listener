@@ -221,7 +221,7 @@ exports.getPatientQuestionnaires = function (patientIdAndLang, lang) {
             }
         }
 
-        connection.query(queryPatientQuestionnaireInfo, [patientIdAndLang[0].PatientId], function (err, rows, fields) {
+        connection.query(queryPatientQuestionnaireInfo, [patientIdAndLang[0].PatientSerNum], function (err, rows, fields) {
             console.log("\n******** in getPatientQuestionnaires, after queryPatientQuestionnaireInfo: ***********\n", rows);
             if (rows.length !== 0) {
                 // console.log("\n******** in getPatientQuestionnaires, after queryPatientQuestionnaireInfo: ***********\n", rows);
