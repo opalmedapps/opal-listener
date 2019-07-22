@@ -26,8 +26,12 @@ const _default = {
     WHERE
         AppointmentsList.AppointmentCode = '${appointmentType}'
         AND WEEKDAY(AppointmentsList.ScheduledDateTime) = ${scheduledDay}
-        AND HOUR(AppointmentsList.ScheduledDateTime) BETWEEN (${scheduledHour}-1) AND (${scheduledHour} +1)
-        AND MINUTE(AppointmentsList.ScheduledDateTime) = ${scheduledMinutes}
+        AND ((HOUR(AppointmentsList.ScheduledDateTime) = (${scheduledHour}-1) 
+                    AND MINUTE(AppointmentsList.ScheduledDateTime) BETWEEN ${scheduledMinutes} AND 59)
+                   OR (HOUR(AppointmentsList.ScheduledDateTime) = ${scheduledHour} 
+                        AND MINUTE(AppointmentsList.ScheduledDateTime) BETWEEN 00 AND 59)
+                        OR (HOUR(AppointmentsList.ScheduledDateTime) = (${scheduledHour} + 1) 
+                            AND MINUTE(AppointmentsList.ScheduledDateTime) BETWEEN 00 AND ${scheduledMinutes}))
         AND TIMESTAMPDIFF(DAY, NOW(), AppointmentsList.ScheduledDateTime) < 0
     ORDER BY
         PatientSerNum, AppointmentSerNum, ScheduledDateTime, PatientLocationRevCount ASC;
