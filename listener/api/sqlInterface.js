@@ -738,7 +738,7 @@ exports.inputQuestionnaireAnswers = function(requestObject) {
 
             var dbLang = -1;
             // ask the opalDB for the language
-            if (queryRows[0].hasOwnProperty('Language') && queryRows[0].Language){
+            if (queryRows[0].hasOwnProperty('Language') && queryRows[0].Language !== undefined){
                 switch (queryRows[0].Language){
                     case ('EN'):
                         dbLang = 2;
@@ -766,8 +766,13 @@ exports.inputQuestionnaireAnswers = function(requestObject) {
                 parameters.Language = dbLang;
             }
 
+            // check input: patientSerNum
+            if (!queryRows[0].hasOwnProperty('PatientSerNum') || queryRows[0].PatientSerNum === undefined){
+                throw new Error('Error inputting questionnaire answers: Cannot find patientSerNum in OpalDB');
+            }
+
             console.log("------------ in inputQuestionnaireAnswers, before questionnaires.inputQuestionnaireAnswers --------------\n");
-            return questionnaires.inputQuestionnaireAnswers(parameters, appVersion);
+            return questionnaires.inputQuestionnaireAnswers(parameters, appVersion, queryRows[0].PatientSerNum);
 
         }).then(function(){
             console.log("------------ in inputQuestionnaireAnswers, before marking completed in opalDB --------------\n");

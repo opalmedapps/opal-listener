@@ -554,7 +554,7 @@ WHERE ID = ? AND deleted <> 1 AND \`status\` <> 2
 var updateStatusCompletedInAnswerQuestionnaireQuery = `UPDATE \`answerquestionnaire\` SET \`status\`='2', \`lastUpdated\`=?, \`updatedBy\`=? WHERE  \`ID\`=?;`;
 var insertSectionIntoAnswerSectionQuery = `REPLACE INTO answersection(answerQuestionnaireId, sectionId) VALUES (?, ?);`;
 
-exports.inputQuestionnaireAnswers = function (parameters, appVersion) {
+exports.inputQuestionnaireAnswers = function (parameters, appVersion, patientSerNum) {
     var r = q.defer();
 
     console.log("------------ in inputQuestionnaireAnswers, before doing anything --------------\n");
@@ -562,7 +562,7 @@ exports.inputQuestionnaireAnswers = function (parameters, appVersion) {
     var authorOfUpdate = 'QPLUS_' + appVersion;
     var patientId;
 
-   getPatientIdInQuestionnaireDB(parameters)
+   getPatientIdInQuestionnaireDB(parameters, patientSerNum)
        .then(function(verifiedPatientId){
            patientId = verifiedPatientId;
 
@@ -743,9 +743,10 @@ function inputAnswerSection(answerQuestionnaireId, answers){
  * getPatientIdInQuestionnaireDB
  * @desc getPatientIdInQuestionnaireDB gets the patientId in the QuestionnaireDB. If parameters contain the property patientId, it also checks if both IDs match
  * @param parameters
+ * @param patientSerNum: The serNum obtained from opalDB
  * @return {promise}
  */
-function getPatientIdInQuestionnaireDB(parameters) {
+function getPatientIdInQuestionnaireDB(parameters, patientSerNum) {
     var r = q.defer();
 
     console.log("------------ in getPatientIdInQuestionnaireDB, begin --------------\n");
@@ -754,12 +755,12 @@ function getPatientIdInQuestionnaireDB(parameters) {
     var hasExternalPatientId = 0;
     var patientId;
 
-    // the existance of parameters.QuestionnaireSerNum was already checked beforehand in inputQuestionnaireAnswers
+    // the existence of parameters.QuestionnaireSerNum was already checked beforehand in inputQuestionnaireAnswers
     promiseArray.push(promisifyQuery(getPatientIdFromQuestionnaireSerNumQuery, [parameters.QuestionnaireSerNum]));
 
-    if (parameters.hasOwnProperty('PatientId') && parameters.PatientId !== undefined){
+    if (patientSerNum !== undefined){
         hasExternalPatientId = 1;
-        promiseArray.push(promisifyQuery(patientIdInQuestionnaireDBQuery, [parameters.PatientId]))
+        promiseArray.push(promisifyQuery(patientIdInQuestionnaireDBQuery, [patientSerNum]))
     }
 
     console.log("------------ in getPatientIdInQuestionnaireDB, before 1st q.all --------------\n");
@@ -782,7 +783,7 @@ function getPatientIdInQuestionnaireDB(parameters) {
             if (hasExternalPatientId === 1){
                 if (patientId !== promiseArrayReturn[1][0].ID){
                     // note that throw will stop the code here and go to catch
-                    throw new Error('Error inputting questionnaire answers: the patientId given does not match to the patientId retrieved using QuestionnaireSerNum');
+                    throw new Error('Error inputting questionnaire answers: the patientSerNum given does not match to the patientId retrieved using QuestionnaireSerNum');
                 }
             }
 
@@ -804,37 +805,44 @@ VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?);
 `;
 var insertTextBox = `INSERT INTO \`answerTextBox\` (\`answerId\`, \`value\`) VALUES (?, ?)`;
 var insertSlider = `INSERT INTO \`answerSlider\` (\`answerId\`, \`value\`) VALUES (?, ?)`;
-var insertRadioButton = `REPLACE INTO answerRadioButton (answerId, \`value\`)
-VALUES (?, 
-(SELECT rbOpt.ID
-FROM radioButton rb, radioButtonOption rbOpt
-WHERE rb.questionId = ?
- AND rbOpt.parentTableId = rb.ID
- AND rbOpt.description IN (
-  SELECT contentId
-  FROM dictionary
-  WHERE content = ?
-   AND deleted <> 1 
-	AND tableId IN (12, 31, 17) -- where 12, 17, 31 are checkboxOption, labelOption, radioButtonOption tables resp., you can check in definitionTable
-  )
-LIMIT 1)
-);`;
 
+// Answer Type ID for getAnswerTableOptionID: 1 = Checkbox, 4 = Radiobutton, 5 = Label
+var insertRadioButton = `REPLACE INTO answerRadioButton (answerId, \`value\`)
+VALUES (?, (SELECT getAnswerTableOptionID(?,?,4)));`;
+
+//
+//     `REPLACE INTO answerRadioButton (answerId, \`value\`)
+// VALUES (?,
+// (SELECT rbOpt.ID
+// FROM radioButton rb, radioButtonOption rbOpt
+// WHERE rb.questionId = ?
+//  AND rbOpt.parentTableId = rb.ID
+//  AND rbOpt.description IN (
+//   SELECT contentId
+//   FROM dictionary
+//   WHERE content = ?
+//    AND deleted <> 1
+// 	AND tableId IN (12, 31, 17) -- where 12, 17, 31 are checkboxOption, labelOption, radioButtonOption tables resp., you can check in definitionTable
+//   )
+// LIMIT 1)
+// );`;
+
+// Answer Type ID for getAnswerTableOptionID: 1 = Checkbox, 4 = Radiobutton, 5 = Label
 var insertCheckbox = `REPLACE INTO answerCheckbox (answerId, \`value\`)
-VALUES (?, 
-(SELECT cbOpt.ID
-FROM checkbox cb, checkboxOption cbOpt
-WHERE cb.questionId = ?
- AND cb.ID = cbOpt.parentTableId
- AND cbOpt.description IN (
-  SELECT contentId
-  FROM dictionary
-  WHERE content = ?
-   AND deleted <> 1 
-	AND tableId IN (12, 31, 17) -- where 12, 17, 31 are checkboxOption, labelOption, radioButtonOption tables resp., you can check in definitionTable
-  )
-LIMIT 1)
-);`;
+VALUES (?, (SELECT getAnswerTableOptionID(?,?,1)));`;
+// (SELECT cbOpt.ID
+// FROM checkbox cb, checkboxOption cbOpt
+// WHERE cb.questionId = ?
+//  AND cb.ID = cbOpt.parentTableId
+//  AND cbOpt.description IN (
+//   SELECT contentId
+//   FROM dictionary
+//   WHERE content = ?
+//    AND deleted <> 1
+// 	AND tableId IN (12, 31, 17) -- where 12, 17, 31 are checkboxOption, labelOption, radioButtonOption tables resp., you can check in definitionTable
+//   )
+// LIMIT 1)
+// );`;
 
 /**
  * inputAnswer
