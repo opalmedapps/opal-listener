@@ -29,6 +29,22 @@ const cp                = require('child_process');
 
 const FIREBASE_DEBUG = !!process.env.FIREBASE_DEBUG;
 
+//Tessa
+
+
+
+//const getTessTest = require('./api/modules/myWaitingTime/getTestTessa.js')
+//const cacheOf = require('./api/modules/myWaitingTime/cache.js')
+//const { runSqlQuery } = require('./api/sqlInterface')
+//const {opalDb: opalDbQueries} = require('./api/modules/myWaitingTime/queries')
+//const processing = require('./api/modules/myWaitingTime/processor')
+//const getAppointments = require('./api/modules/myWaitingTime/getAppointments')
+//const getTestTessa = require('./api/modules/myWaitingTime/getTestTessa')
+//const request = require('./api/modules/appointmentDelays/request')
+//End Tessa
+
+
+
 /*********************************************
  * INITIALIZE
  *********************************************/
@@ -107,6 +123,7 @@ function listenForRequest(requestType){
  * @param snapshot
  */
 function handleRequest(requestType, snapshot){
+    console.log("This is the requestType: ", requestType)
     logger.log('debug', 'Handling request');
 
     const headers = {key: snapshot.key, objectRequest: snapshot.val()};
@@ -576,6 +593,120 @@ function spawnHeartBeatDB(){
             heartBeatDB = cp.fork(`${__dirname}/cron/heartBeatDB.js`);
         }
     });
+
+/*
+
+
+    function tessArtTest(){
+        return new Promise((resolve, reject) => {
+            var obj = {
+                'Parameters' : {
+                    'refId' : 12,
+                    'refSource' : 2
+                }
+            }
+            request(obj).catch(reject)
+        })
+    }
+
+    tessArtTest()
+    //Tessa
+
+
+
+    function tessArtTest() {
+        return new Promise((resolve, reject) => {
+            var obj = {
+                'Parameters': {
+                    'patientId': 2020
+                }
+            }
+            var obj2 = {
+                'Parameters': {
+                    'patientId': 1313
+                }
+            }
+
+
+            request(obj).catch(reject)
+            request(obj2).catch(reject)
+                })
+    }
+
+
+    tessArtTest();
+
+    function partTwo(patientId) {
+        return function (cached) {
+            return new Promise((resolve, reject) => {
+                console.log("This is happening");
+                runSqlQuery(opalDbQueries.getTimestamps(patientId))
+                    .then(console.log("This is working correctly"))
+                    .then(result => resolve(result&& result.length > 0 ? result : []))
+                    //.then(console.log(result))
+                    .catch(reject);
+            })
+        }
+
+    function second() {
+            cacheOf(patientID).partTwo(patID)).then("we made it")
+                .then(function(result){
+                    firstCheckIN = result[0].FirstCheckinTime;
+                    console.log(firstCheckIN);
+                }).catch(e => console.log(`.catch(${e})`)).catch(e => console.log(`.catch(${e})`))
+                .catch(e => console.log(`.catch(${e})`));
+        })
+    }*/
+
+   // tessArtTest();
+
+    /**
+     * tessTessaTest
+     * @desc Proof of the existence of tables and the ability to create and add to them
+     */
+/*
+    function tessTessaTest() {
+        return new Promise((resolve) => {
+
+            const patientID = 1234567;
+
+            const patID = parseInt(patientID, 10);
+            cacheOf(patientID).then(getTestTessa(patientID))
+                .then(function(result){
+                    console.log("This is where I successfully access the database");
+                firstName = result[0].FirstName;
+                lastName = result[0].LastName;
+                number = result[0].PatientSerNum;
+                console.log(firstName);
+                console.log(lastName);
+                console.log(number);
+            })
+
+                .catch(e => console.log(`.catch(${e})`)).catch(e => console.log(`.catch(${e})`))
+                .catch(e => console.log(`.catch(${e})`));
+
+        })
+    }
+
+
+    /**
+     * @name async1
+     * @desc Dumb async function, prints "async1" randomly
+     */
+/*
+    function async1()
+    {
+        setTimeout(function(){
+            tessTessaTest();
+            },2000);
+    }
+*/
+   // console.log(async1());
+
+
+
+
+    //EndTessa
 
     process.on('exit', function () {
         heartBeatDB.kill();
