@@ -65,10 +65,9 @@ const requestMappings =
             numberOfLastUpdated: 1
         },
         'Questionnaires': {
-            sql: queries.patientQuestionnaireTableFields(),
+            sql: queries.getPatientSerNumAndLanguage(), //patientQuestionnaireTableFields(), // getPatientSerNumAndLanguage(),
             numberOfLastUpdated: 2,
-            processFunction: questionnaires.getPatientQuestionnaires
-
+            processFunction: exports.getQuestionnaires //questionnaires.getPatientQuestionnaires
         },
         'Appointments': {
             sql: queries.patientAppointmentsTableFields(),
@@ -1388,10 +1387,12 @@ exports.getQuestionnaires = function(requestObject){
         }
     }
 
+    logger.log('debug', "******** in getQuestionnaires: ***********\n" + JSON.stringify(requestObject));
     console.log("what does requestObject look like: \n", requestObject);
 
     exports.runSqlQuery(queries.getPatientSerNumAndLanguage(), [requestObject.UserID, null, null])
         .then(function (queryRows) {
+            logger.log('debug', "******** in getQuestionnaires, calling getPatientQuestionnaires: ***********\n" + JSON.stringify(queryRows));
             return questionnaires.getPatientQuestionnaires(queryRows,lang);
         })
         .then(function (result) {
