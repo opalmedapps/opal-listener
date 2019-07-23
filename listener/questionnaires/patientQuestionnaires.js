@@ -42,19 +42,22 @@ handleDisconnect(connection);
 
 // new
 // query to emulate patientQuestionnaireTableFields in the new Database
-var queryPatientQuestionnaireInfo = `SELECT IF(\`status\` <> 2, 0, 1) AS CompletedFlag,
-    creationDate AS DateAdded,
-    IF(\`status\` <> 2, NULL, lastUpdated) AS CompletionDate,
-    ID AS QuestionnaireSerNum,
-    questionnaireId AS QuestionnaireDBSerNum
-FROM answerQuestionnaire
-WHERE deleted <> 1
-AND patientId IN (
-    SELECT ID
-FROM patient
-WHERE externalId = ?
-AND deleted <> 1
-);`;
+var queryPatientQuestionnaireInfo = `CALL queryPatientQuestionnaireInfo(?);`;
+//     `SELECT IF(\`status\` <> 2, 0, 1) AS CompletedFlag,
+//     creationDate AS DateAdded,
+//     IF(\`status\` <> 2, NULL, lastUpdated) AS CompletionDate,
+//     ID AS QuestionnaireSerNum,
+//     questionnaireId AS QuestionnaireDBSerNum
+// FROM answerQuestionnaire
+// WHERE deleted <> 1
+// AND patientId IN (
+//     SELECT ID
+// FROM patient
+// WHERE externalId = ?
+// AND deleted <> 1
+// );`;
+
+// `CALL queryPatientQuestionnaireInfo(?);`;
 
 //Queries to obtain the questions and question choices for questionnaires
 // var queryQuestions = `SELECT DISTINCT Questionnaire.QuestionnaireSerNum as QuestionnaireDBSerNum,
@@ -88,92 +91,98 @@ AND deleted <> 1
 // new one
 // since a section can only be contained in one questionnaire,
 // questionSection.ID can be thought as QuestionnaireQuestionSerNum because there is only one per combination of sectionId and questionId
-var queryQuestions = `SELECT questionnaire.ID AS QuestionnaireDBSerNum,
-	questionnaire.legacyName AS QuestionnaireName,
-	IF (questionnaire.nickname <> -1, getDisplayName(questionnaire.nickname,2), getDisplayName(questionnaire.title,2)) AS QuestionnaireName_EN,
-	IF (questionnaire.nickname <> -1, getDisplayName(questionnaire.nickname,1), getDisplayName(questionnaire.title,1)) AS QuestionnaireName_FR,
-	getDisplayName(questionnaire.description,2) AS Intro_EN,
-	getDisplayName(questionnaire.description,1) AS Intro_FR,
-	sec.ID AS sectionId,
-	sec.\`order\` AS secOrder,
-	qSec.ID AS QuestionnaireQuestionSerNum,
-	qSec.questionId AS QuestionSerNum,
-	q.polarity AS isPositiveQuestion,
-	getDisplayName(q.question,2) AS QuestionText_EN,
-	getDisplayName(q.question,1) AS QuestionText_FR,
-	getDisplayName(display, 2) AS Asseses_EN,
-	getDisplayName(display, 1) AS Asseses_FR,
-	legacyType.legacyName AS QuestionType,
-	q.legacyTypeId AS QuestionTypeSerNum,
-	qSec.\`order\` AS qOrder
-FROM questionnaire
-	LEFT JOIN section sec ON (sec.questionnaireId = questionnaire.ID)
-	LEFT JOIN questionSection qSec ON (qSec.sectionId = sec.ID)
-	LEFT JOIN question q ON (qSec.questionId = q.ID)
-	LEFT JOIN legacyType ON (q.legacyTypeId = legacyType.ID)
-WHERE questionnaire.ID IN ?
-	AND questionnaire.deleted <> 1
-	AND sec.deleted <> 1
-	AND q.deleted <> 1;`;
+var queryQuestions = `CALL queryQuestions(?);`;
+
+//     `SELECT questionnaire.ID AS QuestionnaireDBSerNum,
+// 	questionnaire.legacyName AS QuestionnaireName,
+// 	IF (questionnaire.nickname <> -1, getDisplayName(questionnaire.nickname,2), getDisplayName(questionnaire.title,2)) AS QuestionnaireName_EN,
+// 	IF (questionnaire.nickname <> -1, getDisplayName(questionnaire.nickname,1), getDisplayName(questionnaire.title,1)) AS QuestionnaireName_FR,
+// 	getDisplayName(questionnaire.description,2) AS Intro_EN,
+// 	getDisplayName(questionnaire.description,1) AS Intro_FR,
+// 	sec.ID AS sectionId,
+// 	sec.\`order\` AS secOrder,
+// 	qSec.ID AS QuestionnaireQuestionSerNum,
+// 	qSec.questionId AS QuestionSerNum,
+// 	q.polarity AS isPositiveQuestion,
+// 	getDisplayName(q.question,2) AS QuestionText_EN,
+// 	getDisplayName(q.question,1) AS QuestionText_FR,
+// 	getDisplayName(display, 2) AS Asseses_EN,
+// 	getDisplayName(display, 1) AS Asseses_FR,
+// 	legacyType.legacyName AS QuestionType,
+// 	q.legacyTypeId AS QuestionTypeSerNum,
+// 	qSec.\`order\` AS qOrder
+// FROM questionnaire
+// 	LEFT JOIN section sec ON (sec.questionnaireId = questionnaire.ID)
+// 	LEFT JOIN questionSection qSec ON (qSec.sectionId = sec.ID)
+// 	LEFT JOIN question q ON (qSec.questionId = q.ID)
+// 	LEFT JOIN legacyType ON (q.legacyTypeId = legacyType.ID)
+// WHERE questionnaire.ID IN ?
+// 	AND questionnaire.deleted <> 1
+// 	AND sec.deleted <> 1
+// 	AND q.deleted <> 1;`;
 
 // var queryQuestionChoices = "SELECT QuestionSerNum, MCSerNum as OrderNum, MCDescription as ChoiceDescription_EN, MCDescription_FR as ChoiceDescription_FR  FROM QuestionMC WHERE QuestionSerNum IN ? UNION ALL SELECT * FROM QuestionCheckbox WHERE QuestionSerNum IN ? UNION ALL SELECT * FROM QuestionMinMax WHERE QuestionSerNum IN ? ORDER BY QuestionSerNum, OrderNum DESC";
 
 // new one
-var queryQuestionChoices = `SELECT rb.questionId AS QuestionSerNum,
-	rbOpt.\`order\` AS OrderNum,
-	getDisplayName(rbOpt.description, 2) AS ChoiceDescription_EN,
-	getDisplayName(rbOpt.description, 1) AS ChoiceDescription_FR
-FROM radioButton rb, radioButtonOption rbOpt
-WHERE rb.Id = rbOpt.parentTableId
-	AND rb.questionId IN ?
-UNION ALL 
-SELECT c.questionId,
-	cOpt.\`order\`,
-	getDisplayName(cOpt.description, 2) AS ChoiceDescription_EN,
-	getDisplayName(cOpt.description, 1) AS ChoiceDescription_FR
-FROM checkbox c, checkboxOption cOpt
-WHERE c.ID = cOpt.parentTableId
-	AND c.questionId IN ?
-UNION ALL 
-SELECT slider.questionId,
-	slider.minValue - 1 AS OrderNum,
-	getDisplayName(slider.minCaption, 2) AS ChoiceDescription_EN,
-	getDisplayName(slider.minCaption, 1) AS ChoiceDescription_FR
-FROM slider
-WHERE slider.questionId IN ?
-UNION ALL 
-SELECT slider.questionId,
-	slider.\`maxValue\` AS OrderNum,
-	getDisplayName(slider.maxCaption, 2) AS ChoiceDescription_EN,
-	getDisplayName(slider.maxCaption, 1) AS ChoiceDescription_FR
-FROM slider
-WHERE slider.questionId IN ?
-UNION ALL 
-SELECT l.questionId,
-	lOpt.\`order\`,
-	getDisplayName(lOpt.description, 2) AS ChoiceDescription_EN,
-	getDisplayName(lOpt.description, 1) AS ChoiceDescription_FR
-FROM label l, labelOption lOpt
-WHERE l.ID = lOpt.parentTableId
-	AND l.questionId IN ?
-ORDER BY QuestionSerNum, OrderNum DESC;`;
+var queryQuestionChoices = `CALL queryQuestionChoices(?);`;
+//     `SELECT rb.questionId AS QuestionSerNum,
+// 	rbOpt.\`order\` AS OrderNum,
+// 	getDisplayName(rbOpt.description, 2) AS ChoiceDescription_EN,
+// 	getDisplayName(rbOpt.description, 1) AS ChoiceDescription_FR
+// FROM radioButton rb, radioButtonOption rbOpt
+// WHERE rb.Id = rbOpt.parentTableId
+// 	AND rb.questionId IN ?
+// UNION ALL
+// SELECT c.questionId,
+// 	cOpt.\`order\`,
+// 	getDisplayName(cOpt.description, 2) AS ChoiceDescription_EN,
+// 	getDisplayName(cOpt.description, 1) AS ChoiceDescription_FR
+// FROM checkbox c, checkboxOption cOpt
+// WHERE c.ID = cOpt.parentTableId
+// 	AND c.questionId IN ?
+// UNION ALL
+// SELECT slider.questionId,
+// 	slider.minValue - 1 AS OrderNum,
+// 	getDisplayName(slider.minCaption, 2) AS ChoiceDescription_EN,
+// 	getDisplayName(slider.minCaption, 1) AS ChoiceDescription_FR
+// FROM slider
+// WHERE slider.questionId IN ?
+// UNION ALL
+// SELECT slider.questionId,
+// 	slider.\`maxValue\` AS OrderNum,
+// 	getDisplayName(slider.maxCaption, 2) AS ChoiceDescription_EN,
+// 	getDisplayName(slider.maxCaption, 1) AS ChoiceDescription_FR
+// FROM slider
+// WHERE slider.questionId IN ?
+// UNION ALL
+// SELECT l.questionId,
+// 	lOpt.\`order\`,
+// 	getDisplayName(lOpt.description, 2) AS ChoiceDescription_EN,
+// 	getDisplayName(lOpt.description, 1) AS ChoiceDescription_FR
+// FROM label l, labelOption lOpt
+// WHERE l.ID = lOpt.parentTableId
+// 	AND l.questionId IN ?
+// ORDER BY QuestionSerNum, OrderNum DESC;`;
+
 
 // var queryAnswersPatientQuestionnaire = "SELECT QuestionnaireQuestionSerNum, Answer.Answer, PatientQuestionnaireSerNum as PatientQuestionnaireDBSerNum FROM Answer WHERE PatientQuestionnaireSerNum IN ? ORDER BY PatientQuestionnaireDBSerNum;"
 
-// new one, require getAnswerText function in DB
+// new one
 // note that this query does not take answered and skipped answers into account since these functionnalities do not exist yet in the qplus
-var queryAnswersPatientQuestionnaire = `SELECT aSec.answerQuestionnaireId AS QuestionnaireSerNum,
-	a.ID,
-	a.languageId,
-    qSec.ID AS QuestionnaireQuestionSerNum
-FROM (answerSection aSec
-LEFT JOIN answer a ON (a.answerSectionId = aSec.ID)),
-questionSection qSec
-WHERE aSec.answerQuestionnaireId IN ?
-    AND a.deleted <> 1
-AND qSec.questionId = a.questionId
-AND qSec.sectionId = a.sectionId
-;`;
+var queryAnswersPatientQuestionnaire = `CALL queryAnswersPatientQuestionnaire(?);`;
+//
+//     `SELECT aSec.answerQuestionnaireId AS QuestionnaireSerNum,
+// 	a.ID,
+// 	a.languageId,
+//     qSec.ID AS QuestionnaireQuestionSerNum
+// FROM (answerSection aSec
+// LEFT JOIN answer a ON (a.answerSectionId = aSec.ID)),
+// questionSection qSec
+// WHERE aSec.answerQuestionnaireId IN ?
+//     AND a.deleted <> 1
+// AND qSec.questionId = a.questionId
+// AND qSec.sectionId = a.sectionId
+// ;`;
 
 //     `SELECT aSec.answerQuestionnaireId AS QuestionnaireSerNum,
 // if (a.languageId <> -1, getAnswerText(a.ID, a.languageId), getAnswerText(a.ID, ?)) AS Answer,
@@ -221,21 +230,26 @@ exports.getPatientQuestionnaires = function (patientIdAndLang, lang) {
             }
         }
 
+        logger.log('debug', "******** in getPatientQuestionnaires, before queryPatientQuestionnaireInfo: ***********\n" + JSON.stringify(patientIdAndLang[0].PatientSerNum));
+
         connection.query(queryPatientQuestionnaireInfo, [patientIdAndLang[0].PatientSerNum], function (err, rows, fields) {
+            logger.log('debug', "******** in getPatientQuestionnaires, after queryPatientQuestionnaireInfo: ***********\n" + JSON.stringify(rows));
             console.log("\n******** in getPatientQuestionnaires, after queryPatientQuestionnaireInfo: ***********\n", rows);
+
             if (rows.length !== 0) {
                 // console.log("\n******** in getPatientQuestionnaires, after queryPatientQuestionnaireInfo: ***********\n", rows);
 
-                let questionnaireDBSerNumArray = getQuestionnaireDBSerNums(rows);
+                let questionnaireDBSerNumArray = getQuestionnaireDBSerNums(rows[0]);
 
-                console.log("\n******** in getPatientQuestionnaires, before queryQuestions: ***********\n", questionnaireDBSerNumArray);
+                console.log("\n******** in getPatientQuestionnaires, before queryQuestions: ***********\n", questionnaireDBSerNumArray.join());
 
-                connection.query(queryQuestions, [[questionnaireDBSerNumArray]], function (err, questions, fields) {
+                connection.query(queryQuestions, [questionnaireDBSerNumArray.join()], function (err, questions, fields) {
                     if (err) reject(err);
 
                     console.log("\n******** in getPatientQuestionnaires, after queryQuestions: ***********\n", questions);
+                    logger.log('debug', "******** in getPatientQuestionnaires, after queryQuestions: ***********\n" + JSON.stringify(questions));
 
-                    let questionsOrdered = setQuestionOrder(questions);
+                    let questionsOrdered = setQuestionOrder(questions[0]);
 
                     // console.log("\n******** in getPatientQuestionnaires, after ordering questions: ***********\n", questionsOrdered);
 
@@ -247,10 +261,10 @@ exports.getPatientQuestionnaires = function (patientIdAndLang, lang) {
 
                         logger.log('debug', "******** in getPatientQuestionnaires, after getQuestionChoices: ***********\n" + JSON.stringify(questionsChoices));
 
-                        let questionnaires = prepareQuestionnaireObject(questionsChoices, rows);
+                        let questionnaires = prepareQuestionnaireObject(questionsChoices, rows[0]);
                         let patientQuestionnaires = {};
 
-                        attachingQuestionnaireAnswers(rows, lang).then(function (paQuestionnaires) {
+                        attachingQuestionnaireAnswers(rows[0], lang).then(function (paQuestionnaires) {
                             console.log("\n******** in getPatientQuestionnaires, after attachingQuestionnaireAnswers: ***********\n", paQuestionnaires);
                             patientQuestionnaires = paQuestionnaires;
                             resolve({'Questionnaires': questionnaires, 'PatientQuestionnaires': patientQuestionnaires});
@@ -365,7 +379,7 @@ function getQuestionnaireDBSerNums(rows) {
     return rows.map(q => q.QuestionnaireDBSerNum)
 }
 
-//Gets the choices for  questions
+//Gets the choices for questions
 function getQuestionChoices(rows) {
     var r = q.defer();
     var array = [];
@@ -374,16 +388,15 @@ function getQuestionChoices(rows) {
             array.push(rows[i].QuestionSerNum);
         }
 
-        connection.query(queryQuestionChoices, [[array], [array], [array], [array], [array]], function (err, choices, fields) {
+        connection.query(queryQuestionChoices, [array.join()], function (err, choices, fields) {
 
             // connection.query(queryQuestionChoices, [[array], [array], [array]], function (err, choices, fields) {
             //console.log(err);
             // logger.log('error', err);
             if (err) r.reject(err);
 
-
             // console.log("\n******** in getQuestionChoices, after queryQuestionChoices: ***********\n", choices);
-            var questions = attachChoicesToQuestions(rows, choices);
+            var questions = attachChoicesToQuestions(rows, choices[0]);
             // console.log(questions);
             // logger.log('debug', questions);
             r.resolve(questions);
@@ -428,10 +441,12 @@ function attachingQuestionnaireAnswers(opalDB, lang) {
         }
     }
     if (questionnaireSerNumArray.length > 0) {
-        var quer = connection.query(queryAnswersPatientQuestionnaire, [[questionnaireSerNumArray]], function (err, rows, fields) {
+        var quer = connection.query(queryAnswersPatientQuestionnaire, [questionnaireSerNumArray.join()], function (err, rows, fields) {
             console.log("QUESTIONNAIRE ANSWERS======================================================", rows);
 
             logger.log('debug', "QUESTIONNAIRE ANSWERS======================================================\n" + JSON.stringify(rows));
+
+            rows = rows[0];
 
             if (err) r.reject(err);
 

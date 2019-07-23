@@ -474,7 +474,6 @@ exports.patientNotificationsTableFields=function()
         "AND Users.Username= ? ";
 };
 
-
 exports.getNewNotifications=function() {
     return "SELECT Notification.NotificationSerNum, " +
         "Notification.DateAdded," +
