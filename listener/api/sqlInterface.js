@@ -786,17 +786,6 @@ exports.inputQuestionnaireAnswers = function(requestObject) {
             r.reject({Response:'error', Reason:err});
         });
     return r.promise;
-
-    // questionnaires.inputQuestionnaireAnswers(parameters).then(function(patientQuestionnaireSerNum) {
-    //     exports.runSqlQuery(queries.setQuestionnaireCompletedQuery(),
-    //         [patientQuestionnaireSerNum, parameters.DateCompleted, requestObject.Token,parameters.QuestionnaireSerNum])
-    //         .then(()=>{
-    //             r.resolve({Response:'success'});
-    //         });
-    // }).catch(function(err){
-    //     r.reject({Response:'error',Reason:err});
-    // });
-    // return r.promise;
 };
 
 /**
