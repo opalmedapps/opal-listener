@@ -202,11 +202,6 @@ var queryAnswerText = `CALL getAnswerText(?,?);`;
 exports.getPatientQuestionnaires = function (patientIdAndLang, lang) {
     return new Promise(((resolve, reject) => {
 
-        // connection.query(`CALL getAnswerText(138,2);`, [], function (err, rows, fields) {
-        //    console.log("---------- test test CALL getAnswerText(138,2); \n", rows);
-        //    throw new Error('break');
-        // });
-
         // console.log("\n******** in getPatientQuestionnaires, before queryPatientQuestionnaireInfo: ***********\n", patientId[0].PatientId);
 
         // check argument
@@ -390,9 +385,6 @@ function getQuestionChoices(rows) {
 
         connection.query(queryQuestionChoices, [array.join()], function (err, choices, fields) {
 
-            // connection.query(queryQuestionChoices, [[array], [array], [array]], function (err, choices, fields) {
-            //console.log(err);
-            // logger.log('error', err);
             if (err) r.reject(err);
 
             // console.log("\n******** in getQuestionChoices, after queryQuestionChoices: ***********\n", choices);
@@ -523,8 +515,6 @@ function attachingQuestionnaireAnswers(opalDB, lang) {
                         answersQuestionnaires[rows[i].QuestionnaireSerNum].push(answerCopy);
 
                     }
-                    // delete rowsOfAnswers[i].ID;
-                    // delete rowsOfAnswers[i].languageId;
                 }
 
                 // putting the answers into patientQuestionnaires object
@@ -574,7 +564,7 @@ exports.inputQuestionnaireAnswers = function (parameters, appVersion, patientSer
 
     console.log("------------ in inputQuestionnaireAnswers, before doing anything --------------\n");
 
-    var authorOfUpdate = 'QPLUS_' + appVersion;
+    var authorOfUpdate = 'QPLUS_' + appVersion; // TODO: maybe make this APP_
     var patientId;
 
    getPatientIdInQuestionnaireDB(parameters, patientSerNum)
@@ -612,61 +602,8 @@ exports.inputQuestionnaireAnswers = function (parameters, appVersion, patientSer
            r.reject(err);
        });
 
-    // getPatientSerNum(parameters.PatientId).then(function (serNum) {
-    //     var sa = connection.query(inputPatientQuestionnaireQuery, [serNum, parameters.DateCompleted, parameters.QuestionnaireDBSerNum], function (err, result) {
-    //         //console.log(sa.sql);
-    //         if (err) r.reject(err);
-    //         //console.log(result);
-    //         inputAnswersHelper(result.insertId, serNum, parameters.Answers).then(function (res) {
-    //             r.resolve(result.insertId);
-    //         }).catch(function (err) {
-    //             r.reject(err);
-    //         });
-    //     });
-    // });
     return r.promise;
 };
-//
-// //Get PatientSerNum for that part
-// function getPatientSerNum(patientId) {
-//     var r = q.defer();
-//     connection.query(patientSerNumQuery, [patientId], function (err, rows, fields) {
-//         if (err) r.reject(err);
-//         else r.resolve(rows[0].PatientSerNum);
-//     });
-//     return r.promise;
-// }
-
-//Helper processes most of the work to insert query.
-function inputAnswersHelper(id, patientSerNum, answers) {
-    var r = q.defer();
-    var arrayPromises = [];
-    //console.log(answers);
-    for (var i in answers) {
-        var objectAnswer = answers[i].Answer;
-
-        logger.log('debug', answers[i].Answer);
-
-        if (answers[i].QuestionType == 'Checkbox') {
-            for (var key in objectAnswer) {
-                if (objectAnswer[key] !== '') {
-                    arrayPromises.push(promisifyQuery(inputAnswersQuery, [answers[i].QuestionnaireQuestionSerNum, objectAnswer[key], patientSerNum, id]));
-                }
-            }
-        } else {
-            arrayPromises.push(promisifyQuery(inputAnswersQuery, [answers[i].QuestionnaireQuestionSerNum, objectAnswer, patientSerNum, id]));
-        }
-    }
-    q.all(arrayPromises).then(function (result) {
-        //console.log(result);
-        r.resolve(result);
-    }).catch(function (err) {
-        //console.log(err);
-        r.reject(err);
-    });
-
-    return r.promise;
-}
 
 /**
  * inputAnswerSection
@@ -674,7 +611,7 @@ function inputAnswersHelper(id, patientSerNum, answers) {
  *      It gets the questionId, sectionId and type of question from the questionnaireQuestionSerNum of one answer
  *      It then put the sectionId into `answerSection` table if an entry does not exist yet for that section
  * @param answerQuestionnaireId: questionnaireSerNum sent from qplus
- *        answers: {array} answers where each element is an object
+ * @param answers: {array} answers where each element is an object
  * @return {promise} containing questionId, sectionId, typeId, and answerSectionID
  */
 function inputAnswerSection(answerQuestionnaireId, answers){
