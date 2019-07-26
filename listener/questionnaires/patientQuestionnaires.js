@@ -377,7 +377,7 @@ function setQuestionOrder(questions) {
             logger.log('debug', "******** in setQuestionsOrder, 2nd for loop, k: *************\n" + k);
             logger.log('debug', "******** in setQuestionsOrder, 2nd for loop, numberOfQuestionsInThisSection[k] *************\n" + numberOfQuestionsInThisSection[k]);
 
-            if (numberOfQuestionsInPrevSections.hasOwnProperty(k)) {
+            if (numberOfQuestionsInThisSection.hasOwnProperty(k) && numberOfQuestionsInPrevSections.hasOwnProperty(k)) {
                 logger.log('debug', "******** in setQuestionsOrder, 2nd for loop in if, numberOfQuestionsInPrevSections[k] *************\n" + numberOfQuestionsInPrevSections[k]);
                 numberOfQuestionsInPrevSections[k] += numberOfQuestionsInThisSection[k];
             }
