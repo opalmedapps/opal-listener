@@ -314,17 +314,23 @@ function prepareQuestionnaireObject(questionnaires, opalDB) {
 function setQuestionOrder(questions) {
 
     console.log('******** in setQuestionsOrder *************', questions);
+    logger.log('debug', "******** in setQuestionsOrder *************\n" + JSON.stringify(questions));
+
     var numberOfQuestionsInPrevSections = {};
     var currSecOrder = 0;
     var thereIsMoreSec = 1;
 
     while (thereIsMoreSec) {
 
+        logger.log('debug', "******** in setQuestionsOrder, while loop, thereIsMoreSec, currSecOrder: *************\n" + thereIsMoreSec + ', ' + currSecOrder);
+
         thereIsMoreSec = 0;
 
         var numberOfQuestionsInThisSection = {};
 
         for (var i = 0; i < questions.length; i++) {
+            logger.log('debug', "******** in setQuestionsOrder, while loop, 1st for loop, thereIsMoreSec: *************\n" + thereIsMoreSec);
+            logger.log('debug', "******** in setQuestionsOrder, while loop, 1st for loop, questions[i] *************\n" + JSON.stringify(questions[i]));
 
             // set up numberOfQuestionsInThisSection and numberOfQuestionsInPrevSections
             // one entry in numberOfQuestionsInThisSection and numberOfQuestionsInPrevSections for one questionnaire
@@ -343,14 +349,20 @@ function setQuestionOrder(questions) {
 
             // if this question is in the current section level,
             // then we adjust its orderNum according to (how many questions are there in the previous sections + what is its order in the current section)
-            if (questions[i].secOrder == currSecOrder) {
+            if (questions[i].secOrder === currSecOrder) {
+                logger.log('debug', "******** in setQuestionsOrder, while loop, 1st for loop, if question in current section level, questions[i] *************\n" + JSON.stringify(questions[i]));
                 questions[i].OrderNum = questions[i].qOrder + numberOfQuestionsInPrevSections[questions[i].QuestionnaireDBSerNum];
 
+                logger.log('debug', "******** in setQuestionsOrder, while loop, 1st for loop, if question in current section level, questions[i].OrderNum *************\n" + questions[i].OrderNum);
+
                 // there is one more question dealt with in this section level for this questionnaire
+                logger.log('debug', "******** in setQuestionsOrder, while loop, 1st for loop, if question in current section level, numberOfQuestionsInThisSection *************\n" + numberOfQuestionsInThisSection[questions[i].QuestionnaireDBSerNum]);
                 numberOfQuestionsInThisSection[questions[i].QuestionnaireDBSerNum]++;
 
             } else if (questions[i].secOrder > currSecOrder) {
                 // this question belongs to sections after the current section level, need another loop
+
+                logger.log('debug', "******** in setQuestionsOrder, while loop, 1st for loop, if question in next section level, questions[i].secOrder *************\n" + questions[i].secOrder);
                 thereIsMoreSec = 1;
             }
         }
@@ -358,12 +370,20 @@ function setQuestionOrder(questions) {
         // increment the section level
         currSecOrder++;
 
+        logger.log('debug', "******** in setQuestionsOrder, 2nd for loop, numberOfQuestionsInThisSection *************\n" +  JSON.stringify(numberOfQuestionsInThisSection));
+
         // this is the end of this section level, we add the number of questions in this section level to the previous total
-        for (var k in Object.keys(numberOfQuestionsInThisSection)) {
+        for (var k in numberOfQuestionsInThisSection) {
+            logger.log('debug', "******** in setQuestionsOrder, 2nd for loop, k: *************\n" + k);
+            logger.log('debug', "******** in setQuestionsOrder, 2nd for loop, numberOfQuestionsInThisSection[k] *************\n" + numberOfQuestionsInThisSection[k]);
+
             if (numberOfQuestionsInPrevSections.hasOwnProperty(k)) {
+                logger.log('debug', "******** in setQuestionsOrder, 2nd for loop in if, numberOfQuestionsInPrevSections[k] *************\n" + numberOfQuestionsInPrevSections[k]);
                 numberOfQuestionsInPrevSections[k] += numberOfQuestionsInThisSection[k];
             }
         }
+
+        logger.log('debug', "******** in setQuestionsOrder, end of while loop, thereIsMoreSec: *************\n" + thereIsMoreSec);
     }
 
     return questions;
@@ -371,7 +391,11 @@ function setQuestionOrder(questions) {
 
 //Extracts only questionnaireSerNum for query injection
 function getQuestionnaireDBSerNums(rows) {
-    return rows.map(q => q.QuestionnaireDBSerNum)
+    var questionnaireDBSerNumArray = [];
+    for (var i = 0; i < rows.length; i++){
+        questionnaireDBSerNumArray.push(rows[i].QuestionnaireDBSerNum);
+    }
+    return questionnaireDBSerNumArray;
 }
 
 //Gets the choices for questions
@@ -379,6 +403,7 @@ function getQuestionChoices(rows) {
     var r = q.defer();
     var array = [];
     if (rows) {
+
         for (var i = 0; i < rows.length; i++) {
             array.push(rows[i].QuestionSerNum);
         }
