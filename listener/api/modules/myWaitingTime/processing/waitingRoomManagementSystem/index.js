@@ -5,7 +5,7 @@ const usersAppointments = require('./usersAppointments')
 const retrieveTimestamps = require('./retrieveTimestamps')
 const timestampsGroups = require('./timestampsGroups')
 
-//Tessa
+
 function addStart(data, appointment){
     const dataAmount = data.length
     if(dataAmount == 0){
