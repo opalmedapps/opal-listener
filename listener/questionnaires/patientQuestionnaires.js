@@ -198,6 +198,8 @@ var queryAnswersPatientQuestionnaire = `CALL queryAnswersPatientQuestionnaire(?)
 
 var queryAnswerText = `CALL getAnswerText(?,?);`;
 
+var queryAnswers = `CALL queryAnswers(?,?);`;
+
 /*SELECT QuestionnaireQuestionSerNum,  GROUP_CONCAT(Answer SEPARATOR ', ') as Answer, PatientQuestionnaireSerNum as PatientQuestionnaireDBSerNum FROM Answer WHERE PatientQuestionnaireSerNum IN ? GROUP BY QuestionnaireQuestionSerNum ORDER BY PatientQuestionnaireDBSerNum;"*/
 exports.getPatientQuestionnaires = function (patientIdAndLang, lang) {
     return new Promise(((resolve, reject) => {
@@ -444,121 +446,75 @@ function attachChoicesToQuestions(questions, choices) {
     return questions;
 }
 
-//Attaching answers to answered questionnaires
-function attachingQuestionnaireAnswers(opalDB, lang) {
+/**
+ * attachingQuestionnaireAnswers
+ * @desc Attaching answers to answered questionnaires
+ * @param questionnairesSentToPatient: The list of questionnaires sent to patients. This info is obtained by calling queryPatientQuestionnaireInfo in the questionnaireDB
+ * @param lang: the language that the answers are going to be displayed in case the answers have languageId = -1 in the database. This should be obtained from the front end or the opalDB
+ *              and pre-processed in getPatientQuestionnaires or the calling function
+ * @return {promise}
+ */
+function attachingQuestionnaireAnswers(questionnairesSentToPatient, lang) {
     var r = q.defer();
     var patientQuestionnaires = {};
     var questionnaireSerNumArray = [];
     var rowsOfAnswers = [];
-    for (var i = 0; i < opalDB.length; i++) {
-        patientQuestionnaires[opalDB[i].QuestionnaireSerNum] = opalDB[i];
+    for (var i = 0; i < questionnairesSentToPatient.length; i++) {
+        patientQuestionnaires[questionnairesSentToPatient[i].QuestionnaireSerNum] = questionnairesSentToPatient[i];
 
-        if (opalDB[i].CompletedFlag == 1 || opalDB[i].CompletedFlag == '1') {
-            questionnaireSerNumArray.push(opalDB[i].QuestionnaireSerNum);
+        if (questionnairesSentToPatient[i].CompletedFlag == 1 || questionnairesSentToPatient[i].CompletedFlag == '1') {
+            questionnaireSerNumArray.push(questionnairesSentToPatient[i].QuestionnaireSerNum);
         }
     }
     if (questionnaireSerNumArray.length > 0) {
-        var quer = connection.query(queryAnswersPatientQuestionnaire, [questionnaireSerNumArray.join()], function (err, rows, fields) {
+        var quer = connection.query(queryAnswers, [questionnaireSerNumArray.join(), lang], function (err, rows, fields) {
             console.log("QUESTIONNAIRE ANSWERS======================================================", rows);
 
             logger.log('debug', "QUESTIONNAIRE ANSWERS======================================================\n" + JSON.stringify(rows));
 
-            rows = rows[0];
-
             if (err) r.reject(err);
 
-            var promiseArray = [];
-            var languageId = lang; // we use the device's or the DB language to retrieve the answers if the language when the answer was entered is not defined
+            // the following line is due to us calling a stored procedure
+            rows = rows[0];
 
-            for (var i = 0; i < rows.length; i++){
-                if (rows[i].languageId !== -1){
-                    // if the language when the answer was entered is defined, we display using that language
-                    languageId = rows[i].languageId;
+            // inserting the answers according to the questionnaire
+            // this is for when a question can have multiple answers
+            var answersQuestionnaires = {};
+
+            console.log("QUESTIONNAIRE ANSWERS before 1st for loop ======================================================");
+
+            for (var i = 0; rows && i < rows.length; i++) {
+                if(!answersQuestionnaires.hasOwnProperty(rows[i].QuestionnaireSerNum)){
+                    answersQuestionnaires[rows[i].QuestionnaireSerNum] = [];
                 }
 
-                rowsOfAnswers.push(rows[i]);
+                // the answer will be '' to denote the case where there is no real answer text, since null and undefined makes qplus give an error
+                if (!rows[i].hasOwnProperty('value') || !rows[i].value || rows[i].value === undefined || rows[i].value === null){
+                    console.log("QUESTIONNAIRE ANSWERS in 1st for loop, 2nd if ======================================================");
 
-                // before this we can also check for if the answer is skipped or not answered,
-                // but since there won't be an entry in the answer(Type) tables, the query will return NULL, this step is skipped
-                promiseArray.push(promisifyQuery(queryAnswerText, [rows[i].ID, languageId]));
+                    rows[i].value = '';
+                }
+
+                answersQuestionnaires[rows[i].QuestionnaireSerNum].push(rows[i]);
             }
 
-            console.log("QUESTIONNAIRE ANSWERS before q.all ======================================================");
-            q.all(promiseArray).then(function(translatedAnswerArray){
+            console.log("QUESTIONNAIRE ANSWERS after 1st for loop ======================================================");
 
-                console.log("QUESTIONNAIRE ANSWERS after q.all ======================================================");
-                logger.log('debug', "translatedAnswerArray: \n" + JSON.stringify(translatedAnswerArray));
+            // putting the answers into patientQuestionnaires object
+            for (var i = 0; i < questionnairesSentToPatient.length; i++) {
 
-                // inserting the answers according to the questionnaire
-                // this is for when a question can have multiple answers
-                var answersQuestionnaires = {};
+                if(questionnairesSentToPatient[i].CompletedFlag === 1 || questionnairesSentToPatient[i].CompletedFlag === '1'){
+                    console.log("QUESTIONNAIRE ANSWERS in 2nd for loop, if ======================================================");
 
-                for (var i = 0; i < rowsOfAnswers.length; i++){
-                    if (!answersQuestionnaires.hasOwnProperty(rows[i].QuestionnaireSerNum)){
-                        answersQuestionnaires[rows[i].QuestionnaireSerNum] = [];
-                    }
-
-                    // this is for cloning rowsOfAnswers to avoid pass by reference
-                    var answerCopy = {};
-
-                    // this case is for when the database has the entry in the `Answer` table
-                    // but does not contain anything in subtables (e.g. AnswerRadioButton) that further give the answer text
-                    // without this, those type of answers will be skipped, and the answer will not be displayed for the correct question in the 'Completed' tab
-                    if (translatedAnswerArray[i][0].length === 0){
-                        // the Answer will be '' to denote this case (no real answer text), since null and undefined makes qplus give an error
-                        rowsOfAnswers[i].Answer = '';
-
-                        logger.log('debug', "translatedAnswerArray[i][0].length === 0: " + JSON.stringify(rowsOfAnswers[i]));
-
-                        // this is for cloning rowsOfAnswers to avoid pass by reference
-                        answerCopy = Object.assign(answerCopy, rowsOfAnswers[i]);
-                        answersQuestionnaires[rows[i].QuestionnaireSerNum].push(answerCopy);
-                    }
-
-                    // add translated answer into answers
-                    // this is for loop is for checkbox questions which can have multiple answers
-                    // if the previous if statement was evaluated to True, this loop will not be entered
-                    for (var j = 0; j < translatedAnswerArray[i][0].length; j++){
-
-                        if (!rowsOfAnswers[i].hasOwnProperty('Answer')){
-                            // the Answer will be '' to denote the case where there is no real answer text, since null and undefined makes qplus give an error
-                            rowsOfAnswers[i].Answer = '';
-                        }
-
-                        logger.log('debug', "translatedAnswerArray next: " + JSON.stringify(translatedAnswerArray[i][0]));
-
-                        if (translatedAnswerArray[i][0][j].hasOwnProperty('value')){
-                            rowsOfAnswers[i].Answer = translatedAnswerArray[i][0][j].value;
-
-                        }else{
-                            // this part is not actually used, but just in case
-                            // the Answer will be '' to denote this case (no real answer text), since null and undefined makes qplus give an error
-                            rowsOfAnswers[i].Answer = '';
-                        }
-
-                        // this is for cloning rowsOfAnswers to avoid pass by reference
-                        answerCopy = {};
-                        answerCopy = Object.assign(answerCopy, rowsOfAnswers[i]);
-                        answersQuestionnaires[rows[i].QuestionnaireSerNum].push(answerCopy);
-
-                    }
+                    patientQuestionnaires[questionnairesSentToPatient[i].QuestionnaireSerNum].Answers = answersQuestionnaires[questionnairesSentToPatient[i].QuestionnaireSerNum];
                 }
+            }
 
-                // putting the answers into patientQuestionnaires object
-                for (var i = 0; i < opalDB.length; i++) {
+            console.log("QUESTIONNAIRE ANSWERS before resolve ======================================================");
 
-                    if (opalDB[i].CompletedFlag == 1 || opalDB[i].CompletedFlag == '1'){
-                        patientQuestionnaires[opalDB[i].QuestionnaireSerNum].Answers = answersQuestionnaires[opalDB[i].QuestionnaireSerNum];
-                    }
-                }
+            r.resolve(patientQuestionnaires);
 
-                console.log("QUESTIONNAIRE ANSWERS before resolve ======================================================");
-                r.resolve(patientQuestionnaires);
-
-            }).catch(function(err){
-                r.reject(err);
             });
-        });
     } else {
         r.resolve(patientQuestionnaires);
     }
