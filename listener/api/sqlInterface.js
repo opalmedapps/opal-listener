@@ -1428,6 +1428,7 @@ exports.getAllNotifications = function(requestObject){
 
 exports.getNewNotifications = function(requestObject){
     let r = Q.defer();
+    // this query does not work for questionnaires as of 29 July 2019 since the opal database do not have the questionnaire
     exports.runSqlQuery(queries.getNewNotifications(), [requestObject.UserID, requestObject.Parameters.LastUpdated, requestObject.Parameters.LastUpdated])
         .then(rows => {
             if(rows.length > 0){
@@ -1542,6 +1543,10 @@ function mapRefreshedDataToNotifications(results, notifications) {
 }
 
 function createQuestionnaireNotificationObject(patient_questionnaires, raw_questionnaires, resultsArray){
+
+    console.log("------------- patient_questionnaires: -------------\n", patient_questionnaires);
+    console.log("------------- raw_questionnaires: --------------\n", raw_questionnaires);
+
     // Iterate through refreshed questionnaire data by serNum
     Object.keys(patient_questionnaires).map(ser => {
 
