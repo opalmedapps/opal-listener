@@ -45,9 +45,8 @@ const request = {
  * Query to retrieve stats from the database
  * The procedure is currently located on 172.26.66.39 (Listener) in table "mysql" and the procedure is "my_memory()
  ******************************/
-//const dbQuery = "call mysql.my_memory();";
-const dbQuery ='SELECT * FROM Appointment WHERE AppointmentAriaSer = 9999998';
-//Tessa I changed this
+const dbQuery = "call mysql.my_memory();";
+
 
 /******************************
  * Use for POOL connection to MySQL.  Not being used now since
