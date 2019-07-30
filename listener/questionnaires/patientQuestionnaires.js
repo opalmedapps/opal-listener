@@ -483,8 +483,10 @@ function attachingQuestionnaireAnswers(opalDB, lang) {
                 promiseArray.push(promisifyQuery(queryAnswerText, [rows[i].ID, languageId]));
             }
 
+            console.log("QUESTIONNAIRE ANSWERS before q.all ======================================================");
             q.all(promiseArray).then(function(translatedAnswerArray){
 
+                console.log("QUESTIONNAIRE ANSWERS after q.all ======================================================");
                 logger.log('debug', "translatedAnswerArray: \n" + JSON.stringify(translatedAnswerArray));
 
                 // inserting the answers according to the questionnaire
@@ -550,6 +552,7 @@ function attachingQuestionnaireAnswers(opalDB, lang) {
                     }
                 }
 
+                console.log("QUESTIONNAIRE ANSWERS before resolve ======================================================");
                 r.resolve(patientQuestionnaires);
 
             }).catch(function(err){
