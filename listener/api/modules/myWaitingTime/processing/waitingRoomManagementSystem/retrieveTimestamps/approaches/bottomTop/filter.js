@@ -19,7 +19,7 @@ function retrieveWaitingRoom (appointmentType, fromAreaIndex, history) {
   let waitingRoomNode
 
   fromAreaIndex++
-  while (--fromAreaIndex >= 0) {//TESSA doesn't enter this because Area Index is not greater or equal to zero
+  while (--fromAreaIndex >= 0) {
     const historyNode = history[fromAreaIndex]
     if (!isWaitingRoom(historyNode.CheckinVenueName)) {
       if (!waitingRoomNode) {

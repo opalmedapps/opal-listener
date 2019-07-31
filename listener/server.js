@@ -1,6 +1,7 @@
 /*
  * Filename     :   server.js
- * Description  :   This script listens for changes on dev2/ in firebase, reads those changes and writes a response back to firebase.
+ * Description  :   This script listens for changes to config.FIREBASE_ROOT_BRANCH in firebase, reads those changes and
+ *                  writes a response back to firebase.
  * Created by   :   David Herrera, Robert Maglieri
  * Date         :   07 Mar 2017
  * Copyright    :   Copyright 2016, HIG, All rights reserved.
@@ -10,9 +11,9 @@
  * *********************************************
  * Modified By    	: Yick Mo
  * Modified Date	: 2017-12-15
- * NOTES				: Added the Heart Beat Database
+ * NOTES			: Added the Heart Beat Database
  *
- * Important		: Do not forget to change "/dev3" back to "/dev2" before merging
+ * Important		: Do not forget to change "/dev3" back to "/dev2" before merging. [Done]
  * *********************************************
  *
  */
@@ -25,23 +26,9 @@ const q                 = require("q");
 const config            = require('./config.json');
 const logger            = require('./logs/logger.js');
 const cp                = require('child_process');
-const mysql             = require('mysql');
 
 const FIREBASE_DEBUG = !!process.env.FIREBASE_DEBUG;
 
-//Tessa
-
-
-
-//const getTessTest = require('./api/modules/myWaitingTime/getTestTessa.js')
-//const cacheOf = require('./api/modules/myWaitingTime/cache.js')
-//const { runSqlQuery } = require('./api/sqlInterface')
-//const {opalDb: opalDbQueries} = require('./api/modules/myWaitingTime/queries')
-//const processing = require('./api/modules/myWaitingTime/processor')
-//const getAppointments = require('./api/modules/myWaitingTime/getAppointments')
-//const getTestTessa = require('./api/modules/myWaitingTime/getTestTessa')
-//const request = require('./api/modules/appointmentDelays/request')
-//End Tessa
 
 
 
@@ -64,12 +51,12 @@ admin.database.enableLogging(false);
 
 // Get reference to correct data element
 const db = admin.database();
-const ref = db.ref("/dev2");
-const heartbeatRef = db.ref("/dev2/users/heartbeat");
+const ref = db.ref(config.FIREBASE_ROOT_BRANCH);
+const heartbeatRef = ref.child('/users/heartbeat');
 
 logger.log('debug', 'INITIALIZED APP IN DEBUG MODE');
 
-// Ensure there is no leftover data on firebase
+// Ensure there is no leftover data on the firebase root branch
 ref.set(null)
 	.catch(function (error) {
 		logger.log('error', 'Cannot reset firebase', {
@@ -190,6 +177,10 @@ function processRequest(headers){
 
     // Separate security requests from main requests
     if(processApi.securityAPI.hasOwnProperty(requestObject.Request)) {
+
+        // Log all requests in the table PatientActivityLog. -SB
+        processApi.logPatientRequest(requestObject);
+
         logger.log('debug', 'Processing security request');
         processApi.securityAPI[requestObject.Request](requestKey, requestObject)
             .then(function (response) {
@@ -284,6 +275,7 @@ function uploadToFirebase(response, key) {
 /**
  * validateKeysForFirebase
  * @author Stacey Beard
+ * @date 2018-10-05
  * @desc Validates all keys in an object intended to be pushed to Firebase.
  *       Empty keys are replaced with 'MISSING_KEY' and illegal characters are replaced with '_'.
  *       This function edits the object directly (does not return a copy).
@@ -346,6 +338,7 @@ function validateKeysForFirebase(objectToValidate) {
 /**
  * incrementStringParenthesisNumber
  * @author Stacey Beard
+ * @date 2018-10-05
  * @desc Utility function that takes as input a string and increments its ending number (in parenthesis),
  *       like when saving a file of the same name as another in Windows.
  *       Examples:
@@ -588,119 +581,7 @@ function spawnHeartBeatDB(){
         }
     });
 
-/*
 
-
-    function tessArtTest(){
-        return new Promise((resolve, reject) => {
-            var obj = {
-                'Parameters' : {
-                    'refId' : 12,
-                    'refSource' : 2
-                }
-            }
-            request(obj).catch(reject)
-        })
-    }
-
-    tessArtTest()
-    //Tessa
-
-
-
-    function tessArtTest() {
-        return new Promise((resolve, reject) => {
-            var obj = {
-                'Parameters': {
-                    'patientId': 2020
-                }
-            }
-            var obj2 = {
-                'Parameters': {
-                    'patientId': 1313
-                }
-            }
-
-
-            request(obj).catch(reject)
-            request(obj2).catch(reject)
-                })
-    }
-
-
-    tessArtTest();
-
-    function partTwo(patientId) {
-        return function (cached) {
-            return new Promise((resolve, reject) => {
-                console.log("This is happening");
-                runSqlQuery(opalDbQueries.getTimestamps(patientId))
-                    .then(console.log("This is working correctly"))
-                    .then(result => resolve(result&& result.length > 0 ? result : []))
-                    //.then(console.log(result))
-                    .catch(reject);
-            })
-        }
-
-    function second() {
-            cacheOf(patientID).partTwo(patID)).then("we made it")
-                .then(function(result){
-                    firstCheckIN = result[0].FirstCheckinTime;
-                    console.log(firstCheckIN);
-                }).catch(e => console.log(`.catch(${e})`)).catch(e => console.log(`.catch(${e})`))
-                .catch(e => console.log(`.catch(${e})`));
-        })
-    }*/
-
-   // tessArtTest();
-
-    /**
-     * tessTessaTest
-     * @desc Proof of the existence of tables and the ability to create and add to them
-     */
-/*
-    function tessTessaTest() {
-        return new Promise((resolve) => {
-
-            const patientID = 1234567;
-
-            const patID = parseInt(patientID, 10);
-            cacheOf(patientID).then(getTestTessa(patientID))
-                .then(function(result){
-                    console.log("This is where I successfully access the database");
-                firstName = result[0].FirstName;
-                lastName = result[0].LastName;
-                number = result[0].PatientSerNum;
-                console.log(firstName);
-                console.log(lastName);
-                console.log(number);
-            })
-
-                .catch(e => console.log(`.catch(${e})`)).catch(e => console.log(`.catch(${e})`))
-                .catch(e => console.log(`.catch(${e})`));
-
-        })
-    }
-
-
-    /**
-     * @name async1
-     * @desc Dumb async function, prints "async1" randomly
-     */
-/*
-    function async1()
-    {
-        setTimeout(function(){
-            tessTessaTest();
-            },2000);
-    }
-*/
-   // console.log(async1());
-
-
-
-
-    //EndTessa
 
     process.on('exit', function () {
         heartBeatDB.kill();

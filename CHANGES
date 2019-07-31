@@ -1,3 +1,100 @@
+Version 1.0.3.5:
+ - Merge remote-tracking branch 'origin/Issue_3' into staging
+ - Move all dev2 references to config.json
+
+Version 1.0.3.4:
+ - Modified the appointment to include CANCELLED in the title
+
+Version 1.0.3.3:
+ -     ---- Fixed questions order sequestion Merge branch 'questionnaire_order_fix' into staging
+ - Quick Patch to questionnaire order number
+ - Merge branch 'staging'
+ - Merge branch 'staging'
+ - Merge branch 'staging'
+
+Version 1.0.3.2:
+ - Merge branch 'Issue_482' into staging
+
+Version 1.0.3.1:
+ -     -- Add app verion to patient activity logging     -- block logging of LogPatientAction request
+
+Version 1.0.3.0:
+ - Log all requests in the PatientActivityLog
+
+Version 1.0.2.2:
+ - Modified default-config.json for the path of the doctor's images
+ - Merge branch 'master' into staging
+
+Version 1.0.2.1:
+ -     ---- modified gitignore to exclude listener/Doctors folder     ---- added DOCTOR_PATH to config.json     ---- added a try statement when trying to load doctor's image
+ - Merge branch 'PreProd'
+ - Merge branch 'PreProdDev' into PreProd
+ - Merge branch 'hotfix-1.0.1.2' into PreProd
+ - Merge branch 'hotfix-1.0.1.1' into PreProd
+ -    --- Merging PreProdDev Merge branch 'PreProdDev' into PreProd
+ -    --- Merging Merge branch 'PreProdDev' into PreProd
+ - Merge branch 'hotfix-1.0.0.5' into PreProd
+ - Merge branch 'hotfix-1.0.0.4' into PreProd
+ - Merge branch 'hotfix-1.0.0.3' into PreProd
+
+Version 1.0.2.0:
+ -     --- Change permission bumpversion.sh to chmod 755
+ - Merge branch 'fertility_logging_packages' into PreProdDev
+ - Remove old unused query for fetching package contents
+ - Remove the type restriction in the Educational Materials query
+ - Merge branch 'master' into fertility_logging_packages
+ - Add a new function to get package contents from the DB
+ - Add comments, remove back quotes from the logPatientAction query
+ - Merge branch 'hotfix-1.0.1.2' into PreProdDev
+ - Merge branch 'hotfix-1.0.1.2'
+ - Modified the getTranslation function to include the record number
+ - Merge-fix: remove redundant logging requests
+ - Merge-fix: add new request LogPatientAction
+ - Merge-fix: clean up code (style, comments)
+ - Merge-fix: remove readMaterial request & function
+ - Merge-fix: restore the function updateReadStatus
+ - Merge remote-tracking branch 'origin/master' into fertility_logging_packages
+ - Add checks to prevent patientQuestionnaires.js from crashing when it can't get questionnaires
+ - Merge branch 'hotfix-1.0.1.1' into PreProdDev
+ - Configure for local database
+ - Configure for local Firebase
+ - Merge branch 'ListenerEason' into fertility_logging_packages
+ - backend merged
+ - merge1
+ -  quick review of changes
+ - db redesign
+ - PatientLog
+ - 9
+ - add package
+ - 9
+ - finished all logging system, click and scroll for doc and subdoc
+ - change ReadStatus to Clicked in educationmaterial
+ - add backend function for scroll to bottom
+ - scrolled to bottom not added to patientEducationalMaterialTableFields
+ - add request for logging, and query
+
+Version 1.0.1.2:
+ - Merge branch 'hotfix-1.0.1.1'
+
+Version 1.0.1.1:
+ - Modified the patient appointment query to use the getTranslation functino
+ -    --- Merging the changes from PreProdDev Merge branch 'PreProdDev'
+ -    --- Images
+ -    --- Adding Images
+ -    --- Merging Merge branch 'PreProdDev'
+ - Merge pull request #1 from Sable/bug_fix_520
+ - Add date tags to comments
+ - Merge branch 'hotfix-1.0.0.5'
+
+Version 1.0.1.0:
+ - Fix bug #520
+   * Replace missing ResourceType with 'Unknown'
+   * Check all object keys before uploading to Firebase
+
+Version 1.0.0.5:
+ - Merge branch 'hotfix-1.0.0.4'
+ - Removed the hard coding of database
+
 Version 1.0.0.4:
  - Merge branch 'hotfix-1.0.0.3'
 
