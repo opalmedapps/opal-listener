@@ -13,11 +13,12 @@ const modules               = require('./modules')
 const API = {
     'DeviceIdentifier': apiHospitalUpdate.updateDeviceIdentifier,
     'Log': apiPatientUpdate.logActivity,
+    'LogPatientAction': apiPatientUpdate.logPatientAction,
     'Login': apiPatientUpdate.login,
     'Logout': apiHospitalUpdate.logout,
     'Resume': apiPatientUpdate.resume,
-    //'Refresh': apiPatientUpdate.refresh,
-    //'AccountChange': apiHospitalUpdate.accountChange,
+    'Refresh': apiPatientUpdate.refresh,
+    'AccountChange': apiHospitalUpdate.accountChange,
     'CheckCheckin': apiPatientUpdate.checkCheckin,
     'Checkin': apiHospitalUpdate.checkIn,
     'CheckinUpdate': apiPatientUpdate.checkinUpdate,
@@ -27,13 +28,13 @@ const API = {
     'MapLocation': apiPatientUpdate.getMapLocation,
     'Message': apiHospitalUpdate.sendMessage,
     'NotificationsAll': apiHospitalUpdate.getAllNotifications,
-    //'NotificationsNew': apiHospitalUpdate.getNewNotifications,
-    //'Questionnaires': apiPatientUpdate.getQuestionnaires,
-    //'QuestionnaireRating': apiHospitalUpdate.inputEducationalMaterialRating,
-    //'QuestionnaireAnswers': apiHospitalUpdate.inputQuestionnaireAnswers,
-    //Tessa
+    'NotificationsNew': apiHospitalUpdate.getNewNotifications,
+    'EducationalPackageContents': apiPatientUpdate.getPackageContents,
+    'Questionnaires': apiPatientUpdate.getQuestionnaires,
+    'QuestionnaireRating': apiHospitalUpdate.inputEducationalMaterialRating,
+    'QuestionnaireAnswers': apiHospitalUpdate.inputQuestionnaireAnswers,
     'Read': apiHospitalUpdate.updateReadStatus,
-    //'PFPMembers': apiPatientUpdate.getPatientsForPatientsMembers,
+    'PFPMembers': apiPatientUpdate.getPatientsForPatientsMembers,
     'AppointmentDelays': modules.appointmentDelays.requestHandler,
     'MyWaitingTime': modules.myWaitingTime.requestHandler
 };
@@ -66,4 +67,8 @@ exports.processRequest=function(requestObject) {
         r.reject('Invalid request type');
     }
     return r.promise;
+};
+
+exports.logPatientRequest = function(requestObject) {
+    return apiPatientUpdate.logPatientRequest(requestObject);
 };

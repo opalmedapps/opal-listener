@@ -42,31 +42,32 @@ handleDisconnect(connection);
 
 //Queries to obtain the questions and question choices for questionnaires
 var queryQuestions = `SELECT DISTINCT Questionnaire.QuestionnaireSerNum as QuestionnaireDBSerNum,
-                                      Questionnaire.QuestionnaireName,
-									  QC.QuestionnaireName_EN,
-									  QC.Intro_EN,
-									  QC.QuestionnaireName_FR,
-									  QC.Intro_FR,
-                                      QuestionnaireQuestion.QuestionnaireQuestionSerNum,
-                                      Question.QuestionSerNum,
-                                      Question.isPositiveQuestion,
-                                      Question.QuestionQuestion as QuestionText_EN,
-                                      Question.QuestionName as Asseses_EN,
-                                      Question.QuestionName_FR as Asseses_FR,
-                                      Question.QuestionQuestion_FR as QuestionText_FR,
-                                      QuestionType.QuestionType,
-                                      QuestionType.QuestionTypeSerNum
+                        Questionnaire.QuestionnaireName,
+                        QC.QuestionnaireName_EN,
+                        QC.Intro_EN,
+                        QC.QuestionnaireName_FR,
+                        QC.Intro_FR,
+                        QuestionnaireQuestion.QuestionnaireQuestionSerNum,
+                        Question.QuestionSerNum,
+                        Question.isPositiveQuestion,
+                        Question.QuestionQuestion as QuestionText_EN,
+                        Question.QuestionName as Asseses_EN,
+                        Question.QuestionName_FR as Asseses_FR,
+                        Question.QuestionQuestion_FR as QuestionText_FR,
+                        QuestionType.QuestionType,
+                        QuestionType.QuestionTypeSerNum,
+                        QuestionnaireQuestion.OrderNum
                       FROM Questionnaire,
-                           Question,
-                           QuestionType,
-                           Patient,
-                           QuestionnaireQuestion,
-						   ` + credentials.MYSQL_DATABASE + `.QuestionnaireControl QC
-                     WHERE QuestionnaireQuestion.QuestionnaireSerNum = Questionnaire.QuestionnaireSerNum
-                         AND QuestionnaireQuestion.QuestionSerNum = Question.QuestionSerNum
-                         AND Question.QuestionTypeSerNum = QuestionType.QuestionTypeSerNum
-						 AND QC.QuestionnaireDBSerNum = Questionnaire.QuestionnaireSerNum
-                         AND Questionnaire.QuestionnaireSerNum IN ?`;
+                        Question,
+                        QuestionType,
+                        Patient,
+                        QuestionnaireQuestion,
+                        ` + credentials.MYSQL_DATABASE + `.QuestionnaireControl QC
+                      WHERE QuestionnaireQuestion.QuestionnaireSerNum = Questionnaire.QuestionnaireSerNum
+                        AND QuestionnaireQuestion.QuestionSerNum = Question.QuestionSerNum
+                        AND Question.QuestionTypeSerNum = QuestionType.QuestionTypeSerNum
+                        AND QC.QuestionnaireDBSerNum = Questionnaire.QuestionnaireSerNum
+                        AND Questionnaire.QuestionnaireSerNum IN ?`;
 
 var queryQuestionChoices = "SELECT QuestionSerNum, MCSerNum as OrderNum, MCDescription as ChoiceDescription_EN, MCDescription_FR as ChoiceDescription_FR  FROM QuestionMC WHERE QuestionSerNum IN ? UNION ALL SELECT * FROM QuestionCheckbox WHERE QuestionSerNum IN ? UNION ALL SELECT * FROM QuestionMinMax WHERE QuestionSerNum IN ? ORDER BY QuestionSerNum, OrderNum DESC";
 var queryAnswersPatientQuestionnaire = "SELECT QuestionnaireQuestionSerNum, Answer.Answer, PatientQuestionnaireSerNum as PatientQuestionnaireDBSerNum FROM Answer WHERE PatientQuestionnaireSerNum IN ? ORDER BY PatientQuestionnaireDBSerNum;"
@@ -77,27 +78,28 @@ exports.getPatientQuestionnaires = function (rows) {
   return new Promise(((resolve, reject) => {
       if(rows.length!== 0) {
           let questionnaireDBSerNumArray = getQuestionnaireDBSerNums(rows);
-          connection.query(queryQuestions, [[questionnaireDBSerNumArray]], function(err,  questions, fields) {
-            if (err) reject(err);
-            /*getQuestionChoices(questions).then(function(questionsChoices){
-                let questionnaires = prepareQuestionnaireObject(questionsChoices,rows);
-                let patientQuestionnaires = {};
-                attachingQuestionnaireAnswers(rows).then(function(paQuestionnaires) {
-                    patientQuestionnaires = paQuestionnaires;
-                    resolve({'Questionnaires':questionnaires, 'PatientQuestionnaires':patientQuestionnaires});
-                }).catch(function(error) {
-                    reject(error);*/
-            //Tessa
-            /*.catch(function(err){
-                        reject(err);
-                    })*/
-            //}else{
-          })}
-        console.log("resolving blank response")
-          resolve([]); //TESSA
-    //  }
+
+          connection.query(queryQuestions, [[questionnaireDBSerNumArray]], function(err,  questions, fields){
+              if(err) reject(err);
+
+              getQuestionChoices(questions).then(function(questionsChoices){
+                  let questionnaires = prepareQuestionnaireObject(questionsChoices,rows);
+                  let patientQuestionnaires = {};
+                  attachingQuestionnaireAnswers(rows).then(function(paQuestionnaires) {
+                      patientQuestionnaires = paQuestionnaires;
+                      resolve({'Questionnaires':questionnaires, 'PatientQuestionnaires':patientQuestionnaires});
+                  }).catch(function(error) {
+                      reject(error);
+                  });
+              }).catch(function(err){
+                  reject(err);
+              })
+          });
+      }else{
+          resolve([]);
+      }
   }));
-}
+};
 
 //Formats questionnaire object to be ready for the app.
 function prepareQuestionnaireObject(questionnaires, opalDB)
@@ -115,7 +117,7 @@ function prepareQuestionnaireObject(questionnaires, opalDB)
 		questionnairesObject[questionnaires[i].QuestionnaireDBSerNum].Intro_EN = questionnaires[i].Intro_EN;
 		questionnairesObject[questionnaires[i].QuestionnaireDBSerNum].QuestionnaireName_FR = questionnaires[i].QuestionnaireName_FR;
 		questionnairesObject[questionnaires[i].QuestionnaireDBSerNum].Intro_FR = questionnaires[i].Intro_FR;
-		questionnairesObject[questionnaires[i].QuestionnaireDBSerNum].QuestionnaireSerNum = questionnaires[i].QuestionnaireSerNum;
+        questionnairesObject[questionnaires[i].QuestionnaireDBSerNum].QuestionnaireSerNum = questionnaires[i].QuestionnaireSerNum;
 		delete questionnaires[i].QuestionnaireName;
 		delete questionnaires[i].QuestionnaireName_EN;
 		delete questionnaires[i].Intro_EN;
@@ -145,18 +147,21 @@ function getQuestionChoices(rows)
   var r = q.defer();
   var array = [];
   if (rows) {
-    for (var i = 0; i < rows.length; i++) {
-      array.push(rows[i].QuestionSerNum);
-    };
-    connection.query(queryQuestionChoices,[[array],[array],[array]],function(err,choices,fields){
-      //console.log(err);
-      // logger.log('error', err);
-      if(err) r.reject(err);
-      var questions = attachChoicesToQuestions(rows,choices);
-      // console.log(questions);
-      // logger.log('debug', questions);
-      r.resolve(questions);
-    });
+      for (var i = 0; i < rows.length; i++) {
+          array.push(rows[i].QuestionSerNum);
+      }
+      ;
+      connection.query(queryQuestionChoices, [[array], [array], [array]], function (err, choices, fields) {
+          //console.log(err);
+          // logger.log('error', err);
+          if (err) r.reject(err);
+          var questions = attachChoicesToQuestions(rows, choices);
+          // console.log(questions);
+          // logger.log('debug', questions);
+          r.resolve(questions);
+      });
+  } else {
+      r.resolve([]);
   }
   return r.promise;
 }
@@ -204,7 +209,7 @@ function attachingQuestionnaireAnswers(opalDB)
       //console.log('line 169', err);
       if(err) r.reject(err);
       var answersQuestionnaires = {};
-      for (var i = 0; i < rows.length; i++) {
+      for (var i = 0; rows && i < rows.length; i++) {
         if(!answersQuestionnaires.hasOwnProperty(rows[i].PatientQuestionnaireDBSerNum))answersQuestionnaires[rows[i].PatientQuestionnaireDBSerNum] = [];
         answersQuestionnaires[rows[i].PatientQuestionnaireDBSerNum].push(rows[i]);
       }

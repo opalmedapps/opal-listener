@@ -36,7 +36,7 @@ function formatAppointment (users, group, index, max, onDone) {
   appointmentObj.History.unshift({ PatientLocationRevCount, ArrivalDateTime: getDate(ArrivalDateTime), ActualStartDate: getDate(ActualStartDate), CheckinVenueName })
   formatAppointment(users, group, index + 1, max, onDone)
 }
-//Tessa: Removed ', DichargeThisLocationDateTime: getDate(DichargeThisLocationDateTime,' from Line 35
+
 module.exports = function (groups) {
   return new Promise((resolve) => {
     const users = {}

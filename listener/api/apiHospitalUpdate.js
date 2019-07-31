@@ -5,7 +5,10 @@ const logger = require('./../logs/logger.js');
 //API call to log user out
 exports.logout=function(requestObject)
 {
-  return sqlInterface.addToActivityLog(requestObject);
+    /* This line was removed because we now add all requests to the activity log.
+     * Logout is still being recorded, but it's now done earlier in the code.
+     * -SB */
+    // return sqlInterface.addToActivityLog(requestObject);
 };
 
 //Send message
@@ -49,7 +52,7 @@ exports.updateDeviceIdentifier= function(requestObject)
     return sqlInterface.updateDeviceIdentifier(requestObject);
 };
 
-//Input rating for 
+//Input rating for
 exports.inputEducationalMaterialRating= function(requestObject)
 {
   return sqlInterface.inputEducationalMaterialRating(requestObject);

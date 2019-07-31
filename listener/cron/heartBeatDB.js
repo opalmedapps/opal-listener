@@ -3,7 +3,7 @@
  * Date: 2017-12-04
  *
  * NOTE: This is copy from the original heartbeat.js on 2017-11-29
- * Important : Do not forget to change "/dev3" back to "/dev2" before merging
+ * Important : Do not forget to change "/dev3" back to "/dev2" before merging. [Done]
  * 
  */
 
@@ -29,7 +29,7 @@ admin.initializeApp({
     databaseURL: config.DATABASE_URL
 });
 const db = admin.database();
-const ref = db.ref("/dev2/DBrequest");
+const ref = db.ref(config.FIREBASE_ROOT_BRANCH).child("DBrequest");
 
 /******************************
  * Set the request for firebase to identify as HearBeatDB
@@ -45,9 +45,8 @@ const request = {
  * Query to retrieve stats from the database
  * The procedure is currently located on 172.26.66.39 (Listener) in table "mysql" and the procedure is "my_memory()
  ******************************/
-//const dbQuery = "call mysql.my_memory();";
-const dbQuery ='SELECT * FROM Appointment WHERE AppointmentAriaSer = 9999998';
-//Tessa I changed this
+const dbQuery = "call mysql.my_memory();";
+
 
 /******************************
  * Use for POOL connection to MySQL.  Not being used now since

@@ -3,7 +3,7 @@ module.exports = function (appointment) {
   try {
     const scheduledTime = appointment.ScheduledDateTime
     const [last, first] = filter(appointment.AppointmentCode, scheduledTime, appointment.History)
-    //first is undefined so set to scheduledTIME //Did I write this? Tessa 99% sure
+    //first is undefined so set to scheduledTime
     if (last) { // this means the patient was there for the appointment
       const firstTime = first ? first.ArrivalDateTime : scheduledTime
       const lastTime = last.ArrivalDateTime
