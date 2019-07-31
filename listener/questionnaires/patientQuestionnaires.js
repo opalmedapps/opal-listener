@@ -489,10 +489,10 @@ function attachingQuestionnaireAnswers(questionnairesSentToPatient, lang) {
                 }
 
                 // the answer will be '' to denote the case where there is no real answer text, since null and undefined makes qplus give an error
-                if (!rows[i].hasOwnProperty('value') || !rows[i].value || rows[i].value === undefined || rows[i].value === null){
+                if (!rows[i].hasOwnProperty('Answer') || !rows[i].Answer || rows[i].Answer === undefined || rows[i].Answer === null){
                     console.log("QUESTIONNAIRE ANSWERS in 1st for loop, 2nd if ======================================================");
 
-                    rows[i].value = '';
+                    rows[i].Answer = '';
                 }
 
                 answersQuestionnaires[rows[i].QuestionnaireSerNum].push(rows[i]);
@@ -843,6 +843,7 @@ function inputAnswer(questionnaireId, answer, languageId, patientId, dateComplet
                     // the front-end send an array inside answer.Answer each containing an answer
                     console.log("------------ in inputAnswer, in checkbox case --------------\n", answerId, answer.questionId, answer.Answer);
 
+                    // sometimes the front end does not send in the array format
                     if (!(answer.Answer instanceof Array)){
                         console.log("------------ in inputAnswer, in checkbox case, error: answer.Answer is not an array --------------\n");
 
@@ -852,8 +853,13 @@ function inputAnswer(questionnaireId, answer, languageId, patientId, dateComplet
                     console.log("------------ in inputAnswer, in checkbox case --------------\n", answerId, answer.questionId, answer.Answer);
 
                     for (var i = 0; i < answer.Answer.length; i++){
-                        console.log("------------ in inputAnswer, in checkbox case loop--------------\n", answerId, answer.questionId, answer.Answer[i]);
-                        promiseArray.push(promisifyQuery(insertCheckbox, [answerId, answer.questionId, answer.Answer[i]]));
+                        console.log("------------ in inputAnswer, in checkbox case loop--------------\n", answerId, answer.questionId, answer.Answer[i], typeof answer.Answer[i]);
+
+                        if (answer.Answer[i] !== undefined && answer.Answer[i] && typeof answer.Answer[i] !== "undefined" && answer.Answer[i] !== 'undefined' && answer.Answer[i] !== null){
+                            console.log("------------ in inputAnswer, in checkbox case loop, if statement --------------\n", answerId, answer.questionId, answer.Answer[i]);
+                            promiseArray.push(promisifyQuery(insertCheckbox, [answerId, answer.questionId, answer.Answer[i]]));
+                        }
+
                     }
 
                     break;
@@ -879,7 +885,7 @@ function inputAnswer(questionnaireId, answer, languageId, patientId, dateComplet
 
         console.log("------------ in inputAnswer, after case switching and before q.all --------------\n");
 
-        return q.all(promiseArray)
+        return q.all(promiseArray);
     }).then(function(result){
 
         console.log("------------ in inputAnswer, before resolve --------------\n");
