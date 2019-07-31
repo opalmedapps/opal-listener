@@ -19,7 +19,7 @@ module.exports = function (usersAppointments) {
           if (dateAppointments.length > 1) {
             cleanupHistory(dateAppointments, dateAppointmentsObj)
             for (const appointmentId of dateAppointments) {
-              const appointment = dateAppointmentsObj[appointmentId] //Tessa Change TODO
+              const appointment = dateAppointmentsObj[appointmentId]
               appointment.Timestamps = bottomTopApproach(appointment)
               if (typeof appointment.Timestamps == null)
               {
@@ -37,8 +37,6 @@ module.exports = function (usersAppointments) {
       }
       resolve(usersAppointments)
     } catch (e) {
-      //TESSA
-      //replacing reject(e)
       var finalResult = []
       resolve(finalResult)
     }

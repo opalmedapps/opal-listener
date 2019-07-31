@@ -15,11 +15,6 @@ function onDataReady (cb, appointmentType, scheduledDay, scheduledHour, schedule
   return (sets) => cb({data: {delays: JSON.stringify({sets, appointmentType, scheduledDay, scheduledHour, scheduledMinutes})}})
 }
 
-function auxFunction(sets){
-    return new Promise((resolve)=>{
-        resolve(sets)
-    })
-}
 
 module.exports = function (requestObject) {
     runSqlQuery(opalDbQueries.createTable())
