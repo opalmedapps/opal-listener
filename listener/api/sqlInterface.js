@@ -65,9 +65,9 @@ const requestMappings =
             numberOfLastUpdated: 1
         },
         'Questionnaires': {
-            sql: queries.getPatientSerNumAndLanguage(), //patientQuestionnaireTableFields(), // getPatientSerNumAndLanguage(),
+            sql: queries.getPatientSerNumAndLanguage(),
             numberOfLastUpdated: 2,
-            processFunction: exports.getQuestionnaires //questionnaires.getPatientQuestionnaires
+            processFunction: exports.getQuestionnaires
         },
         'Appointments': {
             sql: queries.patientAppointmentsTableFields(),
