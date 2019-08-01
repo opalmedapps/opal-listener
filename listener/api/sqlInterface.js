@@ -717,18 +717,10 @@ exports.inputQuestionnaireAnswers = function(requestObject) {
         throw new Error('Error inputting questionnaire answers: Lack of required parameters');
     }
 
-    console.log("------------ in inputQuestionnaireAnswers, check input questionnaireDBSerNum --------------\n", parameters.QuestionnaireDBSerNum, typeof(parameters.QuestionnaireDBSerNum)); // string
-    console.log("------------ in inputQuestionnaireAnswers, check input answer --------------\n", parameters.Answers, typeof(parameters.Answers));
-    // Answer: string, QuestionType: string, QuestionnaireQuestionSerNum: string;   object
-    console.log("------------ in inputQuestionnaireAnswers, check input dateCompleted --------------\n", parameters.DateCompleted, typeof(parameters.DateCompleted)); // string
-    console.log("------------ in inputQuestionnaireAnswers, check input CompletedFlag --------------\n", parameters.CompletedFlag, typeof(parameters.CompletedFlag)); // string
-
     // check input: the questionnaire should be completed to send answer to the DB
     if (!parameters.hasOwnProperty('CompletedFlag') || (parameters.CompletedFlag !== 1 && parameters.CompletedFlag !== '1')){
         throw new Error('Error inputting questionnaire answers: The questionnaire has not been completed');
     }
-
-    console.log("------------ in inputQuestionnaireAnswers, check input Language --------------\n");
 
     // the following query is simply for getting the language from the opalDB, there is no other use of it.
     // But since there might be the possibility of the front end not sending any language, this is necessary
@@ -770,11 +762,9 @@ exports.inputQuestionnaireAnswers = function(requestObject) {
                 throw new Error('Error inputting questionnaire answers: Cannot find patientSerNum in OpalDB');
             }
 
-            console.log("------------ in inputQuestionnaireAnswers, before questionnaires.inputQuestionnaireAnswers --------------\n");
             return questionnaires.inputQuestionnaireAnswers(parameters, appVersion, queryRows[0].PatientSerNum);
 
         }).then(function(){
-            console.log("------------ in inputQuestionnaireAnswers, before marking completed in opalDB --------------\n");
 
             // mark, in opalDB.Questionnaire, that this particular questionnaire is completed
             return exports.runSqlQuery(queries.updateQuestionnaireStatus(), [parameters.CompletedFlag, parameters.DateCompleted, parameters.QuestionnaireSerNum]);
@@ -1376,12 +1366,8 @@ exports.getQuestionnaires = function(requestObject){
         }
     }
 
-    logger.log('debug', "******** in getQuestionnaires: ***********\n" + JSON.stringify(requestObject));
-    console.log("what does requestObject look like: \n", requestObject);
-
     exports.runSqlQuery(queries.getPatientSerNumAndLanguage(), [requestObject.UserID, null, null])
         .then(function (queryRows) {
-            logger.log('debug', "******** in getQuestionnaires, calling getPatientQuestionnaires: ***********\n" + JSON.stringify(queryRows));
             return questionnaires.getPatientQuestionnaires(queryRows,lang);
         })
         .then(function (result) {
@@ -1543,9 +1529,6 @@ function mapRefreshedDataToNotifications(results, notifications) {
 }
 
 function createQuestionnaireNotificationObject(patient_questionnaires, raw_questionnaires, resultsArray){
-
-    console.log("------------- patient_questionnaires: -------------\n", patient_questionnaires);
-    console.log("------------- raw_questionnaires: --------------\n", raw_questionnaires);
 
     // Iterate through refreshed questionnaire data by serNum
     Object.keys(patient_questionnaires).map(ser => {
