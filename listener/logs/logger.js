@@ -33,7 +33,7 @@ winston.configure({
         // Store all info events and higher to the opal.log file
         new (winston.transports.File)({
             filename: './logs/opal-info.log',
-            level: 'debug',
+            level: 'info',
             json: true,
             timestamp: true
         })

@@ -29,9 +29,6 @@ const cp                = require('child_process');
 
 const FIREBASE_DEBUG = !!process.env.FIREBASE_DEBUG;
 
-
-
-
 /*********************************************
  * INITIALIZE
  *********************************************/
@@ -110,7 +107,6 @@ function listenForRequest(requestType){
  * @param snapshot
  */
 function handleRequest(requestType, snapshot){
-    console.log("This is the requestType: ", requestType)
     logger.log('debug', 'Handling request');
 
     const headers = {key: snapshot.key, objectRequest: snapshot.val()};
@@ -580,8 +576,6 @@ function spawnHeartBeatDB(){
             heartBeatDB = cp.fork(`${__dirname}/cron/heartBeatDB.js`);
         }
     });
-
-
 
     process.on('exit', function () {
         heartBeatDB.kill();
