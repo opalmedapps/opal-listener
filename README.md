@@ -1,5 +1,5 @@
 # opal-listener
-This is the Opal app's backend listener that sits between Firebase and OpalDB. This branch is based on "PreProd", by @yickmo.
+This is the Opal app's backend listener that sits between Firebase and OpalDB.
 
 ## Getting Started
 
