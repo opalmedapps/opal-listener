@@ -2,7 +2,7 @@ var exports=module.exports={};
 //Get Patient table information for a particular patient
 exports.patientTableFields=function()
 {
-    return "SELECT Patient.PatientSerNum,Patient.FirstName, Patient.LastName, Patient.TelNum, Patient.PatientId, Patient.Email, Patient.Alias, Patient.Language, Patient.EnableSMS,Patient.ProfileImage, Patient.SSN, Patient.AccessLevel FROM Patient, Users WHERE Users.Username LIKE ? AND Users.UserTypeSerNum=Patient.PatientSerNum AND Patient.LastUpdated > ?;";
+    return "SELECT Patient.PatientSerNum, Patient.TestUser, Patient.FirstName, Patient.LastName, Patient.TelNum, Patient.PatientId, Patient.Email, Patient.Alias, Patient.Language, Patient.EnableSMS,Patient.ProfileImage, Patient.SSN, Patient.AccessLevel FROM Patient, Users WHERE Users.Username LIKE ? AND Users.UserTypeSerNum=Patient.PatientSerNum AND Patient.LastUpdated > ?"
 };
 
 exports.patientDoctorTableFields=function()
@@ -43,6 +43,7 @@ exports.patientAppointmentsTableFields=function()
                   "Appt.ScheduledStartTime, " +
                   "Appt.ScheduledEndTime, " +
                   "Appt.Checkin, " +
+                  "Appt.SourceDatabaseSerNum, " +
                   "Appt.AppointmentAriaSer, " +
                   "Appt.ReadStatus, " +
                   "R.ResourceName, " +
