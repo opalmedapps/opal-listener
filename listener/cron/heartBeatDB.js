@@ -47,7 +47,6 @@ const request = {
  ******************************/
 const dbQuery = "call mysql.my_memory();";
 
-
 /******************************
  * Use for POOL connection to MySQL.  Not being used now since
  * this is a simple query to get the stats of MySQL, but might be used in the future
@@ -91,7 +90,7 @@ logger.log('info','Initialize SQL configuration');
 /**
  * START THE HEARTBEAT DB
  */
-//init();
+init();
 
 
 //////////////////////////////////////////////////////////////////////////
@@ -110,7 +109,7 @@ function init(){
 
 	setInterval(() => {
         startHeartBeatDB()
-    }, 60000);
+    }, 600000);
 }
 
 /**
