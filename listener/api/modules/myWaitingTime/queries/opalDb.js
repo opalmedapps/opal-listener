@@ -6,7 +6,7 @@ const _default = {
       , FirstCheckinTime datetime NOT NULL COMMENT 'First patients check-in in the hospital.'
       , ScheduledTime datetime NOT NULL COMMENT 'Appointments scheduled time.'
       , ActualStartTime datetime NOT NULL COMMENT 'The actual time the appointment really started.'
-      , LastUpdate datetime NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
+      , LastUpdate timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
       , PRIMARY KEY (PatientSerNum, AppointmentSerNum)
       , FOREIGN KEY (PatientSerNum) REFERENCES Patient(PatientSerNum)
       , FOREIGN KEY (AppointmentSerNum) REFERENCES Appointment(AppointmentSerNum)
