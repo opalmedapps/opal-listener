@@ -29,6 +29,7 @@ function addStart(data, appointment){
                 var timestamp = date.getTime() / 1000
                 obj.ActualStartDate = timestamp
                 finalResult[0] = obj
+                console.log("finalResults: ", finalResult)
             return finalResult
         } else {
             var finalResult = []

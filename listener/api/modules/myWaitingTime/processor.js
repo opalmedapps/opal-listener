@@ -15,6 +15,9 @@ function getProcessor (source) {
 
 module.exports = function (patientId) {
   return function ([cache, newAppointments]) {
+    console.log("cache: ", cache)
+    console.log("newAppointments: ", newAppointments)
+
     return new Promise((resolve, reject) => {
       if (newAppointments && newAppointments.length > 0) {
         const promises = []
@@ -31,6 +34,7 @@ module.exports = function (patientId) {
             for (const processedAppointments of userProcessedAppointments) {
               for (const processedAppointment of processedAppointments) {
                 timestamps.unshift(processedAppointment)
+                console.log("processedAppointment: ", processedAppointment)
                 runSqlQuery(opalDbQueries.registerTimestamps(patientId, processedAppointment.AppointmentSerNum, processedAppointment.FirstCheckinTime, processedAppointment.ScheduledTime, processedAppointment.ActualStartTime))
               }
             }
@@ -43,6 +47,7 @@ module.exports = function (patientId) {
               }
             }
             for (const timestamp of timestamps) {
+              console.log("timestamp: ", timestamp)
               const firstCheckinTime = new Date(timestamp.FirstCheckinTime * 1000)
               const scheduledTime = new Date(timestamp.ScheduledTime * 1000)
               const actualStartTime = new Date(timestamp.ActualStartTime * 1000)
