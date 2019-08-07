@@ -16,6 +16,15 @@
 		]
 
 	},
+	"FU-BCG": {
+		"waitingRooms": [
+			".*waiting(?:\\s?room)?.*"
+		],
+		"examRooms": [
+			".*tx(?:\\s?area)?.*"
+		]
+
+	},
 	"TXCHM": {
 		"waitingRooms": [
 			".*waiting(?:\\s?room)?.*"
