@@ -3,6 +3,7 @@ module.exports = function (appointment) {
   try {
     const scheduledTime = appointment.ScheduledDateTime
     const [last, first] = filter(appointment.AppointmentCode, scheduledTime, appointment.History)
+    console.log("[last, first]: ", [last, first])
     //first is undefined so set to scheduledTime
     if (last) { // this means the patient was there for the appointment
       const firstTime = first ? first.ArrivalDateTime : scheduledTime
@@ -15,6 +16,7 @@ module.exports = function (appointment) {
       }
     }
   } catch (e) {
+    console.log("catching error 3")
     throw e
   }
   return null

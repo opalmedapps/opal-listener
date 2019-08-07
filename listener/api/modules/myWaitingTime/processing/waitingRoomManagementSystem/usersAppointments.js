@@ -29,11 +29,13 @@ function formatAppointment (users, group, index, max, onDone) {
   const scheduledDate = getDate(ScheduledDateTime)
   const appointmentDate = formatDate(scheduledDate)
   const appointments = user[appointmentDate] || (user[appointmentDate] = {})
+  console.log("appointments: ", appointments)
   const appointmentObj = appointments[AppointmentSerNum] || (appointments[AppointmentSerNum] = { AppointmentCode, MaxPatientLocationRevCount: PatientLocationRevCount, ScheduledDateTime: scheduledDate, History: [] })
   if (PatientLocationRevCount > appointmentObj.MaxPatientLocationRevCount) {
     appointmentObj.MaxPatientLocationRevCount = PatientLocationRevCount
   }
   appointmentObj.History.unshift({ PatientLocationRevCount, ArrivalDateTime: getDate(ArrivalDateTime), ActualStartDate: getDate(ActualStartDate), CheckinVenueName })
+  console.log("appointmentObj.History: ", appointmentObj.History)
   formatAppointment(users, group, index + 1, max, onDone)
 }
 
