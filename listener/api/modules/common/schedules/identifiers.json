@@ -6,5 +6,1859 @@
 		"examRooms": [
 			".*tx(?:\\s?area)?.*"
 		]
+	},
+	"ADD-ON": {
+		"waitingRooms": [
+			".*waiting(?:\\s?room)?.*"
+		],
+		"examRooms": [
+			".*tx(?:\\s?area)?.*"
+		]
+
+	},
+	"TXCHM": {
+		"waitingRooms": [
+			".*waiting(?:\\s?room)?.*"
+		],
+		"examRooms": [
+			".*tx(?:\\s?area)?.*"
+		]
+
+	},
+	"TX-V": {
+		"waitingRooms": [
+			".*waiting(?:\\s?room)?.*"
+		],
+		"examRooms": [
+			".*tx(?:\\s?area)?.*"
+		]
+
+	},
+	"BCG-TX-V": {
+		"waitingRooms": [
+			".*waiting(?:\\s?room)?.*"
+		],
+		"examRooms": [
+			".*tx(?:\\s?area)?.*"
+		]
+
+	},
+	"GYNONC-V": {
+		"waitingRooms": [
+			".*waiting(?:\\s?room)?.*"
+		],
+		"examRooms": [
+			".*tx(?:\\s?area)?.*"
+		]
+
+	},
+	"NSBLD": {
+		"waitingRooms": [
+			".*waiting(?:\\s?room)?.*"
+		],
+		"examRooms": [
+			".*tx(?:\\s?area)?.*"
+		]
+
+	},
+	"SEBAG-V": {
+		"waitingRooms": [
+			".*waiting(?:\\s?room)?.*"
+		],
+		"examRooms": [
+			".*tx(?:\\s?area)?.*"
+		]
+
+	},
+	"MIHA-BREAST": {
+		"waitingRooms": [
+			".*waiting(?:\\s?room)?.*"
+		],
+		"examRooms": [
+			".*tx(?:\\s?area)?.*"
+		]
+
+	},
+	"ALCI-SARCO": {
+		"waitingRooms": [
+			".*waiting(?:\\s?room)?.*"
+		],
+		"examRooms": [
+			".*tx(?:\\s?area)?.*"
+		]
+
+	},
+	"TURC-V": {
+		"waitingRooms": [
+			".*waiting(?:\\s?room)?.*"
+		],
+		"examRooms": [
+			".*tx(?:\\s?area)?.*"
+		]
+
+	},
+	"LANE-V": {
+		"waitingRooms": [
+			".*waiting(?:\\s?room)?.*"
+		],
+		"examRooms": [
+			".*tx(?:\\s?area)?.*"
+		]
+
+	},
+	"LEGLC-BREAST": {
+		"waitingRooms": [
+			".*waiting(?:\\s?room)?.*"
+		],
+		"examRooms": [
+			".*tx(?:\\s?area)?.*"
+		]
+
+	},
+	"VANHU-URO": {
+		"waitingRooms": [
+			".*waiting(?:\\s?room)?.*"
+		],
+		"examRooms": [
+			".*tx(?:\\s?area)?.*"
+		]
+
+	},
+	"THIR-BREAST": {
+		"waitingRooms": [
+			".*waiting(?:\\s?room)?.*"
+		],
+		"examRooms": [
+			".*tx(?:\\s?area)?.*"
+		]
+
+	},
+	"BOUG-BREAST": {
+		"waitingRooms": [
+			".*waiting(?:\\s?room)?.*"
+		],
+		"examRooms": [
+			".*tx(?:\\s?area)?.*"
+		]
+
+	},
+	"RAJA-CRC": {
+		"waitingRooms": [
+			".*waiting(?:\\s?room)?.*"
+		],
+		"examRooms": [
+			".*tx(?:\\s?area)?.*"
+		]
+
+	},
+	"OWENS-LUNG": {
+		"waitingRooms": [
+			".*waiting(?:\\s?room)?.*"
+		],
+		"examRooms": [
+			".*tx(?:\\s?area)?.*"
+		]
+
+	},
+	"HING-CRC": {
+		"waitingRooms": [
+			".*waiting(?:\\s?room)?.*"
+		],
+		"examRooms": [
+			".*tx(?:\\s?area)?.*"
+		]
+
+	},
+	"COUR-V": {
+		"waitingRooms": [
+			".*waiting(?:\\s?room)?.*"
+		],
+		"examRooms": [
+			".*tx(?:\\s?area)?.*"
+		]
+
+	},
+	"SOLY-THROM": {
+		"waitingRooms": [
+			".*waiting(?:\\s?room)?.*"
+		],
+		"examRooms": [
+			".*tx(?:\\s?area)?.*"
+		]
+
+	},
+	"VANHU-CRC": {
+		"waitingRooms": [
+			".*waiting(?:\\s?room)?.*"
+		],
+		"examRooms": [
+			".*tx(?:\\s?area)?.*"
+		]
+
+	},
+	"MIHA-MELA": {
+		"waitingRooms": [
+			".*waiting(?:\\s?room)?.*"
+		],
+		"examRooms": [
+			".*tx(?:\\s?area)?.*"
+		]
+
+	},
+	"DAVI-V": {
+		"waitingRooms": [
+			".*waiting(?:\\s?room)?.*"
+		],
+		"examRooms": [
+			".*tx(?:\\s?area)?.*"
+		]
+
+	},
+	"CHAUD-HPB": {
+		"waitingRooms": [
+			".*waiting(?:\\s?room)?.*"
+		],
+		"examRooms": [
+			".*tx(?:\\s?area)?.*"
+		]
+
+	},
+	"RAJA-URO": {
+		"waitingRooms": [
+			".*waiting(?:\\s?room)?.*"
+		],
+		"examRooms": [
+			".*tx(?:\\s?area)?.*"
+		]
+
+	},
+	"TANG-V": {
+		"waitingRooms": [
+			".*waiting(?:\\s?room)?.*"
+		],
+		"examRooms": [
+			".*tx(?:\\s?area)?.*"
+		]
+
+	},
+	"STOR-V": {
+		"waitingRooms": [
+			".*waiting(?:\\s?room)?.*"
+		],
+		"examRooms": [
+			".*tx(?:\\s?area)?.*"
+		]
+
+	},
+	"HOW-V": {
+		"waitingRooms": [
+			".*waiting(?:\\s?room)?.*"
+		],
+		"examRooms": [
+			".*tx(?:\\s?area)?.*"
+		]
+
+	},
+	"POPR-V": {
+		"waitingRooms": [
+			".*waiting(?:\\s?room)?.*"
+		],
+		"examRooms": [
+			".*tx(?:\\s?area)?.*"
+		]
+
+	},
+	"APRI-V": {
+		"waitingRooms": [
+			".*waiting(?:\\s?room)?.*"
+		],
+		"examRooms": [
+			".*tx(?:\\s?area)?.*"
+		]
+
+	},
+	"FLEI-V": {
+		"waitingRooms": [
+			".*waiting(?:\\s?room)?.*"
+		],
+		"examRooms": [
+			".*tx(?:\\s?area)?.*"
+		]
+
+	},
+	"ODCNRS": {
+		"waitingRooms": [
+			".*waiting(?:\\s?room)?.*"
+		],
+		"examRooms": [
+			".*tx(?:\\s?area)?.*"
+		]
+
+	},
+	"OFIAL-LUNG": {
+		"waitingRooms": [
+			".*waiting(?:\\s?room)?.*"
+		],
+		"examRooms": [
+			".*tx(?:\\s?area)?.*"
+		]
+
+	},
+	"MELA-V": {
+		"waitingRooms": [
+			".*waiting(?:\\s?room)?.*"
+		],
+		"examRooms": [
+			".*tx(?:\\s?area)?.*"
+		]
+
+	},
+	"KAED-V": {
+		"waitingRooms": [
+			".*waiting(?:\\s?room)?.*"
+		],
+		"examRooms": [
+			".*tx(?:\\s?area)?.*"
+		]
+
+	},
+	"KASS-V": {
+		"waitingRooms": [
+			".*waiting(?:\\s?room)?.*"
+		],
+		"examRooms": [
+			".*tx(?:\\s?area)?.*"
+		]
+
+	},
+	"ASSEL-CRC": {
+		"waitingRooms": [
+			".*waiting(?:\\s?room)?.*"
+		],
+		"examRooms": [
+			".*tx(?:\\s?area)?.*"
+		]
+
+	},
+	"ASSEL-BREAST": {
+		"waitingRooms": [
+			".*waiting(?:\\s?room)?.*"
+		],
+		"examRooms": [
+			".*tx(?:\\s?area)?.*"
+		]
+
+	},
+	"INFO-ONC": {
+		"waitingRooms": [
+			".*waiting(?:\\s?room)?.*"
+		],
+		"examRooms": [
+			".*tx(?:\\s?area)?.*"
+		]
+
+	},
+	"BLAKE-V": {
+		"waitingRooms": [
+			".*waiting(?:\\s?room)?.*"
+		],
+		"examRooms": [
+			".*tx(?:\\s?area)?.*"
+		]
+
+	},
+	"METRA-HPB": {
+		"waitingRooms": [
+			".*waiting(?:\\s?room)?.*"
+		],
+		"examRooms": [
+			".*tx(?:\\s?area)?.*"
+		]
+
+	},
+	"ONCMA-V": {
+		"waitingRooms": [
+			".*waiting(?:\\s?room)?.*"
+		],
+		"examRooms": [
+			".*tx(?:\\s?area)?.*"
+		]
+
+	},
+	"OHRN8": {
+		"waitingRooms": [
+			".*waiting(?:\\s?room)?.*"
+		],
+		"examRooms": [
+			".*tx(?:\\s?area)?.*"
+		]
+
+	},
+	"TREM-V": {
+		"waitingRooms": [
+			".*waiting(?:\\s?room)?.*"
+		],
+		"examRooms": [
+			".*tx(?:\\s?area)?.*"
+		]
+
+	},
+	"URO-RES-V": {
+		"waitingRooms": [
+			".*waiting(?:\\s?room)?.*"
+		],
+		"examRooms": [
+			".*tx(?:\\s?area)?.*"
+		]
+
+	},
+	"MEGU-COLO-V": {
+		"waitingRooms": [
+			".*waiting(?:\\s?room)?.*"
+		],
+		"examRooms": [
+			".*tx(?:\\s?area)?.*"
+		]
+
+	},
+	"OHRN11": {
+		"waitingRooms": [
+			".*waiting(?:\\s?room)?.*"
+		],
+		"examRooms": [
+			".*tx(?:\\s?area)?.*"
+		]
+
+	},
+	"ALCI-UGI": {
+		"waitingRooms": [
+			".*waiting(?:\\s?room)?.*"
+		],
+		"examRooms": [
+			".*tx(?:\\s?area)?.*"
+		]
+
+	},
+	"OHRN9": {
+		"waitingRooms": [
+			".*waiting(?:\\s?room)?.*"
+		],
+		"examRooms": [
+			".*tx(?:\\s?area)?.*"
+		]
+
+	},
+	"BARK-V": {
+		"waitingRooms": [
+			".*waiting(?:\\s?room)?.*"
+		],
+		"examRooms": [
+			".*tx(?:\\s?area)?.*"
+		]
+
+	},
+	"OHRN7": {
+		"waitingRooms": [
+			".*waiting(?:\\s?room)?.*"
+		],
+		"examRooms": [
+			".*tx(?:\\s?area)?.*"
+		]
+
+	},
+	"TRPL-V": {
+		"waitingRooms": [
+			".*waiting(?:\\s?room)?.*"
+		],
+		"examRooms": [
+			".*tx(?:\\s?area)?.*"
+		]
+
+	},
+	"MEGU-BRST-V": {
+		"waitingRooms": [
+			".*waiting(?:\\s?room)?.*"
+		],
+		"examRooms": [
+			".*tx(?:\\s?area)?.*"
+		]
+
+	},
+	"HING-BREAST": {
+		"waitingRooms": [
+			".*waiting(?:\\s?room)?.*"
+		],
+		"examRooms": [
+			".*tx(?:\\s?area)?.*"
+		]
+
+	},
+	"THIR-CRC": {
+		"waitingRooms": [
+			".*waiting(?:\\s?room)?.*"
+		],
+		"examRooms": [
+			".*tx(?:\\s?area)?.*"
+		]
+
+	},
+	"SHUS-V": {
+		"waitingRooms": [
+			".*waiting(?:\\s?room)?.*"
+		],
+		"examRooms": [
+			".*tx(?:\\s?area)?.*"
+		]
+
+	},
+	"KAVP-HEPA": {
+		"waitingRooms": [
+			".*waiting(?:\\s?room)?.*"
+		],
+		"examRooms": [
+			".*tx(?:\\s?area)?.*"
+		]
+
+	},
+	"HIRS-LUNG": {
+		"waitingRooms": [
+			".*waiting(?:\\s?room)?.*"
+		],
+		"examRooms": [
+			".*tx(?:\\s?area)?.*"
+		]
+
+	},
+	"INFO-RADONC": {
+		"waitingRooms": [
+			".*waiting(?:\\s?room)?.*"
+		],
+		"examRooms": [
+			".*tx(?:\\s?area)?.*"
+		]
+
+	},
+	"CABR-HCC-V": {
+		"waitingRooms": [
+			".*waiting(?:\\s?room)?.*"
+		],
+		"examRooms": [
+			".*tx(?:\\s?area)?.*"
+		]
+
+	},
+	"SEGU-V": {
+		"waitingRooms": [
+			".*waiting(?:\\s?room)?.*"
+		],
+		"examRooms": [
+			".*tx(?:\\s?area)?.*"
+		]
+
+	},
+	"TCHER-HCC": {
+		"waitingRooms": [
+			".*waiting(?:\\s?room)?.*"
+		],
+		"examRooms": [
+			".*tx(?:\\s?area)?.*"
+		]
+
+	},
+	"TRPLNR": {
+		"waitingRooms": [
+			".*waiting(?:\\s?room)?.*"
+		],
+		"examRooms": [
+			".*tx(?:\\s?area)?.*"
+		]
+
+	},
+	"LCC-V": {
+		"waitingRooms": [
+			".*waiting(?:\\s?room)?.*"
+		],
+		"examRooms": [
+			".*tx(?:\\s?area)?.*"
+		]
+
+	},
+	"GOUL-V": {
+		"waitingRooms": [
+			".*waiting(?:\\s?room)?.*"
+		],
+		"examRooms": [
+			".*tx(?:\\s?area)?.*"
+		]
+
+	},
+	"VANHU-UGI": {
+		"waitingRooms": [
+			".*waiting(?:\\s?room)?.*"
+		],
+		"examRooms": [
+			".*tx(?:\\s?area)?.*"
+		]
+
+	},
+	"METE-CRC": {
+		"waitingRooms": [
+			".*waiting(?:\\s?room)?.*"
+		],
+		"examRooms": [
+			".*tx(?:\\s?area)?.*"
+		]
+
+	},
+	"ROUT-V": {
+		"waitingRooms": [
+			".*waiting(?:\\s?room)?.*"
+		],
+		"examRooms": [
+			".*tx(?:\\s?area)?.*"
+		]
+
+	},
+	"ALCI-CRC": {
+		"waitingRooms": [
+			".*waiting(?:\\s?room)?.*"
+		],
+		"examRooms": [
+			".*tx(?:\\s?area)?.*"
+		]
+
+	},
+	"ONCABDAL-V": {
+		"waitingRooms": [
+			".*waiting(?:\\s?room)?.*"
+		],
+		"examRooms": [
+			".*tx(?:\\s?area)?.*"
+		]
+
+	},
+	"SEGU-THROM": {
+		"waitingRooms": [
+			".*waiting(?:\\s?room)?.*"
+		],
+		"examRooms": [
+			".*tx(?:\\s?area)?.*"
+		]
+
+	},
+	"METE-BREAST": {
+		"waitingRooms": [
+			".*waiting(?:\\s?room)?.*"
+		],
+		"examRooms": [
+			".*tx(?:\\s?area)?.*"
+		]
+
+	},
+	"ZOGO-HCC": {
+		"waitingRooms": [
+			".*waiting(?:\\s?room)?.*"
+		],
+		"examRooms": [
+			".*tx(?:\\s?area)?.*"
+		]
+
+	},
+	"OHRN10": {
+		"waitingRooms": [
+			".*waiting(?:\\s?room)?.*"
+		],
+		"examRooms": [
+			".*tx(?:\\s?area)?.*"
+		]
+
+	},
+	"LUNGRVH8-V": {
+		"waitingRooms": [
+			".*waiting(?:\\s?room)?.*"
+		],
+		"examRooms": [
+			".*tx(?:\\s?area)?.*"
+		]
+
+	},
+	"SALA-V2": {
+		"waitingRooms": [
+			".*waiting(?:\\s?room)?.*"
+		],
+		"examRooms": [
+			".*tx(?:\\s?area)?.*"
+		]
+
+	},
+	"SARCORVH-V": {
+		"waitingRooms": [
+			".*waiting(?:\\s?room)?.*"
+		],
+		"examRooms": [
+			".*tx(?:\\s?area)?.*"
+		]
+
+	},
+	"ONCSS8V": {
+		"waitingRooms": [
+			".*waiting(?:\\s?room)?.*"
+		],
+		"examRooms": [
+			".*tx(?:\\s?area)?.*"
+		]
+
+	},
+	"HEPBRVH-V": {
+		"waitingRooms": [
+			".*waiting(?:\\s?room)?.*"
+		],
+		"examRooms": [
+			".*tx(?:\\s?area)?.*"
+		]
+
+	},
+	"TX2-V": {
+		"waitingRooms": [
+			".*waiting(?:\\s?room)?.*"
+		],
+		"examRooms": [
+			".*tx(?:\\s?area)?.*"
+		]
+
+	},
+	"UGIRVH-V": {
+		"waitingRooms": [
+			".*waiting(?:\\s?room)?.*"
+		],
+		"examRooms": [
+			".*tx(?:\\s?area)?.*"
+		]
+
+	},
+	"ZOGO-HPB-V": {
+		"waitingRooms": [
+			".*waiting(?:\\s?room)?.*"
+		],
+		"examRooms": [
+			".*tx(?:\\s?area)?.*"
+		]
+
+	},
+	"GYNERVH2-V": {
+		"waitingRooms": [
+			".*waiting(?:\\s?room)?.*"
+		],
+		"examRooms": [
+			".*tx(?:\\s?area)?.*"
+		]
+
+	},
+	"TURC-V2": {
+		"waitingRooms": [
+			".*waiting(?:\\s?room)?.*"
+		],
+		"examRooms": [
+			".*tx(?:\\s?area)?.*"
+		]
+
+	},
+	"ORTHO-RNFL": {
+		"waitingRooms": [
+			".*waiting(?:\\s?room)?.*"
+		],
+		"examRooms": [
+			".*tx(?:\\s?area)?.*"
+		]
+
+	},
+	"LUNGRVH5-V": {
+		"waitingRooms": [
+			".*waiting(?:\\s?room)?.*"
+		],
+		"examRooms": [
+			".*tx(?:\\s?area)?.*"
+		]
+
+	},
+	"HNRVH-V": {
+		"waitingRooms": [
+			".*waiting(?:\\s?room)?.*"
+		],
+		"examRooms": [
+			".*tx(?:\\s?area)?.*"
+		]
+
+	},
+	"URORVH5-V": {
+		"waitingRooms": [
+			".*waiting(?:\\s?room)?.*"
+		],
+		"examRooms": [
+			".*tx(?:\\s?area)?.*"
+		]
+
+	},
+	"HEMARVH1-V": {
+		"waitingRooms": [
+			".*waiting(?:\\s?room)?.*"
+		],
+		"examRooms": [
+			".*tx(?:\\s?area)?.*"
+		]
+
+	},
+	"DIETONC2": {
+		"waitingRooms": [
+			".*waiting(?:\\s?room)?.*"
+		],
+		"examRooms": [
+			".*tx(?:\\s?area)?.*"
+		]
+
+	},
+	"COLORVH2-V": {
+		"waitingRooms": [
+			".*waiting(?:\\s?room)?.*"
+		],
+		"examRooms": [
+			".*tx(?:\\s?area)?.*"
+		]
+
+	},
+	"LUNGRVH1-V": {
+		"waitingRooms": [
+			".*waiting(?:\\s?room)?.*"
+		],
+		"examRooms": [
+			".*tx(?:\\s?area)?.*"
+		]
+
+	},
+	"MELA-V2": {
+		"waitingRooms": [
+			".*waiting(?:\\s?room)?.*"
+		],
+		"examRooms": [
+			".*tx(?:\\s?area)?.*"
+		]
+
+	},
+	"BCRVH5-V": {
+		"waitingRooms": [
+			".*waiting(?:\\s?room)?.*"
+		],
+		"examRooms": [
+			".*tx(?:\\s?area)?.*"
+		]
+
+	},
+	"WEBER": {
+		"waitingRooms": [
+			".*waiting(?:\\s?room)?.*"
+		],
+		"examRooms": [
+			".*tx(?:\\s?area)?.*"
+		]
+
+	},
+	"SOLY-V": {
+		"waitingRooms": [
+			".*waiting(?:\\s?room)?.*"
+		],
+		"examRooms": [
+			".*tx(?:\\s?area)?.*"
+		]
+
+	},
+	"WARN-V": {
+		"waitingRooms": [
+			".*waiting(?:\\s?room)?.*"
+		],
+		"examRooms": [
+			".*tx(?:\\s?area)?.*"
+		]
+
+	},
+	"BURM": {
+		"waitingRooms": [
+			".*waiting(?:\\s?room)?.*"
+		],
+		"examRooms": [
+			".*tx(?:\\s?area)?.*"
+		]
+
+	},
+	"ASSEL-HEPA": {
+		"waitingRooms": [
+			".*waiting(?:\\s?room)?.*"
+		],
+		"examRooms": [
+			".*tx(?:\\s?area)?.*"
+		]
+
+	},
+	"R17RVH2-V": {
+		"waitingRooms": [
+			".*waiting(?:\\s?room)?.*"
+		],
+		"examRooms": [
+			".*tx(?:\\s?area)?.*"
+		]
+
+	},
+	"METRA-HPB-V": {
+		"waitingRooms": [
+			".*waiting(?:\\s?room)?.*"
+		],
+		"examRooms": [
+			".*tx(?:\\s?area)?.*"
+		]
+
+	},
+	"LUNGRVH6-V": {
+		"waitingRooms": [
+			".*waiting(?:\\s?room)?.*"
+		],
+		"examRooms": [
+			".*tx(?:\\s?area)?.*"
+		]
+
+	},
+	"METRA-HCC-V": {
+		"waitingRooms": [
+			".*waiting(?:\\s?room)?.*"
+		],
+		"examRooms": [
+			".*tx(?:\\s?area)?.*"
+		]
+
+	},
+	"GYNEONC-V": {
+		"waitingRooms": [
+			".*waiting(?:\\s?room)?.*"
+		],
+		"examRooms": [
+			".*tx(?:\\s?area)?.*"
+		]
+
+	},
+	"DIETONC1": {
+		"waitingRooms": [
+			".*waiting(?:\\s?room)?.*"
+		],
+		"examRooms": [
+			".*tx(?:\\s?area)?.*"
+		]
+
+	},
+	"BCRVH6-V": {
+		"waitingRooms": [
+			".*waiting(?:\\s?room)?.*"
+		],
+		"examRooms": [
+			".*tx(?:\\s?area)?.*"
+		]
+
+	},
+	"BARK-HPB-V": {
+		"waitingRooms": [
+			".*waiting(?:\\s?room)?.*"
+		],
+		"examRooms": [
+			".*tx(?:\\s?area)?.*"
+		]
+
+	},
+	"TREM-V2": {
+		"waitingRooms": [
+			".*waiting(?:\\s?room)?.*"
+		],
+		"examRooms": [
+			".*tx(?:\\s?area)?.*"
+		]
+
+	},
+	"ONCFRAN-V": {
+		"waitingRooms": [
+			".*waiting(?:\\s?room)?.*"
+		],
+		"examRooms": [
+			".*tx(?:\\s?area)?.*"
+		]
+
+	},
+	"VANHU4": {
+		"waitingRooms": [
+			".*waiting(?:\\s?room)?.*"
+		],
+		"examRooms": [
+			".*tx(?:\\s?area)?.*"
+		]
+
+	},
+	"CABR-HCC-V2": {
+		"waitingRooms": [
+			".*waiting(?:\\s?room)?.*"
+		],
+		"examRooms": [
+			".*tx(?:\\s?area)?.*"
+		]
+
+	},
+	"MARTP2": {
+		"waitingRooms": [
+			".*waiting(?:\\s?room)?.*"
+		],
+		"examRooms": [
+			".*tx(?:\\s?area)?.*"
+		]
+
+	},
+	"ONCELKR-V": {
+		"waitingRooms": [
+			".*waiting(?:\\s?room)?.*"
+		],
+		"examRooms": [
+			".*tx(?:\\s?area)?.*"
+		]
+
+	},
+	"HEMARVH2-V": {
+		"waitingRooms": [
+			".*waiting(?:\\s?room)?.*"
+		],
+		"examRooms": [
+			".*tx(?:\\s?area)?.*"
+		]
+
+	},
+	"FOUW-V2": {
+		"waitingRooms": [
+			".*waiting(?:\\s?room)?.*"
+		],
+		"examRooms": [
+			".*tx(?:\\s?area)?.*"
+		]
+
+	},
+	"ONCSS7V": {
+		"waitingRooms": [
+			".*waiting(?:\\s?room)?.*"
+		],
+		"examRooms": [
+			".*tx(?:\\s?area)?.*"
+		]
+
+	},
+	"BERNSM": {
+		"waitingRooms": [
+			".*waiting(?:\\s?room)?.*"
+		],
+		"examRooms": [
+			".*tx(?:\\s?area)?.*"
+		]
+
+	},
+	"LOUT-V": {
+		"waitingRooms": [
+			".*waiting(?:\\s?room)?.*"
+		],
+		"examRooms": [
+			".*tx(?:\\s?area)?.*"
+		]
+
+	},
+	"ORTHGOBD": {
+		"waitingRooms": [
+			".*waiting(?:\\s?room)?.*"
+		],
+		"examRooms": [
+			".*tx(?:\\s?area)?.*"
+		]
+
+	},
+	"JARZ": {
+		"waitingRooms": [
+			".*waiting(?:\\s?room)?.*"
+		],
+		"examRooms": [
+			".*tx(?:\\s?area)?.*"
+		]
+
+	},
+	"CIMBLD": {
+		"waitingRooms": [
+			".*waiting(?:\\s?room)?.*"
+		],
+		"examRooms": [
+			".*tx(?:\\s?area)?.*"
+		]
+
+	},
+	"PALL-V2": {
+		"waitingRooms": [
+			".*waiting(?:\\s?room)?.*"
+		],
+		"examRooms": [
+			".*tx(?:\\s?area)?.*"
+		]
+
+	},
+	"WANCW-V": {
+		"waitingRooms": [
+			".*waiting(?:\\s?room)?.*"
+		],
+		"examRooms": [
+			".*tx(?:\\s?area)?.*"
+		]
+
+	},
+	"TANG-V2": {
+		"waitingRooms": [
+			".*waiting(?:\\s?room)?.*"
+		],
+		"examRooms": [
+			".*tx(?:\\s?area)?.*"
+		]
+
+	},
+	"MEGU-BRST-V2": {
+		"waitingRooms": [
+			".*waiting(?:\\s?room)?.*"
+		],
+		"examRooms": [
+			".*tx(?:\\s?area)?.*"
+		]
+
+	},
+	"MEGU-COLO-V2": {
+		"waitingRooms": [
+			".*waiting(?:\\s?room)?.*"
+		],
+		"examRooms": [
+			".*tx(?:\\s?area)?.*"
+		]
+
+	},
+	"CHAUD-HPB-V": {
+		"waitingRooms": [
+			".*waiting(?:\\s?room)?.*"
+		],
+		"examRooms": [
+			".*tx(?:\\s?area)?.*"
+		]
+
+	},
+	"MGRES1-V": {
+		"waitingRooms": [
+			".*waiting(?:\\s?room)?.*"
+		],
+		"examRooms": [
+			".*tx(?:\\s?area)?.*"
+		]
+
+	},
+	"ONCMARTON-V": {
+		"waitingRooms": [
+			".*waiting(?:\\s?room)?.*"
+		],
+		"examRooms": [
+			".*tx(?:\\s?area)?.*"
+		]
+
+	},
+	"WEBER-V2": {
+		"waitingRooms": [
+			".*waiting(?:\\s?room)?.*"
+		],
+		"examRooms": [
+			".*tx(?:\\s?area)?.*"
+		]
+
+	},
+	"MORR-GYNE": {
+		"waitingRooms": [
+			".*waiting(?:\\s?room)?.*"
+		],
+		"examRooms": [
+			".*tx(?:\\s?area)?.*"
+		]
+
+	},
+	"ZOGO-V": {
+		"waitingRooms": [
+			".*waiting(?:\\s?room)?.*"
+		],
+		"examRooms": [
+			".*tx(?:\\s?area)?.*"
+		]
+
+	},
+	"METRA-HCC": {
+		"waitingRooms": [
+			".*waiting(?:\\s?room)?.*"
+		],
+		"examRooms": [
+			".*tx(?:\\s?area)?.*"
+		]
+
+	},
+	"SALA-V": {
+		"waitingRooms": [
+			".*waiting(?:\\s?room)?.*"
+		],
+		"examRooms": [
+			".*tx(?:\\s?area)?.*"
+		]
+
+	},
+	"DAVID-V": {
+		"waitingRooms": [
+			".*waiting(?:\\s?room)?.*"
+		],
+		"examRooms": [
+			".*tx(?:\\s?area)?.*"
+		]
+
+	},
+	"PALL-V": {
+		"waitingRooms": [
+			".*waiting(?:\\s?room)?.*"
+		],
+		"examRooms": [
+			".*tx(?:\\s?area)?.*"
+		]
+
+	},
+	"MYELOMA-V": {
+		"waitingRooms": [
+			".*waiting(?:\\s?room)?.*"
+		],
+		"examRooms": [
+			".*tx(?:\\s?area)?.*"
+		]
+
+	},
+	"CHAUD-HCC": {
+		"waitingRooms": [
+			".*waiting(?:\\s?room)?.*"
+		],
+		"examRooms": [
+			".*tx(?:\\s?area)?.*"
+		]
+
+	},
+	"CLSCBLD": {
+		"waitingRooms": [
+			".*waiting(?:\\s?room)?.*"
+		],
+		"examRooms": [
+			".*tx(?:\\s?area)?.*"
+		]
+
+	},
+	"ONCSALEH-V": {
+		"waitingRooms": [
+			".*waiting(?:\\s?room)?.*"
+		],
+		"examRooms": [
+			".*tx(?:\\s?area)?.*"
+		]
+
+	},
+	"FOUW-V": {
+		"waitingRooms": [
+			".*waiting(?:\\s?room)?.*"
+		],
+		"examRooms": [
+			".*tx(?:\\s?area)?.*"
+		]
+
+	},
+	"ORIENTRVH": {
+		"waitingRooms": [
+			".*waiting(?:\\s?room)?.*"
+		],
+		"examRooms": [
+			".*tx(?:\\s?area)?.*"
+		]
+
+	},
+	"NUDO-HCC-V": {
+		"waitingRooms": [
+			".*waiting(?:\\s?room)?.*"
+		],
+		"examRooms": [
+			".*tx(?:\\s?area)?.*"
+		]
+
+	},
+	"PRO-RM-CD": {
+		"waitingRooms": [
+			".*waiting(?:\\s?room)?.*"
+		],
+		"examRooms": [
+			".*tx(?:\\s?area)?.*"
+		]
+
+	},
+	"SANTAG": {
+		"waitingRooms": [
+			".*waiting(?:\\s?room)?.*"
+		],
+		"examRooms": [
+			".*tx(?:\\s?area)?.*"
+		]
+
+	},
+	"RADHA": {
+		"waitingRooms": [
+			".*waiting(?:\\s?room)?.*"
+		],
+		"examRooms": [
+			".*tx(?:\\s?area)?.*"
+		]
+
+	},
+	"LENC": {
+		"waitingRooms": [
+			".*waiting(?:\\s?room)?.*"
+		],
+		"examRooms": [
+			".*tx(?:\\s?area)?.*"
+		]
+
+	},
+	"FISH-REG": {
+		"waitingRooms": [
+			".*waiting(?:\\s?room)?.*"
+		],
+		"examRooms": [
+			".*tx(?:\\s?area)?.*"
+		]
+
+	},
+	"BERR2": {
+		"waitingRooms": [
+			".*waiting(?:\\s?room)?.*"
+		],
+		"examRooms": [
+			".*tx(?:\\s?area)?.*"
+		]
+
+	},
+	"TANZC": {
+		"waitingRooms": [
+			".*waiting(?:\\s?room)?.*"
+		],
+		"examRooms": [
+			".*tx(?:\\s?area)?.*"
+		]
+
+	},
+	"BERR": {
+		"waitingRooms": [
+			".*waiting(?:\\s?room)?.*"
+		],
+		"examRooms": [
+			".*tx(?:\\s?area)?.*"
+		]
+
+	},
+	"REIN": {
+		"waitingRooms": [
+			".*waiting(?:\\s?room)?.*"
+		],
+		"examRooms": [
+			".*tx(?:\\s?area)?.*"
+		]
+
+	},
+	"OUEL": {
+		"waitingRooms": [
+			".*waiting(?:\\s?room)?.*"
+		],
+		"examRooms": [
+			".*tx(?:\\s?area)?.*"
+		]
+
+	},
+	"MARI": {
+		"waitingRooms": [
+			".*waiting(?:\\s?room)?.*"
+		],
+		"examRooms": [
+			".*tx(?:\\s?area)?.*"
+		]
+
+	},
+	"BAY": {
+		"waitingRooms": [
+			".*waiting(?:\\s?room)?.*"
+		],
+		"examRooms": [
+			".*tx(?:\\s?area)?.*"
+		]
+
+	},
+	"REIN2": {
+		"waitingRooms": [
+			".*waiting(?:\\s?room)?.*"
+		],
+		"examRooms": [
+			".*tx(?:\\s?area)?.*"
+		]
+
+	},
+	"HARV": {
+		"waitingRooms": [
+			".*waiting(?:\\s?room)?.*"
+		],
+		"examRooms": [
+			".*tx(?:\\s?area)?.*"
+		]
+
+	},
+	"TANZOF": {
+		"waitingRooms": [
+			".*waiting(?:\\s?room)?.*"
+		],
+		"examRooms": [
+			".*tx(?:\\s?area)?.*"
+		]
+
+	},
+	"LACR2": {
+		"waitingRooms": [
+			".*waiting(?:\\s?room)?.*"
+		],
+		"examRooms": [
+			".*tx(?:\\s?area)?.*"
+		]
+
+	},
+	"POSTOP": {
+		"waitingRooms": [
+			".*waiting(?:\\s?room)?.*"
+		],
+		"examRooms": [
+			".*tx(?:\\s?area)?.*"
+		]
+
+	},
+	"HIP": {
+		"waitingRooms": [
+			".*waiting(?:\\s?room)?.*"
+		],
+		"examRooms": [
+			".*tx(?:\\s?area)?.*"
+		]
+
+	},
+	"FISHOF": {
+		"waitingRooms": [
+			".*waiting(?:\\s?room)?.*"
+		],
+		"examRooms": [
+			".*tx(?:\\s?area)?.*"
+		]
+
+	},
+	"TURC": {
+		"waitingRooms": [
+			".*waiting(?:\\s?room)?.*"
+		],
+		"examRooms": [
+			".*tx(?:\\s?area)?.*"
+		]
+
+	},
+	"DOUL": {
+		"waitingRooms": [
+			".*waiting(?:\\s?room)?.*"
+		],
+		"examRooms": [
+			".*tx(?:\\s?area)?.*"
+		]
+
+	},
+	"GOULD": {
+		"waitingRooms": [
+			".*waiting(?:\\s?room)?.*"
+		],
+		"examRooms": [
+			".*tx(?:\\s?area)?.*"
+		]
+
+	},
+	"ONCGUO-V": {
+		"waitingRooms": [
+			".*waiting(?:\\s?room)?.*"
+		],
+		"examRooms": [
+			".*tx(?:\\s?area)?.*"
+		]
+
+	},
+	"GOLANJ": {
+		"waitingRooms": [
+			".*waiting(?:\\s?room)?.*"
+		],
+		"examRooms": [
+			".*tx(?:\\s?area)?.*"
+		]
+
+	},
+	"HEMPAY-V": {
+		"waitingRooms": [
+			".*waiting(?:\\s?room)?.*"
+		],
+		"examRooms": [
+			".*tx(?:\\s?area)?.*"
+		]
+
+	},
+	"ONCALFAK-V": {
+		"waitingRooms": [
+			".*waiting(?:\\s?room)?.*"
+		],
+		"examRooms": [
+			".*tx(?:\\s?area)?.*"
+		]
+
+	},
+	"GOUL-V2": {
+		"waitingRooms": [
+			".*waiting(?:\\s?room)?.*"
+		],
+		"examRooms": [
+			".*tx(?:\\s?area)?.*"
+		]
+
+	},
+	"KASS-V2": {
+		"waitingRooms": [
+			".*waiting(?:\\s?room)?.*"
+		],
+		"examRooms": [
+			".*tx(?:\\s?area)?.*"
+		]
+
+	},
+	"URORES-V": {
+		"waitingRooms": [
+			".*waiting(?:\\s?room)?.*"
+		],
+		"examRooms": [
+			".*tx(?:\\s?area)?.*"
+		]
+
+	},
+	"APRI-V2": {
+		"waitingRooms": [
+			".*waiting(?:\\s?room)?.*"
+		],
+		"examRooms": [
+			".*tx(?:\\s?area)?.*"
+		]
+
+	},
+	"URORES3-V": {
+		"waitingRooms": [
+			".*waiting(?:\\s?room)?.*"
+		],
+		"examRooms": [
+			".*tx(?:\\s?area)?.*"
+		]
+
+	},
+	"CHAUD-HCC-V": {
+		"waitingRooms": [
+			".*waiting(?:\\s?room)?.*"
+		],
+		"examRooms": [
+			".*tx(?:\\s?area)?.*"
+		]
+
+	},
+	"MORR-GYN-V": {
+		"waitingRooms": [
+			".*waiting(?:\\s?room)?.*"
+		],
+		"examRooms": [
+			".*tx(?:\\s?area)?.*"
+		]
+
+	},
+	"TCHER-HCC-V": {
+		"waitingRooms": [
+			".*waiting(?:\\s?room)?.*"
+		],
+		"examRooms": [
+			".*tx(?:\\s?area)?.*"
+		]
+
+	},
+	"OST-DRC": {
+		"waitingRooms": [
+			".*waiting(?:\\s?room)?.*"
+		],
+		"examRooms": [
+			".*tx(?:\\s?area)?.*"
+		]
+
+	},
+	"METE-CRC-V2": {
+		"waitingRooms": [
+			".*waiting(?:\\s?room)?.*"
+		],
+		"examRooms": [
+			".*tx(?:\\s?area)?.*"
+		]
+
+	},
+	"METE-BRST-V2": {
+		"waitingRooms": [
+			".*waiting(?:\\s?room)?.*"
+		],
+		"examRooms": [
+			".*tx(?:\\s?area)?.*"
+		]
+
+	},
+	"RR-SPINE": {
+		"waitingRooms": [
+			".*waiting(?:\\s?room)?.*"
+		],
+		"examRooms": [
+			".*tx(?:\\s?area)?.*"
+		]
+
+	},
+	"FLEI-V2": {
+		"waitingRooms": [
+			".*waiting(?:\\s?room)?.*"
+		],
+		"examRooms": [
+			".*tx(?:\\s?area)?.*"
+		]
+
+	},
+	"ONCDENT-V": {
+		"waitingRooms": [
+			".*waiting(?:\\s?room)?.*"
+		],
+		"examRooms": [
+			".*tx(?:\\s?area)?.*"
+		]
+
+	},
+	"HEMRES-V": {
+		"waitingRooms": [
+			".*waiting(?:\\s?room)?.*"
+		],
+		"examRooms": [
+			".*tx(?:\\s?area)?.*"
+		]
+
+	},
+	"DUMIT-V2": {
+		"waitingRooms": [
+			".*waiting(?:\\s?room)?.*"
+		],
+		"examRooms": [
+			".*tx(?:\\s?area)?.*"
+		]
+
+	},
+	"NUDO-HCC-V2": {
+		"waitingRooms": [
+			".*waiting(?:\\s?room)?.*"
+		],
+		"examRooms": [
+			".*tx(?:\\s?area)?.*"
+		]
+
+	},
+	"AVN-ORTHO": {
+		"waitingRooms": [
+			".*waiting(?:\\s?room)?.*"
+		],
+		"examRooms": [
+			".*tx(?:\\s?area)?.*"
+		]
+
+	},
+	"ONCSHIEH-V": {
+		"waitingRooms": [
+			".*waiting(?:\\s?room)?.*"
+		],
+		"examRooms": [
+			".*tx(?:\\s?area)?.*"
+		]
+
+	},
+	"WHEL-V": {
+		"waitingRooms": [
+			".*waiting(?:\\s?room)?.*"
+		],
+		"examRooms": [
+			".*tx(?:\\s?area)?.*"
+		]
+
+	},
+	"LOUT-V2": {
+		"waitingRooms": [
+			".*waiting(?:\\s?room)?.*"
+		],
+		"examRooms": [
+			".*tx(?:\\s?area)?.*"
+		]
+
+	},
+	"ONCDESF-V": {
+		"waitingRooms": [
+			".*waiting(?:\\s?room)?.*"
+		],
+		"examRooms": [
+			".*tx(?:\\s?area)?.*"
+		]
+
+	},
+	"TALB": {
+		"waitingRooms": [
+			".*waiting(?:\\s?room)?.*"
+		],
+		"examRooms": [
+			".*tx(?:\\s?area)?.*"
+		]
+
+	},
+	"HEMGROL-V": {
+		"waitingRooms": [
+			".*waiting(?:\\s?room)?.*"
+		],
+		"examRooms": [
+			".*tx(?:\\s?area)?.*"
+		]
+
+	},
+	"SHIEH-V": {
+		"waitingRooms": [
+			".*waiting(?:\\s?room)?.*"
+		],
+		"examRooms": [
+			".*tx(?:\\s?area)?.*"
+		]
+
+	},
+	"HART": {
+		"waitingRooms": [
+			".*waiting(?:\\s?room)?.*"
+		],
+		"examRooms": [
+			".*tx(?:\\s?area)?.*"
+		]
+
+	},
+	"HPBRES-V": {
+		"waitingRooms": [
+			".*waiting(?:\\s?room)?.*"
+		],
+		"examRooms": [
+			".*tx(?:\\s?area)?.*"
+		]
+
+	},
+	"PAUYT": {
+		"waitingRooms": [
+			".*waiting(?:\\s?room)?.*"
+		],
+		"examRooms": [
+			".*tx(?:\\s?area)?.*"
+		]
+
+	},
+	"WEBER-V3": {
+		"waitingRooms": [
+			".*waiting(?:\\s?room)?.*"
+		],
+		"examRooms": [
+			".*tx(?:\\s?area)?.*"
+		]
+
+	},
+	"WHEL-V2": {
+		"waitingRooms": [
+			".*waiting(?:\\s?room)?.*"
+		],
+		"examRooms": [
+			".*tx(?:\\s?area)?.*"
+		]
+
+	},
+	"CLHOFF-ODC": {
+		"waitingRooms": [
+			".*waiting(?:\\s?room)?.*"
+		],
+		"examRooms": [
+			".*tx(?:\\s?area)?.*"
+		]
+
+	},
+	"MGRES1-V2": {
+		"waitingRooms": [
+			".*waiting(?:\\s?room)?.*"
+		],
+		"examRooms": [
+			".*tx(?:\\s?area)?.*"
+		]
+
+	},
+	"MORR-V": {
+		"waitingRooms": [
+			".*waiting(?:\\s?room)?.*"
+		],
+		"examRooms": [
+			".*tx(?:\\s?area)?.*"
+		]
+
+	},
+	"NAESS-V": {
+		"waitingRooms": [
+			".*waiting(?:\\s?room)?.*"
+		],
+		"examRooms": [
+			".*tx(?:\\s?area)?.*"
+		]
+
+	},
+	"HIP-PRES": {
+		"waitingRooms": [
+			".*waiting(?:\\s?room)?.*"
+		],
+		"examRooms": [
+			".*tx(?:\\s?area)?.*"
+		]
+
+	},
+	"REICH-V2": {
+		"waitingRooms": [
+			".*waiting(?:\\s?room)?.*"
+		],
+		"examRooms": [
+			".*tx(?:\\s?area)?.*"
+		]
+
+	},
+	"BCGTXV": {
+		"waitingRooms": [
+			".*waiting(?:\\s?room)?.*"
+		],
+		"examRooms": [
+			".*tx(?:\\s?area)?.*"
+		]
+
 	}
 }
