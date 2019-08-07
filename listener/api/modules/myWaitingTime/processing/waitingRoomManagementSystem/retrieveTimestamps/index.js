@@ -4,6 +4,7 @@ const cleanupHistory = require('./approaches/cleanHistory')
 module.exports = function (usersAppointments) {
   if(usersAppointments == 0){
     usersAppointments = []
+    console.log("catching error 2")
     return usersAppointments
   }
   return new Promise((resolve, reject) => {
@@ -38,6 +39,7 @@ module.exports = function (usersAppointments) {
       resolve(usersAppointments)
     } catch (e) {
       var finalResult = []
+      console.log("catching error 1")
       resolve(finalResult)
     }
   })

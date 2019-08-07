@@ -35,11 +35,13 @@ function retrieveWaitingRoom (appointmentType, fromAreaIndex, history) {
 module.exports = function (appointmentType, scheduledTime, history) {
   const appointmentTypeTester = identifierTester(appointmentType, 'examRooms')
   if (typeof appointmentTypeTester !== 'function') {
+    console.log("catching error 3")
     throw appointmentTypeTester
   }
   const [area, areaIndex] = retrieveArea(appointmentTypeTester, history)
   if (area) {
     return [area, retrieveWaitingRoom(appointmentType, areaIndex, history)]
   }
+  console.log("catching error 4")
   return emptyResponse
 }
