@@ -1347,6 +1347,39 @@ exports.setTrusted = function(requestObject)
 };
 
 /**
+ * getQuestionnaireList
+ * @desc Returns a promise containing the questionnaires general information
+ * @param {object} requestObject
+ * @return {Promise} Returns a promise that contains a list of questionnaire data
+ */
+exports.getQuestionnaireList = function(requestObject){
+    var r = Q.defer();
+
+    // check argument
+    if (!requestObject.hasOwnProperty('UserID') || requestObject.UserID === undefined){
+        r.reject(new Error('Error getting questionnaire list: the requestObject does not have UserID'));
+
+    }else{
+        // get language in the database
+        exports.runSqlQuery(queries.getPatientSerNumAndLanguage(), [requestObject.UserID, null, null])
+            .then(function (patientSerNumAndLanguageRow) {
+
+                // get questionnaire list
+                return questionnaires.getQuestionnaireList(patientSerNumAndLanguageRow[0]);
+            })
+            .then(function (result) {
+                var obj = {};
+                obj.Data = result;
+                r.resolve(obj);
+            })
+            .catch(function (error) {
+                r.reject(error);
+            });
+    }
+    return r.promise;
+};
+
+/**
  * Returns a promise containing the questionnaires and answers
  * @param {object} requestObject the request
  * @returns {Promise} Returns a promise that contains the questionnaire data

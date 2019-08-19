@@ -736,3 +736,79 @@ function promisifyQuery(query, parameters) {
     });
     return r.promise;
 }
+
+/**
+ * From this point is the new questionnaire front-end 19-08-2019
+ */
+
+exports.getQuestionnaireList = getQuestionnaireList;
+
+/*
+QUERIES
+ */
+
+var getQuestionnairePatientID = `SELECT ID FROM patient WHERE externalId = ? AND deleted <> 1;`;
+
+var getQuestionnaireListQuery = `
+SELECT aq.ID AS qp_ser_num,
+	aq.questionnaireId AS questionnaire_ser_num,
+	aq.\`status\` AS status,
+	aq.creationDate AS created,
+	aq.lastUpdated AS last_updated,
+	getDisplayName(IF(q.nickname <> -1, q.nickname, q.title), ?) AS nickname
+FROM answerQuestionnaire aq LEFT JOIN questionnaire q ON q.ID = aq.questionnaireId
+WHERE aq.deleted <> 1
+	AND aq.patientId = 
+		(SELECT ID
+		FROM patient
+		WHERE externalId = ?
+		AND deleted <> 1);`;
+
+function getQuestionnaireList (opalPatientSerNumAndLanguage){
+    var r = q.defer();
+
+    // verify the argument
+    if (!opalPatientSerNumAndLanguage.hasOwnProperty('PatientSerNum') || !opalPatientSerNumAndLanguage.hasOwnProperty('Language')
+        || !opalPatientSerNumAndLanguage.PatientSerNum || !opalPatientSerNumAndLanguage.Language){
+        r.reject(new Error('Error getting questionnaire list: No matching PatientSerNum or/and Language found in opalDB'));
+    }else{
+        // get the language of the user
+        var lang = mapOpalLangToQuestionnaireLang(opalPatientSerNumAndLanguage.Language);
+
+        // get questionnaire list
+        promisifyQuery(getQuestionnaireListQuery, [lang, opalPatientSerNumAndLanguage.PatientSerNum])
+            .then(function (questionnaireListRow) {
+                r.resolve(questionnaireListRow);
+            })
+            .catch(function(err){
+                r.reject(err);
+            })
+    }
+
+    return r.promise;
+}
+
+/**
+ * mapOpalLangToQuestionnaireLang
+ * @desc This function translate the language code ('FR', 'EN') gotten from the OpalDB to the language code in the questionnaireDB (1,2)
+ *      The function is hard coded, but all the functions for new questionnaire front-end use this function. Changing language code in the DB only need to be changed here.
+ *      The default language is French.
+ * @param {string} opalLang: the language code ('FR', 'EN') gotten from the OpalDB
+ * @return {number} qLang: language code in the questionnaireDB (1,2)
+ */
+function mapOpalLangToQuestionnaireLang (opalLang){
+    var qLang = 1; // default is French
+
+    switch (opalLang){
+        case 'EN':
+            qLang = 2;
+            break;
+        case 'FR':
+            qLang = 1;
+            break;
+        default:
+            qLang = 1; // default is French
+    }
+
+    return qLang;
+}

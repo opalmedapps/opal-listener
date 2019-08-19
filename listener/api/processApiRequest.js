@@ -30,6 +30,7 @@ const API = {
     'NotificationsNew': apiHospitalUpdate.getNewNotifications,
     'EducationalPackageContents': apiPatientUpdate.getPackageContents,
     'Questionnaires': apiPatientUpdate.getQuestionnaires,
+    'QuestionnaireList': apiPatientUpdate.getQuestionnaireList,
     'QuestionnaireRating': apiHospitalUpdate.inputEducationalMaterialRating,
     'QuestionnaireAnswers': apiHospitalUpdate.inputQuestionnaireAnswers,
     'Read': apiHospitalUpdate.updateReadStatus,
