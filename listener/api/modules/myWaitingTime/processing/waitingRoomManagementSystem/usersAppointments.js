@@ -39,6 +39,13 @@ function formatAppointment (users, group, index, max, onDone) {
 
 module.exports = function (groups) {
   return new Promise((resolve) => {
+    if(groups.ActualStartDate){
+
+      var aTime = Date.parse(groups.ActualStartDate)/1000
+      groups.ActualStartDate = aTime
+
+      resolve(groups)
+    }
     const users = {}
     const max = groups.length
     var index = 0

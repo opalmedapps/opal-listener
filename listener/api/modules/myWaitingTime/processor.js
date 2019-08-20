@@ -56,9 +56,19 @@ module.exports = function (patientId) {
               if (isPatientLate) {
                 response.onTime.late++
                 responseWaitingTime.personalWait = getTimeDifferenceInMinutes(firstCheckinTime, actualStartTime)
+                console.log("personal wait: ", responseWaitingTime.personalWait)
+                if(responseWaitingTime.personalWait < 0){
+                  responseWaitingTime.personalWait = 0
+                }
               } else {
                 responseWaitingTime.hospitalDelay = getTimeDifferenceInMinutes(scheduledTime, actualStartTime)
                 responseWaitingTime.personalWait = getTimeDifferenceInMinutes(firstCheckinTime, scheduledTime)
+                if(responseWaitingTime.personalWait < 0){
+                  responseWaitingTime.personalWait = 0
+                }
+                if(responseWaitingTime.hospitalDelay < 0){
+                  responseWaitingTime.hospitalDelay = 0
+                }
                 if (responseWaitingTime.personalWait > 30) {
                   response.onTime.tooEarly++
                 } else {
@@ -68,7 +78,7 @@ module.exports = function (patientId) {
               response.waitingTimes.push(responseWaitingTime)
             }
 
-            response.waitingTimes = response.waitingTimes.sort((a, b) => a.scheduledTime > b.scheduledTime)
+            response.waitingTimes = response.waitingTimes.sort((a, b) => a.scheduledTime - b.scheduledTime)
 
 
             resolve(response)
