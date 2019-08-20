@@ -13,7 +13,6 @@ module.exports = function (usersAppointments) {
         const userAppointmentsDatesObj = usersAppointments[user]
         const userAppointmentsDates = Object.keys(userAppointmentsDatesObj)
         for (const date of userAppointmentsDates) {
-          //This is the mistake// dateAppoinments should be each date
           const dateAppointmentsObj = userAppointmentsDatesObj[date]
           const dateAppointments = Object.keys(dateAppointmentsObj)
           if (dateAppointments.length > 1) {
