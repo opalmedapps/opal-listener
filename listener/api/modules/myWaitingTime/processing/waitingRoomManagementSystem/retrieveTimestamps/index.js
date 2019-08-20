@@ -2,6 +2,10 @@ const bottomTopApproach = require('./approaches/bottomTop')
 const cleanupHistory = require('./approaches/cleanHistory')
 
 module.exports = function (usersAppointments) {
+  if(usersAppointments.ActualStartDate){
+    console.log(usersAppointments.ActualStartDate)
+    return usersAppointments
+  }
   if(usersAppointments == 0){
     usersAppointments = []
     return usersAppointments
