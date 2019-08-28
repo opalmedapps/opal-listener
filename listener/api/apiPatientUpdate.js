@@ -139,6 +139,10 @@ exports.getQuestionnaireList = function(requestObject){
     return sqlInterface.getQuestionnaireList(requestObject);
 };
 
+exports.getQuestionnaire = function(requestObject){
+    return sqlInterface.getQuestionnaire(requestObject);
+};
+
 exports.getPatientsForPatientsMembers = function ()
 {
   return new Promise((resolve, reject)=>{

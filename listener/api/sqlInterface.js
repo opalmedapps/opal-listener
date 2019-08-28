@@ -1380,6 +1380,16 @@ exports.getQuestionnaireList = function(requestObject){
 };
 
 /**
+ * getQuestionnaire
+ * @desc Returns a promise containing the questionnaires and answers
+ * @param {object} requestObject the request
+ * @returns {Promise} Returns a promise that contains the questionnaire data
+ */
+exports.getQuestionnaire = function(requestObject) {
+    // TODO
+};
+
+/**
  * Returns a promise containing the questionnaires and answers
  * @param {object} requestObject the request
  * @returns {Promise} Returns a promise that contains the questionnaire data

@@ -31,6 +31,7 @@ const API = {
     'EducationalPackageContents': apiPatientUpdate.getPackageContents,
     'Questionnaires': apiPatientUpdate.getQuestionnaires,
     'QuestionnaireList': apiPatientUpdate.getQuestionnaireList,
+    'Questionnaire': apiPatientUpdate.getQuestionnaire,
     'QuestionnaireRating': apiHospitalUpdate.inputEducationalMaterialRating,
     'QuestionnaireAnswers': apiHospitalUpdate.inputQuestionnaireAnswers,
     'Read': apiHospitalUpdate.updateReadStatus,

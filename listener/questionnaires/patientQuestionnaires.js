@@ -751,7 +751,7 @@ var getQuestionnairePatientID = `SELECT ID FROM patient WHERE externalId = ? AND
 
 var getQuestionnaireListQuery = `
 SELECT aq.ID AS qp_ser_num,
-	aq.questionnaireId AS questionnaire_ser_num,
+	aq.questionnaireId AS questionnaire_id,
 	aq.\`status\` AS status,
 	aq.creationDate AS created,
 	aq.lastUpdated AS last_updated,
