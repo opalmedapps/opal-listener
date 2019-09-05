@@ -2,6 +2,10 @@ const bottomTopApproach = require('./approaches/bottomTop')
 const cleanupHistory = require('./approaches/cleanHistory')
 
 module.exports = function (usersAppointments) {
+  if(usersAppointments.ActualStartDate){
+    console.log(usersAppointments.ActualStartDate)
+    return usersAppointments
+  }
   if(usersAppointments == 0){
     usersAppointments = []
     console.log("catching error 2")
@@ -14,7 +18,6 @@ module.exports = function (usersAppointments) {
         const userAppointmentsDatesObj = usersAppointments[user]
         const userAppointmentsDates = Object.keys(userAppointmentsDatesObj)
         for (const date of userAppointmentsDates) {
-          //This is the mistake// dateAppoinments should be each date
           const dateAppointmentsObj = userAppointmentsDatesObj[date]
           const dateAppointments = Object.keys(dateAppointmentsObj)
           if (dateAppointments.length > 1) {
