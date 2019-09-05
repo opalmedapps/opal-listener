@@ -747,22 +747,11 @@ exports.getQuestionnaireList = getQuestionnaireList;
 QUERIES
  */
 
-var getQuestionnairePatientID = `SELECT ID FROM patient WHERE externalId = ? AND deleted <> 1;`;
+var getQuestionnaireListQuery = `call getQuestionnaireList(?,?);`;
 
-var getQuestionnaireListQuery = `
-SELECT aq.ID AS qp_ser_num,
-	aq.questionnaireId AS questionnaire_id,
-	aq.\`status\` AS status,
-	aq.creationDate AS created,
-	aq.lastUpdated AS last_updated,
-	getDisplayName(IF(q.nickname <> -1, q.nickname, q.title), ?) AS nickname
-FROM answerQuestionnaire aq LEFT JOIN questionnaire q ON q.ID = aq.questionnaireId
-WHERE aq.deleted <> 1
-	AND aq.patientId = 
-		(SELECT ID
-		FROM patient
-		WHERE externalId = ?
-		AND deleted <> 1);`;
+/*
+FUNCTIONS
+ */
 
 function getQuestionnaireList (opalPatientSerNumAndLanguage){
     var r = q.defer();
@@ -772,13 +761,18 @@ function getQuestionnaireList (opalPatientSerNumAndLanguage){
         || !opalPatientSerNumAndLanguage.PatientSerNum || !opalPatientSerNumAndLanguage.Language){
         r.reject(new Error('Error getting questionnaire list: No matching PatientSerNum or/and Language found in opalDB'));
     }else{
-        // get the language of the user
-        var lang = mapOpalLangToQuestionnaireLang(opalPatientSerNumAndLanguage.Language);
-
         // get questionnaire list
-        promisifyQuery(getQuestionnaireListQuery, [lang, opalPatientSerNumAndLanguage.PatientSerNum])
-            .then(function (questionnaireListRow) {
-                r.resolve(questionnaireListRow);
+        promisifyQuery(getQuestionnaireListQuery, [opalPatientSerNumAndLanguage.PatientSerNum, opalPatientSerNumAndLanguage.Language])
+            .then(function (queryResult) {
+
+                // verify that the procedure has completed.
+                // if the procedure did not complete, there will not be a property called procedure_status. If there is an error, the error code will be stored in procedure_status
+                // the object containing property procedure_status is stored in the second last position in the returned array since the last position is used for OkPacket.
+                if (!queryResult[queryResult.length - 2][0].hasOwnProperty('procedure_status') || queryResult[queryResult.length - 2][0].procedure_status !== 0){
+                    r.reject(new Error('Error getting questionnaire list'));
+                }else{
+                    r.resolve(queryResult[0]);
+                }
             })
             .catch(function(err){
                 r.reject(err);
@@ -786,29 +780,4 @@ function getQuestionnaireList (opalPatientSerNumAndLanguage){
     }
 
     return r.promise;
-}
-
-/**
- * mapOpalLangToQuestionnaireLang
- * @desc This function translate the language code ('FR', 'EN') gotten from the OpalDB to the language code in the questionnaireDB (1,2)
- *      The function is hard coded, but all the functions for new questionnaire front-end use this function. Changing language code in the DB only need to be changed here.
- *      The default language is French.
- * @param {string} opalLang: the language code ('FR', 'EN') gotten from the OpalDB
- * @return {number} qLang: language code in the questionnaireDB (1,2)
- */
-function mapOpalLangToQuestionnaireLang (opalLang){
-    var qLang = 1; // default is French
-
-    switch (opalLang){
-        case 'EN':
-            qLang = 2;
-            break;
-        case 'FR':
-            qLang = 1;
-            break;
-        default:
-            qLang = 1; // default is French
-    }
-
-    return qLang;
 }
