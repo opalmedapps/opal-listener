@@ -36,6 +36,9 @@ function groupify (dataArr, isNewGroup, onDone) {
 
 module.exports = function (results) {
   return new Promise((resolve) => {
+    if(results.ActualStartDate){
+      resolve(results)
+    }
     linearGroupify(
       results,
       (currentValue, previousValue) => previousValue === null ||
