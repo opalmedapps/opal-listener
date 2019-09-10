@@ -742,17 +742,26 @@ function promisifyQuery(query, parameters) {
  */
 
 exports.getQuestionnaireList = getQuestionnaireList;
+exports.getQuestionnaire = getQuestionnaire;
 
 /*
 QUERIES
  */
 
 var getQuestionnaireListQuery = `call getQuestionnaireList(?,?);`;
+var getQuestionnaireQuery = `call getQuestionnaireInfo(?,?);`;
+var getQuestionOptionsQuery = `CALL getQuestionOptions(?, ?, ?);`;
 
 /*
 FUNCTIONS
  */
 
+/**
+ * getQuestionnaireList
+ * @desc this function get a list of questionnaire belonging to an user.
+ * @param opalPatientSerNumAndLanguage {object} object containing PatientSerNum and Language as property. These information comes from OpalDB
+ * @returns {promise}
+ */
 function getQuestionnaireList (opalPatientSerNumAndLanguage){
     var r = q.defer();
 
@@ -769,7 +778,7 @@ function getQuestionnaireList (opalPatientSerNumAndLanguage){
                 // if the procedure did not complete, there will not be a property called procedure_status. If there is an error, the error code will be stored in procedure_status
                 // the object containing property procedure_status is stored in the second last position in the returned array since the last position is used for OkPacket.
                 if (!queryResult[queryResult.length - 2][0].hasOwnProperty('procedure_status') || queryResult[queryResult.length - 2][0].procedure_status !== 0){
-                    r.reject(new Error('Error getting questionnaire list'));
+                    r.reject(new Error('Error getting questionnaire list: query error'));
                 }else{
                     r.resolve(queryResult[0]);
                 }
@@ -778,6 +787,301 @@ function getQuestionnaireList (opalPatientSerNumAndLanguage){
                 r.reject(err);
             })
     }
+
+    return r.promise;
+}
+
+/**
+ * getQuestionnaire
+ * @desc this function gets data related to that questionnaire, including answers
+ * @param opalPatientSerNumAndLanguage {object}: object containing PatientSerNum and Language as property. These information comes from OpalDB
+ * @param answerQuestionnaire_Id: This is the ID of the answerQuestionnaire (questionnaire belonging to that user and which the user would like to view). Should be passed from qplus.
+ * @returns {promise}
+ */
+function getQuestionnaire (opalPatientSerNumAndLanguage, answerQuestionnaire_Id){
+    var r = q.defer();
+
+    var questionAndTypeMap = {};
+    var lang_id;
+    var questionnaireDataArray;
+    var sectionDataArray;
+    var questionDataArray;
+    var answerDataArray; // note that this might not contain any useful data if the questionnaire is new
+    var answerObject;
+
+    /*
+    TODO: delete the next part, this is for testing only
+     */
+    // answerQuestionnaire_Id = 392;
+
+    // verify the argument
+    if (!opalPatientSerNumAndLanguage.hasOwnProperty('PatientSerNum') || !opalPatientSerNumAndLanguage.hasOwnProperty('Language')
+        || !opalPatientSerNumAndLanguage.PatientSerNum || !opalPatientSerNumAndLanguage.Language){
+        r.reject(new Error('Error getting questionnaire list: No matching PatientSerNum or/and Language found in opalDB'));
+    }else{
+        promisifyQuery(getQuestionnaireQuery, [answerQuestionnaire_Id, opalPatientSerNumAndLanguage.Language])
+            .then(function(queryResult){
+                // verify that the procedure has completed.
+                // if the procedure did not complete, there will not be a property called procedure_status. If there is an error, the error code will be stored in procedure_status
+                // the object containing property procedure_status is stored in the second last position in the returned array since the last position is used for OkPacket.
+                if (!queryResult[queryResult.length - 2][0].hasOwnProperty('procedure_status') || queryResult[queryResult.length - 2][0].procedure_status !== 0 ||
+                    !queryResult[queryResult.length - 2][0].hasOwnProperty('language_id') || !queryResult[queryResult.length - 2][0].language_id) {
+                    r.reject(new Error('Error getting questionnaire: query error'));
+                }else{
+                    lang_id = queryResult[queryResult.length - 2][0].language_id;
+
+                    questionnaireDataArray = queryResult[0];
+                    sectionDataArray = queryResult[1];
+                    questionDataArray = queryResult[2];
+                    answerDataArray = queryResult[3];
+
+                    questionAndTypeMap = getQuestionAndTypeMap(queryResult[2]);
+                    answerObject = formatAnswer(questionnaireDataArray, answerDataArray);
+
+                    return getQuestionOptions(questionAndTypeMap, lang_id);
+                }
+            })
+            .then(function(questionOptionsAndTypeMap){
+
+                var dataFormatted = formatQuestionnaire (questionnaireDataArray, sectionDataArray, questionDataArray, answerObject, questionOptionsAndTypeMap);
+
+                r.resolve(dataFormatted);
+            })
+            .catch(function(err){
+                r.reject(err);
+        })
+    }
+    return r.promise;
+}
+
+/**
+ * formatAnswer
+ * @desc this function is a helper to organize the answers according to the questionSection_id if the questionnaire is not new.
+ *       It also check the required properties of questionnaire and answers.
+ * @param questionnaireDataArray {array}
+ * @param answerDataArray {array}
+ * @return answerObject {object} this object has questionSection_id as key, and an array of answers as value
+ */
+function formatAnswer(questionnaireDataArray, answerDataArray){
+    var answerObject = {};
+
+    // check properties of questionnaireDataArray
+    if (!questionnaireDataArray[0].hasOwnProperty('qp_ser_num') || !questionnaireDataArray[0].qp_ser_num ||
+        !questionnaireDataArray[0].hasOwnProperty('status') ||
+        !questionnaireDataArray[0].hasOwnProperty('questionnaire_id') ||
+        !questionnaireDataArray[0].hasOwnProperty('nickname') || !questionnaireDataArray[0].nickname){
+        throw new Error("Error getting questionnaire: this questionnaire does not have the required properties");
+    }
+
+    // if new questionnaire, there will be no answers to format
+    if (questionnaireDataArray[0].status === 0){
+        return answerObject;
+    }
+
+    // if in progress or completed questionnaire, organize the answers
+    for (var i = 0; i < answerDataArray.length; i++){
+
+        var answer = answerDataArray[i];
+
+        // check property for every answer
+        if (!answer.hasOwnProperty('answer_id') || !answer.hasOwnProperty('question_id') || !answer.hasOwnProperty('section_id') ||
+            !answer.hasOwnProperty('type_id') || !answer.hasOwnProperty('answered') || !answer.hasOwnProperty('skipped') ||
+            !answer.hasOwnProperty('created') || !answer.hasOwnProperty('last_updated') || !answer.hasOwnProperty('questionSection_id') ||
+            !answer.hasOwnProperty('answer_value') || !answer.hasOwnProperty('intensity') || !answer.hasOwnProperty('posX') ||
+            !answer.hasOwnProperty('posY') || !answer.hasOwnProperty('selected') || !answer.hasOwnProperty('questionnairePatientRelSerNum')){
+
+            throw new Error("Error getting questionnaire: this questionnaire's answers do not have the required properties");
+        }
+
+        // initialize the questionSection_id as the key for answerObject
+        if (answerObject[answer.questionSection_id] === undefined){
+            answerObject[answer.questionSection_id] = [];
+        }
+        answerObject[answer.questionSection_id].push(answer);
+    }
+
+    return answerObject;
+}
+
+/**
+ * formatQuestionnaire
+ * @desc this function is a helper function for formatting one questionnaire data gotten from the questionnaireDB to the JSON accepted on the front end.
+ * @param questionnaireDataArray {array}
+ * @param sectionDataArray {array}
+ * @param questionDataArray {array}
+ * @param questionOptionsAndTypeMap {object}
+ * @param answerObject {array}
+ * @return returnedData {object} the fully formated object to send to front end
+ */
+function formatQuestionnaire (questionnaireDataArray, sectionDataArray, questionDataArray, answerObject, questionOptionsAndTypeMap){
+    var returnedData = {};
+
+    // this function is used for formatting one questionnaire only. This is checked in the procedure getQuestionnaireInfo, but just in case that this function is being called by mistake.
+    // verify required properties for the questionnaire data should be done in the calling function
+    if (questionnaireDataArray.length !== 1){
+        throw new Error("Error getting questionnaire: there is more than one or no questionnaire associated with the ID provided");
+    }
+
+    var sections = {};  // TODO: this was implemented as an array by Thomas before, now that it is an object, check if everything works
+
+    sectionDataArray.forEach(function(section){
+        // check required properties for a section
+        if (!section.hasOwnProperty('section_id') || !section.hasOwnProperty('section_position')){
+            console.log("\n------------------------section property err ---------------------\n", section);
+            throw new Error("Error getting questionnaire: this questionnaire's sections do not have required property");
+        }
+
+        // this is to prevent passing by reference
+        sections[section.section_id] = Object.assign({}, {questions: []}, section);
+    });
+
+    questionDataArray.forEach(function (question) {
+        // required properties should be checked beforehand by the calling function
+
+        // this should not happen. A question should be contained in a section
+        if (sections[question.section_id] === undefined){
+            throw new Error("Error getting questionnaire: this questionnaire's question does not belong to a section");
+        }
+
+        // get the options for that question
+        // if the options are not defined or are not inside an array for that question, raise error
+        if (questionOptionsAndTypeMap[question.type_id][question.question_id] === undefined || !Array.isArray(questionOptionsAndTypeMap[question.type_id][question.question_id])){
+            throw new Error("Error getting questionnaire: options do not exist for question");
+        }
+
+        var options =  questionOptionsAndTypeMap[question.type_id][question.question_id];
+
+        // dealing with answers now
+        var patient_answer = {};
+
+        console.log("\n--------------------------answerObject--------------------\n", answerObject);
+
+        // get the answers for that question if the questionnaire is not new
+        if (questionnaireDataArray[0].status !== 0) {
+            patient_answer.answer = answerObject[question.questionSection_id];
+            patient_answer.is_defined = 1;
+        }else{
+            patient_answer.answer = [];
+            patient_answer.is_defined = 0;
+        }
+
+        // a question might have duplicates in a single section, but a questionSection_id is unique (reason for why the key is questionSection_id and not question_id)
+        sections[question.section_id].questions[question.questionSection_id] = Object.assign({},
+            {options: options, patient_answer: patient_answer}, question);
+    });
+
+    returnedData = Object.assign({}, {sections: sections}, questionnaireDataArray[0]);
+
+    console.log("\n ----------------------returnedData-----------------\n", returnedData);
+
+    return returnedData;
+}
+
+/**
+ * getQuestionAndTypeMap
+ * @desc this function takes the array of questions (coming from the questionnaireDB) and sort them into different types.
+ *      It is a helper for getting the options for questions
+ *      It also verifies the properties of the questionDataArray for the calling function
+ * @param questionDataArray {array}
+ * @returns questionAndTypeMap {object} This object has type_id as keys, and an array of question_id as value
+ */
+function getQuestionAndTypeMap (questionDataArray){
+    var questionAndTypeMap = {};
+
+    questionDataArray.forEach(function (question) {
+        // check required properties for a question
+        if (!question.hasOwnProperty('section_id') || !question.hasOwnProperty('questionSection_id') || !question.hasOwnProperty('type_id') ||
+            !question.hasOwnProperty('question_position') || !question.hasOwnProperty('orientation') || !question.hasOwnProperty('optional') ||
+            !question.hasOwnProperty('question_type_category_key') || !question.hasOwnProperty('allow_question_feedback') ||
+            !question.hasOwnProperty('polarity') || !question.hasOwnProperty('question_id') || !question.hasOwnProperty('question_text') ||
+            !question.question_type_category_key || !question.question_text){
+
+            console.log("\n ----------------question property error-------------", question);
+            throw new Error("Error getting questionnaire: this questionnaire's questions do not have required properties");
+        }
+
+        // initialize for every type
+        if (questionAndTypeMap[question.type_id] === undefined){
+            questionAndTypeMap[question.type_id] = [];
+        }
+
+        questionAndTypeMap[question.type_id].push(question.question_id);
+
+        // questionAndTypeMap[question.type_id].push({
+        //     question_id: question.question_id,
+        //     type_id: question.type_id,
+        //     options: []
+        // })
+    });
+
+    return questionAndTypeMap;
+}
+
+/**
+ * getQuestionOptions
+ * @desc This async function calls a procedure in the questionnaireDB to get all the question options according to the language passed.
+ * @param questionAndTypeMap {object} this object should have type_id as key and question_id as value
+ * @param languageId {int} this is the id in the questionnaireDB of the language required
+ * @returns {promise} This promise resolves to questionOptionsAndTypeMap which is an object with type_id as keys and the options per questionId gotten from questionnaireDB as values
+ *                      questionOptionsAndTypeMap should look like questionOptionsAndTypeMap[type_id][question_id][array of objects which are the options]
+ */
+function getQuestionOptions(questionAndTypeMap, languageId){
+    var r = q.defer();
+    var promiseArray = [];
+    var questionOptionsAndTypeMap = {};
+    var queryErr = 0;
+
+    Object.keys(questionAndTypeMap).forEach(function(typeId){
+        promiseArray.push(promisifyQuery(getQuestionOptionsQuery, [typeId, [questionAndTypeMap[typeId].join()], languageId]));
+    });
+
+    q.all(promiseArray)
+        .then(function(returnedPromiseArray){
+            for (var i = 0; i < returnedPromiseArray.length; i++){
+                var typeQueryResponse = returnedPromiseArray[i];
+
+                // verify that the procedure has completed.
+                // if the procedure did not complete, there will not be a property called procedure_status. If there is an error, the error code will be stored in procedure_status
+                // the object containing property procedure_status is stored in the second last position in the returned array since the last position is used for OkPacket.
+                if(!typeQueryResponse[typeQueryResponse.length - 2][0].hasOwnProperty('procedure_status') || typeQueryResponse[typeQueryResponse.length - 2][0].procedure_status !== 0 ||
+                    !typeQueryResponse[typeQueryResponse.length - 2][0].hasOwnProperty('type_id')){
+                    queryErr = 1;
+                    break;
+                }
+
+                // initialize the array.
+                // questionOptionsAndTypeMap should look like questionOptionsAndTypeMap[type_id][question_id][array of objects which are the options]
+                questionOptionsAndTypeMap[typeQueryResponse[typeQueryResponse.length - 2][0].type_id] = [];
+
+                // check properties for each question options and group them by questionId
+                for (var j = 0; j < typeQueryResponse[0].length; j++){
+                    var typeQueryResponseRow = typeQueryResponse[0][j];
+
+                    // verify properties
+                    if (!typeQueryResponseRow.hasOwnProperty('questionId') || !typeQueryResponseRow.questionId){
+                        queryErr = 1;
+                        i = returnedPromiseArray.length;    // this is used to break from the outer loop
+                        break;
+                    }
+
+                    // if required properties exist then sort them by question_id
+                    if (questionOptionsAndTypeMap[typeQueryResponse[typeQueryResponse.length - 2][0].type_id][typeQueryResponseRow.questionId] === undefined){
+                        questionOptionsAndTypeMap[typeQueryResponse[typeQueryResponse.length - 2][0].type_id][typeQueryResponseRow.questionId] = [];
+                    }
+
+                    questionOptionsAndTypeMap[typeQueryResponse[typeQueryResponse.length - 2][0].type_id][typeQueryResponseRow.questionId].push(typeQueryResponseRow);
+                }
+            }
+
+            if (queryErr === 1){
+                r.reject(new Error('Error getting questionnaire: query for question options error'));
+            }else{
+                r.resolve(questionOptionsAndTypeMap);
+            }
+        })
+        .catch(function (err) {
+            r.reject(err);
+        });
 
     return r.promise;
 }

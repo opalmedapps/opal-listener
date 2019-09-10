@@ -1348,7 +1348,7 @@ exports.setTrusted = function(requestObject)
 
 /**
  * getQuestionnaireList
- * @desc Returns a promise containing the questionnaires general information
+ * @desc Returns a promise containing the questionnaires general information. Used for the new questionnaire 2019
  * @param {object} requestObject
  * @return {Promise} Returns a promise that contains a list of questionnaire data
  */
@@ -1381,12 +1381,37 @@ exports.getQuestionnaireList = function(requestObject){
 
 /**
  * getQuestionnaire
- * @desc Returns a promise containing the questionnaires and answers
+ * @desc Returns a promise containing the questionnaires and answers. Used for new questionnaire 2019
  * @param {object} requestObject the request
  * @returns {Promise} Returns a promise that contains the questionnaire data
  */
 exports.getQuestionnaire = function(requestObject) {
-    // TODO
+    var r = Q.defer();
+
+    // check argument
+    if (!requestObject.hasOwnProperty('Parameters') || !requestObject.Parameters.hasOwnProperty('qp_ser_num') || !requestObject.Parameters.qp_ser_num) {
+        r.reject(new Error('Error getting questionnaire: the requestObject does not have the required parameter qp_ser_num'));
+    }else if (!requestObject.hasOwnProperty('UserID') || requestObject.UserID === undefined){
+        r.reject(new Error('Error getting questionnaire: the requestObject does not have UserID'));
+    }else{
+        // get language in the database
+        exports.runSqlQuery(queries.getPatientSerNumAndLanguage(), [requestObject.UserID, null, null])
+            .then(function (patientSerNumAndLanguageRow) {
+
+                // get questionnaire belonging to that qp_ser_num
+                return questionnaires.getQuestionnaire(patientSerNumAndLanguageRow[0], requestObject.Parameters.qp_ser_num);
+            })
+            .then(function (result) {
+                var obj = {};
+                obj.Data = result;
+                r.resolve(obj);
+            })
+            .catch(function (error) {
+                r.reject(error);
+            });
+    }
+
+    return r.promise;
 };
 
 /**
@@ -1422,7 +1447,7 @@ exports.getQuestionnaires = function(requestObject){
             r.reject(error);
         });
 
-    return r.promise
+    return r.promise;
 };
 
 /**
