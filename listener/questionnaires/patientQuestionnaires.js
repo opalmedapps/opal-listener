@@ -914,7 +914,7 @@ function formatAnswer(questionnaireDataArray, answerDataArray){
  * @return returnedData {object} the fully formated object to send to front end
  */
 function formatQuestionnaire (questionnaireDataArray, sectionDataArray, questionDataArray, answerObject, questionOptionsAndTypeMap){
-    var returnedData = {};
+    const char_limit_for_textbox = 500;     // this is arbitrarily determined, can be changed
 
     // this function is used for formatting one questionnaire only. This is checked in the procedure getQuestionnaireInfo, but just in case that this function is being called by mistake.
     // verify required properties for the questionnaire data should be done in the calling function
@@ -922,7 +922,7 @@ function formatQuestionnaire (questionnaireDataArray, sectionDataArray, question
         throw new Error("Error getting questionnaire: there is more than one or no questionnaire associated with the ID provided");
     }
 
-    var sections = {};  // TODO: this was implemented as an array by Thomas before, now that it is an object, check if everything works
+    var sections = {};
 
     sectionDataArray.forEach(function(section){
         // check required properties for a section
@@ -951,6 +951,15 @@ function formatQuestionnaire (questionnaireDataArray, sectionDataArray, question
 
         var options =  questionOptionsAndTypeMap[question.type_id][question.question_id];
 
+        // add character limit for textbox questions
+        if (question.question_type_category_key === 'Text box'){
+            if (options.length !== 1){
+                throw new Error("Error getting questionnaire: text box question options error");
+            }
+
+            options[0].char_limit = char_limit_for_textbox;
+        }
+
         // dealing with answers now
         var patient_answer = {};
 
@@ -958,6 +967,7 @@ function formatQuestionnaire (questionnaireDataArray, sectionDataArray, question
 
         // get the answers for that question if the questionnaire is not new
         if (questionnaireDataArray[0].status !== 0) {
+            // a question might have duplicates in a single section, but a questionSection_id is unique (reason for why the key is questionSection_id and not question_id)
             patient_answer.answer = answerObject[question.questionSection_id];
             patient_answer.is_defined = 1;
         }else{
@@ -965,12 +975,16 @@ function formatQuestionnaire (questionnaireDataArray, sectionDataArray, question
             patient_answer.is_defined = 0;
         }
 
-        // a question might have duplicates in a single section, but a questionSection_id is unique (reason for why the key is questionSection_id and not question_id)
-        sections[question.section_id].questions[question.questionSection_id] = Object.assign({},
-            {options: options, patient_answer: patient_answer}, question);
+        // combine the question general information with its answer and options
+        var questionObject = Object.assign({},{options: options, patient_answer: patient_answer}, question);
+
+        console.log("\n------------questionObject-------------\n", questionObject);
+
+        sections[question.section_id].questions.push(questionObject);
     });
 
-    returnedData = Object.assign({}, {sections: sections}, questionnaireDataArray[0]);
+    // the use of Object.values is because the front-end uses indexes with is based off an array
+    var returnedData = Object.assign({}, {sections: Object.values(sections)}, questionnaireDataArray[0]);
 
     console.log("\n ----------------------returnedData-----------------\n", returnedData);
 
