@@ -968,12 +968,24 @@ function formatQuestionnaire (questionnaireDataArray, sectionDataArray, question
         // get the answers for that question if the questionnaire is not new
         if (questionnaireDataArray[0].status !== 0) {
             // a question might have duplicates in a single section, but a questionSection_id is unique (reason for why the key is questionSection_id and not question_id)
-            patient_answer.answer = answerObject[question.questionSection_id];
+            // the following check is for when the migration has not migrate the answers
+            if (answerObject[question.questionSection_id] === undefined){
+                patient_answer.answer = [];
+            }else{
+                patient_answer.answer = answerObject[question.questionSection_id];
+            }
+
             patient_answer.is_defined = 1;
+            console.log("\n-------------------question.questionSection_id--------------------\n", question.questionSection_id);
+            console.log("\n-------------------answerObject[question.questionSection_id]--------------------\n", answerObject[question.questionSection_id]);
+            console.log("\n-------------------patient_answer: progress or completed--------------------\n", patient_answer);
         }else{
             patient_answer.answer = [];
             patient_answer.is_defined = 0;
+            console.log("\n-------------------patient_answer: new--------------------\n", patient_answer);
         }
+
+        console.log("\n-------------------patient_answer--------------------\n", patient_answer);
 
         // combine the question general information with its answer and options
         var questionObject = Object.assign({},{options: options, patient_answer: patient_answer}, question);
