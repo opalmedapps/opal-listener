@@ -1414,6 +1414,43 @@ exports.getQuestionnaire = function(requestObject) {
     return r.promise;
 };
 
+exports.questionnaireSaveAnswer = function(requestObject){
+    let r = Q.defer();
+
+    console.log("\n----------------requestObject----------------------", requestObject);
+
+    // check argument
+    if (!requestObject.hasOwnProperty('Parameters') || !requestObject.Parameters.hasOwnProperty('answer') ||
+        !requestObject.Parameters.hasOwnProperty('answerQuestionnaire_id') || !requestObject.Parameters.hasOwnProperty('is_skipped') ||
+        !requestObject.Parameters.hasOwnProperty('questionSection_id') || !requestObject.Parameters.hasOwnProperty('question_id') ||
+        !requestObject.Parameters.hasOwnProperty('section_id') || !requestObject.Parameters.hasOwnProperty('question_type_id') ||
+        !Array.isArray(requestObject.Parameters.answer)) {
+
+        r.reject(new Error('Error saving answer: the requestObject does not have the required parameters'));
+
+    }else if (!requestObject.hasOwnProperty('UserID') || requestObject.UserID === undefined){
+        r.reject(new Error('Error saving answer: the requestObject does not have UserID'));
+
+    }else if (!requestObject.hasOwnProperty('AppVersion') || requestObject.AppVersion === undefined){
+        r.reject(new Error ('Error saving answer: the requestObject does not have AppVersion'));
+    }else{
+        // get language in the opal database
+        exports.runSqlQuery(queries.getPatientSerNumAndLanguage(), [requestObject.UserID, null, null])
+            .then(function (patientSerNumAndLanguageRow) {
+                // save answer in questionnaire DB
+
+                return questionnaires.saveAnswer(patientSerNumAndLanguageRow[0], requestObject.Parameters, requestObject.AppVersion);
+
+            }).then(function(){
+                // update the opalDB questionnaire status
+            }).catch(function (error) {
+                r.reject(error);
+            });
+    }
+
+    return r.promise;
+};
+
 /**
  * Returns a promise containing the questionnaires and answers
  * @param {object} requestObject the request

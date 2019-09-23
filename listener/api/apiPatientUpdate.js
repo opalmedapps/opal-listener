@@ -135,11 +135,13 @@ exports.getQuestionnaires = function (requestObject) {
     return sqlInterface.getQuestionnaires(requestObject);
 };
 
-exports.getQuestionnaireList = function(requestObject){
+// V2 is for the 2019 version of qplus questionnaire front-end
+exports.getQuestionnaireListV2 = function(requestObject){
     return sqlInterface.getQuestionnaireList(requestObject);
 };
 
-exports.getQuestionnaire = function(requestObject){
+// V2 is for the 2019 version of qplus questionnaire front-end
+exports.getQuestionnaireV2 = function(requestObject){
     return sqlInterface.getQuestionnaire(requestObject);
 };
 

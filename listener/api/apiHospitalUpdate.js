@@ -23,6 +23,12 @@ exports.inputQuestionnaireAnswers = function(requestObject)
   return sqlInterface.inputQuestionnaireAnswers(requestObject);
 };
 
+// V2 is for inputting a single question's answer for 2019 qplus questionnaire front-end
+exports.questionnaireSaveAnswerV2 = function(requestObject)
+{
+    return sqlInterface.questionnaireSaveAnswer(requestObject);
+};
+
 //Input feedback
 exports.inputFeedback=function(requestObject)
 {

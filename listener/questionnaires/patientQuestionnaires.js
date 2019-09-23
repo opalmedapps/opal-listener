@@ -743,17 +743,26 @@ function promisifyQuery(query, parameters) {
 
 exports.getQuestionnaireList = getQuestionnaireList;
 exports.getQuestionnaire = getQuestionnaire;
+exports.saveAnswer = saveAnswer;
 
 /*
 QUERIES
  */
 
-var getQuestionnaireListQuery = `call getQuestionnaireList(?,?);`;
-var getQuestionnaireQuery = `call getQuestionnaireInfo(?,?);`;
-var getQuestionOptionsQuery = `CALL getQuestionOptions(?, ?, ?);`;
+const getQuestionnaireListQuery = `call getQuestionnaireList(?,?);`;
+const getQuestionnaireQuery = `call getQuestionnaireInfo(?,?);`;
+const getQuestionOptionsQuery = `CALL getQuestionOptions(?, ?, ?);`;
+const saveAnswerQuery = `call saveAnswer(?,?,?,?,?,?,?);`;
+const insertAnswerTextbox = `INSERT INTO answerTextBox (answerId, value) VALUES (?, ?)`;
+const insertAnswerSlider = `INSERT INTO \`answerSlider\` (\`answerId\`, \`value\`) VALUES (?, ?)`;
+const insertAnswerRadioButton = `INSERT INTO answerRadioButton (answerId, value) VALUES (?,?);`;
+const insertAnswerTime = `INSERT INTO answerTime (answerId, value) VALUES (?, ?)`;
+const insertAnswerDate = `INSERT INTO answerDate (answerId, value) VALUES (?, ?)`;
+const insertAnswerLabel = `INSERT INTO answerLabel (answerId, selected, posX, posY, intensity, value) VALUES `;
+const insertAnswerCheckbox = `INSERT INTO answerCheckbox (answerId, value) VALUES `;
 
 /*
-FUNCTIONS
+FUNCTIONS TO GET QUESTIONNAIRES
  */
 
 /**
@@ -1108,6 +1117,247 @@ function getQuestionOptions(questionAndTypeMap, languageId){
         .catch(function (err) {
             r.reject(err);
         });
+
+    return r.promise;
+}
+
+/*
+FUNCTIONS TO SAVE QUESTIONNAIRE
+ */
+
+/**
+ * saveAnswer
+ * @desc this saves the answer of one question only
+ * @param opalPatientSerNumAndLanguage {object} must contain PatientSerNum and Language as properties. This should be gotten directly from the OpalDB
+ * @param param {object} the parameters passed from the front-end. The calling function must verify its properties.
+ * @param appVersion {String} a string denoting the version of the app.
+ * @returns {promise}
+ */
+function saveAnswer(opalPatientSerNumAndLanguage, param, appVersion){
+
+    // TODO: CHECK SAVE ANSWER PROCEDURE'S VALIDITY
+    /*
+    call saveAnswer(398,37,853,2,0,'100.100.100','EN');
+     */
+
+    var r = q.defer();
+    var isoLang;
+    var answerId;
+
+    // r.reject(new Error('Will this stop?'));
+    //
+    // console.log("\n---------------------------\nyou can see this if r.reject did not stop");
+    //
+    // throw new Error('STOPPED');
+
+    // verify the argument
+    if (!opalPatientSerNumAndLanguage.hasOwnProperty('PatientSerNum') || !opalPatientSerNumAndLanguage.hasOwnProperty('Language')
+        || !opalPatientSerNumAndLanguage.PatientSerNum || !opalPatientSerNumAndLanguage.Language){
+        r.reject(new Error('Error saving questionnaire: No matching PatientSerNum or/and Language found in opalDB'));
+
+    }else{
+        isoLang = opalPatientSerNumAndLanguage.Language;
+
+        /*
+        author of update should be patientId(in questionnaireDB) + '_APP_' + appVersion
+
+        1. get patientId and questionnaireId from answerQuestionnaire_id
+        2. update status from new to in progress using answerQuestionnaire_id
+        3. verify if the answerSection exist for that answerQuestionnaire_id
+            3.1 if it exist take that ID as answerSectionId
+                and verify if the answer exists for that ID
+                    3.1.1 if it exists, mark it as deleted, go to 4.
+                    3.1.2 if it does not exist, go to 4.
+            3.2 if it does not exist, create one, and take the insertId as answerSectionId
+        4. use answerSectionId from 3. and section_id, question_id, is_skipped, question_type_id from the param, questionnaireId from 1., and language from the opal db to insert into the answer table
+        5. using the insertId from 4. and using answer array and question_type_id from param, insert into the sub-answer tables
+         */
+
+        promisifyQuery(saveAnswerQuery, [param.answerQuestionnaire_id, param.section_id, param.question_id, param.question_type_id, param.is_skipped, appVersion, isoLang])
+            .then(function(queryResult){
+                // verify that the procedure has completed.
+                // if the procedure did not complete, there will not be a property called procedure_status. If there is an error, the error code will be stored in procedure_status
+                // the object containing property procedure_status is stored in the second last position in the returned array since the last position is used for OkPacket.
+                if (!queryResult[queryResult.length - 2][0].hasOwnProperty('procedure_status')){
+                    r.reject(new Error('Error saving answer: query uncompleted'));
+                }else if(queryResult[queryResult.length - 2][0].procedure_status !== 0) {
+                    if (queryResult[queryResult.length - 2][0].hasOwnProperty('procedure_message')) {
+                        r.reject(new Error('Error saving answer: query unsuccessful due to ' + queryResult[queryResult.length - 2][0].procedure_message));
+                    } else {
+                        r.reject(new Error('Error saving answer: query unsuccessful'));
+                    }
+                } else if (!queryResult[queryResult.length - 2][0].hasOwnProperty('inserted_answer_id') || !queryResult[queryResult.length - 2][0].hasOwnProperty('question_type_name_EN')){
+                    r.reject(new Error('Error saving answer: query unsuccessful'));
+                }else{
+                    answerId = queryResult[queryResult.length - 2][0].inserted_answer_id;
+
+                    // 5. using the insertId from 4. and using answer array and question_type_id from param, insert into the sub-answer tables
+                    return insertAnswerByType(answerId, param.answer, queryResult[queryResult.length - 2][0].question_type_name_EN);
+                }
+
+            })
+            .then(function(insertAnswerResult){
+                r.resolve('AnswerId: ' + answerId + '. Insert answer by type: ' + insertAnswerResult);
+            })
+            .catch(function(err){
+                r.reject(err);
+        });
+    }
+    return r.promise;
+}
+
+/**
+ * insertAnswerByType
+ * @desc this is a helper function which insert answers to specific table in the DB depending on the question type.
+ * @param answerId {int} this is the ID of the answer inserted for that question in the answer table.
+ * @param answerArray {array} this is the array of objects passed from the front-end. We check the property for them. A common property is answer_value.
+ * @param question_type_name_EN {String} this is a string in English denoting the type of the question
+ * @returns {promise}
+ */
+function insertAnswerByType (answerId, answerArray, question_type_name_EN){
+    var r = q.defer();
+
+    var promiseArray = [];  // this should contain only one query. It is used to avoid r.reject not doing a break.
+
+    switch (question_type_name_EN) {
+        case 'Checkbox':
+            var isErr = 0;
+            var insert_array_string = "(";
+            var insert_value_string = "(?,?)";
+            var insert_param_array = [];
+
+            // this is for inserting multiple values into the DB using one insert query, to avoid unnecessary network time
+            /*
+            for 3 answers, i.e. answerArray.length = 3:
+
+            insertAnswerCheckbox should look like this at the end of the loop
+            INSERT INTO answerCheckbox (answerId, value) VALUES
+
+            insert_array_string should look like this at the end of the loop
+            (
+                (?,?),
+                (?,?),
+                (?,?)
+            );
+
+            insert_param_array should look like this at the end of the loop
+            [answerId, answerArray[0].answer_value, answerId, answerArray[1].answer_value, answerId, answerArray[2].answer_value]
+             */
+            for (var i=0; i<answerArray.length; i++){
+                if (!answerArray[i].hasOwnProperty('answer_value')){
+                    isErr = 1;
+                }else{
+                    // if this is not the last value inserted, then add a comma
+                    if (i !== answerArray.length - 1){
+                        insert_array_string = insert_array_string + insert_value_string + ", ";
+                    }else{
+                        // if this is the last value, close the parenthesis and add a semi-colon
+                        insert_array_string = insert_array_string + insert_value_string + ");";
+                    }
+                    insert_param_array.push(answerId);
+                    insert_param_array.push(answerArray[i].answer_value);
+                }
+            }
+
+            if (isErr !== 0){
+                r.reject(new Error ('Error saving answer: no required properties in answer array'));
+            }else{
+                var query = insertAnswerCheckbox + insert_array_string;
+                promiseArray.push(promisifyQuery(query, insert_param_array));
+            }
+            break;
+        case 'Slider':
+            if (answerArray.length !== 1 || !answerArray[0].hasOwnProperty('answer_value')){
+                r.reject(new Error ('Error saving answer: answer array does not have the correct length or no property answer_value in answer array'));
+            }else{
+                promiseArray.push(promisifyQuery(insertAnswerSlider, [answerId, answerArray[0].answer_value]));
+            }
+            break;
+        case 'Text box':
+            if (answerArray.length !== 1 || !answerArray[0].hasOwnProperty('answer_value')){
+                r.reject(new Error ('Error saving answer: answer array does not have the correct length or no property answer_value in answer array'));
+            }else{
+                promiseArray.push(promisifyQuery(insertAnswerTextbox, [answerId, answerArray[0].answer_value]));
+            }
+            break;
+        case 'Radio Button':
+            if (answerArray.length !== 1 || !answerArray[0].hasOwnProperty('answer_value')){
+                r.reject(new Error ('Error saving answer: answer array does not have the correct length or no property answer_value in answer array'));
+            }else{
+                promiseArray.push(promisifyQuery(insertAnswerRadioButton, [answerId, answerArray[0].answer_value]));
+            }
+            break;
+        case 'Label':
+            var insert_array_string = "(";
+            var isErr = 0;
+
+            for (var i = 0; i < answerArray.length; i++){
+                if (!answerArray[i].hasOwnProperty('answer_value') || !answerArray[i].hasOwnProperty('selected') || !answerArray[i].hasOwnProperty('posX') ||
+                    !answerArray[i].hasOwnProperty('posY') || !answerArray[i].hasOwnProperty('intensity')){
+                    // this is a flag for outside the for loop due to r.reject does not stop the execution of the code
+                    isErr = 1;
+                    break;
+
+                }else{
+                    // this is the string for inserted value. It should look like this at the end of the loop:
+                    /*
+                    INSERT INTO answerLabel(answerId, selected, posX, posY, intensity, value)
+                    VALUES
+                    (
+                        (answerId, selected, posX, posY, intensity, answer_value),
+                        (answerId, selected, posX, posY, intensity, answer_value),
+                        (answerId, selected, posX, posY, intensity, answer_value)
+                    )
+                     */
+                    // this is to avoid unnecessary network transaction when calling the DB
+                    var value_string = "(" + answerId + ", " +  answerArray[i].selected + ", " + answerArray[i].posX + ", " +
+                        answerArray[i].posY + ", " + answerArray[i].intensity + ", " + answerArray[i].answer_value + ")";
+
+                    // add comma if this is not the last inserted value
+                    if (i !== answerArray.length-1){
+                        value_string = value_string + ",";
+                    }else{
+                        // if this is the last one, add another parentheses and semi-colon
+                        value_string = value_string + ");";
+                    }
+
+                    insert_array_string = insert_array_string + value_string;
+                }
+            }
+
+            if (isErr === 0){
+                var query = insertAnswerLabel + insert_array_string;
+                promiseArray.push(promisifyQuery(query, []));
+            }else{
+                r.reject(new Error ('Error saving answer: no required properties in answer array'));
+            }
+            break;
+
+        case 'Time':
+            if (answerArray.length !== 1 || !answerArray[0].hasOwnProperty('answer_value')){
+                r.reject(new Error ('Error saving answer: answer array does not have the correct length or no property answer_value in answer array'));
+            }else{
+                promiseArray.push(promisifyQuery(insertAnswerTime, [answerId, answerArray[0].answer_value]));
+            }
+            break;
+        case 'Date':
+            if (answerArray.length !== 1 || !answerArray[0].hasOwnProperty('answer_value')){
+                r.reject(new Error ('Error saving answer: answer array does not have the correct length or no property answer_value in answer array'));
+            }else{
+                promiseArray.push(promisifyQuery(insertAnswerDate, [answerId, answerArray[0].answer_value]));
+            }
+            break;
+        default:
+            r.reject(new Error('Error saving answer: do not have an answer table matching the question type. The answerId in answer table is: '+ answerId));
+    }
+
+    q.all(promiseArray)
+        .then(function(queryResult){
+            r.resolve(queryResult);
+
+        }).catch(function(err){
+            r.reject(err);
+    });
 
     return r.promise;
 }

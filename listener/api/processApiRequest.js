@@ -30,10 +30,11 @@ const API = {
     'NotificationsNew': apiHospitalUpdate.getNewNotifications,
     'EducationalPackageContents': apiPatientUpdate.getPackageContents,
     'Questionnaires': apiPatientUpdate.getQuestionnaires,
-    'QuestionnaireListV2': apiPatientUpdate.getQuestionnaireList,
-    'QuestionnaireV2': apiPatientUpdate.getQuestionnaire,
+    'QuestionnaireListV2': apiPatientUpdate.getQuestionnaireListV2,
+    'QuestionnaireV2': apiPatientUpdate.getQuestionnaireV2,
     'QuestionnaireRating': apiHospitalUpdate.inputEducationalMaterialRating,
     'QuestionnaireAnswers': apiHospitalUpdate.inputQuestionnaireAnswers,
+    'QuestionnaireSaveAnswerV2': apiHospitalUpdate.questionnaireSaveAnswerV2,
     'Read': apiHospitalUpdate.updateReadStatus,
     'PFPMembers': apiPatientUpdate.getPatientsForPatientsMembers,
 };
