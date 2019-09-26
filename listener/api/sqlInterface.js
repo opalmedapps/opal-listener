@@ -1499,7 +1499,7 @@ function mapRefreshedDataToNotifications(results, notifications) {
             let raw_questionnaires = results[key]['Questionnaires'];
 
             // convert the questionnaire object into a more manageable object for the next steps of notification mapping
-            resultsArray = createQuestionnaireNotificationObject(patient_questionnaires, raw_questionnaires, resultsArray)
+            resultsArray = createQuestionnaireNotificationObject(patient_questionnaires, raw_questionnaires, resultsArray);
 
         } else {
             resultsArray = resultsArray.concat(results[key])
@@ -1529,6 +1529,12 @@ function mapRefreshedDataToNotifications(results, notifications) {
 }
 
 function createQuestionnaireNotificationObject(patient_questionnaires, raw_questionnaires, resultsArray){
+
+    // input check
+    if (patient_questionnaires === undefined || patient_questionnaires === null || typeof patient_questionnaires !== 'object' ||
+        raw_questionnaires === undefined || raw_questionnaires === null || typeof raw_questionnaires !== 'object'){
+        return resultsArray;
+    }
 
     // Iterate through refreshed questionnaire data by serNum
     Object.keys(patient_questionnaires).map(ser => {
