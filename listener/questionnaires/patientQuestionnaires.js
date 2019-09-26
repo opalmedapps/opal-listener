@@ -105,6 +105,9 @@ var queryAnswers = `CALL queryAnswers(?,?);`;
 exports.getPatientQuestionnaires = function (patientIdAndLang, lang) {
     return new Promise(((resolve, reject) => {
 
+        console.log("\n----------in getPatientQuestionnaires: patientIdAndLang--------------", patientIdAndLang);
+        console.log("\n----------in getPatientQuestionnaires: lang--------------", lang);
+
         // check argument
         // if the front-end did not send a language, then we get the language in the opalDB. If that too does not exist, then we default to French
         if (lang === -1){
@@ -128,7 +131,12 @@ exports.getPatientQuestionnaires = function (patientIdAndLang, lang) {
 
         connection.query(queryPatientQuestionnaireInfo, [patientIdAndLang[0].PatientSerNum], function (err, rows, fields) {
 
-            if (rows.length !== 0) {
+            console.log("\n----------in getPatientQuestionnaires: queryPatientQuestionnaireInfo--------------", rows);
+
+            if (err){
+                resolve([]);
+            }
+            else if (rows.length !== 0) {
 
                 let questionnaireDBSerNumArray = getQuestionnaireDBSerNums(rows[0]);
 
@@ -300,11 +308,13 @@ function getQuestionChoices(rows) {
         // which requires a TEXT argument in the following format: '11,12,23,..'
         connection.query(queryQuestionChoices, [array.join()], function (err, choices, fields) {
 
-            if (err) r.reject(err);
+            if (err){
+                r.reject(err);
+            }else{
+                var questions = attachChoicesToQuestions(rows, choices[0]);
 
-            var questions = attachChoicesToQuestions(rows, choices[0]);
-
-            r.resolve(questions);
+                r.resolve(questions);
+            }
         });
     } else {
         r.resolve([]);
@@ -365,43 +375,46 @@ function attachingQuestionnaireAnswers(questionnairesSentToPatient, lang) {
         }
     }
     if (questionnaireSerNumArray.length > 0) {
+
         var quer = connection.query(queryAnswers, [questionnaireSerNumArray.join(), lang], function (err, rows, fields) {
 
-            if (err) r.reject(err);
+            if (err){
+                r.reject(err);
+            } else{
+                // the following line is due to us calling a stored procedure
+                rows = rows[0];
 
-            // the following line is due to us calling a stored procedure
-            rows = rows[0];
+                // inserting the answers according to the questionnaire
+                // this is for when a question can have multiple answers
+                var answersQuestionnaires = {};
 
-            // inserting the answers according to the questionnaire
-            // this is for when a question can have multiple answers
-            var answersQuestionnaires = {};
+                for (var i = 0; rows && i < rows.length; i++) {
+                    if(!answersQuestionnaires.hasOwnProperty(rows[i].QuestionnaireSerNum)){
+                        answersQuestionnaires[rows[i].QuestionnaireSerNum] = [];
+                    }
 
-            for (var i = 0; rows && i < rows.length; i++) {
-                if(!answersQuestionnaires.hasOwnProperty(rows[i].QuestionnaireSerNum)){
-                    answersQuestionnaires[rows[i].QuestionnaireSerNum] = [];
+                    // the answer will be '' to denote the case where there is no real answer text, since null and undefined makes qplus give an error
+                    if (!rows[i].hasOwnProperty('Answer') || !rows[i].Answer || rows[i].Answer === undefined || rows[i].Answer === null){
+
+                        rows[i].Answer = '';
+                    }
+
+                    answersQuestionnaires[rows[i].QuestionnaireSerNum].push(rows[i]);
                 }
 
-                // the answer will be '' to denote the case where there is no real answer text, since null and undefined makes qplus give an error
-                if (!rows[i].hasOwnProperty('Answer') || !rows[i].Answer || rows[i].Answer === undefined || rows[i].Answer === null){
+                // putting the answers into patientQuestionnaires object
+                for (var i = 0; i < questionnairesSentToPatient.length; i++) {
 
-                    rows[i].Answer = '';
+                    if(questionnairesSentToPatient[i].CompletedFlag === 1 || questionnairesSentToPatient[i].CompletedFlag === '1'){
+
+                        patientQuestionnaires[questionnairesSentToPatient[i].QuestionnaireSerNum].Answers = answersQuestionnaires[questionnairesSentToPatient[i].QuestionnaireSerNum];
+                    }
                 }
 
-                answersQuestionnaires[rows[i].QuestionnaireSerNum].push(rows[i]);
+                r.resolve(patientQuestionnaires);
             }
+        });
 
-            // putting the answers into patientQuestionnaires object
-            for (var i = 0; i < questionnairesSentToPatient.length; i++) {
-
-                if(questionnairesSentToPatient[i].CompletedFlag === 1 || questionnairesSentToPatient[i].CompletedFlag === '1'){
-
-                    patientQuestionnaires[questionnairesSentToPatient[i].QuestionnaireSerNum].Answers = answersQuestionnaires[questionnairesSentToPatient[i].QuestionnaireSerNum];
-                }
-            }
-
-            r.resolve(patientQuestionnaires);
-
-            });
     } else {
         r.resolve(patientQuestionnaires);
     }
