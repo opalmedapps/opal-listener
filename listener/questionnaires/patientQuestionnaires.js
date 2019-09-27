@@ -143,24 +143,26 @@ exports.getPatientQuestionnaires = function (patientIdAndLang, lang) {
                 // the following join in the argument is due to us calling a procedure using CONCAT with a prepared statement,
                 // which requires a TEXT argument in the following format: '11,12,23,..'
                 connection.query(queryQuestions, [questionnaireDBSerNumArray.join()], function (err, questions, fields) {
-                    if (err) reject(err);
-
-                    let questionsOrdered = setQuestionOrder(questions[0]);
-
-                    getQuestionChoices(questionsOrdered).then(function (questionsChoices) {
-
-                        let questionnaires = prepareQuestionnaireObject(questionsChoices, rows[0]);
-                        let patientQuestionnaires = {};
-
-                        attachingQuestionnaireAnswers(rows[0], lang).then(function (paQuestionnaires) {
-                            patientQuestionnaires = paQuestionnaires;
-                            resolve({'Questionnaires': questionnaires, 'PatientQuestionnaires': patientQuestionnaires});
-                        }).catch(function (error) {
-                            reject(error);
-                        });
-                    }).catch(function (err) {
+                    if (err){
                         reject(err);
-                    })
+                    }else{
+                        let questionsOrdered = setQuestionOrder(questions[0]);
+
+                        getQuestionChoices(questionsOrdered).then(function (questionsChoices) {
+
+                            let questionnaires = prepareQuestionnaireObject(questionsChoices, rows[0]);
+                            let patientQuestionnaires = {};
+
+                            attachingQuestionnaireAnswers(rows[0], lang).then(function (paQuestionnaires) {
+                                patientQuestionnaires = paQuestionnaires;
+                                resolve({'Questionnaires': questionnaires, 'PatientQuestionnaires': patientQuestionnaires});
+                            }).catch(function (error) {
+                                reject(error);
+                            });
+                        }).catch(function (err) {
+                            reject(err);
+                        })
+                    }
                 });
             } else {
                 resolve([]);
