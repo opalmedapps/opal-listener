@@ -707,6 +707,8 @@ exports.inputQuestionnaireAnswers = function(requestObject) {
     let parameters = requestObject.Parameters;
     let appVersion = requestObject.AppVersion;
 
+    console.log("\n-------------in inputQuestionnaireAnswers--------------------------");
+
     // check input: these are required properties.
     // The non required properties is: parameters.PatientId
     if (!parameters.hasOwnProperty('QuestionnaireDBSerNum') || parameters.QuestionnaireDBSerNum === undefined
@@ -722,10 +724,14 @@ exports.inputQuestionnaireAnswers = function(requestObject) {
         throw new Error('Error inputting questionnaire answers: The questionnaire has not been completed');
     }
 
+    console.log("\n-------------in inputQuestionnaireAnswers: after checking input--------------------------");
+
     // the following query is simply for getting the language from the opalDB, there is no other use of it.
     // But since there might be the possibility of the front end not sending any language, this is necessary
     exports.runSqlQuery(queries.getPatientSerNumAndLanguage(), [requestObject.UserID, null, null])
         .then(function (queryRows) {
+
+            console.log("\n-------------in inputQuestionnaireAnswers: after getting patient ser num and lang--------------------------");
 
             var dbLang = -1;
             // ask the opalDB for the language
@@ -762,12 +768,16 @@ exports.inputQuestionnaireAnswers = function(requestObject) {
                 throw new Error('Error inputting questionnaire answers: Cannot find patientSerNum in OpalDB');
             }
 
+            console.log("\n-------------in inputQuestionnaireAnswers: before getting to questionnaireDB--------------------------");
+
             return questionnaires.inputQuestionnaireAnswers(parameters, appVersion, queryRows[0].PatientSerNum);
 
-        }).then(function(){
+        }).then(function(answerQuestionnaireId){
 
-            // mark, in opalDB.Questionnaire, that this particular questionnaire is completed
-            return exports.runSqlQuery(queries.updateQuestionnaireStatus(), [parameters.CompletedFlag, parameters.DateCompleted, parameters.QuestionnaireSerNum]);
+            console.log("\n-------------in inputQuestionnaireAnswers: getting back from questionnaireDB--------------------------");
+
+            // mark, in opalDB.Questionnaire, that this particular questionnaire is completed and add PatientQuestionnaireDBSerNum
+            return exports.runSqlQuery(queries.setQuestionnaireCompletedQuery(), [answerQuestionnaireId, parameters.DateCompleted, requestObject.Token, parameters.QuestionnaireSerNum]);
 
         }).then(function(){
             r.resolve({Response:'success'});
@@ -1356,6 +1366,7 @@ exports.getQuestionnaires = function(requestObject){
     "use strict";
     var r = Q.defer();
     var lang = -1;
+    var patientSerNum_opalDB;
 
     // check and pre-process argument
     if (requestObject.hasOwnProperty('Parameters') && requestObject.Parameters.hasOwnProperty('Language') && requestObject.Parameters.Language !== undefined){
@@ -1368,7 +1379,38 @@ exports.getQuestionnaires = function(requestObject){
 
     exports.runSqlQuery(queries.getPatientSerNumAndLanguage(), [requestObject.UserID, null, null])
         .then(function (queryRows) {
-            return questionnaires.getPatientQuestionnaires(queryRows,lang);
+            // check argument: PatientSerNum
+            if (queryRows[0].hasOwnProperty("PatientSerNum") && queryRows[0].PatientSerNum !== undefined){
+                patientSerNum_opalDB = queryRows[0].PatientSerNum;
+            }else{
+                throw new Error('Error getting questionnaires: There is no such PatientSerNum in opalDB matching the UserID');
+            }
+
+            // check argument: Language
+            // if the front-end did not send a language, then we get the language in the opalDB. If that too does not exist, then we default to French
+            if (lang === -1){
+                if(queryRows[0].hasOwnProperty('Language') && queryRows[0].Language !== undefined){
+                    switch (queryRows[0].Language) {
+                        case ('EN'):
+                            lang = 2;
+                            break;
+                        case ('FR'):
+                            lang = 1;
+                            break;
+                        default:
+                            // the default is French
+                            lang = 1;
+                    }
+                }else{
+                    // the default is French
+                    lang = 1;
+                }
+            }
+
+            return exports.runSqlQuery(queries.patientQuestionnaireTableFields(), [requestObject.UserID, null, null]);
+        })
+        .then(function(patientQuestionnaireTableFields){
+            return questionnaires.getPatientQuestionnaires(patientQuestionnaireTableFields, lang);
         })
         .then(function (result) {
             var obj = {};

@@ -98,76 +98,47 @@ var queryAnswers = `CALL queryAnswers(?,?);`;
 /**
  * getPatientQuestionnaires
  * @desc the main function for getting the questionnaire information for a patient
- * @param patientIdAndLang: this parameter is obtained form a query for the opalDB
- * @param lang: this is the language passed from the front-end, if the front-end did not send any language parameter, then this should be -1. Pre-processed in the calling function: getQuestionnaires
+ * @param patientQuestionnaireTableFields: this is the list of questionnaires gotten from the opalDB
+ * @param lang: this is the language pre-processed in the calling function: getQuestionnaires
  * @return {Promise}
  */
-exports.getPatientQuestionnaires = function (patientIdAndLang, lang) {
+exports.getPatientQuestionnaires = function (patientQuestionnaireTableFields, lang) {
     return new Promise(((resolve, reject) => {
 
-        console.log("\n----------in getPatientQuestionnaires: patientIdAndLang--------------", patientIdAndLang);
+        console.log("\n----------in getPatientQuestionnaires: patientQuestionnaireTableFields--------------", patientQuestionnaireTableFields);
         console.log("\n----------in getPatientQuestionnaires: lang--------------", lang);
 
-        // check argument
-        // if the front-end did not send a language, then we get the language in the opalDB. If that too does not exist, then we default to French
-        if (lang === -1){
-            if(patientIdAndLang[0].hasOwnProperty('Language') && patientIdAndLang[0].Language !== undefined){
-                switch (patientIdAndLang[0].Language) {
-                    case ('EN'):
-                        lang = 2;
-                        break;
-                    case ('FR'):
-                        lang = 1;
-                        break;
-                    default:
-                        // the default is French
-                        lang = 1;
-                }
-            }else{
-                // the default is French
-                lang = 1;
-            }
-        }
+        if (patientQuestionnaireTableFields.length !== 0) {
 
-        connection.query(queryPatientQuestionnaireInfo, [patientIdAndLang[0].PatientSerNum], function (err, rows, fields) {
+            let questionnaireDBSerNumArray = getQuestionnaireDBSerNums(patientQuestionnaireTableFields);
 
-            console.log("\n----------in getPatientQuestionnaires: queryPatientQuestionnaireInfo--------------", rows);
+            // the following join in the argument is due to us calling a procedure using CONCAT with a prepared statement,
+            // which requires a TEXT argument in the following format: '11,12,23,..'
+            connection.query(queryQuestions, [questionnaireDBSerNumArray.join()], function (err, questions, fields) {
+                if (err){
+                    reject(err);
+                }else{
+                    let questionsOrdered = setQuestionOrder(questions[0]);
 
-            if (err){
-                resolve([]);
-            }
-            else if (rows.length !== 0) {
+                    getQuestionChoices(questionsOrdered).then(function (questionsChoices) {
 
-                let questionnaireDBSerNumArray = getQuestionnaireDBSerNums(rows[0]);
+                        let questionnaires = prepareQuestionnaireObject(questionsChoices, patientQuestionnaireTableFields);
+                        let patientQuestionnaires = {};
 
-                // the following join in the argument is due to us calling a procedure using CONCAT with a prepared statement,
-                // which requires a TEXT argument in the following format: '11,12,23,..'
-                connection.query(queryQuestions, [questionnaireDBSerNumArray.join()], function (err, questions, fields) {
-                    if (err){
+                        attachingQuestionnaireAnswers(patientQuestionnaireTableFields, lang).then(function (paQuestionnaires) {
+                            patientQuestionnaires = paQuestionnaires;
+                            resolve({'Questionnaires': questionnaires, 'PatientQuestionnaires': patientQuestionnaires});
+                        }).catch(function (error) {
+                            reject(error);
+                        });
+                    }).catch(function (err) {
                         reject(err);
-                    }else{
-                        let questionsOrdered = setQuestionOrder(questions[0]);
-
-                        getQuestionChoices(questionsOrdered).then(function (questionsChoices) {
-
-                            let questionnaires = prepareQuestionnaireObject(questionsChoices, rows[0]);
-                            let patientQuestionnaires = {};
-
-                            attachingQuestionnaireAnswers(rows[0], lang).then(function (paQuestionnaires) {
-                                patientQuestionnaires = paQuestionnaires;
-                                resolve({'Questionnaires': questionnaires, 'PatientQuestionnaires': patientQuestionnaires});
-                            }).catch(function (error) {
-                                reject(error);
-                            });
-                        }).catch(function (err) {
-                            reject(err);
-                        })
-                    }
-                });
-            } else {
-                resolve([]);
-            }
-        });
+                    })
+                }
+            });
+        } else {
+            resolve([]);
+        }
     }));
 };
 
@@ -357,7 +328,7 @@ function attachChoicesToQuestions(questions, choices) {
 /**
  * attachingQuestionnaireAnswers
  * @desc Attaching answers to answered questionnaires
- * @param questionnairesSentToPatient: The list of questionnaires sent to patients. This info is obtained by calling queryPatientQuestionnaireInfo in the questionnaireDB
+ * @param questionnairesSentToPatient: The list of questionnaires sent to patients. This info is obtained by querying questionnaires in opalDB
  * @param lang: the language that the answers are going to be displayed in case the answers have languageId = -1 in the database. This should be obtained from the front end or the opalDB
  *              and pre-processed in getPatientQuestionnaires or the calling function
  * @return {promise}
@@ -367,18 +338,23 @@ function attachingQuestionnaireAnswers(questionnairesSentToPatient, lang) {
     var r = q.defer();
 
     var patientQuestionnaires = {};
-    var questionnaireSerNumArray = [];
+    var answerQuestionnaireIdArray = [];
 
     for (var i = 0; i < questionnairesSentToPatient.length; i++) {
         patientQuestionnaires[questionnairesSentToPatient[i].QuestionnaireSerNum] = questionnairesSentToPatient[i];
 
-        if (questionnairesSentToPatient[i].CompletedFlag == 1 || questionnairesSentToPatient[i].CompletedFlag == '1') {
-            questionnaireSerNumArray.push(questionnairesSentToPatient[i].QuestionnaireSerNum);
+        if (questionnairesSentToPatient[i].CompletedFlag === 1 || questionnairesSentToPatient[i].CompletedFlag === '1') {
+            if (questionnairesSentToPatient[i].PatientQuestionnaireDBSerNum === null || questionnairesSentToPatient[i].PatientQuestionnaireDBSerNum === undefined){
+                // this should never happen. this means that the questionnaire is completed but there is no answer for it. This would be an error in the database
+                // TODO: report something back
+            }else{
+                answerQuestionnaireIdArray.push(questionnairesSentToPatient[i].PatientQuestionnaireDBSerNum);
+            }
         }
     }
-    if (questionnaireSerNumArray.length > 0) {
+    if (answerQuestionnaireIdArray.length > 0) {
 
-        var quer = connection.query(queryAnswers, [questionnaireSerNumArray.join(), lang], function (err, rows, fields) {
+        var quer = connection.query(queryAnswers, [answerQuestionnaireIdArray.join(), lang], function (err, rows, fields) {
 
             if (err){
                 r.reject(err);
@@ -391,6 +367,8 @@ function attachingQuestionnaireAnswers(questionnairesSentToPatient, lang) {
                 var answersQuestionnaires = {};
 
                 for (var i = 0; rows && i < rows.length; i++) {
+                    // note: due to the change of where to get the new questionnaires, the QuestionnaireSerNum which meant answerQuestionnaireId before was transformed into opalDB.questionnaire.ID
+                    // but here QuestionnaireSerNum still means answerQuestionnaireId since it comes from the procedure in the questionnaireDB.
                     if(!answersQuestionnaires.hasOwnProperty(rows[i].QuestionnaireSerNum)){
                         answersQuestionnaires[rows[i].QuestionnaireSerNum] = [];
                     }
@@ -409,7 +387,7 @@ function attachingQuestionnaireAnswers(questionnairesSentToPatient, lang) {
 
                     if(questionnairesSentToPatient[i].CompletedFlag === 1 || questionnairesSentToPatient[i].CompletedFlag === '1'){
 
-                        patientQuestionnaires[questionnairesSentToPatient[i].QuestionnaireSerNum].Answers = answersQuestionnaires[questionnairesSentToPatient[i].QuestionnaireSerNum];
+                        patientQuestionnaires[questionnairesSentToPatient[i].QuestionnaireSerNum].Answers = answersQuestionnaires[questionnairesSentToPatient[i].PatientQuestionnaireDBSerNum];
                     }
                 }
 
@@ -445,6 +423,7 @@ FROM answerQuestionnaire
 WHERE ID = ? AND deleted <> 1 AND \`status\` <> 2
 ;`;
 var updateStatusCompletedInAnswerQuestionnaireQuery = `UPDATE \`answerquestionnaire\` SET \`status\`='2', \`lastUpdated\`=?, \`updatedBy\`=? WHERE  \`ID\`=?;`;
+var insertInAnswerQuestionnaireQuery = `INSERT INTO \`answerquestionnaire\` (\`questionnaireId\`, \`patientId\`, \`status\`, \`deleted\`, \`deletedBy\`, \`creationDate\`, \`createdBy\`, \`lastUpdated\`, \`updatedBy\`) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?);`;
 var insertSectionIntoAnswerSectionQuery = `REPLACE INTO answersection(answerQuestionnaireId, sectionId) VALUES (?, ?);`;
 
 var insertIntoAnswerQuery = `REPLACE INTO 
@@ -475,21 +454,41 @@ exports.inputQuestionnaireAnswers = function (parameters, appVersion, patientSer
 
     var authorOfUpdate; // patientId_APP_appVersion
     var patientId;
+    const completedStatus = 2;
+    const deleted = 0;
+    const deletedBy = '';
+    var answerQuestionnaireId = -1;
 
-   getPatientIdInQuestionnaireDB(parameters, patientSerNum)
-       .then(function(verifiedPatientId){
+    console.log("\n--------------in inputQuestionnaireAnswers, questionnaire-------------------");
 
-           patientId = verifiedPatientId;
+    promisifyQuery(patientIdInQuestionnaireDBQuery, [patientSerNum])
+       .then(function(patientId_questionnaireDB){
+
+           console.log("\n--------------in inputQuestionnaireAnswers, questionnaire, after getting patientId: patientId_questionnaireDB-------------------", patientId_questionnaireDB);
+
+           patientId = patientId_questionnaireDB[0].ID;
            authorOfUpdate = patientId + '_APP_' + appVersion;
 
-           // update the status in `answerQuestionnaire` table
-           return promisifyQuery(updateStatusCompletedInAnswerQuestionnaireQuery, [parameters.DateCompleted, authorOfUpdate, parameters.QuestionnaireSerNum]);
-       }).then(function(){
+           // insert in `answerQuestionnaire` table
+           return promisifyQuery(insertInAnswerQuestionnaireQuery, [parameters.QuestionnaireDBSerNum, patientId, completedStatus, deleted, deletedBy, parameters.DateCompleted, authorOfUpdate, parameters.DateCompleted, authorOfUpdate]);
+
+       }).then(function(insertReturn){
+
+           console.log("\n--------------in inputQuestionnaireAnswers, questionnaire, after inserting the answer questionnaire-------------------");
+
+           console.log("\n----------insertReturn---------",insertReturn);
+
+           if (insertReturn.hasOwnProperty('insertId') && insertReturn.insertId !== undefined){
+               answerQuestionnaireId = insertReturn.insertId;
+           }
 
            // gets the questionId, sectionId and type of question from the questionnaireQuestionSerNum of one answer, also the answerSectionId
             // transform the object parameters.Answers into an array to ensure order
-           return inputAnswerSection(parameters.QuestionnaireSerNum, Object.values(parameters.Answers));
+           return inputAnswerSection(answerQuestionnaireId, Object.values(parameters.Answers));
+
        }).then(function(formattedAnswers){
+
+           console.log("\n--------------in inputQuestionnaireAnswers, questionnaire, after inputting answer section-------------------");
 
            var promiseArray = [];
 
@@ -501,7 +500,8 @@ exports.inputQuestionnaireAnswers = function (parameters, appVersion, patientSer
            return q.all(promiseArray);
        }).then(function(result){
 
-           r.resolve(result);
+           r.resolve(answerQuestionnaireId);
+
        }).catch(function(err){
            r.reject(err);
        });
@@ -525,6 +525,10 @@ function inputAnswerSection(answerQuestionnaireId, answers){
     var sectionAndAnswerSection = {};
     var sectionArray = [];
     var promiseArray2 =[];
+
+    if (answerQuestionnaireId === undefined || answerQuestionnaireId === null || answerQuestionnaireId === -1){
+        throw new Error('Error inputting questionnaire answers: Failed to get answerQuestionnaireId');
+    }
 
     for (var i = 0; i < answers.length; i++){
 
