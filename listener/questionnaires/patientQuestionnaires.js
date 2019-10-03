@@ -1141,7 +1141,7 @@ function saveAnswer(opalPatientSerNumAndLanguage, param, appVersion){
 
     // r.reject(new Error('Will this stop?'));
     //
-    // console.log("\n---------------------------\nyou can see this if r.reject did not stop");
+    // console.log("\n---------------------------\you can see this if r.reject did not stop");
     //
     // throw new Error('STOPPED');
 
@@ -1214,12 +1214,16 @@ function saveAnswer(opalPatientSerNumAndLanguage, param, appVersion){
 function insertAnswerByType (answerId, answerArray, question_type_name_EN){
     var r = q.defer();
 
+    console.log ("\n-------------in insertAnswerByType: answerArray: --------------------------", answerArray);
+    console.log ("\n-------------in insertAnswerByType: answerId: --------------------------", answerId);
+    console.log ("\n-------------in insertAnswerByType: question_type_name_EN: --------------------------", question_type_name_EN);
+
     var promiseArray = [];  // this should contain only one query. It is used to avoid r.reject not doing a break.
 
     switch (question_type_name_EN) {
         case 'Checkbox':
             var isErr = 0;
-            var insert_array_string = "(";
+            var insert_array_string = "";
             var insert_value_string = "(?,?)";
             var insert_param_array = [];
 
@@ -1231,11 +1235,10 @@ function insertAnswerByType (answerId, answerArray, question_type_name_EN){
             INSERT INTO answerCheckbox (answerId, value) VALUES
 
             insert_array_string should look like this at the end of the loop
-            (
-                (?,?),
-                (?,?),
-                (?,?)
-            );
+            (?,?),
+            (?,?),
+            (?,?)
+            ;
 
             insert_param_array should look like this at the end of the loop
             [answerId, answerArray[0].answer_value, answerId, answerArray[1].answer_value, answerId, answerArray[2].answer_value]
@@ -1243,13 +1246,17 @@ function insertAnswerByType (answerId, answerArray, question_type_name_EN){
             for (var i=0; i<answerArray.length; i++){
                 if (!answerArray[i].hasOwnProperty('answer_value')){
                     isErr = 1;
-                }else{
+                }else if (isNaN(parseInt(answerArray[i].answer_value))){
+                        // check the validity of the answer: If the first character cannot be converted to a number, parseInt() returns NaN
+                        // it should not happen since the answer value should be the ID of the option
+                        // TODO: error handling
+                }else {
                     // if this is not the last value inserted, then add a comma
                     if (i !== answerArray.length - 1){
                         insert_array_string = insert_array_string + insert_value_string + ", ";
                     }else{
-                        // if this is the last value, close the parenthesis and add a semi-colon
-                        insert_array_string = insert_array_string + insert_value_string + ");";
+                        // if this is the last value, add a semi-colon
+                        insert_array_string = insert_array_string + insert_value_string + ";";
                     }
                     insert_param_array.push(answerId);
                     insert_param_array.push(answerArray[i].answer_value);
@@ -1260,16 +1267,23 @@ function insertAnswerByType (answerId, answerArray, question_type_name_EN){
                 r.reject(new Error ('Error saving answer: no required properties in answer array'));
             }else{
                 var query = insertAnswerCheckbox + insert_array_string;
+                console.log("\n-------------in insertAnswerByType: checkbox, query: --------------------------", query);
+                console.log("\n-------------in insertAnswerByType: checkbox, insert_param_array: --------------------------", insert_param_array);
                 promiseArray.push(promisifyQuery(query, insert_param_array));
             }
             break;
+
         case 'Slider':
             if (answerArray.length !== 1 || !answerArray[0].hasOwnProperty('answer_value')){
                 r.reject(new Error ('Error saving answer: answer array does not have the correct length or no property answer_value in answer array'));
-            }else{
+            }else if (isNaN(parseFloat(answerArray[i].answer_value))) {
+                // it should not happen since the answer value should be a float
+                // TODO: error handling
+            }else {
                 promiseArray.push(promisifyQuery(insertAnswerSlider, [answerId, answerArray[0].answer_value]));
             }
             break;
+
         case 'Text box':
             if (answerArray.length !== 1 || !answerArray[0].hasOwnProperty('answer_value')){
                 r.reject(new Error ('Error saving answer: answer array does not have the correct length or no property answer_value in answer array'));
@@ -1277,15 +1291,20 @@ function insertAnswerByType (answerId, answerArray, question_type_name_EN){
                 promiseArray.push(promisifyQuery(insertAnswerTextbox, [answerId, answerArray[0].answer_value]));
             }
             break;
+
         case 'Radio Button':
             if (answerArray.length !== 1 || !answerArray[0].hasOwnProperty('answer_value')){
                 r.reject(new Error ('Error saving answer: answer array does not have the correct length or no property answer_value in answer array'));
+            }else if (isNaN(parseInt(answerArray[i].answer_value))) {
+                // it should not happen since the answer value should be a bigint = ID of radio button option
+                // TODO: error handling
             }else{
                 promiseArray.push(promisifyQuery(insertAnswerRadioButton, [answerId, answerArray[0].answer_value]));
             }
             break;
+
         case 'Label':
-            var insert_array_string = "(";
+            var insert_array_string = "";
             var isErr = 0;
 
             for (var i = 0; i < answerArray.length; i++){
@@ -1295,16 +1314,20 @@ function insertAnswerByType (answerId, answerArray, question_type_name_EN){
                     isErr = 1;
                     break;
 
+                }else if (isNaN(parseInt(answerArray[i].answer_value)) || isNaN(parseInt(answerArray[i].posY)) ||
+                    isNaN(parseInt(answerArray[i].posX)) || isNaN(parseInt(answerArray[i].intensity)) ||
+                    isNaN(parseInt(answerArray[i].selected))){
+                    // should not happen
+                    // TODO: error handling
                 }else{
                     // this is the string for inserted value. It should look like this at the end of the loop:
                     /*
                     INSERT INTO answerLabel(answerId, selected, posX, posY, intensity, value)
                     VALUES
-                    (
-                        (answerId, selected, posX, posY, intensity, answer_value),
-                        (answerId, selected, posX, posY, intensity, answer_value),
-                        (answerId, selected, posX, posY, intensity, answer_value)
-                    )
+                    (answerId, selected, posX, posY, intensity, answer_value),
+                    (answerId, selected, posX, posY, intensity, answer_value),
+                    (answerId, selected, posX, posY, intensity, answer_value)
+
                      */
                     // this is to avoid unnecessary network transaction when calling the DB
                     var value_string = "(" + answerId + ", " +  answerArray[i].selected + ", " + answerArray[i].posX + ", " +
@@ -1314,10 +1337,9 @@ function insertAnswerByType (answerId, answerArray, question_type_name_EN){
                     if (i !== answerArray.length-1){
                         value_string = value_string + ",";
                     }else{
-                        // if this is the last one, add another parentheses and semi-colon
-                        value_string = value_string + ");";
+                        // if this is the last one, add a semi-colon
+                        value_string = value_string + ";";
                     }
-
                     insert_array_string = insert_array_string + value_string;
                 }
             }

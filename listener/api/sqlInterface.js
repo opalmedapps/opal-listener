@@ -1442,7 +1442,11 @@ exports.questionnaireSaveAnswer = function(requestObject){
                 return questionnaires.saveAnswer(patientSerNumAndLanguageRow[0], requestObject.Parameters, requestObject.AppVersion);
 
             }).then(function(){
-                // update the opalDB questionnaire status
+
+                // no need to update opalDB questionnaire status since it is not completed.
+
+                r.resolve({Response:'success'});
+
             }).catch(function (error) {
                 r.reject(error);
             });
