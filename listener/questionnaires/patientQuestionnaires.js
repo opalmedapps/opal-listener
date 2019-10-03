@@ -1135,11 +1135,6 @@ FUNCTIONS TO SAVE QUESTIONNAIRE
  */
 function saveAnswer(opalPatientSerNumAndLanguage, param, appVersion){
 
-    // TODO: CHECK SAVE ANSWER PROCEDURE'S VALIDITY
-    /*
-    call saveAnswer(398,37,853,2,0,'100.100.100','EN');
-     */
-
     var r = q.defer();
     var isoLang;
     var answerId;
@@ -1190,6 +1185,8 @@ function saveAnswer(opalPatientSerNumAndLanguage, param, appVersion){
                     r.reject(new Error('Error saving answer: query unsuccessful'));
                 }else{
                     answerId = queryResult[queryResult.length - 2][0].inserted_answer_id;
+
+                    // TODO: this does not cover the case of skipped answer, but since skipped is not implemented yet, it's fine
 
                     // 5. using the insertId from 4. and using answer array and question_type_id from param, insert into the sub-answer tables
                     return insertAnswerByType(answerId, param.answer, queryResult[queryResult.length - 2][0].question_type_name_EN);
