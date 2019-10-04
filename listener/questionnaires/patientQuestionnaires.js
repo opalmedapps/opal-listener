@@ -4,6 +4,10 @@ var q = require('q');
 var credentials = require('./../config.json');
 const logger = require('./../logs/logger');
 
+// the following config file stores all of our constants used in the questionnaireDB. Note that we use require here. That means any change made to the JSON inside will be made to the cached version.
+// you should not, in any stage of your program, make change to properties inside.
+const questionnaireConfig = require('./questionnaireConfig.json');
+
 /*var sqlConfig={
   port:'/Applications/MAMP/tmp/mysql/mysql.sock',
   user:'root',
@@ -833,7 +837,7 @@ function getQuestionnaire (opalPatientSerNumAndLanguage, answerQuestionnaire_Id)
                 // verify that the procedure has completed.
                 // if the procedure did not complete, there will not be a property called procedure_status. If there is an error, the error code will be stored in procedure_status
                 // the object containing property procedure_status is stored in the second last position in the returned array since the last position is used for OkPacket.
-                if (!queryResult[queryResult.length - 2][0].hasOwnProperty('procedure_status') || queryResult[queryResult.length - 2][0].procedure_status !== 0 ||
+                if (!queryResult[queryResult.length - 2][0].hasOwnProperty('procedure_status') || queryResult[queryResult.length - 2][0].procedure_status !== questionnaireConfig.PROCEDURE_SUCCESS_CODE ||
                     !queryResult[queryResult.length - 2][0].hasOwnProperty('language_id') || !queryResult[queryResult.length - 2][0].language_id) {
                     r.reject(new Error('Error getting questionnaire: query error'));
                 }else{
@@ -883,7 +887,7 @@ function formatAnswer(questionnaireDataArray, answerDataArray){
     }
 
     // if new questionnaire, there will be no answers to format
-    if (questionnaireDataArray[0].status === 0){
+    if (questionnaireDataArray[0].status === questionnaireConfig.NEW_QUESTIONNAIRE_STATUS){
         return answerObject;
     }
 
@@ -923,7 +927,7 @@ function formatAnswer(questionnaireDataArray, answerDataArray){
  * @return returnedData {object} the fully formated object to send to front end
  */
 function formatQuestionnaire (questionnaireDataArray, sectionDataArray, questionDataArray, answerObject, questionOptionsAndTypeMap){
-    const char_limit_for_textbox = 500;     // this is arbitrarily determined, can be changed
+    const char_limit_for_textbox = questionnaireConfig.CHAR_LIMIT_FOR_TEXTBOX;     // this is arbitrarily determined, can be changed
 
     // this function is used for formatting one questionnaire only. This is checked in the procedure getQuestionnaireInfo, but just in case that this function is being called by mistake.
     // verify required properties for the questionnaire data should be done in the calling function
@@ -961,7 +965,7 @@ function formatQuestionnaire (questionnaireDataArray, sectionDataArray, question
         var options =  questionOptionsAndTypeMap[question.type_id][question.question_id];
 
         // add character limit for textbox questions
-        if (question.question_type_category_key === 'Text box'){
+        if (question.type_id === questionnaireConfig.TEXTBOX_TYPE_ID){
             if (options.length !== 1){
                 throw new Error("Error getting questionnaire: text box question options error");
             }
@@ -975,7 +979,7 @@ function formatQuestionnaire (questionnaireDataArray, sectionDataArray, question
         console.log("\n--------------------------answerObject--------------------\n", answerObject);
 
         // get the answers for that question if the questionnaire is not new
-        if (questionnaireDataArray[0].status !== 0) {
+        if (questionnaireDataArray[0].status !== questionnaireConfig.NEW_QUESTIONNAIRE_STATUS) {
             // a question might have duplicates in a single section, but a questionSection_id is unique (reason for why the key is questionSection_id and not question_id)
             // the following check is for when the migration has not migrate the answers
             if (answerObject[question.questionSection_id] === undefined){
@@ -1078,7 +1082,7 @@ function getQuestionOptions(questionAndTypeMap, languageId){
                 // verify that the procedure has completed.
                 // if the procedure did not complete, there will not be a property called procedure_status. If there is an error, the error code will be stored in procedure_status
                 // the object containing property procedure_status is stored in the second last position in the returned array since the last position is used for OkPacket.
-                if(!typeQueryResponse[typeQueryResponse.length - 2][0].hasOwnProperty('procedure_status') || typeQueryResponse[typeQueryResponse.length - 2][0].procedure_status !== 0 ||
+                if(!typeQueryResponse[typeQueryResponse.length - 2][0].hasOwnProperty('procedure_status') || typeQueryResponse[typeQueryResponse.length - 2][0].procedure_status !== questionnaireConfig.PROCEDURE_SUCCESS_CODE ||
                     !typeQueryResponse[typeQueryResponse.length - 2][0].hasOwnProperty('type_id')){
                     queryErr = 1;
                     break;
@@ -1175,7 +1179,7 @@ function saveAnswer(opalPatientSerNumAndLanguage, param, appVersion){
                 // the object containing property procedure_status is stored in the second last position in the returned array since the last position is used for OkPacket.
                 if (!queryResult[queryResult.length - 2][0].hasOwnProperty('procedure_status')){
                     r.reject(new Error('Error saving answer: query uncompleted'));
-                }else if(queryResult[queryResult.length - 2][0].procedure_status !== 0) {
+                }else if(queryResult[queryResult.length - 2][0].procedure_status !== questionnaireConfig.PROCEDURE_SUCCESS_CODE) {
                     if (queryResult[queryResult.length - 2][0].hasOwnProperty('procedure_message')) {
                         r.reject(new Error('Error saving answer: query unsuccessful due to ' + queryResult[queryResult.length - 2][0].procedure_message));
                     } else {
@@ -1189,9 +1193,9 @@ function saveAnswer(opalPatientSerNumAndLanguage, param, appVersion){
                     // TODO: this does not cover the case of skipped answer, but since skipped is not implemented yet, it's fine
 
                     // 5. using the insertId from 4. and using answer array and question_type_id from param, insert into the sub-answer tables
-                    return insertAnswerByType(answerId, param.answer, queryResult[queryResult.length - 2][0].question_type_name_EN);
+                    // parseInt is used here just in case that the front end sent a string
+                    return insertAnswerByType(answerId, param.answer, parseInt(param.question_type_id));
                 }
-
             })
             .then(function(insertAnswerResult){
                 r.resolve('AnswerId: ' + answerId + '. Insert answer by type: ' + insertAnswerResult);
@@ -1208,20 +1212,20 @@ function saveAnswer(opalPatientSerNumAndLanguage, param, appVersion){
  * @desc this is a helper function which insert answers to specific table in the DB depending on the question type.
  * @param answerId {int} this is the ID of the answer inserted for that question in the answer table.
  * @param answerArray {array} this is the array of objects passed from the front-end. We check the property for them. A common property is answer_value.
- * @param question_type_name_EN {String} this is a string in English denoting the type of the question
+ * @param question_typeId {int} this denotes the type of the question
  * @returns {promise}
  */
-function insertAnswerByType (answerId, answerArray, question_type_name_EN){
+function insertAnswerByType (answerId, answerArray, question_typeId){
     var r = q.defer();
 
     console.log ("\n-------------in insertAnswerByType: answerArray: --------------------------", answerArray);
     console.log ("\n-------------in insertAnswerByType: answerId: --------------------------", answerId);
-    console.log ("\n-------------in insertAnswerByType: question_type_name_EN: --------------------------", question_type_name_EN);
+    console.log ("\n-------------in insertAnswerByType: question_typeId: --------------------------", question_typeId);
 
     var promiseArray = [];  // this should contain only one query. It is used to avoid r.reject not doing a break.
 
-    switch (question_type_name_EN) {
-        case 'Checkbox':
+    switch (question_typeId) {
+        case questionnaireConfig.CHECKBOX_TYPE_ID:
             var isErr = 0;
             var insert_array_string = "";
             var insert_value_string = "(?,?)";
@@ -1273,7 +1277,7 @@ function insertAnswerByType (answerId, answerArray, question_type_name_EN){
             }
             break;
 
-        case 'Slider':
+        case questionnaireConfig.SLIDER_TYPE_ID:
             if (answerArray.length !== 1 || !answerArray[0].hasOwnProperty('answer_value')){
                 r.reject(new Error ('Error saving answer: answer array does not have the correct length or no property answer_value in answer array'));
             }else if (isNaN(parseFloat(answerArray[0].answer_value))) {
@@ -1284,7 +1288,7 @@ function insertAnswerByType (answerId, answerArray, question_type_name_EN){
             }
             break;
 
-        case 'Text box':
+        case questionnaireConfig.TEXTBOX_TYPE_ID:
             if (answerArray.length !== 1 || !answerArray[0].hasOwnProperty('answer_value')){
                 r.reject(new Error ('Error saving answer: answer array does not have the correct length or no property answer_value in answer array'));
             }else{
@@ -1292,7 +1296,7 @@ function insertAnswerByType (answerId, answerArray, question_type_name_EN){
             }
             break;
 
-        case 'Radio Button':
+        case questionnaireConfig.RADIOBUTTON_TYPE_ID:
             if (answerArray.length !== 1 || !answerArray[0].hasOwnProperty('answer_value')){
                 r.reject(new Error ('Error saving answer: answer array does not have the correct length or no property answer_value in answer array'));
             }else if (isNaN(parseInt(answerArray[0].answer_value))) {
@@ -1303,7 +1307,7 @@ function insertAnswerByType (answerId, answerArray, question_type_name_EN){
             }
             break;
 
-        case 'Label':
+        case questionnaireConfig.LABEL_TYPE_ID:
             var insert_array_string = "";
             var isErr = 0;
 
@@ -1352,14 +1356,14 @@ function insertAnswerByType (answerId, answerArray, question_type_name_EN){
             }
             break;
 
-        case 'Time':
+        case questionnaireConfig.TIME_TYPE_ID:
             if (answerArray.length !== 1 || !answerArray[0].hasOwnProperty('answer_value')){
                 r.reject(new Error ('Error saving answer: answer array does not have the correct length or no property answer_value in answer array'));
             }else{
                 promiseArray.push(promisifyQuery(insertAnswerTime, [answerId, answerArray[0].answer_value]));
             }
             break;
-        case 'Date':
+        case questionnaireConfig.DATE_TYPE_ID:
             if (answerArray.length !== 1 || !answerArray[0].hasOwnProperty('answer_value')){
                 r.reject(new Error ('Error saving answer: answer array does not have the correct length or no property answer_value in answer array'));
             }else{
