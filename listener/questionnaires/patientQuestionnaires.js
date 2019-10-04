@@ -1276,7 +1276,7 @@ function insertAnswerByType (answerId, answerArray, question_type_name_EN){
         case 'Slider':
             if (answerArray.length !== 1 || !answerArray[0].hasOwnProperty('answer_value')){
                 r.reject(new Error ('Error saving answer: answer array does not have the correct length or no property answer_value in answer array'));
-            }else if (isNaN(parseFloat(answerArray[i].answer_value))) {
+            }else if (isNaN(parseFloat(answerArray[0].answer_value))) {
                 // it should not happen since the answer value should be a float
                 // TODO: error handling
             }else {
@@ -1295,7 +1295,7 @@ function insertAnswerByType (answerId, answerArray, question_type_name_EN){
         case 'Radio Button':
             if (answerArray.length !== 1 || !answerArray[0].hasOwnProperty('answer_value')){
                 r.reject(new Error ('Error saving answer: answer array does not have the correct length or no property answer_value in answer array'));
-            }else if (isNaN(parseInt(answerArray[i].answer_value))) {
+            }else if (isNaN(parseInt(answerArray[0].answer_value))) {
                 // it should not happen since the answer value should be a bigint = ID of radio button option
                 // TODO: error handling
             }else{
