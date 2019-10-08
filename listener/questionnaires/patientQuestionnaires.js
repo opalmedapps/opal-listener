@@ -422,9 +422,9 @@ var getPatientIdFromQuestionnaireSerNumQuery = `SELECT patientId
 FROM answerQuestionnaire
 WHERE ID = ? AND deleted <> 1 AND \`status\` <> 2
 ;`;
-var updateStatusCompletedInAnswerQuestionnaireQuery = `UPDATE \`answerquestionnaire\` SET \`status\`='2', \`lastUpdated\`=?, \`updatedBy\`=? WHERE  \`ID\`=?;`;
-var insertInAnswerQuestionnaireQuery = `INSERT INTO \`answerquestionnaire\` (\`questionnaireId\`, \`patientId\`, \`status\`, \`deleted\`, \`deletedBy\`, \`creationDate\`, \`createdBy\`, \`lastUpdated\`, \`updatedBy\`) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?);`;
-var insertSectionIntoAnswerSectionQuery = `REPLACE INTO answersection(answerQuestionnaireId, sectionId) VALUES (?, ?);`;
+var updateStatusCompletedInAnswerQuestionnaireQuery = `UPDATE \`answerQuestionnaire\` SET \`status\`='2', \`lastUpdated\`=?, \`updatedBy\`=? WHERE  \`ID\`=?;`;
+var insertInAnswerQuestionnaireQuery = `INSERT INTO \`answerQuestionnaire\` (\`questionnaireId\`, \`patientId\`, \`status\`, \`deleted\`, \`deletedBy\`, \`creationDate\`, \`createdBy\`, \`lastUpdated\`, \`updatedBy\`) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?);`;
+var insertSectionIntoAnswerSectionQuery = `REPLACE INTO answerSection(answerQuestionnaireId, sectionId) VALUES (?, ?);`;
 
 var insertIntoAnswerQuery = `REPLACE INTO 
 answer(questionnaireId, sectionId, questionId, typeId, answerSectionId, languageId, patientId, answered, skipped, creationDate, createdBy, lastUpdated, updatedBy)
