@@ -752,8 +752,6 @@ exports.inputQuestionnaireAnswers = function(requestObject) {
     let parameters = requestObject.Parameters;
     let appVersion = requestObject.AppVersion;
 
-    console.log("\n-------------in inputQuestionnaireAnswers--------------------------");
-
     // check input: these are required properties.
     // The non required properties is: parameters.PatientId
     if (!parameters.hasOwnProperty('QuestionnaireDBSerNum') || parameters.QuestionnaireDBSerNum === undefined
@@ -769,14 +767,10 @@ exports.inputQuestionnaireAnswers = function(requestObject) {
         throw new Error('Error inputting questionnaire answers: The questionnaire has not been completed');
     }
 
-    console.log("\n-------------in inputQuestionnaireAnswers: after checking input--------------------------");
-
     // the following query is simply for getting the language from the opalDB, there is no other use of it.
     // But since there might be the possibility of the front end not sending any language, this is necessary
     exports.runSqlQuery(queries.getPatientSerNumAndLanguage(), [requestObject.UserID, null, null])
         .then(function (queryRows) {
-
-            console.log("\n-------------in inputQuestionnaireAnswers: after getting patient ser num and lang--------------------------");
 
             var dbLang = -1;
             // ask the opalDB for the language
@@ -813,13 +807,9 @@ exports.inputQuestionnaireAnswers = function(requestObject) {
                 throw new Error('Error inputting questionnaire answers: Cannot find patientSerNum in OpalDB');
             }
 
-            console.log("\n-------------in inputQuestionnaireAnswers: before getting to questionnaireDB--------------------------");
-
             return questionnaires.inputQuestionnaireAnswers(parameters, appVersion, queryRows[0].PatientSerNum);
 
         }).then(function(answerQuestionnaireId){
-
-            console.log("\n-------------in inputQuestionnaireAnswers: getting back from questionnaireDB--------------------------");
 
             // mark, in opalDB.Questionnaire, that this particular questionnaire is completed and add PatientQuestionnaireDBSerNum
             return exports.runSqlQuery(queries.setQuestionnaireCompletedQuery(), [answerQuestionnaireId, parameters.DateCompleted, requestObject.Token, parameters.QuestionnaireSerNum]);
