@@ -509,12 +509,8 @@ exports.inputQuestionnaireAnswers = function (parameters, appVersion, patientSer
     const deletedBy = '';
     var answerQuestionnaireId = -1;
 
-    console.log("\n--------------in inputQuestionnaireAnswers, questionnaire-------------------");
-
     promisifyQuery(patientIdInQuestionnaireDBQuery, [patientSerNum])
        .then(function(patientId_questionnaireDB){
-
-           console.log("\n--------------in inputQuestionnaireAnswers, questionnaire, after getting patientId: patientId_questionnaireDB-------------------", patientId_questionnaireDB);
 
            patientId = patientId_questionnaireDB[0].ID;
            authorOfUpdate = patientId + '_APP_' + appVersion;
@@ -523,10 +519,6 @@ exports.inputQuestionnaireAnswers = function (parameters, appVersion, patientSer
            return promisifyQuery(insertInAnswerQuestionnaireQuery, [parameters.QuestionnaireDBSerNum, patientId, completedStatus, deleted, deletedBy, parameters.DateCompleted, authorOfUpdate, parameters.DateCompleted, authorOfUpdate]);
 
        }).then(function(insertReturn){
-
-           console.log("\n--------------in inputQuestionnaireAnswers, questionnaire, after inserting the answer questionnaire-------------------");
-
-           console.log("\n----------insertReturn---------",insertReturn);
 
            if (insertReturn.hasOwnProperty('insertId') && insertReturn.insertId !== undefined){
                answerQuestionnaireId = insertReturn.insertId;
@@ -537,8 +529,6 @@ exports.inputQuestionnaireAnswers = function (parameters, appVersion, patientSer
            return inputAnswerSection(answerQuestionnaireId, Object.values(parameters.Answers));
 
        }).then(function(formattedAnswers){
-
-           console.log("\n--------------in inputQuestionnaireAnswers, questionnaire, after inputting answer section-------------------");
 
            var promiseArray = [];
 
