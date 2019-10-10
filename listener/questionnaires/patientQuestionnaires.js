@@ -158,9 +158,9 @@ function prepareQuestionnaireObject(questionnaires, opalDB) {
             questionnairesObject[questionnaires[i].QuestionnaireDBSerNum].QuestionnaireDBSerNum = questionnaires[i].QuestionnaireDBSerNum;
             questionnairesObject[questionnaires[i].QuestionnaireDBSerNum].QuestionnaireName = questionnaires[i].QuestionnaireName;
             questionnairesObject[questionnaires[i].QuestionnaireDBSerNum].QuestionnaireName_EN = questionnaires[i].QuestionnaireName_EN;
-            questionnairesObject[questionnaires[i].QuestionnaireDBSerNum].Intro_EN = questionnaires[i].Intro_EN;
+            questionnairesObject[questionnaires[i].QuestionnaireDBSerNum].Intro_EN = htmlspecialchars_decode(questionnaires[i].Intro_EN);
             questionnairesObject[questionnaires[i].QuestionnaireDBSerNum].QuestionnaireName_FR = questionnaires[i].QuestionnaireName_FR;
-            questionnairesObject[questionnaires[i].QuestionnaireDBSerNum].Intro_FR = questionnaires[i].Intro_FR;
+            questionnairesObject[questionnaires[i].QuestionnaireDBSerNum].Intro_FR = htmlspecialchars_decode(questionnaires[i].Intro_FR);
             questionnairesObject[questionnaires[i].QuestionnaireDBSerNum].QuestionnaireSerNum = questionnaires[i].QuestionnaireSerNum;
             delete questionnaires[i].QuestionnaireName;
             delete questionnaires[i].QuestionnaireName_EN;
@@ -180,6 +180,59 @@ function prepareQuestionnaireObject(questionnaires, opalDB) {
     return questionnairesObject;
 }
 
+/**
+ * htmlspecialchars_decode
+ * @desc this is a helper function used to decode html encoding
+ * @param string
+ * @param quoteStyle
+ * @returns {string} decoded string
+ */
+function htmlspecialchars_decode (string, quoteStyle) {
+    var optTemp = 0;
+    var i = 0;
+    var noquotes = false;
+
+    if (typeof quoteStyle === 'undefined') {
+        quoteStyle = 2;
+    }
+    string = string.toString()
+        .replace(/&lt;/g, '<')
+        .replace(/&gt;/g, '>');
+    var OPTS = {
+        'ENT_NOQUOTES': 0,
+        'ENT_HTML_QUOTE_SINGLE': 1,
+        'ENT_HTML_QUOTE_DOUBLE': 2,
+        'ENT_COMPAT': 2,
+        'ENT_QUOTES': 3,
+        'ENT_IGNORE': 4
+    };
+
+    if (quoteStyle === 0) {
+        noquotes = true;
+    }
+    if (typeof quoteStyle !== 'number') {
+        // Allow for a single string or an array of string flags
+        quoteStyle = [].concat(quoteStyle);
+        for (i = 0; i < quoteStyle.length; i++) {
+            if (OPTS[quoteStyle[i]] === 0) {
+                noquotes = true;
+            } else if (OPTS[quoteStyle[i]]) {
+                optTemp = optTemp | OPTS[quoteStyle[i]];
+            }
+        }
+        quoteStyle = optTemp
+    }
+    if (quoteStyle & OPTS.ENT_HTML_QUOTE_SINGLE) {
+        string = string.replace(/&#0*39;/g, "'");
+    }
+    if (!noquotes) {
+        string = string.replace(/&quot;/g, '"');
+    }
+
+    string = string.replace(/&amp;/g, '&');
+
+    return string;
+}
 
 /**
  * setQuestionOrder
