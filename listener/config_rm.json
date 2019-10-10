@@ -1,0 +1,18 @@
+{
+  "MYSQL_USERNAME":"depdocs_OpalUser",
+  "MYSQL_PASSWORD":"enter the darkness",
+  "MYSQL_DATABASE":"depdocs_OpalDB",
+  "MYSQL_DATABASE_QUESTIONNAIRE":"depdocs_QuestionnaireDB",
+  "MYSQL_DATABASE_PORT": 3307,
+  "MYSQL_DATABASE_HOST": "127.0.0.1",
+  "HOST" : "localhost",
+  "DOCUMENTS_PATH" : "",
+  "DOCTOR_PATH" : "",
+  "CHECKIN_PATH" : "",
+  "VERIFYCHECKIN_PATH" : "",
+  "WT_PATH" : "",
+  "PFP_PATH" : "",
+  "FIREBASE_ADMIN_KEY": "C:/Users/Eda/Documents/opal/2019/staging_for_questionnaire/firebase/opalstaging-6ecfc-firebase-adminsdk-xx0gn-42121ff661.json",
+  "DATABASE_URL": "https://opalstaging-6ecfc.firebaseio.com",
+  "LATEST_STABLE_VERSION": "0.0.1"
+}
