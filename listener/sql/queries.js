@@ -380,9 +380,9 @@ exports.getPatientId= function()
     return "SELECT Patient.PatientId FROM Patient, Users WHERE Patient.PatientSerNum = Users.UserTypeSerNum && Users.Username = ?"
 };
 
-exports.getPatientId= function()
+exports.getPatientSerNumAndLanguage = function()
 {
-    return "SELECT Patient.PatientId FROM Patient, Users WHERE Patient.PatientSerNum = Users.UserTypeSerNum && Users.Username = ?"
+    return "SELECT Patient.PatientSerNum, Patient.`Language` FROM Patient, Users WHERE Patient.PatientSerNum = Users.UserTypeSerNum && Users.Username = ?;";
 };
 
 /**
@@ -477,7 +477,6 @@ exports.patientNotificationsTableFields=function()
         "AND Users.Username= ? ";
 };
 
-
 exports.getNewNotifications=function() {
     return "SELECT Notification.NotificationSerNum, " +
         "Notification.DateAdded," +
@@ -503,4 +502,8 @@ exports.getNewNotifications=function() {
         "AND Users.Username= ? " +
         "AND Notification.ReadStatus = 0 " +
         "AND (Notification.DateAdded > ? OR NotificationControl.DateAdded > ?);";
+};
+
+exports.updateQuestionnaireStatus = function () {
+    return `UPDATE \`questionnaire\` SET \`CompletedFlag\`= ?, \`CompletionDate\`= ? WHERE PatientQuestionnaireDBSerNum = ?;`;
 };
