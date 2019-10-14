@@ -748,6 +748,7 @@ function promisifyQuery(query, parameters) {
 exports.getQuestionnaireList = getQuestionnaireList;
 exports.getQuestionnaire = getQuestionnaire;
 exports.saveAnswer = saveAnswer;
+exports.updateQuestionnaireStatusInQuestionnaireDB = updateQuestionnaireStatusInQuestionnaireDB;
 
 /*
 QUERIES
@@ -764,6 +765,7 @@ const insertAnswerTime = `INSERT INTO answerTime (answerId, value) VALUES (?, ?)
 const insertAnswerDate = `INSERT INTO answerDate (answerId, value) VALUES (?, ?)`;
 const insertAnswerLabel = `INSERT INTO answerLabel (answerId, selected, posX, posY, intensity, value) VALUES `;
 const insertAnswerCheckbox = `INSERT INTO answerCheckbox (answerId, value) VALUES `;
+const updateAnswerQuestionnaireStatus = `call updateAnswerQuestionnaireStatus(?,?,?);`;
 
 /*
 FUNCTIONS TO GET QUESTIONNAIRES
@@ -1381,6 +1383,51 @@ function insertAnswerByType (answerId, answerArray, question_typeId){
         }).catch(function(err){
             r.reject(err);
     });
+
+    return r.promise;
+}
+
+/**
+ * updateQuestionnaireStatusInQuestionnaireDB
+ * @desc This function is exported and is used to update the questionnaire status in the questionnaireDB
+ * @param answerQuestionnaireId The unique Id of the answerQuestionnaire table
+ * @param newStatus denote the status to be updated to. It should match the database convention of being either 0,1,2
+ * @param appVersion {String} a string denoting the version of the app. This is used for noting the author of update
+ * @returns {promise} resolve with a boolean denoting whether the questionnaire's new status is completed or not
+ */
+function updateQuestionnaireStatusInQuestionnaireDB(answerQuestionnaireId, newStatus, appVersion) {
+    var r = q.defer();
+
+    var isCompleted = 0;
+    var newStatusInt = parseInt(newStatus);
+
+    // preprocess arguments passed
+    if (newStatusInt === questionnaireConfig.COMPLETED_QUESTIONNAIRE_STATUS){
+        isCompleted = 1;
+    }else if (newStatusInt !== questionnaireConfig.IN_PROGRESS_QUESTIONNAIRE_STATUS && newStatusInt !== questionnaireConfig.NEW_QUESTIONNAIRE_STATUS){
+        throw new Error("Error updating the questionnaire status: the new status is not in progress, completed, or new");
+    }
+
+    promisifyQuery(updateAnswerQuestionnaireStatus, [answerQuestionnaireId, newStatus, appVersion])
+        .then(function(queryResult){
+            // verify that the procedure has completed.
+            // if the procedure did not complete, there will not be a property called procedure_status. If there is an error, the error code will be stored in procedure_status
+            // the object containing property procedure_status is stored in the second last position in the returned array since the last position is used for OkPacket.
+            if (!queryResult[queryResult.length - 2][0].hasOwnProperty('procedure_status')){
+                r.reject(new Error('Error updating the questionnaire status: query uncompleted'));
+            }else if(queryResult[queryResult.length - 2][0].procedure_status !== questionnaireConfig.PROCEDURE_SUCCESS_CODE) {
+                if (queryResult[queryResult.length - 2][0].hasOwnProperty('procedure_message')) {
+                    r.reject(new Error('Error updating the questionnaire status: query unsuccessful due to ' + queryResult[queryResult.length - 2][0].procedure_message));
+                } else {
+                    r.reject(new Error('Error updating the questionnaire status: query unsuccessful'));
+                }
+            }
+
+            r.resolve(isCompleted);
+
+        }).catch(function(err){
+            r.reject(err);
+        });
 
     return r.promise;
 }

@@ -36,6 +36,19 @@ exports.questionnaireSaveAnswerV2 = function(requestObject)
     }
 };
 
+// V2 is for 2019 qplus questionnaire front-end
+exports.QuestionnaireUpdateStatusV2 = function(requestObject)
+{
+    if (!requestObject.hasOwnProperty('AppVersion') || requestObject.AppVersion === undefined) {
+        throw new Error('Error saving answer: the requestObject does not have AppVersion');
+    }
+
+    // TODO: decide on an app version to block/allow
+    if (requestObject.AppVersion){
+        return sqlInterface.questionnaireUpdateStatus(requestObject);
+    }
+};
+
 //Input feedback
 exports.inputFeedback=function(requestObject)
 {

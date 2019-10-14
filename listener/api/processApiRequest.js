@@ -35,6 +35,7 @@ const API = {
     'QuestionnaireRating': apiHospitalUpdate.inputEducationalMaterialRating,
     'QuestionnaireAnswers': apiHospitalUpdate.inputQuestionnaireAnswers,
     'QuestionnaireSaveAnswerV2': apiHospitalUpdate.questionnaireSaveAnswerV2,
+    'QuestionnaireUpdateStatusV2': apiHospitalUpdate.QuestionnaireUpdateStatusV2,
     'Read': apiHospitalUpdate.updateReadStatus,
     'PFPMembers': apiPatientUpdate.getPatientsForPatientsMembers,
 };

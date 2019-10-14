@@ -1444,11 +1444,62 @@ exports.questionnaireSaveAnswer = function(requestObject){
             }).then(function(){
 
                 // no need to update opalDB questionnaire status since it is not completed.
-
                 r.resolve({Response:'success'});
 
             }).catch(function (error) {
                 r.reject(error);
+            });
+    }
+
+    return r.promise;
+};
+
+exports.questionnaireUpdateStatus = function(requestObject){
+    let r = Q.defer();
+
+    console.log("\n----------------requestObject----------------------", requestObject);
+
+    // check arguments
+    if (!requestObject.hasOwnProperty('Parameters') || !requestObject.Parameters.hasOwnProperty('answerQuestionnaire_id') ||
+        !requestObject.Parameters.hasOwnProperty('new_status') || isNaN(parseInt(requestObject.Parameters.new_status)) ||
+        isNaN(parseInt(requestObject.Parameters.answerQuestionnaire_id))) {
+
+        r.reject(new Error('Error saving answer: the requestObject does not have the required parameters'));
+
+    }else if (!requestObject.hasOwnProperty('UserID') || requestObject.UserID === undefined){
+        r.reject(new Error('Error saving answer: the requestObject does not have UserID'));
+
+    }else if (!requestObject.hasOwnProperty('AppVersion') || requestObject.AppVersion === undefined){
+        r.reject(new Error ('Error saving answer: the requestObject does not have AppVersion'));
+    }else{
+        var patientSerNumOpalDB;
+
+        // 1. update the status in the answerQuestionnaire table in questionnaire DB
+        // get patientSerNum in the opal database
+        exports.runSqlQuery(queries.getPatientSerNumAndLanguage(), [requestObject.UserID, null, null])
+            .then(function (patientSerNumAndLanguageRow) {
+                // check returns
+                if (!patientSerNumAndLanguageRow[0].hasOwnProperty('PatientSerNum') || !patientSerNumAndLanguageRow[0].PatientSerNum){
+                    r.reject(new Error('Error saving questionnaire: No matching PatientSerNum found in opalDB'));
+                }else{
+                    patientSerNumOpalDB = patientSerNumAndLanguageRow[0].PatientSerNum;
+                    return questionnaires.updateQuestionnaireStatusInQuestionnaireDB(requestObject.Parameters.answerQuestionnaire_id, requestObject.Parameters.new_status, requestObject.AppVersion);
+                }
+            }).then(function(isCompleted){
+
+                // 2. update the status in the questionnaire table of the opal DB if completed
+                if (isCompleted === 1){
+                    return exports.runSqlQuery(exports.updateQuestionnaireStatus, [isCompleted, 'CURRENT_TIMESTAMP', requestObject.Parameters.answerQuestionnaire_id]);
+                    // TODO: do we rollback if this fails
+                }else{
+                    r.resolve({Response:'success'});
+                }
+
+            }).then(function(){
+                r.resolve({Response:'success'});
+            })
+            .catch(function(err){
+                r.reject(err);
             });
     }
 
