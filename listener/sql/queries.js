@@ -174,7 +174,13 @@ exports.patientTestResultsTableFields=function()
 				'IfNull((Select EMC.URL_FR From EducationalMaterialControl EMC, TestResultExpression TRE, TestResultControl TRC ' +
 					'Where EMC.EducationalMaterialControlSerNum = TRC.EducationalMaterialControlSerNum ' +
 						'and TRE.TestResultControlSerNum = TRC.TestResultControlSerNum ' +
-						'and TRE.TestResultExpressionSerNum = TR.TestResultExpressionSerNum), "") as URL_FR ' +
+						'and TRE.TestResultExpressionSerNum = TR.TestResultExpressionSerNum), "") as URL_FR, ' +
+                'Ifnull((select TRC2.Group_EN from TestResultControl TRC2, TestResultExpression TRE ' +
+                    'where TRC2.TestResultControlSerNum = TRE.TestResultControlSerNum ' +
+                        'and TRE.TestResultExpressionSerNum = TR.TestResultExpressionSerNum), "Other") Group_EN, ' +
+                'Ifnull((select TRC2.Group_FR from TestResultControl TRC2, TestResultExpression TRE ' +
+                    'where TRC2.TestResultControlSerNum = TRE.TestResultControlSerNum ' +
+                        'and TRE.TestResultExpressionSerNum = TR.TestResultExpressionSerNum), "Autre") Group_FR ' +
 				'FROM TestResult TR, Users U, Patient P ' +
 				'WHERE P.AccessLevel = 3 AND U.UserTypeSerNum=P.PatientSerNum AND TR.PatientSerNum = P.PatientSerNum AND TR.TestDate >= "1970-01-01" AND U.Username LIKE ? AND TR.LastUpdated > ? AND TR.ValidEntry = "Y";';
 };
@@ -380,9 +386,9 @@ exports.getPatientId= function()
     return "SELECT Patient.PatientId FROM Patient, Users WHERE Patient.PatientSerNum = Users.UserTypeSerNum && Users.Username = ?"
 };
 
-exports.getPatientId= function()
+exports.getPatientSerNumAndLanguage = function()
 {
-    return "SELECT Patient.PatientId FROM Patient, Users WHERE Patient.PatientSerNum = Users.UserTypeSerNum && Users.Username = ?"
+    return "SELECT Patient.PatientSerNum, Patient.`Language` FROM Patient, Users WHERE Patient.PatientSerNum = Users.UserTypeSerNum && Users.Username = ?;";
 };
 
 /**
@@ -477,7 +483,6 @@ exports.patientNotificationsTableFields=function()
         "AND Users.Username= ? ";
 };
 
-
 exports.getNewNotifications=function() {
     return "SELECT Notification.NotificationSerNum, " +
         "Notification.DateAdded," +
@@ -503,4 +508,8 @@ exports.getNewNotifications=function() {
         "AND Users.Username= ? " +
         "AND Notification.ReadStatus = 0 " +
         "AND (Notification.DateAdded > ? OR NotificationControl.DateAdded > ?);";
+};
+
+exports.updateQuestionnaireStatus = function () {
+    return `UPDATE \`questionnaire\` SET \`CompletedFlag\`= ?, \`CompletionDate\`= ? WHERE PatientQuestionnaireDBSerNum = ?;`;
 };
