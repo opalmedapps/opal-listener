@@ -1,0 +1,19 @@
+{
+	"CHM": {
+		"waitingRooms": [
+			".*waiting(?:\\s?room)?.*"
+		],
+		"examRooms": [
+			".*tx(?:\\s?area)?.*"
+		]
+	},
+	"ADD-ON": {
+		"waitingRooms": [
+			".*waiting(?:\\s?room)?.*"
+		],
+		"examRooms": [
+			".*tx(?:\\s?area)?.*"
+		]
+
+	}
+}

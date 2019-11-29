@@ -102,53 +102,31 @@ var queryAnswers = `CALL queryAnswers(?,?);`;
 /**
  * getPatientQuestionnaires
  * @desc the main function for getting the questionnaire information for a patient
- * @param patientIdAndLang: this parameter is obtained form a query for the opalDB
- * @param lang: this is the language passed from the front-end, if the front-end did not send any language parameter, then this should be -1. Pre-processed in the calling function: getQuestionnaires
+ * @param patientQuestionnaireTableFields: this is the list of questionnaires gotten from the opalDB
+ * @param lang: this is the language pre-processed in the calling function: getQuestionnaires
  * @return {Promise}
  */
-exports.getPatientQuestionnaires = function (patientIdAndLang, lang) {
+exports.getPatientQuestionnaires = function (patientQuestionnaireTableFields, lang) {
     return new Promise(((resolve, reject) => {
 
-        // check argument
-        // if the front-end did not send a language, then we get the language in the opalDB. If that too does not exist, then we default to French
-        if (lang === -1){
-            if(patientIdAndLang[0].hasOwnProperty('Language') && patientIdAndLang[0].Language !== undefined){
-                switch (patientIdAndLang[0].Language) {
-                    case ('EN'):
-                        lang = 2;
-                        break;
-                    case ('FR'):
-                        lang = 1;
-                        break;
-                    default:
-                        // the default is French
-                        lang = 1;
-                }
-            }else{
-                // the default is French
-                lang = 1;
-            }
-        }
+        if (patientQuestionnaireTableFields.length !== 0) {
 
-        connection.query(queryPatientQuestionnaireInfo, [patientIdAndLang[0].PatientSerNum], function (err, rows, fields) {
+            let questionnaireDBSerNumArray = getQuestionnaireDBSerNums(patientQuestionnaireTableFields);
 
-            if (rows.length !== 0) {
-
-                let questionnaireDBSerNumArray = getQuestionnaireDBSerNums(rows[0]);
-
-                // the following join in the argument is due to us calling a procedure using CONCAT with a prepared statement,
-                // which requires a TEXT argument in the following format: '11,12,23,..'
-                connection.query(queryQuestions, [questionnaireDBSerNumArray.join()], function (err, questions, fields) {
-                    if (err) reject(err);
-
+            // the following join in the argument is due to us calling a procedure using CONCAT with a prepared statement,
+            // which requires a TEXT argument in the following format: '11,12,23,..'
+            connection.query(queryQuestions, [questionnaireDBSerNumArray.join()], function (err, questions, fields) {
+                if (err){
+                    reject(err);
+                }else{
                     let questionsOrdered = setQuestionOrder(questions[0]);
 
                     getQuestionChoices(questionsOrdered).then(function (questionsChoices) {
 
-                        let questionnaires = prepareQuestionnaireObject(questionsChoices, rows[0]);
+                        let questionnaires = prepareQuestionnaireObject(questionsChoices, patientQuestionnaireTableFields);
                         let patientQuestionnaires = {};
 
-                        attachingQuestionnaireAnswers(rows[0], lang).then(function (paQuestionnaires) {
+                        attachingQuestionnaireAnswers(patientQuestionnaireTableFields, lang).then(function (paQuestionnaires) {
                             patientQuestionnaires = paQuestionnaires;
                             resolve({'Questionnaires': questionnaires, 'PatientQuestionnaires': patientQuestionnaires});
                         }).catch(function (error) {
@@ -157,17 +135,17 @@ exports.getPatientQuestionnaires = function (patientIdAndLang, lang) {
                     }).catch(function (err) {
                         reject(err);
                     })
-                });
-            } else {
-                resolve([]);
-            }
-        });
+                }
+            });
+        } else {
+            resolve([]);
+        }
     }));
 };
 
 /**
  * prepareQuestionnaireObject
- * @desc Formats questionnaire object to be ready for the app. Did not change anything from the legacy questionnaire
+ * @desc Formats questionnaire object to be ready for the app. Did not change anything from the legacy questionnaire except HTML parsing
  * @param questionnaires
  * @param opalDB
  * @return {object}
@@ -181,9 +159,9 @@ function prepareQuestionnaireObject(questionnaires, opalDB) {
             questionnairesObject[questionnaires[i].QuestionnaireDBSerNum].QuestionnaireDBSerNum = questionnaires[i].QuestionnaireDBSerNum;
             questionnairesObject[questionnaires[i].QuestionnaireDBSerNum].QuestionnaireName = questionnaires[i].QuestionnaireName;
             questionnairesObject[questionnaires[i].QuestionnaireDBSerNum].QuestionnaireName_EN = questionnaires[i].QuestionnaireName_EN;
-            questionnairesObject[questionnaires[i].QuestionnaireDBSerNum].Intro_EN = questionnaires[i].Intro_EN;
+            questionnairesObject[questionnaires[i].QuestionnaireDBSerNum].Intro_EN = htmlspecialchars_decode(questionnaires[i].Intro_EN);
             questionnairesObject[questionnaires[i].QuestionnaireDBSerNum].QuestionnaireName_FR = questionnaires[i].QuestionnaireName_FR;
-            questionnairesObject[questionnaires[i].QuestionnaireDBSerNum].Intro_FR = questionnaires[i].Intro_FR;
+            questionnairesObject[questionnaires[i].QuestionnaireDBSerNum].Intro_FR = htmlspecialchars_decode(questionnaires[i].Intro_FR);
             questionnairesObject[questionnaires[i].QuestionnaireDBSerNum].QuestionnaireSerNum = questionnaires[i].QuestionnaireSerNum;
             delete questionnaires[i].QuestionnaireName;
             delete questionnaires[i].QuestionnaireName_EN;
@@ -203,6 +181,59 @@ function prepareQuestionnaireObject(questionnaires, opalDB) {
     return questionnairesObject;
 }
 
+/**
+ * htmlspecialchars_decode
+ * @desc this is a helper function used to decode html encoding
+ * @param string
+ * @param quoteStyle
+ * @returns {string} decoded string
+ */
+function htmlspecialchars_decode (string, quoteStyle) {
+    var optTemp = 0;
+    var i = 0;
+    var noquotes = false;
+
+    if (typeof quoteStyle === 'undefined') {
+        quoteStyle = 2;
+    }
+    string = string.toString()
+        .replace(/&lt;/g, '<')
+        .replace(/&gt;/g, '>');
+    var OPTS = {
+        'ENT_NOQUOTES': 0,
+        'ENT_HTML_QUOTE_SINGLE': 1,
+        'ENT_HTML_QUOTE_DOUBLE': 2,
+        'ENT_COMPAT': 2,
+        'ENT_QUOTES': 3,
+        'ENT_IGNORE': 4
+    };
+
+    if (quoteStyle === 0) {
+        noquotes = true;
+    }
+    if (typeof quoteStyle !== 'number') {
+        // Allow for a single string or an array of string flags
+        quoteStyle = [].concat(quoteStyle);
+        for (i = 0; i < quoteStyle.length; i++) {
+            if (OPTS[quoteStyle[i]] === 0) {
+                noquotes = true;
+            } else if (OPTS[quoteStyle[i]]) {
+                optTemp = optTemp | OPTS[quoteStyle[i]];
+            }
+        }
+        quoteStyle = optTemp
+    }
+    if (quoteStyle & OPTS.ENT_HTML_QUOTE_SINGLE) {
+        string = string.replace(/&#0*39;/g, "'");
+    }
+    if (!noquotes) {
+        string = string.replace(/&quot;/g, '"');
+    }
+
+    string = string.replace(/&amp;/g, '&');
+
+    return string;
+}
 
 /**
  * setQuestionOrder
@@ -304,11 +335,13 @@ function getQuestionChoices(rows) {
         // which requires a TEXT argument in the following format: '11,12,23,..'
         connection.query(queryQuestionChoices, [array.join()], function (err, choices, fields) {
 
-            if (err) r.reject(err);
+            if (err){
+                r.reject(err);
+            }else{
+                var questions = attachChoicesToQuestions(rows, choices[0]);
 
-            var questions = attachChoicesToQuestions(rows, choices[0]);
-
-            r.resolve(questions);
+                r.resolve(questions);
+            }
         });
     } else {
         r.resolve([]);
@@ -349,7 +382,7 @@ function attachChoicesToQuestions(questions, choices) {
 /**
  * attachingQuestionnaireAnswers
  * @desc Attaching answers to answered questionnaires
- * @param questionnairesSentToPatient: The list of questionnaires sent to patients. This info is obtained by calling queryPatientQuestionnaireInfo in the questionnaireDB
+ * @param questionnairesSentToPatient: The list of questionnaires sent to patients. This info is obtained by querying questionnaires in opalDB
  * @param lang: the language that the answers are going to be displayed in case the answers have languageId = -1 in the database. This should be obtained from the front end or the opalDB
  *              and pre-processed in getPatientQuestionnaires or the calling function
  * @return {promise}
@@ -359,53 +392,63 @@ function attachingQuestionnaireAnswers(questionnairesSentToPatient, lang) {
     var r = q.defer();
 
     var patientQuestionnaires = {};
-    var questionnaireSerNumArray = [];
+    var answerQuestionnaireIdArray = [];
 
     for (var i = 0; i < questionnairesSentToPatient.length; i++) {
         patientQuestionnaires[questionnairesSentToPatient[i].QuestionnaireSerNum] = questionnairesSentToPatient[i];
 
-        if (questionnairesSentToPatient[i].CompletedFlag == 1 || questionnairesSentToPatient[i].CompletedFlag == '1') {
-            questionnaireSerNumArray.push(questionnairesSentToPatient[i].QuestionnaireSerNum);
+        if (questionnairesSentToPatient[i].CompletedFlag === 1 || questionnairesSentToPatient[i].CompletedFlag === '1') {
+            if (questionnairesSentToPatient[i].PatientQuestionnaireDBSerNum === null || questionnairesSentToPatient[i].PatientQuestionnaireDBSerNum === undefined){
+                // this should never happen. this means that the questionnaire is completed but there is no answer for it. This would be an error in the database
+                // TODO: report something back
+            }else{
+                answerQuestionnaireIdArray.push(questionnairesSentToPatient[i].PatientQuestionnaireDBSerNum);
+            }
         }
     }
-    if (questionnaireSerNumArray.length > 0) {
-        var quer = connection.query(queryAnswers, [questionnaireSerNumArray.join(), lang], function (err, rows, fields) {
+    if (answerQuestionnaireIdArray.length > 0) {
 
-            if (err) r.reject(err);
+        var quer = connection.query(queryAnswers, [answerQuestionnaireIdArray.join(), lang], function (err, rows, fields) {
 
-            // the following line is due to us calling a stored procedure
-            rows = rows[0];
+            if (err){
+                r.reject(err);
+            } else{
+                // the following line is due to us calling a stored procedure
+                rows = rows[0];
 
-            // inserting the answers according to the questionnaire
-            // this is for when a question can have multiple answers
-            var answersQuestionnaires = {};
+                // inserting the answers according to the questionnaire
+                // this is for when a question can have multiple answers
+                var answersQuestionnaires = {};
 
-            for (var i = 0; rows && i < rows.length; i++) {
-                if(!answersQuestionnaires.hasOwnProperty(rows[i].QuestionnaireSerNum)){
-                    answersQuestionnaires[rows[i].QuestionnaireSerNum] = [];
+                for (var i = 0; rows && i < rows.length; i++) {
+                    // note: due to the change of where to get the new questionnaires, the QuestionnaireSerNum which meant answerQuestionnaireId before was transformed into opalDB.questionnaire.ID
+                    // but here QuestionnaireSerNum still means answerQuestionnaireId since it comes from the procedure in the questionnaireDB.
+                    if(!answersQuestionnaires.hasOwnProperty(rows[i].QuestionnaireSerNum)){
+                        answersQuestionnaires[rows[i].QuestionnaireSerNum] = [];
+                    }
+
+                    // the answer will be '' to denote the case where there is no real answer text, since null and undefined makes qplus give an error
+                    if (!rows[i].hasOwnProperty('Answer') || !rows[i].Answer || rows[i].Answer === undefined || rows[i].Answer === null){
+
+                        rows[i].Answer = '';
+                    }
+
+                    answersQuestionnaires[rows[i].QuestionnaireSerNum].push(rows[i]);
                 }
 
-                // the answer will be '' to denote the case where there is no real answer text, since null and undefined makes qplus give an error
-                if (!rows[i].hasOwnProperty('Answer') || !rows[i].Answer || rows[i].Answer === undefined || rows[i].Answer === null){
+                // putting the answers into patientQuestionnaires object
+                for (var i = 0; i < questionnairesSentToPatient.length; i++) {
 
-                    rows[i].Answer = '';
+                    if(questionnairesSentToPatient[i].CompletedFlag === 1 || questionnairesSentToPatient[i].CompletedFlag === '1'){
+
+                        patientQuestionnaires[questionnairesSentToPatient[i].QuestionnaireSerNum].Answers = answersQuestionnaires[questionnairesSentToPatient[i].PatientQuestionnaireDBSerNum];
+                    }
                 }
 
-                answersQuestionnaires[rows[i].QuestionnaireSerNum].push(rows[i]);
+                r.resolve(patientQuestionnaires);
             }
+        });
 
-            // putting the answers into patientQuestionnaires object
-            for (var i = 0; i < questionnairesSentToPatient.length; i++) {
-
-                if(questionnairesSentToPatient[i].CompletedFlag === 1 || questionnairesSentToPatient[i].CompletedFlag === '1'){
-
-                    patientQuestionnaires[questionnairesSentToPatient[i].QuestionnaireSerNum].Answers = answersQuestionnaires[questionnairesSentToPatient[i].QuestionnaireSerNum];
-                }
-            }
-
-            r.resolve(patientQuestionnaires);
-
-            });
     } else {
         r.resolve(patientQuestionnaires);
     }
@@ -433,8 +476,9 @@ var getPatientIdFromQuestionnaireSerNumQuery = `SELECT patientId
 FROM answerQuestionnaire
 WHERE ID = ? AND deleted <> 1 AND \`status\` <> 2
 ;`;
-var updateStatusCompletedInAnswerQuestionnaireQuery = `UPDATE \`answerquestionnaire\` SET \`status\`='2', \`lastUpdated\`=?, \`updatedBy\`=? WHERE  \`ID\`=?;`;
-var insertSectionIntoAnswerSectionQuery = `REPLACE INTO answersection(answerQuestionnaireId, sectionId) VALUES (?, ?);`;
+var updateStatusCompletedInAnswerQuestionnaireQuery = `UPDATE \`answerQuestionnaire\` SET \`status\`='2', \`lastUpdated\`=?, \`updatedBy\`=? WHERE  \`ID\`=?;`;
+var insertInAnswerQuestionnaireQuery = `INSERT INTO \`answerQuestionnaire\` (\`questionnaireId\`, \`patientId\`, \`status\`, \`deleted\`, \`deletedBy\`, \`creationDate\`, \`createdBy\`, \`lastUpdated\`, \`updatedBy\`) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?);`;
+var insertSectionIntoAnswerSectionQuery = `REPLACE INTO answerSection(answerQuestionnaireId, sectionId) VALUES (?, ?);`;
 
 var insertIntoAnswerQuery = `REPLACE INTO 
 answer(questionnaireId, sectionId, questionId, typeId, answerSectionId, languageId, patientId, answered, skipped, creationDate, createdBy, lastUpdated, updatedBy)
@@ -464,20 +508,30 @@ exports.inputQuestionnaireAnswers = function (parameters, appVersion, patientSer
 
     var authorOfUpdate; // patientId_APP_appVersion
     var patientId;
+    const completedStatus = 2;
+    const deleted = 0;
+    const deletedBy = '';
+    var answerQuestionnaireId = -1;
 
-   getPatientIdInQuestionnaireDB(parameters, patientSerNum)
-       .then(function(verifiedPatientId){
+    promisifyQuery(patientIdInQuestionnaireDBQuery, [patientSerNum])
+       .then(function(patientId_questionnaireDB){
 
-           patientId = verifiedPatientId;
+           patientId = patientId_questionnaireDB[0].ID;
            authorOfUpdate = patientId + '_APP_' + appVersion;
 
-           // update the status in `answerQuestionnaire` table
-           return promisifyQuery(updateStatusCompletedInAnswerQuestionnaireQuery, [parameters.DateCompleted, authorOfUpdate, parameters.QuestionnaireSerNum]);
-       }).then(function(){
+           // insert in `answerQuestionnaire` table
+           return promisifyQuery(insertInAnswerQuestionnaireQuery, [parameters.QuestionnaireDBSerNum, patientId, completedStatus, deleted, deletedBy, parameters.DateCompleted, authorOfUpdate, parameters.DateCompleted, authorOfUpdate]);
+
+       }).then(function(insertReturn){
+
+           if (insertReturn.hasOwnProperty('insertId') && insertReturn.insertId !== undefined){
+               answerQuestionnaireId = insertReturn.insertId;
+           }
 
            // gets the questionId, sectionId and type of question from the questionnaireQuestionSerNum of one answer, also the answerSectionId
             // transform the object parameters.Answers into an array to ensure order
-           return inputAnswerSection(parameters.QuestionnaireSerNum, Object.values(parameters.Answers));
+           return inputAnswerSection(answerQuestionnaireId, Object.values(parameters.Answers));
+
        }).then(function(formattedAnswers){
 
            var promiseArray = [];
@@ -490,7 +544,8 @@ exports.inputQuestionnaireAnswers = function (parameters, appVersion, patientSer
            return q.all(promiseArray);
        }).then(function(result){
 
-           r.resolve(result);
+           r.resolve(answerQuestionnaireId);
+
        }).catch(function(err){
            r.reject(err);
        });
@@ -514,6 +569,10 @@ function inputAnswerSection(answerQuestionnaireId, answers){
     var sectionAndAnswerSection = {};
     var sectionArray = [];
     var promiseArray2 =[];
+
+    if (answerQuestionnaireId === undefined || answerQuestionnaireId === null || answerQuestionnaireId === -1){
+        throw new Error('Error inputting questionnaire answers: Failed to get answerQuestionnaireId');
+    }
 
     for (var i = 0; i < answers.length; i++){
 
@@ -640,7 +699,7 @@ function inputAnswer(questionnaireId, answer, languageId, patientId, dateComplet
     var answered = 1; // default for answered is 1 unless the answer is undefined
     var skipped = 0; // there is no option on the front-end right now to skip a question
     var answerId;
-    
+
     // in the qplus, if the answer has been chosen but not filled in, the answer is undefined. In this new version of DB, this is not answered
     // the front end, in case of space only answer, sends Answer: 'undefined' as a string, thus the following check will make the Answer as not answered if the user inputs undefined in a textbox question
     // this can be solved by using trim() (javascript) on the front end (qplus)

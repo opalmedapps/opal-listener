@@ -25,11 +25,22 @@ const dbCredentials = {
     port: config.MYSQL_DATABASE_PORT
 };
 
+const waitingRoomDbCredentials = {
+	connectionLimit: 10,
+    host: config.WAITING_ROOM_MANAGEMENT_SYSTEM_MYSQL.HOST,
+    port: config.WAITING_ROOM_MANAGEMENT_SYSTEM_MYSQL.PORT,
+	user: config.WAITING_ROOM_MANAGEMENT_SYSTEM_MYSQL.MYSQL_USERNAME,
+	password: config.WAITING_ROOM_MANAGEMENT_SYSTEM_MYSQL.MYSQL_PASSWORD,
+	database: config.WAITING_ROOM_MANAGEMENT_SYSTEM_MYSQL.MYSQL_DATABASE,
+	dateStrings: true
+};
+
 /**
  * SQL POOL CONFIGURATION
  * @type {Pool}
  */
 const pool = mysql.createPool(dbCredentials);
+const waitingRoomPool = mysql.createPool(waitingRoomDbCredentials);
 
 /////////////////////////////////////////////////////
 
@@ -164,6 +175,40 @@ exports.runSqlQuery = function(query, parameters, processRawFunction) {
     });
     return r.promise;
 };
+
+/**
+ * runWaitingRoomSqlQuery
+ * @desc runs inputted query against SQL mapping by grabbing an available connection from connection pool
+ * @param query
+ * @param parameters
+ * @param processRawFunction
+ * @return {Promise}
+ */
+exports.runWaitingRoomSqlQuery = function(query, parameters, processRawFunction) {
+    return new Promise((resolve, reject) => {
+        waitingRoomPool.getConnection((err, connection) => {
+            if (err) {
+                logger.log('error', err)
+                return reject(err)
+            }
+            logger.log('debug', `grabbed waiting room connection: ${connection}`)
+            logger.log('info', 'Successfully grabbed connection from waiting room pool and about to perform following query: ', {query: query})
+            const que = connection.query(query, parameters, (err, rows, fields) => {
+                connection.release();
+                if (err) {
+                    logger.log('error', err)
+                    return reject(err)
+                }
+                logger.log('info', 'Successfully performed query on waiting room database', {query: que.sql, response: JSON.stringify(rows)});
+                if (processRawFunction) {
+                    processRawFunction(rows).then(resolve)
+                } else {
+                    resolve(rows)
+                }
+            })
+        })
+    })
+}
 
 /**
  * getPatientTableFields
@@ -764,10 +809,10 @@ exports.inputQuestionnaireAnswers = function(requestObject) {
 
             return questionnaires.inputQuestionnaireAnswers(parameters, appVersion, queryRows[0].PatientSerNum);
 
-        }).then(function(){
+        }).then(function(answerQuestionnaireId){
 
-            // mark, in opalDB.Questionnaire, that this particular questionnaire is completed
-            return exports.runSqlQuery(queries.updateQuestionnaireStatus(), [parameters.CompletedFlag, parameters.DateCompleted, parameters.QuestionnaireSerNum]);
+            // mark, in opalDB.Questionnaire, that this particular questionnaire is completed and add PatientQuestionnaireDBSerNum
+            return exports.runSqlQuery(queries.setQuestionnaireCompletedQuery(), [answerQuestionnaireId, parameters.DateCompleted, requestObject.Token, parameters.QuestionnaireSerNum]);
 
         }).then(function(){
             r.resolve({Response:'success'});
@@ -1516,6 +1561,7 @@ exports.getQuestionnaires = function(requestObject){
     "use strict";
     var r = Q.defer();
     var lang = -1;
+    var patientSerNum_opalDB;
 
     // check and pre-process argument
     if (requestObject.hasOwnProperty('Parameters') && requestObject.Parameters.hasOwnProperty('Language') && requestObject.Parameters.Language !== undefined){
@@ -1528,7 +1574,38 @@ exports.getQuestionnaires = function(requestObject){
 
     exports.runSqlQuery(queries.getPatientSerNumAndLanguage(), [requestObject.UserID, null, null])
         .then(function (queryRows) {
-            return questionnaires.getPatientQuestionnaires(queryRows,lang);
+            // check argument: PatientSerNum
+            if (queryRows[0].hasOwnProperty("PatientSerNum") && queryRows[0].PatientSerNum !== undefined){
+                patientSerNum_opalDB = queryRows[0].PatientSerNum;
+            }else{
+                throw new Error('Error getting questionnaires: There is no such PatientSerNum in opalDB matching the UserID');
+            }
+
+            // check argument: Language
+            // if the front-end did not send a language, then we get the language in the opalDB. If that too does not exist, then we default to French
+            if (lang === -1){
+                if(queryRows[0].hasOwnProperty('Language') && queryRows[0].Language !== undefined){
+                    switch (queryRows[0].Language) {
+                        case ('EN'):
+                            lang = 2;
+                            break;
+                        case ('FR'):
+                            lang = 1;
+                            break;
+                        default:
+                            // the default is French
+                            lang = 1;
+                    }
+                }else{
+                    // the default is French
+                    lang = 1;
+                }
+            }
+
+            return exports.runSqlQuery(queries.patientQuestionnaireTableFields(), [requestObject.UserID, null, null]);
+        })
+        .then(function(patientQuestionnaireTableFields){
+            return questionnaires.getPatientQuestionnaires(patientQuestionnaireTableFields, lang);
         })
         .then(function (result) {
             var obj = {};
@@ -1659,7 +1736,7 @@ function mapRefreshedDataToNotifications(results, notifications) {
             let raw_questionnaires = results[key]['Questionnaires'];
 
             // convert the questionnaire object into a more manageable object for the next steps of notification mapping
-            resultsArray = createQuestionnaireNotificationObject(patient_questionnaires, raw_questionnaires, resultsArray)
+            resultsArray = createQuestionnaireNotificationObject(patient_questionnaires, raw_questionnaires, resultsArray);
 
         } else {
             resultsArray = resultsArray.concat(results[key])
@@ -1689,6 +1766,12 @@ function mapRefreshedDataToNotifications(results, notifications) {
 }
 
 function createQuestionnaireNotificationObject(patient_questionnaires, raw_questionnaires, resultsArray){
+
+    // input check
+    if (patient_questionnaires === undefined || patient_questionnaires === null || typeof patient_questionnaires !== 'object' ||
+        raw_questionnaires === undefined || raw_questionnaires === null || typeof raw_questionnaires !== 'object'){
+        return resultsArray;
+    }
 
     // Iterate through refreshed questionnaire data by serNum
     Object.keys(patient_questionnaires).map(ser => {

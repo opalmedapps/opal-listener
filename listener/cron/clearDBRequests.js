@@ -9,7 +9,7 @@
  * Date: 2017-12-15
  *
  * NOTE: This is copy from the original clearRequests.js on 2017-12-13
- * Important : Do not forget to change "/dev3" back to "/dev2" before merging
+ * Important : Do not forget to change "/dev3" back to "/dev2" before merging. [Done]
  *
  */
 
@@ -26,7 +26,7 @@ admin.initializeApp({
 
 // Get reference to correct data element
 const db = admin.database();
-const ref = db.ref("/dev2");
+const ref = db.ref(config.FIREBASE_ROOT_BRANCH);
 
 process.send('Clear DB Request Cron Successfully Initialized');
 
