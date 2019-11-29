@@ -23,5 +23,7 @@
   "PFP_PATH" : "",
   "FIREBASE_ADMIN_KEY": "C:/Users/CHYU6010/Opal/staging/firebase/opalstaging-6ecfc-firebase-adminsdk-xx0gn-42121ff661.json",
   "DATABASE_URL": "https://opalstaging-6ecfc.firebaseio.com",
-  "LATEST_STABLE_VERSION": "0.0.1"
+  "LATEST_STABLE_VERSION": "0.0.1",
+  "FIREBASE_ROOT_BRANCH": "dev2"
 }
+

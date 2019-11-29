@@ -304,8 +304,6 @@ function preparePromiseArrayFields(userId,timestamp,arrayTables) {
     }else{
         for (const key in requestMappings) {
 
-            logger.log('debug', key);
-
             array.push(processSelectRequest(key,userId,timestamp));
         }
     }
