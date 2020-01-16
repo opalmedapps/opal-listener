@@ -640,7 +640,7 @@ function inputAnswer(questionnaireId, answer, languageId, patientId, dateComplet
     var answered = 1; // default for answered is 1 unless the answer is undefined
     var skipped = 0; // there is no option on the front-end right now to skip a question
     var answerId;
-    
+
     // in the qplus, if the answer has been chosen but not filled in, the answer is undefined. In this new version of DB, this is not answered
     // the front end, in case of space only answer, sends Answer: 'undefined' as a string, thus the following check will make the Answer as not answered if the user inputs undefined in a textbox question
     // this can be solved by using trim() (javascript) on the front end (qplus)
@@ -981,7 +981,7 @@ function formatQuestionnaire (questionnaireDataArray, sectionDataArray, question
         console.log("\n--------------------------answerObject--------------------\n", answerObject);
 
         // get the answers for that question if the questionnaire is not new
-        if (questionnaireDataArray[0].status !== questionnaireConfig.NEW_QUESTIONNAIRE_STATUS) {
+        if (questionnaireDataArray[0].status === questionnaireConfig.COMPLETED_QUESTIONNAIRE_STATUS) {
             // a question might have duplicates in a single section, but a questionSection_id is unique (reason for why the key is questionSection_id and not question_id)
             // the following check is for when the migration has not migrate the answers
             if (answerObject[question.questionSection_id] === undefined){
@@ -993,7 +993,21 @@ function formatQuestionnaire (questionnaireDataArray, sectionDataArray, question
             patient_answer.is_defined = 1;
             console.log("\n-------------------question.questionSection_id--------------------\n", question.questionSection_id);
             console.log("\n-------------------answerObject[question.questionSection_id]--------------------\n", answerObject[question.questionSection_id]);
-            console.log("\n-------------------patient_answer: progress or completed--------------------\n", patient_answer);
+            console.log("\n-------------------patient_answer: completed--------------------\n", patient_answer);
+        }else if (questionnaireDataArray[0].status === questionnaireConfig.IN_PROGRESS_QUESTIONNAIRE_STATUS){
+            // a question might have duplicates in a single section, but a questionSection_id is unique (reason for why the key is questionSection_id and not question_id)
+            // the following check is for when the migration has not migrate the answers
+            if (answerObject[question.questionSection_id] === undefined){
+                patient_answer.is_defined = 0;
+            }else{
+                patient_answer.answer = answerObject[question.questionSection_id];
+                patient_answer.is_defined = 1;
+            }
+
+            console.log("\n-------------------question.questionSection_id--------------------\n", question.questionSection_id);
+            console.log("\n-------------------answerObject[question.questionSection_id]--------------------\n", answerObject[question.questionSection_id]);
+            console.log("\n-------------------patient_answer: progress --------------------\n", patient_answer);
+
         }else{
             patient_answer.answer = [];
             patient_answer.is_defined = 0;
