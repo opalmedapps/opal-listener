@@ -1420,11 +1420,10 @@ exports.questionnaireSaveAnswer = function(requestObject){
     console.log("\n----------------requestObject----------------------", requestObject);
 
     // check argument
-    if (!requestObject.hasOwnProperty('Parameters') || !requestObject.Parameters.hasOwnProperty('answer') ||
-        !requestObject.Parameters.hasOwnProperty('answerQuestionnaire_id') || !requestObject.Parameters.hasOwnProperty('is_skipped') ||
-        !requestObject.Parameters.hasOwnProperty('questionSection_id') || !requestObject.Parameters.hasOwnProperty('question_id') ||
-        !requestObject.Parameters.hasOwnProperty('section_id') || !requestObject.Parameters.hasOwnProperty('question_type_id') ||
-        !Array.isArray(requestObject.Parameters.answer)) {
+    if (!requestObject.hasOwnProperty('Parameters') || !requestObject.Parameters.hasOwnProperty('answerQuestionnaire_id') ||
+        !requestObject.Parameters.hasOwnProperty('is_skipped') || !requestObject.Parameters.hasOwnProperty('questionSection_id') ||
+        !requestObject.Parameters.hasOwnProperty('question_id') || !requestObject.Parameters.hasOwnProperty('section_id') ||
+        !requestObject.Parameters.hasOwnProperty('question_type_id')) {
 
         r.reject(new Error('Error saving answer: the requestObject does not have the required parameters'));
 

@@ -903,9 +903,16 @@ function formatAnswer(questionnaireDataArray, answerDataArray){
             !answer.hasOwnProperty('type_id') || !answer.hasOwnProperty('answered') || !answer.hasOwnProperty('skipped') ||
             !answer.hasOwnProperty('created') || !answer.hasOwnProperty('last_updated') || !answer.hasOwnProperty('questionSection_id') ||
             !answer.hasOwnProperty('answer_value') || !answer.hasOwnProperty('intensity') || !answer.hasOwnProperty('posX') ||
-            !answer.hasOwnProperty('posY') || !answer.hasOwnProperty('selected') || !answer.hasOwnProperty('questionnairePatientRelSerNum')){
+            !answer.hasOwnProperty('posY') || !answer.hasOwnProperty('selected') || !answer.hasOwnProperty('questionnairePatientRelSerNum') ||
+            !answer.hasOwnProperty('answer_option_text')){
 
             throw new Error("Error getting questionnaire: this questionnaire's answers do not have the required properties");
+        }
+
+        // this can happen if the user answered the question but did not select an option
+        if (answer.answer_value === null) {
+            // do not include it in the answer giving to the app because it is an invalid answer.
+            continue;
         }
 
         // initialize the questionSection_id as the key for answerObject
@@ -996,7 +1003,6 @@ function formatQuestionnaire (questionnaireDataArray, sectionDataArray, question
             console.log("\n-------------------patient_answer: completed--------------------\n", patient_answer);
         }else if (questionnaireDataArray[0].status === questionnaireConfig.IN_PROGRESS_QUESTIONNAIRE_STATUS){
             // a question might have duplicates in a single section, but a questionSection_id is unique (reason for why the key is questionSection_id and not question_id)
-            // the following check is for when the migration has not migrate the answers
             if (answerObject[question.questionSection_id] === undefined){
                 patient_answer.is_defined = 0;
             }else{
@@ -1208,9 +1214,14 @@ function saveAnswer(opalPatientSerNumAndLanguage, param, appVersion){
 
                     // TODO: this does not cover the case of skipped answer, but since skipped is not implemented yet, it's fine
 
-                    // 5. using the insertId from 4. and using answer array and question_type_id from param, insert into the sub-answer tables
-                    // parseInt is used here just in case that the front end sent a string
-                    return insertAnswerByType(answerId, param.answer, parseInt(param.question_type_id));
+                    if (!param.hasOwnProperty('answer') || !Array.isArray(param.answer)){
+                        // this happens if the user has given an answer but has not chosen an option. It should only happen for checkbox type.
+                        r.resolve('AnswerId: ' + answerId + '. The answer is not submitted in sub table. ');
+                    }else{
+                        // 5. using the insertId from 4. and using answer array and question_type_id from param, insert into the sub-answer tables
+                        // parseInt is used here just in case that the front end sent a string
+                        return insertAnswerByType(answerId, param.answer, parseInt(param.question_type_id));
+                    }
                 }
             })
             .then(function(insertAnswerResult){
@@ -1264,11 +1275,14 @@ function insertAnswerByType (answerId, answerArray, question_typeId){
             [answerId, answerArray[0].answer_value, answerId, answerArray[1].answer_value, answerId, answerArray[2].answer_value]
              */
             for (var i=0; i<answerArray.length; i++){
+                console.log('----------------------- in checkbox for loop for saving answer ---------------------');
                 if (!answerArray[i].hasOwnProperty('answer_value')){
                     isErr = 1;
+                    console.log('----------------------- in checkbox for loop for saving answer: error no property answer_value ---------------------');
                 }else if (isNaN(parseInt(answerArray[i].answer_value))){
                         // check the validity of the answer: If the first character cannot be converted to a number, parseInt() returns NaN
                         // it should not happen since the answer value should be the ID of the option
+                    console.log('----------------------- in checkbox for loop for saving answer: error isNaN ---------------------');
                         // TODO: error handling
                 }else {
                     // if this is not the last value inserted, then add a comma
