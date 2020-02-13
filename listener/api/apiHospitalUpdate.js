@@ -26,27 +26,13 @@ exports.inputQuestionnaireAnswers = function(requestObject)
 // V2 is for inputting a single question's answer for 2019 qplus questionnaire front-end
 exports.questionnaireSaveAnswerV2 = function(requestObject)
 {
-    if (!requestObject.hasOwnProperty('AppVersion') || requestObject.AppVersion === undefined) {
-        throw new Error('Error saving answer: the requestObject does not have AppVersion');
-    }
-
-    // TODO: decide on an app version to block/allow
-    if (requestObject.AppVersion){
-        return sqlInterface.questionnaireSaveAnswer(requestObject);
-    }
+    return sqlInterface.questionnaireSaveAnswer(requestObject);
 };
 
 // V2 is for 2019 qplus questionnaire front-end
 exports.QuestionnaireUpdateStatusV2 = function(requestObject)
 {
-    if (!requestObject.hasOwnProperty('AppVersion') || requestObject.AppVersion === undefined) {
-        throw new Error('Error saving answer: the requestObject does not have AppVersion');
-    }
-
-    // TODO: decide on an app version to block/allow
-    if (requestObject.AppVersion){
-        return sqlInterface.questionnaireUpdateStatus(requestObject);
-    }
+    return sqlInterface.questionnaireUpdateStatus(requestObject);
 };
 
 //Input feedback

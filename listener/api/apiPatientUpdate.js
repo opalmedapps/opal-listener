@@ -56,7 +56,7 @@ exports.refresh = function (requestObject) {
             r.resolve(rows);
         },function(error)
         {
-            r.reject(error);        
+            r.reject(error);
         });
     }
     return r.promise;
@@ -81,7 +81,7 @@ exports.checkinUpdate = function(requestObject)
   return sqlInterface.checkinUpdate(requestObject);
 };
 
-//Get Map Location API call 
+//Get Map Location API call
 exports.getMapLocation=function(requestObject)
 {
    return sqlInterface.getMapLocation(requestObject);
@@ -138,27 +138,13 @@ exports.getQuestionnaires = function (requestObject) {
 // V2 is for the 2019 version of qplus questionnaire front-end
 exports.getQuestionnaireListV2 = function(requestObject){
 
-    if (!requestObject.hasOwnProperty('AppVersion') || requestObject.AppVersion === undefined) {
-        throw new Error('Error saving answer: the requestObject does not have AppVersion');
-    }
-
-    // TODO: decide on an app version to block/allow
-    if (requestObject.AppVersion){
-        return sqlInterface.getQuestionnaireList(requestObject);
-    }
+    return sqlInterface.getQuestionnaireList(requestObject);
 };
 
 // V2 is for the 2019 version of qplus questionnaire front-end
 exports.getQuestionnaireV2 = function(requestObject){
 
-    if (!requestObject.hasOwnProperty('AppVersion') || requestObject.AppVersion === undefined) {
-        throw new Error('Error saving answer: the requestObject does not have AppVersion');
-    }
-
-    // TODO: decide on an app version to block/allow
-    if (requestObject.AppVersion){
-        return sqlInterface.getQuestionnaire(requestObject);
-    }
+    return sqlInterface.getQuestionnaire(requestObject);
 };
 
 exports.getPatientsForPatientsMembers = function ()
