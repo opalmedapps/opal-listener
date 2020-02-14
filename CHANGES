@@ -1,3 +1,73 @@
+Version 1.1.0.0:
+ - Added Groups in the Lab Results
+ - Merge branch 'staging_merge_test_questionnaire' into staging
+ - Change logger.js from debug to info
+ - merged with staging_questionnaire_backendOnly branch and cleaned up console.log
+ - Merge remote-tracking branch 'origin/staging_questionnaire_backendOnly' into staging_merge_test_questionnaire
+ - added html decoding for questionnaire description
+ - change query uppercase
+ - get questionnaire list from opalDB instead of questionnaireDB: note that if there is no title on the front end that it is due to no corresponding questionnaire in the questionnaireDB and that if the questionnaire is completed but there is no patientQuestionnaireDBsernum then there is no answer matching so that particular questionnaire will not appear in the list
+ - add check on questionnaire
+ - added check for questionnaire and its notifications
+ - Merge branch 'staging' of https://github.com/Sable/opal-listener into staging
+ -    Added the Doctor's Bio and also included Tessa's changes
+ - Merge branch 'staging_waiting_times' into staging
+ - Merge branch 'waiting_times_tessa' into staging_waiting_times
+ - Reduce Processing Time if Value Exists If the appointment has an actual start time in the Appointment table, the processing of the steps of the appointment from the other tables doesn't happen
+ - Clean up Wait Times Gets rid of Appointment Codes that haven't been screened yet, corrects wait times so they're not negative, and gets rid of unnecessary comments
+ - Add Print statements For Debugging to be Removed
+ - Merge branch 'staging_waiting_times' into staging
+ - Merge branch 'waiting_times_tessa' into staging_waiting_times
+ - Add One More Appointment Code
+ - Merge branch 'staging_waiting_times' into staging
+ - Merge branch 'waiting_times_tessa' into staging_waiting_times
+ - Add New Appointment Codes
+ - Change LastUpdated from datetime to timestamp
+ - Change LastUpdate from datetime to timestamp
+ - Merge Waiting Times Project Into Staging
+ - Fix Differences for Merge
+ - Merge branch 'waiting_times_tessa' into staging_waiting_times
+ - Add Patient.TestUser Query so the Front End Can Filter Information for Test Users
+ - clean up and change author of update when inserting answers
+ - fixed a bug concerning checkbox answers when they return null
+ - Merge branch 'staging_waiting_times' into waiting_times_tessa
+ - changed answer query from 2 to 1
+ - notification does not work for questionnaire comment
+ - Remove Comments and Notes from Code
+ - added a check for setting order
+ - fixed a bug in question order when there are multiple sections
+ - clean up unused code
+ - Get Missing Appointment Attribute
+ - changed request mappings, changed queries for getting questionnaires to call to store procedures
+ - Merge branch 'waiting_times_tessa' into staging_waiting_times
+ - Query between two different times
+ - changed so that the DB stores the patientSerNum not patientId (of the patient table of opal db), also modified query for input answer for checkbox and radiobutton to call a function in the questionnaireDB
+ - changed query so to get patientSerNum instead o patientID for the questionnaire DB
+ - fixed textbox undefined bug and getting language from backend
+ - Fix My Waiting Time and Appointment Delays
+ - solved the bug of when there is no real answer text (i.e. there is answerID in `Answer` table but not in the subtables)
+ - solved the if copying the questions of another questionnaire, the copied questionnaire will not display or cannot be answered problem
+ - finished inserting questionnaire answers and modified some bugs for getting answers. Logger.js has been modified for testing purposes
+ - verify input of get questionnaires and setting answers + some queries for getting information required to set answer
+ - add Assess when getting questionnaires
+ - finished getting questionnaire and its answers, note that the Yes/No, checkbox, radio buttons answer do not work since there is no answers in the database
+ - bug fixes in setQuestionOrder, add languages, getting patientQuestionnaire info from questionnaireDB
+ - add explanations before changes
+ - getting questionnaire data from new questionnaireDB2019
+ - transform queries for getting questionnaire to fit the new questionnaireDB
+ - :rocket: Refactored modules.
+ - :rocket: My Waiting Time done.
+ - :rocket: Added My Waiting Time.
+ - :rocket: Waiting Time Visualizations ready.
+ - :rocket: Waiting Time Visualizations ready.
+ - :construction: Added get Appointments History by appointment comparison.
+ - :construction: Created channel between app and listener for Waiting Time Visualizations.
+ - :construction: Starting porting the Waiting Time Visualization algorithm into the Opal Listener...
+
+Version 1.0.3.5:
+ - Merge remote-tracking branch 'origin/Issue_3' into staging
+ - Move all dev2 references to config.json
+
 Version 1.0.3.4:
  - Modified the appointment to include CANCELLED in the title
 

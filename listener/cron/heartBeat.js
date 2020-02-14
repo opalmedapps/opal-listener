@@ -25,7 +25,7 @@ admin.initializeApp({
     databaseURL: config.DATABASE_URL
 });
 const db = admin.database();
-const ref = db.ref("/dev2/requests");
+const ref = db.ref(config.FIREBASE_ROOT_BRANCH).child("requests");
 
 
 /**
