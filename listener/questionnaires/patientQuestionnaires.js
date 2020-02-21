@@ -466,11 +466,11 @@ var inputPatientQuestionnaireQuery = "INSERT INTO `PatientQuestionnaire`(`Patien
 var patientIdInQuestionnaireDBQuery = `SELECT ID FROM patient WHERE externalId = ?;`;
 var getQuestionSectionInfoFromQuestionnaireQuestionSerNumQuery = `SELECT qSec.questionId, qSec.sectionId, q.typeId 
 FROM question q, (SELECT questionId, sectionId FROM questionSection WHERE ID = ?) qSec
-WHERE q.deleted <> 1 AND q.ID = qSec.questionId
+WHERE q.deleted = 0 AND q.ID = qSec.questionId
 ;`;
 var getPatientIdFromQuestionnaireSerNumQuery = `SELECT patientId
 FROM answerQuestionnaire
-WHERE ID = ? AND deleted <> 1 AND \`status\` <> 2
+WHERE ID = ? AND deleted = 0 AND \`status\` <> 2
 ;`;
 var updateAnswerQuestionnaireQuery = `UPDATE \`answerQuestionnaire\` SET \`status\` = ?, \`updatedBy\` = ? WHERE \`ID\` = ?;`;
 var insertSectionIntoAnswerSectionQuery = `REPLACE INTO answerSection(answerQuestionnaireId, sectionId) VALUES (?, ?);`;
