@@ -8,7 +8,7 @@ exports.patientTableFields=function()
 exports.patientDoctorTableFields=function()
 {
 	return "SELECT ifnull(D.FirstName, '') FirstName, ifnull(D.LastName, '') LastName, D.DoctorSerNum, PD.PrimaryFlag, PD.OncologistFlag, ifnull(D.Email, '') Email, ifnull(D.Phone, '') Phone, ifnull(D.ProfileImage, '') ProfileImage, ifnull(D.Address, '') Address,	ifnull(D.BIO_EN, '') Bio_EN, ifnull(D.BIO_FR, '') Bio_FR FROM Doctor D, PatientDoctor PD, Patient P, Users U WHERE U.Username Like ? AND P.PatientSerNum=U.UserTypeSerNum AND PD.PatientSerNum = P.PatientSerNum AND D.DoctorSerNum = PD.DoctorSerNum AND (D.LastUpdated > ? OR PD.LastUpdated > ?);";
-	
+
     // return "SELECT Doctor.FirstName, Doctor.LastName, Doctor.DoctorSerNum, PatientDoctor.PrimaryFlag, PatientDoctor.OncologistFlag, Doctor.Email,Doctor.Phone, Doctor.ProfileImage, Doctor.Address FROM Doctor, PatientDoctor, Patient, Users WHERE Users.Username Like ? AND Patient.PatientSerNum=Users.UserTypeSerNum AND PatientDoctor.PatientSerNum = Patient.PatientSerNum AND Doctor.DoctorSerNum = PatientDoctor.DoctorSerNum AND (Doctor.LastUpdated > ? OR PatientDoctor.LastUpdated > ?);";
 };
 
@@ -373,7 +373,7 @@ exports.insertEducationalMaterialRatingQuery=function()
 };
 exports.setQuestionnaireCompletedQuery = function()
 {
-    return "UPDATE `Questionnaire` SET PatientQuestionnaireDBSerNum = ?, CompletedFlag = 1, CompletionDate = ?, SessionId = ? WHERE Questionnaire.QuestionnaireSerNum = ?;";
+    return "UPDATE `Questionnaire` SET CompletedFlag = 1, CompletionDate = ?, SessionId = ? WHERE Questionnaire.QuestionnaireSerNum = ?;";
 };
 
 exports.getPatientAriaSerQuery = function()
@@ -512,4 +512,8 @@ exports.getNewNotifications=function() {
 
 exports.updateQuestionnaireStatus = function () {
     return `UPDATE \`questionnaire\` SET \`CompletedFlag\`= ?, \`CompletionDate\`= ? WHERE PatientQuestionnaireDBSerNum = ?;`;
+};
+
+exports.getPatientQuestionnaireDBSerNum = function () {
+    return `SELECT q.PatientQuestionnaireDBSerNum FROM Questionnaire q WHERE q.QuestionnaireSerNum = ? AND q.CompletedFlag <> 1;`;
 };
