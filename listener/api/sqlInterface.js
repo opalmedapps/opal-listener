@@ -749,6 +749,7 @@ exports.inputQuestionnaireAnswers = function(requestObject) {
     let r = Q.defer();
     let parameters = requestObject.Parameters;
     let appVersion = requestObject.AppVersion;
+    let patientSerNum = -1;
 
     // check input: these are required properties.
     // The non required properties is: parameters.PatientId
@@ -772,8 +773,8 @@ exports.inputQuestionnaireAnswers = function(requestObject) {
 
             var dbLang = -1;
             // ask the opalDB for the language
-            if (queryRows[0].hasOwnProperty('Language') && queryRows[0].Language !== undefined){
-                switch (queryRows[0].Language){
+            if (queryRows[0].hasOwnProperty('Language') && queryRows[0].Language !== undefined) {
+                switch (queryRows[0].Language) {
                     case ('EN'):
                         dbLang = 2;
                         break;
@@ -786,31 +787,41 @@ exports.inputQuestionnaireAnswers = function(requestObject) {
             }
 
             // check input: format language
-            if (parameters.hasOwnProperty('Language')){
-                if (parameters.Language === 'EN'){
+            if (parameters.hasOwnProperty('Language')) {
+                if (parameters.Language === 'EN') {
                     parameters.Language = 2;
-                }else if (parameters.Language === 'FR'){
+                } else if (parameters.Language === 'FR') {
                     parameters.Language = 1;
-                }else{
+                } else {
                     // the default is French, but we do not have, as of July 2019, any other language in the DB, therefore we will ask the opalDB for the language
                     parameters.Language = dbLang;
                 }
-            }else{
+            } else {
                 // if the app does not send a language, we will ask the opalDB for the language
                 parameters.Language = dbLang;
             }
 
             // check input: patientSerNum
-            if (!queryRows[0].hasOwnProperty('PatientSerNum') || queryRows[0].PatientSerNum === undefined){
+            if (!queryRows[0].hasOwnProperty('PatientSerNum') || queryRows[0].PatientSerNum === undefined) {
                 throw new Error('Error inputting questionnaire answers: Cannot find patientSerNum in OpalDB');
             }
 
-            return questionnaires.inputQuestionnaireAnswers(parameters, appVersion, queryRows[0].PatientSerNum);
+            patientSerNum = queryRows[0].PatientSerNum;
+
+            return exports.runSqlQuery(queries.getPatientQuestionnaireDBSerNum(), [parameters.QuestionnaireSerNum]);
+
+        }).then(function(queryReturned){
+
+            if (!queryReturned[0].hasOwnProperty('PatientQuestionnaireDBSerNum') || queryReturned[0].PatientQuestionnaireDBSerNum === undefined || queryReturned[0].PatientQuestionnaireDBSerNum === null){
+                throw new Error('Error inputting questionnaire answers: Cannot find PatientQuestionnaireDBSerNum in OpalDB');
+            }
+
+            return questionnaires.inputQuestionnaireAnswers(queryReturned[0].PatientQuestionnaireDBSerNum, parameters, appVersion, patientSerNum);
 
         }).then(function(answerQuestionnaireId){
 
-            // mark, in opalDB.Questionnaire, that this particular questionnaire is completed and add PatientQuestionnaireDBSerNum
-            return exports.runSqlQuery(queries.setQuestionnaireCompletedQuery(), [answerQuestionnaireId, parameters.DateCompleted, requestObject.Token, parameters.QuestionnaireSerNum]);
+            // mark, in opalDB.Questionnaire, that this particular questionnaire is completed and
+            return exports.runSqlQuery(queries.setQuestionnaireCompletedQuery(), [parameters.DateCompleted, requestObject.Token, parameters.QuestionnaireSerNum]);
 
         }).then(function(){
             r.resolve({Response:'success'});
