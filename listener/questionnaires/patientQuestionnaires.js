@@ -466,14 +466,13 @@ var inputPatientQuestionnaireQuery = "INSERT INTO `PatientQuestionnaire`(`Patien
 var patientIdInQuestionnaireDBQuery = `SELECT ID FROM patient WHERE externalId = ?;`;
 var getQuestionSectionInfoFromQuestionnaireQuestionSerNumQuery = `SELECT qSec.questionId, qSec.sectionId, q.typeId 
 FROM question q, (SELECT questionId, sectionId FROM questionSection WHERE ID = ?) qSec
-WHERE q.deleted <> 1 AND q.ID = qSec.questionId
+WHERE q.deleted = 0 AND q.ID = qSec.questionId
 ;`;
 var getPatientIdFromQuestionnaireSerNumQuery = `SELECT patientId
 FROM answerQuestionnaire
-WHERE ID = ? AND deleted <> 1 AND \`status\` <> 2
+WHERE ID = ? AND deleted = 0 AND \`status\` <> 2
 ;`;
-var updateStatusCompletedInAnswerQuestionnaireQuery = `UPDATE \`answerQuestionnaire\` SET \`status\`='2', \`lastUpdated\`=?, \`updatedBy\`=? WHERE  \`ID\`=?;`;
-var insertInAnswerQuestionnaireQuery = `INSERT INTO \`answerQuestionnaire\` (\`questionnaireId\`, \`patientId\`, \`status\`, \`deleted\`, \`deletedBy\`, \`creationDate\`, \`createdBy\`, \`lastUpdated\`, \`updatedBy\`) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?);`;
+var updateAnswerQuestionnaireQuery = `UPDATE \`answerQuestionnaire\` SET \`status\` = ?, \`updatedBy\` = ? WHERE \`ID\` = ?;`;
 var insertSectionIntoAnswerSectionQuery = `REPLACE INTO answerSection(answerQuestionnaireId, sectionId) VALUES (?, ?);`;
 
 var insertIntoAnswerQuery = `REPLACE INTO 
@@ -494,20 +493,18 @@ VALUES (?, (SELECT getAnswerTableOptionID(?,?,1)));`;
 /**
  * inputQuestionnaireAnswers
  * @desc the main function to input the answers gotten from the front-end
+ * @param answerQuestionnaireId: the PatientQuestionnaireDBSerNum in opalDB.Questionnaire, which corresponds to the ID in questionnaireDB2019.answerQuestionnaire
  * @param parameters: the parameters gotten from the front-end, verified in the calling function, i.e. inputQuestionnaireAnswers
  * @param appVersion: the version of the app, required for logging updatedBy and createdBy in the database
  * @param patientSerNum: the patientSerNum in the opalDB found using UserID. Its existence is verified by the calling function, i.e. inputQuestionnaireAnswers
  * @return {promise}
  */
-exports.inputQuestionnaireAnswers = function (parameters, appVersion, patientSerNum) {
-    var r = q.defer();
+exports.inputQuestionnaireAnswers = function (answerQuestionnaireId, parameters, appVersion, patientSerNum) {
+    let r = q.defer();
 
-    var authorOfUpdate; // patientId_APP_appVersion
-    var patientId;
+    let authorOfUpdate; // patientId_APP_appVersion
+    let patientId;
     const completedStatus = 2;
-    const deleted = 0;
-    const deletedBy = '';
-    var answerQuestionnaireId = -1;
 
     promisifyQuery(patientIdInQuestionnaireDBQuery, [patientSerNum])
        .then(function(patientId_questionnaireDB){
@@ -516,12 +513,13 @@ exports.inputQuestionnaireAnswers = function (parameters, appVersion, patientSer
            authorOfUpdate = patientId + '_APP_' + appVersion;
 
            // insert in `answerQuestionnaire` table
-           return promisifyQuery(insertInAnswerQuestionnaireQuery, [parameters.QuestionnaireDBSerNum, patientId, completedStatus, deleted, deletedBy, parameters.DateCompleted, authorOfUpdate, parameters.DateCompleted, authorOfUpdate]);
+           return promisifyQuery(updateAnswerQuestionnaireQuery, [completedStatus, authorOfUpdate, answerQuestionnaireId]);
 
-       }).then(function(insertReturn){
+       }).then(function(updateReturn){
 
-           if (insertReturn.hasOwnProperty('insertId') && insertReturn.insertId !== undefined){
-               answerQuestionnaireId = insertReturn.insertId;
+           if (!updateReturn.hasOwnProperty('affectedRows') || updateReturn.affectedRows === 0){
+               // no corresponding records in the questionnaireDB
+               answerQuestionnaireId = -1;
            }
 
            // gets the questionId, sectionId and type of question from the questionnaireQuestionSerNum of one answer, also the answerSectionId
