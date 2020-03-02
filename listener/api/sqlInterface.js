@@ -1542,7 +1542,7 @@ exports.questionnaireUpdateStatus = function(requestObject){
 
                 // 2. update the status in the questionnaire table of the opal DB if completed
                 if (isCompleted === 1){
-                    return exports.runSqlQuery(exports.updateQuestionnaireStatus, [isCompleted, 'CURRENT_TIMESTAMP', requestObject.Parameters.answerQuestionnaire_id]);
+                    return exports.runSqlQuery(queries.updateQuestionnaireStatus(), [isCompleted, requestObject.Parameters.answerQuestionnaire_id]);
                     // TODO: do we rollback if this fails
                 }else{
                     r.resolve({Response:'success'});
