@@ -1471,8 +1471,6 @@ exports.getQuestionnaire = function(requestObject) {
 exports.questionnaireSaveAnswer = function(requestObject){
     let r = Q.defer();
 
-    console.log("\n----------------requestObject----------------------", requestObject);
-
     // check argument
     if (!requestObject.hasOwnProperty('Parameters') || !requestObject.Parameters.hasOwnProperty('answerQuestionnaire_id') ||
         !requestObject.Parameters.hasOwnProperty('is_skipped') || !requestObject.Parameters.hasOwnProperty('questionSection_id') ||
@@ -1510,8 +1508,6 @@ exports.questionnaireSaveAnswer = function(requestObject){
 exports.questionnaireUpdateStatus = function(requestObject){
     let r = Q.defer();
 
-    console.log("\n----------------requestObject----------------------", requestObject);
-
     // check arguments
     if (!requestObject.hasOwnProperty('Parameters') || !requestObject.Parameters.hasOwnProperty('answerQuestionnaire_id') ||
         !requestObject.Parameters.hasOwnProperty('new_status') || isNaN(parseInt(requestObject.Parameters.new_status)) ||
@@ -1543,7 +1539,7 @@ exports.questionnaireUpdateStatus = function(requestObject){
                 // 2. update the status in the questionnaire table of the opal DB if completed
                 if (isCompleted === 1){
                     return exports.runSqlQuery(queries.updateQuestionnaireStatus(), [isCompleted, requestObject.Parameters.answerQuestionnaire_id]);
-                    // TODO: do we rollback if this fails
+                    // TODO: do we rollback if this fails + insert log into DB
                 }else{
                     r.resolve({Response:'success'});
                 }
