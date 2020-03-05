@@ -936,7 +936,10 @@ function formatAnswer(questionnaireDataArray, answerDataArray){
     if (!questionnaireDataArray[0].hasOwnProperty('qp_ser_num') || !questionnaireDataArray[0].qp_ser_num ||
         !questionnaireDataArray[0].hasOwnProperty('status') ||
         !questionnaireDataArray[0].hasOwnProperty('questionnaire_id') ||
-        !questionnaireDataArray[0].hasOwnProperty('nickname') || !questionnaireDataArray[0].nickname){
+        !questionnaireDataArray[0].hasOwnProperty('nickname') || !questionnaireDataArray[0].nickname ||
+        !questionnaireDataArray[0].hasOwnProperty('description') ||
+        !questionnaireDataArray[0].hasOwnProperty('logo') ||
+        !questionnaireDataArray[0].hasOwnProperty('instruction')){
         throw new Error("Error getting questionnaire: this questionnaire does not have the required properties");
     }
 
@@ -979,7 +982,7 @@ function formatAnswer(questionnaireDataArray, answerDataArray){
 
 /**
  * formatQuestionnaire
- * @desc this function is a helper function for formatting one questionnaire data gotten from the questionnaireDB to the JSON accepted on the front end.
+ * @desc this function is a helper function for formatting one questionnaire data gotten from the questionnaireDB to the JSON accepted on the front end. Also decode html.
  * @param questionnaireDataArray {array}
  * @param sectionDataArray {array}
  * @param questionDataArray {array}
@@ -996,13 +999,21 @@ function formatQuestionnaire (questionnaireDataArray, sectionDataArray, question
         throw new Error("Error getting questionnaire: there is more than one or no questionnaire associated with the ID provided");
     }
 
+    // decode html
+    questionnaireDataArray[0].description = htmlspecialchars_decode(questionnaireDataArray[0].description);
+    questionnaireDataArray[0].instruction = htmlspecialchars_decode(questionnaireDataArray[0].instruction);
+
     var sections = {};
 
     sectionDataArray.forEach(function(section){
         // check required properties for a section
-        if (!section.hasOwnProperty('section_id') || !section.hasOwnProperty('section_position')){
+        if (!section.hasOwnProperty('section_id') || !section.hasOwnProperty('section_position') ||
+            !section.hasOwnProperty('section_title') || !section.hasOwnProperty('section_instruction')){
             throw new Error("Error getting questionnaire: this questionnaire's sections do not have required property");
         }
+
+        // decode html
+        section.section_instruction = htmlspecialchars_decode(section.section_instruction);
 
         // this is to prevent passing by reference
         sections[section.section_id] = Object.assign({}, {questions: []}, section);
@@ -1010,6 +1021,9 @@ function formatQuestionnaire (questionnaireDataArray, sectionDataArray, question
 
     questionDataArray.forEach(function (question) {
         // required properties should be checked beforehand by the calling function
+
+        // html decoding
+        question.question_text = htmlspecialchars_decode(question.question_text);
 
         // this should not happen. A question should be contained in a section
         if (sections[question.section_id] === undefined){
