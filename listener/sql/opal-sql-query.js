@@ -1,6 +1,6 @@
 const mysql = require("mysql");
 const logger = require('./../logs/logger');
-
+const config = require('./../config.json');
 class OpalSQLQuery{
 	static #DB_CREDENTIALS = {
 		connectionLimit: 10,
