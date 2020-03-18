@@ -1103,9 +1103,8 @@ function getQuestionAndTypeMap (questionDataArray){
         // check required properties for a question
         if (!question.hasOwnProperty('section_id') || !question.hasOwnProperty('questionSection_id') || !question.hasOwnProperty('type_id') ||
             !question.hasOwnProperty('question_position') || !question.hasOwnProperty('orientation') || !question.hasOwnProperty('optional') ||
-            !question.hasOwnProperty('question_type_category_key') || !question.hasOwnProperty('allow_question_feedback') ||
-            !question.hasOwnProperty('polarity') || !question.hasOwnProperty('question_id') || !question.hasOwnProperty('question_text') ||
-            !question.question_type_category_key || !question.question_text){
+            !question.hasOwnProperty('allow_question_feedback') || !question.hasOwnProperty('polarity') || !question.hasOwnProperty('question_id') ||
+            !question.hasOwnProperty('question_text') || !question.question_text){
 
             throw new Error("Error getting questionnaire: this questionnaire's questions do not have required properties");
         }
@@ -1244,7 +1243,7 @@ function saveAnswer(opalPatientSerNumAndLanguage, param, appVersion){
                     } else {
                         r.reject(new Error('Error saving answer: query unsuccessful'));
                     }
-                } else if (!queryResult[queryResult.length - 2][0].hasOwnProperty('inserted_answer_id') || !queryResult[queryResult.length - 2][0].hasOwnProperty('question_type_name_EN')){
+                } else if (!queryResult[queryResult.length - 2][0].hasOwnProperty('inserted_answer_id')){
                     r.reject(new Error('Error saving answer: query unsuccessful'));
                 }else{
                     answerId = queryResult[queryResult.length - 2][0].inserted_answer_id;
