@@ -4,13 +4,15 @@ const apiPatientUpdate      = require('./apiPatientUpdate.js');
 const apiHospitalUpdate     = require('./apiHospitalUpdate.js');
 const security              = require('./../security/security');
 const logger                = require('./../logs/logger');
-const modules               = require('./modules')
+const modules               = require('./modules');
+// New API handlers
+const tests = require("./patient/tests");
 
 /**
  * API HANDLERS FOR GENERAL REQUESTS
  * @type {{DeviceIdentifier: *, Log: *, Login: *, Logout: *, Resume: *, Refresh: *, AccountChange: *, CheckCheckin: *, Checkin: *, CheckinUpdate: *, DocumentContent: *, Feedback: *, LabResults: *, MapLocation: *, Message: *, NotificationsAll: *, Questionnaires: *, QuestionnaireRating: *, QuestionnaireAnswers: *, Read: *, PFPMembers: *, AppointmentDelays: *}}
  */
-const API = {
+const LEGACYAPI = {
     'DeviceIdentifier': apiHospitalUpdate.updateDeviceIdentifier,
     'Log': apiPatientUpdate.logActivity,
     'LogPatientAction': apiPatientUpdate.logPatientAction,
@@ -49,6 +51,11 @@ exports.securityAPI = {
     'SetNewPassword': security.resetPasswordRequest,
     'VerifyAnswer': security.resetPasswordRequest
 };
+/**
+ * New API handlers
+ * @type {{PatientTestDates: {(OpalRequest): Promise<*>, (*): Promise<void>}, PatientTestTypeResults: {(OpalRequest): Promise<OpalResponseError|*>, (*): Promise<void>}, PatientTestDateResultsHandler: {(OpalRequest): Promise<OpalResponseError|*>, (*): Promise<void>}, PatientTestTypes: {(OpalRequest): Promise<*>, (*): Promise<void>}}}
+ */
+const API = {...tests};
 
 /**
  * processRequest
@@ -57,16 +64,18 @@ exports.securityAPI = {
  * @return {Promise}
  */
 exports.processRequest=function(requestObject) {
-    const r = Q.defer();
-    const type = requestObject.Request;
-    if (API.hasOwnProperty(type)) {
-        logger.log('debug', 'Processing request of type: ' + type);
+    const type = requestObject.type;
+    // Old requests
+    logger.log('debug', 'Processing request of type: ' + type);
+    if (LEGACYAPI.hasOwnProperty(type)) {
+        return LEGACYAPI[type](requestObject.toLegacy());
+    // New request format
+    }else if(API.hasOwnProperty(type)){
         return API[type](requestObject);
     }else{
-        logger.log('error', 'Invalid request type: ' + type);
-        r.reject('Invalid request type');
+        logger.log("error", `Invalid request type: ${type}`);
+        return Promise.reject("Invalid request type");
     }
-    return r.promise;
 };
 
 exports.logPatientRequest = function(requestObject) {

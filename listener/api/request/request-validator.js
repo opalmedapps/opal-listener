@@ -2,7 +2,7 @@
 *  Opal Imports
 */
 const OpalRequest = require('./request');
-const OpalResponseError = require('../response/response-error');
+const {OpalResponseError} = require('../response/response-error');
 const sqlInterface = require('../sqlInterface');
 const utility = require('../../utility/utility');
 const logger = require('../../logs/logger');

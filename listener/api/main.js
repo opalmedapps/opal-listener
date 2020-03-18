@@ -1,7 +1,8 @@
 const q                   = require('q');
 const processApiRequest   = require('./processApiRequest.js');
 const OpalResponseSuccess = require('./response/response-success');
-const OpalResponseError   = require('./response/response-error');
+const {OpalResponseError}   = require('./response/response-error');
+const {OpalResponse}   = require('./response/response');
 const RequestValidator    = require('./request/request-validator');
 const logger              = require('../logs/logger.js');
 
@@ -25,18 +26,17 @@ module.exports = {
 function requestFormatter({key,request}) {
 
 	logger.log('debug', 'request object in request formatter: ' + JSON.stringify(request));
-
 	return RequestValidator.validate(key, request)
 		.then( opalReq => { //opalReq of type, OpalRequest
 
             // After they have been decrypted, log all main requests in the table PatientActivityLog. -SB
             processApiRequest.logPatientRequest(opalReq);
 
-			return processApiRequest.processRequest(opalReq.toLegacy()).then((data)=>
+			return processApiRequest.processRequest(opalReq).then((data)=>
 			{
 				logger.log('debug', 'Successfully processed request: ' + data);
                 logger.log('info', 'Successfully processed request');
-
+                if(data instanceof OpalResponse) return response.toLegacy();
 				let response = new OpalResponseSuccess(data, opalReq);
 				return response.toLegacy();
 			}).catch((err)=>{
