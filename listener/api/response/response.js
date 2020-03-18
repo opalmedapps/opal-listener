@@ -18,12 +18,14 @@ module.exports = OpalResponse;
  * CODE 2: User is authenticated correctly but their was a problem processing the request, could be queries, incorrect parameters, etc. In that case we log the error
  *        In the error log table and respond to the user a server error, report error to the hospital.
  * CODE 3: success
+ * CODE 400: HTTP Client Error, typically used when the request is incorrect, failing parameter validation
  */
 //
 var responseCodes =
 	{
-		'1':'Authentication problem',
-		'2':'Server Response Error',
-		'3':'Success',
-		'4':'Too many attempts for answer'
+		'1':'Authentication problem', // 401 HTTP Code
+		'2':'Server Response Error', // 500 Server error
+		'3':'Success', // 200 Ok
+		'4':'Too many attempts for answer', // TODO(dherre3) Get rid of this code, belongs to 400 client error
+		'400':'Client Error' // HTTP 400 Client error
 	};

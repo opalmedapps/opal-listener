@@ -8,23 +8,13 @@ const questionnaires    = require('./../questionnaires/patientQuestionnaires.js'
 const Mail              = require('./../mailer/mailer.js');
 const utility           = require('./../utility/utility');
 const logger            = require('./../logs/logger');
-
+const OpalSQLQueryRunner = require("../sql/opal-sql-query-runner");
 
 var exports = module.exports = {};
 
 /******************************
  * CONFIGURATIONS
  ******************************/
-const dbCredentials = {
-	connectionLimit: 10,
-	host: config.HOST,
-	user: config.MYSQL_USERNAME,
-	password: config.MYSQL_PASSWORD,
-	database: config.MYSQL_DATABASE,
-	dateStrings: true,
-    port: config.MYSQL_DATABASE_PORT
-};
-
 const waitingRoomDbCredentials = {
 	connectionLimit: 10,
     host: config.WAITING_ROOM_MANAGEMENT_SYSTEM_MYSQL.HOST,
@@ -35,11 +25,6 @@ const waitingRoomDbCredentials = {
 	dateStrings: true
 };
 
-/**
- * SQL POOL CONFIGURATION
- * @type {Pool}
- */
-const pool = mysql.createPool(dbCredentials);
 const waitingRoomPool = mysql.createPool(waitingRoomDbCredentials);
 
 /////////////////////////////////////////////////////
@@ -139,42 +124,14 @@ exports.getSqlApiMappings = function() {
 
 
 /**
- * runSqlQuery
+ * runSqlQuery function runs query, its kept due to the many references
  * @desc runs inputted query against SQL mapping by grabbing an available connection from connection pool
  * @param query
  * @param parameters
  * @param processRawFunction
  * @return {Promise}
  */
-exports.runSqlQuery = function(query, parameters, processRawFunction) {
-    let r = Q.defer();
-
-    pool.getConnection(function(err, connection) {
-        if(err) logger.log('error', err);
-        logger.log('debug', 'grabbed connection: ' + connection);
-        logger.log('info', 'Successfully grabbed connection from pool and about to perform following query: ', {query: query});
-
-        const que = connection.query(query, parameters, function (err, rows, fields) {
-            connection.release();
-
-            logger.log('info', 'Successfully performed query', {query: que.sql, response: JSON.stringify(rows)});
-
-            if (err) r.reject(err);
-            if (typeof rows !== 'undefined') {
-                if (processRawFunction && typeof processRawFunction !== 'undefined') {
-                    processRawFunction(rows).then(function (result) {
-                        r.resolve(result);
-                    });
-                } else {
-                    r.resolve(rows);
-                }
-            } else {
-                r.resolve([]);
-            }
-        });
-    });
-    return r.promise;
-};
+exports.runSqlQuery = OpalSQLQueryRunner.run;
 
 /**
  * runWaitingRoomSqlQuery
@@ -683,7 +640,7 @@ exports.updateDeviceIdentifier = function(requestObject, parameters) {
 /**
  * @name addToActivityLog
  * @desc Adding action to activity log
- * @param requestObject
+ * @param {OpalRequest}requestObject
  */
 exports.addToActivityLog=function(requestObject)
 {
@@ -704,7 +661,7 @@ exports.addToActivityLog=function(requestObject)
             logger.log('verbose', "Success logging request of type: "+Request);
             r.resolve({Response:'success'});
         }).catch((err)=>{
-            logger.log('error', "Error logging request of type: "+Request);
+            logger.log('error', "Error logging request of type: "+Request, err);
             r.reject({Response:'error', Reason:err});
         });
 	}
