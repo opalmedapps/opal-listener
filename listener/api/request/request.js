@@ -34,7 +34,7 @@ class RequestMeta {
 		this.Token = Token;
 		this.UserID = UserID;
 		this.Timestamp = Timestamp;
-		this.Email = UserEmail;
+		this.UserEmail = UserEmail;
 		this.AppVersion = AppVersion;
 	}
 

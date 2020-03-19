@@ -11,7 +11,7 @@ class OpalSQLQuery{
 		dateStrings: true,
 		port: config.MYSQL_DATABASE_PORT
 	};
-	static #POOL = mysql.createPool(this.#DB_CREDENTIALS);
+	static POOL = mysql.createPool(this.#DB_CREDENTIALS);
 
 	/**
 	 * Performs sql query given parameters and a postProcessing function
@@ -23,7 +23,7 @@ class OpalSQLQuery{
 	 */
 	static run(query, parameters=null, postProcessor=null) {
 		return new Promise((resolve,reject)=>{
-			this.#POOL.getConnection(function(err, connection) {
+			OpalSQLQuery.POOL.getConnection(function(err, connection) {
 				logger.log('debug', `Grabbed SQL connection: ${connection}`);
 				const que = connection.query(query, parameters, function (err, rows) {
 					connection.release();

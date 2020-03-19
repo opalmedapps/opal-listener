@@ -662,7 +662,7 @@ exports.addToActivityLog=function(requestObject)
             logger.log('verbose', "Success logging request of type: "+Request);
             r.resolve({Response:'success'});
         }).catch((err)=>{
-            logger.log('error', "Error logging request of type: "+Request);
+            logger.log('error', "Error logging request of type: "+Request, err);
             r.reject({Response:'error', Reason:err});
         });
 	}
