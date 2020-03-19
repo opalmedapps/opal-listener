@@ -28,12 +28,12 @@ class OpalSQLQuery{
 				const que = connection.query(query, parameters, function (err, rows) {
 					connection.release();
 					if (err){
-						logger.log("error", `Failed to execute query: ${que.sql}`, error);
+						logger.log("error", `Failed to execute query: ${que.sql}`, err);
 						reject(err);
 					}
 					logger.log('info', `Successfully performed query: ${que.sql}`);
 					if (typeof rows !== 'undefined') {
-						if (postProcessor instanceof Function) return postProcessor(rows);
+						if (postProcessor instanceof Function) postProcessor(rows).then(rows=>resolve(rows));
 						else resolve(rows);
 					} else {
 						resolve([]);

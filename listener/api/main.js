@@ -2,7 +2,7 @@ const q                   = require('q');
 const processApiRequest   = require('./processApiRequest.js');
 const OpalResponseSuccess = require('./response/response-success');
 const {OpalResponseError}   = require('./response/response-error');
-const {OpalResponse}   = require('./response/response');
+const OpalResponse   = require('./response/response');
 const RequestValidator    = require('./request/request-validator');
 const logger              = require('../logs/logger.js');
 
