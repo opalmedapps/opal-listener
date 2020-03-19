@@ -31,7 +31,7 @@ class PatientTests {
 		return results;
 	}
 
-	async getTestResultByDate(date) {
+	async getTestResultsByDate(date) {
 		const query = PatientTestsQuery.getTestResultsByDateQuery(this._patient.patientSerNum, moment(date)
 			.format("YYYY-MM-DD"));
 		let results;

@@ -21,7 +21,7 @@ class PatientTestDateResultsHandler extends ApiRequestHandler {
 		const patient = await Patient.getPatientByUsername(requestObject.meta.UserID);
 		const date = requestObject.parameters.date;
 		const patientTestResult = new PatientTests(patient);
-		return await patientTestResult.getTestResultByDate(date);
+		return await patientTestResult.getTestResultsByDate(date);
 	}
 }
 

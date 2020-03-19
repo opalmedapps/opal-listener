@@ -11,6 +11,7 @@ class OpalSQLQuery{
 		dateStrings: true,
 		port: config.MYSQL_DATABASE_PORT
 	};
+
 	static POOL = mysql.createPool(this.#DB_CREDENTIALS);
 
 	/**
