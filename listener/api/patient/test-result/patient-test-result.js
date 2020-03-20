@@ -1,5 +1,5 @@
 const moment = require("moment");
-const {PatientTestsQuery: PatientTestResultQuery} = require("./patient-test-result.query");
+const { PatientTestResultQuery } = require("./patient-test-result.query");
 const logger = require("../../../logs/logger");
 const opalSQLQuery = require("../../../sql/opal-sql-query");
 
