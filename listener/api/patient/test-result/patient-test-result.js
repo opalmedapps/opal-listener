@@ -7,6 +7,7 @@ const opalSQLQuery = require("../../../sql/opal-sql-query");
 class PatientTestResult {
 	constructor(patient) {
 		this._patient = patient;
+		logger.log("error", patient);
 	}
 
 	async getTestTypes() {

@@ -12,12 +12,10 @@ class Patient {
      */
     constructor(patientSerNum=0, firstName="", lastName="",
                 email=""){
-        this.patientSerNum = Number(0);
+        this.patientSerNum = Number(patientSerNum);
         this.firstName = firstName;
         this.lastName = lastName;
         this.email = email;
-        this.sex = sex;
-        this.ssn = ssn;
     }
     static async getPatientByUsername(username=""){
         const query = patientQueries.getPatientQuery(username);
