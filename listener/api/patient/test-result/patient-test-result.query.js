@@ -57,7 +57,7 @@ class PatientTestResultQuery {
                             ptr.PatientSerNum = ?
                             AND ptr.TestExpressionSerNum = te.TestExpressionSerNum 
                             AND te.TestControlSerNum = tc.TestControlSerNum ORDER BY Name_EN;`, 
-                            [this.patientSerNum])
+                            [patientSerNum])
     }
     /**
      * Returns results for the given test type given a TestExpressionSerNum
