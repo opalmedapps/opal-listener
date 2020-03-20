@@ -21,7 +21,7 @@ class PatientTestResult {
 	}
 
 	async getTestDates() {
-		const query = PatientTestResultQuery.getTestResultByDate(this._patient.patientSerNum);
+		const query = PatientTestResultQuery.getTestDatesQuery(this._patient.patientSerNum);
 		let results;
 		try {
 			results = await opalSQLQuery.run(query);
