@@ -1,5 +1,5 @@
 const {ApiRequestHandler} = require("../../api-request-handler");
-const {PatientTests} = require("./patient-test-result");
+const {PatientTestResult} = require("./patient-test-result");
 const {Patient} = require("../patient");
 
 class PatientTestDatesHandler extends ApiRequestHandler {
@@ -9,7 +9,7 @@ class PatientTestDatesHandler extends ApiRequestHandler {
 	 */
 	static async handleRequest(requestObject) {
 		const patient = await Patient.getPatientByUsername(requestObject.meta.UserID);
-		const patientTest = new PatientTests(patient);
+		const patientTest = new PatientTestResult(patient);
 		return await patientTest.getTestDates();
 	}
 }

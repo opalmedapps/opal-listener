@@ -1,12 +1,12 @@
-const {PatientTests} = require("./patient-test-result");
+const {PatientTestResult} = require("./patient-test-result");
 const {ApiRequestHandler} = require("../../api-request-handler");
 const {Patient} = require("../patient");
 const {OpalResponseError} = require("../../response/response-error");
 const {param} = require("express-validator");
 class PatientTestTypeResultsHandler extends ApiRequestHandler {
 	/**
-	 * Validation of request handler
-	 * @type {ValidationChain[]}
+	 * Array parameters specifies the validation of fields for a given request.
+	 * @type {ValidationChain[]} ValidationChain in the express-validator class
 	 */
 	static validators = [
 		param("type", "Test type is required and must be string of length>1").isString()
@@ -14,7 +14,7 @@ class PatientTestTypeResultsHandler extends ApiRequestHandler {
 	];
 	/**
 	 * Handler for the PatientTestTypes request, gets list of tests for the patient
-	 * @param {OpalRequest} requestObject
+	 * @param {OpalRequest} requestObject Request coming from Firebase
 	 */
 	static async handleRequest(requestObject) {
 		const errors = await this.validate(requestObject.parameters);
@@ -24,7 +24,7 @@ class PatientTestTypeResultsHandler extends ApiRequestHandler {
 		}
 		const type = requestObject.parameters.type;
 		const patient = await Patient.getPatientByUsername(requestObject.meta.UserID);
-		const patientTests = new PatientTests(patient);
+		const patientTests = new PatientTestResult(patient);
 		return await patientTests.getTestResultsByType(type);
 	}
 }

@@ -6,7 +6,7 @@ const security              = require('./../security/security');
 const logger                = require('./../logs/logger');
 const modules               = require('./modules');
 // New API handlers
-const tests = require("./patient/tests");
+const tests = require("./patient/test-result");
 
 /**
  * API HANDLERS FOR GENERAL REQUESTS

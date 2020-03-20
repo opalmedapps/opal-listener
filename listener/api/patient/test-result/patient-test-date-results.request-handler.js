@@ -1,6 +1,6 @@
 const {OpalResponseError} = require("../../response/response-error");
 const {ApiRequestHandler} = require("../../api-request-handler");
-const {PatientTests} = require("./patient-test-result");
+const {PatientTestResult} = require("./patient-test-result");
 const {Patient} = require("../patient");
 const {param} = require("express-validator");
 
@@ -20,7 +20,7 @@ class PatientTestDateResultsHandler extends ApiRequestHandler {
 		}
 		const patient = await Patient.getPatientByUsername(requestObject.meta.UserID);
 		const date = requestObject.parameters.date;
-		const patientTestResult = new PatientTests(patient);
+		const patientTestResult = new PatientTestResult(patient);
 		return await patientTestResult.getTestResultsByDate(date);
 	}
 }

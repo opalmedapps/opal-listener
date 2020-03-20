@@ -1,5 +1,5 @@
 const moment = require("moment");
-const {PatientTestsQuery} = require("./patient-test-result.query");
+const {PatientTestsQuery: PatientTestResultQuery} = require("./patient-test-result.query");
 const logger = require("../../../logs/logger");
 const opalSQLQuery = require("../../../sql/opal-sql-query");
 
@@ -10,7 +10,7 @@ class PatientTestResult {
 	}
 
 	async getTestTypes() {
-		const query = PatientTestsQuery.getTestTypesQuery(this._patient.patientSerNum);
+		const query = PatientTestResultQuery.getTestTypesQuery(this._patient.patientSerNum);
 		let results;
 		try {
 			results = await opalSQLQuery.run(query);
@@ -21,7 +21,7 @@ class PatientTestResult {
 	}
 
 	async getTestDates() {
-		const query = PatientTestsQuery.getTestResultByDate(this._patient.patientSerNum);
+		const query = PatientTestResultQuery.getTestResultByDate(this._patient.patientSerNum);
 		let results;
 		try {
 			results = await opalSQLQuery.run(query);
@@ -32,7 +32,7 @@ class PatientTestResult {
 	}
 
 	async getTestResultsByDate(date) {
-		const query = PatientTestsQuery.getTestResultsByDateQuery(this._patient.patientSerNum, moment(date)
+		const query = PatientTestResultQuery.getTestResultsByDateQuery(this._patient.patientSerNum, moment(date)
 			.format("YYYY-MM-DD"));
 		let results;
 		try {
@@ -46,7 +46,7 @@ class PatientTestResult {
 	}
 
 	async getTestResultsByType(typeSerNum) {
-		const query = PatientTestsQuery.getTestResultByTestType(this._patient.patientSerNum, typeSerNum);
+		const query = PatientTestResultQuery.getTestResultByTestType(this._patient.patientSerNum, typeSerNum);
 		let results;
 		try {
 			results = await opalSQLQuery.run(query);
@@ -60,4 +60,4 @@ class PatientTestResult {
 	}
 }
 
-module.exports = {PatientTests: PatientTestResult};
+module.exports = {PatientTestResult};

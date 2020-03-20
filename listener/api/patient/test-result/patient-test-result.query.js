@@ -89,4 +89,4 @@ class PatientTestResultQuery {
                             [patientSerNum, testExpressionSerNum]);
     }
 }
-module.export = {PatientTestsQuery: PatientTestResultQuery};
+module.export = {PatientTestResultQuery: PatientTestResultQuery};
