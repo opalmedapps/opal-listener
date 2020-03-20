@@ -17,6 +17,7 @@ class PatientTestResult {
 			results = await opalSQLQuery.run(query);
 		} catch (err) {
 			logger.log("debug", `SQL: could not obtain test types for patient ${this._patient}`, error);
+			throw err;
 		}
 		return results;
 	}
@@ -28,6 +29,7 @@ class PatientTestResult {
 			results = await opalSQLQuery.run(query);
 		} catch (err) {
 			logger.log("debug", `SQL: could not obtain tests for patient ${this._patient}`, error);
+			throw err;
 		}
 		return results;
 	}

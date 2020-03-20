@@ -10,7 +10,7 @@ class PatientTestTypesHandler extends ApiRequestHandler {
 	static async handleRequest(requestObject) {
 		const patient = await Patient.getPatientByUsername(requestObject.meta.UserID);
 		const patientTestResult = new PatientTestResult(patient);
-		return await patientTestResult.getTestTypes();
+		return {"data": await patientTestResult.getTestTypes()};
 	}
 }
 module.exports = PatientTestTypesHandler.handleRequest;

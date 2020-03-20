@@ -1,4 +1,4 @@
-const {OpalResponseError} = require("../../response/response-error");
+const {ValidationError} = require("../../errors/validation-error");
 const {ApiRequestHandler} = require("../../api-request-handler");
 const {PatientTestResult} = require("./patient-test-result");
 const {Patient} = require("../patient");
@@ -8,20 +8,21 @@ class PatientTestDateResultsHandler extends ApiRequestHandler {
 	static validators = [
 		param("date", "Must provide valid date parameters").toDate().exists()
 	];
+
 	/**
 	 * Request returns list of test dates for the patient
 	 * @param {OpalRequest} requestObject OpalRequest object
 	 */
 	static async handleRequest(requestObject) {
 		const errors = this.validate(requestObject.parameters);
-		if(!errors.isEmpty()){
+		if (!errors.isEmpty()) {
 			logger.log("debug", "Validation Error", errors);
-			return new OpalResponseError(400, errors.array(), errors); // Bad request
+			throw new ValidationError(errors.errors());
 		}
 		const patient = await Patient.getPatientByUsername(requestObject.meta.UserID);
 		const date = requestObject.parameters.date;
 		const patientTestResult = new PatientTestResult(patient);
-		return await patientTestResult.getTestResultsByDate(date);
+		return {"data": await patientTestResult.getTestResultsByDate(date)};
 	}
 }
 

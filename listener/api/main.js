@@ -5,7 +5,7 @@ const {OpalResponseError}   = require('./response/response-error');
 const OpalResponse   = require('./response/response');
 const RequestValidator    = require('./request/request-validator');
 const logger              = require('../logs/logger.js');
-
+const {ValidationError} = require("./errors/validation-error");
 
 /**
  * @namespace RequestFormatter
@@ -36,13 +36,15 @@ function requestFormatter({key,request}) {
 			{
 				logger.log('debug', 'Successfully processed request: ' + data);
                 logger.log('info', 'Successfully processed request');
-                if(data instanceof OpalResponse) return response.toLegacy();
-				let response = new OpalResponseSuccess(data, opalReq);
-				return response.toLegacy();
+				return (new OpalResponseSuccess(data, opalReq)).toLegacy();
 			}).catch((err)=>{
 				logger.log('error', 'Error processing request', err);
-				let response = new OpalResponseError( 2, 'Server error, report the error to the hospital', opalReq, JSON.stringify(err));
-				return response.toLegacy();
+				if(err instanceof ValidationError){
+					return (new OpalResponseError( 400, err.message, opalReq)).toLegacy();
+				}else{
+					return (new OpalResponseError( 2, 'Server error, report the error to the hospital',
+						opalReq, JSON.stringify(err))).toLegacy();
+				}
 			});
 		}).catch( err => {
             logger.log('error', 'Error validating request', err);

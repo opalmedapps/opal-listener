@@ -10,7 +10,7 @@ class PatientTestDatesHandler extends ApiRequestHandler {
 	static async handleRequest(requestObject) {
 		const patient = await Patient.getPatientByUsername(requestObject.meta.UserID);
 		const patientTest = new PatientTestResult(patient);
-		return await patientTest.getTestDates();
+		return {"data": await patientTest.getTestDates()};
 	}
 }
 

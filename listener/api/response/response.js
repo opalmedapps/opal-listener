@@ -26,6 +26,6 @@ var responseCodes =
 		'1':'Authentication problem', // 401 HTTP Code
 		'2':'Server Response Error', // 500 Server error
 		'3':'Success', // 200 Ok
-		'4':'Too many attempts for answer', // TODO(dherre3) Get rid of these code, belongs to 400 client error
+		'4':'Too many attempts for answer', // TODO(dherre3) Get rid of this code, belongs to 400 client error
 		'400':'Client Error' // HTTP 400 Client error
 	};
