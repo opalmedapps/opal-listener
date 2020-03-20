@@ -1,10 +1,10 @@
 const moment = require("moment");
-const {PatientTestsQuery} = require("./patient-tests.query");
+const {PatientTestsQuery} = require("./patient-test-result.query");
 const logger = require("../../../logs/logger");
 const opalSQLQuery = require("../../../sql/opal-sql-query");
 
 
-class PatientTests {
+class PatientTestResult {
 	constructor(patient) {
 		this._patient = patient;
 	}
@@ -60,4 +60,4 @@ class PatientTests {
 	}
 }
 
-module.exports = {PatientTests};
+module.exports = {PatientTests: PatientTestResult};

@@ -1,6 +1,6 @@
 const {OpalResponseError} = require("../../response/response-error");
 const {ApiRequestHandler} = require("../../api-request-handler");
-const {PatientTests} = require("./patient-tests");
+const {PatientTests} = require("./patient-test-result");
 const {Patient} = require("../patient");
 const {param} = require("express-validator");
 

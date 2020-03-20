@@ -3,7 +3,7 @@ const mysql = require("mysql");
 /**
  *  Class encapsulates the PatientTestsQuery
  */
-class PatientTestsQuery {
+class PatientTestResultQuery {
 
     /**
      * Returns query to obtain the patients lab tests given a date
@@ -89,4 +89,4 @@ class PatientTestsQuery {
                             [patientSerNum, testExpressionSerNum]);
     }
 }
-module.export = {PatientTestsQuery};
+module.export = {PatientTestsQuery: PatientTestResultQuery};

@@ -1,4 +1,4 @@
-const {PatientTests} = require("./patient-tests");
+const {PatientTests} = require("./patient-test-result");
 const {ApiRequestHandler} = require("../../api-request-handler");
 const {Patient} = require("../patient");
 
