@@ -29,7 +29,7 @@ class PatientTestResultQuery {
                         AND ptr.TestExpressionSerNum = te.TestExpressionSerNum 
                         AND te.TestControlSerNum = tc.TestControlSerNum  
                         AND tc.EducationalMaterialControlSerNum = emc.EducationalMaterialControlSerNum 
-                    ORDER BY CollectedDate, GroupName, SequenceNum;`,
+                    ORDER BY CollectedDateTime, GroupName, SequenceNum;`,
 			[date, patientSerNum]);
 	}
 
@@ -41,7 +41,7 @@ class PatientTestResultQuery {
 		return mysql.format(`
                         SELECT DISTINCT CollectedDateTime 
                         FROM PatientTestResult
-                        WHERE PatientSerNum=? ORDER BY CollectedDate DESC;`, [patientSerNum]);
+                        WHERE PatientSerNum=? ORDER BY CollectedDateTime DESC;`, [patientSerNum]);
 	}
 
 	/**
@@ -57,7 +57,7 @@ class PatientTestResultQuery {
                         WHERE 
                             ptr.PatientSerNum = ?
                             AND ptr.TestExpressionSerNum = te.TestExpressionSerNum 
-                            AND te.TestControlSerNum = tc.TestControlSerNum ORDER BY Name_EN;`,
+                            AND te.TestControlSerNum = tc.TestControlSerNum;`,
 			[patientSerNum])
 	}
 
@@ -87,7 +87,7 @@ class PatientTestResultQuery {
                                     OR ptr.TestGroupExpressionSerNum IS NULL)
                                 AND te.TestControlSerNum = tc.TestControlSerNum  
                                 AND tc.EducationalMaterialControlSerNum = emc.EducationalMaterialControlSerNum 
-                            ORDER BY CollectedDate, GroupName, SequenceNum;`,
+                            ORDER BY CollectedDateTime, GroupName, SequenceNum;`,
 			[patientSerNum, testExpressionSerNum]);
 	}
 }
