@@ -20,7 +20,7 @@ class Patient {
 	}
 
 	static async getPatientByUsername(username = "") {
-		const query = patientQueries.getPatientQuery(username);
+		const query = patientQueries.getPatientByUsernameQuery(username);
 		let results;
 		try {
 			results = await opalSqlQuery.run(query);

@@ -5,7 +5,7 @@ class PatientQueries {
      * @param {string} username Username for patient
      * @returns string string query
      */
-    static getPatientQuery(username) {
+    static getPatientByUsernameQuery(username) {
         return mysql.format(`SELECT * FROM Patient as pat, Users as u 
                 WHERE pat.PatientSerNum = u.UserTypeSerNum AND u.Username = ?;`, username);
     }
