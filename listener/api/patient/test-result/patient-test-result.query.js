@@ -13,7 +13,7 @@ class PatientTestResultQuery {
 	 */
 	static getTestResultsByDateQuery(patientSerNum, date) {
 		return mysql.format(
-				`   SELECT  
+			`   SELECT DISTINCT
                         ptr.PatientTestResultSerNum, ptr.AbnormalFlag,
                         IF(ptr.TestGroupExpressionSerNum IS NULL , "other", tge.ExpressionName) as GroupName,
                      	ptr.SequenceNum, ptr.CollectedDateTime,
