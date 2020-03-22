@@ -14,7 +14,8 @@ class PatientTestResultQuery {
 	static getTestResultsByDateQuery(patientSerNum, date) {
 		return mysql.format(
 				`   SELECT  
-                        ptr.PatientTestResultSerNum, ptr.AbnormalFlag,tge.ExpressionName as GroupName,
+                        ptr.PatientTestResultSerNum, ptr.AbnormalFlag,
+                        IF(ptr.TextGroupExpressionSerNum IS NULL , "other", tge.ExpressionName) as GroupName,
                      	ptr.SequenceNum, ptr.CollectedDateTime,
                         ptr.NormalRangeMin, ptr.NormalRangeMax, ptr.NormalRange, ptr.TestValueNumeric, ptr.TestValue,
                         ptr.UnitDescription, ptr.ReadStatus,  tc.Name_EN, tc.Name_FR,
@@ -26,7 +27,8 @@ class PatientTestResultQuery {
                     WHERE 
                         ptr.CollectedDateTime=?
                         AND ptr.PatientSerNum = ? 
-                        AND ptr.TestGroupExpressionSerNum = tge.TestGroupExpressionSerNum
+                        AND (ptr.TestGroupExpressionSerNum = tge.TestGroupExpressionSerNum,
+                        		ptr.TestGroupExpressionSerNum IS NULL)
                         AND ptr.TestExpressionSerNum = te.TestExpressionSerNum 
                         AND te.TestControlSerNum = tc.TestControlSerNum  
                         AND tc.EducationalMaterialControlSerNum = emc.EducationalMaterialControlSerNum 
