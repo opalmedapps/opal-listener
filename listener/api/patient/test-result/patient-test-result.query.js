@@ -27,7 +27,7 @@ class PatientTestResultQuery {
                     WHERE 
                         ptr.CollectedDateTime=?
                         AND ptr.PatientSerNum = ? 
-                        AND (ptr.TestGroupExpressionSerNum = tge.TestGroupExpressionSerNum,
+                        AND (ptr.TestGroupExpressionSerNum = tge.TestGroupExpressionSerNum OR
                         		ptr.TestGroupExpressionSerNum IS NULL)
                         AND ptr.TestExpressionSerNum = te.TestExpressionSerNum 
                         AND te.TestControlSerNum = tc.TestControlSerNum  
