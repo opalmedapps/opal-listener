@@ -16,7 +16,7 @@ class PatientTestResultQuery {
 			`   SELECT DISTINCT
                         ptr.PatientTestResultSerNum, ptr.AbnormalFlag,
                         IF(ptr.TestGroupExpressionSerNum IS NULL , "other", tge.ExpressionName) as GroupName,
-                     	ptr.SequenceNum, ptr.CollectedDateTime,
+                     	ptr.SequenceNum, 
                         ptr.NormalRangeMin, ptr.NormalRangeMax, ptr.NormalRange, ptr.TestValueNumeric, ptr.TestValue,
                         ptr.UnitDescription, ptr.ReadStatus,  tc.Name_EN, tc.Name_FR,
                         emc.URL_EN as EducationalMaterialURL_EN, emc.URL_EN as EducationalMaterialURL_FR
@@ -53,7 +53,7 @@ class PatientTestResultQuery {
 	 */
 	static getTestTypesQuery(patientSerNum) {
 		return mysql.format(`
-                        SELECT DISTINCT te.TestExpressionSerNum, tc.Name_EN, tc.Name_FR
+                        SELECT DISTINCT te.TestExpressionSerNum, te.ExpressionName, tc.Name_EN, tc.Name_FR
                         FROM 
                             PatientTestResult as ptr, TestExpression te,
                             TestControl as tc

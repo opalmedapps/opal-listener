@@ -2,7 +2,7 @@ const {ApiRequestHandler} = require("../../api-request-handler");
 const {PatientTestResult} = require("./patient-test-result");
 const {Patient} = require("../patient");
 
-class PatientTestDatesHandler extends ApiRequestHandler {
+class PatientTestCollectedDatesHandler extends ApiRequestHandler {
 	/**
 	 * Request returns list of test dates for the patient
 	 * @param {OpalRequest} requestObject OpalRequest object
@@ -10,8 +10,14 @@ class PatientTestDatesHandler extends ApiRequestHandler {
 	static async handleRequest(requestObject) {
 		const patient = await Patient.getPatientByUsername(requestObject.meta.UserID);
 		const patientTest = new PatientTestResult(patient);
-		return {"data": await patientTest.getTestDates()};
+		const testDates = (await patientTest.getTestDates()).map(queryRes=>queryRes.CollectedDateTime);
+		return {
+			"data": {
+				"patientSerNum": patient.patientSerNum,
+				"collectedDates": testDates
+			}
+		};
 	}
 }
 
-module.exports = PatientTestDatesHandler.handleRequest;
+module.exports = PatientTestCollectedDatesHandler.handleRequest;
