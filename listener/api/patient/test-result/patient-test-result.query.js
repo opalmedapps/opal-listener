@@ -16,20 +16,18 @@ class PatientTestResultQuery {
 				`   SELECT  
                         ptr.PatientTestResultSerNum, ptr.AbnormalFlag, ptr.SequenceNum, ptr.CollectedDateTime,
                         ptr.NormalRangeMin, ptr.NormalRangeMax, ptr.NormalRange, ptr.TestValueNumeric, ptr.TestValue,
-                        ptr.UnitDescription, ptr.ReadStatus, tge.ExpressionName as GroupName, tc.Name_EN, tc.Name_FR,
+                        ptr.UnitDescription, ptr.ReadStatus,  tc.Name_EN, tc.Name_FR,
                         emc.URL_EN as EducationalMaterialURL_EN, emc.URL_EN as EducationalMaterialURL_FR
                     FROM 
-                        PatientTestResult as ptr, TestExpression as te, TestGroupExpression as tge, TestControl as tc, 
+                        PatientTestResult as ptr, TestExpression as te, TestControl as tc, 
                         EducationalMaterialControl as emc
                     WHERE 
-                        DATE(ptr.CollectedDateTime)=?
+                        ptr.CollectedDateTime=?
                         AND ptr.PatientSerNum = ? 
-                        AND (ptr.TestGroupExpressionSerNum = tge.TestGroupExpressionSerNum 
-                            OR ptr.TestGroupExpressionSerNum IS NULL)
                         AND ptr.TestExpressionSerNum = te.TestExpressionSerNum 
                         AND te.TestControlSerNum = tc.TestControlSerNum  
                         AND tc.EducationalMaterialControlSerNum = emc.EducationalMaterialControlSerNum 
-                    ORDER BY CollectedDateTime, GroupName, SequenceNum;`,
+                    ORDER BY CollectedDateTime, SequenceNum;`,
 			[date, patientSerNum]);
 	}
 
