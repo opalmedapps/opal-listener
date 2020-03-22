@@ -15,7 +15,7 @@ class PatientTestResultQuery {
 		return mysql.format(
 				`   SELECT  
                         ptr.PatientTestResultSerNum, ptr.AbnormalFlag,
-                        IF(ptr.TextGroupExpressionSerNum IS NULL , "other", tge.ExpressionName) as GroupName,
+                        IF(ptr.TestGroupExpressionSerNum IS NULL , "other", tge.ExpressionName) as GroupName,
                      	ptr.SequenceNum, ptr.CollectedDateTime,
                         ptr.NormalRangeMin, ptr.NormalRangeMax, ptr.NormalRange, ptr.TestValueNumeric, ptr.TestValue,
                         ptr.UnitDescription, ptr.ReadStatus,  tc.Name_EN, tc.Name_FR,
