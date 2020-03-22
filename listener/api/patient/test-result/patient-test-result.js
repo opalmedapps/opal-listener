@@ -36,7 +36,7 @@ class PatientTestResult {
 
 	async getTestResultsByDate(date) {
 		const query = PatientTestResultQuery.getTestResultsByDateQuery(this._patient.patientSerNum, moment(date)
-			.format("YYYY-MM-DD"));
+			.format("YYYY-MM-DD hh:mm:ss"));
 		let results;
 		try {
 			results = await opalSQLQuery.run(query);
