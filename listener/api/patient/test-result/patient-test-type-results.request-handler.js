@@ -3,6 +3,7 @@ const {PatientTestResult} = require("./patient-test-result");
 const {ApiRequestHandler} = require("../../api-request-handler");
 const {Patient} = require("../patient");
 const {param} = require("express-validator");
+const logger = require("./../../../logs/logger");
 
 class PatientTestTypeResultsHandler extends ApiRequestHandler {
 	/**
