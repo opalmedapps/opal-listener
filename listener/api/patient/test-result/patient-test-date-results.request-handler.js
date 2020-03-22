@@ -14,7 +14,7 @@ class PatientTestDateResultsHandler extends ApiRequestHandler {
 	 * @param {OpalRequest} requestObject OpalRequest object
 	 */
 	static async handleRequest(requestObject) {
-		const errors = this.validate(requestObject.parameters);
+		const errors = PatientTestDateResultsHandler.validate(requestObject.parameters);
 		if (!errors.isEmpty()) {
 			logger.log("debug", "Validation Error", errors);
 			throw new ValidationError(errors.errors());

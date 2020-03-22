@@ -19,7 +19,7 @@ class PatientTestTypeResultsHandler extends ApiRequestHandler {
 	 * @param {OpalRequest} requestObject Request coming from Firebase
 	 */
 	static async handleRequest(requestObject) {
-		const errors = await this.validate(requestObject.parameters);
+		const errors = await PatientTestTypeResultsHandler.validate(requestObject.parameters);
 		if (!errors.isEmpty()) {
 			logger.log("debug", "Validation Error", errors);
 			throw new ValidationError(errors.errors());
