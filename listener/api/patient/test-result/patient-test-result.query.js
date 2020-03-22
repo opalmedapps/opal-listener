@@ -14,15 +14,17 @@ class PatientTestResultQuery {
 	static getTestResultsByDateQuery(patientSerNum, date) {
 		return mysql.format(
 			`   SELECT DISTINCT
-                        ptr.PatientTestResultSerNum, ptr.AbnormalFlag,
-                        IF(ptr.TestGroupExpressionSerNum IS NULL , "other", tge.ExpressionName) as GroupName,
-                     	ptr.SequenceNum, 
-                        ptr.NormalRangeMin, ptr.NormalRangeMax, ptr.NormalRange, ptr.TestValueNumeric, ptr.TestValue,
-                        ptr.UnitDescription, ptr.ReadStatus,  tc.Name_EN, tc.Name_FR,
+                        ptr.PatientTestResultSerNum, 
+                        IF(ptr.TestGroupExpressionSerNum IS NULL , "", tge.ExpressionName) as GroupName,
+                     	ptr.SequenceNum, ptr.ReadStatus, 
+                      	tc.Name_EN, tc.Name_FR,
                         emc.URL_EN as EducationalMaterialURL_EN, emc.URL_EN as EducationalMaterialURL_FR
+                     	ptr.AbnormalFlag, ptr.NormalRange, 
+                        ptr.NormalRangeMin, ptr.NormalRangeMax, ptr.TestValue, ptr.TestValueNumeric,
+                        ptr.UnitDescription
                     FROM 
-                        PatientTestResult as ptr, TestExpression as te, TestGroupExpression as tge,
-                        TestControl as tc, 
+                        PatientTestResult as ptr, TestExpression as te,
+                        TestGroupExpression as tge, TestControl as tc, 
                         EducationalMaterialControl as emc
                     WHERE 
                         ptr.CollectedDateTime=?
@@ -37,14 +39,22 @@ class PatientTestResultQuery {
 	}
 
 	/**
-	 * Query to return the dates the patient had tests
+	 * Query to return the collected dates the patient had tests for the test types
+	 * that are aliased.
 	 * @param patientSerNum Patient SerNum
 	 */
 	static getTestDatesQuery(patientSerNum) {
 		return mysql.format(`
                         SELECT DISTINCT CollectedDateTime 
-                        FROM PatientTestResult
-                        WHERE PatientSerNum=? ORDER BY CollectedDateTime DESC;`, [patientSerNum]);
+                        FROM 
+                        	PatientTestResult as ptr, 
+                        	TestExpression as te, 
+                        	TestControl as tc
+                        WHERE 
+                        	ptr.PatientSerNum=? 
+                        	AND ptr.TestExpressionSerNum = te.TestExpressionSerNum 
+                        	and te.TestControlSerNum = tc.TestControlSerNum  
+                        ORDER BY CollectedDateTime DESC;`, [patientSerNum]);
 	}
 
 	/**
@@ -72,15 +82,19 @@ class PatientTestResultQuery {
 	 */
 	static getTestResultByTestType(patientSerNum, testExpressionSerNum) {
 		return mysql.format(`
-							SELECT  
-                                ptr.PatientTestResultSerNum, tge.ExpressionName as GroupName, ptr.SequenceNum,
-                                tc.Name_EN, tc.Name_FR, ptr.CollectedDateTime, ptr.AbnormalFlag,  ptr.NormalRange, 
-                                ptr.NormalRangeMin, ptr.NormalRangeMax, ptr.TestValue,
-                                ptr.TestValueNumeric, ptr.UnitDescription, 
-                                ptr.ReadStatus, emc.URL_EN as EducationalMaterialURL_EN, 
-                                emc.URL_EN as EducationalMaterialURL_FR
+							SELECT DISTINCT
+                                ptr.PatientTestResultSerNum, 
+                                IF(ptr.TestGroupExpressionSerNum IS NULL , "", tge.ExpressionName) as GroupName, 
+                                ptr.SequenceNum, ptr.ReadStatus,
+                                tc.Name_EN, tc.Name_FR, 
+                             	emc.URL_EN as EducationalMaterialURL_EN, 
+                                emc.URL_EN as EducationalMaterialURL_FR,
+                                ptr.CollectedDateTime, ptr.AbnormalFlag,  
+                                ptr.NormalRange, ptr.NormalRangeMin, ptr.NormalRangeMax, ptr.TestValue,
+                                ptr.TestValueNumeric, ptr.UnitDescription 
                             FROM 
-                                PatientTestResult as ptr, TestExpression as te, TestGroupExpression as tge, TestControl as tc, 
+                                PatientTestResult as ptr, TestExpression as te, 
+                                TestGroupExpression as tge, TestControl as tc, 
                                 EducationalMaterialControl as emc
                             WHERE 
                                 ptr.PatientSerNum = ? 
