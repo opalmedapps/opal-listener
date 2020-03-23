@@ -11,8 +11,8 @@ class PatientTestTypeResultsHandler extends ApiRequestHandler {
 	 * @type {ValidationChain[]} ValidationChain in the express-validator class
 	 */
 	static validators = [
-		param("type", "Test type is required and must be string of length>1").isString()
-			.isLength({min: 1}).exists(),
+		param("testTypeSerNum", "Test type is required and must be string of length>1").exists().
+		isNumeric(),
 	];
 
 	/**
@@ -25,15 +25,15 @@ class PatientTestTypeResultsHandler extends ApiRequestHandler {
 			logger.log("debug", "Validation Error", errors);
 			throw new ValidationError(errors.array());
 		}
-		const type = requestObject.parameters.type;
+		const testTypeSerNum = requestObject.parameters.testTypeSerNum;
 		const patient = await Patient.getPatientByUsername(requestObject.meta.UserID);
 		const patientTests = new PatientTestResult(patient);
-		const queryResults = await patientTests.getTestResultsByType(type);
+		const queryResults = await patientTests.getTestResultsByType(testTypeSerNum);
 		const hasNumericValues = queryResults.every(row=>row.TestValueNumeric != null);
 		return {
 			"data": {
 				"patientSerNum": patient.patientSerNum,
-				"testType": type,
+				"testType": testTypeSerNum,
 				"hasNumericValues": hasNumericValues,
 				"results": queryResults
 			}
