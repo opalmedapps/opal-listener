@@ -48,7 +48,7 @@ class PatientTestResult {
 		return results;
 	}
 
-	async getTestResultValuesByType(typeSerNum) {
+	async getTestResultValuesByTestType(typeSerNum) {
 		const query = PatientTestResultQuery.getTestResultValuesByTestType(this._patient.patientSerNum, typeSerNum);
 		let results;
 		try {
