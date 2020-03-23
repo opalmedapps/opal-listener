@@ -11,7 +11,7 @@ class PatientTestTypeResultsHandler extends ApiRequestHandler {
 	 * @type {ValidationChain[]} ValidationChain in the express-validator class
 	 */
 	static validators = [
-		param("testTypeId").exists().
+		param("testTypeId", "Is required and must be numeric").exists().
 		isNumeric(),
 	];
 
