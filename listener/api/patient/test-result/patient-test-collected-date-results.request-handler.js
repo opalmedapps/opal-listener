@@ -5,7 +5,7 @@ const {Patient} = require("../patient");
 const {param} = require("express-validator");
 const logger = require("./../../../logs/logger");
 
-class PatientTestDateResultsHandler extends ApiRequestHandler {
+class PatientTestCollectedDateResultsHandler extends ApiRequestHandler {
 	static validators = [
 		param("date", "Must provide valid date parameters").toDate().exists()
 	];
@@ -15,7 +15,7 @@ class PatientTestDateResultsHandler extends ApiRequestHandler {
 	 * @param {OpalRequest} requestObject OpalRequest object
 	 */
 	static async handleRequest(requestObject) {
-		const errors = await PatientTestDateResultsHandler.validate(requestObject.parameters);
+		const errors = await PatientTestCollectedDateResultsHandler.validate(requestObject.parameters);
 		if (!errors.isEmpty()) {
 			logger.log("debug", "Validation Error", errors);
 			throw new ValidationError(errors.errors());
@@ -33,4 +33,4 @@ class PatientTestDateResultsHandler extends ApiRequestHandler {
 	}
 }
 
-module.exports = PatientTestDateResultsHandler.handleRequest;
+module.exports = PatientTestCollectedDateResultsHandler.handleRequest;

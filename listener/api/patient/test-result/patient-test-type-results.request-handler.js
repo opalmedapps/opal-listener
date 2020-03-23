@@ -23,7 +23,7 @@ class PatientTestTypeResultsHandler extends ApiRequestHandler {
 		const errors = await PatientTestTypeResultsHandler.validate(requestObject.parameters);
 		if (!errors.isEmpty()) {
 			logger.log("debug", "Validation Error", errors);
-			throw new ValidationError(errors.errors());
+			throw new ValidationError(errors.array());
 		}
 		const type = requestObject.parameters.type;
 		const patient = await Patient.getPatientByUsername(requestObject.meta.UserID);

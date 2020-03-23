@@ -18,7 +18,7 @@ class PatientTestResultQuery {
                         IF(ptr.TestGroupExpressionSerNum IS NULL , "", tge.ExpressionName) as GroupName,
                      	ptr.SequenceNum, ptr.ReadStatus, 
                       	tc.Name_EN, tc.Name_FR,
-                        emc.URL_EN as EducationalMaterialURL_EN, emc.URL_EN as EducationalMaterialURL_FR
+                        emc.URL_EN as EducationalMaterialURL_EN, emc.URL_EN as EducationalMaterialURL_FR,
                      	ptr.AbnormalFlag, ptr.NormalRange, 
                         ptr.NormalRangeMin, ptr.NormalRangeMax, ptr.TestValue, ptr.TestValueNumeric,
                         ptr.UnitDescription
