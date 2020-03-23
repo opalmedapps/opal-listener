@@ -28,15 +28,18 @@ class PatientTestTypeResultsHandler extends ApiRequestHandler {
 		const testTypeSerNum = requestObject.parameters.testTypeSerNum;
 		const patient = await Patient.getPatientByUsername(requestObject.meta.UserID);
 		const patientTests = new PatientTestResult(patient);
-		const queryResults = await patientTests.getTestResultsByType(testTypeSerNum);
-		const hasNumericValues = queryResults.every(row=>row.TestValueNumeric != null);
-		return {
-			"data": {
-				"patientSerNum": patient.patientSerNum,
+		const testValues = await patientTests.getTestResultValuesByTestType(testTypeSerNum);
+		const latestPatientTestResultByType = await patientTests.getLatestTestResultByTestType(testTypeSerNum);
+		const hasNumericValues = testValues.every(row=>row.TestValueNumeric != null);
+		let result = {
+			"patientSerNum": patient.patientSerNum,
 				"testTypeSerNum": testTypeSerNum,
 				"hasNumericValues": hasNumericValues,
-				"results": queryResults
-			}
+				"results": testValues
+		};
+		return {
+			// Add the properties in latest patient test result
+			"data": Object.assign(result, latestPatientTestResultByType)
 		};
 	}
 }

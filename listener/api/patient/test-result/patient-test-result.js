@@ -48,8 +48,21 @@ class PatientTestResult {
 		return results;
 	}
 
-	async getTestResultsByType(typeSerNum) {
-		const query = PatientTestResultQuery.getTestResultByTestType(this._patient.patientSerNum, typeSerNum);
+	async getTestResultValuesByType(typeSerNum) {
+		const query = PatientTestResultQuery.getTestResultValuesByTestType(this._patient.patientSerNum, typeSerNum);
+		let results;
+		try {
+			results = await opalSQLQuery.run(query);
+		} catch (err) {
+			logger.log("debug", `SQL: could not obtain result values for test ExpressionSerNum ${typeSerNum}` +
+				` for patient ${this._patient}`);
+			throw err;
+		}
+		return results;
+	}
+
+	async getLatestTestResultByTestType(testTypeSerNum) {
+		const query = PatientTestResultQuery.getLatestTestResultByTestType(this._patient.patientSerNum, typeSerNum);
 		let results;
 		try {
 			results = await opalSQLQuery.run(query);
@@ -59,7 +72,6 @@ class PatientTestResult {
 			throw err;
 		}
 		return results;
-
 	}
 }
 

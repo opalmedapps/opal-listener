@@ -73,25 +73,26 @@ class PatientTestResultQuery {
                             AND te.TestControlSerNum = tc.TestControlSerNum;`,
 			[patientSerNum])
 	}
-
 	/**
 	 * Returns results for the given test type given a TestExpressionSerNum
 	 * @param patientSerNum PatientSerNum to use to build query
 	 * @param {number} testExpressionSerNum TestExpressionSerNum to get results for
 	 * @returns string all the test results for the given test type.
 	 */
-	static getTestResultByTestType(patientSerNum, testExpressionSerNum) {
+	static getLatestTestResultByTestType(patientSerNum, testExpressionSerNum) {
 		return mysql.format(`
-							SELECT DISTINCT
+							SELECT 
                                 ptr.PatientTestResultSerNum, 
                                 IF(ptr.TestGroupExpressionSerNum IS NULL , "", tge.ExpressionName) as GroupName, 
-                                ptr.SequenceNum, ptr.ReadStatus,
+                                ptr.ReadStatus,
                                 tc.Name_EN, tc.Name_FR, 
                              	emc.URL_EN as EducationalMaterialURL_EN, 
                                 emc.URL_EN as EducationalMaterialURL_FR,
-                                ptr.CollectedDateTime, ptr.AbnormalFlag,  
-                                ptr.NormalRange, ptr.NormalRangeMin, ptr.NormalRangeMax, ptr.TestValue,
-                                ptr.TestValueNumeric, ptr.UnitDescription 
+                                ptr.CollectedDateTime as latestCollectedDateTime, 
+                                ptr.AbnormalFlag as latestAbnormalFlag,  
+                             	ptr.TestValue as latestTestValue,
+                                ptr.NormalRange, ptr.NormalRangeMin, ptr.NormalRangeMax,
+                                ptr.UnitDescription 
                             FROM 
                                 PatientTestResult as ptr, TestExpression as te, 
                                 TestGroupExpression as tge, TestControl as tc, 
@@ -104,7 +105,29 @@ class PatientTestResultQuery {
                                     OR ptr.TestGroupExpressionSerNum IS NULL)
                                 AND te.TestControlSerNum = tc.TestControlSerNum  
                                 AND tc.EducationalMaterialControlSerNum = emc.EducationalMaterialControlSerNum 
-                            ORDER BY CollectedDateTime, GroupName, SequenceNum;`,
+                            ORDER BY CollectedDateTime, GroupName, SequenceNum LIMIT TO 1;`,
+			[patientSerNum, testExpressionSerNum]);
+	}
+	/**
+	 * Returns results for the given test type given a TestExpressionSerNum
+	 * @param patientSerNum PatientSerNum to use to build query
+	 * @param {number} testExpressionSerNum TestExpressionSerNum to get results for
+	 * @returns string all the test results for the given test type.
+	 */
+	static getTestResultValuesByTestType(patientSerNum, testExpressionSerNum) {
+		return mysql.format(`
+							SELECT 
+                                ptr.PatientTestResultSerNum, 
+                                ptr.CollectedDateTime, 
+                                ptr.AbnormalFlag,  
+                                ptr.TestValue,
+                                ptr.TestValueNumeric 
+                            FROM 
+                                PatientTestResult as ptr,
+                            WHERE 
+                                ptr.PatientSerNum = ? 
+                                AND ptr.TestExpressionSerNum = ?
+                            ORDER BY CollectedDateTime;`,
 			[patientSerNum, testExpressionSerNum]);
 	}
 }
