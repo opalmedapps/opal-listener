@@ -40,7 +40,7 @@ function requestFormatter({key,request}) {
 			}).catch((err)=>{
 				logger.log('error', 'Error processing request', err);
 				if(err instanceof ValidationError){
-					return (new OpalResponseError( 400, err.message, opalReq)).toLegacy();
+					return (new OpalResponseError( 400, err.error, opalReq)).toLegacy();
 				}else{
 					return (new OpalResponseError( 2, 'Server error, report the error to the hospital',
 						opalReq, JSON.stringify(err))).toLegacy();

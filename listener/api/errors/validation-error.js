@@ -1,7 +1,8 @@
 class ValidationError extends Error {
-	constructor(msg = "") {
-		super(`SQL Error: ${msg}`);
-		this.name = "SQLError";
+	constructor(err) {
+		super("Validation Error");
+		this.error = err;
+		this.name = "ValidationError";
 	}
 }
 
