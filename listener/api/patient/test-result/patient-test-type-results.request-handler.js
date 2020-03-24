@@ -34,9 +34,9 @@ class PatientTestTypeResultsHandler extends ApiRequestHandler {
 		const hasNumericValues = testValues.every(row=>row.TestValueNumeric != null);
 		let result = {
 			"patientSerNum": patient.patientSerNum,
-				"testTypeSerNum": testTypeSerNum,
-				"hasNumericValues": hasNumericValues,
-				"results": testValues
+			"testTypeSerNum": testTypeSerNum,
+			"hasNumericValues": hasNumericValues,
+			"results": testValues
 		};
 		return {
 			// Add the properties in latest patient test result

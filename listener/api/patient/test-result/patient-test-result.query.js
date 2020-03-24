@@ -82,17 +82,18 @@ class PatientTestResultQuery {
 	static getLatestTestResultByTestType(patientSerNum, testExpressionSerNum) {
 		return mysql.format(`
 							SELECT 
-                                ptr.PatientTestResultSerNum, 
-                                IF(ptr.TestGroupExpressionSerNum IS NULL , "", tge.ExpressionName) as GroupName, 
-                                ptr.ReadStatus,
-                                tc.Name_EN, tc.Name_FR, 
-                             	emc.URL_EN as EducationalMaterialURL_EN, 
-                                emc.URL_EN as EducationalMaterialURL_FR,
+                                ptr.PatientTestResultSerNum as latestPatientTestResultSerNum, 
+                                IF(ptr.TestGroupExpressionSerNum IS NULL , "", tge.ExpressionName) as latestGroupName, 
+                                ptr.ReadStatus as readStatus,
+                                tc.Name_EN as name_EN, tc.Name_FR as name_FR, 
+                             	emc.URL_EN as educationalMaterialURL_EN, 
+                                emc.URL_EN as educationalMaterialURL_FR,
                                 ptr.CollectedDateTime as latestCollectedDateTime, 
                                 ptr.AbnormalFlag as latestAbnormalFlag,  
                              	ptr.TestValue as latestTestValue,
-                                ptr.NormalRange, ptr.NormalRangeMin, ptr.NormalRangeMax,
-                                ptr.UnitDescription 
+                                ptr.NormalRange as normalRange, 
+                                ptr.NormalRangeMin as normalRangeMin, ptr.NormalRangeMax as normalRangeMax,
+                                ptr.UnitDescription as unitDescription
                             FROM 
                                 PatientTestResult as ptr, TestExpression as te, 
                                 TestGroupExpression as tge, TestControl as tc, 
