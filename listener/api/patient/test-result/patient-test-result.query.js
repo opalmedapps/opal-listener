@@ -63,14 +63,30 @@ class PatientTestResultQuery {
 	 */
 	static getTestTypesQuery(patientSerNum) {
 		return mysql.format(`
-                        SELECT DISTINCT te.TestExpressionSerNum, te.ExpressionName, tc.Name_EN, tc.Name_FR
+                        SELECT DISTINCT 
+                                ptr.PatientTestResultSerNum as latestPatientTestResultSerNum, 
+                                IF(ptr.TestGroupExpressionSerNum IS NULL , "", tge.ExpressionName) as latestGroupName, 
+                                ptr.ReadStatus as readStatus,
+                                tc.Name_EN as name_EN, tc.Name_FR as name_FR, 
+                             	emc.URL_EN as educationalMaterialURL_EN, 
+                                emc.URL_EN as educationalMaterialURL_FR,
+                                ptr.CollectedDateTime as latestCollectedDateTime, 
+                                ptr.AbnormalFlag as latestAbnormalFlag,  
+                             	ptr.TestValue as latestTestValue,
+                                ptr.NormalRange as normalRange, 
+                                ptr.NormalRangeMin as normalRangeMin, ptr.NormalRangeMax as normalRangeMax,
+                                ptr.UnitDescription as unitDescription
                         FROM 
-                            PatientTestResult as ptr, TestExpression te,
-                            TestControl as tc
+                            PatientTestResult as ptr, TestExpression as te, 
+                            TestGroupExpression as tge, TestControl as tc, 
+                            EducationalMaterialControl as emc
                         WHERE 
-                            ptr.PatientSerNum = ?
+                            ptr.PatientSerNum = ? 
                             AND ptr.TestExpressionSerNum = te.TestExpressionSerNum 
-                            AND te.TestControlSerNum = tc.TestControlSerNum;`,
+                            AND (ptr.TestGroupExpressionSerNum = tge.TestGroupExpressionSerNum 
+                                OR ptr.TestGroupExpressionSerNum IS NULL)
+                            AND te.TestControlSerNum = tc.TestControlSerNum  
+                            AND tc.EducationalMaterialControlSerNum = emc.EducationalMaterialControlSerNum`,
 			[patientSerNum])
 	}
 	/**
