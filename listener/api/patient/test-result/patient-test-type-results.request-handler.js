@@ -31,7 +31,7 @@ class PatientTestTypeResultsHandler extends ApiRequestHandler {
 		const latestPatientTestResultByType = await patientTests.getLatestTestResultByTestType(testTypeSerNum);
 		if(!latestPatientTestResultByType) return {"data": null};
 		const testValues = await patientTests.getTestResultValuesByTestType(testTypeSerNum);
-		const hasNumericValues = testValues.every(row=>row.TestValueNumeric != null);
+		const hasNumericValues = testValues.every(row=>row.testValueNumeric != null);
 		let result = {
 			"patientSerNum": patient.patientSerNum,
 			"testTypeSerNum": testTypeSerNum,

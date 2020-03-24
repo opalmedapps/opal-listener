@@ -10,7 +10,7 @@ class PatientTestCollectedDatesHandler extends ApiRequestHandler {
 	static async handleRequest(requestObject) {
 		const patient = await Patient.getPatientByUsername(requestObject.meta.UserID);
 		const patientTest = new PatientTestResult(patient);
-		const testDates = (await patientTest.getTestDates()).map(queryRes=>queryRes.CollectedDateTime);
+		const testDates = (await patientTest.getTestDates()).map(queryRes=>queryRes.collectedDateTime);
 		return {
 			"data": {
 				"patientSerNum": patient.patientSerNum,
