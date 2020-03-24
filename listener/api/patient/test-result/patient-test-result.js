@@ -54,8 +54,8 @@ class PatientTestResult {
 		try {
 			results = await opalSQLQuery.run(query);
 		} catch (err) {
-			logger.log("debug", `SQL: could not obtain result values for test ExpressionSerNum ${typeSerNum}` +
-				` for patient ${this._patient}`);
+			logger.log("debug", `SQL: could not obtain result latest information for test ExpressionSerNum `+
+					`${typeSerNum} for patient ${this._patient}`);
 			throw err;
 		}
 		return results;

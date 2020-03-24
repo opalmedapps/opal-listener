@@ -123,7 +123,7 @@ class PatientTestResultQuery {
                                 ptr.TestValue,
                                 ptr.TestValueNumeric 
                             FROM 
-                                PatientTestResult as ptr,
+                                PatientTestResult as ptr
                             WHERE 
                                 ptr.PatientSerNum = ? 
                                 AND ptr.TestExpressionSerNum = ?
