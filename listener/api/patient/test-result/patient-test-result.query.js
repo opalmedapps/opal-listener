@@ -105,7 +105,7 @@ class PatientTestResultQuery {
                                     OR ptr.TestGroupExpressionSerNum IS NULL)
                                 AND te.TestControlSerNum = tc.TestControlSerNum  
                                 AND tc.EducationalMaterialControlSerNum = emc.EducationalMaterialControlSerNum 
-                            ORDER BY CollectedDateTime, GroupName, SequenceNum LIMIT TO 1;`,
+                            ORDER BY CollectedDateTime DESC, GroupName, SequenceNum LIMIT 1;`,
 			[patientSerNum, testExpressionSerNum]);
 	}
 	/**
