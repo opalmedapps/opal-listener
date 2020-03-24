@@ -62,7 +62,8 @@ class PatientTestResult {
 	}
 
 	async getLatestTestResultByTestType(testTypeSerNum) {
-		const query = PatientTestResultQuery.getLatestTestResultByTestType(this._patient.patientSerNum, typeSerNum);
+		const query = PatientTestResultQuery.getLatestTestResultByTestType(this._patient.patientSerNum,
+						testTypeSerNum);
 		let results;
 		try {
 			results = await opalSQLQuery.run(query);
