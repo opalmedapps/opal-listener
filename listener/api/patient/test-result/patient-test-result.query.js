@@ -67,17 +67,34 @@ class PatientTestResultQuery {
 	 * @returns string test types for the patient
 	 */
 	static getTestTypesQuery(patientSerNum) {
+		// Coalesce gets the first non-null value, in this case that's the last value
 		return mysql.format(`
-                        SELECT DISTINCT te.TestExpressionSerNum as testExpressionSerNum, 
-                        tc.Name_EN as name_EN, tc.Name_FR as name_FR
-                        FROM 
-                            PatientTestResult as ptr, TestExpression te,
-                            TestControl as tc
-                        WHERE 
-                            ptr.PatientSerNum = ?
-                            AND ptr.TestExpressionSerNum = te.TestExpressionSerNum 
-                            AND te.TestControlSerNum = tc.TestControlSerNum;`,
-			[patientSerNum])
+                        SELECT * FROM (SELECT
+							ptr.PatientTestResultSerNum as latestPatientTestResultSerNum,
+							te.TestExpressionSerNum as testExpressionSerNum,
+							ptr.ReadStatus as readStatus,
+							tc.Name_EN as name_EN, tc.Name_FR as name_FR,
+							emc.URL_EN as educationalMaterialURL_EN,
+							emc.URL_EN as educationalMaterialURL_FR,
+							ptr.UnitDescription as unitDescription,
+							COALESCE(ptr.CollectedDateTime) as latestCollectedDateTime,
+							COALESCE(ptr.AbnormalFlag) as latestAbnormalFlag,
+							COALESCE(ptr.TestValue) as latestTestValue,
+							COALESCE(ptr.NormalRange) as normalRange,
+							COALESCE(ptr.NormalRangeMin) as normalRangeMin,
+							COALESCE(ptr.NormalRangeMax) as normalRangeMax
+						FROM
+							PatientTestResult as ptr, TestExpression as te,
+							TestControl as tc, EducationalMaterialControl as emc
+						WHERE
+							ptr.PatientSerNum = ? 
+							AND ptr.TestExpressionSerNum = te.TestExpressionSerNum
+							AND ptr.TestGroupExpressionSerNum = tge.TestGroupExpressionSerNum
+							AND te.TestControlSerNum = tc.TestControlSerNum
+							AND tc.EducationalMaterialControlSerNum = emc.EducationalMaterialControlSerNum
+						ORDER BY name_EN, latestCollectedDateTime DESC) as tab
+						GROUP BY name_EN`,
+				  [patientSerNum])
 	}
 	/**
 	 * Returns results for the given test type given a TestExpressionSerNum
@@ -89,7 +106,6 @@ class PatientTestResultQuery {
 		return mysql.format(`
 							SELECT 
                                 ptr.PatientTestResultSerNum as latestPatientTestResultSerNum, 
-                                IF(ptr.TestGroupExpressionSerNum IS NULL , "", tge.ExpressionName) as latestGroupName, 
                                 ptr.ReadStatus as readStatus,
                                 tc.Name_EN as name_EN, tc.Name_FR as name_FR, 
                              	emc.URL_EN as educationalMaterialURL_EN, 
@@ -102,17 +118,15 @@ class PatientTestResultQuery {
                                 ptr.UnitDescription as unitDescription
                             FROM 
                                 PatientTestResult as ptr, TestExpression as te, 
-                                TestGroupExpression as tge, TestControl as tc, 
+                             	TestControl as tc, 
                                 EducationalMaterialControl as emc
                             WHERE 
                                 ptr.PatientSerNum = ? 
                                 AND ptr.TestExpressionSerNum = ?
                                 AND ptr.TestExpressionSerNum = te.TestExpressionSerNum 
-                                AND (ptr.TestGroupExpressionSerNum = tge.TestGroupExpressionSerNum 
-                                    OR ptr.TestGroupExpressionSerNum IS NULL)
                                 AND te.TestControlSerNum = tc.TestControlSerNum  
-                                AND tc.EducationalMaterialControlSerNum = emc.EducationalMaterialControlSerNum 
-                            LIMIT 1;`,
+                                AND tc.EducationalMaterialControlSerNum = emc.EducationalMaterialControlSerNum
+                            ORDER BY latestCollectedDateTime DESC LIMIT 1;`,
 			[patientSerNum, testExpressionSerNum]);
 	}
 	/**
