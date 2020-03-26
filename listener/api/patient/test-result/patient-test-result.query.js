@@ -89,7 +89,6 @@ class PatientTestResultQuery {
 						WHERE
 							ptr.PatientSerNum = ? 
 							AND ptr.TestExpressionSerNum = te.TestExpressionSerNum
-							AND ptr.TestGroupExpressionSerNum = tge.TestGroupExpressionSerNum
 							AND te.TestControlSerNum = tc.TestControlSerNum
 							AND tc.EducationalMaterialControlSerNum = emc.EducationalMaterialControlSerNum
 						ORDER BY name_EN, latestCollectedDateTime DESC) as tab
