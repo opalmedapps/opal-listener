@@ -1513,13 +1513,13 @@ exports.questionnaireUpdateStatus = function(requestObject){
         !requestObject.Parameters.hasOwnProperty('new_status') || isNaN(parseInt(requestObject.Parameters.new_status)) ||
         isNaN(parseInt(requestObject.Parameters.answerQuestionnaire_id))) {
 
-        r.reject(new Error('Error saving answer: the requestObject does not have the required parameters'));
+        r.reject(new Error('Error updating status: the requestObject does not have the required parameters'));
 
     }else if (!requestObject.hasOwnProperty('UserID') || requestObject.UserID === undefined){
-        r.reject(new Error('Error saving answer: the requestObject does not have UserID'));
+        r.reject(new Error('Error updating status: the requestObject does not have UserID'));
 
     }else if (!requestObject.hasOwnProperty('AppVersion') || requestObject.AppVersion === undefined){
-        r.reject(new Error ('Error saving answer: the requestObject does not have AppVersion'));
+        r.reject(new Error ('Error updating status: the requestObject does not have AppVersion'));
     }else{
         var patientSerNumOpalDB;
 
@@ -1529,7 +1529,7 @@ exports.questionnaireUpdateStatus = function(requestObject){
             .then(function (patientSerNumAndLanguageRow) {
                 // check returns
                 if (!patientSerNumAndLanguageRow[0].hasOwnProperty('PatientSerNum') || !patientSerNumAndLanguageRow[0].PatientSerNum){
-                    r.reject(new Error('Error saving questionnaire: No matching PatientSerNum found in opalDB'));
+                    r.reject(new Error('Error updating status: No matching PatientSerNum found in opalDB'));
                 }else{
                     patientSerNumOpalDB = patientSerNumAndLanguageRow[0].PatientSerNum;
                     return questionnaires.updateQuestionnaireStatusInQuestionnaireDB(requestObject.Parameters.answerQuestionnaire_id, requestObject.Parameters.new_status, requestObject.AppVersion);
