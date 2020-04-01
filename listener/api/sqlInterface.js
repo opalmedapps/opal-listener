@@ -8,22 +8,13 @@ const questionnaires    = require('./../questionnaires/patientQuestionnaires.js'
 const Mail              = require('./../mailer/mailer.js');
 const utility           = require('./../utility/utility');
 const logger            = require('./../logs/logger');
-const SQLQueryRunner = require("../sql/sql-query-runner");
+const OpalSQLQueryRunner = require("../sql/opal-sql-query-runner");
 
 var exports = module.exports = {};
 
 /******************************
  * CONFIGURATIONS
  ******************************/
-const OPAL_DB_CREDENTIALS = {
-    connectionLimit: 10,
-    host: config.HOST,
-    user: config.MYSQL_USERNAME,
-    password: config.MYSQL_PASSWORD,
-    database: config.MYSQL_DATABASE,
-    dateStrings: true,
-    port: config.MYSQL_DATABASE_PORT
-};
 const waitingRoomDbCredentials = {
 	connectionLimit: 10,
     host: config.WAITING_ROOM_MANAGEMENT_SYSTEM_MYSQL.HOST,
@@ -140,7 +131,7 @@ exports.getSqlApiMappings = function() {
  * @param processRawFunction
  * @return {Promise}
  */
-exports.runSqlQuery = new SQLQueryRunner(OPAL_DB_CREDENTIALS).run;
+exports.runSqlQuery = OpalSQLQueryRunner.run;
 
 /**
  * runWaitingRoomSqlQuery

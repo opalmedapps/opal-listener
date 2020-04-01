@@ -1,6 +1,6 @@
 const {ValidationError} = require("../errors/validation-error");
 const patientQueries = require("./patient.queries");
-const opalSqlQuery = require("../../sql/opal-sql-query");
+const opalSQLQuery = require("../../sql/opal-sql-query-runner");
 const logger = require("./../../logs/logger");
 
 class Patient {
