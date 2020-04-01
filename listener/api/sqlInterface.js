@@ -140,7 +140,7 @@ exports.getSqlApiMappings = function() {
  * @param processRawFunction
  * @return {Promise}
  */
-exports.runSqlQuery = new SQLQueryRunner().run;
+exports.runSqlQuery = new SQLQueryRunner(OPAL_DB_CREDENTIALS).run;
 
 /**
  * runWaitingRoomSqlQuery

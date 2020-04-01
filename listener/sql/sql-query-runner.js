@@ -3,7 +3,7 @@ const logger = require('./../logs/logger');
 class SQLQueryRunner {
 	#SQL_QUERY_POOL;
 	#DB_CREDENTIALS;
-	constructor(databaseCredentials) {
+	constructor(databaseCredentials={}) {
 		this.#DB_CREDENTIALS = databaseCredentials;
 		this.#SQL_QUERY_POOL = mysql.createPool(databaseCredentials);
 	}
