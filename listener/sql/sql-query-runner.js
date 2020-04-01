@@ -1,18 +1,12 @@
 const mysql = require("mysql");
 const logger = require('./../logs/logger');
-const config = require('./../config.json');
-class OpalSQLQuery{
-	static #DB_CREDENTIALS = {
-		connectionLimit: 10,
-		host: config.HOST,
-		user: config.MYSQL_USERNAME,
-		password: config.MYSQL_PASSWORD,
-		database: config.MYSQL_DATABASE,
-		dateStrings: true,
-		port: config.MYSQL_DATABASE_PORT
-	};
-
-	static POOL = mysql.createPool(this.#DB_CREDENTIALS);
+class SQLQueryRunner {
+	#SQL_QUERY_POOL;
+	#DB_CREDENTIALS;
+	constructor(databaseCredentials) {
+		this.#DB_CREDENTIALS = databaseCredentials;
+		this.#SQL_QUERY_POOL = mysql.createPool(databaseCredentials);
+	}
 
 	/**
 	 * Performs sql query given parameters and a postProcessing function
@@ -22,19 +16,19 @@ class OpalSQLQuery{
 	 * @param {Function} postProcessor Post processing function
 	 * @returns {Promise<any>} Returns a promise with the results from the query
 	 */
-	static run(query, parameters=null, postProcessor=null) {
-		return new Promise((resolve,reject)=>{
-			OpalSQLQuery.POOL.getConnection(function(err, connection) {
+	run(query, parameters = null, postProcessor = null) {
+		return new Promise((resolve, reject) => {
+			this.#SQL_QUERY_POOL.getConnection(function (err, connection) {
 				logger.log('debug', `Grabbed SQL connection: ${connection}`);
 				const que = connection.query(query, parameters, function (err, rows) {
 					connection.release();
-					if (err){
+					if (err) {
 						logger.log("error", `Failed to execute query: ${que.sql}`, err);
 						reject(err);
 					}
 					logger.log('info', `Successfully performed query: ${que.sql}`);
 					if (typeof rows !== 'undefined') {
-						if (postProcessor instanceof Function) postProcessor(rows).then(rows=>resolve(rows));
+						if (postProcessor instanceof Function) postProcessor(rows).then(rows => resolve(rows));
 						else resolve(rows);
 					} else {
 						resolve([]);
@@ -44,4 +38,4 @@ class OpalSQLQuery{
 		});
 	};
 }
-module.exports = OpalSQLQuery;
+module.exports = SQLQueryRunner;

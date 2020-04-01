@@ -1,15 +1,21 @@
 const moment = require("moment");
 const { PatientTestResultQuery } = require("./patient-test-result.query");
 const logger = require("../../../logs/logger");
-const opalSQLQuery = require("../../../sql/opal-sql-query");
+const opalSQLQuery = require("../../../sql/sql-query-runner");
 
 
 class PatientTestResult {
+	/**
+	 * Base constructor takes a patient
+	 * @param {Patient} patient 
+	 */
 	constructor(patient) {
 		this._patient = patient;
-		logger.log("error", patient);
 	}
-
+	/**
+	 * Method gets the test types for the patient
+	 * @returns {Promise<Object>} Returns the test types for the patient 
+	 */
 	async getTestTypes() {
 		const query = PatientTestResultQuery.getTestTypesQuery(this._patient.patientSerNum);
 		let results;
@@ -22,6 +28,10 @@ class PatientTestResult {
 		return results;
 	}
 
+	/**
+	 * Method gets the test dates for the patient
+	 * @returns {Promise<Object[]>} Returns the test types for the patient 
+	 */
 	async getTestDates() {
 		const query = PatientTestResultQuery.getTestDatesQuery(this._patient.patientSerNum);
 		let results;
@@ -34,6 +44,11 @@ class PatientTestResult {
 		return results;
 	}
 
+	/**
+	 * Method gets the test results by date
+	 * @param {Date} date Date to obtains the results for.
+	 * @returns {Promise<Object>} Returns the test types for the patient 
+	 */
 	async getTestResultsByDate(date) {
 		const query = PatientTestResultQuery.getTestResultsByDateQuery(this._patient.patientSerNum, moment(date)
 			.format("YYYY-MM-DD hh:mm:ss"));
@@ -48,6 +63,11 @@ class PatientTestResult {
 		return results;
 	}
 
+	/**
+	 * Method obtains the test results values for a given test type
+	 * @param {number} typeSerNum ExpressionSerNum to get the results for.
+	 * @returns {Promise<Object[]>} Returns an array of the test results
+	 */
 	async getTestResultValuesByTestType(typeSerNum) {
 		const query = PatientTestResultQuery.getTestResultValuesByTestType(this._patient.patientSerNum, typeSerNum);
 		let results;
@@ -61,6 +81,11 @@ class PatientTestResult {
 		return results;
 	}
 
+	/**
+	 * Method gets the latest result for the given test type
+	 * @param {number} typeSerNum ExpressionSerNum for the test type
+	 * @returns {Promise<Object>} Returns an test result object containing the latest values for given test dates.
+	 */
 	async getLatestTestResultByTestType(testTypeSerNum) {
 		const query = PatientTestResultQuery.getLatestTestResultByTestType(this._patient.patientSerNum,
 						testTypeSerNum);

@@ -20,4 +20,4 @@ class PatientTestCollectedDatesHandler extends ApiRequestHandler {
 	}
 }
 
-module.exports = PatientTestCollectedDatesHandler.handleRequest;
+module.exports = PatientTestCollectedDatesHandler;

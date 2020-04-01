@@ -6,6 +6,9 @@ const {param} = require("express-validator");
 const logger = require("./../../../logs/logger");
 
 class PatientTestCollectedDateResultsHandler extends ApiRequestHandler {
+	/**
+	 * Must validate the date string in the parameters is a proper date object.
+	 */
 	static validators = [
 		param("date", "Must provide valid date parameters").toDate().exists()
 	];

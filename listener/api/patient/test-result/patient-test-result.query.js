@@ -1,7 +1,7 @@
 const mysql = require("mysql");
 
 /**
- *  Class encapsulates the PatientTestsQuery
+ *  Class encapsulates all the queries pertaining the patient test results.
  */
 class PatientTestResultQuery {
 
@@ -46,7 +46,7 @@ class PatientTestResultQuery {
 	/**
 	 * Query to return the collected dates the patient had tests for the test types
 	 * that are aliased.
-	 * @param patientSerNum Patient SerNum
+	 * @param {string|number} patientSerNum PatientSerNum in the DB
 	 */
 	static getTestDatesQuery(patientSerNum) {
 		return mysql.format(`
@@ -63,8 +63,9 @@ class PatientTestResultQuery {
 	}
 
 	/**
-	 * Query to return all test types for the patient
-	 * @returns string test types for the patient
+	 * Query to return all test types for the patient including the latest results for the given type
+	 * @param {string|number} patientSerNum PatientSerNum in the DB
+	 * @returns {string} query test types for the patient
 	 */
 	static getTestTypesQuery(patientSerNum) {
 		// Coalesce gets the first non-null value, in this case that's the last value

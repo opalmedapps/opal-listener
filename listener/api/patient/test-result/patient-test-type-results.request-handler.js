@@ -7,7 +7,7 @@ const logger = require("./../../../logs/logger");
 
 class PatientTestTypeResultsHandler extends ApiRequestHandler {
 	/**
-	 * Array parameters specifies the validation of fields for a given request.
+	 * This request validates and sanitizes the testTypeSerNum.
 	 * @type {ValidationChain[]} ValidationChain in the express-validator class
 	 */
 	static validators = [
@@ -45,4 +45,4 @@ class PatientTestTypeResultsHandler extends ApiRequestHandler {
 	}
 }
 
-module.exports = PatientTestTypeResultsHandler.handleRequest;
+module.exports = PatientTestTypeResultsHandler;

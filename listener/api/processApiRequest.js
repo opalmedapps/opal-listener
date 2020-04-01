@@ -71,7 +71,8 @@ exports.processRequest=function(requestObject) {
         return LEGACYAPI[type](requestObject.toLegacy());
     // New request format
     }else if(API.hasOwnProperty(type)){
-        return API[type](requestObject);
+        let requestHandler = API[type];
+        return requestHandler.handleRequest(requestObject);
     }else{
         logger.log("error", `Invalid request type: ${type}`);
         return Promise.reject("Invalid request type");

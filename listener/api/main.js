@@ -31,7 +31,6 @@ function requestFormatter({key,request}) {
 
             // After they have been decrypted, log all main requests in the table PatientActivityLog. -SB
             processApiRequest.logPatientRequest(opalReq);
-
 			return processApiRequest.processRequest(opalReq).then((data)=>
 			{
 				logger.log('debug', 'Successfully processed request: ' + data);

@@ -18,4 +18,4 @@ class PatientTestTypesHandler extends ApiRequestHandler {
 		};
 	}
 }
-module.exports = PatientTestTypesHandler.handleRequest;
+module.exports = PatientTestTypesHandler;
