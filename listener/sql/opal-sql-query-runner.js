@@ -18,10 +18,10 @@ class OpalSQLQueryRunner {
         dateStrings: true,
         port: config.MYSQL_DATABASE_PORT
     };
-    #opalQueryInstance = new SQLQueryRunner(this.#OPAL_DB_CREDENTIALS);
+    static opalQueryInstance = new SQLQueryRunner(this.#OPAL_DB_CREDENTIALS);
     constructor(){
         throw new Error("This class cannot be istantiated, use static method: run()");
     }
-    static run=(...args)=>OpalSQLQueryRunner.#opalQueryInstance.run(...args);
+    static run=(...args)=>OpalSQLQueryRunner.opalQueryInstance.run(...args);
 }
 module.exports = OpalSQLQueryRunner;
