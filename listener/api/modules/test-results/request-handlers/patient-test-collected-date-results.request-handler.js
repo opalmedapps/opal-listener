@@ -1,7 +1,7 @@
 const {ValidationError} = require("../../../errors/validation-error");
 const {ApiRequestHandler} = require("../../../api-request-handler");
-const {PatientTestResult} = require("./patient-test-result");
-const {Patient} = require("../patient");
+const {PatientTestResult} = require("../classes/patient-test-result");
+const {Patient} = require("../../patient/patient");
 const {param} = require("express-validator");
 const logger = require("../../../../logs/logger");
 

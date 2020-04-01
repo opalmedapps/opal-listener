@@ -1,6 +1,6 @@
 const {ApiRequestHandler} = require("../../../api-request-handler");
-const {PatientTestResult} = require("./patient-test-result");
-const {Patient} = require("../patient");
+const {PatientTestResult} = require("../classes/patient-test-result");
+const {Patient} = require("../../patient/patient");
 
 class PatientTestCollectedDatesHandler extends ApiRequestHandler {
 	/**

@@ -27,6 +27,7 @@ class ApiRequestHandler {
     /**
      * This class serves as an interface for the API handlers to implement.
      * @param {OpalRequest} requestObject request object coming from front-end
+     * @returns {Promise<*>} requestObject request object coming from front-end
      */
     static async handleRequest(requestObject){
         throw new Error("Must be implemented by child class");

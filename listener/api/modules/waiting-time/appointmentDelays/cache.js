@@ -1,4 +1,4 @@
-const { runSqlQuery } = require('../../sqlInterface')
+const { runSqlQuery } = require('../../../sqlInterface')
 const { opalDb: opalDbQueries } = require('./queries')
 const ONE_DAY = 1000 * 60 * 60 * 24; // 1 ms * 60 sec * 60 min * 24 h
 const memoized = {}

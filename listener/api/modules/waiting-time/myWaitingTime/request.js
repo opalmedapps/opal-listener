@@ -1,5 +1,5 @@
 const process = require('./processor')
-const logger = require('../../../logs/logger');
+const logger = require('../../../../logs/logger');
 const cacheOf = require('./cache')
 const getAppointmentsOf = require('./getAppointments')
 

@@ -4,9 +4,9 @@ const apiPatientUpdate      = require('./apiPatientUpdate.js');
 const apiHospitalUpdate     = require('./apiHospitalUpdate.js');
 const security              = require('./../security/security');
 const logger                = require('./../logs/logger');
-const modules               = require('./modules');
+const modules               = require('./modules/waiting-time');
 // New API handlers
-const tests = require("./modules/patient/test-result");
+const tests = require("./modules/test-results");
 
 /**
  * API HANDLERS FOR GENERAL REQUESTS
