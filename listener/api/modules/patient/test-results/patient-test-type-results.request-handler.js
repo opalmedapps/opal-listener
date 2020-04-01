@@ -1,9 +1,9 @@
-const {ValidationError} =require("../../errors/validation-error");
+const {ValidationError} =require("../../../errors/validation-error");
 const {PatientTestResult} = require("./patient-test-result");
-const {ApiRequestHandler} = require("../../api-request-handler");
+const {ApiRequestHandler} = require("../../../api-request-handler");
 const {Patient} = require("../patient");
 const {param} = require("express-validator");
-const logger = require("./../../../logs/logger");
+const logger = require("../../../../logs/logger");
 
 class PatientTestTypeResultsHandler extends ApiRequestHandler {
 	/**
