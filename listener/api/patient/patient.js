@@ -23,7 +23,7 @@ class Patient {
 		const query = patientQueries.getPatientByUsernameQuery(username);
 		let results;
 		try {
-			results = await opalSqlQuery.run(query);
+			results = await opalSQLQuery.run(query);
 		} catch (err) {
 			logger.log("debug", `Error fetching patient with Username ${username}`, err);
 			throw err;
