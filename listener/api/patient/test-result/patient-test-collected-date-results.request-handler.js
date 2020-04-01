@@ -36,4 +36,4 @@ class PatientTestCollectedDateResultsHandler extends ApiRequestHandler {
 	}
 }
 
-module.exports = PatientTestCollectedDateResultsHandler.handleRequest;
+module.exports = PatientTestCollectedDateResultsHandler;
