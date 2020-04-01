@@ -9,7 +9,7 @@ class OpalSQLQueryRunner {
     /******************************
      * CONFIGURATIONS
      ******************************/
-    #OPAL_DB_CREDENTIALS = {
+    static #OPAL_DB_CREDENTIALS = {
         connectionLimit: 10,
         host: config.HOST,
         user: config.MYSQL_USERNAME,
