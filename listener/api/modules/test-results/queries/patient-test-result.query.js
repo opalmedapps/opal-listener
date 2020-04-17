@@ -55,12 +55,13 @@ class PatientTestResultQuery {
                         FROM 
                         	PatientTestResult as ptr, 
                         	TestExpression as te, 
-                        	TestControl as tc
+							TestControl as tc,
+							EducationalMaterialControl as emc
                         WHERE 
                         	ptr.PatientSerNum=? 
                         	AND ptr.TestExpressionSerNum = te.TestExpressionSerNum 
-							AND te.TestControlSerNum IS NOT NULL 
 							AND te.TestControlSerNum = tc.TestControlSerNum  
+							AND tc.EducationalMaterialControlSerNum = emc.EducationalMaterialControlSerNum
                         ORDER BY collectedDateTime DESC;`, [patientSerNum]);
 	}
 
@@ -92,7 +93,6 @@ class PatientTestResultQuery {
 						WHERE
 							ptr.PatientSerNum = ? 
 							AND ptr.TestExpressionSerNum = te.TestExpressionSerNum
-							AND te.TestControlSerNum IS NOT NULL 
 							AND te.TestControlSerNum = tc.TestControlSerNum
 							AND tc.EducationalMaterialControlSerNum = emc.EducationalMaterialControlSerNum
 						ORDER BY name_EN, latestCollectedDateTime DESC) as tab
@@ -127,7 +127,6 @@ class PatientTestResultQuery {
                                 ptr.PatientSerNum = ? 
                                 AND ptr.TestExpressionSerNum = ?
 								AND ptr.TestExpressionSerNum = te.TestExpressionSerNum 
-								AND te.TestControlSerNum IS NOT NULL 
                                 AND te.TestControlSerNum = tc.TestControlSerNum  
                                 AND tc.EducationalMaterialControlSerNum = emc.EducationalMaterialControlSerNum
                             ORDER BY latestCollectedDateTime DESC LIMIT 1;`,
