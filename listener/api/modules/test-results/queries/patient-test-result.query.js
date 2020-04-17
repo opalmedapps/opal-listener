@@ -36,8 +36,7 @@ class PatientTestResultQuery {
                         AND ptr.PatientSerNum = ? 
                         AND (ptr.TestGroupExpressionSerNum = tge.TestGroupExpressionSerNum OR
                         		ptr.TestGroupExpressionSerNum IS NULL)
-						AND ptr.TestExpressionSerNum = te.TestExpressionSerNum 
-						AND te.TestControlSerNum IS NOT NULL 
+                        AND ptr.TestExpressionSerNum = te.TestExpressionSerNum 
                         AND te.TestControlSerNum = tc.TestControlSerNum  
                         AND tc.EducationalMaterialControlSerNum = emc.EducationalMaterialControlSerNum 
                     ORDER BY groupName, sequenceNum;`,
@@ -55,12 +54,12 @@ class PatientTestResultQuery {
                         FROM 
                         	PatientTestResult as ptr, 
                         	TestExpression as te, 
-							TestControl as tc,
+							TestControl as tc, 
 							EducationalMaterialControl as emc
                         WHERE 
-                        	ptr.PatientSerNum=? 
-                        	AND ptr.TestExpressionSerNum = te.TestExpressionSerNum 
-							AND te.TestControlSerNum = tc.TestControlSerNum  
+                        	ptr.PatientSerNum = ?
+                        	AND ptr.TestExpressionSerNum = te.TestExpressionSerNum
+							AND te.TestControlSerNum = tc.TestControlSerNum
 							AND tc.EducationalMaterialControlSerNum = emc.EducationalMaterialControlSerNum
                         ORDER BY collectedDateTime DESC;`, [patientSerNum]);
 	}
@@ -126,7 +125,7 @@ class PatientTestResultQuery {
                             WHERE 
                                 ptr.PatientSerNum = ? 
                                 AND ptr.TestExpressionSerNum = ?
-								AND ptr.TestExpressionSerNum = te.TestExpressionSerNum 
+                                AND ptr.TestExpressionSerNum = te.TestExpressionSerNum 
                                 AND te.TestControlSerNum = tc.TestControlSerNum  
                                 AND tc.EducationalMaterialControlSerNum = emc.EducationalMaterialControlSerNum
                             ORDER BY latestCollectedDateTime DESC LIMIT 1;`,
