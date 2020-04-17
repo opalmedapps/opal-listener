@@ -32,11 +32,12 @@ class PatientTestResultQuery {
                         TestGroupExpression as tge, TestControl as tc, 
                         EducationalMaterialControl as emc
                     WHERE 
-                        ptr.CollectedDateTime=?
+                        ptr.CollectedDateTime = ?
                         AND ptr.PatientSerNum = ? 
                         AND (ptr.TestGroupExpressionSerNum = tge.TestGroupExpressionSerNum OR
                         		ptr.TestGroupExpressionSerNum IS NULL)
-                        AND ptr.TestExpressionSerNum = te.TestExpressionSerNum 
+						AND ptr.TestExpressionSerNum = te.TestExpressionSerNum 
+						AND te.TestControlSerNum IS NOT NULL 
                         AND te.TestControlSerNum = tc.TestControlSerNum  
                         AND tc.EducationalMaterialControlSerNum = emc.EducationalMaterialControlSerNum 
                     ORDER BY groupName, sequenceNum;`,
@@ -58,7 +59,8 @@ class PatientTestResultQuery {
                         WHERE 
                         	ptr.PatientSerNum=? 
                         	AND ptr.TestExpressionSerNum = te.TestExpressionSerNum 
-                        	and te.TestControlSerNum = tc.TestControlSerNum  
+							AND te.TestControlSerNum IS NOT NULL 
+							AND te.TestControlSerNum = tc.TestControlSerNum  
                         ORDER BY collectedDateTime DESC;`, [patientSerNum]);
 	}
 
@@ -68,7 +70,7 @@ class PatientTestResultQuery {
 	 * @returns {string} query test types for the patient
 	 */
 	static getTestTypesQuery(patientSerNum) {
-		// Coalesce gets the first non-null value, in this case that's the last value
+		// Coalesce gets the first non-null value, in this case that's the last test value
 		return mysql.format(`
                         SELECT * FROM (SELECT
 							ptr.PatientTestResultSerNum as latestPatientTestResultSerNum,
@@ -90,6 +92,7 @@ class PatientTestResultQuery {
 						WHERE
 							ptr.PatientSerNum = ? 
 							AND ptr.TestExpressionSerNum = te.TestExpressionSerNum
+							AND te.TestControlSerNum IS NOT NULL 
 							AND te.TestControlSerNum = tc.TestControlSerNum
 							AND tc.EducationalMaterialControlSerNum = emc.EducationalMaterialControlSerNum
 						ORDER BY name_EN, latestCollectedDateTime DESC) as tab
@@ -123,7 +126,8 @@ class PatientTestResultQuery {
                             WHERE 
                                 ptr.PatientSerNum = ? 
                                 AND ptr.TestExpressionSerNum = ?
-                                AND ptr.TestExpressionSerNum = te.TestExpressionSerNum 
+								AND ptr.TestExpressionSerNum = te.TestExpressionSerNum 
+								AND te.TestControlSerNum IS NOT NULL 
                                 AND te.TestControlSerNum = tc.TestControlSerNum  
                                 AND tc.EducationalMaterialControlSerNum = emc.EducationalMaterialControlSerNum
                             ORDER BY latestCollectedDateTime DESC LIMIT 1;`,

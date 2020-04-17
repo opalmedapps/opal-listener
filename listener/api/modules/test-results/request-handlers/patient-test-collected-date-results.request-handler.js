@@ -10,11 +10,11 @@ class PatientTestCollectedDateResultsHandler extends ApiRequestHandler {
 	 * Must validate the date string in the parameters is a proper date object.
 	 */
 	static validators = [
-		param("date", "Must provide valid date parameters").toDate().exists()
+		param("date", "Must provide valid date parameters").exists().toDate()
 	];
 
 	/**
-	 * Request returns list of test dates for the patient
+	 * Request returns the test dates result for the patient. 
 	 * @param {OpalRequest} requestObject OpalRequest object
 	 */
 	static async handleRequest(requestObject) {
