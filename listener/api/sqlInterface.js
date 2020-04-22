@@ -1409,27 +1409,32 @@ exports.setTrusted = function(requestObject)
 exports.getQuestionnaireList = function(requestObject){
     var r = Q.defer();
 
-    // check argument
-    if (!requestObject.hasOwnProperty('UserID') || requestObject.UserID === undefined){
-        r.reject(new Error('Error getting questionnaire list: the requestObject does not have UserID'));
+    // get language in the database
+    exports.runSqlQuery(queries.getPatientSerNumAndLanguage(), [requestObject.UserID, null, null])
+        .then(function (patientSerNumAndLanguageRow) {
 
-    }else{
-        // get language in the database
-        exports.runSqlQuery(queries.getPatientSerNumAndLanguage(), [requestObject.UserID, null, null])
-            .then(function (patientSerNumAndLanguageRow) {
-
+            if (patientSerNumAndLanguageRow.length === 1
+                && patientSerNumAndLanguageRow[0].hasOwnProperty('PatientSerNum')
+                && patientSerNumAndLanguageRow[0].hasOwnProperty('Language')
+                && patientSerNumAndLanguageRow[0].PatientSerNum !== undefined
+                && patientSerNumAndLanguageRow[0].PatientSerNum !== null) {
                 // get questionnaire list
                 return questionnaires.getQuestionnaireList(patientSerNumAndLanguageRow[0]);
-            })
-            .then(function (result) {
-                var obj = {};
-                obj.Data = result;
-                r.resolve(obj);
-            })
-            .catch(function (error) {
-                r.reject(error);
-            });
-    }
+
+            } else {
+                r.reject(new Error('Error getting questionnaire list: No matching PatientSerNum found in opalDB'))
+            }
+
+        })
+        .then(function (result) {
+            var obj = {};
+            obj.Data = result;
+            r.resolve(obj);
+        })
+        .catch(function (error) {
+            r.reject(error);
+        });
+
     return r.promise;
 };
 
@@ -1443,10 +1448,10 @@ exports.getQuestionnaire = function(requestObject) {
     var r = Q.defer();
 
     // check argument
-    if (!requestObject.hasOwnProperty('Parameters') || !requestObject.Parameters.hasOwnProperty('qp_ser_num') || !requestObject.Parameters.qp_ser_num) {
+    if (!requestObject.hasOwnProperty('Parameters') || !requestObject.Parameters.hasOwnProperty('qp_ser_num')
+        || !requestObject.Parameters.qp_ser_num || isNaN(requestObject.Parameters.qp_ser_num)) {
         r.reject(new Error('Error getting questionnaire: the requestObject does not have the required parameter qp_ser_num'));
-    }else if (!requestObject.hasOwnProperty('UserID') || requestObject.UserID === undefined){
-        r.reject(new Error('Error getting questionnaire: the requestObject does not have UserID'));
+
     }else{
         // get language in the database
         exports.runSqlQuery(queries.getPatientSerNumAndLanguage(), [requestObject.UserID, null, null])
@@ -1475,15 +1480,12 @@ exports.questionnaireSaveAnswer = function(requestObject){
     if (!requestObject.hasOwnProperty('Parameters') || !requestObject.Parameters.hasOwnProperty('answerQuestionnaire_id') ||
         !requestObject.Parameters.hasOwnProperty('is_skipped') || !requestObject.Parameters.hasOwnProperty('questionSection_id') ||
         !requestObject.Parameters.hasOwnProperty('question_id') || !requestObject.Parameters.hasOwnProperty('section_id') ||
-        !requestObject.Parameters.hasOwnProperty('question_type_id')) {
+        !requestObject.Parameters.hasOwnProperty('question_type_id') || isNaN(requestObject.Parameters.answerQuestionnaire_id) ||
+        isNaN(requestObject.Parameters.questionSection_id) || isNaN(requestObject.Parameters.question_id) ||
+        isNaN(requestObject.Parameters.section_id) || isNaN(requestObject.Parameters.question_type_id)) {
 
         r.reject(new Error('Error saving answer: the requestObject does not have the required parameters'));
 
-    }else if (!requestObject.hasOwnProperty('UserID') || requestObject.UserID === undefined){
-        r.reject(new Error('Error saving answer: the requestObject does not have UserID'));
-
-    }else if (!requestObject.hasOwnProperty('AppVersion') || requestObject.AppVersion === undefined){
-        r.reject(new Error ('Error saving answer: the requestObject does not have AppVersion'));
     }else{
         // get language in the opal database
         exports.runSqlQuery(queries.getPatientSerNumAndLanguage(), [requestObject.UserID, null, null])
@@ -1515,11 +1517,6 @@ exports.questionnaireUpdateStatus = function(requestObject){
 
         r.reject(new Error('Error updating status: the requestObject does not have the required parameters'));
 
-    }else if (!requestObject.hasOwnProperty('UserID') || requestObject.UserID === undefined){
-        r.reject(new Error('Error updating status: the requestObject does not have UserID'));
-
-    }else if (!requestObject.hasOwnProperty('AppVersion') || requestObject.AppVersion === undefined){
-        r.reject(new Error ('Error updating status: the requestObject does not have AppVersion'));
     }else{
         var patientSerNumOpalDB;
 
