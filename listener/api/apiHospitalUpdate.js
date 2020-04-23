@@ -1,6 +1,7 @@
 var exports = module.exports = {};
 const sqlInterface = require('./sqlInterface.js');
 const logger = require('./../logs/logger.js');
+const questionnaires = require('./../questionnaires/questionnaireOpalDB.js');
 
 //API call to log user out
 exports.logout=function(requestObject)
@@ -17,22 +18,16 @@ exports.sendMessage=function(requestObject)
   return sqlInterface.sendMessage(requestObject);
 };
 
-//Input questionnaire answers to DB
-exports.inputQuestionnaireAnswers = function(requestObject)
+// This is for questionnaire V2 (inputting a single question's answer for 2019 qplus questionnaire front-end)
+exports.questionnaireSaveAnswer = function(requestObject)
 {
-  return sqlInterface.inputQuestionnaireAnswers(requestObject);
+    return questionnaires.questionnaireSaveAnswer(requestObject);
 };
 
-// V2 is for inputting a single question's answer for 2019 qplus questionnaire front-end
-exports.questionnaireSaveAnswerV2 = function(requestObject)
+// This is for questionnaire V2 (2019 qplus questionnaire front-end)
+exports.QuestionnaireUpdateStatus = function(requestObject)
 {
-    return sqlInterface.questionnaireSaveAnswer(requestObject);
-};
-
-// V2 is for 2019 qplus questionnaire front-end
-exports.QuestionnaireUpdateStatusV2 = function(requestObject)
-{
-    return sqlInterface.questionnaireUpdateStatus(requestObject);
+    return questionnaires.questionnaireUpdateStatus(requestObject);
 };
 
 //Input feedback

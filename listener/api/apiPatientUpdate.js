@@ -5,6 +5,7 @@ var utility = require('./../utility/utility.js');
 var validate = require('./../utility/validate.js');
 var queries = require('./../sql/queries.js');
 var logger = require('./../logs/logger.js');
+const questionnaires = require('./../questionnaires/questionnaireOpalDB.js');
 
 /**
  *@name login
@@ -131,20 +132,16 @@ exports.logPatientRequest = function(requestObject) {
     return sqlInterface.addToActivityLog(requestObject);
 };
 
-exports.getQuestionnaires = function (requestObject) {
-    return sqlInterface.getQuestionnaires(requestObject);
+// This is for questionnaire V2 (2019 version of qplus questionnaire front-end)
+exports.getQuestionnaireList = function(requestObject){
+
+    return questionnaires.getQuestionnaireList(requestObject);
 };
 
-// V2 is for the 2019 version of qplus questionnaire front-end
-exports.getQuestionnaireListV2 = function(requestObject){
+// This is for questionnaire V2 (2019 version of qplus questionnaire front-end)
+exports.getQuestionnaire = function(requestObject){
 
-    return sqlInterface.getQuestionnaireList(requestObject);
-};
-
-// V2 is for the 2019 version of qplus questionnaire front-end
-exports.getQuestionnaireV2 = function(requestObject){
-
-    return sqlInterface.getQuestionnaire(requestObject);
+    return questionnaires.getQuestionnaire(requestObject);
 };
 
 exports.getPatientsForPatientsMembers = function ()

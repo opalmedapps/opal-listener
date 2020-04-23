@@ -371,10 +371,6 @@ exports.insertEducationalMaterialRatingQuery=function()
 {
     return "INSERT INTO `EducationalMaterialRating`(`EducationalMaterialRatingSerNum`, `EducationalMaterialControlSerNum`, `PatientSerNum`, `RatingValue`, `SessionId`, `LastUpdated`) VALUES (NULL,?,?,?,?,NULL)";
 };
-exports.setQuestionnaireCompletedQuery = function()
-{
-    return "UPDATE `Questionnaire` SET CompletedFlag = 1, CompletionDate = ?, SessionId = ? WHERE Questionnaire.QuestionnaireSerNum = ?;";
-};
 
 exports.getPatientAriaSerQuery = function()
 {
@@ -384,11 +380,6 @@ exports.getPatientAriaSerQuery = function()
 exports.getPatientId= function()
 {
     return "SELECT Patient.PatientId FROM Patient, Users WHERE Patient.PatientSerNum = Users.UserTypeSerNum && Users.Username = ?"
-};
-
-exports.getPatientSerNumAndLanguage = function()
-{
-    return "SELECT Patient.PatientSerNum, Patient.`Language` FROM Patient, Users WHERE Patient.PatientSerNum = Users.UserTypeSerNum && Users.Username = ?;";
 };
 
 /**
@@ -508,12 +499,4 @@ exports.getNewNotifications=function() {
         "AND Users.Username= ? " +
         "AND Notification.ReadStatus = 0 " +
         "AND (Notification.DateAdded > ? OR NotificationControl.DateAdded > ?);";
-};
-
-exports.updateQuestionnaireStatus = function () {
-    return "UPDATE \`Questionnaire\` SET \`CompletedFlag\`= ?, \`CompletionDate\`= CURRENT_TIMESTAMP WHERE PatientQuestionnaireDBSerNum = ?;";
-};
-
-exports.getPatientQuestionnaireDBSerNum = function () {
-    return `SELECT q.PatientQuestionnaireDBSerNum FROM Questionnaire q WHERE q.QuestionnaireSerNum = ? AND q.CompletedFlag <> 1;`;
 };
