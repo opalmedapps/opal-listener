@@ -49,7 +49,7 @@ var queryQuestions = `SELECT DISTINCT Questionnaire.QuestionnaireSerNum as Quest
 // since a section can only be contained in one questionnaire,
 // questionSection.ID can be thought as QuestionnaireQuestionSerNum because there is only one per combination of sectionId and questionId
 exports.queryQuestions = function(){
-    return `CALL queryQuestions(?);`;
+    return "CALL queryQuestions(?);";
 }
 
 /*
@@ -58,7 +58,7 @@ var queryQuestionChoices = "SELECT QuestionSerNum, MCSerNum as OrderNum, MCDescr
  */
 // for questionnaireDB2019:
 exports.queryQuestionChoices = function(){
-    return `CALL queryQuestionChoices(?);`;
+    return "CALL queryQuestionChoices(?);";
 }
 
 /*
@@ -68,7 +68,7 @@ var queryAnswersPatientQuestionnaire = "SELECT QuestionnaireQuestionSerNum, Answ
 // for questionnaireDB2019:
 // note that this query does not take skipped answers into account since these functionnalities do not exist yet in the qplus
 exports.queryAnswers = function(){
-    return `CALL queryAnswers(?,?);`;
+    return "CALL queryAnswers(?,?);";
 }
 
 /*
@@ -84,7 +84,7 @@ var inputPatientQuestionnaireQuery = "INSERT INTO `PatientQuestionnaire`(`Patien
 
 // For questionnaireDB2019
 exports.patientIdInQuestionnaireDBQuery = function(){
-    return `SELECT ID FROM patient WHERE externalId = ?;`;
+    return "SELECT ID FROM patient WHERE externalId = ?;";
 }
 
 exports.getQuestionSectionInfoFromQuestionnaireQuestionSerNumQuery = function(){
@@ -95,18 +95,15 @@ WHERE q.deleted <> 1 AND q.ID = qSec.questionId
 }
 
 exports.getPatientIdFromQuestionnaireSerNumQuery = function(){
-    return `SELECT patientId
-FROM answerQuestionnaire
-WHERE ID = ? AND deleted <> 1 AND \`status\` <> 2
-;`;
+    return "SELECT patientId FROM answerQuestionnaire WHERE ID = ? AND deleted <> 1 AND \`status\` <> 2;";
 }
 
 exports.updateAnswerQuestionnaireQuery = function(){
-    return `UPDATE \`answerQuestionnaire\` SET \`status\` = ?, \`updatedBy\` = ? WHERE \`ID\` = ?;`;
+    return "UPDATE \`answerQuestionnaire\` SET \`status\` = ?, \`updatedBy\` = ? WHERE \`ID\` = ?;";
 }
 
 exports.insertSectionIntoAnswerSectionQuery = function () {
-    return `REPLACE INTO answerSection(answerQuestionnaireId, sectionId) VALUES (?, ?);`;
+    return "REPLACE INTO answerSection(answerQuestionnaireId, sectionId) VALUES (?, ?);";
 }
 
 exports.insertIntoAnswerQuery = function(){
@@ -116,21 +113,21 @@ VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?);`;
 }
 
 exports.insertTextBox = function(){
-    return `INSERT INTO \`answerTextBox\` (\`answerId\`, \`value\`) VALUES (?, ?)`;
+    return "INSERT INTO \`answerTextBox\` (\`answerId\`, \`value\`) VALUES (?, ?)";
 }
 
 exports.insertSlider = function(){
-    return `INSERT INTO \`answerSlider\` (\`answerId\`, \`value\`) VALUES (?, ?)`;
+    return "INSERT INTO \`answerSlider\` (\`answerId\`, \`value\`) VALUES (?, ?)";
 }
 
 // Answer Type ID for getAnswerTableOptionID: 1 = Checkbox, 4 = Radiobutton, 5 = Label
 exports.insertRadioButton = function(){
-    return `REPLACE INTO answerRadioButton (answerId, \`value\`) VALUES (?, (SELECT getAnswerTableOptionID(?,?,4)));`;
+    return "REPLACE INTO answerRadioButton (answerId, \`value\`) VALUES (?, (SELECT getAnswerTableOptionID(?,?,4)));";
 }
 
 // Answer Type ID for getAnswerTableOptionID: 1 = Checkbox, 4 = Radiobutton, 5 = Label
 exports.insertCheckbox = function(){
-    return `REPLACE INTO answerCheckbox (answerId, \`value\`) VALUES (?, (SELECT getAnswerTableOptionID(?,?,1)));`;
+    return "REPLACE INTO answerCheckbox (answerId, \`value\`) VALUES (?, (SELECT getAnswerTableOptionID(?,?,1)));";
 }
 
 /**
@@ -140,49 +137,49 @@ exports.insertCheckbox = function(){
  */
 
 exports.getQuestionnaireListQuery = function(){
-    return `call getQuestionnaireList(?,?);`;
+    return "call getQuestionnaireList(?,?);";
 }
 
 exports.getQuestionnaireQuery = function () {
-    return `call getQuestionnaireInfo(?,?);`;
+    return "call getQuestionnaireInfo(?,?);";
 }
 
 exports.getQuestionOptionsQuery = function () {
-    return `CALL getQuestionOptions(?, ?, ?);`;
+    return "CALL getQuestionOptions(?, ?, ?);";
 }
 
 exports.saveAnswerQuery = function () {
-    return `call saveAnswer(?,?,?,?,?,?,?);`;
+    return "call saveAnswer(?,?,?,?,?,?,?);";
 }
 
 exports.insertAnswerTextbox = function () {
-    return `INSERT INTO answerTextBox (answerId, value) VALUES (?, ?)`;
+    return "INSERT INTO answerTextBox (answerId, value) VALUES (?, ?)";
 }
 
 exports.insertAnswerSlider = function () {
-    return `INSERT INTO \`answerSlider\` (\`answerId\`, \`value\`) VALUES (?, ?)`;
+    return "INSERT INTO \`answerSlider\` (\`answerId\`, \`value\`) VALUES (?, ?)";
 }
 
 exports.insertAnswerRadioButton = function () {
-    return `INSERT INTO answerRadioButton (answerId, value) VALUES (?,?);`;
+    return "INSERT INTO answerRadioButton (answerId, value) VALUES (?,?);";
 }
 
 exports.insertAnswerTime = function () {
-    return `INSERT INTO answerTime (answerId, value) VALUES (?, ?)`;
+    return "INSERT INTO answerTime (answerId, value) VALUES (?, ?)";
 }
 
 exports.insertAnswerDate = function () {
-    return `INSERT INTO answerDate (answerId, value) VALUES (?, ?)`;
+    return "INSERT INTO answerDate (answerId, value) VALUES (?, ?)";
 }
 
 exports.insertAnswerLabel = function () {
-    return `INSERT INTO answerLabel (answerId, selected, posX, posY, intensity, value) VALUES `;
+    return "INSERT INTO answerLabel (answerId, selected, posX, posY, intensity, value) VALUES ";
 }
 
 exports.insertAnswerCheckbox = function () {
-    return `INSERT INTO answerCheckbox (answerId, value) VALUES `;
+    return "INSERT INTO answerCheckbox (answerId, value) VALUES ";
 }
 
 exports.updateAnswerQuestionnaireStatus = function () {
-    return `call updateAnswerQuestionnaireStatus(?,?,?);`;
+    return "call updateAnswerQuestionnaireStatus(?,?,?);";
 }

@@ -511,7 +511,7 @@ exports.getNewNotifications=function() {
 };
 
 exports.updateQuestionnaireStatus = function () {
-    return `UPDATE \`Questionnaire\` SET \`CompletedFlag\`= ?, \`CompletionDate\`= CURRENT_TIMESTAMP WHERE PatientQuestionnaireDBSerNum = ?;`;
+    return "UPDATE \`Questionnaire\` SET \`CompletedFlag\`= ?, \`CompletionDate\`= CURRENT_TIMESTAMP WHERE PatientQuestionnaireDBSerNum = ?;";
 };
 
 exports.getPatientQuestionnaireDBSerNum = function () {
