@@ -2,6 +2,8 @@ var exports = module.exports = {};
 var mysql = require('mysql');
 var q = require('q');
 var credentials = require('./../config.json');
+var utility = require('../utility/utility');
+const logger = require('./../logs/logger');
 
 // the following config file stores all of our constants used in the questionnaireDB. Note that we use require here. That means any change made to the JSON inside will be made to the cached version.
 // you should not, in any stage of your program, make change to properties inside.
@@ -12,7 +14,7 @@ const questionnaireQueries = require('./questionnaireQueries.js');
 /*
 *Connecting to mysql database
 */
-var sqlConfig = {
+const questionnaireDBCredentials = {
     host: credentials.HOST,
     user: credentials.MYSQL_USERNAME,
     password: credentials.MYSQL_PASSWORD,
@@ -20,92 +22,28 @@ var sqlConfig = {
     dateStrings: true,
     port: credentials.MYSQL_DATABASE_PORT
 };
-/*
-*Re-connecting the sql database, NodeJS has problems and disconnects if inactive,
-The handleDisconnect deals with that
-*/
-var connection = mysql.createConnection(sqlConfig);
 
-function handleDisconnect(myconnection) {
-    myconnection.on('error', function (err) {
-        //console.log('Re-connecting lost connection');
-        connection.destroy();
-        connection = mysql.createConnection(sqlConfig);
-        handleDisconnect(connection);
-        connection.connect();
+const questionnairePool = mysql.createPool(questionnaireDBCredentials);
+
+function runQuery(query, parameters = null) {
+    return new Promise((resolve, reject) => {
+        questionnairePool.getConnection(function (err, connection) {
+            logger.log('debug', `Grabbed SQL connection: ${connection}`);
+            const que = connection.query(query, parameters, function (err, rows) {
+                connection.release();
+                if (err) {
+                    logger.log("error", `Failed to execute query: ${que.sql}`, err);
+                    reject(err);
+                }
+                logger.log('info', `Successfully performed query: ${que.sql}`);
+                if (typeof rows !== 'undefined') {
+                    resolve(rows);
+                } else {
+                    resolve([]);
+                }
+            });
+        });
     });
-}
-
-handleDisconnect(connection);
-
-/**
- * htmlspecialchars_decode
- * @desc this is a helper function used to decode html encoding
- * @param string
- * @param quoteStyle
- * @returns {string} decoded string
- */
-function htmlspecialchars_decode(string, quoteStyle) {
-    var optTemp = 0;
-    var i = 0;
-    var noquotes = false;
-
-    if (typeof quoteStyle === 'undefined') {
-        quoteStyle = 2;
-    }
-    string = string.toString()
-        .replace(/&lt;/g, '<')
-        .replace(/&gt;/g, '>');
-    var OPTS = {
-        'ENT_NOQUOTES': 0,
-        'ENT_HTML_QUOTE_SINGLE': 1,
-        'ENT_HTML_QUOTE_DOUBLE': 2,
-        'ENT_COMPAT': 2,
-        'ENT_QUOTES': 3,
-        'ENT_IGNORE': 4
-    };
-
-    if (quoteStyle === 0) {
-        noquotes = true;
-    }
-    if (typeof quoteStyle !== 'number') {
-        // Allow for a single string or an array of string flags
-        quoteStyle = [].concat(quoteStyle);
-        for (i = 0; i < quoteStyle.length; i++) {
-            if (OPTS[quoteStyle[i]] === 0) {
-                noquotes = true;
-            } else if (OPTS[quoteStyle[i]]) {
-                optTemp = optTemp | OPTS[quoteStyle[i]];
-            }
-        }
-        quoteStyle = optTemp
-    }
-    if (quoteStyle & OPTS.ENT_HTML_QUOTE_SINGLE) {
-        string = string.replace(/&#0*39;/g, "'");
-    }
-    if (!noquotes) {
-        string = string.replace(/&quot;/g, '"');
-    }
-
-    string = string.replace(/&amp;/g, '&');
-
-    return string;
-}
-
-/**
- * runQuery
- * @desc Turns a callback query function into a promise
- * @param query
- * @param parameters: the parameters to pass to the query
- * @return {promise}
- */
-function runQuery(query, parameters) {
-    var r = q.defer();
-    connection.query(query, parameters, function (err, rows, fields) {
-        if (err) r.reject(err);
-        else r.resolve(rows);
-    });
-    return r.promise;
 }
 
 /**
@@ -124,7 +62,7 @@ FUNCTIONS TO GET QUESTIONNAIRES
 /**
  * getQuestionnaireList
  * @desc this function get a list of questionnaire belonging to an user.
- * @param opalPatientSerNumAndLanguage {object} object containing PatientSerNum and Language as property. These information comes from OpalDB
+ * @param {object} opalPatientSerNumAndLanguage object containing PatientSerNum and Language as property. These information comes from OpalDB
  * @returns {promise}
  */
 function getQuestionnaireList(opalPatientSerNumAndLanguage) {
@@ -151,9 +89,9 @@ function getQuestionnaireList(opalPatientSerNumAndLanguage) {
 /**
  * getQuestionnaire
  * @desc this function gets data related to that questionnaire, including answers
- * @param opalPatientSerNumAndLanguage {object}: object containing PatientSerNum and Language as property. These information comes from OpalDB
- * @param answerQuestionnaire_Id: This is the ID of the answerQuestionnaire (questionnaire belonging to that user and which the user would like to view). Should be passed from qplus.
- * @returns {promise}
+ * @param {object} opalPatientSerNumAndLanguage object containing PatientSerNum and Language as property. These information comes from OpalDB
+ * @param {number} answerQuestionnaire_Id This is the ID of the answerQuestionnaire (questionnaire belonging to that user and which the user would like to view). Should be passed from qplus.
+ * @returns {Promise}
  */
 function getQuestionnaire(opalPatientSerNumAndLanguage, answerQuestionnaire_Id) {
     let r = q.defer();
@@ -204,9 +142,9 @@ function getQuestionnaire(opalPatientSerNumAndLanguage, answerQuestionnaire_Id) 
  * formatAnswer
  * @desc this function is a helper to organize the answers according to the questionSection_id if the questionnaire is not new.
  *       It also check the required properties of questionnaire and answers.
- * @param questionnaireDataArray {array}
- * @param answerDataArray {array}
- * @return answerObject {object} this object has questionSection_id as key, and an array of answers as value
+ * @param {array} questionnaireDataArray
+ * @param {array} answerDataArray
+ * @return {object} answerObject this object has questionSection_id as key, and an array of answers as value
  */
 function formatAnswer(questionnaireDataArray, answerDataArray) {
     let answerObject = {};
@@ -246,7 +184,7 @@ function formatAnswer(questionnaireDataArray, answerDataArray) {
 /**
  * @name validateAnsweredQuestionnaire
  * @desc verify that the answer gotten from the database has the required properties. Throw an error if not.
- * @param answer {object}
+ * @param {object} answer
  */
 function validateAnsweredQuestionnaire(answer) {
     if (!answer.hasOwnProperty('answer_id') || !answer.hasOwnProperty('question_id') || !answer.hasOwnProperty('section_id') ||
@@ -263,7 +201,7 @@ function validateAnsweredQuestionnaire(answer) {
 /**
  * @name validateQuestionnaireProperties
  * @desc verify that the questionnaire has the required properties. If not, throw an error
- * @param questionnaire {object}
+ * @param {object} questionnaire
  */
 function validateQuestionnaireProperties(questionnaire) {
 
@@ -284,7 +222,7 @@ function validateQuestionnaireProperties(questionnaire) {
 /**
  * @name validateQuestionProperties
  * @desc verify if the question has the required properties. If not, the function will throw an error.
- * @param question {object}
+ * @param {object} question
  */
 function validateQuestionProperties(question) {
     if (!question.hasOwnProperty('section_id') || !question.hasOwnProperty('questionSection_id') || !question.hasOwnProperty('type_id') ||
@@ -300,7 +238,7 @@ function validateQuestionProperties(question) {
 /**
  * @name validateSectionProperties
  * @desc verify if the section has the required properties. If not, the function will throw an error.
- * @param section {object}
+ * @param {object} section
  */
 function validateSectionProperties(section) {
     if (!section.hasOwnProperty('section_id') || !section.hasOwnProperty('section_position') ||
@@ -312,12 +250,12 @@ function validateSectionProperties(section) {
 /**
  * formatQuestionnaire
  * @desc this function is a helper function for formatting one questionnaire data gotten from the questionnaireDB to the JSON accepted on the front end. Also decode html.
- * @param questionnaireDataArray {array}
- * @param sectionDataArray {array}
- * @param questionDataArray {array}
- * @param questionOptionsAndTypeMap {object}
- * @param answerObject {array}
- * @return returnedData {object} the fully formated object to send to front end
+ * @param {array} questionnaireDataArray
+ * @param {array} sectionDataArray
+ * @param {array} questionDataArray
+ * @param {object} questionOptionsAndTypeMap
+ * @param {array} answerObject
+ * @return {object} returnedData the fully formatted object to send to front end
  */
 function formatQuestionnaire(questionnaireDataArray, sectionDataArray, questionDataArray, answerObject, questionOptionsAndTypeMap) {
     const char_limit_for_textbox = questionnaireConfig.CHAR_LIMIT_FOR_TEXTBOX;     // this is arbitrarily determined, can be changed
@@ -329,8 +267,8 @@ function formatQuestionnaire(questionnaireDataArray, sectionDataArray, questionD
     }
 
     // decode html
-    questionnaireDataArray[0].description = htmlspecialchars_decode(questionnaireDataArray[0].description);
-    questionnaireDataArray[0].instruction = htmlspecialchars_decode(questionnaireDataArray[0].instruction);
+    questionnaireDataArray[0].description = utility.htmlspecialchars_decode(questionnaireDataArray[0].description);
+    questionnaireDataArray[0].instruction = utility.htmlspecialchars_decode(questionnaireDataArray[0].instruction);
 
     let sections = {};
 
@@ -339,7 +277,7 @@ function formatQuestionnaire(questionnaireDataArray, sectionDataArray, questionD
         validateSectionProperties(section);
 
         // decode html
-        section.section_instruction = htmlspecialchars_decode(section.section_instruction);
+        section.section_instruction = utility.htmlspecialchars_decode(section.section_instruction);
 
         // this is to prevent passing by reference
         sections[section.section_id] = Object.assign({}, {questions: []}, section);
@@ -349,7 +287,7 @@ function formatQuestionnaire(questionnaireDataArray, sectionDataArray, questionD
         // required properties should be checked beforehand by the calling function
 
         // html decoding
-        question.question_text = htmlspecialchars_decode(question.question_text);
+        question.question_text = utility.htmlspecialchars_decode(question.question_text);
 
         // this should not happen. A question should be contained in a section
         if (sections[question.section_id] === undefined) {
@@ -419,8 +357,8 @@ function formatQuestionnaire(questionnaireDataArray, sectionDataArray, questionD
  * @desc this function takes the array of questions (coming from the questionnaireDB) and sort them into different types.
  *      It is a helper for getting the options for questions
  *      It also verifies the properties of the questionDataArray for the calling function
- * @param questionDataArray {array}
- * @returns questionAndTypeMap {object} This object has type_id as keys, and an array of question_id as value
+ * @param {array} questionDataArray
+ * @returns {object} questionAndTypeMap This object has type_id as keys, and an array of question_id as value
  */
 function getQuestionAndTypeMap(questionDataArray) {
     let questionAndTypeMap = {};
@@ -443,9 +381,9 @@ function getQuestionAndTypeMap(questionDataArray) {
 /**
  * getQuestionOptions
  * @desc This async function calls a procedure in the questionnaireDB to get all the question options according to the language passed.
- * @param questionAndTypeMap {object} this object should have type_id as key and question_id as value
- * @param languageId {int} this is the id in the questionnaireDB of the language required
- * @returns {promise} This promise resolves to questionOptionsAndTypeMap which is an object with type_id as keys and the options per questionId gotten from questionnaireDB as values
+ * @param {object} questionAndTypeMap this object should have type_id as key and question_id as value
+ * @param {int} languageId this is the id in the questionnaireDB of the language required
+ * @returns {Promise} This promise resolves to questionOptionsAndTypeMap which is an object with type_id as keys and the options per questionId gotten from questionnaireDB as values
  *                      questionOptionsAndTypeMap should look like questionOptionsAndTypeMap[type_id][question_id][array of objects which are the options]
  */
 function getQuestionOptions(questionAndTypeMap, languageId) {
@@ -512,10 +450,10 @@ FUNCTIONS TO SAVE QUESTIONNAIRE
 /**
  * saveAnswer
  * @desc this saves the answer of one question only
- * @param opalPatientSerNumAndLanguage {object} must contain PatientSerNum and Language as properties. This should be gotten directly from the OpalDB
- * @param param {object} the parameters passed from the front-end. The calling function must verify its properties.
- * @param appVersion {String} a string denoting the version of the app.
- * @returns {promise}
+ * @param {object} opalPatientSerNumAndLanguage must contain PatientSerNum and Language as properties. This should be gotten directly from the OpalDB
+ * @param {object} param the parameters passed from the front-end. The calling function must verify its properties.
+ * @param {String} appVersion a string denoting the version of the app.
+ * @returns {Promise}
  */
 function saveAnswer(opalPatientSerNumAndLanguage, param, appVersion) {
 
@@ -571,10 +509,10 @@ function saveAnswer(opalPatientSerNumAndLanguage, param, appVersion) {
 /**
  * insertAnswerByType
  * @desc this is a helper function which insert answers to specific table in the DB depending on the question type.
- * @param answerId {int} this is the ID of the answer inserted for that question in the answer table.
- * @param answerArray {array} this is the array of objects passed from the front-end. We check the property for them. A common property is answer_value.
- * @param question_typeId {int} this denotes the type of the question
- * @returns {promise}
+ * @param {int} answerId this is the ID of the answer inserted for that question in the answer table.
+ * @param {array} answerArray this is the array of objects passed from the front-end. We check the property for them. A common property is answer_value.
+ * @param {int} question_typeId this denotes the type of the question
+ * @returns {Promise}
  */
 function insertAnswerByType(answerId, answerArray, question_typeId) {
     let r = q.defer();
@@ -742,10 +680,10 @@ function insertAnswerByType(answerId, answerArray, question_typeId) {
 /**
  * updateQuestionnaireStatusInQuestionnaireDB
  * @desc This function is exported and is used to update the questionnaire status in the questionnaireDB
- * @param answerQuestionnaireId The unique Id of the answerQuestionnaire table
- * @param newStatus denote the status to be updated to. It should match the database convention of being either 0,1,2
- * @param appVersion {String} a string denoting the version of the app. This is used for noting the author of update
- * @returns {promise} resolve with a boolean denoting whether the questionnaire's new status is completed or not
+ * @param {number} answerQuestionnaireId The unique Id of the answerQuestionnaire table
+ * @param {String} newStatus denote the status to be updated to. It should match the database convention of being either 0,1,2
+ * @param {String} appVersion a string denoting the version of the app. This is used for noting the author of update
+ * @returns {Promise} resolve with a boolean denoting whether the questionnaire's new status is completed or not
  */
 function updateQuestionnaireStatusInQuestionnaireDB(answerQuestionnaireId, newStatus, appVersion) {
     let r = q.defer();
@@ -779,7 +717,7 @@ function updateQuestionnaireStatusInQuestionnaireDB(answerQuestionnaireId, newSt
 /**
  * @name hasValidProcedureStatus
  * @desc verify if the routine in the database has executed successfully or not
- * @param queryResult
+ * @param {array} queryResult
  * @returns {boolean} true if the routine has executed successfully, false otherwise
  */
 function hasValidProcedureStatus(queryResult) {
