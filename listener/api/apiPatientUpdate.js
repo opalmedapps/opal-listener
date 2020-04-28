@@ -132,13 +132,21 @@ exports.logPatientRequest = function(requestObject) {
     return sqlInterface.addToActivityLog(requestObject);
 };
 
-// This is for questionnaire V2 (2019 version of qplus questionnaire front-end)
+/**
+ * For questionnaire V2 (2019 version of qplus questionnaire front-end). Getting the list of questionnaires belonging to a patient
+ * @param {object} requestObject
+ * @returns {Promise}
+ */
 exports.getQuestionnaireList = function(requestObject){
 
     return questionnaires.getQuestionnaireList(requestObject);
 };
 
-// This is for questionnaire V2 (2019 version of qplus questionnaire front-end)
+/**
+ * For questionnaire V2 (2019 version of qplus questionnaire front-end). Gets one questionnaire.
+ * @param {object} requestObject
+ * @returns {Promise}
+ */
 exports.getQuestionnaire = function(requestObject){
 
     return questionnaires.getQuestionnaire(requestObject);

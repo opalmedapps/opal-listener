@@ -18,13 +18,21 @@ exports.sendMessage=function(requestObject)
   return sqlInterface.sendMessage(requestObject);
 };
 
-// This is for questionnaire V2 (inputting a single question's answer for 2019 qplus questionnaire front-end)
+/**
+ * This is for questionnaire V2 (inputting a single question's answer for 2019 qplus questionnaire front-end)
+ * @param {object} requestObject
+ * @returns {Promise}
+ */
 exports.questionnaireSaveAnswer = function(requestObject)
 {
     return questionnaires.questionnaireSaveAnswer(requestObject);
 };
 
-// This is for questionnaire V2 (2019 qplus questionnaire front-end)
+/**
+ * This is for questionnaire V2 (2019 qplus questionnaire front-end). Update the status of one questionnaire
+ * @param {object} requestObject
+ * @returns {Promise}
+ */
 exports.QuestionnaireUpdateStatus = function(requestObject)
 {
     return questionnaires.questionnaireUpdateStatus(requestObject);
