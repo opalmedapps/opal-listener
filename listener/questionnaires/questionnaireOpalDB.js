@@ -3,11 +3,14 @@ var exports = module.exports = {};
 const questionnaireQueries = require('./questionnaireQueries.js');
 const questionnaires = require('./questionnaireQuestionnaireDB.js');
 const sqlInterface = require('./../api/sqlInterface.js');
+const opalQueries = require('../sql/queries');
 
 exports.getQuestionnaireList = getQuestionnaireList;
 exports.getQuestionnaire = getQuestionnaire;
 exports.questionnaireSaveAnswer = questionnaireSaveAnswer;
 exports.questionnaireUpdateStatus = questionnaireUpdateStatus;
+
+const lastUpdatedDateForGettingPatient = '0000-00-00';
 
 /*
 FUNCTIONS TO GET QUESTIONNAIRES (QUESTIONNAIRE V2)
@@ -21,7 +24,7 @@ FUNCTIONS TO GET QUESTIONNAIRES (QUESTIONNAIRE V2)
  */
 function getQuestionnaireList(requestObject) {
 
-    return sqlInterface.runSqlQuery(questionnaireQueries.getPatientSerNumAndLanguage(), [requestObject.UserID, null, null])
+    return sqlInterface.runSqlQuery(opalQueries.patientTableFields(), [requestObject.UserID, lastUpdatedDateForGettingPatient])
         .then(function (patientSerNumAndLanguageRow) {
 
             if (validatePatientSerNumAndLanguage(patientSerNumAndLanguageRow)) {
@@ -56,7 +59,7 @@ function getQuestionnaire(requestObject) {
 
         } else {
             // get language in the database
-            sqlInterface.runSqlQuery(questionnaireQueries.getPatientSerNumAndLanguage(), [requestObject.UserID, null, null])
+            sqlInterface.runSqlQuery(opalQueries.patientTableFields(), [requestObject.UserID, lastUpdatedDateForGettingPatient])
                 .then(function (patientSerNumAndLanguageRow) {
 
                     if (validatePatientSerNumAndLanguage(patientSerNumAndLanguageRow)) {
@@ -96,7 +99,7 @@ function questionnaireSaveAnswer(requestObject) {
 
         } else {
             // get language in the opal database
-            sqlInterface.runSqlQuery(questionnaireQueries.getPatientSerNumAndLanguage(), [requestObject.UserID, null, null])
+            sqlInterface.runSqlQuery(opalQueries.patientTableFields(), [requestObject.UserID, lastUpdatedDateForGettingPatient])
                 .then(function (patientSerNumAndLanguageRow) {
 
                     if (validatePatientSerNumAndLanguage(patientSerNumAndLanguageRow)) {
@@ -136,7 +139,7 @@ function questionnaireUpdateStatus(requestObject) {
 
             // 1. update the status in the answerQuestionnaire table in questionnaire DB
             // get patientSerNum in the opal database
-            sqlInterface.runSqlQuery(questionnaireQueries.getPatientSerNumAndLanguage(), [requestObject.UserID, null, null])
+            sqlInterface.runSqlQuery(opalQueries.patientTableFields(), [requestObject.UserID, lastUpdatedDateForGettingPatient])
                 .then(function (patientSerNumAndLanguageRow) {
                     // check returns
                     if (!validatePatientSerNumAndLanguage(patientSerNumAndLanguageRow)) {

@@ -158,17 +158,14 @@ function formatAnswer(questionnaireDataArray, answerDataArray) {
     }
 
     // if in progress or completed questionnaire, organize the answers
-    for (var i = 0; i < answerDataArray.length; i++) {
-
-        let answer = answerDataArray[i];
-
+    answerDataArray.forEach(function(answer){
         // check property for every answer
         validateAnsweredQuestionnaire(answer);
 
         // this can happen if the user answered the question but did not select an option
         if (answer.answer_value === null) {
             // do not include it in the answer giving to the app because it is an invalid answer.
-            continue;
+            return;     // this means a `continue` if we use normal for loop.
         }
 
         // initialize the questionSection_id as the key for answerObject
@@ -176,7 +173,7 @@ function formatAnswer(questionnaireDataArray, answerDataArray) {
             answerObject[answer.questionSection_id] = [];
         }
         answerObject[answer.questionSection_id].push(answer);
-    }
+    })
 
     return answerObject;
 }

@@ -10,14 +10,9 @@ This file stores all queries related to the questionnaire system
  * ==============================================
  */
 
-exports.getPatientSerNumAndLanguage = function () {
-    return "SELECT Patient.PatientSerNum, Patient.`Language` FROM Patient, Users WHERE Patient.PatientSerNum = Users.UserTypeSerNum && Users.Username = ?;";
-};
-
 exports.updateQuestionnaireStatus = function () {
     return "UPDATE Questionnaire SET CompletedFlag= ?, CompletionDate= CURRENT_TIMESTAMP WHERE PatientQuestionnaireDBSerNum = ?;";
 };
-
 
 /**
  * ==============================================
