@@ -1,6 +1,6 @@
 const {ValidationError} = require("../../errors/validation-error");
 const patientQueries = require("./patient.queries");
-const opalSQLQuery = require("../../../sql/opal-sql-query-runner");
+const {OpalSQLQueryRunner} = require("../../../sql/opal-sql-query-runner");
 const logger = require("../../../logs/logger");
 
 class Patient {
@@ -23,13 +23,15 @@ class Patient {
 		const query = patientQueries.getPatientByUsernameQuery(username);
 		let results;
 		try {
-			results = await opalSQLQuery.run(query);
+			results = await OpalSQLQueryRunner.run(query);
 		} catch (err) {
 			logger.log("debug", `Error fetching patient with Username ${username}`, err);
 			throw err;
 		}
-		if (results.length === 0) throw new ValidationError(`Patient with username ${username} not found`);
-		logger.log("error", results);
+		if (results.length === 0) {
+			logger.log("error", `Patient with username ${username} not found`,results);
+			throw new ValidationError(`Patient with username ${username} not found`);
+		}
 		let patientRows = results[0];
 		return new Patient(patientRows.PatientSerNum, patientRows.FirstName, patientRows.LastName, patientRows.Email);
 	}

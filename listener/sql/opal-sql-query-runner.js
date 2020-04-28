@@ -6,22 +6,25 @@ const SQLQueryRunner = require('./sql-query-runner');
  * through the whole application we use this to simulate that behaviour while decoupling the sqlInterface file slightly
  */
 class OpalSQLQueryRunner {
-    /******************************
-     * CONFIGURATIONS
-     ******************************/
-    static #OPAL_DB_CREDENTIALS = {
-        connectionLimit: 10,
-        host: config.HOST,
-        user: config.MYSQL_USERNAME,
-        password: config.MYSQL_PASSWORD,
-        database: config.MYSQL_DATABASE,
-        dateStrings: true,
-        port: config.MYSQL_DATABASE_PORT
-    };
-    static opalQueryInstance = new SQLQueryRunner(this.#OPAL_DB_CREDENTIALS);
-    constructor(){
-        throw new Error("This class cannot be istantiated, use static method: run()");
-    }
-    static run=(...args)=>OpalSQLQueryRunner.opalQueryInstance.run(...args);
+	/******************************
+	 * CONFIGURATIONS
+	 ******************************/
+	static #OPAL_DB_CREDENTIALS = {
+		connectionLimit: 10,
+		host: config.HOST,
+		user: config.MYSQL_USERNAME,
+		password: config.MYSQL_PASSWORD,
+		database: config.MYSQL_DATABASE,
+		dateStrings: true,
+		port: config.MYSQL_DATABASE_PORT
+	};
+	static opalQueryInstance = new SQLQueryRunner(this.#OPAL_DB_CREDENTIALS);
+
+	constructor() {
+		throw new Error("This class cannot be instantiated, use static method: run()");
+	}
+
+	static run = (...args) => OpalSQLQueryRunner.opalQueryInstance.run(...args);
 }
-module.exports = OpalSQLQueryRunner;
+
+module.exports = {OpalSQLQueryRunner};

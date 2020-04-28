@@ -1,3 +1,4 @@
+const moment = require("moment");
 const mysql = require("mysql");
 
 /**
@@ -8,7 +9,7 @@ class PatientTestResultQuery {
 	/**
 	 * Returns query to obtain the patients lab tests given a date
 	 * @param {string|number} patientSerNum PatientSerNum for patient
-	 * @param {string} date string representation of date in format '2018-05-21'
+	 * @param {Date} date string representation of date in format '2018-05-21'
 	 * @returns string query to obtain the patients lab tests given a date
 	 */
 	static getTestResultsByDateQuery(patientSerNum, date) {
@@ -40,7 +41,7 @@ class PatientTestResultQuery {
                         AND te.TestControlSerNum = tc.TestControlSerNum  
                         AND tc.EducationalMaterialControlSerNum = emc.EducationalMaterialControlSerNum 
                     ORDER BY groupName, sequenceNum;`,
-			[date, patientSerNum]);
+			[moment(date).format("YYYY-MM-DD HH:mm:ss"), patientSerNum]);
 	}
 
 	/**
@@ -100,9 +101,9 @@ class PatientTestResultQuery {
 	}
 	/**
 	 * Returns results for the given test type given a TestExpressionSerNum
-	 * @param patientSerNum PatientSerNum to use to build query
+	 * @param {number} patientSerNum PatientSerNum to use to build query
 	 * @param {number} testExpressionSerNum TestExpressionSerNum to get results for
-	 * @returns string all the test results for the given test type.
+	 * @returns string query for all the test results for the given test type.
 	 */
 	static getLatestTestResultByTestType(patientSerNum, testExpressionSerNum) {
 		return mysql.format(`

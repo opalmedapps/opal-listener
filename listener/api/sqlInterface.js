@@ -8,7 +8,7 @@ const questionnaires    = require('./../questionnaires/patientQuestionnaires.js'
 const Mail              = require('./../mailer/mailer.js');
 const utility           = require('./../utility/utility');
 const logger            = require('./../logs/logger');
-const OpalSQLQueryRunner = require("../sql/opal-sql-query-runner");
+const {OpalSQLQueryRunner} = require("../sql/opal-sql-query-runner");
 
 var exports = module.exports = {};
 
