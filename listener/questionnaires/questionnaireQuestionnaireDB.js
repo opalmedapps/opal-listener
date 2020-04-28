@@ -290,7 +290,8 @@ function validateQuestionProperties(question){
     if (!question.hasOwnProperty('section_id') || !question.hasOwnProperty('questionSection_id') || !question.hasOwnProperty('type_id') ||
         !question.hasOwnProperty('question_position') || !question.hasOwnProperty('orientation') || !question.hasOwnProperty('optional') ||
         !question.hasOwnProperty('allow_question_feedback') || !question.hasOwnProperty('polarity') || !question.hasOwnProperty('question_id') ||
-        !question.hasOwnProperty('question_text') || !question.question_text){
+        !question.hasOwnProperty('question_text') || !question.question_text ||
+        !question.hasOwnProperty('question_display') || !question.question_display){
 
         throw new Error("Error getting questionnaire: this questionnaire's questions do not have required properties");
     }

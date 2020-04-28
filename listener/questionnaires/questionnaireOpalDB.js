@@ -8,7 +8,7 @@ const sqlInterface = require('./../api/sqlInterface.js');
 exports.getQuestionnaireList = getQuestionnaireList;
 exports.getQuestionnaire = getQuestionnaire;
 exports.questionnaireSaveAnswer = questionnaireSaveAnswer;
-exports.questionnaireUpdateStatus = questionnaireUpdateStatus
+exports.questionnaireUpdateStatus = questionnaireUpdateStatus;
 
 /*
 FUNCTIONS TO GET QUESTIONNAIRES (QUESTIONNAIRE V2)

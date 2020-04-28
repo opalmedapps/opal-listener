@@ -127,6 +127,7 @@ BEGIN
 			qSec.optional as optional,
 			q.ID as question_id,
 			getDisplayName(q.question,language_id) as question_text,
+			getDisplayName(q.display, language_id) as question_display,
 			q.typeId as type_id,	
 			q.polarity as polarity,
 			q.optionalFeedback as allow_question_feedback
