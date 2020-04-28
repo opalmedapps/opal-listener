@@ -20,7 +20,7 @@ FUNCTIONS TO GET QUESTIONNAIRES (QUESTIONNAIRE V2)
  * @param {object} requestObject
  * @return {Promise} Returns a promise that contains a list of questionnaire data
  */
-function getQuestionnaireList(requestObject){
+function getQuestionnaireList(requestObject) {
     var r = Q.defer();
 
     // get language in the OpalDB
@@ -60,7 +60,7 @@ function getQuestionnaire(requestObject) {
     if (!validateParam_qp_ser_num(requestObject)) {
         r.reject(new Error('Error getting questionnaire: the requestObject does not have the required parameter qp_ser_num'));
 
-    }else{
+    } else {
         // get language in the database
         sqlInterface.runSqlQuery(questionnaireQueries.getPatientSerNumAndLanguage(), [requestObject.UserID, null, null])
             .then(function (patientSerNumAndLanguageRow) {
@@ -95,7 +95,7 @@ FUNCTIONS TO SAVE ANSWERS (QUESTIONNAIRE V2)
  * @param requestObject{object}
  * @returns {Promise}
  */
-function questionnaireSaveAnswer(requestObject){
+function questionnaireSaveAnswer(requestObject) {
     let r = Q.defer();
 
     // check argument
@@ -103,7 +103,7 @@ function questionnaireSaveAnswer(requestObject){
 
         r.reject(new Error('Error saving answer: the requestObject does not have the required parameters'));
 
-    }else{
+    } else {
         // get language in the opal database
         sqlInterface.runSqlQuery(questionnaireQueries.getPatientSerNumAndLanguage(), [requestObject.UserID, null, null])
             .then(function (patientSerNumAndLanguageRow) {
@@ -116,9 +116,9 @@ function questionnaireSaveAnswer(requestObject){
                 }
 
             })
-            .then(function(){
+            .then(function () {
                 // no need to update opalDB questionnaire status since it is not completed.
-                r.resolve({Response:'success'});
+                r.resolve({Response: 'success'});
 
             })
             .catch(function (error) {
@@ -135,14 +135,14 @@ function questionnaireSaveAnswer(requestObject){
  * @param requestObject
  * @returns {Promise}
  */
-function questionnaireUpdateStatus(requestObject){
+function questionnaireUpdateStatus(requestObject) {
     let r = Q.defer();
 
     // check arguments
     if (!validateParamUpdateStatus(requestObject)) {
         r.reject(new Error('Error updating status: the requestObject does not have the required parameters'));
 
-    }else{
+    } else {
         var patientSerNumOpalDB;
 
         // 1. update the status in the answerQuestionnaire table in questionnaire DB
@@ -150,27 +150,27 @@ function questionnaireUpdateStatus(requestObject){
         sqlInterface.runSqlQuery(questionnaireQueries.getPatientSerNumAndLanguage(), [requestObject.UserID, null, null])
             .then(function (patientSerNumAndLanguageRow) {
                 // check returns
-                if (!validatePatientSerNumAndLanguage(patientSerNumAndLanguageRow)){
+                if (!validatePatientSerNumAndLanguage(patientSerNumAndLanguageRow)) {
                     r.reject(new Error('Error updating status: No matching PatientSerNum found in opalDB'));
-                }else{
+                } else {
                     patientSerNumOpalDB = patientSerNumAndLanguageRow[0].PatientSerNum;
                     return questionnaires.updateQuestionnaireStatusInQuestionnaireDB(requestObject.Parameters.answerQuestionnaire_id, requestObject.Parameters.new_status, requestObject.AppVersion);
                 }
 
-            }).then(function(isCompleted){
+            }).then(function (isCompleted) {
 
             // 2. update the status in the questionnaire table of the opal DB if completed
-            if (isCompleted === 1){
+            if (isCompleted === 1) {
                 return sqlInterface.runSqlQuery(questionnaireQueries.updateQuestionnaireStatus(), [isCompleted, requestObject.Parameters.answerQuestionnaire_id]);
                 // TODO: do we rollback if this fails + insert log into DB
-            }else{
-                r.resolve({Response:'success'});
+            } else {
+                r.resolve({Response: 'success'});
             }
 
-        }).then(function(){
-            r.resolve({Response:'success'});
-        }).catch(function(err){
-                r.reject(err);
+        }).then(function () {
+            r.resolve({Response: 'success'});
+        }).catch(function (err) {
+            r.reject(err);
         });
     }
 
@@ -187,7 +187,7 @@ FUNCTIONS FOR VALIDATION (QUESTIONNAIRE V2)
  * @param requestObject {object} object sent from the front-end
  * @returns {boolean} true if the qp_ser_num parameter exists and is in correct format, false otherwise
  */
-function validateParam_qp_ser_num(requestObject){
+function validateParam_qp_ser_num(requestObject) {
     return (requestObject.hasOwnProperty('Parameters') && requestObject.Parameters.hasOwnProperty('qp_ser_num')
         && requestObject.Parameters.qp_ser_num !== null && !isNaN(requestObject.Parameters.qp_ser_num));
 }
@@ -198,7 +198,7 @@ function validateParam_qp_ser_num(requestObject){
  * @param queryResponse {array} The response directly from the OpalDB
  * @returns {boolean} true if the response is valid, false otherwise
  */
-function validatePatientSerNumAndLanguage(queryResponse){
+function validatePatientSerNumAndLanguage(queryResponse) {
     return (queryResponse.length === 1
         && queryResponse[0].hasOwnProperty('PatientSerNum')
         && queryResponse[0].hasOwnProperty('Language')
@@ -214,7 +214,7 @@ function validatePatientSerNumAndLanguage(queryResponse){
  * @param requestObject {object}
  * @returns {boolean} true if the requestObject contain the requested properties with the correct format, false otherwise
  */
-function validateParamSaveAnswer(requestObject){
+function validateParamSaveAnswer(requestObject) {
     return (requestObject.hasOwnProperty('Parameters') && requestObject.Parameters.hasOwnProperty('answerQuestionnaire_id') &&
         requestObject.Parameters.hasOwnProperty('is_skipped') && requestObject.Parameters.hasOwnProperty('questionSection_id') &&
         requestObject.Parameters.hasOwnProperty('question_id') && requestObject.Parameters.hasOwnProperty('section_id') &&
@@ -230,7 +230,7 @@ function validateParamSaveAnswer(requestObject){
  * @param requestObject {object}
  * @returns {boolean} true if the requestObject contain the requested properties with the correct format, false otherwise
  */
-function validateParamUpdateStatus(requestObject){
+function validateParamUpdateStatus(requestObject) {
     return (
         requestObject.hasOwnProperty('Parameters') && requestObject.Parameters.hasOwnProperty('answerQuestionnaire_id') &&
         requestObject.Parameters.hasOwnProperty('new_status') && !isNaN(parseInt(requestObject.Parameters.new_status)) &&

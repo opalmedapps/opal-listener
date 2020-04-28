@@ -10,8 +10,7 @@ This file stores all queries related to the questionnaire system
  * ==============================================
  */
 
-exports.getPatientSerNumAndLanguage = function()
-{
+exports.getPatientSerNumAndLanguage = function () {
     return "SELECT Patient.PatientSerNum, Patient.`Language` FROM Patient, Users WHERE Patient.PatientSerNum = Users.UserTypeSerNum && Users.Username = ?;";
 };
 
@@ -27,7 +26,7 @@ exports.updateQuestionnaireStatus = function () {
  * ==============================================
  */
 
-exports.getQuestionnaireListQuery = function(){
+exports.getQuestionnaireListQuery = function () {
     return "call getQuestionnaireList(?,?);";
 }
 
