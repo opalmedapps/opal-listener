@@ -1,4 +1,3 @@
-const moment = require("moment");
 const {PatientTestResultQuery} = require("../queries/patient-test-result.query");
 const logger = require("../../../../logs/logger");
 const {OpalSQLQueryRunner} = require("../../../../sql/opal-sql-query-runner");
@@ -83,7 +82,7 @@ class PatientTestResult {
 
 	/**
 	 * Method gets the latest result for the given test type
-	 * @param testTypeSerNum ExpressionSerNum for the test type.
+	 * @param {number} testTypeSerNum ExpressionSerNum for the test type.
 	 * @returns {Promise<Object>} Returns an test result object containing the latest values for given test types.
 	 */
 	async getLatestTestResultByTestType(testTypeSerNum) {
