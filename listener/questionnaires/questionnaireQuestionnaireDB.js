@@ -5,7 +5,7 @@ var credentials = require('./../config.json');
 var utility = require('../utility/utility');
 const logger = require('./../logs/logger');
 
-const questionnaireConfig = require('./questionnaireConfig.json');
+const {QuestionnaireConfig} = require('./questionnaireConfig.js');
 const questionnaireQueries = require('./questionnaireQueries.js');
 const questionnaireValidation = require('./questionnaire.validate');
 
@@ -151,7 +151,7 @@ function formatAnswer(questionnaireDataArray, answerDataArray) {
     questionnaireValidation.validateQuestionnaireProperties(questionnaireDataArray[0]);
 
     // if new questionnaire, there will be no answers to format
-    if (questionnaireDataArray[0].status === questionnaireConfig.NEW_QUESTIONNAIRE_STATUS) {
+    if (questionnaireDataArray[0].status === QuestionnaireConfig.getQuestionnaireConfig().NEW_QUESTIONNAIRE_STATUS) {
         return answerObject;
     }
 
@@ -187,7 +187,7 @@ function formatAnswer(questionnaireDataArray, answerDataArray) {
  * @return {object} returnedData the fully formatted object to send to front end
  */
 function formatQuestionnaire(questionnaireDataArray, sectionDataArray, questionDataArray, answerObject, questionOptionsAndTypeMap) {
-    const char_limit_for_textbox = questionnaireConfig.CHAR_LIMIT_FOR_TEXTBOX;     // this is arbitrarily determined, can be changed
+    const char_limit_for_textbox = QuestionnaireConfig.getQuestionnaireConfig().CHAR_LIMIT_FOR_TEXTBOX;     // this is arbitrarily determined, can be changed
 
     // this function is used for formatting one questionnaire only. This is checked in the procedure getQuestionnaireInfo, but just in case that this function is being called by mistake.
     // verify required properties for the questionnaire data should be done in the calling function
@@ -232,7 +232,7 @@ function formatQuestionnaire(questionnaireDataArray, sectionDataArray, questionD
         let options = questionOptionsAndTypeMap[question.type_id][question.question_id];
 
         // add character limit for textbox questions
-        if (question.type_id === questionnaireConfig.TEXTBOX_TYPE_ID) {
+        if (question.type_id === QuestionnaireConfig.getQuestionnaireConfig().TEXTBOX_TYPE_ID) {
             if (options.length !== 1) {
                 throw new Error("Error getting questionnaire: text box question options error");
             }
@@ -244,7 +244,7 @@ function formatQuestionnaire(questionnaireDataArray, sectionDataArray, questionD
         let patient_answer = {};
 
         // get the answers for that question if the questionnaire is not new
-        if (questionnaireDataArray[0].status === questionnaireConfig.COMPLETED_QUESTIONNAIRE_STATUS) {
+        if (questionnaireDataArray[0].status === QuestionnaireConfig.getQuestionnaireConfig().COMPLETED_QUESTIONNAIRE_STATUS) {
             // a question might have duplicates in a single section, but a questionSection_id is unique (reason for why the key is questionSection_id and not question_id)
             // the following check is for when the migration has not migrate the answers
             if (answerObject[question.questionSection_id] === undefined) {
@@ -255,7 +255,7 @@ function formatQuestionnaire(questionnaireDataArray, sectionDataArray, questionD
 
             patient_answer.is_defined = 1;
 
-        } else if (questionnaireDataArray[0].status === questionnaireConfig.IN_PROGRESS_QUESTIONNAIRE_STATUS) {
+        } else if (questionnaireDataArray[0].status === QuestionnaireConfig.getQuestionnaireConfig().IN_PROGRESS_QUESTIONNAIRE_STATUS) {
             // a question might have duplicates in a single section, but a questionSection_id is unique (reason for why the key is questionSection_id and not question_id)
             if (answerObject[question.questionSection_id] === undefined) {
                 patient_answer.is_defined = 0;
@@ -450,7 +450,7 @@ function insertAnswerByType(answerId, answerArray, question_typeId) {
     let insert_array_string = "";
 
     switch (question_typeId) {
-        case questionnaireConfig.CHECKBOX_TYPE_ID:
+        case QuestionnaireConfig.getQuestionnaireConfig().CHECKBOX_TYPE_ID:
             let insert_value_string = "(?,?)";
             let insert_param_array = [];
 
@@ -498,7 +498,7 @@ function insertAnswerByType(answerId, answerArray, question_typeId) {
             }
             break;
 
-        case questionnaireConfig.SLIDER_TYPE_ID:
+        case QuestionnaireConfig.getQuestionnaireConfig().SLIDER_TYPE_ID:
             if (answerArray.length !== 1 || !answerArray[0].hasOwnProperty('answer_value')) {
                 r.reject(new Error('Error saving answer: answer array does not have the correct length or no property answer_value in answer array'));
             } else if (isNaN(parseFloat(answerArray[0].answer_value))) {
@@ -509,7 +509,7 @@ function insertAnswerByType(answerId, answerArray, question_typeId) {
             }
             break;
 
-        case questionnaireConfig.TEXTBOX_TYPE_ID:
+        case QuestionnaireConfig.getQuestionnaireConfig().TEXTBOX_TYPE_ID:
             if (answerArray.length !== 1 || !answerArray[0].hasOwnProperty('answer_value')) {
                 r.reject(new Error('Error saving answer: answer array does not have the correct length or no property answer_value in answer array'));
             } else {
@@ -517,7 +517,7 @@ function insertAnswerByType(answerId, answerArray, question_typeId) {
             }
             break;
 
-        case questionnaireConfig.RADIOBUTTON_TYPE_ID:
+        case QuestionnaireConfig.getQuestionnaireConfig().RADIOBUTTON_TYPE_ID:
             if (answerArray.length !== 1 || !answerArray[0].hasOwnProperty('answer_value')) {
                 r.reject(new Error('Error saving answer: answer array does not have the correct length or no property answer_value in answer array'));
             } else if (isNaN(parseInt(answerArray[0].answer_value))) {
@@ -528,7 +528,7 @@ function insertAnswerByType(answerId, answerArray, question_typeId) {
             }
             break;
 
-        case questionnaireConfig.LABEL_TYPE_ID:
+        case QuestionnaireConfig.getQuestionnaireConfig().LABEL_TYPE_ID:
 
             for (var i = 0; i < answerArray.length; i++) {
                 if (!answerArray[i].hasOwnProperty('answer_value') || !answerArray[i].hasOwnProperty('selected') || !answerArray[i].hasOwnProperty('posX') ||
@@ -575,14 +575,14 @@ function insertAnswerByType(answerId, answerArray, question_typeId) {
             }
             break;
 
-        case questionnaireConfig.TIME_TYPE_ID:
+        case QuestionnaireConfig.getQuestionnaireConfig().TIME_TYPE_ID:
             if (answerArray.length !== 1 || !answerArray[0].hasOwnProperty('answer_value')) {
                 r.reject(new Error('Error saving answer: answer array does not have the correct length or no property answer_value in answer array'));
             } else {
                 promiseArray.push(runQuery(questionnaireQueries.insertAnswerTime(), [answerId, answerArray[0].answer_value]));
             }
             break;
-        case questionnaireConfig.DATE_TYPE_ID:
+        case QuestionnaireConfig.getQuestionnaireConfig().DATE_TYPE_ID:
             if (answerArray.length !== 1 || !answerArray[0].hasOwnProperty('answer_value')) {
                 r.reject(new Error('Error saving answer: answer array does not have the correct length or no property answer_value in answer array'));
             } else {
@@ -619,9 +619,9 @@ function updateQuestionnaireStatusInQuestionnaireDB(answerQuestionnaireId, newSt
     let newStatusInt = parseInt(newStatus);
 
     // preprocess arguments passed
-    if (newStatusInt === questionnaireConfig.COMPLETED_QUESTIONNAIRE_STATUS) {
+    if (newStatusInt === QuestionnaireConfig.getQuestionnaireConfig().COMPLETED_QUESTIONNAIRE_STATUS) {
         isCompleted = 1;
-    } else if (newStatusInt !== questionnaireConfig.IN_PROGRESS_QUESTIONNAIRE_STATUS && newStatusInt !== questionnaireConfig.NEW_QUESTIONNAIRE_STATUS) {
+    } else if (newStatusInt !== QuestionnaireConfig.getQuestionnaireConfig().IN_PROGRESS_QUESTIONNAIRE_STATUS && newStatusInt !== QuestionnaireConfig.getQuestionnaireConfig().NEW_QUESTIONNAIRE_STATUS) {
         throw new Error("Error updating the questionnaire status: the new status is not in progress, completed, or new");
     }
 

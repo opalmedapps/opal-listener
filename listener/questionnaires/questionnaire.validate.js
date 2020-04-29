@@ -1,4 +1,5 @@
 var exports = module.exports = {};
+const {QuestionnaireConfig} = require('./questionnaireConfig.js');
 
 /**
  * ==============================================
@@ -92,7 +93,7 @@ function hasValidProcedureStatus(queryResult) {
     // the object containing property procedure_status is stored in the second last position in the returned array since the last position is used for OkPacket.
 
     return queryResult[queryResult.length - 2][0].hasOwnProperty('procedure_status') &&
-        queryResult[queryResult.length - 2][0].procedure_status === questionnaireConfig.PROCEDURE_SUCCESS_CODE;
+        queryResult[queryResult.length - 2][0].procedure_status === QuestionnaireConfig.getQuestionnaireConfig().PROCEDURE_SUCCESS_CODE;
 }
 
 /**
