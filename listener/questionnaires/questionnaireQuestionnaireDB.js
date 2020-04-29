@@ -5,11 +5,9 @@ var credentials = require('./../config.json');
 var utility = require('../utility/utility');
 const logger = require('./../logs/logger');
 
-// the following config file stores all of our constants used in the questionnaireDB. Note that we use require here. That means any change made to the JSON inside will be made to the cached version.
-// you should not, in any stage of your program, make change to properties inside.
 const questionnaireConfig = require('./questionnaireConfig.json');
-// queries related to questionnaire
 const questionnaireQueries = require('./questionnaireQueries.js');
+const questionnaireValidation = require('./questionnaire.validate');
 
 /*
 *Connecting to mysql database
@@ -73,7 +71,7 @@ function getQuestionnaireList(opalPatientSerNumAndLanguage) {
         [opalPatientSerNumAndLanguage.PatientSerNum, opalPatientSerNumAndLanguage.Language])
         .then(function (queryResult) {
 
-            if (!hasValidProcedureStatus(queryResult)) {
+            if (!questionnaireValidation.hasValidProcedureStatus(queryResult)) {
                 r.reject(new Error('Error getting questionnaire list: query error'));
             } else {
                 r.resolve(queryResult[0]);
@@ -106,7 +104,7 @@ function getQuestionnaire(opalPatientSerNumAndLanguage, answerQuestionnaire_Id) 
 
     runQuery(questionnaireQueries.getQuestionnaireQuery(), [answerQuestionnaire_Id, opalPatientSerNumAndLanguage.Language])
         .then(function (queryResult) {
-            if (!hasValidProcedureStatus(queryResult) ||
+            if (!questionnaireValidation.hasValidProcedureStatus(queryResult) ||
                 !queryResult[queryResult.length - 2][0].hasOwnProperty('language_id') ||
                 !queryResult[queryResult.length - 2][0].language_id) {
 
@@ -150,7 +148,7 @@ function formatAnswer(questionnaireDataArray, answerDataArray) {
     let answerObject = {};
 
     // check properties of questionnaireDataArray
-    validateQuestionnaireProperties(questionnaireDataArray[0]);
+    questionnaireValidation.validateQuestionnaireProperties(questionnaireDataArray[0]);
 
     // if new questionnaire, there will be no answers to format
     if (questionnaireDataArray[0].status === questionnaireConfig.NEW_QUESTIONNAIRE_STATUS) {
@@ -160,7 +158,7 @@ function formatAnswer(questionnaireDataArray, answerDataArray) {
     // if in progress or completed questionnaire, organize the answers
     answerDataArray.forEach(function(answer){
         // check property for every answer
-        validateAnsweredQuestionnaire(answer);
+        questionnaireValidation.validateAnsweredQuestionnaire(answer);
 
         // this can happen if the user answered the question but did not select an option
         if (answer.answer_value === null) {
@@ -176,72 +174,6 @@ function formatAnswer(questionnaireDataArray, answerDataArray) {
     })
 
     return answerObject;
-}
-
-/**
- * @name validateAnsweredQuestionnaire
- * @desc verify that the answer gotten from the database has the required properties. Throw an error if not.
- * @param {object} answer
- */
-function validateAnsweredQuestionnaire(answer) {
-    if (!answer.hasOwnProperty('answer_id') || !answer.hasOwnProperty('question_id') || !answer.hasOwnProperty('section_id') ||
-        !answer.hasOwnProperty('type_id') || !answer.hasOwnProperty('answered') || !answer.hasOwnProperty('skipped') ||
-        !answer.hasOwnProperty('created') || !answer.hasOwnProperty('last_updated') || !answer.hasOwnProperty('questionSection_id') ||
-        !answer.hasOwnProperty('answer_value') || !answer.hasOwnProperty('intensity') || !answer.hasOwnProperty('posX') ||
-        !answer.hasOwnProperty('posY') || !answer.hasOwnProperty('selected') || !answer.hasOwnProperty('questionnairePatientRelSerNum') ||
-        !answer.hasOwnProperty('answer_option_text')) {
-
-        throw new Error("Error getting questionnaire: this questionnaire's answers do not have the required properties");
-    }
-}
-
-/**
- * @name validateQuestionnaireProperties
- * @desc verify that the questionnaire has the required properties. If not, throw an error
- * @param {object} questionnaire
- */
-function validateQuestionnaireProperties(questionnaire) {
-
-    if (!questionnaire.hasOwnProperty('qp_ser_num') ||
-        !questionnaire.qp_ser_num ||
-        !questionnaire.hasOwnProperty('status') ||
-        !questionnaire.hasOwnProperty('questionnaire_id') ||
-        !questionnaire.hasOwnProperty('nickname') ||
-        !questionnaire.nickname ||
-        !questionnaire.hasOwnProperty('description') ||
-        !questionnaire.hasOwnProperty('logo') ||
-        !questionnaire.hasOwnProperty('instruction')) {
-
-        throw new Error("Error: this questionnaire does not have the required properties");
-    }
-}
-
-/**
- * @name validateQuestionProperties
- * @desc verify if the question has the required properties. If not, the function will throw an error.
- * @param {object} question
- */
-function validateQuestionProperties(question) {
-    if (!question.hasOwnProperty('section_id') || !question.hasOwnProperty('questionSection_id') || !question.hasOwnProperty('type_id') ||
-        !question.hasOwnProperty('question_position') || !question.hasOwnProperty('orientation') || !question.hasOwnProperty('optional') ||
-        !question.hasOwnProperty('allow_question_feedback') || !question.hasOwnProperty('polarity') || !question.hasOwnProperty('question_id') ||
-        !question.hasOwnProperty('question_text') || !question.question_text ||
-        !question.hasOwnProperty('question_display') || !question.question_display) {
-
-        throw new Error("Error getting questionnaire: this questionnaire's questions do not have required properties");
-    }
-}
-
-/**
- * @name validateSectionProperties
- * @desc verify if the section has the required properties. If not, the function will throw an error.
- * @param {object} section
- */
-function validateSectionProperties(section) {
-    if (!section.hasOwnProperty('section_id') || !section.hasOwnProperty('section_position') ||
-        !section.hasOwnProperty('section_title') || !section.hasOwnProperty('section_instruction')) {
-        throw new Error("Error getting questionnaire: this questionnaire's sections do not have required property");
-    }
 }
 
 /**
@@ -271,7 +203,7 @@ function formatQuestionnaire(questionnaireDataArray, sectionDataArray, questionD
 
     sectionDataArray.forEach(function (section) {
         // check required properties for a section
-        validateSectionProperties(section);
+        questionnaireValidation.validateSectionProperties(section);
 
         // decode html
         section.section_instruction = utility.htmlspecialchars_decode(section.section_instruction);
@@ -344,9 +276,7 @@ function formatQuestionnaire(questionnaireDataArray, sectionDataArray, questionD
     });
 
     // the use of Object.values is because the front-end uses indexes with is based off an array
-    let returnedData = Object.assign({}, {sections: Object.values(sections)}, questionnaireDataArray[0]);
-
-    return returnedData;
+    return Object.assign({}, {sections: Object.values(sections)}, questionnaireDataArray[0]);
 }
 
 /**
@@ -362,7 +292,7 @@ function getQuestionAndTypeMap(questionDataArray) {
 
     questionDataArray.forEach(function (question) {
         // check required properties for a question
-        validateQuestionProperties(question);
+        questionnaireValidation.validateQuestionProperties(question);
 
         // initialize for every type
         if (questionAndTypeMap[question.type_id] === undefined) {
@@ -398,7 +328,7 @@ function getQuestionOptions(questionAndTypeMap, languageId) {
             for (var i = 0; i < returnedPromiseArray.length; i++) {
                 let typeQueryResponse = returnedPromiseArray[i];
 
-                if (!hasValidProcedureStatus(typeQueryResponse) || !typeQueryResponse[typeQueryResponse.length - 2][0].hasOwnProperty('type_id')) {
+                if (!questionnaireValidation.hasValidProcedureStatus(typeQueryResponse) || !typeQueryResponse[typeQueryResponse.length - 2][0].hasOwnProperty('type_id')) {
                     queryErr = 1;
                     break;
                 }
@@ -476,7 +406,7 @@ function saveAnswer(opalPatientSerNumAndLanguage, param, appVersion) {
     runQuery(questionnaireQueries.saveAnswerQuery(),
         [param.answerQuestionnaire_id, param.section_id, param.question_id, param.question_type_id, param.is_skipped, appVersion, isoLang])
         .then(function (queryResult) {
-            if (!hasValidProcedureStatus(queryResult) || !queryResult[queryResult.length - 2][0].hasOwnProperty('inserted_answer_id')) {
+            if (!questionnaireValidation.hasValidProcedureStatus(queryResult) || !queryResult[queryResult.length - 2][0].hasOwnProperty('inserted_answer_id')) {
                 r.reject(new Error('Error saving answer: query unsuccessful'));
             } else {
                 answerId = queryResult[queryResult.length - 2][0].inserted_answer_id;
@@ -698,7 +628,7 @@ function updateQuestionnaireStatusInQuestionnaireDB(answerQuestionnaireId, newSt
     runQuery(questionnaireQueries.updateAnswerQuestionnaireStatus(), [answerQuestionnaireId, newStatus, appVersion])
         .then(function (queryResult) {
 
-            if (!hasValidProcedureStatus(queryResult)) {
+            if (!questionnaireValidation.hasValidProcedureStatus(queryResult)) {
                 r.reject(new Error('Error updating the questionnaire status: query unsuccessful'));
             } else {
                 r.resolve(isCompleted);
@@ -709,20 +639,4 @@ function updateQuestionnaireStatusInQuestionnaireDB(answerQuestionnaireId, newSt
     });
 
     return r.promise;
-}
-
-/**
- * @name hasValidProcedureStatus
- * @desc verify if the routine in the database has executed successfully or not
- * @param {array} queryResult
- * @returns {boolean} true if the routine has executed successfully, false otherwise
- */
-function hasValidProcedureStatus(queryResult) {
-    // verify that the procedure has completed.
-    // if the procedure did not complete, there will not be a property called procedure_status.
-    // If there is an error, the error code will be stored in procedure_status
-    // the object containing property procedure_status is stored in the second last position in the returned array since the last position is used for OkPacket.
-
-    return queryResult[queryResult.length - 2][0].hasOwnProperty('procedure_status') &&
-        queryResult[queryResult.length - 2][0].procedure_status === questionnaireConfig.PROCEDURE_SUCCESS_CODE;
 }

@@ -286,7 +286,5 @@ exports.htmlspecialchars_decode = function (string, quoteStyle) {
         string = string.replace(/&quot;/g, '"');
     }
 
-    string = string.replace(/&amp;/g, '&');
-
-    return string;
+    return string.replace(/&amp;/g, '&');
 }

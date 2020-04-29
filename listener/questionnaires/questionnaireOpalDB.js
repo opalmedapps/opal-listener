@@ -4,6 +4,8 @@ const questionnaireQueries = require('./questionnaireQueries.js');
 const questionnaires = require('./questionnaireQuestionnaireDB.js');
 const sqlInterface = require('./../api/sqlInterface.js');
 const opalQueries = require('../sql/queries');
+const questionnaireValidation = require('./questionnaire.validate');
+const logger = require('./../logs/logger');
 
 exports.getQuestionnaireList = getQuestionnaireList;
 exports.getQuestionnaire = getQuestionnaire;
@@ -27,10 +29,11 @@ function getQuestionnaireList(requestObject) {
     return sqlInterface.runSqlQuery(opalQueries.patientTableFields(), [requestObject.UserID, lastUpdatedDateForGettingPatient])
         .then(function (patientSerNumAndLanguageRow) {
 
-            if (validatePatientSerNumAndLanguage(patientSerNumAndLanguageRow)) {
+            if (questionnaireValidation.validatePatientSerNumAndLanguage(patientSerNumAndLanguageRow)) {
                 // get questionnaire list
                 return questionnaires.getQuestionnaireList(patientSerNumAndLanguageRow[0]);
             } else {
+                logger.log("error", "Error getting questionnaire list: No matching PatientSerNum or/and Language found in opalDB");
                 throw new Error('Error getting questionnaire list: No matching PatientSerNum or/and Language found in opalDB');
             }
         })
@@ -40,6 +43,7 @@ function getQuestionnaireList(requestObject) {
             return obj;
         })
         .catch(function (error) {
+            logger.log("error", "Error getting questionnaire list", error);
             throw new Error(error);
         });
 }
@@ -54,7 +58,7 @@ function getQuestionnaire(requestObject) {
 
     return new Promise(function (resolve, reject) {
         // check argument
-        if (!validateParam_qp_ser_num(requestObject)) {
+        if (!questionnaireValidation.validateParam_qp_ser_num(requestObject)) {
             reject(new Error('Error getting questionnaire: the requestObject does not have the required parameter qp_ser_num'));
 
         } else {
@@ -62,10 +66,11 @@ function getQuestionnaire(requestObject) {
             sqlInterface.runSqlQuery(opalQueries.patientTableFields(), [requestObject.UserID, lastUpdatedDateForGettingPatient])
                 .then(function (patientSerNumAndLanguageRow) {
 
-                    if (validatePatientSerNumAndLanguage(patientSerNumAndLanguageRow)) {
+                    if (questionnaireValidation.validatePatientSerNumAndLanguage(patientSerNumAndLanguageRow)) {
                         // get questionnaire belonging to that qp_ser_num
                         return questionnaires.getQuestionnaire(patientSerNumAndLanguageRow[0], requestObject.Parameters.qp_ser_num);
                     } else {
+                        logger.log("error", "Error getting questionnaire: No matching PatientSerNum or/and Language found in opalDB");
                         reject(new Error('Error getting questionnaire: No matching PatientSerNum or/and Language found in opalDB'));
                     }
                 })
@@ -75,6 +80,7 @@ function getQuestionnaire(requestObject) {
                     resolve(obj);
                 })
                 .catch(function (error) {
+                    logger.log("error", "Error getting questionnaire", error);
                     reject(error);
                 });
         }
@@ -93,8 +99,8 @@ FUNCTIONS TO SAVE ANSWERS (QUESTIONNAIRE V2)
 function questionnaireSaveAnswer(requestObject) {
     return new Promise(function (resolve, reject) {
         // check argument
-        if (!validateParamSaveAnswer(requestObject)) {
-
+        if (!questionnaireValidation.validateParamSaveAnswer(requestObject)) {
+            logger.log("error", "Error saving answer: the requestObject does not have the required parameters");
             reject(new Error('Error saving answer: the requestObject does not have the required parameters'));
 
         } else {
@@ -102,11 +108,12 @@ function questionnaireSaveAnswer(requestObject) {
             sqlInterface.runSqlQuery(opalQueries.patientTableFields(), [requestObject.UserID, lastUpdatedDateForGettingPatient])
                 .then(function (patientSerNumAndLanguageRow) {
 
-                    if (validatePatientSerNumAndLanguage(patientSerNumAndLanguageRow)) {
+                    if (questionnaireValidation.validatePatientSerNumAndLanguage(patientSerNumAndLanguageRow)) {
                         // save answer in questionnaire DB
                         return questionnaires.saveAnswer(patientSerNumAndLanguageRow[0], requestObject.Parameters, requestObject.AppVersion);
                     } else {
-                        reject(new Error('Error saving questionnaire: No matching PatientSerNum or/and Language found in opalDB'));
+                        logger.log("error", "Error saving answer: No matching PatientSerNum or/and Language found in opalDB");
+                        reject(new Error('Error saving answer: No matching PatientSerNum or/and Language found in opalDB'));
                     }
 
                 })
@@ -116,6 +123,7 @@ function questionnaireSaveAnswer(requestObject) {
 
                 })
                 .catch(function (error) {
+                    logger.log("error", "Error saving answer", error);
                     reject(error);
                 });
         }
@@ -131,7 +139,8 @@ function questionnaireSaveAnswer(requestObject) {
 function questionnaireUpdateStatus(requestObject) {
     return new Promise(function (resolve, reject) {
         // check arguments
-        if (!validateParamUpdateStatus(requestObject)) {
+        if (!questionnaireValidation.validateParamUpdateStatus(requestObject)) {
+            logger.log("error", "Error updating status: the requestObject does not have the required parameters");
             reject(new Error('Error updating status: the requestObject does not have the required parameters'));
 
         } else {
@@ -142,7 +151,8 @@ function questionnaireUpdateStatus(requestObject) {
             sqlInterface.runSqlQuery(opalQueries.patientTableFields(), [requestObject.UserID, lastUpdatedDateForGettingPatient])
                 .then(function (patientSerNumAndLanguageRow) {
                     // check returns
-                    if (!validatePatientSerNumAndLanguage(patientSerNumAndLanguageRow)) {
+                    if (!questionnaireValidation.validatePatientSerNumAndLanguage(patientSerNumAndLanguageRow)) {
+                        logger.log("error", "Error updating status: No matching PatientSerNum found in opalDB");
                         reject(new Error('Error updating status: No matching PatientSerNum found in opalDB'));
                     } else {
                         patientSerNumOpalDB = patientSerNumAndLanguageRow[0].PatientSerNum;
@@ -158,73 +168,12 @@ function questionnaireUpdateStatus(requestObject) {
                     } else {
                         resolve({Response: 'success'});
                     }
-
                 }).then(function () {
                     resolve({Response: 'success'});
                 }).catch(function (err) {
+                    logger.log("error", "Error updating status", err);
                     reject(err);
                 });
         }
     });
-}
-
-/*
-FUNCTIONS FOR VALIDATION (QUESTIONNAIRE V2)
- */
-
-/**
- * @name validateParam_qp_ser_num
- * @desc validating the parameter qp_ser_num sent from the front-end
- * @param {object} requestObject object sent from the front-end
- * @returns {boolean} true if the qp_ser_num parameter exists and is in correct format, false otherwise
- */
-function validateParam_qp_ser_num(requestObject) {
-    return (requestObject.hasOwnProperty('Parameters') && requestObject.Parameters.hasOwnProperty('qp_ser_num')
-        && requestObject.Parameters.qp_ser_num !== null && !isNaN(requestObject.Parameters.qp_ser_num));
-}
-
-/**
- * @name validatePatientSerNumAndLanguage
- * @desc validate the whether there is a patientSerNum and language returned from the OpalDB
- * @param {array} queryResponse The response directly from the OpalDB
- * @returns {boolean} true if the response is valid, false otherwise
- */
-function validatePatientSerNumAndLanguage(queryResponse) {
-    return (queryResponse.length === 1
-        && queryResponse[0].hasOwnProperty('PatientSerNum')
-        && queryResponse[0].hasOwnProperty('Language')
-        && queryResponse[0].PatientSerNum !== undefined
-        && queryResponse[0].PatientSerNum !== null
-        && queryResponse[0].Language !== undefined
-        && queryResponse[0].Language !== null);
-}
-
-/**
- * @name validateParamSaveAnswer
- * @desc validation function for saving answer.
- * @param {object} requestObject
- * @returns {boolean} true if the requestObject contain the requested properties with the correct format, false otherwise
- */
-function validateParamSaveAnswer(requestObject) {
-    return (requestObject.hasOwnProperty('Parameters') && requestObject.Parameters.hasOwnProperty('answerQuestionnaire_id') &&
-        requestObject.Parameters.hasOwnProperty('is_skipped') && requestObject.Parameters.hasOwnProperty('questionSection_id') &&
-        requestObject.Parameters.hasOwnProperty('question_id') && requestObject.Parameters.hasOwnProperty('section_id') &&
-        requestObject.Parameters.hasOwnProperty('question_type_id') && !isNaN(requestObject.Parameters.answerQuestionnaire_id) &&
-        !isNaN(requestObject.Parameters.questionSection_id) && !isNaN(requestObject.Parameters.question_id) &&
-        !isNaN(requestObject.Parameters.section_id) && !isNaN(requestObject.Parameters.question_type_id) &&
-        !isNaN(requestObject.Parameters.is_skipped));
-}
-
-/**
- * @name validateParamUpdateStatus
- * @desc validation function for updating status
- * @param {object} requestObject
- * @returns {boolean} true if the requestObject contain the requested properties with the correct format, false otherwise
- */
-function validateParamUpdateStatus(requestObject) {
-    return (
-        requestObject.hasOwnProperty('Parameters') && requestObject.Parameters.hasOwnProperty('answerQuestionnaire_id') &&
-        requestObject.Parameters.hasOwnProperty('new_status') && !isNaN(parseInt(requestObject.Parameters.new_status)) &&
-        !isNaN(parseInt(requestObject.Parameters.answerQuestionnaire_id))
-    );
 }
