@@ -10,7 +10,7 @@ const tests = require("./modules/test-results");
 
 /**
  * API HANDLERS FOR GENERAL REQUESTS
- * @type {{DeviceIdentifier: *, Log: *, Login: *, Logout: *, Resume: *, Refresh: *, AccountChange: *, CheckCheckin: *, Checkin: *, CheckinUpdate: *, DocumentContent: *, Feedback: *, LabResults: *, MapLocation: *, Message: *, NotificationsAll: *, Questionnaires: *, QuestionnaireRating: *, QuestionnaireAnswers: *, Read: *, PFPMembers: *, AppointmentDelays: *}}
+ * @type {{DeviceIdentifier: *, Log: *, Login: *, Logout: *, Resume: *, Refresh: *, AccountChange: *, CheckCheckin: *, Checkin: *, CheckinUpdate: *, DocumentContent: *, Feedback: *, MapLocation: *, Message: *, NotificationsAll: *, Questionnaires: *, QuestionnaireRating: *, QuestionnaireAnswers: *, Read: *, PFPMembers: *, AppointmentDelays: *}}
  */
 const LEGACYAPI = {
     'DeviceIdentifier': apiHospitalUpdate.updateDeviceIdentifier,
@@ -26,7 +26,6 @@ const LEGACYAPI = {
     'CheckinUpdate': apiPatientUpdate.checkinUpdate,
     'DocumentContent': apiPatientUpdate.getDocumentsContent,
     'Feedback': apiHospitalUpdate.inputFeedback,
-    'LabResults': apiPatientUpdate.getLabResults,
     'MapLocation': apiPatientUpdate.getMapLocation,
     'Message': apiHospitalUpdate.sendMessage,
     'NotificationsAll': apiHospitalUpdate.getAllNotifications,

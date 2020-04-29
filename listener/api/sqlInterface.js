@@ -35,7 +35,7 @@ const waitingRoomPool = mysql.createPool(waitingRoomDbCredentials);
 
 /**
  * Table mappings and process data functions for results obtained from the database. Exporting function for testing purposes.
- * @type {{Patient: {sql, processFunction: loadProfileImagePatient, numberOfLastUpdated: number}, Documents: {sql, numberOfLastUpdated: number, table: string, serNum: string}, Doctors: {sql, processFunction: loadImageDoctor, numberOfLastUpdated: number}, Diagnosis: {sql, numberOfLastUpdated: number}, Questionnaires: {sql, numberOfLastUpdated: number, processFunction: *}, Appointments: {sql, numberOfLastUpdated: number, processFunction: combineResources, table: string, serNum: string}, Notifications: {sql, numberOfLastUpdated: number, table: string, serNum: string}, Tasks: {sql, numberOfLastUpdated: number}, LabTests: {sql, numberOfLastUpdated: number}, TxTeamMessages: {sql, numberOfLastUpdated: number, table: string, serNum: string}, EducationalMaterial: {sql, processFunction: getEducationTableOfContents, numberOfLastUpdated: number, table: string, serNum: string}, Announcements: {sql, numberOfLastUpdated: number, table: string, serNum: string}}}
+ * @type {{Patient: {sql, processFunction: loadProfileImagePatient, numberOfLastUpdated: number}, Documents: {sql, numberOfLastUpdated: number, table: string, serNum: string}, Doctors: {sql, processFunction: loadImageDoctor, numberOfLastUpdated: number}, Diagnosis: {sql, numberOfLastUpdated: number}, Questionnaires: {sql, numberOfLastUpdated: number, processFunction: *}, Appointments: {sql, numberOfLastUpdated: number, processFunction: combineResources, table: string, serNum: string}, Notifications: {sql, numberOfLastUpdated: number, table: string, serNum: string}, Tasks: {sql, numberOfLastUpdated: number}, TxTeamMessages: {sql, numberOfLastUpdated: number, table: string, serNum: string}, EducationalMaterial: {sql, processFunction: getEducationTableOfContents, numberOfLastUpdated: number, table: string, serNum: string}, Announcements: {sql, numberOfLastUpdated: number, table: string, serNum: string}}}
  */
 const requestMappings =
     {
@@ -82,10 +82,6 @@ const requestMappings =
             sql: queries.patientTasksTableFields(),
             numberOfLastUpdated: 2
         },
-        'LabTests': {
-            sql: queries.patientTestResultsTableFields(),
-            numberOfLastUpdated: 1
-        },
         'TxTeamMessages': {
             sql: queries.patientTeamMessagesTableFields(),
             numberOfLastUpdated: 2,
@@ -116,7 +112,7 @@ const requestMappings =
 
 /**
  * getSqlApiMapping
- * @return {{Patient: {sql, processFunction: loadProfileImagePatient, numberOfLastUpdated: number}, Documents: {sql, numberOfLastUpdated: number, table: string, serNum: string}, Doctors: {sql, processFunction: loadImageDoctor, numberOfLastUpdated: number}, Diagnosis: {sql, numberOfLastUpdated: number}, Questionnaires: {sql, numberOfLastUpdated: number, processFunction: *}, Appointments: {sql, numberOfLastUpdated: number, processFunction: combineResources, table: string, serNum: string}, Notifications: {sql, numberOfLastUpdated: number, table: string, serNum: string}, Tasks: {sql, numberOfLastUpdated: number}, LabTests: {sql, numberOfLastUpdated: number}, TxTeamMessages: {sql, numberOfLastUpdated: number, table: string, serNum: string}, EducationalMaterial: {sql, processFunction: getEducationTableOfContents, numberOfLastUpdated: number, table: string, serNum: string}, Announcements: {sql, numberOfLastUpdated: number, table: string, serNum: string}}}
+ * @return {{Patient: {sql, processFunction: loadProfileImagePatient, numberOfLastUpdated: number}, Documents: {sql, numberOfLastUpdated: number, table: string, serNum: string}, Doctors: {sql, processFunction: loadImageDoctor, numberOfLastUpdated: number}, Diagnosis: {sql, numberOfLastUpdated: number}, Questionnaires: {sql, numberOfLastUpdated: number, processFunction: *}, Appointments: {sql, numberOfLastUpdated: number, processFunction: combineResources, table: string, serNum: string}, Notifications: {sql, numberOfLastUpdated: number, table: string, serNum: string}, Tasks: {sql, numberOfLastUpdated: number}, TxTeamMessages: {sql, numberOfLastUpdated: number, table: string, serNum: string}, EducationalMaterial: {sql, processFunction: getEducationTableOfContents, numberOfLastUpdated: number, table: string, serNum: string}, Announcements: {sql, numberOfLastUpdated: number, table: string, serNum: string}}}
  */
 exports.getSqlApiMappings = function() {
     return requestMappings;
@@ -1291,27 +1287,6 @@ function combineResources(rows)
     return r.promise;
 }*/
 
-exports.getLabResults = function(requestObject)
-{
-
-    var r = Q.defer();
-    //var labResults = requestObject.Parameters;
-
-    var userID = requestObject.UserID;
-    //console.log('Getting LabResults ');
-    exports.runSqlQuery(queries.patientTestResultsTableFields(),[userID, requestObject.Timestamp])
-        .then(function (queryRows) {
-            var labs={};
-            labs.labResults = queryRows;
-            r.resolve(labs);
-        })
-        .catch(function (error) {
-            r.reject({Response:'error', Reason:'Error getting lab results due to '+error});
-        });
-
-    return r.promise;
-
-};
 
 exports.getSecurityQuestion = function (requestObject){
     var r = Q.defer();
