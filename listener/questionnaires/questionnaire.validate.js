@@ -79,6 +79,9 @@ exports.validateAnsweredQuestionnaire = validateAnsweredQuestionnaire;
 exports.validateQuestionnaireProperties = validateQuestionnaireProperties;
 exports.validateQuestionProperties = validateQuestionProperties;
 exports.validateSectionProperties = validateSectionProperties;
+exports.hasValidProcedureStatusAndLang = hasValidProcedureStatusAndLang;
+exports.hasValidProcedureStatusAndType = hasValidProcedureStatusAndType;
+exports.hasValidProcedureStatusAndInsertId = hasValidProcedureStatusAndInsertId;
 
 /**
  * @name hasValidProcedureStatus
@@ -94,6 +97,44 @@ function hasValidProcedureStatus(queryResult) {
 
     return queryResult[queryResult.length - 2][0].hasOwnProperty('procedure_status') &&
         queryResult[queryResult.length - 2][0].procedure_status === QuestionnaireConfig.getQuestionnaireConfig().PROCEDURE_SUCCESS_CODE;
+}
+
+/**
+ * @name hasValidProcedureStatusAndType
+ * @desc verify if the routine in the database has executed successfully or not and whether a type id is returned
+ * @param {array} typeQueryResult
+ * @returns {boolean} true if the routine has executed successfully with type id returned, false otherwise
+ */
+function hasValidProcedureStatusAndType(typeQueryResult) {
+    return hasValidProcedureStatus(typeQueryResult) &&
+        typeQueryResult[typeQueryResponse.length - 2][0].hasOwnProperty('type_id') &&
+        typeQueryResult[typeQueryResponse.length - 2][0].type_id
+}
+
+/**
+ * @name hasValidProcedureStatusAndLang
+ * @desc verify if the routine in the database has executed successfully or not and whether a language value is returned
+ * @param {array} queryResult The result of the query
+ * @returns {boolean} true if the routine has executed successfully with language returned, false otherwise
+ */
+function hasValidProcedureStatusAndLang(queryResult){
+    // the object containing property language is stored in the second last position in the returned array since the last position is used for OkPacket.
+
+    return hasValidProcedureStatus(queryResult) &&
+        queryResult[queryResult.length - 2][0].hasOwnProperty('language_id') &&
+        queryResult[queryResult.length - 2][0].language_id;
+}
+
+/**
+ * @name hasValidProcedureStatusAndInsertId
+ * @desc verify if the routine in the database has executed successfully or not and whether an insert id called 'inserted_answer_id' is returned
+ * @param {array} queryResult The result of the query
+ * @returns {boolean} true if the routine has executed successfully with insert id returned, false otherwise
+ */
+function hasValidProcedureStatusAndInsertId (queryResult){
+    return hasValidProcedureStatus(queryResult) &&
+        queryResult[queryResult.length - 2][0].hasOwnProperty('inserted_answer_id') &&
+        queryResult[queryResult.length - 2][0].inserted_answer_id;
 }
 
 /**

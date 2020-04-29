@@ -104,9 +104,7 @@ function getQuestionnaire(opalPatientSerNumAndLanguage, answerQuestionnaire_Id) 
 
     runQuery(questionnaireQueries.getQuestionnaireQuery(), [answerQuestionnaire_Id, opalPatientSerNumAndLanguage.Language])
         .then(function (queryResult) {
-            if (!questionnaireValidation.hasValidProcedureStatus(queryResult) ||
-                !queryResult[queryResult.length - 2][0].hasOwnProperty('language_id') ||
-                !queryResult[queryResult.length - 2][0].language_id) {
+            if (!questionnaireValidation.hasValidProcedureStatusAndLang(queryResult)) {
 
                 r.reject(new Error('Error getting questionnaire: query error'));
             } else {
@@ -328,7 +326,7 @@ function getQuestionOptions(questionAndTypeMap, languageId) {
             for (var i = 0; i < returnedPromiseArray.length; i++) {
                 let typeQueryResponse = returnedPromiseArray[i];
 
-                if (!questionnaireValidation.hasValidProcedureStatus(typeQueryResponse) || !typeQueryResponse[typeQueryResponse.length - 2][0].hasOwnProperty('type_id')) {
+                if (!questionnaireValidation.hasValidProcedureStatusAndType(typeQueryResponse)) {
                     queryErr = 1;
                     break;
                 }
@@ -406,7 +404,7 @@ function saveAnswer(opalPatientSerNumAndLanguage, param, appVersion) {
     runQuery(questionnaireQueries.saveAnswerQuery(),
         [param.answerQuestionnaire_id, param.section_id, param.question_id, param.question_type_id, param.is_skipped, appVersion, isoLang])
         .then(function (queryResult) {
-            if (!questionnaireValidation.hasValidProcedureStatus(queryResult) || !queryResult[queryResult.length - 2][0].hasOwnProperty('inserted_answer_id')) {
+            if (!questionnaireValidation.hasValidProcedureStatusAndInsertId(queryResult)) {
                 r.reject(new Error('Error saving answer: query unsuccessful'));
             } else {
                 answerId = queryResult[queryResult.length - 2][0].inserted_answer_id;
