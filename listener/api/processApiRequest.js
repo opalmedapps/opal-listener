@@ -32,7 +32,7 @@ const API = {
     'EducationalPackageContents': apiPatientUpdate.getPackageContents,
     'QuestionnaireList': apiPatientUpdate.getQuestionnaireList,
     'Questionnaire': apiPatientUpdate.getQuestionnaire,
-    'QuestionnaireRating': apiHospitalUpdate.inputEducationalMaterialRating,
+    'EducationalMaterialRating': apiHospitalUpdate.inputEducationalMaterialRating,
     'QuestionnaireSaveAnswer': apiHospitalUpdate.questionnaireSaveAnswer,
     'QuestionnaireUpdateStatus': apiHospitalUpdate.QuestionnaireUpdateStatus,
     'Read': apiHospitalUpdate.updateReadStatus,
