@@ -2,12 +2,11 @@ var exports = module.exports = {};
 var mysql = require('mysql');
 var q = require('q');
 var credentials = require('./../config.json');
-var utility = require('../utility/utility');
 const logger = require('./../logs/logger');
-
-const {QuestionnaireConfig} = require('./questionnaireConfig.js');
+const questionnaireConfig = require('./questionnaireConfig.json');
 const questionnaireQueries = require('./questionnaireQueries.js');
 const questionnaireValidation = require('./questionnaire.validate');
+const format = require('./questionnaireFormatting');
 
 /*
 *Connecting to mysql database
@@ -72,12 +71,14 @@ function getQuestionnaireList(opalPatientSerNumAndLanguage) {
         .then(function (queryResult) {
 
             if (!questionnaireValidation.hasValidProcedureStatus(queryResult)) {
+                logger.log("error", "Error getting questionnaire list: query error");
                 r.reject(new Error('Error getting questionnaire list: query error'));
             } else {
                 r.resolve(queryResult[0]);
             }
         })
         .catch(function (err) {
+            logger.log("error", "Error getting questionnaire list, " + err);
             r.reject(err);
         })
 
@@ -106,6 +107,7 @@ function getQuestionnaire(opalPatientSerNumAndLanguage, answerQuestionnaire_Id) 
         .then(function (queryResult) {
             if (!questionnaireValidation.hasValidProcedureStatusAndLang(queryResult)) {
 
+                logger.log("error", "Error getting questionnaire: query error");
                 r.reject(new Error('Error getting questionnaire: query error'));
             } else {
                 lang_id = queryResult[queryResult.length - 2][0].language_id;
@@ -115,192 +117,24 @@ function getQuestionnaire(opalPatientSerNumAndLanguage, answerQuestionnaire_Id) 
                 questionDataArray = queryResult[2];
                 answerDataArray = queryResult[3];
 
-                questionAndTypeMap = getQuestionAndTypeMap(queryResult[2]);
-                answerObject = formatAnswer(questionnaireDataArray, answerDataArray);
+                questionAndTypeMap = format.getQuestionAndTypeMap(queryResult[2]);
+                answerObject = format.formatAnswer(questionnaireDataArray, answerDataArray);
 
                 return getQuestionOptions(questionAndTypeMap, lang_id);
             }
         })
         .then(function (questionOptionsAndTypeMap) {
 
-            let dataFormatted = formatQuestionnaire(questionnaireDataArray, sectionDataArray, questionDataArray, answerObject, questionOptionsAndTypeMap);
+            let dataFormatted = format.formatQuestionnaire(questionnaireDataArray, sectionDataArray, questionDataArray, answerObject, questionOptionsAndTypeMap);
 
             r.resolve(dataFormatted);
         })
         .catch(function (err) {
+            logger.log("error", "Error getting questionnaire, " + err);
             r.reject(err);
         })
 
     return r.promise;
-}
-
-/**
- * formatAnswer
- * @desc this function is a helper to organize the answers according to the questionSection_id if the questionnaire is not new.
- *       It also check the required properties of questionnaire and answers.
- * @param {array} questionnaireDataArray
- * @param {array} answerDataArray
- * @return {object} answerObject this object has questionSection_id as key, and an array of answers as value
- */
-function formatAnswer(questionnaireDataArray, answerDataArray) {
-    let answerObject = {};
-
-    // check properties of questionnaireDataArray
-    questionnaireValidation.validateQuestionnaireProperties(questionnaireDataArray[0]);
-
-    // if new questionnaire, there will be no answers to format
-    if (questionnaireDataArray[0].status === QuestionnaireConfig.getQuestionnaireConfig().NEW_QUESTIONNAIRE_STATUS) {
-        return answerObject;
-    }
-
-    // if in progress or completed questionnaire, organize the answers
-    answerDataArray.forEach(function(answer){
-        // check property for every answer
-        questionnaireValidation.validateAnsweredQuestionnaire(answer);
-
-        // this can happen if the user answered the question but did not select an option
-        if (answer.answer_value === null) {
-            // do not include it in the answer giving to the app because it is an invalid answer.
-            return;     // this means a `continue` if we use normal for loop.
-        }
-
-        // initialize the questionSection_id as the key for answerObject
-        if (answerObject[answer.questionSection_id] === undefined) {
-            answerObject[answer.questionSection_id] = [];
-        }
-        answerObject[answer.questionSection_id].push(answer);
-    })
-
-    return answerObject;
-}
-
-/**
- * formatQuestionnaire
- * @desc this function is a helper function for formatting one questionnaire data gotten from the questionnaireDB to the JSON accepted on the front end. Also decode html.
- * @param {array} questionnaireDataArray
- * @param {array} sectionDataArray
- * @param {array} questionDataArray
- * @param {object} questionOptionsAndTypeMap
- * @param {array} answerObject
- * @return {object} returnedData the fully formatted object to send to front end
- */
-function formatQuestionnaire(questionnaireDataArray, sectionDataArray, questionDataArray, answerObject, questionOptionsAndTypeMap) {
-    const char_limit_for_textbox = QuestionnaireConfig.getQuestionnaireConfig().CHAR_LIMIT_FOR_TEXTBOX;     // this is arbitrarily determined, can be changed
-
-    // this function is used for formatting one questionnaire only. This is checked in the procedure getQuestionnaireInfo, but just in case that this function is being called by mistake.
-    // verify required properties for the questionnaire data should be done in the calling function
-    if (questionnaireDataArray.length !== 1) {
-        throw new Error("Error getting questionnaire: there is more than one or no questionnaire associated with the ID provided");
-    }
-
-    // decode html
-    questionnaireDataArray[0].description = utility.htmlspecialchars_decode(questionnaireDataArray[0].description);
-    questionnaireDataArray[0].instruction = utility.htmlspecialchars_decode(questionnaireDataArray[0].instruction);
-
-    let sections = {};
-
-    sectionDataArray.forEach(function (section) {
-        // check required properties for a section
-        questionnaireValidation.validateSectionProperties(section);
-
-        // decode html
-        section.section_instruction = utility.htmlspecialchars_decode(section.section_instruction);
-
-        // this is to prevent passing by reference
-        sections[section.section_id] = Object.assign({}, {questions: []}, section);
-    });
-
-    questionDataArray.forEach(function (question) {
-        // required properties should be checked beforehand by the calling function
-
-        // html decoding
-        question.question_text = utility.htmlspecialchars_decode(question.question_text);
-
-        // this should not happen. A question should be contained in a section
-        if (sections[question.section_id] === undefined) {
-            throw new Error("Error getting questionnaire: this questionnaire's question does not belong to a section");
-        }
-
-        // get the options for that question
-        // if the options are not defined or are not inside an array for that question, raise error
-        if (questionOptionsAndTypeMap[question.type_id][question.question_id] === undefined || !Array.isArray(questionOptionsAndTypeMap[question.type_id][question.question_id])) {
-            throw new Error("Error getting questionnaire: options do not exist for question");
-        }
-
-        let options = questionOptionsAndTypeMap[question.type_id][question.question_id];
-
-        // add character limit for textbox questions
-        if (question.type_id === QuestionnaireConfig.getQuestionnaireConfig().TEXTBOX_TYPE_ID) {
-            if (options.length !== 1) {
-                throw new Error("Error getting questionnaire: text box question options error");
-            }
-
-            options[0].char_limit = char_limit_for_textbox;
-        }
-
-        // dealing with answers now
-        let patient_answer = {};
-
-        // get the answers for that question if the questionnaire is not new
-        if (questionnaireDataArray[0].status === QuestionnaireConfig.getQuestionnaireConfig().COMPLETED_QUESTIONNAIRE_STATUS) {
-            // a question might have duplicates in a single section, but a questionSection_id is unique (reason for why the key is questionSection_id and not question_id)
-            // the following check is for when the migration has not migrate the answers
-            if (answerObject[question.questionSection_id] === undefined) {
-                patient_answer.answer = [];
-            } else {
-                patient_answer.answer = answerObject[question.questionSection_id];
-            }
-
-            patient_answer.is_defined = 1;
-
-        } else if (questionnaireDataArray[0].status === QuestionnaireConfig.getQuestionnaireConfig().IN_PROGRESS_QUESTIONNAIRE_STATUS) {
-            // a question might have duplicates in a single section, but a questionSection_id is unique (reason for why the key is questionSection_id and not question_id)
-            if (answerObject[question.questionSection_id] === undefined) {
-                patient_answer.is_defined = 0;
-            } else {
-                patient_answer.answer = answerObject[question.questionSection_id];
-                patient_answer.is_defined = 1;
-            }
-
-        } else {
-            patient_answer.answer = [];
-            patient_answer.is_defined = 0;
-        }
-
-        // combine the question general information with its answer and options
-        let questionObject = Object.assign({}, {options: options, patient_answer: patient_answer}, question);
-
-        sections[question.section_id].questions.push(questionObject);
-    });
-
-    // the use of Object.values is because the front-end uses indexes with is based off an array
-    return Object.assign({}, {sections: Object.values(sections)}, questionnaireDataArray[0]);
-}
-
-/**
- * getQuestionAndTypeMap
- * @desc this function takes the array of questions (coming from the questionnaireDB) and sort them into different types.
- *      It is a helper for getting the options for questions
- *      It also verifies the properties of the questionDataArray for the calling function
- * @param {array} questionDataArray
- * @returns {object} questionAndTypeMap This object has type_id as keys, and an array of question_id as value
- */
-function getQuestionAndTypeMap(questionDataArray) {
-    let questionAndTypeMap = {};
-
-    questionDataArray.forEach(function (question) {
-        // check required properties for a question
-        questionnaireValidation.validateQuestionProperties(question);
-
-        // initialize for every type
-        if (questionAndTypeMap[question.type_id] === undefined) {
-            questionAndTypeMap[question.type_id] = [];
-        }
-
-        questionAndTypeMap[question.type_id].push(question.question_id);
-    });
-
-    return questionAndTypeMap;
 }
 
 /**
@@ -315,7 +149,6 @@ function getQuestionOptions(questionAndTypeMap, languageId) {
     let r = q.defer();
     let promiseArray = [];
     let questionOptionsAndTypeMap = {};
-    let queryErr = 0;
 
     Object.keys(questionAndTypeMap).forEach(function (typeId) {
         promiseArray.push(runQuery(questionnaireQueries.getQuestionOptionsQuery(), [typeId, [questionAndTypeMap[typeId].join()], languageId]));
@@ -324,44 +157,12 @@ function getQuestionOptions(questionAndTypeMap, languageId) {
     q.all(promiseArray)
         .then(function (returnedPromiseArray) {
             for (var i = 0; i < returnedPromiseArray.length; i++) {
-                let typeQueryResponse = returnedPromiseArray[i];
-
-                if (!questionnaireValidation.hasValidProcedureStatusAndType(typeQueryResponse)) {
-                    queryErr = 1;
-                    break;
-                }
-
-                // initialize the array.
-                // questionOptionsAndTypeMap should look like questionOptionsAndTypeMap[type_id][question_id][array of objects which are the options]
-                questionOptionsAndTypeMap[typeQueryResponse[typeQueryResponse.length - 2][0].type_id] = [];
-
-                // check properties for each question options and group them by questionId
-                for (var j = 0; j < typeQueryResponse[0].length; j++) {
-                    let typeQueryResponseRow = typeQueryResponse[0][j];
-
-                    // verify properties
-                    if (!typeQueryResponseRow.hasOwnProperty('questionId') || !typeQueryResponseRow.questionId) {
-                        queryErr = 1;
-                        i = returnedPromiseArray.length;    // this is used to break from the outer loop
-                        break;
-                    }
-
-                    // if required properties exist then sort them by question_id
-                    if (questionOptionsAndTypeMap[typeQueryResponse[typeQueryResponse.length - 2][0].type_id][typeQueryResponseRow.questionId] === undefined) {
-                        questionOptionsAndTypeMap[typeQueryResponse[typeQueryResponse.length - 2][0].type_id][typeQueryResponseRow.questionId] = [];
-                    }
-
-                    questionOptionsAndTypeMap[typeQueryResponse[typeQueryResponse.length - 2][0].type_id][typeQueryResponseRow.questionId].push(typeQueryResponseRow);
-                }
+                format.formatQuestionOptions(returnedPromiseArray[i], questionOptionsAndTypeMap);
             }
-
-            if (queryErr === 1) {
-                r.reject(new Error('Error getting questionnaire: query for question options error'));
-            } else {
-                r.resolve(questionOptionsAndTypeMap);
-            }
+            r.resolve(questionOptionsAndTypeMap);
         })
         .catch(function (err) {
+            logger.log("error", "Error getting question options, " + err);
             r.reject(err);
         });
 
@@ -405,6 +206,8 @@ function saveAnswer(opalPatientSerNumAndLanguage, param, appVersion) {
         [param.answerQuestionnaire_id, param.section_id, param.question_id, param.question_type_id, param.is_skipped, appVersion, isoLang])
         .then(function (queryResult) {
             if (!questionnaireValidation.hasValidProcedureStatusAndInsertId(queryResult)) {
+
+                logger.log("error", "Error saving answer: query unsuccessful");
                 r.reject(new Error('Error saving answer: query unsuccessful'));
             } else {
                 answerId = queryResult[queryResult.length - 2][0].inserted_answer_id;
@@ -425,6 +228,7 @@ function saveAnswer(opalPatientSerNumAndLanguage, param, appVersion) {
             r.resolve('AnswerId: ' + answerId + '. Insert answer by type: ' + insertAnswerResult);
         })
         .catch(function (err) {
+            logger.log("error", "Error saving questionnaire answers, " + err);
             r.reject(err);
         });
 
@@ -448,8 +252,8 @@ function insertAnswerByType(answerId, answerArray, question_typeId) {
     let insert_array_string = "";
 
     switch (question_typeId) {
-        case QuestionnaireConfig.getQuestionnaireConfig().CHECKBOX_TYPE_ID:
-            let insert_value_string = "(?,?)";
+        case questionnaireConfig.CHECKBOX_TYPE_ID:
+            let insert_value_string_checkbox = "(?,?)";
             let insert_param_array = [];
 
             // this is for inserting multiple values into the DB using one insert query, to avoid unnecessary network time
@@ -469,19 +273,16 @@ function insertAnswerByType(answerId, answerArray, question_typeId) {
             [answerId, answerArray[0].answer_value, answerId, answerArray[1].answer_value, answerId, answerArray[2].answer_value]
              */
             for (var i = 0; i < answerArray.length; i++) {
-                if (!answerArray[i].hasOwnProperty('answer_value')) {
+                if (!questionnaireValidation.validateCheckboxAnswer(answerArray[i])) {
                     isErr = 1;
-                } else if (isNaN(parseInt(answerArray[i].answer_value))) {
-                    // check the validity of the answer: If the first character cannot be converted to a number, parseInt() returns NaN
-                    // it should not happen since the answer value should be the ID of the option
-                    // TODO: error handling -> insert log into DB
+                    break;
                 } else {
                     // if this is not the last value inserted, then add a comma
                     if (i !== answerArray.length - 1) {
-                        insert_array_string = insert_array_string + insert_value_string + ", ";
+                        insert_array_string = insert_array_string + insert_value_string_checkbox + ", ";
                     } else {
                         // if this is the last value, add a semi-colon
-                        insert_array_string = insert_array_string + insert_value_string + ";";
+                        insert_array_string = insert_array_string + insert_value_string_checkbox + ";";
                     }
                     insert_param_array.push(answerId);
                     insert_param_array.push(answerArray[i].answer_value);
@@ -489,6 +290,7 @@ function insertAnswerByType(answerId, answerArray, question_typeId) {
             }
 
             if (isErr !== 0) {
+                logger.log("error", "Error saving answer: no required properties in answer array");
                 r.reject(new Error('Error saving answer: no required properties in answer array'));
             } else {
                 let query = questionnaireQueries.insertAnswerCheckbox() + insert_array_string;
@@ -496,98 +298,80 @@ function insertAnswerByType(answerId, answerArray, question_typeId) {
             }
             break;
 
-        case QuestionnaireConfig.getQuestionnaireConfig().SLIDER_TYPE_ID:
-            if (answerArray.length !== 1 || !answerArray[0].hasOwnProperty('answer_value')) {
-                r.reject(new Error('Error saving answer: answer array does not have the correct length or no property answer_value in answer array'));
-            } else if (isNaN(parseFloat(answerArray[0].answer_value))) {
-                // it should not happen since the answer value should be a float
-                // TODO: error handling -> insert log into DB
+        case questionnaireConfig.SLIDER_TYPE_ID:
+            if (!questionnaireValidation.validateSliderAnswer(answerArray)) {
+                logger.log("error", "Error saving answer: answer array does not have the correct length, no property answer_value, or incorrect answer_value in answer array");
+                r.reject(new Error('Error saving answer: answer array does not have the correct length, no property answer_value, or incorrect answer_value in answer array'));
             } else {
                 promiseArray.push(runQuery(questionnaireQueries.insertAnswerSlider(), [answerId, answerArray[0].answer_value]));
             }
             break;
 
-        case QuestionnaireConfig.getQuestionnaireConfig().TEXTBOX_TYPE_ID:
-            if (answerArray.length !== 1 || !answerArray[0].hasOwnProperty('answer_value')) {
+        case questionnaireConfig.TEXTBOX_TYPE_ID:
+            if (!questionnaireValidation.validateAnswerArrayLen1(answerArray)) {
+
+                logger.log("error", "Error saving answer: answer array does not have the correct length or no property answer_value");
                 r.reject(new Error('Error saving answer: answer array does not have the correct length or no property answer_value in answer array'));
             } else {
                 promiseArray.push(runQuery(questionnaireQueries.insertAnswerTextbox(), [answerId, answerArray[0].answer_value]));
             }
             break;
 
-        case QuestionnaireConfig.getQuestionnaireConfig().RADIOBUTTON_TYPE_ID:
-            if (answerArray.length !== 1 || !answerArray[0].hasOwnProperty('answer_value')) {
-                r.reject(new Error('Error saving answer: answer array does not have the correct length or no property answer_value in answer array'));
-            } else if (isNaN(parseInt(answerArray[0].answer_value))) {
-                // it should not happen since the answer value should be a bigint = ID of radio button option
-                // TODO: error handling -> insert log into DB
+        case questionnaireConfig.RADIOBUTTON_TYPE_ID:
+            if (!questionnaireValidation.validateRadioButtonAnswer(answerArray)) {
+                logger.log("error", "Error saving answer: answer array does not have the correct length, no property answer_value, or incorrect answer_value in answer array");
+                r.reject(new Error('Error saving answer: answer array does not have the correct length, no property answer_value, or incorrect answer_value in answer array'));
             } else {
                 promiseArray.push(runQuery(questionnaireQueries.insertAnswerRadioButton(), [answerId, answerArray[0].answer_value]));
             }
             break;
 
-        case QuestionnaireConfig.getQuestionnaireConfig().LABEL_TYPE_ID:
+        case questionnaireConfig.LABEL_TYPE_ID:
+
+            let insert_value_string_label = "(?, ?, ?, ?, ?, ?)";
 
             for (var i = 0; i < answerArray.length; i++) {
-                if (!answerArray[i].hasOwnProperty('answer_value') || !answerArray[i].hasOwnProperty('selected') || !answerArray[i].hasOwnProperty('posX') ||
-                    !answerArray[i].hasOwnProperty('posY') || !answerArray[i].hasOwnProperty('intensity')) {
+                if (!questionnaireValidation.validateLabelAnswer(answerArray[i])) {
                     // this is a flag for outside the for loop due to r.reject does not stop the execution of the code
                     isErr = 1;
                     break;
-
-                } else if (isNaN(parseInt(answerArray[i].answer_value)) || isNaN(parseInt(answerArray[i].posY)) ||
-                    isNaN(parseInt(answerArray[i].posX)) || isNaN(parseInt(answerArray[i].intensity)) ||
-                    isNaN(parseInt(answerArray[i].selected))) {
-                    // should not happen
-                    // TODO: error handling -> insert log into DB
-                } else {
-                    // this is the string for inserted value. It should look like this at the end of the loop:
-                    /*
-                    INSERT INTO answerLabel(answerId, selected, posX, posY, intensity, value)
-                    VALUES
-                    (answerId, selected, posX, posY, intensity, answer_value),
-                    (answerId, selected, posX, posY, intensity, answer_value),
-                    (answerId, selected, posX, posY, intensity, answer_value)
-
-                     */
-                    // this is to avoid unnecessary network transaction when calling the DB
-                    let value_string = "(" + answerId + ", " + answerArray[i].selected + ", " + answerArray[i].posX + ", " +
-                        answerArray[i].posY + ", " + answerArray[i].intensity + ", " + answerArray[i].answer_value + ")";
-
-                    // add comma if this is not the last inserted value
-                    if (i !== answerArray.length - 1) {
-                        value_string = value_string + ",";
-                    } else {
-                        // if this is the last one, add a semi-colon
-                        value_string = value_string + ";";
-                    }
-                    insert_array_string = insert_array_string + value_string;
                 }
             }
 
             if (isErr === 0) {
-                let query = questionnaireQueries.insertAnswerLabel() + insert_array_string;
-                promiseArray.push(runQuery(query, []));
+                // Construct query string, result should be (?, ?, ?, ?, ?, ?),(?, ?, ?, ?, ?, ?)
+                let insert_array_string = answerArray.reduce((acc) => [...acc, insert_value_string_label], []).join(',');
+
+                // Create query parameters
+                let query_parameters = answerArray.reduce(
+                    (acc, answer) => [...acc, answerId, answer.selected, answer.posX, answer.posY, answer.intensity, answer.answer_value] ,[]);
+
+                let query = questionnaireQueries.insertAnswerLabel() + insert_array_string + ';';
+                promiseArray.push(runQuery(query, query_parameters));
             } else {
+                logger.log("error", "Error saving answer: no required properties in answer array");
                 r.reject(new Error('Error saving answer: no required properties in answer array'));
             }
             break;
 
-        case QuestionnaireConfig.getQuestionnaireConfig().TIME_TYPE_ID:
-            if (answerArray.length !== 1 || !answerArray[0].hasOwnProperty('answer_value')) {
+        case questionnaireConfig.TIME_TYPE_ID:
+            if (!questionnaireValidation.validateAnswerArrayLen1(answerArray)) {
+                logger.log("error", "Error saving answer: answer array does not have the correct length or no property answer_value in answer array");
                 r.reject(new Error('Error saving answer: answer array does not have the correct length or no property answer_value in answer array'));
             } else {
                 promiseArray.push(runQuery(questionnaireQueries.insertAnswerTime(), [answerId, answerArray[0].answer_value]));
             }
             break;
-        case QuestionnaireConfig.getQuestionnaireConfig().DATE_TYPE_ID:
-            if (answerArray.length !== 1 || !answerArray[0].hasOwnProperty('answer_value')) {
+        case questionnaireConfig.DATE_TYPE_ID:
+            if (!questionnaireValidation.validateAnswerArrayLen1(answerArray)) {
+                logger.log("error", "Error saving answer: answer array does not have the correct length or no property answer_value in answer array");
                 r.reject(new Error('Error saving answer: answer array does not have the correct length or no property answer_value in answer array'));
             } else {
                 promiseArray.push(runQuery(questionnaireQueries.insertAnswerDate(), [answerId, answerArray[0].answer_value]));
             }
             break;
         default:
+            logger.log("error", "Error saving answer: do not have an answer table matching the question type. The answerId in answer table is: " + answerId);
             r.reject(new Error('Error saving answer: do not have an answer table matching the question type. The answerId in answer table is: ' + answerId));
     }
 
@@ -596,8 +380,9 @@ function insertAnswerByType(answerId, answerArray, question_typeId) {
             r.resolve(queryResult);
 
         }).catch(function (err) {
-        r.reject(err);
-    });
+            logger.log("error", "Error saving questionnaire answers, " + err);
+            r.reject(err);
+        });
 
     return r.promise;
 }
@@ -617,9 +402,9 @@ function updateQuestionnaireStatusInQuestionnaireDB(answerQuestionnaireId, newSt
     let newStatusInt = parseInt(newStatus);
 
     // preprocess arguments passed
-    if (newStatusInt === QuestionnaireConfig.getQuestionnaireConfig().COMPLETED_QUESTIONNAIRE_STATUS) {
+    if (newStatusInt === questionnaireConfig.COMPLETED_QUESTIONNAIRE_STATUS) {
         isCompleted = 1;
-    } else if (newStatusInt !== QuestionnaireConfig.getQuestionnaireConfig().IN_PROGRESS_QUESTIONNAIRE_STATUS && newStatusInt !== QuestionnaireConfig.getQuestionnaireConfig().NEW_QUESTIONNAIRE_STATUS) {
+    } else if (newStatusInt !== questionnaireConfig.IN_PROGRESS_QUESTIONNAIRE_STATUS && newStatusInt !== questionnaireConfig.NEW_QUESTIONNAIRE_STATUS) {
         throw new Error("Error updating the questionnaire status: the new status is not in progress, completed, or new");
     }
 
@@ -627,14 +412,16 @@ function updateQuestionnaireStatusInQuestionnaireDB(answerQuestionnaireId, newSt
         .then(function (queryResult) {
 
             if (!questionnaireValidation.hasValidProcedureStatus(queryResult)) {
+                logger.log("error", "Error updating the questionnaire status: query unsuccessful");
                 r.reject(new Error('Error updating the questionnaire status: query unsuccessful'));
             } else {
                 r.resolve(isCompleted);
             }
 
         }).catch(function (err) {
-        r.reject(err);
-    });
+            logger.log("error", "Error updating the questionnaire status: ", + err);
+            r.reject(err);
+        });
 
     return r.promise;
 }

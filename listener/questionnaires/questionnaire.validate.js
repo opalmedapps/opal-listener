@@ -1,5 +1,6 @@
 var exports = module.exports = {};
-const {QuestionnaireConfig} = require('./questionnaireConfig.js');
+const questionnaireConfig = require('./questionnaireConfig.json');
+const logger = require('./../logs/logger');
 
 /**
  * ==============================================
@@ -68,6 +69,7 @@ function validateParamUpdateStatus(requestObject) {
         !isNaN(parseInt(requestObject.Parameters.answerQuestionnaire_id))
     );
 }
+
 /**
  * ==============================================
  * Validation for questionnaireQuestionnaireDB.js
@@ -82,6 +84,12 @@ exports.validateSectionProperties = validateSectionProperties;
 exports.hasValidProcedureStatusAndLang = hasValidProcedureStatusAndLang;
 exports.hasValidProcedureStatusAndType = hasValidProcedureStatusAndType;
 exports.hasValidProcedureStatusAndInsertId = hasValidProcedureStatusAndInsertId;
+exports.hasQuestionId = hasQuestionId;
+exports.validateAnswerArrayLen1 = validateAnswerArrayLen1;
+exports.validateLabelAnswer = validateLabelAnswer;
+exports.validateSliderAnswer = validateSliderAnswer;
+exports.validateRadioButtonAnswer = validateRadioButtonAnswer;
+exports.validateCheckboxAnswer = validateCheckboxAnswer;
 
 /**
  * @name hasValidProcedureStatus
@@ -96,7 +104,7 @@ function hasValidProcedureStatus(queryResult) {
     // the object containing property procedure_status is stored in the second last position in the returned array since the last position is used for OkPacket.
 
     return queryResult[queryResult.length - 2][0].hasOwnProperty('procedure_status') &&
-        queryResult[queryResult.length - 2][0].procedure_status === QuestionnaireConfig.getQuestionnaireConfig().PROCEDURE_SUCCESS_CODE;
+        queryResult[queryResult.length - 2][0].procedure_status === questionnaireConfig.PROCEDURE_SUCCESS_CODE;
 }
 
 /**
@@ -107,8 +115,8 @@ function hasValidProcedureStatus(queryResult) {
  */
 function hasValidProcedureStatusAndType(typeQueryResult) {
     return hasValidProcedureStatus(typeQueryResult) &&
-        typeQueryResult[typeQueryResponse.length - 2][0].hasOwnProperty('type_id') &&
-        typeQueryResult[typeQueryResponse.length - 2][0].type_id
+        typeQueryResult[typeQueryResult.length - 2][0].hasOwnProperty('type_id') &&
+        typeQueryResult[typeQueryResult.length - 2][0].type_id;
 }
 
 /**
@@ -117,7 +125,7 @@ function hasValidProcedureStatusAndType(typeQueryResult) {
  * @param {array} queryResult The result of the query
  * @returns {boolean} true if the routine has executed successfully with language returned, false otherwise
  */
-function hasValidProcedureStatusAndLang(queryResult){
+function hasValidProcedureStatusAndLang(queryResult) {
     // the object containing property language is stored in the second last position in the returned array since the last position is used for OkPacket.
 
     return hasValidProcedureStatus(queryResult) &&
@@ -131,7 +139,7 @@ function hasValidProcedureStatusAndLang(queryResult){
  * @param {array} queryResult The result of the query
  * @returns {boolean} true if the routine has executed successfully with insert id returned, false otherwise
  */
-function hasValidProcedureStatusAndInsertId (queryResult){
+function hasValidProcedureStatusAndInsertId(queryResult) {
     return hasValidProcedureStatus(queryResult) &&
         queryResult[queryResult.length - 2][0].hasOwnProperty('inserted_answer_id') &&
         queryResult[queryResult.length - 2][0].inserted_answer_id;
@@ -150,6 +158,7 @@ function validateAnsweredQuestionnaire(answer) {
         !answer.hasOwnProperty('posY') || !answer.hasOwnProperty('selected') || !answer.hasOwnProperty('questionnairePatientRelSerNum') ||
         !answer.hasOwnProperty('answer_option_text')) {
 
+        logger.log("error", "Error getting questionnaire: this questionnaire's answers do not have the required properties");
         throw new Error("Error getting questionnaire: this questionnaire's answers do not have the required properties");
     }
 }
@@ -171,6 +180,8 @@ function validateQuestionnaireProperties(questionnaire) {
         !questionnaire.hasOwnProperty('logo') ||
         !questionnaire.hasOwnProperty('instruction')) {
 
+        logger.log("error", "Error: this questionnaire does not have the required properties");
+
         throw new Error("Error: this questionnaire does not have the required properties");
     }
 }
@@ -187,6 +198,8 @@ function validateQuestionProperties(question) {
         !question.hasOwnProperty('question_text') || !question.question_text ||
         !question.hasOwnProperty('question_display') || !question.question_display) {
 
+        logger.log("error", "Error getting questionnaire: this questionnaire's questions do not have required properties");
+
         throw new Error("Error getting questionnaire: this questionnaire's questions do not have required properties");
     }
 }
@@ -199,6 +212,74 @@ function validateQuestionProperties(question) {
 function validateSectionProperties(section) {
     if (!section.hasOwnProperty('section_id') || !section.hasOwnProperty('section_position') ||
         !section.hasOwnProperty('section_title') || !section.hasOwnProperty('section_instruction')) {
+
+        logger.log("error", "Error getting questionnaire: this questionnaire's sections do not have required properties");
         throw new Error("Error getting questionnaire: this questionnaire's sections do not have required property");
     }
+}
+
+/**
+ * @name hasQuestionId
+ * @desc test if the object has the property questionId
+ * @param {object} obj
+ * @returns {boolean} True if it has the property, false otherwise
+ */
+function hasQuestionId(obj) {
+    return obj.hasOwnProperty('questionId') && obj.questionId
+}
+
+/**
+ * @name validateAnswerArrayLen1
+ * @desc validate the answer array of length 1, i.e. for question types slider, textbox, date, time, and radio button
+ * @param {array} answerArray
+ * @returns {boolean} True if the answer array has appropriate length and property, false otherwise
+ */
+function validateAnswerArrayLen1(answerArray) {
+    return answerArray.length === 1 && answerArray[0].hasOwnProperty('answer_value');
+}
+
+/**
+ * validateLabelAnswer
+ * @desc validate all the properties an answer to a label type question should have and their types
+ * @param {object} answer
+ * @returns {boolean} true if the answer has all required properties and correct types, false otherwise
+ */
+function validateLabelAnswer(answer) {
+    return answer.hasOwnProperty('answer_value') && answer.hasOwnProperty('selected') &&
+        answer.hasOwnProperty('posX') && answer.hasOwnProperty('posY') &&
+        answer.hasOwnProperty('intensity') && !isNaN(parseInt(answer.answer_value)) &&
+        !isNaN(parseInt(answer.posY)) && !isNaN(parseInt(answer.posX)) &&
+        !isNaN(parseInt(answer.intensity)) && !isNaN(parseInt(answer.selected));
+}
+
+/**
+ * validateCheckboxAnswer
+ * @desc validate all the properties an answer to a checkbox type question should have and their types
+ * @param {object} answer
+ * @returns {boolean} true if the answer has all required properties and correct type, false otherwise
+ */
+function validateCheckboxAnswer(answer) {
+    // check the validity of the answer: If the first character cannot be converted to a number, parseInt() returns NaN
+    // it should not happen since the answer value should be the ID of the option
+    return answer.hasOwnProperty('answer_value') && !isNaN(parseInt(answer.answer_value));
+}
+
+/**
+ * validateSliderAnswer
+ * @desc validate all the properties an answer to a slider type question should have and their types
+ * @param {array} answerArray
+ * @returns {boolean} true if the answer has required properties and correct type, false otherwise
+ */
+function validateSliderAnswer(answerArray) {
+    return validateAnswerArrayLen1(answerArray) && !isNaN(parseFloat(answerArray[0].answer_value));
+}
+
+/**
+ * validateRadioButtonAnswer
+ * @desc validate all the properties an answer to a radio button type question should have and their types
+ * @param {array} answerArray
+ * @returns {boolean} true if the answer has required properties and correct type, false otherwise
+ */
+function validateRadioButtonAnswer(answerArray) {
+    return validateAnswerArrayLen1(answerArray) && !isNaN(parseInt(answerArray[0].answer_value));
 }
