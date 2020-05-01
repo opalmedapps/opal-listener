@@ -163,32 +163,6 @@ exports.patientTasksTableFields=function()
         "AND (Task.LastUpdated > ? OR Alias.LastUpdated > ?) " +
         "ORDER BY Task.DueDateTime ASC;";
 };
-exports.patientTestResultsTableFields=function()
-{
-
-	return 'SELECT ComponentName, FacComponentName, AbnormalFlag, MaxNorm, MinNorm, TestValue, TestValueString, UnitDescription, CAST(TestDate AS char(30)) as `TestDate`, ' +
-				'IfNull((Select EMC.URL_EN From EducationalMaterialControl EMC, TestResultExpression TRE, TestResultControl TRC ' +
-					'Where EMC.EducationalMaterialControlSerNum = TRC.EducationalMaterialControlSerNum ' +
-						'and TRE.TestResultControlSerNum = TRC.TestResultControlSerNum ' +
-						'and TRE.TestResultExpressionSerNum = TR.TestResultExpressionSerNum), "") as URL_EN, ' +
-				'IfNull((Select EMC.URL_FR From EducationalMaterialControl EMC, TestResultExpression TRE, TestResultControl TRC ' +
-					'Where EMC.EducationalMaterialControlSerNum = TRC.EducationalMaterialControlSerNum ' +
-						'and TRE.TestResultControlSerNum = TRC.TestResultControlSerNum ' +
-						'and TRE.TestResultExpressionSerNum = TR.TestResultExpressionSerNum), "") as URL_FR, ' +
-                'Ifnull((select TRC2.Group_EN from TestResultControl TRC2, TestResultExpression TRE ' +
-                    'where TRC2.TestResultControlSerNum = TRE.TestResultControlSerNum ' +
-                        'and TRE.TestResultExpressionSerNum = TR.TestResultExpressionSerNum), "Other") Group_EN, ' +
-                'Ifnull((select TRC2.Group_FR from TestResultControl TRC2, TestResultExpression TRE ' +
-                    'where TRC2.TestResultControlSerNum = TRE.TestResultControlSerNum ' +
-                        'and TRE.TestResultExpressionSerNum = TR.TestResultExpressionSerNum), "Autre") Group_FR ' +
-				'FROM TestResult TR, Users U, Patient P ' +
-				'WHERE P.AccessLevel = 3 AND U.UserTypeSerNum=P.PatientSerNum AND TR.PatientSerNum = P.PatientSerNum AND TR.TestDate >= "1970-01-01" AND U.Username LIKE ? AND TR.LastUpdated > ? AND TR.ValidEntry = "Y";';
-};
-
-/*exports.getPatientFieldsForPasswordReset=function(userID)
- {
- return 'SELECT Patient.SSN, Patient.PatientSerNum FROM Patient, Users WHERE Users.Username LIKE '+"\'"+ userID+"\'"+'AND Users.UserTypeSerNum = Patient.PatientSerNum';
- };*/
 
 exports.getPatientPasswordForVerification = function()
 {

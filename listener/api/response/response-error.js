@@ -18,4 +18,4 @@ class OpalResponseError extends OpalResponse {
 				}, EncryptionKey: this.reqObj.auth.pass, Salt: this.reqObj.auth.salt};
 	}
 }
-module.exports = OpalResponseError;
+module.exports = {OpalResponseError};
