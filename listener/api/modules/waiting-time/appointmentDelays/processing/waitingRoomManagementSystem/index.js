@@ -1,4 +1,4 @@
-const { runWaitingRoomSqlQuery } = require('../../../../sqlInterface')
+const { runWaitingRoomSqlQuery } = require('../../../../../sqlInterface')
 const { waitingRoomManagement: waitingRoomQueries } = require('../../queries')
 const groupify = require('./groupify')
 const usersAppointments = require('./usersAppointments')

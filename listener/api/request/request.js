@@ -7,7 +7,7 @@ class OpalRequest {
 		this.parameters = reqObj.Parameters;
 		this.key = key;
 		this.auth = {salt: salt,pass: pass};
-		this.meta = reqObj; //contains deviceId, token, UserEmail etc..
+		this.meta = new RequestMeta(reqObj); //contains deviceId, token, UserEmail etc..
 		delete reqObj.Request;
 		delete reqObj.Parameters;
 	}
@@ -27,3 +27,15 @@ class OpalRequest {
 }
 
 module.exports = OpalRequest;
+
+class RequestMeta {
+	constructor({DeviceId, Token, UserID, Timestamp, UserEmail, AppVersion}) {
+		this.DeviceId = DeviceId;
+		this.Token = Token;
+		this.UserID = UserID;
+		this.Timestamp = Timestamp;
+		this.UserEmail = UserEmail;
+		this.AppVersion = AppVersion;
+	}
+
+}

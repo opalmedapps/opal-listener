@@ -144,7 +144,7 @@ exports.securityQuestion=function(requestKey,requestObject) {
     let r = q.defer();
 
     let unencrypted = null;
-    utility.decrypt(requestObject.Parameters, utility.hash("none"))
+    return utility.decrypt(requestObject.Parameters, utility.hash("none"))
         .then((params) => {
             unencrypted = params;
 
@@ -156,42 +156,32 @@ exports.securityQuestion=function(requestKey,requestObject) {
             //Then this means this is a login attempt
             if (password) {
                 //first check to make sure user's password is correct in DB
-                sqlInterface.getPasswordForVerification(email)
+                return sqlInterface.getPasswordForVerification(email)
                     .then((res) => {
-
                         logger.log('debug', 'successfully got password for verification');
-
                         if (res.Password === password) {
                             logger.log('debug', 'pasword was verified');
-
-                            getSecurityQuestion(requestKey, requestObject, unencrypted)
+                            return getSecurityQuestion(requestKey, requestObject, unencrypted)
                                 .then(function (response) {
                                     logger.log('debug', 'successfully got security question with response: ' + JSON.stringify(response));
-                                    r.resolve(response)
-                                })
+                                    return response
+                                });
                         } else {
-                            r.resolve({
+                            return {
                                 Headers: {RequestKey: requestKey, RequestObject: requestObject},
                                 Code: 1,
                                 Data: {},
                                 Response: 'error',
                                 Reason: 'Received password does not match password stored in database.'
-                            });
-
+                            };
                         }
                     });
             } else {
                 //Otherwise we are dealing with a password reset
-                getSecurityQuestion(requestKey, requestObject, unencrypted)
-                    .then(function (response) {
-                        r.resolve(response)
-                    });
+                return getSecurityQuestion(requestKey, requestObject, unencrypted);
             }
 
         });
-
-    return r.promise;
-
 };
 
 function getSecurityQuestion(requestKey, requestObject, unencrypted){

@@ -1,4 +1,4 @@
-const { runSqlQuery } = require('../../sqlInterface')
+const { runSqlQuery } = require('../../../sqlInterface')
 const { opalDb: opalDbQueries } = require('./queries')
 
 module.exports = function (patientId) {
