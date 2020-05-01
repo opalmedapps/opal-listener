@@ -163,21 +163,6 @@ exports.patientTasksTableFields=function()
         "AND (Task.LastUpdated > ? OR Alias.LastUpdated > ?) " +
         "ORDER BY Task.DueDateTime ASC;";
 };
-exports.patientQuestionnaireTableFields = function()
-{
-    return "SELECT Q.CompletedFlag, CAST(DATE_FORMAT(Q.DateAdded, '%Y-%m-%d') AS char(30)) as DateAdded, Q.PatientQuestionnaireDBSerNum, " +
-    "CAST(DATE_FORMAT(Q.CompletionDate, '%Y-%m-%d') AS char(30)) as CompletionDate, " +
-		"Q.QuestionnaireSerNum, QC.QuestionnaireDBSerNum " +
-		"FROM QuestionnaireControl QC, Questionnaire Q, Patient P, Users U " +
-		"WHERE QC.QuestionnaireControlSerNum = Q.QuestionnaireControlSerNum " +
-		"AND Q.PatientSerNum = P.PatientSerNum AND U.UserTypeSerNum = P.PatientSerNum and " +
-		"U.Username = ? order by CAST(DATE_FORMAT(Q.DateAdded, '%Y-%m-%d') AS char(30)) desc";
-};
-
-/*exports.getPatientFieldsForPasswordReset=function(userID)
- {
- return 'SELECT Patient.SSN, Patient.PatientSerNum FROM Patient, Users WHERE Users.Username LIKE '+"\'"+ userID+"\'"+'AND Users.UserTypeSerNum = Patient.PatientSerNum';
- };*/
 
 exports.getPatientPasswordForVerification = function()
 {
@@ -350,10 +335,6 @@ exports.insertEducationalMaterialRatingQuery=function()
 {
     return "INSERT INTO `EducationalMaterialRating`(`EducationalMaterialRatingSerNum`, `EducationalMaterialControlSerNum`, `PatientSerNum`, `RatingValue`, `SessionId`, `LastUpdated`) VALUES (NULL,?,?,?,?,NULL)";
 };
-exports.setQuestionnaireCompletedQuery = function()
-{
-    return "UPDATE `Questionnaire` SET CompletedFlag = 1, CompletionDate = ?, SessionId = ? WHERE Questionnaire.QuestionnaireSerNum = ?;";
-};
 
 exports.getPatientAriaSerQuery = function()
 {
@@ -363,11 +344,6 @@ exports.getPatientAriaSerQuery = function()
 exports.getPatientId= function()
 {
     return "SELECT Patient.PatientId FROM Patient, Users WHERE Patient.PatientSerNum = Users.UserTypeSerNum && Users.Username = ?"
-};
-
-exports.getPatientSerNumAndLanguage = function()
-{
-    return "SELECT Patient.PatientSerNum, Patient.`Language` FROM Patient, Users WHERE Patient.PatientSerNum = Users.UserTypeSerNum && Users.Username = ?;";
 };
 
 /**
@@ -487,12 +463,4 @@ exports.getNewNotifications=function() {
         "AND Users.Username= ? " +
         "AND Notification.ReadStatus = 0 " +
         "AND (Notification.DateAdded > ? OR NotificationControl.DateAdded > ?);";
-};
-
-exports.updateQuestionnaireStatus = function () {
-    return `UPDATE \`questionnaire\` SET \`CompletedFlag\`= ?, \`CompletionDate\`= ? WHERE PatientQuestionnaireDBSerNum = ?;`;
-};
-
-exports.getPatientQuestionnaireDBSerNum = function () {
-    return `SELECT q.PatientQuestionnaireDBSerNum FROM Questionnaire q WHERE q.QuestionnaireSerNum = ? AND q.CompletedFlag <> 1;`;
 };
