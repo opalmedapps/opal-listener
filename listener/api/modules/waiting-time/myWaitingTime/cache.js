@@ -1,6 +1,6 @@
-const { runSqlQuery } = require('../../sqlInterface')
+const { runSqlQuery } = require('../../../sqlInterface')
 const { opalDb: opalDbQueries } = require('./queries')
-const logger = require('./../../../logs/logger.js')
+const logger = require('../../../../logs/logger.js')
 
 module.exports = function (patientId) {
   return new Promise((resolve, reject) => {

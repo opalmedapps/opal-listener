@@ -1,8 +1,8 @@
 const retrieveProcessor = require('./processor')
-const logger = require('../../../logs/logger');
+const logger = require('../../../../logs/logger');
 const cacheOf = require('./cache')
 const { opalDb : opalDbQueries} = require('./queries')
-const { runSqlQuery } = require('../../sqlInterface')
+const { runSqlQuery } = require('../../../sqlInterface')
 
 function createDefaultErrorLogger (cb) {
   return (err) => {

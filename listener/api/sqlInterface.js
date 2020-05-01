@@ -7,23 +7,13 @@ const request           = require('request');
 const Mail              = require('./../mailer/mailer.js');
 const utility           = require('./../utility/utility');
 const logger            = require('./../logs/logger');
-
+const {OpalSQLQueryRunner} = require("../sql/opal-sql-query-runner");
 
 var exports = module.exports = {};
 
 /******************************
  * CONFIGURATIONS
  ******************************/
-const dbCredentials = {
-	connectionLimit: 10,
-	host: config.HOST,
-	user: config.MYSQL_USERNAME,
-	password: config.MYSQL_PASSWORD,
-	database: config.MYSQL_DATABASE,
-	dateStrings: true,
-    port: config.MYSQL_DATABASE_PORT
-};
-
 const waitingRoomDbCredentials = {
 	connectionLimit: 10,
     host: config.WAITING_ROOM_MANAGEMENT_SYSTEM_MYSQL.HOST,
@@ -34,11 +24,6 @@ const waitingRoomDbCredentials = {
 	dateStrings: true
 };
 
-/**
- * SQL POOL CONFIGURATION
- * @type {Pool}
- */
-const pool = mysql.createPool(dbCredentials);
 const waitingRoomPool = mysql.createPool(waitingRoomDbCredentials);
 
 /////////////////////////////////////////////////////
@@ -49,7 +34,7 @@ const waitingRoomPool = mysql.createPool(waitingRoomDbCredentials);
 
 /**
  * Table mappings and process data functions for results obtained from the database. Exporting function for testing purposes.
- * @type {{Patient: {sql, processFunction: loadProfileImagePatient, numberOfLastUpdated: number}, Documents: {sql, numberOfLastUpdated: number, table: string, serNum: string}, Doctors: {sql, processFunction: loadImageDoctor, numberOfLastUpdated: number}, Diagnosis: {sql, numberOfLastUpdated: number}, Questionnaires: {sql, numberOfLastUpdated: number, processFunction: *}, Appointments: {sql, numberOfLastUpdated: number, processFunction: combineResources, table: string, serNum: string}, Notifications: {sql, numberOfLastUpdated: number, table: string, serNum: string}, Tasks: {sql, numberOfLastUpdated: number}, LabTests: {sql, numberOfLastUpdated: number}, TxTeamMessages: {sql, numberOfLastUpdated: number, table: string, serNum: string}, EducationalMaterial: {sql, processFunction: getEducationTableOfContents, numberOfLastUpdated: number, table: string, serNum: string}, Announcements: {sql, numberOfLastUpdated: number, table: string, serNum: string}}}
+ * @type {{Patient: {sql, processFunction: loadProfileImagePatient, numberOfLastUpdated: number}, Documents: {sql, numberOfLastUpdated: number, table: string, serNum: string}, Doctors: {sql, processFunction: loadImageDoctor, numberOfLastUpdated: number}, Diagnosis: {sql, numberOfLastUpdated: number}, Questionnaires: {sql, numberOfLastUpdated: number, processFunction: *}, Appointments: {sql, numberOfLastUpdated: number, processFunction: combineResources, table: string, serNum: string}, Notifications: {sql, numberOfLastUpdated: number, table: string, serNum: string}, Tasks: {sql, numberOfLastUpdated: number}, TxTeamMessages: {sql, numberOfLastUpdated: number, table: string, serNum: string}, EducationalMaterial: {sql, processFunction: getEducationTableOfContents, numberOfLastUpdated: number, table: string, serNum: string}, Announcements: {sql, numberOfLastUpdated: number, table: string, serNum: string}}}
  */
 const requestMappings =
     {
@@ -91,10 +76,6 @@ const requestMappings =
             sql: queries.patientTasksTableFields(),
             numberOfLastUpdated: 2
         },
-        'LabTests': {
-            sql: queries.patientTestResultsTableFields(),
-            numberOfLastUpdated: 1
-        },
         'TxTeamMessages': {
             sql: queries.patientTeamMessagesTableFields(),
             numberOfLastUpdated: 2,
@@ -125,7 +106,7 @@ const requestMappings =
 
 /**
  * getSqlApiMapping
- * @return {{Patient: {sql, processFunction: loadProfileImagePatient, numberOfLastUpdated: number}, Documents: {sql, numberOfLastUpdated: number, table: string, serNum: string}, Doctors: {sql, processFunction: loadImageDoctor, numberOfLastUpdated: number}, Diagnosis: {sql, numberOfLastUpdated: number}, Questionnaires: {sql, numberOfLastUpdated: number, processFunction: *}, Appointments: {sql, numberOfLastUpdated: number, processFunction: combineResources, table: string, serNum: string}, Notifications: {sql, numberOfLastUpdated: number, table: string, serNum: string}, Tasks: {sql, numberOfLastUpdated: number}, LabTests: {sql, numberOfLastUpdated: number}, TxTeamMessages: {sql, numberOfLastUpdated: number, table: string, serNum: string}, EducationalMaterial: {sql, processFunction: getEducationTableOfContents, numberOfLastUpdated: number, table: string, serNum: string}, Announcements: {sql, numberOfLastUpdated: number, table: string, serNum: string}}}
+ * @return {{Patient: {sql, processFunction: loadProfileImagePatient, numberOfLastUpdated: number}, Documents: {sql, numberOfLastUpdated: number, table: string, serNum: string}, Doctors: {sql, processFunction: loadImageDoctor, numberOfLastUpdated: number}, Diagnosis: {sql, numberOfLastUpdated: number}, Questionnaires: {sql, numberOfLastUpdated: number, processFunction: *}, Appointments: {sql, numberOfLastUpdated: number, processFunction: combineResources, table: string, serNum: string}, Notifications: {sql, numberOfLastUpdated: number, table: string, serNum: string}, Tasks: {sql, numberOfLastUpdated: number}, TxTeamMessages: {sql, numberOfLastUpdated: number, table: string, serNum: string}, EducationalMaterial: {sql, processFunction: getEducationTableOfContents, numberOfLastUpdated: number, table: string, serNum: string}, Announcements: {sql, numberOfLastUpdated: number, table: string, serNum: string}}}
  */
 exports.getSqlApiMappings = function() {
     return requestMappings;
@@ -133,42 +114,14 @@ exports.getSqlApiMappings = function() {
 
 
 /**
- * runSqlQuery
+ * runSqlQuery function runs query, its kept due to the many references
  * @desc runs inputted query against SQL mapping by grabbing an available connection from connection pool
  * @param query
  * @param parameters
  * @param processRawFunction
  * @return {Promise}
  */
-exports.runSqlQuery = function(query, parameters, processRawFunction) {
-    let r = Q.defer();
-
-    pool.getConnection(function(err, connection) {
-        if(err) logger.log('error', err);
-        logger.log('debug', 'grabbed connection: ' + connection);
-        logger.log('info', 'Successfully grabbed connection from pool and about to perform following query: ', {query: query});
-
-        const que = connection.query(query, parameters, function (err, rows, fields) {
-            connection.release();
-
-            logger.log('info', 'Successfully performed query', {query: que.sql, response: JSON.stringify(rows)});
-
-            if (err) r.reject(err);
-            if (typeof rows !== 'undefined') {
-                if (processRawFunction && typeof processRawFunction !== 'undefined') {
-                    processRawFunction(rows).then(function (result) {
-                        r.resolve(result);
-                    });
-                } else {
-                    r.resolve(rows);
-                }
-            } else {
-                r.resolve([]);
-            }
-        });
-    });
-    return r.promise;
-};
+exports.runSqlQuery = OpalSQLQueryRunner.run;
 
 /**
  * runWaitingRoomSqlQuery
@@ -675,7 +628,7 @@ exports.updateDeviceIdentifier = function(requestObject, parameters) {
 /**
  * @name addToActivityLog
  * @desc Adding action to activity log
- * @param requestObject
+ * @param {OpalRequest}requestObject
  */
 exports.addToActivityLog=function(requestObject)
 {
@@ -696,7 +649,7 @@ exports.addToActivityLog=function(requestObject)
             logger.log('verbose', "Success logging request of type: "+Request);
             r.resolve({Response:'success'});
         }).catch((err)=>{
-            logger.log('error', "Error logging request of type: "+Request);
+            logger.log('error', "Error logging request of type: "+Request, err);
             r.reject({Response:'error', Reason:err});
         });
 	}
@@ -1233,27 +1186,6 @@ function combineResources(rows)
     return r.promise;
 }*/
 
-exports.getLabResults = function(requestObject)
-{
-
-    var r = Q.defer();
-    //var labResults = requestObject.Parameters;
-
-    var userID = requestObject.UserID;
-    //console.log('Getting LabResults ');
-    exports.runSqlQuery(queries.patientTestResultsTableFields(),[userID, requestObject.Timestamp])
-        .then(function (queryRows) {
-            var labs={};
-            labs.labResults = queryRows;
-            r.resolve(labs);
-        })
-        .catch(function (error) {
-            r.reject({Response:'error', Reason:'Error getting lab results due to '+error});
-        });
-
-    return r.promise;
-
-};
 
 exports.getSecurityQuestion = function (requestObject){
     var r = Q.defer();
