@@ -74,10 +74,6 @@ const requestMappings =
             sql: queries.patientDiagnosisTableFields(),
             numberOfLastUpdated: 1
         },
-        'Questionnaires': {
-            sql: queries.patientQuestionnaireTableFields(),
-            numberOfLastUpdated: 2,
-        },
         'Appointments': {
             sql: queries.patientAppointmentsTableFields(),
             numberOfLastUpdated: 5,
