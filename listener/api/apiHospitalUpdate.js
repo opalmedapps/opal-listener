@@ -23,20 +23,14 @@ exports.sendMessage=function(requestObject)
  * @param {object} requestObject
  * @returns {Promise}
  */
-exports.questionnaireSaveAnswer = function(requestObject)
-{
-    return questionnaires.questionnaireSaveAnswer(requestObject);
-};
+exports.questionnaireSaveAnswer = questionnaires.questionnaireSaveAnswer;
 
 /**
  * This is for questionnaire V2 (2019 qplus questionnaire front-end). Update the status of one questionnaire
  * @param {object} requestObject
  * @returns {Promise}
  */
-exports.QuestionnaireUpdateStatus = function(requestObject)
-{
-    return questionnaires.questionnaireUpdateStatus(requestObject);
-};
+exports.questionnaireUpdateStatus = questionnaires.questionnaireUpdateStatus;
 
 //Input feedback
 exports.inputFeedback=function(requestObject)

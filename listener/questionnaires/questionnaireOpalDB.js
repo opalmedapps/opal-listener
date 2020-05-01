@@ -58,7 +58,7 @@ function getQuestionnaire(requestObject) {
 
     return new Promise(function (resolve, reject) {
         // check argument
-        if (!questionnaireValidation.validateParam_qp_ser_num(requestObject)) {
+        if (!questionnaireValidation.validatingPatientQuestionnaireSerNum(requestObject)) {
             reject(new Error('Error getting questionnaire: the requestObject does not have the required parameter qp_ser_num'));
 
         } else {

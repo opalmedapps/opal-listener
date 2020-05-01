@@ -34,7 +34,7 @@ const API = {
     'Questionnaire': apiPatientUpdate.getQuestionnaire,
     'EducationalMaterialRating': apiHospitalUpdate.inputEducationalMaterialRating,
     'QuestionnaireSaveAnswer': apiHospitalUpdate.questionnaireSaveAnswer,
-    'QuestionnaireUpdateStatus': apiHospitalUpdate.QuestionnaireUpdateStatus,
+    'QuestionnaireUpdateStatus': apiHospitalUpdate.questionnaireUpdateStatus,
     'Read': apiHospitalUpdate.updateReadStatus,
     'PFPMembers': apiPatientUpdate.getPatientsForPatientsMembers,
     'AppointmentDelays': modules.appointmentDelays.requestHandler,

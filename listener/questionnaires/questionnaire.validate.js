@@ -1,4 +1,3 @@
-var exports = module.exports = {};
 const questionnaireConfig = require('./questionnaireConfig.json');
 const logger = require('./../logs/logger');
 
@@ -8,18 +7,20 @@ const logger = require('./../logs/logger');
  * ==============================================
  */
 
-exports.validateParam_qp_ser_num = validateParam_qp_ser_num;
-exports.validatePatientSerNumAndLanguage = validatePatientSerNumAndLanguage;
-exports.validateParamSaveAnswer = validateParamSaveAnswer;
-exports.validateParamUpdateStatus = validateParamUpdateStatus;
+const questionnaireOpalDBValidation = {
+    'validatingPatientQuestionnaireSerNum': validatingPatientQuestionnaireSerNum,
+    'validatePatientSerNumAndLanguage': validatePatientSerNumAndLanguage,
+    'validateParamSaveAnswer': validateParamSaveAnswer,
+    'validateParamUpdateStatus': validateParamUpdateStatus,
+}
 
 /**
- * @name validateParam_qp_ser_num
+ * @name validatingPatientQuestionnaireSerNum
  * @desc validating the parameter qp_ser_num sent from the front-end
  * @param {object} requestObject object sent from the front-end
  * @returns {boolean} true if the qp_ser_num parameter exists and is in correct format, false otherwise
  */
-function validateParam_qp_ser_num(requestObject) {
+function validatingPatientQuestionnaireSerNum(requestObject) {
     return (requestObject.hasOwnProperty('Parameters') && requestObject.Parameters.hasOwnProperty('qp_ser_num')
         && requestObject.Parameters.qp_ser_num !== null && !isNaN(requestObject.Parameters.qp_ser_num));
 }
@@ -76,20 +77,22 @@ function validateParamUpdateStatus(requestObject) {
  * ==============================================
  */
 
-exports.hasValidProcedureStatus = hasValidProcedureStatus;
-exports.validateAnsweredQuestionnaire = validateAnsweredQuestionnaire;
-exports.validateQuestionnaireProperties = validateQuestionnaireProperties;
-exports.validateQuestionProperties = validateQuestionProperties;
-exports.validateSectionProperties = validateSectionProperties;
-exports.hasValidProcedureStatusAndLang = hasValidProcedureStatusAndLang;
-exports.hasValidProcedureStatusAndType = hasValidProcedureStatusAndType;
-exports.hasValidProcedureStatusAndInsertId = hasValidProcedureStatusAndInsertId;
-exports.hasQuestionId = hasQuestionId;
-exports.validateAnswerArrayLen1 = validateAnswerArrayLen1;
-exports.validateLabelAnswer = validateLabelAnswer;
-exports.validateSliderAnswer = validateSliderAnswer;
-exports.validateRadioButtonAnswer = validateRadioButtonAnswer;
-exports.validateCheckboxAnswer = validateCheckboxAnswer;
+const questionnaireQuestionnaireDBValidation = {
+    'hasValidProcedureStatus': hasValidProcedureStatus,
+    'validateAnsweredQuestionnaire': validateAnsweredQuestionnaire,
+    'validateQuestionnaireProperties': validateQuestionnaireProperties,
+    'validateQuestionProperties': validateQuestionProperties,
+    'validateSectionProperties': validateSectionProperties,
+    'hasValidProcedureStatusAndLang': hasValidProcedureStatusAndLang,
+    'hasValidProcedureStatusAndType': hasValidProcedureStatusAndType,
+    'hasValidProcedureStatusAndInsertId': hasValidProcedureStatusAndInsertId,
+    'hasQuestionId': hasQuestionId,
+    'validateAnswerArrayLen1': validateAnswerArrayLen1,
+    'validateLabelAnswer': validateLabelAnswer,
+    'validateSliderAnswer': validateSliderAnswer,
+    'validateRadioButtonAnswer': validateRadioButtonAnswer,
+    'validateCheckboxAnswer': validateCheckboxAnswer,
+}
 
 /**
  * @name hasValidProcedureStatus
@@ -283,3 +286,11 @@ function validateSliderAnswer(answerArray) {
 function validateRadioButtonAnswer(answerArray) {
     return validateAnswerArrayLen1(answerArray) && !isNaN(parseInt(answerArray[0].answer_value));
 }
+
+/**
+ * ==============================================
+ * Exporting validation functions
+ * ==============================================
+ */
+
+module.exports = {...questionnaireOpalDBValidation, ...questionnaireQuestionnaireDBValidation};

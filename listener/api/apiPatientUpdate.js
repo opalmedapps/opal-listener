@@ -137,20 +137,14 @@ exports.logPatientRequest = function(requestObject) {
  * @param {object} requestObject
  * @returns {Promise}
  */
-exports.getQuestionnaireList = function(requestObject){
-
-    return questionnaires.getQuestionnaireList(requestObject);
-};
+exports.getQuestionnaireList = questionnaires.getQuestionnaireList;
 
 /**
  * For questionnaire V2 (2019 version of qplus questionnaire front-end). Gets one questionnaire.
  * @param {object} requestObject
  * @returns {Promise}
  */
-exports.getQuestionnaire = function(requestObject){
-
-    return questionnaires.getQuestionnaire(requestObject);
-};
+exports.getQuestionnaire = questionnaires.getQuestionnaire;
 
 exports.getPatientsForPatientsMembers = function ()
 {
