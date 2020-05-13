@@ -1083,31 +1083,6 @@ function getPatientId(username) {
 }
 
 
-//Get time estimate from Ackeem's scripts
-exports.getTimeEstimate = function(appointmentAriaSer)
-{
-    console.log(appointmentAriaSer);
-    var r = Q.defer();
-    var url = config.WT_PATH+appointmentAriaSer.Parameters;
-    console.log(url);
-    request(url, function(error, response, body)
-    {
-        if(!error&&response.statusCode=='200')
-        {
-            console.log('Time Estimate ', body);
-            body = JSON.parse(body);
-            body['appointmentAriaSer'] = appointmentAriaSer.Parameters;
-            if(body.length>=1){
-                r.resolve(body);
-            } else{
-                r.reject({Response:'No data from getEstimate script'});
-            }
-        }else{
-            r.resolve(error);
-        }
-    });
-    return r.promise;
-};
 /**
  * @module sqlInterface
  * @name combineResources
