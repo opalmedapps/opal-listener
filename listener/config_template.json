@@ -1,29 +1,25 @@
 {
-  "MYSQL_USERNAME":"root",
-  "MYSQL_PASSWORD":"",
-  "MYSQL_DATABASE":"OpalDB_Student1905",
-  "MYSQL_DATABASE_QUESTIONNAIRE":"questionnaireDB2019_PREPROD15102019",
-  "MYSQL_DATABASE_PORT": 3306,
-  "MYSQL_DATABASE_HOST": "127.0.0.1",
-  "HOST" : "localhost",
-
+  "MYSQL_USERNAME": "",
+  "MYSQL_PASSWORD": "",
+  "MYSQL_DATABASE": "",
+  "MYSQL_DATABASE_QUESTIONNAIRE": "",
+  "HOST": "",
   "WAITING_ROOM_MANAGEMENT_SYSTEM_MYSQL": {
-    "PORT": 3306,
+    "PORT": "",
     "MYSQL_USERNAME": "",
     "MYSQL_PASSWORD": "",
-    "MYSQL_DATABASE": "WaitRoomManagementDev",
+    "MYSQL_DATABASE": "",
     "HOST": ""
   },
-
-  "DOCUMENTS_PATH" : "",
-  "DOCTOR_PATH" : "",
-  "CHECKIN_PATH" : "",
-  "VERIFYCHECKIN_PATH" : "",
-  "WT_PATH" : "",
-  "PFP_PATH" : "",
-  "FIREBASE_ADMIN_KEY": "C:/Users/CHYU6010/Opal/staging/firebase/opalstaging-6ecfc-firebase-adminsdk-xx0gn-42121ff661.json",
-  "DATABASE_URL": "https://opalstaging-6ecfc.firebaseio.com",
-  "LATEST_STABLE_VERSION": "0.0.1",
-  "FIREBASE_ROOT_BRANCH": "dev2"
+  "DOCUMENTS_PATH": "",
+  "DOCTOR_PATH": "",
+  "CHECKIN_PATH": "",
+  "VERIFYCHECKIN_PATH": "",
+  "PFP_PATH": "",
+  "_COMMENT1": "",
+  "FIREBASE_ADMIN_KEY": "",
+  "_COMMENT2": "",
+  "DATABASE_URL": "",
+  "FIREBASE_ROOT_BRANCH": "",
+  "LATEST_STABLE_VERSION": ""
 }
-
