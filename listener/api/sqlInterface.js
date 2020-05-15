@@ -78,6 +78,7 @@ const requestMappings =
         },
         'TxTeamMessages': {
             sql: queries.patientTeamMessagesTableFields(),
+            processFunction: decodePostMessages,
             numberOfLastUpdated: 2,
             table: 'TxTeamMessage',
             serNum: 'TxTeamMessageSerNum'
@@ -91,6 +92,7 @@ const requestMappings =
         },
         'Announcements': {
             sql: queries.patientAnnouncementsTableFields(),
+            processFunction: decodePostMessages,
             numberOfLastUpdated: 2,
             table: 'Announcement',
             serNum: 'AnnouncementSerNum'
@@ -1009,6 +1011,25 @@ function getEducationalMaterialTableOfContents(rows)
         r.resolve(rows);
     }
     return r.promise;
+}
+
+/**
+ * decodePostMessages
+ * @desc this function decode the html for the strings of treatment team messages and announcements which contain html text
+ * @param {array} rows
+ * @returns {Promise}
+ */
+function decodePostMessages(rows){
+    for (var i = 0; i < rows.length; i++) {
+        let currentRow = rows[i];
+
+        if (currentRow.hasOwnProperty('Body_EN') && currentRow.hasOwnProperty('Body_FR')) {
+            currentRow.Body_EN = utility.htmlspecialchars_decode(currentRow.Body_EN);
+            currentRow.Body_FR = utility.htmlspecialchars_decode(currentRow.Body_FR);
+        }
+    }
+
+    return Promise.resolve(rows);
 }
 
 //Obtains the educational material table of contents and adds it to the pertinent materials
