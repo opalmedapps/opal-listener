@@ -4,27 +4,16 @@ const Q                 = require('q');
 const queries           = require('./../sql/queries.js');
 const config            = require('./../config.json');
 const request           = require('request');
-const questionnaires    = require('./../questionnaires/patientQuestionnaires.js');
 const Mail              = require('./../mailer/mailer.js');
 const utility           = require('./../utility/utility');
 const logger            = require('./../logs/logger');
-
+const {OpalSQLQueryRunner} = require("../sql/opal-sql-query-runner");
 
 var exports = module.exports = {};
 
 /******************************
  * CONFIGURATIONS
  ******************************/
-const dbCredentials = {
-	connectionLimit: 10,
-	host: config.HOST,
-	user: config.MYSQL_USERNAME,
-	password: config.MYSQL_PASSWORD,
-	database: config.MYSQL_DATABASE,
-	dateStrings: true,
-    port: config.MYSQL_DATABASE_PORT
-};
-
 const waitingRoomDbCredentials = {
 	connectionLimit: 10,
     host: config.WAITING_ROOM_MANAGEMENT_SYSTEM_MYSQL.HOST,
@@ -35,11 +24,6 @@ const waitingRoomDbCredentials = {
 	dateStrings: true
 };
 
-/**
- * SQL POOL CONFIGURATION
- * @type {Pool}
- */
-const pool = mysql.createPool(dbCredentials);
 const waitingRoomPool = mysql.createPool(waitingRoomDbCredentials);
 
 /////////////////////////////////////////////////////
@@ -50,7 +34,7 @@ const waitingRoomPool = mysql.createPool(waitingRoomDbCredentials);
 
 /**
  * Table mappings and process data functions for results obtained from the database. Exporting function for testing purposes.
- * @type {{Patient: {sql, processFunction: loadProfileImagePatient, numberOfLastUpdated: number}, Documents: {sql, numberOfLastUpdated: number, table: string, serNum: string}, Doctors: {sql, processFunction: loadImageDoctor, numberOfLastUpdated: number}, Diagnosis: {sql, numberOfLastUpdated: number}, Questionnaires: {sql, numberOfLastUpdated: number, processFunction: *}, Appointments: {sql, numberOfLastUpdated: number, processFunction: combineResources, table: string, serNum: string}, Notifications: {sql, numberOfLastUpdated: number, table: string, serNum: string}, Tasks: {sql, numberOfLastUpdated: number}, LabTests: {sql, numberOfLastUpdated: number}, TxTeamMessages: {sql, numberOfLastUpdated: number, table: string, serNum: string}, EducationalMaterial: {sql, processFunction: getEducationTableOfContents, numberOfLastUpdated: number, table: string, serNum: string}, Announcements: {sql, numberOfLastUpdated: number, table: string, serNum: string}}}
+ * @type {{Patient: {sql, processFunction: loadProfileImagePatient, numberOfLastUpdated: number}, Documents: {sql, numberOfLastUpdated: number, table: string, serNum: string}, Doctors: {sql, processFunction: loadImageDoctor, numberOfLastUpdated: number}, Diagnosis: {sql, numberOfLastUpdated: number}, Questionnaires: {sql, numberOfLastUpdated: number, processFunction: *}, Appointments: {sql, numberOfLastUpdated: number, processFunction: combineResources, table: string, serNum: string}, Notifications: {sql, numberOfLastUpdated: number, table: string, serNum: string}, Tasks: {sql, numberOfLastUpdated: number}, TxTeamMessages: {sql, numberOfLastUpdated: number, table: string, serNum: string}, EducationalMaterial: {sql, processFunction: getEducationTableOfContents, numberOfLastUpdated: number, table: string, serNum: string}, Announcements: {sql, numberOfLastUpdated: number, table: string, serNum: string}}}
  */
 const requestMappings =
     {
@@ -75,11 +59,6 @@ const requestMappings =
             sql: queries.patientDiagnosisTableFields(),
             numberOfLastUpdated: 1
         },
-        'Questionnaires': {
-            sql: queries.getPatientSerNumAndLanguage(),
-            numberOfLastUpdated: 2,
-            processFunction: exports.getQuestionnaires
-        },
         'Appointments': {
             sql: queries.patientAppointmentsTableFields(),
             numberOfLastUpdated: 5,
@@ -97,12 +76,9 @@ const requestMappings =
             sql: queries.patientTasksTableFields(),
             numberOfLastUpdated: 2
         },
-        'LabTests': {
-            sql: queries.patientTestResultsTableFields(),
-            numberOfLastUpdated: 1
-        },
         'TxTeamMessages': {
             sql: queries.patientTeamMessagesTableFields(),
+            processFunction: decodePostMessages,
             numberOfLastUpdated: 2,
             table: 'TxTeamMessage',
             serNum: 'TxTeamMessageSerNum'
@@ -116,6 +92,7 @@ const requestMappings =
         },
         'Announcements': {
             sql: queries.patientAnnouncementsTableFields(),
+            processFunction: decodePostMessages,
             numberOfLastUpdated: 2,
             table: 'Announcement',
             serNum: 'AnnouncementSerNum'
@@ -131,7 +108,7 @@ const requestMappings =
 
 /**
  * getSqlApiMapping
- * @return {{Patient: {sql, processFunction: loadProfileImagePatient, numberOfLastUpdated: number}, Documents: {sql, numberOfLastUpdated: number, table: string, serNum: string}, Doctors: {sql, processFunction: loadImageDoctor, numberOfLastUpdated: number}, Diagnosis: {sql, numberOfLastUpdated: number}, Questionnaires: {sql, numberOfLastUpdated: number, processFunction: *}, Appointments: {sql, numberOfLastUpdated: number, processFunction: combineResources, table: string, serNum: string}, Notifications: {sql, numberOfLastUpdated: number, table: string, serNum: string}, Tasks: {sql, numberOfLastUpdated: number}, LabTests: {sql, numberOfLastUpdated: number}, TxTeamMessages: {sql, numberOfLastUpdated: number, table: string, serNum: string}, EducationalMaterial: {sql, processFunction: getEducationTableOfContents, numberOfLastUpdated: number, table: string, serNum: string}, Announcements: {sql, numberOfLastUpdated: number, table: string, serNum: string}}}
+ * @return {{Patient: {sql, processFunction: loadProfileImagePatient, numberOfLastUpdated: number}, Documents: {sql, numberOfLastUpdated: number, table: string, serNum: string}, Doctors: {sql, processFunction: loadImageDoctor, numberOfLastUpdated: number}, Diagnosis: {sql, numberOfLastUpdated: number}, Questionnaires: {sql, numberOfLastUpdated: number, processFunction: *}, Appointments: {sql, numberOfLastUpdated: number, processFunction: combineResources, table: string, serNum: string}, Notifications: {sql, numberOfLastUpdated: number, table: string, serNum: string}, Tasks: {sql, numberOfLastUpdated: number}, TxTeamMessages: {sql, numberOfLastUpdated: number, table: string, serNum: string}, EducationalMaterial: {sql, processFunction: getEducationTableOfContents, numberOfLastUpdated: number, table: string, serNum: string}, Announcements: {sql, numberOfLastUpdated: number, table: string, serNum: string}}}
  */
 exports.getSqlApiMappings = function() {
     return requestMappings;
@@ -139,42 +116,14 @@ exports.getSqlApiMappings = function() {
 
 
 /**
- * runSqlQuery
+ * runSqlQuery function runs query, its kept due to the many references
  * @desc runs inputted query against SQL mapping by grabbing an available connection from connection pool
  * @param query
  * @param parameters
  * @param processRawFunction
  * @return {Promise}
  */
-exports.runSqlQuery = function(query, parameters, processRawFunction) {
-    let r = Q.defer();
-
-    pool.getConnection(function(err, connection) {
-        if(err) logger.log('error', err);
-        logger.log('debug', 'grabbed connection: ' + connection);
-        logger.log('info', 'Successfully grabbed connection from pool and about to perform following query: ', {query: query});
-
-        const que = connection.query(query, parameters, function (err, rows, fields) {
-            connection.release();
-
-            logger.log('info', 'Successfully performed query', {query: que.sql, response: JSON.stringify(rows)});
-
-            if (err) r.reject(err);
-            if (typeof rows !== 'undefined') {
-                if (processRawFunction && typeof processRawFunction !== 'undefined') {
-                    processRawFunction(rows).then(function (result) {
-                        r.resolve(result);
-                    });
-                } else {
-                    r.resolve(rows);
-                }
-            } else {
-                r.resolve([]);
-            }
-        });
-    });
-    return r.promise;
-};
+exports.runSqlQuery = OpalSQLQueryRunner.run;
 
 /**
  * runWaitingRoomSqlQuery
@@ -303,8 +252,6 @@ function preparePromiseArrayFields(userId,timestamp,arrayTables) {
         }
     }else{
         for (const key in requestMappings) {
-
-            logger.log('debug', key);
 
             array.push(processSelectRequest(key,userId,timestamp));
         }
@@ -683,7 +630,7 @@ exports.updateDeviceIdentifier = function(requestObject, parameters) {
 /**
  * @name addToActivityLog
  * @desc Adding action to activity log
- * @param requestObject
+ * @param {OpalRequest}requestObject
  */
 exports.addToActivityLog=function(requestObject)
 {
@@ -704,7 +651,7 @@ exports.addToActivityLog=function(requestObject)
             logger.log('verbose', "Success logging request of type: "+Request);
             r.resolve({Response:'success'});
         }).catch((err)=>{
-            logger.log('error', "Error logging request of type: "+Request);
+            logger.log('error', "Error logging request of type: "+Request, err);
             r.reject({Response:'error', Reason:err});
         });
 	}
@@ -739,99 +686,6 @@ exports.getFirstEncryption=function(requestObject) {
 exports.getEncryption=function(requestObject)
 {
     return exports.runSqlQuery(queries.userEncryption(),[requestObject.UserID, requestObject.DeviceId]);
-};
-
-/**
- * inputQuestionnaireAnswers
- * @desc Input questionnaire answers into DB
- * @param requestObject
- * @return {Promise}
- */
-exports.inputQuestionnaireAnswers = function(requestObject) {
-    let r = Q.defer();
-    let parameters = requestObject.Parameters;
-    let appVersion = requestObject.AppVersion;
-    let patientSerNum = -1;
-
-    // check input: these are required properties.
-    // The non required properties is: parameters.PatientId
-    if (!parameters.hasOwnProperty('QuestionnaireDBSerNum') || parameters.QuestionnaireDBSerNum === undefined
-        || !parameters.hasOwnProperty('DateCompleted') || parameters.DateCompleted === undefined
-        || !parameters.hasOwnProperty('Answers') || parameters.Answers === undefined
-        || !parameters.hasOwnProperty('QuestionnaireSerNum') || parameters.QuestionnaireSerNum === undefined) {
-
-        throw new Error('Error inputting questionnaire answers: Lack of required parameters');
-    }
-
-    // check input: the questionnaire should be completed to send answer to the DB
-    if (!parameters.hasOwnProperty('CompletedFlag') || (parameters.CompletedFlag !== 1 && parameters.CompletedFlag !== '1')){
-        throw new Error('Error inputting questionnaire answers: The questionnaire has not been completed');
-    }
-
-    // the following query is simply for getting the language from the opalDB, there is no other use of it.
-    // But since there might be the possibility of the front end not sending any language, this is necessary
-    exports.runSqlQuery(queries.getPatientSerNumAndLanguage(), [requestObject.UserID, null, null])
-        .then(function (queryRows) {
-
-            var dbLang = -1;
-            // ask the opalDB for the language
-            if (queryRows[0].hasOwnProperty('Language') && queryRows[0].Language !== undefined) {
-                switch (queryRows[0].Language) {
-                    case ('EN'):
-                        dbLang = 2;
-                        break;
-                    case ('FR'):
-                        dbLang = 1;
-                        break;
-                    default:
-                        dbLang = -1;
-                }
-            }
-
-            // check input: format language
-            if (parameters.hasOwnProperty('Language')) {
-                if (parameters.Language === 'EN') {
-                    parameters.Language = 2;
-                } else if (parameters.Language === 'FR') {
-                    parameters.Language = 1;
-                } else {
-                    // the default is French, but we do not have, as of July 2019, any other language in the DB, therefore we will ask the opalDB for the language
-                    parameters.Language = dbLang;
-                }
-            } else {
-                // if the app does not send a language, we will ask the opalDB for the language
-                parameters.Language = dbLang;
-            }
-
-            // check input: patientSerNum
-            if (!queryRows[0].hasOwnProperty('PatientSerNum') || queryRows[0].PatientSerNum === undefined) {
-                throw new Error('Error inputting questionnaire answers: Cannot find patientSerNum in OpalDB');
-            }
-
-            patientSerNum = queryRows[0].PatientSerNum;
-
-            return exports.runSqlQuery(queries.getPatientQuestionnaireDBSerNum(), [parameters.QuestionnaireSerNum]);
-
-        }).then(function(queryReturned){
-
-            if (!queryReturned[0].hasOwnProperty('PatientQuestionnaireDBSerNum') || queryReturned[0].PatientQuestionnaireDBSerNum === undefined || queryReturned[0].PatientQuestionnaireDBSerNum === null){
-                throw new Error('Error inputting questionnaire answers: Cannot find PatientQuestionnaireDBSerNum in OpalDB');
-            }
-
-            return questionnaires.inputQuestionnaireAnswers(queryReturned[0].PatientQuestionnaireDBSerNum, parameters, appVersion, patientSerNum);
-
-        }).then(function(answerQuestionnaireId){
-
-            // mark, in opalDB.Questionnaire, that this particular questionnaire is completed and
-            return exports.runSqlQuery(queries.setQuestionnaireCompletedQuery(), [parameters.DateCompleted, requestObject.Token, parameters.QuestionnaireSerNum]);
-
-        }).then(function(){
-            r.resolve({Response:'success'});
-
-        }).catch(function(err){
-            r.reject({Response:'error', Reason:err});
-        });
-    return r.promise;
 };
 
 /**
@@ -1159,6 +1013,25 @@ function getEducationalMaterialTableOfContents(rows)
     return r.promise;
 }
 
+/**
+ * decodePostMessages
+ * @desc this function decode the html for the strings of treatment team messages and announcements which contain html text
+ * @param {array} rows
+ * @returns {Promise}
+ */
+function decodePostMessages(rows){
+    for (var i = 0; i < rows.length; i++) {
+        let currentRow = rows[i];
+
+        if (currentRow.hasOwnProperty('Body_EN') && currentRow.hasOwnProperty('Body_FR')) {
+            currentRow.Body_EN = utility.htmlspecialchars_decode(currentRow.Body_EN);
+            currentRow.Body_FR = utility.htmlspecialchars_decode(currentRow.Body_FR);
+        }
+    }
+
+    return Promise.resolve(rows);
+}
+
 //Obtains the educational material table of contents and adds it to the pertinent materials
 function getEducationTableOfContents(rows)
 {
@@ -1231,31 +1104,6 @@ function getPatientId(username) {
 }
 
 
-//Get time estimate from Ackeem's scripts
-exports.getTimeEstimate = function(appointmentAriaSer)
-{
-    console.log(appointmentAriaSer);
-    var r = Q.defer();
-    var url = config.WT_PATH+appointmentAriaSer.Parameters;
-    console.log(url);
-    request(url, function(error, response, body)
-    {
-        if(!error&&response.statusCode=='200')
-        {
-            console.log('Time Estimate ', body);
-            body = JSON.parse(body);
-            body['appointmentAriaSer'] = appointmentAriaSer.Parameters;
-            if(body.length>=1){
-                r.resolve(body);
-            } else{
-                r.reject({Response:'No data from getEstimate script'});
-            }
-        }else{
-            r.resolve(error);
-        }
-    });
-    return r.promise;
-};
 /**
  * @module sqlInterface
  * @name combineResources
@@ -1334,27 +1182,6 @@ function combineResources(rows)
     return r.promise;
 }*/
 
-exports.getLabResults = function(requestObject)
-{
-
-    var r = Q.defer();
-    //var labResults = requestObject.Parameters;
-
-    var userID = requestObject.UserID;
-    //console.log('Getting LabResults ');
-    exports.runSqlQuery(queries.patientTestResultsTableFields(),[userID, requestObject.Timestamp])
-        .then(function (queryRows) {
-            var labs={};
-            labs.labResults = queryRows;
-            r.resolve(labs);
-        })
-        .catch(function (error) {
-            r.reject({Response:'error', Reason:'Error getting lab results due to '+error});
-        });
-
-    return r.promise;
-
-};
 
 exports.getSecurityQuestion = function (requestObject){
     var r = Q.defer();
@@ -1400,74 +1227,6 @@ exports.setTrusted = function(requestObject)
 
     return r.promise;
 
-};
-
-/**
- * Returns a promise containing the questionnaires and answers
- * @param {object} requestObject the request
- * @returns {Promise} Returns a promise that contains the questionnaire data
- */
-
-exports.getQuestionnaires = function(requestObject){
-    "use strict";
-    var r = Q.defer();
-    var lang = -1;
-    var patientSerNum_opalDB;
-
-    // check and pre-process argument
-    if (requestObject.hasOwnProperty('Parameters') && requestObject.Parameters.hasOwnProperty('Language') && requestObject.Parameters.Language !== undefined){
-        if (requestObject.Parameters.Language === 'EN') {
-            lang = 2;
-        } else if (requestObject.Parameters.Language === 'FR'){
-            lang = 1;
-        }
-    }
-
-    exports.runSqlQuery(queries.getPatientSerNumAndLanguage(), [requestObject.UserID, null, null])
-        .then(function (queryRows) {
-            // check argument: PatientSerNum
-            if (queryRows[0].hasOwnProperty("PatientSerNum") && queryRows[0].PatientSerNum !== undefined){
-                patientSerNum_opalDB = queryRows[0].PatientSerNum;
-            }else{
-                throw new Error('Error getting questionnaires: There is no such PatientSerNum in opalDB matching the UserID');
-            }
-
-            // check argument: Language
-            // if the front-end did not send a language, then we get the language in the opalDB. If that too does not exist, then we default to French
-            if (lang === -1){
-                if(queryRows[0].hasOwnProperty('Language') && queryRows[0].Language !== undefined){
-                    switch (queryRows[0].Language) {
-                        case ('EN'):
-                            lang = 2;
-                            break;
-                        case ('FR'):
-                            lang = 1;
-                            break;
-                        default:
-                            // the default is French
-                            lang = 1;
-                    }
-                }else{
-                    // the default is French
-                    lang = 1;
-                }
-            }
-
-            return exports.runSqlQuery(queries.patientQuestionnaireTableFields(), [requestObject.UserID, null, null]);
-        })
-        .then(function(patientQuestionnaireTableFields){
-            return questionnaires.getPatientQuestionnaires(patientQuestionnaireTableFields, lang);
-        })
-        .then(function (result) {
-            var obj = {};
-            obj.Data = result;
-            r.resolve(obj);
-        })
-        .catch(function (error) {
-            r.reject(error);
-        });
-
-    return r.promise
 };
 
 /**

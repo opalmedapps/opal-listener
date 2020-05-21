@@ -1,5 +1,5 @@
 const waitingRoomManagementSystem = require('./processing/waitingRoomManagementSystem')
-const { runSqlQuery } = require('../../sqlInterface')
+const { runSqlQuery } = require('../../../sqlInterface')
 const { opalDb: opalDbQueries } = require('./queries')
 const { getTimeDifferenceInMinutes } = require('../common/utils')
 
