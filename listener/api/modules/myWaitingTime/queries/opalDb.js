@@ -1,3 +1,4 @@
+const mysql = require('mysql');
 const _default = {
   createTable: () => `
     CREATE TABLE IF NOT EXISTS UsersAppointmentsTimestamps (
@@ -12,7 +13,7 @@ const _default = {
       , FOREIGN KEY (AppointmentSerNum) REFERENCES Appointment(AppointmentSerNum)
     );
   `,
-  getTimestamps: () => `
+  getTimestamps: (patientId) => mysql.format(`
     SELECT
       AppointmentSerNum
       , UNIX_TIMESTAMP(FirstCheckinTime) AS FirstCheckinTime
@@ -22,9 +23,10 @@ const _default = {
     WHERE
       PatientSerNum = ?
     ORDER BY
-      AppointmentSerNum DESC;
-  `,
-  registerTimestamps: (patientId, appointmentId, firstCheckin, scheduledTime, actualStartTime) => `
+      AppointmentSerNum DESC;`, [patientId])
+  ,
+  registerTimestamps: (patientId, appointmentId, firstCheckin, scheduledTime, actualStartTime) =>
+    mysql.format(`
     INSERT INTO UsersAppointmentsTimestamps (
       PatientSerNum
       , AppointmentSerNum
@@ -32,24 +34,37 @@ const _default = {
       , ScheduledTime
       , ActualStartTime
     ) VALUES (
-      ${patientId}
-      , ${appointmentId}
-      , FROM_UNIXTIME(${firstCheckin})
-      , FROM_UNIXTIME(${scheduledTime})
-      , FROM_UNIXTIME(${actualStartTime})
+      ?
+      , ?
+      , FROM_UNIXTIME(?)
+      , FROM_UNIXTIME(?)
+      , FROM_UNIXTIME(?)
     );
-  `,
-  getAppointments: (patientId, knownAppointments) => `
-    SELECT
-      AppointmentSerNum
-      , SourceDatabaseSerNum
-      , AppointmentAriaSer
-      , ActualStartDate
-    FROM Appointment
-    WHERE
-      PatientSerNum = ${patientId}
-      ${knownAppointments ? `AND AppointmentSerNum NOT IN (${knownAppointments.join(',')})` : ''};
-  `
+  `, [patientId, appointmentId, firstCheckin, scheduledTime, actualStartTime]),
+  getAppointments: (patientId, knownAppointments) => {
+    if (knownAppointments) {
+      return mysql.format(`
+        SELECT
+          AppointmentSerNum
+          , SourceDatabaseSerNum
+          , AppointmentAriaSer
+          , ActualStartDate
+        FROM Appointment
+        WHERE
+          PatientSerNum = ?
+          AND AppointmentSerNum NOT IN (?);`, [patientId, knownAppointments])
+    } else {
+      return mysql.format(`
+        SELECT
+          AppointmentSerNum
+          , SourceDatabaseSerNum
+          , AppointmentAriaSer
+          , ActualStartDate
+        FROM Appointment
+        WHERE
+          PatientSerNum = ?;`, [patientId]);
+    }
+  }
 }
 
 module.exports = _default
