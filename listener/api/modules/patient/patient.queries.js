@@ -6,8 +6,11 @@ class PatientQueries {
      * @returns string string query
      */
     static getPatientByUsernameQuery(username) {
-        return mysql.format(`SELECT * FROM Patient as pat, Users as u 
-                WHERE pat.PatientSerNum = u.UserTypeSerNum AND u.Username = ?;`, username);
+        return mysql.format(`SELECT p.*, u.* 
+                FROM Patient AS p, Users AS u, UserPatient AS up 
+                WHERE p.PatientSerNum = up.PatientSerNum
+                    AND up.UserSerNum = u.UserSerNum
+                    AND u.Username = ?;`, username);
     }
 
 }

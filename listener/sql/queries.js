@@ -2,25 +2,47 @@ var exports=module.exports={};
 //Get Patient table information for a particular patient
 exports.patientTableFields=function()
 {
-    return "SELECT Patient.PatientSerNum, Patient.TestUser, Patient.FirstName, Patient.LastName, Patient.TelNum, Patient.PatientId, Patient.Email, Patient.Alias, Patient.Language, Patient.EnableSMS,Patient.ProfileImage, Patient.SSN, Patient.AccessLevel FROM Patient, Users WHERE Users.Username LIKE ? AND Users.UserTypeSerNum=Patient.PatientSerNum AND Patient.LastUpdated > ?"
+    return `SELECT Patient.PatientSerNum, Patient.TestUser, Patient.FirstName, Patient.LastName, Patient.TelNum, Patient.PatientId, Patient.Email, Patient.Alias, Patient.Language, Patient.EnableSMS,Patient.ProfileImage, Patient.SSN, Patient.AccessLevel 
+            FROM Patient, Users, UserPatient
+            WHERE Users.Username LIKE ?
+                AND UserPatient.PatientSerNum = Patient.PatientSerNum
+                AND UserPatient.UserSerNum = Users.UserSerNum
+                AND Patient.LastUpdated > ?;`;
 };
 
 exports.patientDoctorTableFields=function()
 {
-	return "SELECT ifnull(D.FirstName, '') FirstName, ifnull(D.LastName, '') LastName, D.DoctorSerNum, PD.PrimaryFlag, PD.OncologistFlag, ifnull(D.Email, '') Email, ifnull(D.Phone, '') Phone, ifnull(D.ProfileImage, '') ProfileImage, ifnull(D.Address, '') Address,	ifnull(D.BIO_EN, '') Bio_EN, ifnull(D.BIO_FR, '') Bio_FR FROM Doctor D, PatientDoctor PD, Patient P, Users U WHERE U.Username Like ? AND P.PatientSerNum=U.UserTypeSerNum AND PD.PatientSerNum = P.PatientSerNum AND D.DoctorSerNum = PD.DoctorSerNum AND (D.LastUpdated > ? OR PD.LastUpdated > ?);";
-
-    // return "SELECT Doctor.FirstName, Doctor.LastName, Doctor.DoctorSerNum, PatientDoctor.PrimaryFlag, PatientDoctor.OncologistFlag, Doctor.Email,Doctor.Phone, Doctor.ProfileImage, Doctor.Address FROM Doctor, PatientDoctor, Patient, Users WHERE Users.Username Like ? AND Patient.PatientSerNum=Users.UserTypeSerNum AND PatientDoctor.PatientSerNum = Patient.PatientSerNum AND Doctor.DoctorSerNum = PatientDoctor.DoctorSerNum AND (Doctor.LastUpdated > ? OR PatientDoctor.LastUpdated > ?);";
+	return `SELECT ifnull(D.FirstName, '') FirstName, ifnull(D.LastName, '') LastName, D.DoctorSerNum, PD.PrimaryFlag, PD.OncologistFlag, ifnull(D.Email, '') Email, ifnull(D.Phone, '') Phone, ifnull(D.ProfileImage, '') ProfileImage, ifnull(D.Address, '') Address,\tifnull(D.BIO_EN, '') Bio_EN, ifnull(D.BIO_FR, '') Bio_FR 
+            FROM Doctor D, PatientDoctor PD, Patient P, Users U, UserPatient UP 
+            WHERE U.Username LIKE ?
+                AND P.PatientSerNum = UP.PatientSerNum 
+                AND U.UserSerNum = UP.UserSerNum
+                AND PD.PatientSerNum = P.PatientSerNum 
+                AND D.DoctorSerNum = PD.DoctorSerNum 
+                AND (D.LastUpdated > ? OR PD.LastUpdated > ?);`;
 };
 
 exports.patientDiagnosisTableFields=function()
 {
-   return "SELECT D.CreationDate, getDiagnosisDescription(D.DiagnosisCode,'EN') Description_EN, getDiagnosisDescription(D.DiagnosisCode,'FR') Description_FR FROM Diagnosis D, Patient P, Users U WHERE U.UserTypeSerNum=P.PatientSerNum AND D.PatientSerNum = P.PatientSerNum AND U.Username Like ? AND D.LastUpdated > ?;";
-    // return "SELECT Diagnosis.CreationDate, Diagnosis.Description_EN, Diagnosis.Description_FR FROM Diagnosis, Patient, Users WHERE Users.UserTypeSerNum=Patient.PatientSerNum AND Diagnosis.PatientSerNum = Patient.PatientSerNum AND Users.Username Like ? AND Diagnosis.LastUpdated > ?;";
+    return `SELECT D.CreationDate, getDiagnosisDescription(D.DiagnosisCode,'EN') Description_EN, getDiagnosisDescription(D.DiagnosisCode,'FR') Description_FR 
+            FROM Diagnosis D, Patient P, Users U, UserPatient UP
+            WHERE UP.PatientSerNum = P.PatientSerNum 
+                AND UP.UserSerNum = U.UserSerNum
+                AND D.PatientSerNum = P.PatientSerNum 
+                AND U.Username Like ?
+                AND D.LastUpdated > ?;`;
 };
 
 exports.patientMessageTableFields=function()
 {
-    return "SELECT Messages.MessageSerNum, Messages.LastUpdated, Messages.SenderRole, Messages.ReceiverRole, Messages.SenderSerNum, Messages.ReceiverSerNum, Messages.MessageContent, Messages.ReadStatus, Messages.MessageDate FROM Messages, Patient, Users WHERE Patient.PatientSerNum=Users.UserTypeSerNum AND ((Messages.ReceiverRole='Patient' AND Patient.PatientSerNum = Messages.ReceiverSerNum) OR (Messages.SenderRole='Patient' AND Patient.PatientSerNum = Messages.SenderSerNum)) AND Users.Username Like ? AND Messages.LastUpdated > ? ORDER BY Messages.MessageDate ASC;";
+    return `SELECT Messages.MessageSerNum, Messages.LastUpdated, Messages.SenderRole, Messages.ReceiverRole, Messages.SenderSerNum, Messages.ReceiverSerNum, Messages.MessageContent, Messages.ReadStatus, Messages.MessageDate 
+            FROM Messages, Patient, Users, UserPatient
+            WHERE Patient.PatientSerNum = UserPatient.PatientSerNum 
+                AND Users.UserSerNum = UserPatient.UserSerNum
+                AND ((Messages.ReceiverRole='Patient' AND Patient.PatientSerNum = Messages.ReceiverSerNum) OR (Messages.SenderRole='Patient' AND Patient.PatientSerNum = Messages.SenderSerNum)) 
+                AND Users.Username Like ?
+                AND Messages.LastUpdated > ?
+            ORDER BY Messages.MessageDate ASC;`;
 };
 
 exports.patientAppointmentsTableFields=function()
@@ -68,7 +90,7 @@ exports.patientAppointmentsTableFields=function()
                 "LEFT JOIN HospitalMap HM ON HM.HospitalMapSerNum=A.HospitalMapSerNum " +
                 "INNER JOIN AppointmentCheckin AC ON AE.AliasSerNum=AC.AliasSerNum " +
                 "LEFT JOIN EducationalMaterialControl emc ON emc.EducationalMaterialControlSerNum = A.EducationalMaterialControlSerNum " +
-              "WHERE Appt.PatientSerNum = (select P.PatientSerNum from Patient P,  Users U where U.Username = ? and U.UserTypeSerNum = P.PatientSerNum) " +
+              "WHERE Appt.PatientSerNum = (select P.PatientSerNum from Patient P,  Users U, UserPatient UP where U.Username = ? and UP.PatientSerNum = P.PatientSerNum AND U.UserSerNum = UP.UserSerNum) " +
                 "AND Appt.State = 'Active' " +
                 "AND Appt.Status <> 'Deleted' " +
                 "AND (Appt.LastUpdated > ? OR A.LastUpdated > ? OR AE.LastUpdated > ? OR R.LastUpdated > ? OR HM.LastUpdated > ?) " +
@@ -78,68 +100,109 @@ exports.patientAppointmentsTableFields=function()
 
 exports.patientDocumentTableFields=function()
 {
-    return "SELECT DISTINCT " +
-        "case " +
-        "   when instr(Document.FinalFileName, '/') = 0 then Document.FinalFileName " +
-        "   when instr(Document.FinalFileName, '/') > 0 then substring(Document.FinalFileName, instr(Document.FinalFileName, '/') + 1, length(Document.FinalFileName)) " +
-        "end FinalFileName, " +
-        "Alias.AliasName_EN, " +
-        "Alias.AliasName_FR, " +
-        "Document.ReadStatus, " +
-        "Alias.AliasDescription_EN, " +
-        "Alias.AliasDescription_FR, " +
-        "Document.DocumentSerNum, " +
-        "Document.ApprovedTimeStamp, " +
-        "Document.CreatedTimeStamp, " +
-        "Staff.FirstName, " +
-        "Staff.LastName, " +
-        "Alias.ColorTag, " +
-        "emc.URL_EN, " +
-        "emc.URL_FR " +
-        "" +
-        "FROM " +
-        "Document " +
-        "INNER JOIN Patient ON Patient.PatientSerNum = Document.PatientSerNum " +
-        "INNER JOIN AliasExpression ON AliasExpression.AliasExpressionSerNum = Document.AliasExpressionSerNum " +
-        "INNER JOIN Alias ON Alias.AliasSerNum = AliasExpression.AliasSerNum " +
-        "INNER JOIN Users ON Users.UserTypeSerNum = Patient.PatientSerNum " +
-        "INNER JOIN Staff ON Staff.StaffSerNum = Document.ApprovedBySerNum " +
-        "LEFT JOIN EducationalMaterialControl emc ON emc.EducationalMaterialControlSerNum = Alias.EducationalMaterialControlSerNum " +
-        "" +
-        "WHERE " +
-        "Patient.AccessLevel = 3 " +
-        "AND Users.Username LIKE ? " +
-        "AND (Document.LastUpdated > ? OR Alias.LastUpdated > ?);";
+    return `SELECT DISTINCT  
+                CASE
+                    WHEN instr(Document.FinalFileName, '/') = 0 THEN Document.FinalFileName
+                    WHEN instr(Document.FinalFileName, '/') > 0 THEN substring(Document.FinalFileName, instr(Document.FinalFileName, '/') + 1, length(Document.FinalFileName))
+                END FinalFileName,
+                 Alias.AliasName_EN,  
+                 Alias.AliasName_FR,  
+                 Document.ReadStatus,  
+                 Alias.AliasDescription_EN,  
+                 Alias.AliasDescription_FR,  
+                 Document.DocumentSerNum,  
+                 Document.ApprovedTimeStamp,  
+                 Document.CreatedTimeStamp,  
+                 Staff.FirstName,  
+                 Staff.LastName,  
+                 Alias.ColorTag,  
+                 emc.URL_EN,  
+                 emc.URL_FR          
+            FROM  
+                 Document  
+                 INNER JOIN Patient ON Patient.PatientSerNum = Document.PatientSerNum  
+                 INNER JOIN AliasExpression ON AliasExpression.AliasExpressionSerNum = Document.AliasExpressionSerNum  
+                 INNER JOIN Alias ON Alias.AliasSerNum = AliasExpression.AliasSerNum  
+                 INNER JOIN UserPatient ON UserPatient.PatientSerNum = Patient.PatientSerNum  
+                 INNER JOIN Users ON Users.UserSerNum = UserPatient.UserSerNum
+                 INNER JOIN Staff ON Staff.StaffSerNum = Document.ApprovedBySerNum  
+                 LEFT JOIN EducationalMaterialControl emc ON emc.EducationalMaterialControlSerNum = Alias.EducationalMaterialControlSerNum           
+            WHERE  
+                 Patient.AccessLevel = 3  
+                 AND Users.Username LIKE ?
+                 AND (Document.LastUpdated > ? OR Alias.LastUpdated > ?);`;
 };
 exports.getDocumentsContentQuery = function()
 {
-    return "SELECT Document.DocumentSerNum, " +
-        "case " +
-        "   when instr(Document.FinalFileName, '/') = 0 then Document.FinalFileName " +
-        "   when instr(Document.FinalFileName, '/') > 0 then substring(Document.FinalFileName, instr(Document.FinalFileName, '/') + 1, length(Document.FinalFileName)) " +
-        "end FinalFileName " + 
-        "FROM Document, Patient, Users WHERE Document.DocumentSerNum IN ? AND Document.PatientSerNum = Patient.PatientSerNum AND Patient.PatientSerNum = Users.UserTypeSerNum AND Users.Username = ?";
+    return `SELECT Document.DocumentSerNum, 
+                CASE 
+                    WHEN instr(Document.FinalFileName, '/') = 0 THEN Document.FinalFileName
+                    WHEN instr(Document.FinalFileName, '/') > 0 THEN substring(Document.FinalFileName, instr(Document.FinalFileName, '/') + 1, length(Document.FinalFileName))
+                END FinalFileName
+            FROM Document, Patient, Users, UserPatient
+            WHERE Document.DocumentSerNum IN ?
+                AND Document.PatientSerNum = Patient.PatientSerNum 
+                AND Patient.PatientSerNum = UserPatient.PatientSerNum 
+                AND UserPatient.UserSerNum = Users.UserSerNum
+                AND Users.Username = ?;`;
 };
 
 exports.patientTeamMessagesTableFields=function()
 {
-    return "SELECT TxRecords.TxTeamMessageSerNum, TxRecords.DateAdded, TxRecords.ReadStatus, Post.PostType, Post.Body_EN, Post.Body_FR, Post.PostName_EN, Post.PostName_FR FROM PostControl as Post, TxTeamMessage as TxRecords, Patient, Users WHERE Post.PostControlSerNum=TxRecords.PostControlSerNum AND TxRecords.PatientSerNum=Patient.PatientSerNum AND Patient.PatientSerNum=Users.UserTypeSerNum AND Users.Username= ? AND (TxRecords.LastUpdated > ? OR Post.LastUpdated > ?);";
+    return `SELECT TxRecords.TxTeamMessageSerNum, TxRecords.DateAdded, TxRecords.ReadStatus, Post.PostType, Post.Body_EN, Post.Body_FR, Post.PostName_EN, Post.PostName_FR 
+            FROM PostControl as Post, TxTeamMessage as TxRecords, Patient, Users, UserPatient
+            WHERE Post.PostControlSerNum = TxRecords.PostControlSerNum 
+                AND TxRecords.PatientSerNum = Patient.PatientSerNum 
+                AND Patient.PatientSerNum = UserPatient.PatientSerNum 
+                AND UserPatient.UserSerNum = Users.UserSerNum
+                AND Users.Username = ?
+                AND (TxRecords.LastUpdated > ? OR Post.LastUpdated > ?);`;
 };
 exports.patientAnnouncementsTableFields=function()
 {
-    return "SELECT Announcement.AnnouncementSerNum, Announcement.DateAdded, Announcement.ReadStatus, PostControl.PostType, PostControl.Body_EN, PostControl.Body_FR, PostControl.PostName_EN, PostControl.PostName_FR FROM PostControl, Announcement, Users, Patient WHERE PostControl.PostControlSerNum = Announcement.PostControlSerNum AND Announcement.PatientSerNum=Patient.PatientSerNum AND Patient.PatientSerNum=Users.UserTypeSerNum AND Users.Username= ? AND (Announcement.LastUpdated > ? OR PostControl.LastUpdated > ?);";
+    return `SELECT Announcement.AnnouncementSerNum, Announcement.DateAdded, Announcement.ReadStatus, PostControl.PostType, PostControl.Body_EN, PostControl.Body_FR, PostControl.PostName_EN, PostControl.PostName_FR 
+            FROM PostControl, Announcement, Users, Patient, UserPatient
+            WHERE PostControl.PostControlSerNum = Announcement.PostControlSerNum 
+                AND Announcement.PatientSerNum = Patient.PatientSerNum 
+                AND Patient.PatientSerNum = UserPatient.PatientSerNum
+                AND UserPatient.UserSerNum = Users.UserSerNum
+                AND Users.Username= ?
+                AND (Announcement.LastUpdated > ? OR PostControl.LastUpdated > ?);`;
 };
 exports.patientEducationalMaterialTableFields=function()
 {
-    return "SELECT DISTINCT EduMat.EducationalMaterialSerNum, EduControl.ShareURL_EN, EduControl.ShareURL_FR, EduControl.EducationalMaterialControlSerNum, " +
-    " EduMat.DateAdded, EduMat.ReadStatus, EduControl.EducationalMaterialType_EN, EduControl.EducationalMaterialType_FR, EduControl.Name_EN, EduControl.Name_FR, " +
-    " EduControl.URL_EN, EduControl.URL_FR, Phase.Name_EN as PhaseName_EN, Phase.Name_FR as PhaseName_FR " +
-    " FROM Users, Patient, EducationalMaterialControl as EduControl, EducationalMaterial as EduMat, PhaseInTreatment as Phase, EducationalMaterialTOC as TOC " +
-    " WHERE (EduMat.EducationalMaterialControlSerNum = EduControl.EducationalMaterialControlSerNum OR " +
-    " (TOC.ParentSerNum = EduMat.EducationalMaterialControlSerNum AND TOC.EducationalMaterialControlSerNum = EduControl.EducationalMaterialControlSerNum)) " +
-    " AND Phase.PhaseInTreatmentSerNum = EduControl.PhaseInTreatmentSerNum AND  EduMat.PatientSerNum = Patient.PatientSerNum AND Patient.PatientSerNum = Users.UserTypeSerNum " +
-    " AND Users.Username = ? AND (EduMat.LastUpdated > ? OR EduControl.LastUpdated > ? OR Phase.LastUpdated > ? OR TOC.LastUpdated > ?) " +
-    " order by FIELD(PhaseName_EN,'Prior To Treatment','During Treatment','After Treatment') ;";
+    return `SELECT DISTINCT 
+                EduMat.EducationalMaterialSerNum, 
+                EduControl.ShareURL_EN, 
+                EduControl.ShareURL_FR, 
+                EduControl.EducationalMaterialControlSerNum,  
+                EduMat.DateAdded, 
+                EduMat.ReadStatus, 
+                EduControl.EducationalMaterialType_EN, 
+                EduControl.EducationalMaterialType_FR, 
+                EduControl.Name_EN, 
+                EduControl.Name_FR,  
+                EduControl.URL_EN,
+                EduControl.URL_FR, 
+                Phase.Name_EN as PhaseName_EN, 
+                Phase.Name_FR as PhaseName_FR  
+            FROM 
+                Users, 
+                Patient, 
+                UserPatient,
+                EducationalMaterialControl as EduControl, 
+                EducationalMaterial as EduMat, 
+                PhaseInTreatment as Phase, 
+                EducationalMaterialTOC as TOC  
+            WHERE 
+                (EduMat.EducationalMaterialControlSerNum = EduControl.EducationalMaterialControlSerNum OR  (TOC.ParentSerNum = EduMat.EducationalMaterialControlSerNum AND TOC.EducationalMaterialControlSerNum = EduControl.EducationalMaterialControlSerNum))  
+                AND Phase.PhaseInTreatmentSerNum = EduControl.PhaseInTreatmentSerNum 
+                AND EduMat.PatientSerNum = Patient.PatientSerNum 
+                AND Patient.PatientSerNum = UserPatient.PatientSerNum
+                AND UserPatient.UserSerNum = Users.UserSerNum
+                AND Users.Username = ?
+                AND (EduMat.LastUpdated > ? OR EduControl.LastUpdated > ? OR Phase.LastUpdated > ? OR TOC.LastUpdated > ?)
+            order by FIELD(PhaseName_EN,'Prior To Treatment','During Treatment','After Treatment');`;
 };
 
 exports.patientEducationalMaterialContents=function()
@@ -149,69 +212,82 @@ exports.patientEducationalMaterialContents=function()
 
 exports.patientTasksTableFields=function()
 {
-    return "SELECT DISTINCT Patient.PatientAriaSer, " +
-        "Alias.AliasName_EN AS TaskName_EN, " +
-        "Alias.AliasName_FR AS TaskName_FR, " +
-        "Alias.AliasDescription_EN AS TaskDescription_EN, " +
-        "Alias.AliasDescription_FR AS TaskDescription_FR, " +
-        "Task.DueDateTime, " +
-        "emc.URL_EN, " +
-        "emc.URL_FR " +
-        "" +
-        "FROM Patient " +
-        "" +
-        "INNER JOIN Users ON Users.UserTypeSerNum = Patient.PatientSerNum " +
-        "INNER JOIN Task ON Task.PatientSerNum = Patient.PatientSerNum " +
-        "INNER JOIN AliasExpression ON AliasExpression.AliasExpressionSerNum = Task.AliasExpressionSerNum " +
-        "INNER JOIN Alias ON Alias.AliasSerNum = AliasExpression.AliasSerNum " +
-        "LEFT JOIN EducationalMaterialControl emc ON emc.EducationalMaterialControlSerNum = Alias.EducationalMaterialControlSerNum " +
-        "" +
-        "WHERE " +
-        "Users.Username LIKE ? " +
-        "AND (Task.LastUpdated > ? OR Alias.LastUpdated > ?) " +
-        "ORDER BY Task.DueDateTime ASC;";
+    return `SELECT DISTINCT Patient.PatientAriaSer,  
+                    Alias.AliasName_EN AS TaskName_EN,  
+                    Alias.AliasName_FR AS TaskName_FR,  
+                    Alias.AliasDescription_EN AS TaskDescription_EN,  
+                    Alias.AliasDescription_FR AS TaskDescription_FR,  
+                    Task.DueDateTime,  
+                    emc.URL_EN,  
+                    emc.URL_FR  
+            FROM Patient  
+                    INNER JOIN UserPatient ON Patient.PatientSerNum = UserPatient.PatientSerNum
+                    INNER JOIN Users ON UserPatient.UserSerNum = Users.UserSerNum
+                    INNER JOIN Task ON Task.PatientSerNum = Patient.PatientSerNum  
+                    INNER JOIN AliasExpression ON AliasExpression.AliasExpressionSerNum = Task.AliasExpressionSerNum  
+                    INNER JOIN Alias ON Alias.AliasSerNum = AliasExpression.AliasSerNum  
+                    LEFT JOIN EducationalMaterialControl emc ON emc.EducationalMaterialControlSerNum = Alias.EducationalMaterialControlSerNum  
+            WHERE  
+                    Users.Username LIKE ?
+                    AND (Task.LastUpdated > ? OR Alias.LastUpdated > ?)  
+                    ORDER BY Task.DueDateTime ASC;`
 };
 
 exports.getPatientPasswordForVerification = function()
 {
     return `SELECT DISTINCT u.Password
-            FROM Users u, Patient pat
-            WHERE pat.Email= ? AND pat.PatientSerNum = u.UserTypeSerNum`;
+            FROM Users u, Patient pat, UserPatient up
+            WHERE pat.Email = ?
+                AND pat.PatientSerNum = up.PatientSerNum
+                AND up.UserSerNum = u.UserSerNum;`;
 };
-
 
  exports.getPatientFieldsForPasswordReset = function()
  {
-    return `SELECT DISTINCT pat.SSN, pat.Email, u.Password, u.UserTypeSerNum, sa.AnswerText, pdi.Attempt, pdi.TimeoutTimestamp
-            FROM Users u, Patient pat, SecurityAnswer sa, PatientDeviceIdentifier pdi
-            WHERE pat.Email= ? AND pat.PatientSerNum = u.UserTypeSerNum AND pdi.DeviceId = ?
-            AND sa.SecurityAnswerSerNum = pdi.SecurityAnswerSerNum AND sa.PatientSerNum = pat.PatientSerNum`;
+    return `SELECT DISTINCT pat.SSN, pat.Email, u.Password, pat.PatientSerNum, sa.AnswerText, pdi.Attempt, pdi.TimeoutTimestamp
+            FROM Users u, Patient pat, SecurityAnswer sa, PatientDeviceIdentifier pdi, UserPatient up
+            WHERE pat.Email = ? 
+                AND pdi.DeviceId = ?
+                AND sa.SecurityAnswerSerNum = pdi.SecurityAnswerSerNum 
+                AND sa.PatientSerNum = pat.PatientSerNum
+                AND pat.PatientSerNum = up.PatientSerNum 
+                AND up.UserSerNum = u.UserSerNum;`;
  };
+
 exports.increaseSecurityAnswerAttempt = function()
 {
     return `UPDATE PatientDeviceIdentifier SET Attempt = Attempt + 1 WHERE DeviceId = ?`;
 };
+
 exports.resetSecurityAnswerAttempt = function()
 {
     return `UPDATE PatientDeviceIdentifier SET Attempt = 0, TimeoutTimestamp = NULL WHERE DeviceId = ?`;
 };
+
 exports.setTimeoutSecurityAnswer = function()
 {
     return `UPDATE PatientDeviceIdentifier SET TimeoutTimestamp = ? WHERE DeviceId = ?`;
 };
+
 exports.setNewPassword=function()
 {
-    return "UPDATE Users SET Password = ? WHERE UserTypeSerNum = ?";
+    return "UPDATE Users SET PASSWORD = ? WHERE UserSerNum = (SELECT UserSerNum FROM UserPatient WHERE PatientSerNum = ?);";
 };
 
 //For checkin
 exports.getAppointmentAriaSer=function()
 {
-    return "SELECT Appointment.AppointmentAriaSer FROM Patient, Users, Appointment WHERE Users.Username = ? AND Appointment.AppointmentSerNum = ? AND Patient.PatientSerNum = Users.UserTypeSerNum ";
+    return `SELECT Appointment.AppointmentAriaSer 
+            FROM Patient, Users, Appointment, UserPatient
+            WHERE Users.Username = ?
+                AND Appointment.AppointmentSerNum = ? 
+                AND Patient.PatientSerNum = UserPatient.PatientSerNum
+                AND UserPatient.UserSerNum = Users.UserSerNum;`;
 };
+
 exports.checkin=function()
 {
-    return "UPDATE Appointment, Patient, Users SET Appointment.Checkin=1, Appointment.SessionId=? WHERE Appointment.AppointmentSerNum=? AND Appointment.PatientSerNum = Patient.PatientSerNum AND Patient.PatientSerNum = Users.UserTypeSerNum AND Users.Username = ? ";
+    return "UPDATE Appointment, Patient, Users, UserPatient SET Appointment.Checkin = 1, Appointment.SessionId = ? WHERE Appointment.AppointmentSerNum = ? AND Appointment.PatientSerNum = Patient.PatientSerNum AND Patient.PatientSerNum = UserPatient.PatientSerNum AND UserPatient.UserSerNum = Users.UserSerNum AND Users.Username = ?;";
 };
 
 exports.logCheckin = function()
@@ -223,10 +299,12 @@ exports.accountChange=function()
 {
     return `UPDATE Patient SET ??=?, SessionId=? WHERE PatientSerNum=?`;
 };
-exports.inputFeedback=function(UserSerNum, content)
+
+exports.inputFeedback=function()
 {
     return "INSERT INTO Feedback (`FeedbackSerNum`,`PatientSerNum`,`FeedbackContent`,`AppRating`,`DateAdded`, `SessionId`, `LastUpdated`) VALUES (NULL,?,?,?,NOW(),?, CURRENT_TIMESTAMP )";
 };
+
 //As the name implies, sends the message, this message function needs to be improved to account for injection attacks
 exports.sendMessage=function(objectRequest)
 {
@@ -273,16 +351,13 @@ exports.securityQuestionEncryption=function(){
 
 exports.userEncryption=function()
 {
-    return "SELECT u.Password, sa.AnswerText FROM Users u, SecurityAnswer sa, PatientDeviceIdentifier pdi WHERE u.Username = ? AND pdi.PatientSerNum = u.UserTypeSerNum AND sa.SecurityAnswerSerNum = pdi.SecurityAnswerSerNum AND pdi.DeviceId = ?";
-};
-    /**
-     * @deprecated;
-     * @param serNum
-     * @returns {string}
-     */
-    exports.getSecurityQuestions=function(serNum)
-{
-    return "SELECT SecurityQuestion.QuestionText_EN, SecurityQuestion.QuestionText_FR, SecurityAnswer.AnswerText FROM SecurityQuestion, SecurityAnswer WHERE SecurityAnswer.PatientSerNum="+serNum +" AND SecurityQuestion.SecurityQuestionSerNum = SecurityAnswer.SecurityQuestionSerNum";
+    return `SELECT u.Password, sa.AnswerText 
+            FROM Users u, SecurityAnswer sa, PatientDeviceIdentifier pdi, UserPatient up
+            WHERE u.Username = ?
+                AND pdi.PatientSerNum = up.PatientSerNum
+                AND up.UserSerNum = u.UserSerNum
+                AND sa.SecurityAnswerSerNum = pdi.SecurityAnswerSerNum 
+                AND pdi.DeviceId = ?;`;
 };
 
 exports.getSecQuestion=function()
@@ -346,12 +421,12 @@ exports.insertEducationalMaterialRatingQuery=function()
 
 exports.getPatientAriaSerQuery = function()
 {
-    return "SELECT Patient.PatientAriaSer, Patient.PatientId FROM Patient, Users WHERE Patient.PatientSerNum = Users.UserTypeSerNum && Users.Username = ?"
+    return "SELECT Patient.PatientAriaSer, Patient.PatientId FROM Patient, Users, UserPatient WHERE Patient.PatientSerNum = UserPatient.PatientSerNum AND UserPatient.UserSerNum = Users.UserSerNum AND Users.Username = ?;";
 };
 
 exports.getPatientId= function()
 {
-    return "SELECT Patient.PatientId FROM Patient, Users WHERE Patient.PatientSerNum = Users.UserTypeSerNum && Users.Username = ?"
+    return "SELECT Patient.PatientId FROM Patient, Users, UserPatient WHERE Patient.PatientSerNum = UserPatient.PatientSerNum AND UserPatient.UserSerNum = Users.UserSerNum AND Users.Username = ?;";
 };
 
 /**
@@ -366,7 +441,7 @@ exports.getPatientSerNum = function()
 };
 
 exports.getTrustedDevice = function () {
-    return "SELECT pdi.Trusted FROM PatientDeviceIdentifier pdi, Users u WHERE pdi.PatientSerNum = u.UserTypeSerNum AND u.Username = ? AND DeviceId = ?"
+    return "SELECT pdi.Trusted FROM PatientDeviceIdentifier pdi, Users u, UserPatient up WHERE pdi.PatientSerNum = up.PatientSerNum AND up.UserSerNum = u.UserSerNum AND u.Username = ? AND DeviceId = ?;";
 };
 
 exports.setDeviceSecurityAnswer = function () {
@@ -422,53 +497,53 @@ exports.getTodaysCheckedInAppointments = function() {
 
 exports.patientNotificationsTableFields=function()
 {
-    return "SELECT Notification.NotificationSerNum, " +
-        "Notification.DateAdded, " +
-        "Notification.ReadStatus, " +
-        "Notification.RefTableRowSerNum, " +
-        "NotificationControl.NotificationType, " +
-        "NotificationControl.Name_EN, " +
-        "NotificationControl.Name_FR, " +
-        "NotificationControl.Description_EN, " +
-        "NotificationControl.Description_FR, " +
-        "Notification.RefTableRowTitle_EN, " +
-        "Notification.RefTableRowTitle_FR " +
-        "" +
-        "FROM Notification, " +
-        "NotificationControl, " +
-        "Patient, " +
-        "Users " +
-        "" +
-        "WHERE " +
-        "NotificationControl.NotificationControlSerNum = Notification.NotificationControlSerNum " +
-        "AND Notification.PatientSerNum=Patient.PatientSerNum " +
-        "AND Patient.PatientSerNum=Users.UserTypeSerNum " +
-        "AND Users.Username= ? ";
+    return `SELECT Notification.NotificationSerNum,  
+                    Notification.DateAdded,  
+                    Notification.ReadStatus,  
+                    Notification.RefTableRowSerNum,  
+                    NotificationControl.NotificationType,  
+                    NotificationControl.Name_EN,  
+                    NotificationControl.Name_FR,  
+                    NotificationControl.Description_EN,  
+                    NotificationControl.Description_FR,  
+                    Notification.RefTableRowTitle_EN,  
+                    Notification.RefTableRowTitle_FR  
+            FROM Notification,  
+                    NotificationControl,  
+                    Patient,  
+                    Users,
+                    UserPatient  
+            WHERE  
+                    NotificationControl.NotificationControlSerNum = Notification.NotificationControlSerNum  
+                    AND Notification.PatientSerNum=Patient.PatientSerNum  
+                    AND Patient.PatientSerNum = UserPatient.PatientSerNum
+                    AND UserPatient.UserSerNum = Users.UserSerNum
+                    AND Users.Username= ?;`;
 };
 
 exports.getNewNotifications=function() {
-    return "SELECT Notification.NotificationSerNum, " +
-        "Notification.DateAdded," +
-        " Notification.ReadStatus, " +
-        "Notification.RefTableRowSerNum, " +
-        "NotificationControl.NotificationType, " +
-        "NotificationControl.Name_EN, " +
-        "NotificationControl.Name_FR, " +
-        "NotificationControl.Description_EN, " +
-        "NotificationControl.Description_FR, " +
-        "Notification.RefTableRowTitle_EN, " +
-        "Notification.RefTableRowTitle_FR " +
-        "" +
-        "FROM Notification, " +
-        "NotificationControl, " +
-        "Patient, " +
-        "Users " +
-        "" +
-        "WHERE " +
-        "NotificationControl.NotificationControlSerNum = Notification.NotificationControlSerNum " +
-        "AND Notification.PatientSerNum=Patient.PatientSerNum " +
-        "AND Patient.PatientSerNum=Users.UserTypeSerNum " +
-        "AND Users.Username= ? " +
-        "AND Notification.ReadStatus = 0 " +
-        "AND (Notification.DateAdded > ? OR NotificationControl.DateAdded > ?);";
+    return `SELECT Notification.NotificationSerNum,  
+                Notification.DateAdded, 
+                Notification.ReadStatus,  
+                Notification.RefTableRowSerNum,  
+                NotificationControl.NotificationType,  
+                NotificationControl.Name_EN,  
+                NotificationControl.Name_FR,  
+                NotificationControl.Description_EN,  
+                NotificationControl.Description_FR,  
+                Notification.RefTableRowTitle_EN,  
+                Notification.RefTableRowTitle_FR  
+            FROM Notification,  
+                NotificationControl,  
+                Patient,  
+                Users,
+                UserPatient  
+            WHERE  
+                NotificationControl.NotificationControlSerNum = Notification.NotificationControlSerNum  
+                AND Notification.PatientSerNum=Patient.PatientSerNum  
+                AND Patient.PatientSerNum = UserPatient.PatientSerNum
+                AND UserPatient.UserSerNum = Users.UserSerNum 
+                AND Users.Username= ?
+                AND Notification.ReadStatus = 0  
+                AND (Notification.DateAdded > ? OR NotificationControl.DateAdded > ?);`;
 };
