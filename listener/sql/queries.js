@@ -244,7 +244,7 @@ exports.getPatientPasswordForVerification = function()
 
  exports.getPatientFieldsForPasswordReset = function()
  {
-    return `SELECT DISTINCT pat.SSN, pat.Email, u.Password, pat.PatientSerNum, sa.AnswerText, pdi.Attempt, pdi.TimeoutTimestamp
+    return `SELECT DISTINCT pat.SSN, pat.Email, u.Password, pat.PatientSerNum, sa.AnswerText, pdi.Attempt, pdi.TimeoutTimestamp, u.UserSerNum
             FROM Users u, Patient pat, SecurityAnswer sa, PatientDeviceIdentifier pdi, UserPatient up
             WHERE pat.Email = ? 
                 AND pdi.DeviceId = ?
@@ -271,7 +271,7 @@ exports.setTimeoutSecurityAnswer = function()
 
 exports.setNewPassword=function()
 {
-    return "UPDATE Users SET PASSWORD = ? WHERE UserSerNum = (SELECT UserSerNum FROM UserPatient WHERE PatientSerNum = ?);";
+    return "UPDATE Users SET PASSWORD = ? WHERE UserSerNum = ?;";
 };
 
 //For checkin
