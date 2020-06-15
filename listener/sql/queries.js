@@ -2,7 +2,7 @@ var exports=module.exports={};
 //Get Patient table information for a particular patient
 exports.patientTableFields=function()
 {
-    return `SELECT Patient.PatientSerNum, Patient.TestUser, Patient.FirstName, Patient.LastName, Patient.TelNum, Patient.PatientId, Patient.Email, Patient.Alias, Patient.Language, Patient.EnableSMS,Patient.ProfileImage, Patient.SSN, Patient.AccessLevel 
+    return `SELECT Patient.PatientSerNum, Patient.TestUser, Patient.FirstName, Patient.LastName, Patient.TelNum, Patient.PatientId, Users.Email, Patient.Alias, Patient.Language, Patient.EnableSMS, Users.ProfileImage, Patient.SSN, Patient.AccessLevel 
             FROM Patient, Users, UserPatient
             WHERE Users.Username LIKE ?
                 AND UserPatient.PatientSerNum = Patient.PatientSerNum
@@ -235,18 +235,14 @@ exports.patientTasksTableFields=function()
 
 exports.getPatientPasswordForVerification = function()
 {
-    return `SELECT DISTINCT u.Password
-            FROM Users u, Patient pat, UserPatient up
-            WHERE pat.Email = ?
-                AND pat.PatientSerNum = up.PatientSerNum
-                AND up.UserSerNum = u.UserSerNum;`;
+    return "SELECT DISTINCT u.Password FROM Users u WHERE u.Email = ?;";
 };
 
  exports.getPatientFieldsForPasswordReset = function()
  {
-    return `SELECT DISTINCT pat.SSN, pat.Email, u.Password, pat.PatientSerNum, sa.AnswerText, pdi.Attempt, pdi.TimeoutTimestamp, u.UserSerNum
+    return `SELECT DISTINCT pat.SSN, u.Email, u.Password, pat.PatientSerNum, sa.AnswerText, pdi.Attempt, pdi.TimeoutTimestamp, u.UserSerNum
             FROM Users u, Patient pat, SecurityAnswer sa, PatientDeviceIdentifier pdi, UserPatient up
-            WHERE pat.Email = ? 
+            WHERE u.Email = ? 
                 AND pdi.DeviceId = ?
                 AND sa.SecurityAnswerSerNum = pdi.SecurityAnswerSerNum 
                 AND sa.PatientSerNum = pat.PatientSerNum
@@ -320,7 +316,10 @@ exports.sendMessage=function(objectRequest)
 };
 exports.getPatientFromEmail=function()
 {
-    return "SELECT PatientSerNum FROM Patient WHERE Email = ?";
+    return `SELECT up.PatientSerNum
+            FROM UserPatient up, Users u
+            WHERE u.Email = ?
+                AND u.UserSerNum = up.UserSerNum;`;
 };
 
 exports.logActivity=function()
@@ -362,7 +361,13 @@ exports.userEncryption=function()
 
 exports.getSecQuestion=function()
 {
-    return "SELECT sq.QuestionText_EN, sq.QuestionText_FR, sa.SecurityAnswerSerNum, sa.PatientSerNum FROM SecurityQuestion sq, SecurityAnswer sa, Patient pat WHERE pat.Email = ? AND sa.PatientSerNum= pat.PatientSerNum AND sq.SecurityQuestionSerNum = sa.SecurityQuestionSerNum ORDER BY RAND() LIMIT 1";
+    return `SELECT sq.QuestionText_EN, sq.QuestionText_FR, sa.SecurityAnswerSerNum, sa.PatientSerNum 
+            FROM SecurityQuestion sq, SecurityAnswer sa, Users u, UserPatient up
+            WHERE u.Email = ?
+                AND sa.PatientSerNum = up.PatientSerNum 
+                AND up.UserSerNum = u.UserSerNum
+                AND sq.SecurityQuestionSerNum = sa.SecurityQuestionSerNum 
+            ORDER BY RAND() LIMIT 1;`;
 };
 
 exports.updateLogout=function()
