@@ -6,7 +6,6 @@ const sqlInterface = require('./../api/sqlInterface.js');
 const opalQueries = require('../sql/queries');
 const questionnaireValidation = require('./questionnaire.validate');
 const logger = require('./../logs/logger');
-const trigger = require('./questionnaireTrigger');
 
 exports.getQuestionnaireList = getQuestionnaireList;
 exports.getQuestionnaire = getQuestionnaire;
@@ -146,7 +145,6 @@ function questionnaireUpdateStatus(requestObject) {
 
         } else {
             let patientSerNumOpalDB;
-            let patientSerNumAndLanguage;
 
             // 1. update the status in the answerQuestionnaire table in questionnaire DB
             // get patientSerNum in the opal database
@@ -157,7 +155,6 @@ function questionnaireUpdateStatus(requestObject) {
                         logger.log("error", "Error updating status: No matching PatientSerNum found in opalDB");
                         reject(new Error('Error updating status: No matching PatientSerNum found in opalDB'));
                     } else {
-                        patientSerNumAndLanguage = patientSerNumAndLanguageRow[0];
                         patientSerNumOpalDB = patientSerNumAndLanguageRow[0].PatientSerNum;
                         return questionnaires.updateQuestionnaireStatusInQuestionnaireDB(requestObject.Parameters.answerQuestionnaire_id, requestObject.Parameters.new_status, requestObject.AppVersion);
                     }
@@ -172,8 +169,6 @@ function questionnaireUpdateStatus(requestObject) {
                         resolve({Response: 'success'});
                     }
                 }).then(function () {
-                    trigger.checkTrigger(patientSerNumAndLanguage, requestObject.Parameters.answerQuestionnaire_id);
-
                     resolve({Response: 'success'});
                 }).catch(function (err) {
                     logger.log("error", "Error updating status", err);
