@@ -25,13 +25,13 @@ function checkTrigger(opalPatientInfo, answerQuestionnaire_Id) {
     };
     */
 
-    // ESAS wellbeing > 5
+    // ESAS wellbeing < 5
     const triggerJsonRules = {
         "and": [
             {"==": [{"var": "section_id"}, 12]},
             {"==": [{"var": "question_id"}, 799]},
             {"==": [{"var": "skipped"}, 0]},
-            {">": [{"var": "answer_value"}, 5]}
+            {"<": [{"var": "answer_value"}, 5]}
         ]
     };
 
@@ -92,7 +92,7 @@ function checkTrigger(opalPatientInfo, answerQuestionnaire_Id) {
             if (shouldTrigger) {
                 console.log("\n-----------in check trigger, should trigger:");
 
-                return triggerQuestionnaire(-1, opalPatientInfo.PatientId);
+                return triggerQuestionnaire(-1, opalPatientInfo.PatientSerNum);
             }
 
             console.log("\n-----------in check trigger, should not trigger");
@@ -111,9 +111,10 @@ const insertFilterQuery =
 
 const checkPublishFlagQuery = `SELECT qc.PublishFlag FROM QuestionnaireControl qc WHERE qc.QuestionnaireControlSerNum = ?;`;
 const updatePublishFlagQuery = `UPDATE questionnairecontrol SET PublishFlag='1' WHERE  QuestionnaireControlSerNum=?;`;
+const insertQuestionnaireQuery = `INSERT INTO Questionnaire (PatientSerNum,QuestionnaireControlSerNum,DateAdded) VALUES (?, ?, ?);`;
 
-function triggerQuestionnaire (questionnaireId, patientId){
-    const questionnaireControlSerNumToSent = 7; // 8 for local
+function triggerQuestionnaire (questionnaireId, patientSerNum){
+    const questionnaireControlSerNumToSent = 11; // 11 for local, 7 for staging
     const controlTable = 'LegacyQuestionnaireControl';
     const filterType = 'Patient'
     let publishFlag = 0;
@@ -127,14 +128,11 @@ function triggerQuestionnaire (questionnaireId, patientId){
 
             console.log("\n-----------in trigger questionnaire, found publish flag =", publishFlag);
 
-            // insert into filter table
-            return sqlInterface.runSqlQuery(insertFilterQuery,
-                [controlTable, questionnaireControlSerNumToSent, filterType, patientId, moment(Date.now()).format("YYYY-MM-DD HH:mm:ss")]);
+            return sqlInterface.runSqlQuery(insertQuestionnaireQuery,
+                [patientSerNum, questionnaireControlSerNumToSent, moment(Date.now()).format("YYYY-MM-DD HH:mm:ss")]);
         })
         .then(function(response){
-            console.log("\n-----------in trigger questionnaire, inserted into the filter table, response:", response);
-
-            // should insert into MH but skip it
+            console.log("\n-----------in trigger questionnaire, inserted into the questionnaire table, response:", response);
 
             if (!publishFlag) {
                 return sqlInterface.runSqlQuery(updatePublishFlagQuery, [questionnaireControlSerNumToSent]);
@@ -147,14 +145,16 @@ function triggerQuestionnaire (questionnaireId, patientId){
             return Promise.resolve("Questionnaire sent");
         })
         .catch(function(err){
-            return Promise.reject("Questionnaire failed to be send");
+            return Promise.reject("Questionnaire failed to be send", err);
         });
 }
 
 function testTrigger(answer){
     // staging
-    return answer.section_id === 12 && answer.question_id === 799 && answer.skipped === 0 && answer.answer_value > 5;
+    // ESAS wellbeing < 5 or test radio button 1st question = yes
+    // return (answer.section_id === 12 && answer.question_id === 799 && answer.skipped === 0 && answer.answer_value < 5) ||
+    //     (answer.section_id === 43 && answer.question_id === 862 && answer.skipped === 0 && answer.answer_value === 25);
 
     // local
-    // return answer.section_id === 19 && answer.question_id === 853 && answer.skipped === 0 && answer.answer_value > 3;
+    return answer.section_id === 19 && answer.question_id === 853 && answer.skipped === 0 && answer.answer_value > 3;
 }
