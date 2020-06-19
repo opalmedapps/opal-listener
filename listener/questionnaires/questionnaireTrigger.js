@@ -13,6 +13,8 @@ exports.checkTrigger = checkTrigger;
 function checkTrigger(opalPatientInfo, answerQuestionnaire_Id) {
     console.log("\n-----------in check trigger");
 
+    /*
+    Local: Opal feedback questionnaire 1st question > 3
     const triggerJsonRules = {
         "and": [
             {"==": [{"var": "section_id"}, 19]},
@@ -21,10 +23,9 @@ function checkTrigger(opalPatientInfo, answerQuestionnaire_Id) {
             {">": [{"var": "answer_value"}, 3]}
         ]
     };
+    */
 
-    /*
-    TODO
-    ESAS wellbeing > 5
+    // ESAS wellbeing > 5
     const triggerJsonRules = {
         "and": [
             {"==": [{"var": "section_id"}, 12]},
@@ -33,7 +34,6 @@ function checkTrigger(opalPatientInfo, answerQuestionnaire_Id) {
             {">": [{"var": "answer_value"}, 5]}
         ]
     };
-     */
 
     questionnaires.getQuestionnaire(opalPatientInfo, answerQuestionnaire_Id)
         .then(function (questionnaireWithAnswer) {
@@ -76,10 +76,6 @@ function checkTrigger(opalPatientInfo, answerQuestionnaire_Id) {
                         let answer = answersArray[a_i];
                         console.log("\n-----------in check trigger, answer is:", answer);
 
-                        if (answer.question_id === 853){
-                            console.log("\n-----------in check trigger, question 853:", answer);
-                        }
-
                         if (testTrigger(answer)) {
                             console.log("\n-----------in check trigger, jsonLogic applied");
                             shouldTrigger = true;
@@ -117,12 +113,12 @@ const checkPublishFlagQuery = `SELECT qc.PublishFlag FROM QuestionnaireControl q
 const updatePublishFlagQuery = `UPDATE questionnairecontrol SET PublishFlag='1' WHERE  QuestionnaireControlSerNum=?;`;
 
 function triggerQuestionnaire (questionnaireId, patientId){
-    const questionnaireControlSerNumToSent = 8; // TODO: 7 for staging
+    const questionnaireControlSerNumToSent = 7; // 8 for local
     const controlTable = 'LegacyQuestionnaireControl';
     const filterType = 'Patient'
     let publishFlag = 0;
 
-    console.log("\n-----------in trigger questionnaire");
+    console.log("\n-----------in trigger questionnaire, sending controlSerNum:", questionnaireControlSerNumToSent);
 
     // check publish flag of that questionnaire
     return sqlInterface.runSqlQuery(checkPublishFlagQuery, [questionnaireControlSerNumToSent])
@@ -156,5 +152,9 @@ function triggerQuestionnaire (questionnaireId, patientId){
 }
 
 function testTrigger(answer){
-    return answer.section_id === 19 && answer.question_id === 853 && answer.skipped === 0 && answer.answer_value > 3;
+    // staging
+    return answer.section_id === 12 && answer.question_id === 799 && answer.skipped === 0 && answer.answer_value > 5;
+
+    // local
+    // return answer.section_id === 19 && answer.question_id === 853 && answer.skipped === 0 && answer.answer_value > 3;
 }
