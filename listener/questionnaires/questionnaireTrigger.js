@@ -114,7 +114,7 @@ const updatePublishFlagQuery = `UPDATE questionnairecontrol SET PublishFlag='1' 
 const insertQuestionnaireQuery = `INSERT INTO Questionnaire (PatientSerNum,QuestionnaireControlSerNum,DateAdded) VALUES (?, ?, ?);`;
 
 function triggerQuestionnaire (questionnaireId, patientSerNum){
-    const questionnaireControlSerNumToSent = 11; // 11 for local, 7 for staging
+    const questionnaireControlSerNumToSent = 7; // 11 for local, 7 for staging
     const controlTable = 'LegacyQuestionnaireControl';
     const filterType = 'Patient'
     let publishFlag = 0;
@@ -152,9 +152,9 @@ function triggerQuestionnaire (questionnaireId, patientSerNum){
 function testTrigger(answer){
     // staging
     // ESAS wellbeing < 5 or test radio button 1st question = yes
-    // return (answer.section_id === 12 && answer.question_id === 799 && answer.skipped === 0 && answer.answer_value < 5) ||
-    //     (answer.section_id === 43 && answer.question_id === 862 && answer.skipped === 0 && answer.answer_value === 25);
+    return (answer.section_id === 12 && answer.question_id === 799 && answer.skipped === 0 && answer.answer_value < 5) ||
+        (answer.section_id === 43 && answer.question_id === 862 && answer.skipped === 0 && answer.answer_value === 25);
 
     // local
-    return answer.section_id === 19 && answer.question_id === 853 && answer.skipped === 0 && answer.answer_value > 3;
+    // return answer.section_id === 19 && answer.question_id === 853 && answer.skipped === 0 && answer.answer_value > 3;
 }
