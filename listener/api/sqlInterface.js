@@ -496,45 +496,95 @@ exports.getDocumentsContent = function(requestObject) {
 };
 
 /**
- * @name updateAccountField
- * @description Updates the fields in the patient table
- * @param requestObject
+ * updateAccountField
+ * @desc Updates the fields in the Patient or the Users table
+ * @param {object} requestObject
+ * @returns {Promise}
  */
-exports.updateAccountField=function(requestObject) {
+exports.updateAccountField = function (requestObject) {
     let r = Q.defer();
 
+    let validPatientFields = ['TelNum', 'Language'];   // Valid fields for Patient table
+    let validUserFields = ['Email', 'Password']; // Valid fields for Users table
+
     let email = requestObject.UserEmail;
-    if(!email) r.reject({Response:'error',Reason:`Invalid parameter email`}); //Check for valid email
-    getPatientFromEmail(email).then(function(patient) {
-        //Valid fields
-        let validFields = ['Email', 'TelNum', 'Language'];
-        let field = requestObject.Parameters.FieldToChange;
-        let newValue = requestObject.Parameters.NewValue;
-        if ( !field || !newValue || typeof field !== 'string' || typeof newValue !== 'string')
-            r.resolve({Response:'error',Reason:'Invalid Parameters'});
-        if(field === 'Password') {
-            //Hash the password before storing
-            let hashedPassword = utility.hash(newValue);
-            //Update database
-            exports.runSqlQuery(queries.setNewPassword(), [hashedPassword, patient.PatientSerNum])
-                .then(()=>{
+    let fieldToBeUpdated = requestObject.Parameters.FieldToChange;
+    let newValue = requestObject.Parameters.NewValue;
+
+    //Check for valid email
+    if (!email) {
+        r.reject({Response: 'error', Reason: `Invalid parameter email`});
+    }
+
+    if (!fieldToBeUpdated || !newValue || typeof fieldToBeUpdated !== 'string' || typeof newValue !== 'string') {
+        r.reject({Response: 'error', Reason: 'Invalid Parameters'});
+    }
+
+    if (validPatientFields.includes(fieldToBeUpdated)) {
+        updatePatientFields(email, requestObject.Token, fieldToBeUpdated, newValue)
+            .then(() => {
+                r.resolve({Response:'success'});
+            })
+            .catch((err) => {
+                r.reject({Response:'error',Reason:err});
+            });
+
+    } else if (validUserFields.includes(fieldToBeUpdated)) {
+        updateUserFields(email, requestObject.Token, fieldToBeUpdated, newValue)
+            .then(() => {
+                if(fieldToBeUpdated === 'Password') {
                     delete requestObject.Parameters.NewValue;
-                    r.resolve({Response:'success'});
-                }).catch((err)=>{
-	                r.reject({Response:'error',Reason:err});
-                });
-            //If not a password field update
-        }else if(validFields.includes(field)){
-            exports.runSqlQuery(queries.accountChange(), [field, newValue, requestObject.Token, patient.PatientSerNum])
-                .then(()=>{
-                    r.resolve({Response:'success'});
-                }).catch((err)=>{
-                    r.reject({Response:'error',Reason:err});
-                });
-        }
-    });
+                }
+
+                r.resolve({Response:'success'});
+            })
+            .catch((err) => {
+                r.reject({Response:'error',Reason:err});
+            });
+
+    } else {
+        r.reject({Response: 'error', Reason: 'Invalid Parameters'});
+    }
+
     return r.promise;
-};
+}
+
+/**
+ * updatePatientFields
+ * @desc Updates the fields in the Patient table
+ * @param {string} email user's email
+ * @param {string} sessionId
+ * @param {string} fieldToBeUpdated the field in the Patient table to be updated
+ * @param {string} newValue the new value of the field
+ * @returns {Promise}
+ */
+function updatePatientFields(email, sessionId, fieldToBeUpdated, newValue) {
+    return getPatientFromEmail(email)
+        .then(function(patient) {
+            return exports.runSqlQuery(queries.patientAccountChange(), [fieldToBeUpdated, newValue, sessionId, patient.PatientSerNum]);
+        });
+}
+
+/**
+ * updateUserFields
+ * @desc Updates the fields in the Users table
+ * @param {string} email user's email
+ * @param {string} sessionId
+ * @param {string} fieldToBeUpdated the field in the Users table to be updated
+ * @param {string} newValue the new value of the field
+ * @returns {Promise}
+ */
+function updateUserFields(email, sessionId, fieldToBeUpdated, newValue) {
+    if(fieldToBeUpdated === 'Password') {
+        //Hash the password before storing
+        let hashedPassword = utility.hash(newValue);
+
+        //Update database
+        return exports.runSqlQuery(queries.setNewPasswordFromEmail(), [hashedPassword, sessionId, email]);
+    } else {
+        return exports.runSqlQuery(queries.userAccountChange(), [fieldToBeUpdated, newValue, sessionId, email]);
+    }
+}
 
 /**
  * @name inputFeedback

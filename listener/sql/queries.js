@@ -267,7 +267,12 @@ exports.setTimeoutSecurityAnswer = function()
 
 exports.setNewPassword=function()
 {
-    return "UPDATE Users SET PASSWORD = ? WHERE UserSerNum = ?;";
+    return "UPDATE Users SET Password = ? WHERE UserSerNum = ?;";
+};
+
+exports.setNewPasswordFromEmail = function()
+{
+    return "UPDATE Users SET Password = ?, SessionId = ? WHERE Email = ?;";
 };
 
 //For checkin
@@ -291,9 +296,14 @@ exports.logCheckin = function()
     return "INSERT INTO `CheckinLog`(`CheckinLogSerNum`, `AppointmentSerNum`, `DeviceId`, `Latitude`, `Longitude`, `Accuracy`, `DateAdded`, `LastUpdated`) VALUES (NULL,?,?,?,?,?,?,NULL)";
 };
 
-exports.accountChange=function()
+exports.patientAccountChange=function()
 {
-    return `UPDATE Patient SET ??=?, SessionId=? WHERE PatientSerNum=?`;
+    return "UPDATE Patient SET ??=?, SessionId=? WHERE PatientSerNum=?";
+};
+
+exports.userAccountChange = function()
+{
+    return "UPDATE Users SET ??=?, SessionId=? WHERE Email=?;";
 };
 
 exports.inputFeedback=function()
