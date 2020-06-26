@@ -3,15 +3,6 @@ const sqlInterface = require('./sqlInterface.js');
 const logger = require('./../logs/logger.js');
 const questionnaires = require('./../questionnaires/questionnaireOpalDB.js');
 
-//API call to log user out
-exports.logout=function(requestObject)
-{
-    /* This line was removed because we now add all requests to the activity log.
-     * Logout is still being recorded, but it's now done earlier in the code.
-     * -SB */
-    // return sqlInterface.addToActivityLog(requestObject);
-};
-
 //Send message
 exports.sendMessage=function(requestObject)
 {
