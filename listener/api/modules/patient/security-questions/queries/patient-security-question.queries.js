@@ -39,7 +39,7 @@ class PatientSecurityQuestionQuery {
      */
     static updateSecurityQuestionAnswerQuery(securityQuestionSerNum, answerText, securityAnswerSerNum, patientSerNum) {
         return mysql.format(
-            `UPDATE securityanswer SET SecurityQuestionSerNum = ?, AnswerText = ? WHERE SecurityAnswerSerNum = ? AND PatientSerNum = ?;`,
+            `UPDATE SecurityAnswer SET SecurityQuestionSerNum = ?, AnswerText = ? WHERE SecurityAnswerSerNum = ? AND PatientSerNum = ?;`,
             [securityQuestionSerNum, answerText, securityAnswerSerNum, patientSerNum]
         );
     }
