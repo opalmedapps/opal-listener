@@ -21,7 +21,7 @@ exports.resetPasswordRequest=function(requestKey, requestObject)
             responseObject = { Headers:{RequestKey:requestKey,RequestObject:requestObject}, Code: 2, Data:{},Response:'error', Reason:'Injection attack, incorrect Email'};
             r.resolve(responseObject);
         }else{
-            //If the request is not erroneus simply direct the request to appropiate function based on the request mapping object
+            //If the request is not erroneous simply direct the request to appropriate function based on the request mapping object
             requestMappings[requestObject.Request](requestKey, requestObject,patient[0]).then(function(response){
                 r.resolve(response);
             });
@@ -160,7 +160,7 @@ exports.securityQuestion=function(requestKey,requestObject) {
                     .then((res) => {
                         logger.log('debug', 'successfully got password for verification');
                         if (res.Password === password) {
-                            logger.log('debug', 'pasword was verified');
+                            logger.log('debug', 'password was verified');
                             return getSecurityQuestion(requestKey, requestObject, unencrypted)
                                 .then(function (response) {
                                     logger.log('debug', 'successfully got security question with response: ' + JSON.stringify(response));
@@ -198,7 +198,7 @@ function getSecurityQuestion(requestKey, requestObject, unencrypted){
             return sqlInterface.getSecurityQuestion(requestObject)
         })
         .then(function (response) {
-            logger.log('debug', 'updated devude id successfully');
+            logger.log('debug', 'updated device id successfully');
 
             r.resolve({
                 Code:3,
