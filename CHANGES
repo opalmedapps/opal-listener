@@ -1,3 +1,12 @@
+Version 1.3.0.0:
+ - Remove unused PasswordReset request (replaced by SetNewPassword) (#16)
+ - security answer query bug fix (#15)
+ - Questionnaire notification bug fix and clean up (#12)
+ - Security answer change (#10)
+ - Revert "Trigger questionnaire (#13)" (#14)
+ - Trigger questionnaire (#13)
+ - Fixing myWaiting SQL Injection problem (#11)
+
 Version 1.2.0.0:
 
 
