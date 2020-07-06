@@ -44,10 +44,9 @@ const LEGACYAPI = {
 
 /**
  * API HANDLERS FOR SECURITY SPECIFIC REQUESTS
- * @type {{PasswordReset: *, SecurityQuestion: *, SetNewPassword: *, VerifyAnswer: *}}
+ * @type {{SecurityQuestion: *, SetNewPassword: *, VerifyAnswer: *}}
  */
 exports.securityAPI = {
-    'PasswordReset': security.resetPasswordRequest,
     'SecurityQuestion': security.securityQuestion,
     'SetNewPassword': security.resetPasswordRequest,
     'VerifyAnswer': security.resetPasswordRequest
