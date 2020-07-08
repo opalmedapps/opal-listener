@@ -7,6 +7,7 @@ const logger                = require('./../logs/logger');
 const modules               = require('./modules/waiting-time');
 // New API handlers
 const tests = require("./modules/test-results");
+const updateSecurityQuestionAnswer = require("./modules/patient/security-questions");
 
 /**
  * API HANDLERS FOR GENERAL REQUESTS
@@ -17,7 +18,6 @@ const LEGACYAPI = {
     'Log': apiPatientUpdate.logActivity,
     'LogPatientAction': apiPatientUpdate.logPatientAction,
     'Login': apiPatientUpdate.login,
-    'Logout': apiHospitalUpdate.logout,
     'Resume': apiPatientUpdate.resume,
     'Refresh': apiPatientUpdate.refresh,
     'AccountChange': apiHospitalUpdate.accountChange,
@@ -44,19 +44,18 @@ const LEGACYAPI = {
 
 /**
  * API HANDLERS FOR SECURITY SPECIFIC REQUESTS
- * @type {{PasswordReset: *, SecurityQuestion: *, SetNewPassword: *, VerifyAnswer: *}}
+ * @type {{SecurityQuestion: *, SetNewPassword: *, VerifyAnswer: *}}
  */
 exports.securityAPI = {
-    'PasswordReset': security.resetPasswordRequest,
     'SecurityQuestion': security.securityQuestion,
     'SetNewPassword': security.resetPasswordRequest,
     'VerifyAnswer': security.resetPasswordRequest
 };
 /**
  * New API handlers
- * @type {{PatientTestDates: {(OpalRequest): Promise<*>, (*): Promise<void>}, PatientTestTypeResults: {(OpalRequest): Promise<OpalResponseError|*>, (*): Promise<void>}, PatientTestDateResultsHandler: {(OpalRequest): Promise<OpalResponseError|*>, (*): Promise<void>}, PatientTestTypes: {(OpalRequest): Promise<*>, (*): Promise<void>}}}
+ * @type {{PatientTestDates: {(OpalRequest): Promise<*>, (*): Promise<void>}, PatientTestTypeResults: {(OpalRequest): Promise<OpalResponseError|*>, (*): Promise<void>}, PatientTestDateResultsHandler: {(OpalRequest): Promise<OpalResponseError|*>, (*): Promise<void>}, PatientTestTypes: {(OpalRequest): Promise<*>, (*): Promise<void>}, SecurityQuestionAnswerList: {(OpalRequest): Promise<*>, (*): Promise<void>}, UpdateSecurityQuestionAnswer: {(OpalRequest): Promise<OpalResponseError|*>, (*): Promise<void>}}}
  */
-const API = {...tests};
+const API = {...tests, ...updateSecurityQuestionAnswer};
 
 /**
  * processRequest

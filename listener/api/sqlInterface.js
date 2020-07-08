@@ -34,7 +34,7 @@ const waitingRoomPool = mysql.createPool(waitingRoomDbCredentials);
 
 /**
  * Table mappings and process data functions for results obtained from the database. Exporting function for testing purposes.
- * @type {{Patient: {sql, processFunction: loadProfileImagePatient, numberOfLastUpdated: number}, Documents: {sql, numberOfLastUpdated: number, table: string, serNum: string}, Doctors: {sql, processFunction: loadImageDoctor, numberOfLastUpdated: number}, Diagnosis: {sql, numberOfLastUpdated: number}, Questionnaires: {sql, numberOfLastUpdated: number, processFunction: *}, Appointments: {sql, numberOfLastUpdated: number, processFunction: combineResources, table: string, serNum: string}, Notifications: {sql, numberOfLastUpdated: number, table: string, serNum: string}, Tasks: {sql, numberOfLastUpdated: number}, TxTeamMessages: {sql, numberOfLastUpdated: number, table: string, serNum: string}, EducationalMaterial: {sql, processFunction: getEducationTableOfContents, numberOfLastUpdated: number, table: string, serNum: string}, Announcements: {sql, numberOfLastUpdated: number, table: string, serNum: string}}}
+ * @type {{Patient: {sql, processFunction: loadProfileImagePatient, numberOfLastUpdated: number}, Documents: {sql, numberOfLastUpdated: number, table: string, serNum: string}, Doctors: {sql, processFunction: loadImageDoctor, numberOfLastUpdated: number}, Diagnosis: {sql, numberOfLastUpdated: number}, Appointments: {sql, numberOfLastUpdated: number, processFunction: combineResources, table: string, serNum: string}, Notifications: {sql, numberOfLastUpdated: number, table: string, serNum: string}, Tasks: {sql, numberOfLastUpdated: number}, TxTeamMessages: {sql, numberOfLastUpdated: number, table: string, serNum: string}, EducationalMaterial: {sql, processFunction: getEducationTableOfContents, numberOfLastUpdated: number, table: string, serNum: string}, Announcements: {sql, numberOfLastUpdated: number, table: string, serNum: string}}}
  */
 const requestMappings =
     {
@@ -108,7 +108,7 @@ const requestMappings =
 
 /**
  * getSqlApiMapping
- * @return {{Patient: {sql, processFunction: loadProfileImagePatient, numberOfLastUpdated: number}, Documents: {sql, numberOfLastUpdated: number, table: string, serNum: string}, Doctors: {sql, processFunction: loadImageDoctor, numberOfLastUpdated: number}, Diagnosis: {sql, numberOfLastUpdated: number}, Questionnaires: {sql, numberOfLastUpdated: number, processFunction: *}, Appointments: {sql, numberOfLastUpdated: number, processFunction: combineResources, table: string, serNum: string}, Notifications: {sql, numberOfLastUpdated: number, table: string, serNum: string}, Tasks: {sql, numberOfLastUpdated: number}, TxTeamMessages: {sql, numberOfLastUpdated: number, table: string, serNum: string}, EducationalMaterial: {sql, processFunction: getEducationTableOfContents, numberOfLastUpdated: number, table: string, serNum: string}, Announcements: {sql, numberOfLastUpdated: number, table: string, serNum: string}}}
+ * @return {{Patient: {sql, processFunction: loadProfileImagePatient, numberOfLastUpdated: number}, Documents: {sql, numberOfLastUpdated: number, table: string, serNum: string}, Doctors: {sql, processFunction: loadImageDoctor, numberOfLastUpdated: number}, Diagnosis: {sql, numberOfLastUpdated: number}, Appointments: {sql, numberOfLastUpdated: number, processFunction: combineResources, table: string, serNum: string}, Notifications: {sql, numberOfLastUpdated: number, table: string, serNum: string}, Tasks: {sql, numberOfLastUpdated: number}, TxTeamMessages: {sql, numberOfLastUpdated: number, table: string, serNum: string}, EducationalMaterial: {sql, processFunction: getEducationTableOfContents, numberOfLastUpdated: number, table: string, serNum: string}, Announcements: {sql, numberOfLastUpdated: number, table: string, serNum: string}}}
  */
 exports.getSqlApiMappings = function() {
     return requestMappings;
@@ -405,7 +405,6 @@ exports.checkIn=function(requestObject) {
 /**
  * Calls John's PHP script in order to check in patient on Aria and Medivisit
  * @param patientId
- * @param apptSerNum
  * @returns {Promise}
  */
 function checkIntoAriaAndMedi(patientId) {
@@ -547,13 +546,10 @@ exports.inputFeedback = function(requestObject) {
     let email = requestObject.UserEmail;
     if(!email) r.reject({Response:'error',Reason:`Invalid parameter email`});
     getPatientFromEmail(email).then((patient)=> {
-//        let {type, feedback, appRating} = requestObject.Parameters;
-//		logger.log('debug', 'Request Object Parameters: ' + JSON.stringify(requestObject.Parameters));
 		let feedback = requestObject.Parameters.FeedbackContent;
 		let appRating = requestObject.Parameters.AppRating;
 		let type = requestObject.Parameters.Type;
 		let patientSerNum = patient.PatientSerNum;
-		// {"AppRating":"3","FeedbackContent":"test","Type":"opal"}
 
         if((!type||!feedback)) r.reject({Response:'error',Reason:`Invalid parameter type`});
         exports.runSqlQuery(queries.inputFeedback(),[ patient.PatientSerNum, feedback, appRating, requestObject.Token ])
@@ -582,7 +578,7 @@ exports.inputFeedback = function(requestObject) {
 /**
  * @module sqlInterface
  * @name updateDeviceIdentifiers
- * @description Updates the device identifer for a particular user and a particular device.
+ * @description Updates the device identifier for a particular user and a particular device.
  * @input {object} Object containing the device identifiers
  * @returns {promise} Promise with success or failure.
  */
@@ -840,7 +836,7 @@ exports.getPatientDeviceLastActivity = function(userid,device)
 
 /**
  *@module sqlInterface
- *@name inputQuestionnaireRating
+ *@name inputEducationalMaterialRating
  *@require queries
  *@descrption Inputs educational material rating
  *@parameter {string} patientSerNum SerNum in database for user that rated the material
@@ -1261,7 +1257,7 @@ exports.getAllNotifications = function(requestObject){
 
 exports.getNewNotifications = function(requestObject){
     let r = Q.defer();
-    // this query does not work for questionnaires as of 29 July 2019 since the opal database do not have the questionnaire
+
     exports.runSqlQuery(queries.getNewNotifications(), [requestObject.UserID, requestObject.Parameters.LastUpdated, requestObject.Parameters.LastUpdated])
         .then(rows => {
             if(rows.length > 0){
@@ -1288,32 +1284,27 @@ function assocNotificationsWithItems(notifications, requestObject){
 
     return new Promise((resolve, reject) => {
 
-        // A list containing all possible notification types
+        // A list containing all possible notification types that need to be refreshed
         // TODO: not an elegant way to do this... should create a mapping
-        const itemList = ['Document', 'Announcement', 'TxTeamMessage', 'EducationalMaterial', 'Questionnaire'];
+        const itemList = ['Document', 'Announcement', 'TxTeamMessage', 'EducationalMaterial'];
 
-        let fields = [];
+        let fieldsToRefresh = [];
 
         // For each notification, build a list of content-types that need to be refreshed to be paired with the notification(s)
         notifications.forEach(notif => {
 
-            // Due to the mess that is questionnaires, we have to map LegacyQuestionnaire to Questionnaire since that how's it named everywhere on the listener
-            if(notif.NotificationType === 'LegacyQuestionnaire') notif.NotificationType = 'Questionnaire';
-
-            if(itemList.includes(notif.NotificationType) && (!fields.includes(notif.NotificationType) || !fields.includes(notif.NotificationType + 's'))) {
+            if(itemList.includes(notif.NotificationType) && (!fieldsToRefresh.includes(notif.NotificationType) || !fieldsToRefresh.includes(notif.NotificationType + 's'))) {
 
                 // Educational material mapping is singular... otherwise add 's' to end of key
                 // TODO: This is a pretty bad way to handle this... should create a mapping
                 let string =(notif.NotificationType !== 'EducationalMaterial') ? notif.NotificationType + 's' : notif.NotificationType;
-                fields.push(string);
+                fieldsToRefresh.push(string);
             }
         });
 
-
-        if(fields.length > 0) {
-
+        if(fieldsToRefresh.length > 0) {
             // Refresh all the new data (should only be data that needs to be associated with notification)
-            refresh(fields, requestObject)
+            refresh(fieldsToRefresh, requestObject)
                 .then(results => {
                     if(!!results.Data){
 
@@ -1337,20 +1328,7 @@ function mapRefreshedDataToNotifications(results, notifications) {
 
     // Iterate through refreshed data object via its keys
     Object.keys(results).map(key => {
-
-        // Need to do special work for questionnaires since it is returned as an object rather than an array
-        if (key === 'Questionnaires') {
-
-            // Extract the patient and raw questionnaire from the object
-            let patient_questionnaires = results[key]['PatientQuestionnaires'];
-            let raw_questionnaires = results[key]['Questionnaires'];
-
-            // convert the questionnaire object into a more manageable object for the next steps of notification mapping
-            resultsArray = createQuestionnaireNotificationObject(patient_questionnaires, raw_questionnaires, resultsArray);
-
-        } else {
-            resultsArray = resultsArray.concat(results[key])
-        }
+        resultsArray = resultsArray.concat(results[key]);
     });
 
     logger.log('debug', 'results array: ' + JSON.stringify(resultsArray));
@@ -1373,36 +1351,6 @@ function mapRefreshedDataToNotifications(results, notifications) {
         tuple.push(item);
         return tuple;
     });
-}
-
-function createQuestionnaireNotificationObject(patient_questionnaires, raw_questionnaires, resultsArray){
-
-    // input check
-    if (patient_questionnaires === undefined || patient_questionnaires === null || typeof patient_questionnaires !== 'object' ||
-        raw_questionnaires === undefined || raw_questionnaires === null || typeof raw_questionnaires !== 'object'){
-        return resultsArray;
-    }
-
-    // Iterate through refreshed questionnaire data by serNum
-    Object.keys(patient_questionnaires).map(ser => {
-
-        // Grab the DB ser num from patient questionnaire object + it's associated raw questionnaire
-        let db_ser = patient_questionnaires[ser].QuestionnaireDBSerNum;
-        let raw_q = raw_questionnaires[db_ser];
-
-        // Create an object that can be referenced by it's questionnareSerNum in order to get Questionnaire objects
-        let q_obj ={
-            QuestionnaireSerNum: ser,
-            Questionnaire: {
-                PatientQuestionnaires: patient_questionnaires[ser],
-                Questionnaires: raw_q
-            }
-        };
-
-        resultsArray = resultsArray.concat(q_obj);
-    });
-
-    return resultsArray
 }
 
 function refresh (fields, requestObject) {
