@@ -79,7 +79,10 @@ exports.patientAppointmentsTableFields=function()
 exports.patientDocumentTableFields=function()
 {
     return "SELECT DISTINCT " +
-        "Document.FinalFileName, " +
+        "case " +
+        "   when instr(Document.FinalFileName, '/') = 0 then Document.FinalFileName " +
+        "   when instr(Document.FinalFileName, '/') > 0 then substring(Document.FinalFileName, instr(Document.FinalFileName, '/') + 1, length(Document.FinalFileName)) " +
+        "end FinalFileName, " +
         "Alias.AliasName_EN, " +
         "Alias.AliasName_FR, " +
         "Document.ReadStatus, " +
@@ -110,7 +113,12 @@ exports.patientDocumentTableFields=function()
 };
 exports.getDocumentsContentQuery = function()
 {
-    return "SELECT Document.DocumentSerNum, Document.FinalFileName FROM Document, Patient, Users WHERE Document.DocumentSerNum IN ? AND Document.PatientSerNum = Patient.PatientSerNum AND Patient.PatientSerNum = Users.UserTypeSerNum AND Users.Username = ?";
+    return "SELECT Document.DocumentSerNum, " +
+        "case " +
+        "   when instr(Document.FinalFileName, '/') = 0 then Document.FinalFileName " +
+        "   when instr(Document.FinalFileName, '/') > 0 then substring(Document.FinalFileName, instr(Document.FinalFileName, '/') + 1, length(Document.FinalFileName)) " +
+        "end FinalFileName " + 
+        "FROM Document, Patient, Users WHERE Document.DocumentSerNum IN ? AND Document.PatientSerNum = Patient.PatientSerNum AND Patient.PatientSerNum = Users.UserTypeSerNum AND Users.Username = ?";
 };
 
 exports.patientTeamMessagesTableFields=function()
