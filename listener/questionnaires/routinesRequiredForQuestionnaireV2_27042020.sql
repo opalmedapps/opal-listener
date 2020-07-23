@@ -281,44 +281,46 @@ DELIMITER ;
 DELIMITER //
 CREATE DEFINER=`root`@`localhost` PROCEDURE `getQuestionnaireList`(
 	IN `i_externalPatientId` VARCHAR(64),
+	IN `i_categoryId` BIGINT,
 	IN `i_isoLang` VARCHAR(2)
+
 )
     DETERMINISTIC
 BEGIN
 
 	-- this procedure gets the list of questionnaire belonging to a single patient.
 	-- it requires an external patient ID i.e. from OpalDB, and a language in ISO format, i.e. 'EN', 'FR'. If the language is not valid, default to French.
-	
+
 	-- declare variables
 	declare wsCountLang, wsReturn int;
 	declare language_id bigint;
 	declare default_isoLang varchar(2);
-	
+
 	-- set default language to French
 	set default_isoLang = 'FR';
-	
+
 	-- note: wsReturn convention for this procedure: success = 0, language error = -1
-	
+
 	-- get language
 	select count(ID), ID into wsCountLang, language_id from language where isoLang = i_isoLang and deleted = 0 group by ID;
-	
+
 	-- label is a way to do early exit
 	get_questionnaire_list:BEGIN
-	
-		-- verify language is correct	
+
+		-- verify language is correct
 		if wsCountLang <> 1 then
-		
+
 			-- try to get language again using default language
 			select count(ID), ID into wsCountLang, language_id from language where isoLang = default_isoLang and deleted = 0 group by ID;
-			
-			-- verify again that language is correct	
+
+			-- verify again that language is correct
 			if wsCountLang <> 1 then
 				set wsReturn = -1;
 				leave get_questionnaire_list;
 			end if;
-			
+
 		end if;
-		
+
 		-- get the list of questionnaire
 		SELECT aq.ID AS qp_ser_num,
 			aq.questionnaireId AS questionnaire_id,
@@ -330,6 +332,7 @@ BEGIN
 		WHERE aq.deleted = 0
 			AND q.deleted = 0
 			AND q.final = 1
+			AND q.questionnaireCategoryId = i_categoryId
 			AND aq.patientId = 
 				(SELECT ID
 				FROM patient

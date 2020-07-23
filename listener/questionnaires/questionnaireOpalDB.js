@@ -26,12 +26,17 @@ FUNCTIONS TO GET QUESTIONNAIRES (QUESTIONNAIRE V2)
  */
 function getQuestionnaireList(requestObject) {
 
+    if (!questionnaireValidation.validateQuestionnaireCategory(requestObject)) {
+        logger.log("error", "Error getting questionnaire list: the requestObject does not have the correct parameter category");
+        return Promise.reject(new Error('Error getting questionnaire list: the requestObject does not have the correct parameter category'));
+    }
+
     return sqlInterface.runSqlQuery(opalQueries.patientTableFields(), [requestObject.UserID, lastUpdatedDateForGettingPatient])
         .then(function (patientSerNumAndLanguageRow) {
 
             if (questionnaireValidation.validatePatientSerNumAndLanguage(patientSerNumAndLanguageRow)) {
                 // get questionnaire list
-                return questionnaires.getQuestionnaireList(patientSerNumAndLanguageRow[0]);
+                return questionnaires.getQuestionnaireList(patientSerNumAndLanguageRow[0], requestObject.Parameters.category);
             } else {
                 logger.log("error", "Error getting questionnaire list: No matching PatientSerNum or/and Language found in opalDB");
                 throw new Error('Error getting questionnaire list: No matching PatientSerNum or/and Language found in opalDB');
@@ -58,7 +63,8 @@ function getQuestionnaire(requestObject) {
 
     return new Promise(function (resolve, reject) {
         // check argument
-        if (!questionnaireValidation.validatingPatientQuestionnaireSerNum(requestObject)) {
+        if (!questionnaireValidation.validatePatientQuestionnaireSerNum(requestObject)) {
+            logger.log("error", "Error getting questionnaire: the requestObject does not have the required parameter");
             reject(new Error('Error getting questionnaire: the requestObject does not have the required parameter qp_ser_num'));
 
         } else {

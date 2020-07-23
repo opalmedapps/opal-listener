@@ -8,19 +8,20 @@ const logger = require('./../logs/logger');
  */
 
 const questionnaireOpalDBValidation = {
-    'validatingPatientQuestionnaireSerNum': validatingPatientQuestionnaireSerNum,
+    'validatePatientQuestionnaireSerNum': validatePatientQuestionnaireSerNum,
     'validatePatientSerNumAndLanguage': validatePatientSerNumAndLanguage,
     'validateParamSaveAnswer': validateParamSaveAnswer,
     'validateParamUpdateStatus': validateParamUpdateStatus,
+    'validateQuestionnaireCategory': validateQuestionnaireCategory,
 }
 
 /**
- * @name validatingPatientQuestionnaireSerNum
+ * @name validatePatientQuestionnaireSerNum
  * @desc validating the parameter qp_ser_num sent from the front-end
  * @param {object} requestObject object sent from the front-end
  * @returns {boolean} true if the qp_ser_num parameter exists and is in correct format, false otherwise
  */
-function validatingPatientQuestionnaireSerNum(requestObject) {
+function validatePatientQuestionnaireSerNum(requestObject) {
     return (requestObject.hasOwnProperty('Parameters') && requestObject.Parameters.hasOwnProperty('qp_ser_num')
         && requestObject.Parameters.qp_ser_num !== null && !isNaN(requestObject.Parameters.qp_ser_num));
 }
@@ -68,6 +69,19 @@ function validateParamUpdateStatus(requestObject) {
         requestObject.hasOwnProperty('Parameters') && requestObject.Parameters.hasOwnProperty('answerQuestionnaire_id') &&
         requestObject.Parameters.hasOwnProperty('new_status') && !isNaN(parseInt(requestObject.Parameters.new_status)) &&
         !isNaN(parseInt(requestObject.Parameters.answerQuestionnaire_id))
+    );
+}
+
+/**
+ * @name validateQuestionnaireCategory
+ * @desc validation function for the questionnaire category
+ * @param {object} requestObject
+ * @returns {boolean} true if the requestObject contain the category with the correct format, false otherwise
+ */
+function validateQuestionnaireCategory(requestObject) {
+    return (
+        requestObject.hasOwnProperty('Parameters') && requestObject.Parameters.hasOwnProperty('category') &&
+        questionnaireConfig.QUESTIONNAIRE_CATEGORY_ID_MAP.hasOwnProperty(requestObject.Parameters.category.toUpperCase())
     );
 }
 
