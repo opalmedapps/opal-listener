@@ -59,15 +59,18 @@ FUNCTIONS TO GET QUESTIONNAIRES
 /**
  * getQuestionnaireList
  * @desc this function get a list of questionnaire belonging to an user.
- * @param {object} opalPatientSerNumAndLanguage object containing PatientSerNum and Language as property. These information comes from OpalDB
+ * @param {object} opalPatientSerNumAndLanguage object containing PatientSerNum and Language as property.
+ *                 These information comes from OpalDB
+ * @param {string} category string indicating the category of the questionnaire list requested.
+ *                 The categories can be found in QUESTIONNAIRE_CATEGORY_ID_MAP of the questionnaireConfig.json file.
  * @returns {promise}
  */
-function getQuestionnaireList(opalPatientSerNumAndLanguage) {
+function getQuestionnaireList(opalPatientSerNumAndLanguage, category) {
     let r = q.defer();
 
     // get questionnaire list
     runQuery(questionnaireQueries.getQuestionnaireListQuery(),
-        [opalPatientSerNumAndLanguage.PatientSerNum, opalPatientSerNumAndLanguage.Language])
+        [opalPatientSerNumAndLanguage.PatientSerNum, findCategoryId(category), opalPatientSerNumAndLanguage.Language])
         .then(function (queryResult) {
 
             if (!questionnaireValidation.hasValidProcedureStatus(queryResult)) {
@@ -167,6 +170,16 @@ function getQuestionOptions(questionAndTypeMap, languageId) {
         });
 
     return r.promise;
+}
+
+/**
+ * findCategoryId
+ * @desc helper function to map the category string sent from the front-end to its ID in the database
+ * @param {string} categoryString
+ * @returns {number} The category ID in the database
+ */
+function findCategoryId(categoryString) {
+    return questionnaireConfig.QUESTIONNAIRE_CATEGORY_ID_MAP[categoryString.toUpperCase()];
 }
 
 /*

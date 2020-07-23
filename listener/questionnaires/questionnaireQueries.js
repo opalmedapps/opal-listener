@@ -22,7 +22,7 @@ exports.updateQuestionnaireStatus = function () {
  */
 
 exports.getQuestionnaireListQuery = function () {
-    return "call getQuestionnaireList(?,?);";
+    return "CALL getQuestionnaireList(?,?,?);";
 }
 
 exports.getQuestionnaireQuery = function () {
