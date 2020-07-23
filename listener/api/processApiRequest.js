@@ -28,7 +28,6 @@ const LEGACYAPI = {
     'Feedback': apiHospitalUpdate.inputFeedback,
     'MapLocation': apiPatientUpdate.getMapLocation,
     'Message': apiHospitalUpdate.sendMessage,
-    'NotificationsAll': apiHospitalUpdate.getAllNotifications,
     'NotificationsNew': apiHospitalUpdate.getNewNotifications,
     'EducationalPackageContents': apiPatientUpdate.getPackageContents,
     'QuestionnaireList': apiPatientUpdate.getQuestionnaireList,
