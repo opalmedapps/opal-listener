@@ -91,7 +91,8 @@ BEGIN
 			q.logo as logo,
 			getDisplayName(q.description,language_id) as description,
 			getDisplayName(q.instruction,language_id) as instruction, 
-			q.optionalFeedback as allow_questionnaire_feedback
+			q.optionalFeedback as allow_questionnaire_feedback,
+			q.questionnaireCategoryId as questionnaire_category_id
 		from answerQuestionnaire aq 
 			left join questionnaire q on (aq.questionnaireId = q.ID)
 		where aq.ID = i_answerQuestionnaireId

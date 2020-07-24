@@ -195,7 +195,9 @@ function validateQuestionnaireProperties(questionnaire) {
         !questionnaire.nickname ||
         !questionnaire.hasOwnProperty('description') ||
         !questionnaire.hasOwnProperty('logo') ||
-        !questionnaire.hasOwnProperty('instruction')) {
+        !questionnaire.hasOwnProperty('instruction') ||
+        !questionnaire.hasOwnProperty('questionnaire_category_id') ||
+        isNaN(parseInt(questionnaire.questionnaire_category_id))) {
 
         logger.log("error", "Error: this questionnaire does not have the required properties");
 
