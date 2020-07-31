@@ -4,7 +4,6 @@ const apiPatientUpdate      = require('./apiPatientUpdate.js');
 const apiHospitalUpdate     = require('./apiHospitalUpdate.js');
 const security              = require('./../security/security');
 const logger                = require('./../logs/logger');
-const modules               = require('./modules/waiting-time');
 // New API handlers
 const tests = require("./modules/test-results");
 const updateSecurityQuestionAnswer = require("./modules/patient/security-questions");
@@ -36,9 +35,7 @@ const LEGACYAPI = {
     'QuestionnaireSaveAnswer': apiHospitalUpdate.questionnaireSaveAnswer,
     'QuestionnaireUpdateStatus': apiHospitalUpdate.questionnaireUpdateStatus,
     'Read': apiHospitalUpdate.updateReadStatus,
-    'PFPMembers': apiPatientUpdate.getPatientsForPatientsMembers,
-    'AppointmentDelays': modules.appointmentDelays.requestHandler,
-    'MyWaitingTime': modules.myWaitingTime.requestHandler
+    'PFPMembers': apiPatientUpdate.getPatientsForPatientsMembers
 };
 
 /**
