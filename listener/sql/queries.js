@@ -133,7 +133,7 @@ exports.patientEducationalMaterialTableFields=function()
 {
     return "SELECT DISTINCT EduMat.EducationalMaterialSerNum, EduControl.ShareURL_EN, EduControl.ShareURL_FR, EduControl.EducationalMaterialControlSerNum, " +
     " EduMat.DateAdded, EduMat.ReadStatus, EduControl.EducationalMaterialType_EN, EduControl.EducationalMaterialType_FR, EduControl.Name_EN, EduControl.Name_FR, " +
-    " EduControl.URL_EN, EduControl.URL_FR, Phase.Name_EN as PhaseName_EN, Phase.Name_FR as PhaseName_FR " +
+    " EduControl.URL_EN, EduControl.URL_FR, EduControl.EducationalMaterialCategoryId, Phase.Name_EN as PhaseName_EN, Phase.Name_FR as PhaseName_FR " +
     " FROM Users, Patient, EducationalMaterialControl as EduControl, EducationalMaterial as EduMat, PhaseInTreatment as Phase, EducationalMaterialTOC as TOC " +
     " WHERE (EduMat.EducationalMaterialControlSerNum = EduControl.EducationalMaterialControlSerNum OR " +
     " (TOC.ParentSerNum = EduMat.EducationalMaterialControlSerNum AND TOC.EducationalMaterialControlSerNum = EduControl.EducationalMaterialControlSerNum)) " +
@@ -315,7 +315,8 @@ exports.getPackageContents = function(){
                    EducationalMaterialControl.ShareURL_EN, EducationalMaterialControl.ShareURL_FR,
                    EducationalMaterialControl.EducationalMaterialType_EN, EducationalMaterialControl.EducationalMaterialType_FR,
                    EducationalMaterialControl.Name_EN, EducationalMaterialControl.Name_FR,  
-                   EducationalMaterialControl.URL_EN, EducationalMaterialControl.URL_FR 
+                   EducationalMaterialControl.URL_EN, EducationalMaterialControl.URL_FR,
+                   EducationalMaterialControl.EducationalMaterialCategoryId
     
             FROM EducationalMaterialPackageContent, EducationalMaterialControl
      
