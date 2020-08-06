@@ -1,3 +1,6 @@
+Version 1.3.1.0:
+ - remove waiting time feature (#18)
+
 Version 1.3.0.2:
  - Fix bugs in NotificationsNew request (#17)
 
