@@ -8,6 +8,7 @@ const Mail              = require('./../mailer/mailer.js');
 const utility           = require('./../utility/utility');
 const logger            = require('./../logs/logger');
 const {OpalSQLQueryRunner} = require("../sql/opal-sql-query-runner");
+const eduMaterialConfig = require('./../eduMaterialConfig.json');
 
 var exports = module.exports = {};
 
@@ -1029,6 +1030,7 @@ function decodePostMessages(rows){
 }
 
 //Obtains the educational material table of contents and adds it to the pertinent materials
+// Also adds educational material category string based on category ID
 function getEducationTableOfContents(rows)
 {
     var r = Q.defer();
@@ -1062,6 +1064,9 @@ function getEducationTableOfContents(rows)
                 if(results[i].length !== 0)
                 {
                     for (var j = 0; j < rows.length; j++) {
+                        // Add edu material category name based on its ID
+                        rows[j].Category = eduMaterialConfig.EDUMATERIAL_CATEGORY_ID_MAP[rows[j].EducationalMaterialCategoryId].toLowerCase();
+
                         if(rows[j].EducationalMaterialControlSerNum ==results[i][0].ParentSerNum)
                         {
                             rows[j].TableContents = results[i];
