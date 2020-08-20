@@ -29,6 +29,7 @@ const LEGACYAPI = {
     'Message': apiHospitalUpdate.sendMessage,
     'NotificationsNew': apiHospitalUpdate.getNewNotifications,
     'EducationalPackageContents': apiPatientUpdate.getPackageContents,
+    'QuestionnaireInOpalDBFromSerNum': apiPatientUpdate.getQuestionnaireInOpalDB,
     'QuestionnaireList': apiPatientUpdate.getQuestionnaireList,
     'Questionnaire': apiPatientUpdate.getQuestionnaire,
     'EducationalMaterialRating': apiHospitalUpdate.inputEducationalMaterialRating,
