@@ -8,7 +8,7 @@ const Mail              = require('./../mailer/mailer.js');
 const utility           = require('./../utility/utility');
 const logger            = require('./../logs/logger');
 const {OpalSQLQueryRunner} = require("../sql/opal-sql-query-runner");
-const eduMaterialConfig = require('./../eduMaterialConfig.json');
+const eduMaterialConfig = require('./../educational_material/eduMaterialConfig.json');
 
 var exports = module.exports = {};
 
