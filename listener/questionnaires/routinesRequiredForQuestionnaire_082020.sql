@@ -12,22 +12,15 @@
 /*!40101 SET @OLD_SQL_MODE=@@SQL_MODE, SQL_MODE='NO_AUTO_VALUE_ON_ZERO' */;
 
 
--- Dumping database structure for questionnaireDB2019
-CREATE DATABASE IF NOT EXISTS `questionnaireDB2019` /*!40100 DEFAULT CHARACTER SET utf8 */;
-USE `questionnaireDB2019`;
+-- Dumping database structure for questionnaireDB
+CREATE DATABASE IF NOT EXISTS `questionnaireDB` /*!40100 DEFAULT CHARACTER SET utf8 */;
+USE `questionnaireDB`;
 
--- Dumping structure for procedure questionnaireDB2019.getQuestionnaireInfo
+-- Dumping structure for procedure questionnaireDB.getQuestionnaireInfo
 DELIMITER //
 CREATE DEFINER=`root`@`localhost` PROCEDURE `getQuestionnaireInfo`(
 	IN `i_answerQuestionnaireId` BIGINT,
 	IN `i_isoLang` VARCHAR(2)
-
-
-
-
-
-
-
 
 )
     DETERMINISTIC
@@ -87,6 +80,7 @@ BEGIN
 		select aq.ID as qp_ser_num,
 			aq.`status` as status,
 			aq.questionnaireId as questionnaire_id,
+			aq.patientId as patient_id,
 			getDisplayName(q.title,language_id) as nickname,
 			q.logo as logo,
 			getDisplayName(q.description,language_id) as description,
@@ -278,7 +272,7 @@ BEGIN
 END//
 DELIMITER ;
 
--- Dumping structure for procedure questionnaireDB2019.getQuestionnaireList
+-- Dumping structure for procedure questionnaireDB.getQuestionnaireList
 DELIMITER //
 CREATE DEFINER=`root`@`localhost` PROCEDURE `getQuestionnaireList`(
 	IN `i_externalPatientId` VARCHAR(64),
@@ -349,7 +343,7 @@ BEGIN
 END//
 DELIMITER ;
 
--- Dumping structure for procedure questionnaireDB2019.getQuestionOptions
+-- Dumping structure for procedure questionnaireDB.getQuestionOptions
 DELIMITER //
 CREATE DEFINER=`root`@`localhost` PROCEDURE `getQuestionOptions`(
 	IN `i_typeId` BIGINT,
@@ -450,7 +444,7 @@ BEGIN
 END//
 DELIMITER ;
 
--- Dumping structure for procedure questionnaireDB2019.saveAnswer
+-- Dumping structure for procedure questionnaireDB.saveAnswer
 DELIMITER //
 CREATE DEFINER=`root`@`localhost` PROCEDURE `saveAnswer`(
 	IN `i_answerQuestionnaireId` BIGINT,
@@ -755,7 +749,32 @@ BEGIN
 END//
 DELIMITER ;
 
--- Dumping structure for procedure questionnaireDB2019.updateAnswerQuestionnaireStatus
+-- Dumping structure for procedure questionnaireDB.getLastCompletedQuestionnaireByPatientId
+DELIMITER //
+CREATE DEFINER=`root`@`localhost` PROCEDURE `getLastCompletedQuestionnaireByPatientId`(
+	IN `i_patientId` BIGINT,
+	IN `i_questionnaireId` BIGINT
+)
+    DETERMINISTIC
+BEGIN
+
+	-- retrieve the last answered questionnaire
+	select max(aq.ID) as PatientQuestionnaireSerNum,
+		aq.questionnaireId,
+		DATE_FORMAT(max(aq.lastUpdated), '%Y-%m-%d') as LastDateTimeAnswered,
+		count(*) as Total
+	from answerQuestionnaire aq
+	where aq.deleted = 0
+		and aq.questionnaireId = i_questionnaireId
+		and aq.patientId = i_patientId
+		and aq.`status` = 2
+	group by aq.questionnaireId
+	;
+
+END//
+DELIMITER ;
+
+-- Dumping structure for procedure questionnaireDB.updateAnswerQuestionnaireStatus
 DELIMITER //
 CREATE DEFINER=`root`@`localhost` PROCEDURE `updateAnswerQuestionnaireStatus`(
 	IN `i_answerQuestionnaireId` BIGINT,
