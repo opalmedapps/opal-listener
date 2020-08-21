@@ -68,7 +68,7 @@ const requestMappings =
         },
         'Notifications': {
             sql: queries.patientNotificationsTableFields(),
-            numberOfLastUpdated: 2,
+            numberOfLastUpdated: 0,
             table: 'Notification',
             serNum: 'NotificationSerNum'
         },
@@ -1230,25 +1230,6 @@ exports.setTrusted = function(requestObject)
  * ========================================================================
  */
 
-
-
-/**
- * Returns a promise containing all the notifications
- * @param {object} requestObject the request
- * @returns {Promise} Returns a promise that contains the notification data
- */
-
-/**
- * DEPRECATED
- */
-exports.getAllNotifications = function(requestObject){
-    let r = Q.defer();
-    exports.runSqlQuery(queries.getAllNotifications(), [requestObject.UserID])
-        .then(rows => r.resolve({Data: rows})
-        .catch(err => r.reject(err)));
-    return r.promise
-};
-
 /**
  * Returns a promise containing all new notifications
  * @param {object} requestObject the request
@@ -1258,7 +1239,9 @@ exports.getAllNotifications = function(requestObject){
 exports.getNewNotifications = function(requestObject){
     let r = Q.defer();
 
-    exports.runSqlQuery(queries.getNewNotifications(), [requestObject.UserID, requestObject.Parameters.LastUpdated, requestObject.Parameters.LastUpdated])
+    let lastUpdated = new Date(Number(requestObject.Parameters.LastUpdated));
+
+    exports.runSqlQuery(queries.getNewNotifications(), [requestObject.UserID, lastUpdated, lastUpdated])
         .then(rows => {
             if(rows.length > 0){
                 assocNotificationsWithItems(rows, requestObject)
@@ -1302,9 +1285,14 @@ function assocNotificationsWithItems(notifications, requestObject){
             }
         });
 
-        if(fieldsToRefresh.length > 0) {
+        // Remove all duplicates from the array (there's no point in refreshing a category more than once)
+        let uniqueFields = fieldsToRefresh.filter(function(e, index) {
+            return fieldsToRefresh.indexOf(e) === index;
+        });
+
+        if(uniqueFields.length > 0) {
             // Refresh all the new data (should only be data that needs to be associated with notification)
-            refresh(fieldsToRefresh, requestObject)
+            refresh(uniqueFields, requestObject)
                 .then(results => {
                     if(!!results.Data){
 
