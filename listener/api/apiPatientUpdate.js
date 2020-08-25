@@ -137,6 +137,14 @@ exports.logPatientRequest = function(requestObject) {
 exports.getQuestionnaireList = questionnaires.getQuestionnaireList;
 
 /**
+ * For questionnaire V2 (2019 version of qplus questionnaire front-end).
+ * Getting the information about a questionnaire stored in OpalDB from its QuestionnaireSerNum
+ * @param {object} requestObject
+ * @returns {Promise}
+ */
+exports.getQuestionnaireInOpalDB = questionnaires.getQuestionnaireInOpalDB;
+
+/**
  * For questionnaire V2 (2019 version of qplus questionnaire front-end). Gets one questionnaire.
  * @param {object} requestObject
  * @returns {Promise}

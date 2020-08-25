@@ -2,11 +2,12 @@ var exports = module.exports = {};
 
 const questionnaireQueries = require('./questionnaireQueries.js');
 const questionnaires = require('./questionnaireQuestionnaireDB.js');
-const sqlInterface = require('./../api/sqlInterface.js');
 const opalQueries = require('../sql/queries');
 const questionnaireValidation = require('./questionnaire.validate');
 const logger = require('./../logs/logger');
+const {OpalSQLQueryRunner} = require("../sql/opal-sql-query-runner");
 
+exports.getQuestionnaireInOpalDB = getQuestionnaireInOpalDB;
 exports.getQuestionnaireList = getQuestionnaireList;
 exports.getQuestionnaire = getQuestionnaire;
 exports.questionnaireSaveAnswer = questionnaireSaveAnswer;
@@ -19,8 +20,45 @@ FUNCTIONS TO GET QUESTIONNAIRES (QUESTIONNAIRE V2)
  */
 
 /**
+ * getQuestionnaireInOpalDB
+ * @desc Returns a promise containing the questionnaire's general information stored in OpalDB. Used for the new questionnaire 2019
+ * @param {object} requestObject
+ * @returns {Promise} object containing the questionnaire's general information stored in OpalDB
+ */
+function getQuestionnaireInOpalDB(requestObject) {
+    return new Promise(function(resolve, reject) {
+        if (!questionnaireValidation.validateQuestionnaireSerNum(requestObject)) {
+
+            const paramErrMessage = "Error getting questionnaire data stored in OpalDB: the requestObject does not have the required parameters";
+            logger.log("error", paramErrMessage);
+            reject(new Error(paramErrMessage));
+
+        } else {
+            OpalSQLQueryRunner.run(questionnaireQueries.getQuestionnaireInOpalDBFromSerNum(), [requestObject.Parameters.questionnaireSerNum])
+                .then(function (rows) {
+                    if (rows.length !== 1) {
+
+                        const questionnaireSerNumErrMessage = `Error getting questionnaire data stored in OpalDB: the questionnaireSerNum ${requestObject.Parameters.questionnaireSerNum} does not have exactly one matching questionnaire`;
+                        logger.log("error", questionnaireSerNumErrMessage);
+                        reject(new Error(questionnaireSerNumErrMessage));
+
+                    } else {
+                        let obj = {};
+                        obj.Data = rows[0];
+                        resolve(obj);
+                    }
+                })
+                .catch(function (error) {
+                    logger.log("error", "Error getting questionnaire data stored in OpalDB", error);
+                    reject(error);
+                });
+        }
+    });
+}
+
+/**
  * getQuestionnaireList
- * @desc Returns a promise containing the questionnaires general information. Used for the new questionnaire 2019
+ * @desc Returns a promise containing the questionnaire list for a particular user. Used for the new questionnaire 2019
  * @param {object} requestObject
  * @return {Promise} Returns a promise that contains a list of questionnaire data
  */
@@ -31,7 +69,7 @@ function getQuestionnaireList(requestObject) {
         return Promise.reject(new Error('Error getting questionnaire list: the requestObject does not have the correct parameter category'));
     }
 
-    return sqlInterface.runSqlQuery(opalQueries.patientTableFields(), [requestObject.UserID, lastUpdatedDateForGettingPatient])
+    return OpalSQLQueryRunner.run(opalQueries.patientTableFields(), [requestObject.UserID, lastUpdatedDateForGettingPatient])
         .then(function (patientSerNumAndLanguageRow) {
 
             if (questionnaireValidation.validatePatientSerNumAndLanguage(patientSerNumAndLanguageRow)) {
@@ -69,7 +107,7 @@ function getQuestionnaire(requestObject) {
 
         } else {
             // get language in the database
-            sqlInterface.runSqlQuery(opalQueries.patientTableFields(), [requestObject.UserID, lastUpdatedDateForGettingPatient])
+            OpalSQLQueryRunner.run(opalQueries.patientTableFields(), [requestObject.UserID, lastUpdatedDateForGettingPatient])
                 .then(function (patientSerNumAndLanguageRow) {
 
                     if (questionnaireValidation.validatePatientSerNumAndLanguage(patientSerNumAndLanguageRow)) {
@@ -111,7 +149,7 @@ function questionnaireSaveAnswer(requestObject) {
 
         } else {
             // get language in the opal database
-            sqlInterface.runSqlQuery(opalQueries.patientTableFields(), [requestObject.UserID, lastUpdatedDateForGettingPatient])
+            OpalSQLQueryRunner.run(opalQueries.patientTableFields(), [requestObject.UserID, lastUpdatedDateForGettingPatient])
                 .then(function (patientSerNumAndLanguageRow) {
 
                     if (questionnaireValidation.validatePatientSerNumAndLanguage(patientSerNumAndLanguageRow)) {
@@ -154,7 +192,7 @@ function questionnaireUpdateStatus(requestObject) {
 
             // 1. update the status in the answerQuestionnaire table in questionnaire DB
             // get patientSerNum in the opal database
-            sqlInterface.runSqlQuery(opalQueries.patientTableFields(), [requestObject.UserID, lastUpdatedDateForGettingPatient])
+            OpalSQLQueryRunner.run(opalQueries.patientTableFields(), [requestObject.UserID, lastUpdatedDateForGettingPatient])
                 .then(function (patientSerNumAndLanguageRow) {
                     // check returns
                     if (!questionnaireValidation.validatePatientSerNumAndLanguage(patientSerNumAndLanguageRow)) {
@@ -169,7 +207,7 @@ function questionnaireUpdateStatus(requestObject) {
 
                     // 2. update the status in the questionnaire table of the opal DB if completed
                     if (isCompleted === 1) {
-                        return sqlInterface.runSqlQuery(questionnaireQueries.updateQuestionnaireStatus(), [isCompleted, requestObject.Parameters.answerQuestionnaire_id]);
+                        return OpalSQLQueryRunner.run(questionnaireQueries.updateQuestionnaireStatus(), [isCompleted, requestObject.Parameters.answerQuestionnaire_id]);
                         // TODO: do we rollback if this fails + insert log into DB
                     } else {
                         resolve({Response: 'success'});

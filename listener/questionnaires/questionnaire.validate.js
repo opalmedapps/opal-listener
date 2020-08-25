@@ -13,7 +13,8 @@ const questionnaireOpalDBValidation = {
     'validateParamSaveAnswer': validateParamSaveAnswer,
     'validateParamUpdateStatus': validateParamUpdateStatus,
     'validateQuestionnaireCategory': validateQuestionnaireCategory,
-}
+    'validateQuestionnaireSerNum': validateQuestionnaireSerNum,
+};
 
 /**
  * @name validatePatientQuestionnaireSerNum
@@ -83,6 +84,17 @@ function validateQuestionnaireCategory(requestObject) {
         requestObject.hasOwnProperty('Parameters') && requestObject.Parameters.hasOwnProperty('category') &&
         questionnaireConfig.QUESTIONNAIRE_CATEGORY_ID_MAP.hasOwnProperty(requestObject.Parameters.category.toUpperCase())
     );
+}
+
+/**
+ * @name validateQuestionnaireSerNum
+ * @desc validating the parameter questionnaireSerNum sent from the front-end
+ * @param {object} requestObject object sent from the front-end
+ * @returns {boolean} true if the questionnaireSerNum parameter exists and is in correct format, false otherwise
+ */
+function validateQuestionnaireSerNum(requestObject) {
+    return (requestObject.hasOwnProperty('Parameters') && requestObject.Parameters.hasOwnProperty('questionnaireSerNum')
+        && !isNaN(requestObject.Parameters.questionnaireSerNum) && parseInt(requestObject.Parameters.questionnaireSerNum) !== 0);
 }
 
 /**
