@@ -39,7 +39,8 @@ class PatientTestResultQuery {
                         		ptr.TestGroupExpressionSerNum IS NULL)
                         AND ptr.TestExpressionSerNum = te.TestExpressionSerNum 
                         AND te.TestControlSerNum = tc.TestControlSerNum  
-                        AND tc.EducationalMaterialControlSerNum = emc.EducationalMaterialControlSerNum 
+						AND tc.EducationalMaterialControlSerNum = emc.EducationalMaterialControlSerNum 
+						AND ptr.TestValueNumeric is not null
                     ORDER BY groupName, sequenceNum;`,
 			[moment(date).format("YYYY-MM-DD HH:mm:ss"), patientSerNum]);
 	}
@@ -62,6 +63,7 @@ class PatientTestResultQuery {
                         	AND ptr.TestExpressionSerNum = te.TestExpressionSerNum
 							AND te.TestControlSerNum = tc.TestControlSerNum
 							AND tc.EducationalMaterialControlSerNum = emc.EducationalMaterialControlSerNum
+							AND ptr.TestValueNumeric is not null
                         ORDER BY collectedDateTime DESC;`, [patientSerNum]);
 	}
 
@@ -95,6 +97,7 @@ class PatientTestResultQuery {
 							AND ptr.TestExpressionSerNum = te.TestExpressionSerNum
 							AND te.TestControlSerNum = tc.TestControlSerNum
 							AND tc.EducationalMaterialControlSerNum = emc.EducationalMaterialControlSerNum
+							AND ptr.TestValueNumeric is not null
 						ORDER BY name_EN, latestCollectedDateTime DESC) as tab
 						GROUP BY name_EN`,
 				  [patientSerNum])
@@ -128,7 +131,8 @@ class PatientTestResultQuery {
                                 AND ptr.TestExpressionSerNum = ?
                                 AND ptr.TestExpressionSerNum = te.TestExpressionSerNum 
                                 AND te.TestControlSerNum = tc.TestControlSerNum  
-                                AND tc.EducationalMaterialControlSerNum = emc.EducationalMaterialControlSerNum
+								AND tc.EducationalMaterialControlSerNum = emc.EducationalMaterialControlSerNum
+								AND ptr.TestValueNumeric is not null
                             ORDER BY latestCollectedDateTime DESC LIMIT 1;`,
 			[patientSerNum, testExpressionSerNum]);
 	}
@@ -150,7 +154,8 @@ class PatientTestResultQuery {
                                 PatientTestResult as ptr
                             WHERE 
                                 ptr.PatientSerNum = ? 
-                                AND ptr.TestExpressionSerNum = ?
+								AND ptr.TestExpressionSerNum = ?
+								AND ptr.TestValueNumeric is not null
                             ORDER BY CollectedDateTime;`,
 			[patientSerNum, testExpressionSerNum]);
 	}
