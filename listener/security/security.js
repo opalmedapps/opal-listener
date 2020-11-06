@@ -69,12 +69,6 @@ exports.verifySecurityAnswer=function(requestKey,requestObject,patient)
 
             unencrypted = params;
 
-            //If its not a reset password request and the passwords are not equivalent
-            if(!requestObject.Parameters.PasswordReset && unencrypted.Password && unencrypted.Password !== patient.Password) {
-                r.resolve({Code:1});
-                return r.promise;
-            }
-
             //If its the right security answer, also make sure is a valid SSN;
             var response = {};
 
@@ -121,8 +115,6 @@ exports.setNewPassword=function(requestKey, requestObject, user)
     var ssn = user.SSN.toUpperCase();
     var answer = user.AnswerText;
 
-    var unencrypted = null;
-
     utility.decrypt(requestObject.Parameters, utility.hash(ssn), answer)
         .then((unencrypted)=> {
             sqlInterface.setNewPassword(utility.hash(unencrypted.newPassword), user.UserTypeSerNum).then(function(){
@@ -148,34 +140,17 @@ exports.securityQuestion=function(requestKey,requestObject) {
         .then((params) => {
             unencrypted = params;
 
-            logger.log('debug', 'unencrypted: ' + JSON.stringify(unencrypted));
+            logger.log('debug', 'Unencrypted: ' + JSON.stringify(unencrypted));
 
             let email = requestObject.UserEmail;
             let password = unencrypted.Password;
 
             //Then this means this is a login attempt
             if (password) {
-                //first check to make sure user's password is correct in DB
-                return sqlInterface.getPasswordForVerification(email)
-                    .then((res) => {
-                        logger.log('debug', 'successfully got password for verification');
-                        if (res.Password === password) {
-                            logger.log('debug', 'password was verified');
-                            return getSecurityQuestion(requestKey, requestObject, unencrypted)
-                                .then(function (response) {
-                                    logger.log('debug', 'successfully got security question with response: ' + JSON.stringify(response));
-                                    return response
-                                });
-                        } else {
-                            return {
-                                Headers: {RequestKey: requestKey, RequestObject: requestObject},
-                                Code: 1,
-                                Data: {},
-                                Response: 'error',
-                                Reason: 'Received password does not match password stored in database.'
-                            };
-                        }
-                    });
+                return getSecurityQuestion(requestKey, requestObject, unencrypted).then(function (response) {
+                    logger.log('debug', 'Successfully got security question with response: ' + JSON.stringify(response));
+                    return response
+                });
             } else {
                 //Otherwise we are dealing with a password reset
                 return getSecurityQuestion(requestKey, requestObject, unencrypted);

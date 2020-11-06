@@ -37,26 +37,29 @@ class RequestValidator {
 				r.reject(new OpalResponseError(5, 'Received request from unsafe app version', request, 'Unsafe App Version'));
 			}
 
-			//Gets user password for decrypting
+			// Get hashed UID for decrypting
+			let hashedUID = utility.hash(requestObject.UserID);
+
+			// Get user security answer for decrypting
 			sqlInterface.getEncryption(requestObject).then(function(rows) {
 				if (rows.length > 1 || rows.length === 0) {
-					//Rejects requests if username returns more than one password
-					r.reject(new OpalResponseError(1, 'Potential Injection Attack, invalid password for encryption', request, 'Invalid credentials'));
+					// Reject requests if username returns more than one row
+					r.reject(new OpalResponseError(1, 'Potential Injection Attack', request, 'Invalid credentials'));
 				} else {
 
-					let {Password, AnswerText} = rows[0];
-					utility.decrypt({req: request.type, params: request.parameters}, Password, AnswerText)
+					let {AnswerText} = rows[0];
+					utility.decrypt({req: request.type, params: request.parameters}, hashedUID, AnswerText)
 					.then((dec)=>{
-						request.setAuthenticatedInfo(AnswerText, Password, dec.req,dec.params);
+						request.setAuthenticatedInfo(AnswerText, hashedUID, dec.req, dec.params);
 						r.resolve(request);
 					})
 					.catch((err)=>{
 						logger.log('error', 'Unable to decrypt due to: ' + JSON.stringify(err));
-						r.reject(new OpalResponseError(2, 'Unable to decrypt request', request, err));
+						r.reject(new OpalResponseError(1, 'Unable to decrypt request', request, err));
 					});
 				}
 			}).catch((err)=>{
-				r.reject(new OpalResponseError(2,  'Unable get user encryption', request, err));
+				r.reject(new OpalResponseError(1, 'Unable get user encryption', request, err));
 			});
 		}else{
 			logger.log('error', 'invalid request due to: ' + JSON.stringify(validation.errors));
