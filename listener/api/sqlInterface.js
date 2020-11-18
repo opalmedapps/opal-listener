@@ -613,14 +613,12 @@ exports.updateDeviceIdentifier = function(requestObject, parameters) {
                 logger.log('debug', 'successfully updated device identifiers');
                 r.resolve({Response:'success'});
             }).catch((error)=>{
-                let errorMessage = 'Error updating device identifiers due to ' + JSON.stringify(error);
-                logger.log('error', errorMessage);
-                r.reject({Response:'error', Reason: errorMessage});
+                logger.log('error', 'Error updating device identifiers due to '+ error);
+                r.reject({Response:'error', Reason:'Error updating device identifiers due to '+error});
             });
     }).catch((error)=>{
-        let errorMessage = 'Error getting patient fields due to ' + JSON.stringify(error);
-        logger.log('error', errorMessage);
-        r.reject({Response:'error', Reason: errorMessage});
+        logger.log('error', 'Error getting patient fields due to '+ error);
+        r.reject({Response:'error', Reason:'Error getting patient fields due to '+error});
     });
     return r.promise;
 };

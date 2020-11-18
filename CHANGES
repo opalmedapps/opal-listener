@@ -1,6 +1,3 @@
-Version 1.3.4.0:
- - Transition All-in-One: Change encryption to UID (#24)
-
 Version 1.3.3.0:
  - Merge branch 'OPAL-521' into staging
  - ---- Filter out the Patient Test Results that have null values
