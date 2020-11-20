@@ -12,10 +12,10 @@ class OpalRequest {
 		delete reqObj.Parameters;
 	}
 
-	setAuthenticatedInfo(salt, pass, type, params)
+	setAuthenticatedInfo(salt, hashedUID, type, params)
 	{
 		this.auth.salt = salt;
-		this.auth.pass = pass;
+		this.auth.hashedUID = hashedUID;
 		this.type = type;
 		this.params = params;
 	}
