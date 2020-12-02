@@ -95,8 +95,8 @@ class PatientTestResultQuery {
 							COALESCE(ptr.NormalRangeMax) as normalRangeMax
 						FROM
 							PatientTestResult as ptr, TestExpression as te
-							ptr.PatientSerNum = ? 
 						WHERE
+							ptr.PatientSerNum = ? 
 							AND ptr.TestExpressionSerNum = te.TestExpressionSerNum
 							AND ptr.TestValueNumeric is not null
 						ORDER BY name_EN, latestCollectedDateTime DESC) as tab
