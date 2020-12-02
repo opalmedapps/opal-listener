@@ -14,35 +14,37 @@ class PatientTestResultQuery {
 	 */
 	static getTestResultsByDateQuery(patientSerNum, date) {
 		return mysql.format(
-			`   SELECT DISTINCT
-                        ptr.PatientTestResultSerNum as patientTestResultSerNum, 
-                        IF(ptr.TestGroupExpressionSerNum IS NULL , "", tge.ExpressionName) as groupName,
-                     	ptr.SequenceNum as sequenceNum, 
-                     	ptr.ReadStatus as readStatus, 
-                      	tc.Name_EN as name_EN, tc.Name_FR as name_FR,
-                      	ptr.TestExpressionSerNum as testExpressionSerNum,	
-                        emc.URL_EN as educationalMaterialURL_EN, emc.URL_EN as educationalMaterialURL_FR,
-                     	ptr.AbnormalFlag as abnormalFlag, ptr.NormalRange as normalRange, 
-                        ptr.NormalRangeMin as normalRangeMin, 
-                        ptr.NormalRangeMax as normalRangeMax,
-                     	ptr.TestValue as testValue,
-                     	ptr.TestValueNumeric as testValueNumeric,
-                        ptr.UnitDescription as unitDescription
-                    FROM 
-                        PatientTestResult as ptr, TestExpression as te,
-                        TestGroupExpression as tge, TestControl as tc, 
-                        EducationalMaterialControl as emc
-                    WHERE 
-                        ptr.CollectedDateTime = ?
-                        AND ptr.PatientSerNum = ? 
-                        AND (ptr.TestGroupExpressionSerNum = tge.TestGroupExpressionSerNum OR
-                        		ptr.TestGroupExpressionSerNum IS NULL)
-                        AND ptr.TestExpressionSerNum = te.TestExpressionSerNum 
-                        AND te.TestControlSerNum = tc.TestControlSerNum  
-						AND tc.EducationalMaterialControlSerNum = emc.EducationalMaterialControlSerNum 
+					`SELECT 
+						ptr.PatientTestResultSerNum as patientTestResultSerNum, 
+						IfNull((Select tge.ExpressionName from TestGroupExpression as tge 
+							where ptr.TestGroupExpressionSerNum = tge.TestGroupExpressionSerNum), "") as groupName,
+						ptr.SequenceNum as sequenceNum, 
+						ptr.ReadStatus as readStatus, 
+						IfNull((select tc.Name_EN from TestControl as tc where te.TestControlSerNum = tc.TestControlSerNum), "") as name_EN,
+						IfNull((select tc.Name_FR from TestControl as tc where te.TestControlSerNum = tc.TestControlSerNum), "") as name_FR,
+						ptr.TestExpressionSerNum as testExpressionSerNum,
+						IfNull((Select emc.URL_EN from  TestControl tc, EducationalMaterialControl emc
+							where tc.EducationalMaterialControlSerNum = emc.EducationalMaterialControlSerNum
+							and te.TestControlSerNum = tc.TestControlSerNum), "") as educationalMaterialURL_EN,
+						IfNull((Select emc.URL_FR from  TestControl tc, EducationalMaterialControl emc
+							where tc.EducationalMaterialControlSerNum = emc.EducationalMaterialControlSerNum
+							and te.TestControlSerNum = tc.TestControlSerNum), "") as educationalMaterialURL_FR,	
+						ptr.AbnormalFlag as abnormalFlag, ptr.NormalRange as normalRange, 
+						ptr.NormalRangeMin as normalRangeMin, 
+						ptr.NormalRangeMax as normalRangeMax,
+						ptr.TestValue as testValue,
+						ptr.TestValueNumeric as testValueNumeric,
+						ptr.UnitDescription as unitDescription
+					FROM 
+						PatientTestResult as ptr, 
+						TestExpression as te
+					WHERE 
+						Date(ptr.CollectedDateTime) = ?
+						AND ptr.PatientSerNum = ? 
+						AND ptr.TestExpressionSerNum = te.TestExpressionSerNum 
 						AND ptr.TestValueNumeric is not null
-                    ORDER BY groupName, sequenceNum;`,
-			[moment(date).format("YYYY-MM-DD HH:mm:ss"), patientSerNum]);
+					ORDER BY groupName, sequenceNum;`,
+				[moment(date).format("YYYY-MM-DD"), patientSerNum]);
 	}
 
 	/**
@@ -52,19 +54,16 @@ class PatientTestResultQuery {
 	 */
 	static getTestDatesQuery(patientSerNum) {
 		return mysql.format(`
-                        SELECT DISTINCT CollectedDateTime as collectedDateTime
-                        FROM 
-                        	PatientTestResult as ptr, 
-                        	TestExpression as te, 
-							TestControl as tc, 
-							EducationalMaterialControl as emc
-                        WHERE 
-                        	ptr.PatientSerNum = ?
-                        	AND ptr.TestExpressionSerNum = te.TestExpressionSerNum
-							AND te.TestControlSerNum = tc.TestControlSerNum
-							AND tc.EducationalMaterialControlSerNum = emc.EducationalMaterialControlSerNum
-							AND ptr.TestValueNumeric is not null
-                        ORDER BY collectedDateTime DESC;`, [patientSerNum]);
+					SELECT DISTINCT Date(CollectedDateTime) as collectedDateTime
+					FROM 
+						PatientTestResult as ptr, 
+						TestExpression as te
+					WHERE 
+						ptr.PatientSerNum = ?
+						AND ptr.TestExpressionSerNum = te.TestExpressionSerNum
+						AND ptr.TestValueNumeric is not null
+					ORDER BY collectedDateTime DESC;`, 
+				[patientSerNum]);
 	}
 
 	/**
@@ -75,13 +74,18 @@ class PatientTestResultQuery {
 	static getTestTypesQuery(patientSerNum) {
 		// Coalesce gets the first non-null value, in this case that's the last test value
 		return mysql.format(`
-                        SELECT * FROM (SELECT
+						SELECT * FROM (SELECT
 							ptr.PatientTestResultSerNum as latestPatientTestResultSerNum,
 							te.TestExpressionSerNum as testExpressionSerNum,
 							ptr.ReadStatus as readStatus,
-							tc.Name_EN as name_EN, tc.Name_FR as name_FR,
-							emc.URL_EN as educationalMaterialURL_EN,
-							emc.URL_EN as educationalMaterialURL_FR,
+							IfNull((select tc.Name_EN from TestControl as tc where te.TestControlSerNum = tc.TestControlSerNum), "") as name_EN,
+							IfNull((select tc.Name_FR from TestControl as tc where te.TestControlSerNum = tc.TestControlSerNum), "") as name_FR,
+							IfNull((Select emc.URL_EN from  TestControl tc, EducationalMaterialControl emc
+								where tc.EducationalMaterialControlSerNum = emc.EducationalMaterialControlSerNum
+								and te.TestControlSerNum = tc.TestControlSerNum), "") as educationalMaterialURL_EN,
+							IfNull((Select emc.URL_FR from  TestControl tc, EducationalMaterialControl emc
+								where tc.EducationalMaterialControlSerNum = emc.EducationalMaterialControlSerNum
+								and te.TestControlSerNum = tc.TestControlSerNum), "") as educationalMaterialURL_FR,
 							ptr.UnitDescription as unitDescription,
 							COALESCE(ptr.CollectedDateTime) as latestCollectedDateTime,
 							COALESCE(ptr.AbnormalFlag) as latestAbnormalFlag,
@@ -90,17 +94,14 @@ class PatientTestResultQuery {
 							COALESCE(ptr.NormalRangeMin) as normalRangeMin,
 							COALESCE(ptr.NormalRangeMax) as normalRangeMax
 						FROM
-							PatientTestResult as ptr, TestExpression as te,
-							TestControl as tc, EducationalMaterialControl as emc
-						WHERE
+							PatientTestResult as ptr, TestExpression as te
 							ptr.PatientSerNum = ? 
+						WHERE
 							AND ptr.TestExpressionSerNum = te.TestExpressionSerNum
-							AND te.TestControlSerNum = tc.TestControlSerNum
-							AND tc.EducationalMaterialControlSerNum = emc.EducationalMaterialControlSerNum
 							AND ptr.TestValueNumeric is not null
 						ORDER BY name_EN, latestCollectedDateTime DESC) as tab
-						GROUP BY name_EN`,
-				  [patientSerNum])
+						GROUP BY name_EN;`,
+					[patientSerNum])
 	}
 	/**
 	 * Returns results for the given test type given a TestExpressionSerNum
@@ -110,31 +111,32 @@ class PatientTestResultQuery {
 	 */
 	static getLatestTestResultByTestType(patientSerNum, testExpressionSerNum) {
 		return mysql.format(`
-							SELECT 
-                                ptr.PatientTestResultSerNum as latestPatientTestResultSerNum, 
-                                ptr.ReadStatus as readStatus,
-                                tc.Name_EN as name_EN, tc.Name_FR as name_FR, 
-                             	emc.URL_EN as educationalMaterialURL_EN, 
-                                emc.URL_EN as educationalMaterialURL_FR,
-                                ptr.CollectedDateTime as latestCollectedDateTime, 
-                                ptr.AbnormalFlag as latestAbnormalFlag,  
-                             	ptr.TestValue as latestTestValue,
-                                ptr.NormalRange as normalRange, 
-                                ptr.NormalRangeMin as normalRangeMin, ptr.NormalRangeMax as normalRangeMax,
-                                ptr.UnitDescription as unitDescription
-                            FROM 
-                                PatientTestResult as ptr, TestExpression as te, 
-                             	TestControl as tc, 
-                                EducationalMaterialControl as emc
-                            WHERE 
-                                ptr.PatientSerNum = ? 
-                                AND ptr.TestExpressionSerNum = ?
-                                AND ptr.TestExpressionSerNum = te.TestExpressionSerNum 
-                                AND te.TestControlSerNum = tc.TestControlSerNum  
-								AND tc.EducationalMaterialControlSerNum = emc.EducationalMaterialControlSerNum
-								AND ptr.TestValueNumeric is not null
-                            ORDER BY latestCollectedDateTime DESC LIMIT 1;`,
-			[patientSerNum, testExpressionSerNum]);
+						SELECT 
+							ptr.PatientTestResultSerNum as latestPatientTestResultSerNum, 
+							ptr.ReadStatus as readStatus,
+							IfNull((select tc.Name_EN from TestControl as tc where te.TestControlSerNum = tc.TestControlSerNum), "") as name_EN,
+							IfNull((select tc.Name_FR from TestControl as tc where te.TestControlSerNum = tc.TestControlSerNum), "") as name_FR,
+							IfNull((Select emc.URL_EN from  TestControl tc, EducationalMaterialControl emc
+								where tc.EducationalMaterialControlSerNum = emc.EducationalMaterialControlSerNum
+								and te.TestControlSerNum = tc.TestControlSerNum), "") as educationalMaterialURL_EN,
+							IfNull((Select emc.URL_FR from  TestControl tc, EducationalMaterialControl emc
+								where tc.EducationalMaterialControlSerNum = emc.EducationalMaterialControlSerNum
+								and te.TestControlSerNum = tc.TestControlSerNum), "") as educationalMaterialURL_FR,
+							ptr.CollectedDateTime as latestCollectedDateTime, 
+							ptr.AbnormalFlag as latestAbnormalFlag,  
+							ptr.TestValue as latestTestValue,
+							ptr.NormalRange as normalRange, 
+							ptr.NormalRangeMin as normalRangeMin, ptr.NormalRangeMax as normalRangeMax,
+							ptr.UnitDescription as unitDescription
+						FROM 
+							PatientTestResult as ptr, TestExpression as te
+						WHERE 
+							ptr.PatientSerNum = ? 
+							AND ptr.TestExpressionSerNum = ?
+							AND ptr.TestExpressionSerNum = te.TestExpressionSerNum 
+							AND ptr.TestValueNumeric is not null
+						ORDER BY latestCollectedDateTime DESC LIMIT 1;`,
+				[patientSerNum, testExpressionSerNum]);
 	}
 	/**
 	 * Returns results for the given test type given a TestExpressionSerNum
@@ -144,20 +146,20 @@ class PatientTestResultQuery {
 	 */
 	static getTestResultValuesByTestType(patientSerNum, testExpressionSerNum) {
 		return mysql.format(`
-							SELECT 
-                                ptr.PatientTestResultSerNum as patientTestResultSerNum, 
-                                ptr.CollectedDateTime as collectedDateTime, 
-                                ptr.AbnormalFlag as abnormalFlag,  
-                                ptr.TestValue as testValue,
-                                ptr.TestValueNumeric as testValueNumeric
-                            FROM 
-                                PatientTestResult as ptr
-                            WHERE 
-                                ptr.PatientSerNum = ? 
-								AND ptr.TestExpressionSerNum = ?
-								AND ptr.TestValueNumeric is not null
-                            ORDER BY CollectedDateTime;`,
-			[patientSerNum, testExpressionSerNum]);
+					SELECT 
+						ptr.PatientTestResultSerNum as patientTestResultSerNum, 
+						ptr.CollectedDateTime as collectedDateTime, 
+						ptr.AbnormalFlag as abnormalFlag,  
+						ptr.TestValue as testValue,
+						ptr.TestValueNumeric as testValueNumeric
+					FROM 
+						PatientTestResult as ptr
+					WHERE 
+						ptr.PatientSerNum = ? 
+						AND ptr.TestExpressionSerNum = ?
+						AND ptr.TestValueNumeric is not null
+					ORDER BY CollectedDateTime;`,
+				[patientSerNum, testExpressionSerNum]);
 	}
 }
 
