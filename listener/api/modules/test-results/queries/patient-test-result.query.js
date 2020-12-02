@@ -20,8 +20,8 @@ class PatientTestResultQuery {
 							where ptr.TestGroupExpressionSerNum = tge.TestGroupExpressionSerNum), "") as groupName,
 						ptr.SequenceNum as sequenceNum, 
 						ptr.ReadStatus as readStatus, 
-						IfNull((select tc.Name_EN from TestControl as tc where te.TestControlSerNum = tc.TestControlSerNum), "") as name_EN,
-						IfNull((select tc.Name_FR from TestControl as tc where te.TestControlSerNum = tc.TestControlSerNum), "") as name_FR,
+						IfNull((select tc.Name_EN from TestControl as tc where te.TestControlSerNum = tc.TestControlSerNum), te.ExpressionName) as name_EN,
+						IfNull((select tc.Name_FR from TestControl as tc where te.TestControlSerNum = tc.TestControlSerNum), te.ExpressionName) as name_FR,
 						ptr.TestExpressionSerNum as testExpressionSerNum,
 						IfNull((Select emc.URL_EN from  TestControl tc, EducationalMaterialControl emc
 							where tc.EducationalMaterialControlSerNum = emc.EducationalMaterialControlSerNum
@@ -78,8 +78,8 @@ class PatientTestResultQuery {
 							ptr.PatientTestResultSerNum as latestPatientTestResultSerNum,
 							te.TestExpressionSerNum as testExpressionSerNum,
 							ptr.ReadStatus as readStatus,
-							IfNull((select tc.Name_EN from TestControl as tc where te.TestControlSerNum = tc.TestControlSerNum), "") as name_EN,
-							IfNull((select tc.Name_FR from TestControl as tc where te.TestControlSerNum = tc.TestControlSerNum), "") as name_FR,
+							IfNull((select tc.Name_EN from TestControl as tc where te.TestControlSerNum = tc.TestControlSerNum), te.ExpressionName) as name_EN,
+							IfNull((select tc.Name_FR from TestControl as tc where te.TestControlSerNum = tc.TestControlSerNum), te.ExpressionName) as name_FR,
 							IfNull((Select emc.URL_EN from  TestControl tc, EducationalMaterialControl emc
 								where tc.EducationalMaterialControlSerNum = emc.EducationalMaterialControlSerNum
 								and te.TestControlSerNum = tc.TestControlSerNum), "") as educationalMaterialURL_EN,
@@ -114,8 +114,8 @@ class PatientTestResultQuery {
 						SELECT 
 							ptr.PatientTestResultSerNum as latestPatientTestResultSerNum, 
 							ptr.ReadStatus as readStatus,
-							IfNull((select tc.Name_EN from TestControl as tc where te.TestControlSerNum = tc.TestControlSerNum), "") as name_EN,
-							IfNull((select tc.Name_FR from TestControl as tc where te.TestControlSerNum = tc.TestControlSerNum), "") as name_FR,
+							IfNull((select tc.Name_EN from TestControl as tc where te.TestControlSerNum = tc.TestControlSerNum), te.ExpressionName) as name_EN,
+							IfNull((select tc.Name_FR from TestControl as tc where te.TestControlSerNum = tc.TestControlSerNum), te.ExpressionName) as name_FR,
 							IfNull((Select emc.URL_EN from  TestControl tc, EducationalMaterialControl emc
 								where tc.EducationalMaterialControlSerNum = emc.EducationalMaterialControlSerNum
 								and te.TestControlSerNum = tc.TestControlSerNum), "") as educationalMaterialURL_EN,
