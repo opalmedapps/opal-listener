@@ -44,7 +44,7 @@ class PatientTestResultQuery {
 						AND ptr.TestExpressionSerNum = te.TestExpressionSerNum 
 						AND ptr.TestValueNumeric is not null
 					ORDER BY groupName, sequenceNum;`,
-				[moment(date).format("YYYY-MM-DD HH:mm:ss"), patientSerNum]);
+				[moment(date).format("YYYY-MM-DD HH:mm"), patientSerNum]);
 	}
 
 	/**
