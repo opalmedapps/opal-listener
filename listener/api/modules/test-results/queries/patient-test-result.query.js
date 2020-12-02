@@ -39,12 +39,12 @@ class PatientTestResultQuery {
 						PatientTestResult as ptr, 
 						TestExpression as te
 					WHERE 
-						Date(ptr.CollectedDateTime) = ?
+						ptr.CollectedDateTime = ?
 						AND ptr.PatientSerNum = ? 
 						AND ptr.TestExpressionSerNum = te.TestExpressionSerNum 
 						AND ptr.TestValueNumeric is not null
 					ORDER BY groupName, sequenceNum;`,
-				[moment(date).format("YYYY-MM-DD HH:mm"), patientSerNum]);
+				[moment(date).format("YYYY-MM-DD HH:mm:ss"), patientSerNum]);
 	}
 
 	/**
