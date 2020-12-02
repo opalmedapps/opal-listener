@@ -44,7 +44,7 @@ class PatientTestResultQuery {
 						AND ptr.TestExpressionSerNum = te.TestExpressionSerNum 
 						AND ptr.TestValueNumeric is not null
 					ORDER BY groupName, sequenceNum;`,
-				[moment(date).format("YYYY-MM-DD"), patientSerNum]);
+				[moment(date).format("YYYY-MM-DD HH:mm:ss"), patientSerNum]);
 	}
 
 	/**
@@ -54,7 +54,7 @@ class PatientTestResultQuery {
 	 */
 	static getTestDatesQuery(patientSerNum) {
 		return mysql.format(`
-					SELECT DISTINCT Date(CollectedDateTime) as collectedDateTime
+					SELECT DISTINCT CollectedDateTime as collectedDateTime
 					FROM 
 						PatientTestResult as ptr, 
 						TestExpression as te
