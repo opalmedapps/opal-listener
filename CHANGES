@@ -1,3 +1,7 @@
+Version 1.4.0.0:
+ - Fix new test results module (#26)
+ - -- hot fix for the new test result queries (#25)
+
 Version 1.3.4.0:
  - Transition All-in-One: Change encryption to UID (#24)
 
