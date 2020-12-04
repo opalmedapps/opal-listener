@@ -21,7 +21,7 @@ exports.resetPasswordRequest=function(requestKey, requestObject)
             responseObject = { Headers:{RequestKey:requestKey,RequestObject:requestObject}, Code: 2, Data:{},Response:'error', Reason:'Injection attack, incorrect Email'};
             r.resolve(responseObject);
         }else{
-            //If the request is not erroneus simply direct the request to appropiate function based on the request mapping object
+            //If the request is not erroneous simply direct the request to appropriate function based on the request mapping object
             requestMappings[requestObject.Request](requestKey, requestObject,patient[0]).then(function(response){
                 r.resolve(response);
             });
@@ -69,12 +69,6 @@ exports.verifySecurityAnswer=function(requestKey,requestObject,patient)
 
             unencrypted = params;
 
-            //If its not a reset password request and the passwords are not equivalent
-            if(!requestObject.Parameters.PasswordReset && unencrypted.Password && unencrypted.Password !== patient.Password) {
-                r.resolve({Code:1});
-                return r.promise;
-            }
-
             //If its the right security answer, also make sure is a valid SSN;
             var response = {};
 
@@ -121,8 +115,6 @@ exports.setNewPassword=function(requestKey, requestObject, user)
     var ssn = user.SSN.toUpperCase();
     var answer = user.AnswerText;
 
-    var unencrypted = null;
-
     utility.decrypt(requestObject.Parameters, utility.hash(ssn), answer)
         .then((unencrypted)=> {
             sqlInterface.setNewPassword(utility.hash(unencrypted.newPassword), user.UserTypeSerNum).then(function(){
@@ -144,54 +136,27 @@ exports.securityQuestion=function(requestKey,requestObject) {
     let r = q.defer();
 
     let unencrypted = null;
-    utility.decrypt(requestObject.Parameters, utility.hash("none"))
+    return utility.decrypt(requestObject.Parameters, utility.hash("none"))
         .then((params) => {
             unencrypted = params;
 
-            logger.log('debug', 'unencrypted: ' + JSON.stringify(unencrypted));
+            logger.log('debug', 'Unencrypted: ' + JSON.stringify(unencrypted));
 
             let email = requestObject.UserEmail;
             let password = unencrypted.Password;
 
             //Then this means this is a login attempt
             if (password) {
-                //first check to make sure user's password is correct in DB
-                sqlInterface.getPasswordForVerification(email)
-                    .then((res) => {
-
-                        logger.log('debug', 'successfully got password for verification');
-
-                        if (res.Password === password) {
-                            logger.log('debug', 'pasword was verified');
-
-                            getSecurityQuestion(requestKey, requestObject, unencrypted)
-                                .then(function (response) {
-                                    logger.log('debug', 'successfully got security question with response: ' + JSON.stringify(response));
-                                    r.resolve(response)
-                                })
-                        } else {
-                            r.resolve({
-                                Headers: {RequestKey: requestKey, RequestObject: requestObject},
-                                Code: 1,
-                                Data: {},
-                                Response: 'error',
-                                Reason: 'Received password does not match password stored in database.'
-                            });
-
-                        }
-                    });
+                return getSecurityQuestion(requestKey, requestObject, unencrypted).then(function (response) {
+                    logger.log('debug', 'Successfully got security question with response: ' + JSON.stringify(response));
+                    return response
+                });
             } else {
                 //Otherwise we are dealing with a password reset
-                getSecurityQuestion(requestKey, requestObject, unencrypted)
-                    .then(function (response) {
-                        r.resolve(response)
-                    });
+                return getSecurityQuestion(requestKey, requestObject, unencrypted);
             }
 
         });
-
-    return r.promise;
-
 };
 
 function getSecurityQuestion(requestKey, requestObject, unencrypted){
@@ -208,7 +173,7 @@ function getSecurityQuestion(requestKey, requestObject, unencrypted){
             return sqlInterface.getSecurityQuestion(requestObject)
         })
         .then(function (response) {
-            logger.log('debug', 'updated devude id successfully');
+            logger.log('debug', 'updated device id successfully');
 
             r.resolve({
                 Code:3,

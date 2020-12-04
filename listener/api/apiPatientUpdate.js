@@ -5,6 +5,7 @@ var utility = require('./../utility/utility.js');
 var validate = require('./../utility/validate.js');
 var queries = require('./../sql/queries.js');
 var logger = require('./../logs/logger.js');
+const questionnaires = require('./../questionnaires/questionnaireOpalDB.js');
 
 /**
  *@name login
@@ -56,7 +57,7 @@ exports.refresh = function (requestObject) {
             r.resolve(rows);
         },function(error)
         {
-            r.reject(error);        
+            r.reject(error);
         });
     }
     return r.promise;
@@ -81,7 +82,7 @@ exports.checkinUpdate = function(requestObject)
   return sqlInterface.checkinUpdate(requestObject);
 };
 
-//Get Map Location API call 
+//Get Map Location API call
 exports.getMapLocation=function(requestObject)
 {
    return sqlInterface.getMapLocation(requestObject);
@@ -99,9 +100,6 @@ exports.getDocumentsContent=function(requestObject)
    return sqlInterface.getDocumentsContent(requestObject);
 };
 
-exports.getLabResults = function (requestObject) {
-    return sqlInterface.getLabResults(requestObject);
-};
 
 exports.getSecurityQuestion = function (requestObject) {
     return sqlInterface.getSecurityQuestion(requestObject);
@@ -131,9 +129,27 @@ exports.logPatientRequest = function(requestObject) {
     return sqlInterface.addToActivityLog(requestObject);
 };
 
-exports.getQuestionnaires = function (requestObject) {
-    return sqlInterface.getQuestionnaires(requestObject);
-};
+/**
+ * For questionnaire V2 (2019 version of qplus questionnaire front-end). Getting the list of questionnaires belonging to a patient
+ * @param {object} requestObject
+ * @returns {Promise}
+ */
+exports.getQuestionnaireList = questionnaires.getQuestionnaireList;
+
+/**
+ * For questionnaire V2 (2019 version of qplus questionnaire front-end).
+ * Getting the information about a questionnaire stored in OpalDB from its QuestionnaireSerNum
+ * @param {object} requestObject
+ * @returns {Promise}
+ */
+exports.getQuestionnaireInOpalDB = questionnaires.getQuestionnaireInOpalDB;
+
+/**
+ * For questionnaire V2 (2019 version of qplus questionnaire front-end). Gets one questionnaire.
+ * @param {object} requestObject
+ * @returns {Promise}
+ */
+exports.getQuestionnaire = questionnaires.getQuestionnaire;
 
 exports.getPatientsForPatientsMembers = function ()
 {
