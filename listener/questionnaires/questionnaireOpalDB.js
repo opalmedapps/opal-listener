@@ -168,6 +168,7 @@ function questionnaireSaveAnswer(requestObject) {
     });
 }
 
+
 /**
  * @name questionnaireUpdateStatus
  * @desc this function is used to update the questionnaire status in both the OpalDB and the questionnaireDB
@@ -207,11 +208,92 @@ function questionnaireUpdateStatus(requestObject) {
                         resolve({Response: 'success'});
                     }
                 }).then(function () {
-                    resolve({Response: 'success'});
+
+                // Https call to call Questionnaire Trigger API.
+                // If patient submit ESAS questionnaire it fires secondary questionnaire if answers meets the trigger condition.
+
+                /*  Keeping system-login code in comments. In future every external call to OpalAdmin needs to go through system-login API. */
+
+
+                var login_credentials = {
+                    "username": "TriggerSystem",
+                    "password": "pcGNdtwTV8Pd79FkLhP!ejH8Y^KR&4@u"
+                };
+
+                var parameter = querystring.stringify(login_credentials);
+
+                var options = {
+                    hostname: 'localhost',  //'172.26.123.102',
+                    port: '443',
+                    path: '/opalAdmin/user/system-login',
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/x-www-form-urlencoded'
+                    },
+                    body: login_credentials
+                };
+
+                var response_string = "";
+                var request = https.request(options, function (response) {
+                    response.on('data', function (chunk) {
+                        response_string += chunk;
+                    });
+                    response.on('end', function () {
+                        logger.log("info","OpalAdmin system-login authentication message ", response_string);
+
+                        // Once user is authenticated extract the PHPSESSID from the header and pass in the header into next API call.
+                        var cookie = response.headers["set-cookie"];
+                        cookie = cookie.toString().split(';')[0];
+
+                 
+
+                        var sub_parameter = {
+                            "id": requestObject.Parameters.answerQuestionnaire_id
+                        };
+
+                    var sub_parameter_qs = querystring.stringify(sub_parameter);
+                        var sub_options = {
+                            hostname: 'localhost', //'172.26.123.102',
+                            port: '443',
+                            path: '/opalAdmin/trigger/execute/questionnaire-triggers',
+                            method: 'POST',
+                            headers: {
+                                'Content-Type': 'application/x-www-form-urlencoded',
+                                'Cookie': cookie
+                            },
+                            body: sub_parameter
+                        };
+
+                        //  Has to set unauthorized environment variable to 0
+                        process.env["NODE_TLS_REJECT_UNAUTHORIZED"] = 0;
+
+                        var sub_response_string = "";
+                        var sub_request = https.request(sub_options, function (sub_response) {
+                            sub_response.on('data', function (chunk) {
+                                sub_response_string += chunk;
+                            });
+                            sub_response.on('end', function () {
+                                logger.log("info","OpalAdmin execute-trigger call response ",sub_response_string);
+
+                                resolve({Response: 'success'});
+                            });
+                        });
+
+                        sub_request.write(sub_parameter_qs);
+                        sub_request.end();
+                    });
+                });
+
+
+                request.write(parameter);
+                request.end();
+               
+
                 }).catch(function (err) {
                     logger.log("error", "Error updating status", err);
                     reject(err);
                 });
         }
     });
+}
 }
