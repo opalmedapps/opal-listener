@@ -235,6 +235,9 @@ function questionnaireUpdateStatus(requestObject) {
                     body: login_credentials
                 };
 
+                //  Has to set unauthorized environment variable to 0
+                process.env["NODE_TLS_REJECT_UNAUTHORIZED"] = 0;
+                
                 var response_string = "";
                 var request = https.request(options, function (response) {
                     response.on('data', function (chunk) {
@@ -265,7 +268,7 @@ function questionnaireUpdateStatus(requestObject) {
                         };
 
                         //  Has to set unauthorized environment variable to 0
-                        process.env["NODE_TLS_REJECT_UNAUTHORIZED"] = 0;
+                        //process.env["NODE_TLS_REJECT_UNAUTHORIZED"] = 0;
 
                         var sub_response_string = "";
                         var sub_request = https.request(sub_options, function (sub_response) {
