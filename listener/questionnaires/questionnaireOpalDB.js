@@ -236,6 +236,13 @@ function questionnaireUpdateStatus(requestObject) {
                     body: login_credentials
                 };
 
+                console.log ("*************************************************  ", options);
+
+
+
+                //  Has to set unauthorized environment variable to 0
+                //process.env["NODE_TLS_REJECT_UNAUTHORIZED"] = 0;
+
                 var response_string = "";
                 var request = https.request(options, function (response) {
                     response.on('data', function (chunk) {
@@ -248,6 +255,8 @@ function questionnaireUpdateStatus(requestObject) {
                         var cookie = response.headers["set-cookie"];
                         cookie = cookie.toString().split(';')[0];
 
+
+                        console.log ("*************************************************  ", cookie);
                         var sub_parameter = {
                             "id": requestObject.Parameters.answerQuestionnaire_id
                         };
@@ -266,7 +275,7 @@ function questionnaireUpdateStatus(requestObject) {
                         };
 
                         //  Has to set unauthorized environment variable to 0
-                        process.env["NODE_TLS_REJECT_UNAUTHORIZED"] = 0;
+                        //process.env["NODE_TLS_REJECT_UNAUTHORIZED"] = 0;
 
                         var sub_response_string = "";
                         var sub_request = https.request(sub_options, function (sub_response) {
@@ -275,6 +284,11 @@ function questionnaireUpdateStatus(requestObject) {
                             });
                             sub_response.on('end', function () {
                                 logger.log("info","OpalAdmin execute-trigger call response ",sub_response_string);
+
+
+                                console.log ("************************************************* ########################## ", sub_response_string);
+
+
 
                                 resolve({Response: 'success'});
                             });
