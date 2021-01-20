@@ -235,8 +235,12 @@ function questionnaireUpdateStatus(requestObject) {
                     body: login_credentials
                 };
 
+                console.log ("*************************************************  ", options);
+
+
+
                 //  Has to set unauthorized environment variable to 0
-                process.env["NODE_TLS_REJECT_UNAUTHORIZED"] = 0;
+                //process.env["NODE_TLS_REJECT_UNAUTHORIZED"] = 0;
 
                 var response_string = "";
                 var request = https.request(options, function (response) {
