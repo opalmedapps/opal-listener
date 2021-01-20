@@ -296,4 +296,3 @@ function questionnaireUpdateStatus(requestObject) {
         }
     });
 }
-}
