@@ -5,6 +5,8 @@ const questionnaires = require('./questionnaireQuestionnaireDB.js');
 const opalQueries = require('../sql/queries');
 const questionnaireValidation = require('./questionnaire.validate');
 const logger = require('./../logs/logger');
+const https = require('https');
+const querystring = require('querystring');
 const {OpalSQLQueryRunner} = require("../sql/opal-sql-query-runner");
 
 exports.getQuestionnaireInOpalDB = getQuestionnaireInOpalDB;
@@ -168,7 +170,6 @@ function questionnaireSaveAnswer(requestObject) {
     });
 }
 
-
 /**
  * @name questionnaireUpdateStatus
  * @desc this function is used to update the questionnaire status in both the OpalDB and the questionnaireDB
@@ -295,5 +296,4 @@ function questionnaireUpdateStatus(requestObject) {
                 });
         }
     });
-}
 }
