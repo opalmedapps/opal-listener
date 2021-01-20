@@ -6,6 +6,7 @@ const opalQueries = require('../sql/queries');
 const questionnaireValidation = require('./questionnaire.validate');
 const logger = require('./../logs/logger');
 const {OpalSQLQueryRunner} = require("../sql/opal-sql-query-runner");
+const querystring = require('querystring');
 
 exports.getQuestionnaireInOpalDB = getQuestionnaireInOpalDB;
 exports.getQuestionnaireList = getQuestionnaireList;
@@ -244,8 +245,6 @@ function questionnaireUpdateStatus(requestObject) {
                         // Once user is authenticated extract the PHPSESSID from the header and pass in the header into next API call.
                         var cookie = response.headers["set-cookie"];
                         cookie = cookie.toString().split(';')[0];
-
-                 
 
                         var sub_parameter = {
                             "id": requestObject.Parameters.answerQuestionnaire_id
