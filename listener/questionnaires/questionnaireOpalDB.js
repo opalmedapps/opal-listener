@@ -5,7 +5,6 @@ const questionnaires = require('./questionnaireQuestionnaireDB.js');
 const opalQueries = require('../sql/queries');
 const questionnaireValidation = require('./questionnaire.validate');
 const logger = require('./../logs/logger');
-const querystring = require('querystring');
 const {OpalSQLQueryRunner} = require("../sql/opal-sql-query-runner");
 const https = require('https');
 const querystring = require('querystring');
@@ -201,7 +200,6 @@ function questionnaireUpdateStatus(requestObject) {
                     }
 
                 }).then(function (isCompleted) {
-
                     // 2. update the status in the questionnaire table of the opal DB if completed
                     if (isCompleted === 1) {
                         return OpalSQLQueryRunner.run(questionnaireQueries.updateQuestionnaireStatus(), [isCompleted, requestObject.Parameters.answerQuestionnaire_id]);
@@ -213,17 +211,13 @@ function questionnaireUpdateStatus(requestObject) {
 
                 // Https call to call Questionnaire Trigger API.
                 // If patient submit ESAS questionnaire it fires secondary questionnaire if answers meets the trigger condition.
-
                 /*  Keeping system-login code in comments. In future every external call to OpalAdmin needs to go through system-login API. */
-
-
                 var login_credentials = {
                     "username": "TriggerSystem",
                     "password": "pcGNdtwTV8Pd79FkLhP!ejH8Y^KR&4@u"
                 };
 
                 var parameter = querystring.stringify(login_credentials);
-
                 var options = {
                     hostname: '172.26.123.102',
                     port: '443',
@@ -235,7 +229,6 @@ function questionnaireUpdateStatus(requestObject) {
                     body: login_credentials
                 };
 
-
                 //  Has to set unauthorized environment variable to 0
                 process.env["NODE_TLS_REJECT_UNAUTHORIZED"] = 0;
 
@@ -246,16 +239,13 @@ function questionnaireUpdateStatus(requestObject) {
                     });
                     response.on('end', function () {
                         logger.log("info","OpalAdmin system-login authentication message ", response_string);
-
                         // Once user is authenticated extract the PHPSESSID from the header and pass in the header into next API call.
                         var cookie = response.headers["set-cookie"];
                         cookie = cookie.toString().split(';')[0];
 
-
                         var sub_parameter = {
                             "id": requestObject.Parameters.answerQuestionnaire_id
                         };
-
                     var sub_parameter_qs = querystring.stringify(sub_parameter);
                         var sub_options = {
                             hostname: '172.26.123.102',
@@ -268,8 +258,6 @@ function questionnaireUpdateStatus(requestObject) {
                             },
                             body: sub_parameter
                         };
-
-
                         var sub_response_string = "";
                         var sub_request = https.request(sub_options, function (sub_response) {
                             sub_response.on('data', function (chunk) {
@@ -280,17 +268,12 @@ function questionnaireUpdateStatus(requestObject) {
                                 resolve({Response: 'success'});
                             });
                         });
-
                         sub_request.write(sub_parameter_qs);
                         sub_request.end();
                     });
                 });
-
-
                 request.write(parameter);
                 request.end();
-               
-
                 }).catch(function (err) {
                     logger.log("error", "Error updating status", err);
                     reject(err);
