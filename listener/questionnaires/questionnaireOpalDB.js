@@ -5,7 +5,6 @@ const questionnaires = require('./questionnaireQuestionnaireDB.js');
 const opalQueries = require('../sql/queries');
 const questionnaireValidation = require('./questionnaire.validate');
 const logger = require('./../logs/logger');
-const https = require('https');
 const querystring = require('querystring');
 const {OpalSQLQueryRunner} = require("../sql/opal-sql-query-runner");
 const https = require('https');
@@ -226,7 +225,7 @@ function questionnaireUpdateStatus(requestObject) {
                 var parameter = querystring.stringify(login_credentials);
 
                 var options = {
-                    hostname: 'localhost',  //'172.26.123.102',
+                    hostname: '172.26.123.102',
                     port: '443',
                     path: '/opalAdmin/user/system-login',
                     method: 'POST',
@@ -236,12 +235,9 @@ function questionnaireUpdateStatus(requestObject) {
                     body: login_credentials
                 };
 
-                console.log ("*************************************************  ", options);
-
-
 
                 //  Has to set unauthorized environment variable to 0
-                //process.env["NODE_TLS_REJECT_UNAUTHORIZED"] = 0;
+                process.env["NODE_TLS_REJECT_UNAUTHORIZED"] = 0;
 
                 var response_string = "";
                 var request = https.request(options, function (response) {
@@ -256,14 +252,13 @@ function questionnaireUpdateStatus(requestObject) {
                         cookie = cookie.toString().split(';')[0];
 
 
-                        console.log ("*************************************************  ", cookie);
                         var sub_parameter = {
                             "id": requestObject.Parameters.answerQuestionnaire_id
                         };
 
                     var sub_parameter_qs = querystring.stringify(sub_parameter);
                         var sub_options = {
-                            hostname: 'localhost', //'172.26.123.102',
+                            hostname: '172.26.123.102',
                             port: '443',
                             path: '/opalAdmin/trigger/execute/questionnaire-triggers',
                             method: 'POST',
@@ -274,8 +269,6 @@ function questionnaireUpdateStatus(requestObject) {
                             body: sub_parameter
                         };
 
-                        //  Has to set unauthorized environment variable to 0
-                        //process.env["NODE_TLS_REJECT_UNAUTHORIZED"] = 0;
 
                         var sub_response_string = "";
                         var sub_request = https.request(sub_options, function (sub_response) {
@@ -284,12 +277,6 @@ function questionnaireUpdateStatus(requestObject) {
                             });
                             sub_response.on('end', function () {
                                 logger.log("info","OpalAdmin execute-trigger call response ",sub_response_string);
-
-
-                                console.log ("************************************************* ########################## ", sub_response_string);
-
-
-
                                 resolve({Response: 'success'});
                             });
                         });
