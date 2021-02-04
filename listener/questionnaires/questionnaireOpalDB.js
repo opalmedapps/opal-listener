@@ -10,6 +10,7 @@ const {OpalSQLQueryRunner} = require("../sql/opal-sql-query-runner");
 exports.getQuestionnaireInOpalDB = getQuestionnaireInOpalDB;
 exports.getQuestionnaireList = getQuestionnaireList;
 exports.getQuestionnaire = getQuestionnaire;
+exports.getQuestionnaireUnreadNumber = getQuestionnaireUnreadNumber;
 exports.questionnaireSaveAnswer = questionnaireSaveAnswer;
 exports.questionnaireUpdateStatus = questionnaireUpdateStatus;
 
@@ -129,6 +130,40 @@ function getQuestionnaire(requestObject) {
                 });
         }
     });
+}
+
+/**
+ * getQuestionnaireUnreadNumber
+ * @desc Returns a promise containing the number of unread (e.g. 'New') questionnaires of a given category for a particular user.
+ * @param {object} requestObject
+ * @return {Promise} Returns a promise that contains the number of unread questionnaires
+ */
+function getQuestionnaireUnreadNumber(requestObject) {
+
+    if (!questionnaireValidation.validateQuestionnaireCategory(requestObject)) {
+        logger.log("error", "Error getting number of unread questionnaires: the requestObject does not have the correct parameter category");
+        return Promise.reject(new Error('Error getting number of unread questionnaires: the requestObject does not have the correct parameter category'));
+    }
+
+    return OpalSQLQueryRunner.run(opalQueries.getPatientSerNumFromUserID(), [requestObject.UserID])
+        .then(function (patientSerNum) {
+            if (questionnaireValidation.validatePatientSerNum(patientSerNum)) {
+                // get number of unread questionnaires
+                return questionnaires.getQuestionnaireUnreadNumber(patientSerNum[0], requestObject.Parameters.category);
+            } else {
+                logger.log("error", "Error getting number of unread questionnaires: No matching PatientSerNum found in opalDB");
+                throw new Error('Error getting number of unread questionnaires: No matching PatientSerNum found in opalDB');
+            }
+        })
+        .then(function (result) {
+            let obj = {};
+            obj.Data = result;
+            return obj;
+        })
+        .catch(function (error) {
+            logger.log("error", "Error getting number of unread questionnaires", error);
+            throw new Error(error);
+        });
 }
 
 /*

@@ -49,6 +49,7 @@ function runQuery(query, parameters = null) {
 
 exports.getQuestionnaireList = getQuestionnaireList;
 exports.getQuestionnaire = getQuestionnaire;
+exports.getQuestionnaireUnreadNumber = getQuestionnaireUnreadNumber;
 exports.saveAnswer = saveAnswer;
 exports.updateQuestionnaireStatusInQuestionnaireDB = updateQuestionnaireStatusInQuestionnaireDB;
 
@@ -134,6 +135,36 @@ function getQuestionnaire(opalPatientSerNumAndLanguage, answerQuestionnaire_Id) 
         })
         .catch(function (err) {
             logger.log("error", "Error getting questionnaire, " + err);
+            r.reject(err);
+        })
+
+    return r.promise;
+}
+
+/**
+ * getQuestionnaireUnreadNumber
+ * @desc this function gets the number of unread (e.g. 'New') questionnaires in a given category belonging to an user.
+ * @param {object} opalPatientSerNum object containing PatientSerNum as a property.
+ *                 This information comes from OpalDB
+ * @param {string} category string indicating the category of the questionnaire list requested.
+ *                 The categories can be found in QUESTIONNAIRE_CATEGORY_ID_MAP of the questionnaireConfig.json file.
+ * @returns {promise}
+ */
+function getQuestionnaireUnreadNumber(opalPatientSerNum, category) {
+    let r = q.defer();
+
+    // get number of unread questionnaires
+    runQuery(questionnaireQueries.getNumberUnreadQuery(), [findCategoryId(category), opalPatientSerNum.PatientSerNum])
+        .then(function (queryResult) {
+            if (!questionnaireValidation.validateUnreadNumber(queryResult)) {
+                logger.log("error", "Error getting number of unread questionnaires: query error");
+                r.reject(new Error('Error getting number of unread questionnaires: query error'));
+            } else {
+                r.resolve(queryResult[0]);
+            }
+        })
+        .catch(function (err) {
+            logger.log("error", "Error getting number of unread questionnaires, " + err);
             r.reject(err);
         })
 

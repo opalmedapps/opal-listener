@@ -151,6 +151,13 @@ exports.getQuestionnaireInOpalDB = questionnaires.getQuestionnaireInOpalDB;
  */
 exports.getQuestionnaire = questionnaires.getQuestionnaire;
 
+/**
+ * Gets the number of unread (e.g. 'New') questionnaires.
+ * @param {object} requestObject
+ * @returns {Promise}
+ */
+exports.getQuestionnaireUnreadNumber = questionnaires.getQuestionnaireUnreadNumber;
+
 exports.getPatientsForPatientsMembers = function ()
 {
   return new Promise((resolve, reject)=>{

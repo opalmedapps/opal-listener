@@ -366,6 +366,11 @@ exports.getPatientSerNum = function()
             Where Patient.PatientId = ?`
 };
 
+exports.getPatientSerNumFromUserID = function()
+{
+    return "SELECT Patient.PatientSerNum FROM Patient, Users WHERE Patient.PatientSerNum = Users.UserTypeSerNum && Users.Username = ?";
+};
+
 exports.getTrustedDevice = function () {
     return "SELECT pdi.Trusted FROM PatientDeviceIdentifier pdi, Users u WHERE pdi.PatientSerNum = u.UserTypeSerNum AND u.Username = ? AND DeviceId = ?"
 };
