@@ -381,16 +381,27 @@ exports.sendMessage=function(requestObject) {
  * @param requestObject
  * @return {Promise}
  */
-exports.checkIn=function(requestObject) {
+exports.checkIn= async function (requestObject) {
     const r = Q.defer();
-    const patientId = requestObject.Parameters.PatientId;
     const patientSerNum = requestObject.Parameters.PatientSerNum;
+
+    // Get the patient's ORMS ID (used in the check-in call to ORMS)
+    let ormsID;
+    try
+    {
+        ormsID = await getORMSID(patientSerNum);
+    }
+    catch (error)
+    {
+        r.reject({Response: 'error', Reason: 'CheckIn error; patient ORMS ID error: ' + error});
+        return r.promise;
+    }
 
     hasAlreadyAttemptedCheckin(patientSerNum)
         .then(result => {
             if(result === false){
                 //Check in to aria using Johns script
-                checkIntoAriaAndMedi(patientId).then(() => {
+                checkIntoAriaAndMedi(ormsID).then(() => {
                     //If successfully checked in, grab all the appointments that have been checked into in order to notify app
                     getCheckedInAppointments(patientSerNum)
                         .then(appts => r.resolve(appts))
@@ -404,12 +415,12 @@ exports.checkIn=function(requestObject) {
 
 /**
  * Calls John's PHP script in order to check in patient on Aria and Medivisit
- * @param patientId
+ * @param ormsID The identifier of the patient in the ORMS system
  * @returns {Promise}
  */
-function checkIntoAriaAndMedi(patientId) {
+function checkIntoAriaAndMedi(ormsID) {
     let r = Q.defer();
-    let url = config.CHECKIN_PATH.replace('{ID}', patientId);
+    let url = config.CHECKIN_PATH.replace('{ID}', ormsID);
 
     request(url,function(error, response, body) {
         logger.log('debug', 'checked into aria and medi response: ' + JSON.stringify(response));
@@ -457,11 +468,25 @@ function getCheckedInAppointments(patientSerNum){
     })
 }
 
-
 /**
  * ============================================================
  */
 
+/**
+ * @description Retrieves a patient's ORMS ID based on their PatientSerNum.
+ * @author Stacey Beard
+ * @date 2021-02-19
+ * @param patientSerNum
+ * @returns {Promise<*>} The patient's ORMS ID
+ */
+async function getORMSID(patientSerNum)
+{
+    let rows = await exports.runSqlQuery(queries.getORMSID(), [patientSerNum]);
+
+    if (rows.length > 1) throw new Error("More than one entry was found for the ORMS ID of PatientSerNum "+patientSerNum+" in Patient_Hospital_Identifier");
+    else if (rows.length === 0 || typeof rows[0].MRN === "undefined") throw new Error("ORMS ID not found for PatientSerNum "+patientSerNum+" in Patient_Hospital_Identifier");
+    else return rows[0].MRN;
+}
 
 /**
  * getDocumentsContent
@@ -809,16 +834,6 @@ exports.setNewPassword=function(password,patientSerNum) {
 };
 
 /**
- * planningStepsAndEstimates
- * @desc Getting planning estimate from Marc's script
- * @param userId
- * @param timestamp
- */
-exports.planningStepsAndEstimates = function(userId, timestamp) {
-    return planningStepsAndEstimates(userId, timestamp);
-};
-
-/**
  * getPatientDeviceLastActivity
  * @desc gets the patient's last active timestamp
  * @param userid
@@ -1086,22 +1101,6 @@ var LoadAttachments = function (rows ) {
 
 };
 
-//Get the appointment aria ser num for a particular AppointmentSerNum, Username is passed as a security measure
-function getAppointmentAriaSer(username, appSerNum) {
-    return exports.runSqlQuery(queries.getAppointmentAriaSer(),[username, appSerNum]);
-}
-
-/**
- * @name getPatientId
- * @desc gets the patients Aria sernum from DB
- * @param username
- * @return {Promise}
- */
-function getPatientId(username) {
-    return exports.runSqlQuery(queries.getPatientId(),[username]);
-}
-
-
 /**
  * @module sqlInterface
  * @name combineResources
@@ -1152,34 +1151,6 @@ function combineResources(rows)
     r.resolve(rows);
     return r.promise;
 }
-
-/*function planningStepsAndEstimates (userId, timestamp)
-{
-    var r = Q.defer();
-    //Obtaing patient aria ser num
-    var que= connection.query(queries.getPatientAriaSerQuery(),[userId],function(error,rows,fields)
-    {
-        if(error) r.reject(error);
-        var command = 'python3 /var/www/devDocuments/marc/ML_Algorithm_MUHC/predictor.py '+rows[0].PatientAriaSer;
-        //Execute Marc's script
-        exec(command, function(error, stdout, stderr){
-            if (error) {
-                r.reject(error);
-            }
-            stdout = stdout.toString();
-            //Parse through the response
-            var firstParenthesis = stdout.indexOf('{');
-            var lastParenthesis = stdout.lastIndexOf('}');
-            var length = lastParenthesis - firstParenthesis+1;
-            //Convert into object
-            var data = JSON.parse(stdout.substring(firstParenthesis, length).replace(/'/g, "\""));
-            //Return data
-            r.resolve(data);
-        });
-    });
-    return r.promise;
-}*/
-
 
 exports.getSecurityQuestion = function (requestObject){
     var r = Q.defer();

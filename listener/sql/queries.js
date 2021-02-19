@@ -2,7 +2,7 @@ var exports=module.exports={};
 //Get Patient table information for a particular patient
 exports.patientTableFields=function()
 {
-    return "SELECT Patient.PatientSerNum, Patient.TestUser, Patient.FirstName, Patient.LastName, Patient.TelNum, Patient.PatientId, Patient.Email, Patient.Alias, Patient.Language, Patient.EnableSMS,Patient.ProfileImage, Patient.SSN, Patient.AccessLevel FROM Patient, Users WHERE Users.Username LIKE ? AND Users.UserTypeSerNum=Patient.PatientSerNum AND Patient.LastUpdated > ?"
+    return "SELECT Patient.PatientSerNum, Patient.TestUser, Patient.FirstName, Patient.LastName, Patient.TelNum, Patient.PatientSerNum AS PatientId, Patient.Email, Patient.Alias, Patient.Language, Patient.EnableSMS,Patient.ProfileImage, Patient.SSN, Patient.AccessLevel FROM Patient, Users WHERE Users.Username LIKE ? AND Users.UserTypeSerNum=Patient.PatientSerNum AND Patient.LastUpdated > ?"
 };
 
 exports.patientDoctorTableFields=function()
@@ -204,11 +204,6 @@ exports.setNewPassword=function()
     return "UPDATE Users SET Password = ? WHERE UserTypeSerNum = ?";
 };
 
-//For checkin
-exports.getAppointmentAriaSer=function()
-{
-    return "SELECT Appointment.AppointmentAriaSer FROM Patient, Users, Appointment WHERE Users.Username = ? AND Appointment.AppointmentSerNum = ? AND Patient.PatientSerNum = Users.UserTypeSerNum ";
-};
 exports.checkin=function()
 {
     return "UPDATE Appointment, Patient, Users SET Appointment.Checkin=1, Appointment.SessionId=? WHERE Appointment.AppointmentSerNum=? AND Appointment.PatientSerNum = Patient.PatientSerNum AND Patient.PatientSerNum = Users.UserTypeSerNum AND Users.Username = ? ";
@@ -344,27 +339,6 @@ exports.insertEducationalMaterialRatingQuery=function()
     return "INSERT INTO `EducationalMaterialRating`(`EducationalMaterialRatingSerNum`, `EducationalMaterialControlSerNum`, `PatientSerNum`, `RatingValue`, `SessionId`, `LastUpdated`) VALUES (NULL,?,?,?,?,NULL)";
 };
 
-exports.getPatientAriaSerQuery = function()
-{
-    return "SELECT Patient.PatientAriaSer, Patient.PatientId FROM Patient, Users WHERE Patient.PatientSerNum = Users.UserTypeSerNum && Users.Username = ?"
-};
-
-exports.getPatientId= function()
-{
-    return "SELECT Patient.PatientId FROM Patient, Users WHERE Patient.PatientSerNum = Users.UserTypeSerNum && Users.Username = ?"
-};
-
-/**
- * Returns the query needed to get a patient's serNum
- * @return {string}
- */
-exports.getPatientSerNum = function()
-{
-    return `Select Patient.PatientSerNum
-            From Patient
-            Where Patient.PatientId = ?`
-};
-
 exports.getTrustedDevice = function () {
     return "SELECT pdi.Trusted FROM PatientDeviceIdentifier pdi, Users u WHERE pdi.PatientSerNum = u.UserTypeSerNum AND u.Username = ? AND DeviceId = ?"
 };
@@ -381,6 +355,21 @@ exports.getPatientForPatientMembers = function() {
     return "SELECT FirstName, LastName, Email, Website, ProfileImage, Bio_EN, Bio_FR  FROM PatientsForPatientsPersonnel;";
 };
 
+/**
+ * @description Retrieves a patient's ORMS ID from the Patient_Hospital_Identifier table
+ * @author Stacey Beard
+ * @date 2021-02-19
+ * @returns {string}
+ */
+exports.getORMSID = function()
+{
+    return `
+        SELECT PHI.MRN FROM Patient_Hospital_Identifier PHI
+        WHERE PHI.Hospital_Identifier_Type_Code = "ORM"
+        AND PHI.PatientSerNum = ?
+        ;
+   `
+};
 
 /**
  * CHECKIN QUERIES
