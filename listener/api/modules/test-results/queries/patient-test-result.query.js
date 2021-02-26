@@ -25,14 +25,18 @@ class PatientTestResultQuery {
 						ptr.TestExpressionSerNum as testExpressionSerNum,
 						IfNull((Select emc.URL_EN from  TestControl tc, EducationalMaterialControl emc
 							where tc.EducationalMaterialControlSerNum = emc.EducationalMaterialControlSerNum
-							and te.TestControlSerNum = tc.TestControlSerNum), "") as educationalMaterialURL_EN,
+							and te.TestControlSerNum = tc.TestControlSerNum), "https://labtestsonline.org/tests/") as educationalMaterialURL_EN,
 						IfNull((Select emc.URL_FR from  TestControl tc, EducationalMaterialControl emc
 							where tc.EducationalMaterialControlSerNum = emc.EducationalMaterialControlSerNum
-							and te.TestControlSerNum = tc.TestControlSerNum), "") as educationalMaterialURL_FR,	
+							and te.TestControlSerNum = tc.TestControlSerNum), "https://labtestsonline.org/tests/") as educationalMaterialURL_FR,	
 						ptr.AbnormalFlag as abnormalFlag, ptr.NormalRange as normalRange, 
 						ptr.NormalRangeMin as normalRangeMin, 
 						ptr.NormalRangeMax as normalRangeMax,
-						ptr.TestValue as testValue,
+						case 
+							when ptr.TestValue = 'Non détecté' then '0'
+							when ptr.TestValue = 'Détecté' then '1'
+						else ptr.TestValue
+						end as testValue,
 						ptr.TestValueNumeric as testValueNumeric,
 						ptr.UnitDescription as unitDescription
 					FROM 
@@ -82,14 +86,18 @@ class PatientTestResultQuery {
 						IfNull((select tc.Name_FR from TestControl as tc where te.TestControlSerNum = tc.TestControlSerNum), te.ExpressionName) as name_FR,
 						IfNull((Select emc.URL_EN from  TestControl tc, EducationalMaterialControl emc
 							where tc.EducationalMaterialControlSerNum = emc.EducationalMaterialControlSerNum
-							and te.TestControlSerNum = tc.TestControlSerNum), "") as educationalMaterialURL_EN,
+							and te.TestControlSerNum = tc.TestControlSerNum), "https://labtestsonline.org/tests/") as educationalMaterialURL_EN,
 						IfNull((Select emc.URL_FR from  TestControl tc, EducationalMaterialControl emc
 							where tc.EducationalMaterialControlSerNum = emc.EducationalMaterialControlSerNum
-							and te.TestControlSerNum = tc.TestControlSerNum), "") as educationalMaterialURL_FR,
+							and te.TestControlSerNum = tc.TestControlSerNum), "https://labtestsonline.org/tests/") as educationalMaterialURL_FR,
 						ptr.UnitDescription as unitDescription,
 						COALESCE(ptr.CollectedDateTime) as latestCollectedDateTime,
 						COALESCE(ptr.AbnormalFlag) as latestAbnormalFlag,
-						COALESCE(ptr.TestValue) as latestTestValue,
+						COALESCE(case 
+								when ptr.TestValue = 'Non détecté' then '0'
+								when ptr.TestValue = 'Détecté' then '1'
+							else ptr.TestValue
+							end) as latestTestValue,
 						COALESCE(ptr.NormalRange) as normalRange,
 						COALESCE(ptr.NormalRangeMin) as normalRangeMin,
 						COALESCE(ptr.NormalRangeMax) as normalRangeMax
@@ -118,13 +126,17 @@ class PatientTestResultQuery {
 						IfNull((select tc.Name_FR from TestControl as tc where te.TestControlSerNum = tc.TestControlSerNum), te.ExpressionName) as name_FR,
 						IfNull((Select emc.URL_EN from  TestControl tc, EducationalMaterialControl emc
 							where tc.EducationalMaterialControlSerNum = emc.EducationalMaterialControlSerNum
-							and te.TestControlSerNum = tc.TestControlSerNum), "") as educationalMaterialURL_EN,
+							and te.TestControlSerNum = tc.TestControlSerNum), "https://labtestsonline.org/tests/") as educationalMaterialURL_EN,
 						IfNull((Select emc.URL_FR from  TestControl tc, EducationalMaterialControl emc
 							where tc.EducationalMaterialControlSerNum = emc.EducationalMaterialControlSerNum
-							and te.TestControlSerNum = tc.TestControlSerNum), "") as educationalMaterialURL_FR,
+							and te.TestControlSerNum = tc.TestControlSerNum), "https://labtestsonline.org/tests/") as educationalMaterialURL_FR,
 						ptr.CollectedDateTime as latestCollectedDateTime, 
 						ptr.AbnormalFlag as latestAbnormalFlag,  
-						ptr.TestValue as latestTestValue,
+						case 
+							when ptr.TestValue = 'Non détecté' then '0'
+							when ptr.TestValue = 'Détecté' then '1'
+						else ptr.TestValue
+						end as latestTestValue,
 						ptr.NormalRange as normalRange, 
 						ptr.NormalRangeMin as normalRangeMin, ptr.NormalRangeMax as normalRangeMax,
 						ptr.UnitDescription as unitDescription
@@ -150,7 +162,11 @@ class PatientTestResultQuery {
 						ptr.PatientTestResultSerNum as patientTestResultSerNum, 
 						ptr.CollectedDateTime as collectedDateTime, 
 						ptr.AbnormalFlag as abnormalFlag,  
-						ptr.TestValue as testValue,
+						case 
+							when ptr.TestValue = 'Non détecté' then '0'
+							when ptr.TestValue = 'Détecté' then '1'
+						else ptr.TestValue
+						end as testValue,
 						ptr.TestValueNumeric as testValueNumeric
 					FROM 
 						PatientTestResult as ptr
