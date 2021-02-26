@@ -356,17 +356,16 @@ exports.getPatientForPatientMembers = function() {
 };
 
 /**
- * @description Retrieves a patient's ORMS ID from the Patient_Hospital_Identifier table
+ * @description Retrieves all of a patient's MRNs from the Patient_Hospital_Identifier table
  * @author Stacey Beard
- * @date 2021-02-19
+ * @date 2021-02-26
  * @returns {string}
  */
-exports.getORMSID = function()
+exports.getMRNs = function()
 {
     return `
-        SELECT PHI.MRN FROM Patient_Hospital_Identifier PHI
-        WHERE PHI.Hospital_Identifier_Type_Code = "ORM"
-        AND PHI.PatientSerNum = ?
+        SELECT PHI.MRN, PHI.Hospital_Identifier_Type_Code FROM Patient_Hospital_Identifier PHI
+        WHERE PHI.PatientSerNum = ?
         ;
    `
 };

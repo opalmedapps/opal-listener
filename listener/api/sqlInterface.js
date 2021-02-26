@@ -377,50 +377,65 @@ exports.sendMessage=function(requestObject) {
 
 /**
  * checkIn
- * @desc checks into aria and then logs the check in status to db
+ * @desc Checks the patient into their appointments for the day via ORMS.
  * @param requestObject
  * @return {Promise}
  */
-exports.checkIn= async function (requestObject) {
-    const r = Q.defer();
-    const patientSerNum = requestObject.Parameters.PatientSerNum;
-
-    // Get the patient's ORMS ID (used in the check-in call to ORMS)
-    let ormsID;
+exports.checkIn = async function (requestObject)
+{
     try
     {
-        ormsID = await getORMSID(patientSerNum);
-    }
-    catch (error)
-    {
-        r.reject({Response: 'error', Reason: 'CheckIn error; patient ORMS ID error: ' + error});
-        return r.promise;
-    }
+        const patientSerNum = requestObject.Parameters.PatientSerNum;
 
-    hasAlreadyAttemptedCheckin(patientSerNum)
-        .then(result => {
-            if(result === false){
-                //Check in to aria using Johns script
-                checkIntoAriaAndMedi(ormsID).then(() => {
-                    //If successfully checked in, grab all the appointments that have been checked into in order to notify app
-                    getCheckedInAppointments(patientSerNum)
-                        .then(appts => r.resolve(appts))
-                        .catch(err => r.reject({Response:'error', Reason:'CheckIn error due to '+ err}));
-                }).catch(error => r.reject({Response:'error', Reason:error}));
-            } else r.resolve([]);
-        }).catch(err=> r.reject({Response:'error', Reason:'Error determining whether this patient has checked in or not due to : '+ error}));
-    return r.promise;
+        if (await hasAlreadyAttemptedCheckin(patientSerNum) === false)
+        {
+            let success = false;
+            let lastError;
+
+            // Get the patient's MRNs (used in the check-in call to ORMS)
+            let mrnList = await getMRNs(patientSerNum);
+
+            // Attempt a check-in on each of the patient's MRNs on a loop until one of the calls is successful
+            for (let i = 0; i < mrnList.length; i++)
+            {
+                let mrnObj = mrnList[i];
+                let mrn = mrnObj.MRN;
+                let mrnSite = mrnObj.Hospital_Identifier_Type_Code;
+                try
+                {
+                    // Check into the patient's appointments via a call to ORMS
+                    await checkIntoAriaAndMedi(mrn, mrnSite);
+                    logger.log("debug", "Success checking in PatientSerNum = "+patientSerNum+
+                        " using MRN = "+mrn+" (site = "+mrnSite+")");
+                    success = true;
+                    break;
+                }
+                catch (error)
+                {
+                    logger.log("error", "Failed to check in PatientSerNum = "+patientSerNum+
+                        " using MRN = "+mrn+" (site = "+mrnSite+"); error: "+error);
+                    lastError = error;
+                }
+            }
+            // Check whether the check-in call succeeded, or all attempts failed
+            // On a success, return all checked-in appointments to the app
+            if (success) return await getCheckedInAppointments(patientSerNum);
+            else throw lastError;
+        }
+        else return [];
+    }
+    catch (error) { throw {Response: 'error', Reason: 'Check-in error: ' + error}; }
 };
-
 
 /**
  * Calls John's PHP script in order to check in patient on Aria and Medivisit
- * @param ormsID The identifier of the patient in the ORMS system
+ * @param {string} mrn One of the patient's medical record numbers.
+ * @param {string} mrnSite The site to which the MRN belongs.
  * @returns {Promise}
  */
-function checkIntoAriaAndMedi(ormsID) {
+function checkIntoAriaAndMedi(mrn, mrnSite) {
     let r = Q.defer();
-    let url = config.CHECKIN_PATH.replace('{ID}', ormsID);
+    let url = config.CHECKIN_PATH.replace('{MRN}', mrn).replace('{SITE}', mrnSite);
 
     request(url,function(error, response, body) {
         logger.log('debug', 'checked into aria and medi response: ' + JSON.stringify(response));
@@ -473,19 +488,18 @@ function getCheckedInAppointments(patientSerNum){
  */
 
 /**
- * @description Retrieves a patient's ORMS ID based on their PatientSerNum.
+ * @description Retrieves a patient's MRNs (with their corresponding sites) based on their PatientSerNum.
  * @author Stacey Beard
- * @date 2021-02-19
+ * @date 2021-02-26
  * @param patientSerNum
- * @returns {Promise<*>} The patient's ORMS ID
+ * @returns {Promise<*>} Rows with the patient's MRN information (multiple MRNs)
  */
-async function getORMSID(patientSerNum)
+async function getMRNs(patientSerNum)
 {
-    let rows = await exports.runSqlQuery(queries.getORMSID(), [patientSerNum]);
+    let rows = await exports.runSqlQuery(queries.getMRNs(), [patientSerNum]);
 
-    if (rows.length > 1) throw new Error("More than one entry was found for the ORMS ID of PatientSerNum "+patientSerNum+" in Patient_Hospital_Identifier");
-    else if (rows.length === 0 || typeof rows[0].MRN === "undefined") throw new Error("ORMS ID not found for PatientSerNum "+patientSerNum+" in Patient_Hospital_Identifier");
-    else return rows[0].MRN;
+    if (rows.length === 0) throw "No MRN found for PatientSerNum "+patientSerNum+" in Patient_Hospital_Identifier";
+    else return rows;
 }
 
 /**
