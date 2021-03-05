@@ -367,7 +367,7 @@ exports.getMRNs = function()
         SELECT PHI.MRN, PHI.Hospital_Identifier_Type_Code FROM Patient_Hospital_Identifier PHI
         WHERE PHI.PatientSerNum = ?
         ;
-   `
+    `
 };
 
 /**
