@@ -172,6 +172,15 @@ exports.patientTasksTableFields=function()
         "ORDER BY Task.DueDateTime ASC;";
 };
 
+/**
+ * patientStudyTableFields
+ * @desc Query that returns the studies assigned to a given patient.
+ * @returns {string}
+ */
+exports.patientStudyTableFields=function(){
+    return "SELECT S.title_EN, S.title_FR, S.description_EN, S.description_FR, S.investigator, S.startDate, S.endDate, S.creationDate FROM study S, Patient P, patientStudy PS, Users U WHERE U.UserTypeSerNum=P.PatientSerNum AND P.PatientSerNum = PS.patientId AND S.ID = PS.studyID AND U.Username LIKE ?";
+}
+
 exports.getPatientPasswordForVerification = function()
 {
     return `SELECT DISTINCT u.Password

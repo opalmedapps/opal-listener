@@ -370,6 +370,23 @@ exports.sendMessage=function(requestObject) {
     return exports.runSqlQuery(queries.sendMessage(requestObject));
 };
 
+/**
+ * @name getStudies
+ * @desc Gets patient studies based on UserID
+ * @param {object} requestObject
+ * @returns {promise}
+ */
+ exports.getStudies=function(requestObject) {
+    let r=Q.defer();
+    exports.runSqlQuery(queries.patientStudyTableFields(),[requestObject.UserID])
+        .then((rows)=>{
+            r.resolve({Response:'success', Data:rows})
+        }).catch((err)=>{
+            r.reject({Response:'error', Reason:err});
+        }); 
+    return r.promise;
+};
+
 
 /**
  * CHECKIN FUNCTIONALITY

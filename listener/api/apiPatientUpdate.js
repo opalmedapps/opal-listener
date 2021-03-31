@@ -105,6 +105,17 @@ exports.getSecurityQuestion = function (requestObject) {
     return sqlInterface.getSecurityQuestion(requestObject);
 };
 
+/**
+*@name getStudies
+*@description Gets the studies associated with the current patient.
+*@param {object} requestObject
+*@returns {Promise}
+*/
+exports.getStudies = function(requestObject) 
+{
+  return sqlInterface.getStudies(requestObject);
+}
+
 // exports.isTrustedDevice = function (requestObject) {
 //     return sqlInterface.isTrustedDevice(requestObject);
 // };
