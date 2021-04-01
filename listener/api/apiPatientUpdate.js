@@ -116,6 +116,17 @@ exports.getStudies = function(requestObject)
   return sqlInterface.getStudies(requestObject);
 }
 
+/**
+*@name getStudyQuestionnaires
+*@description Gets the questionnaires associated with the current study.
+*@param {object} requestObject
+*@returns {Promise}
+*/
+exports.getStudyQuestionnaires = function(requestObject)
+{
+  return sqlInterface.getStudyQuestionnaires(requestObject);
+}
+
 // exports.isTrustedDevice = function (requestObject) {
 //     return sqlInterface.isTrustedDevice(requestObject);
 // };

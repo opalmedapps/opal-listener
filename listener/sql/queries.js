@@ -178,7 +178,16 @@ exports.patientTasksTableFields=function()
  * @returns {string}
  */
 exports.patientStudyTableFields=function(){
-    return "SELECT S.title_EN, S.title_FR, S.description_EN, S.description_FR, S.investigator, S.startDate, S.endDate, S.creationDate FROM study S, Patient P, patientStudy PS, Users U WHERE U.UserTypeSerNum=P.PatientSerNum AND P.PatientSerNum = PS.patientId AND S.ID = PS.studyID AND U.Username LIKE ?";
+    return "SELECT S.ID, S.title_EN, S.title_FR, S.description_EN, S.description_FR, S.investigator, S.startDate, S.endDate, S.creationDate FROM study S, Patient P, patientStudy PS, Users U WHERE U.UserTypeSerNum=P.PatientSerNum AND P.PatientSerNum = PS.patientId AND S.ID = PS.studyID AND U.Username LIKE ?";
+}
+
+/**
+ * getStudyQuestionnairesQuery
+ * @desc Query that returns the questionnaires assigned to a given study.
+ * @returns {string}
+ */
+exports.getStudyQuestionnairesQuery = function(){
+    return "SELECT QS.questionnaireID, Q.DateAdded, QC.QuestionnaireName_EN, QC.QuestionnaireName_FR FROM questionnaireStudy QS, Questionnaire Q, QuestionnaireControl QC, study S WHERE S.ID = QS.studyID AND QC.QuestionnaireControlSerNum = Q.QuestionnaireControlSerNum AND Q.QuestionnaireSerNum = QS.questionnaireId AND S.ID = ?";
 }
 
 exports.getPatientPasswordForVerification = function()

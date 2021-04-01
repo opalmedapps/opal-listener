@@ -38,6 +38,7 @@ const LEGACYAPI = {
     'QuestionnaireUpdateStatus': apiHospitalUpdate.questionnaireUpdateStatus,
     'Read': apiHospitalUpdate.updateReadStatus,
     'Studies': apiPatientUpdate.getStudies,
+    'StudyQuestionnaires': apiPatientUpdate.getStudyQuestionnaires,
     'PFPMembers': apiPatientUpdate.getPatientsForPatientsMembers
 };
 
