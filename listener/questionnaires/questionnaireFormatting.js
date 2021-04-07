@@ -138,7 +138,7 @@ function formatQuestionnaire(questionnaireDataArray, sectionDataArray, questionD
     // decode html
     questionnaireDataArray[0].description = utility.htmlspecialchars_decode(questionnaireDataArray[0].description);
     questionnaireDataArray[0].instruction = utility.htmlspecialchars_decode(questionnaireDataArray[0].instruction);
-    questionnaireDataArray[0].questionnaire_category = findCategoryFromId(questionnaireDataArray[0].purpose_id);
+    questionnaireDataArray[0].questionnaire_purpose = findPurposeFromId(questionnaireDataArray[0].purpose_id);
 
     let sections = {};
 
@@ -262,15 +262,15 @@ function formatPatientAnswer(status, question, answerObject) {
 }
 
 /**
- * findCategoryFromId
- * @desc find the category string from the category ID
- * @param {number} categoryId the ID of the category in the database
- * @returns {string} the category string
+ * findPurposeFromId
+ * @desc find the purpose string from the purpose ID
+ * @param {number} purposeId the ID of the purpose in the database
+ * @returns {string} the purpose string
  */
-function findCategoryFromId(categoryId) {
-    for (let category in questionnaireConfig.QUESTIONNAIRE_CATEGORY_ID_MAP) {
-        if (questionnaireConfig.QUESTIONNAIRE_CATEGORY_ID_MAP[category] === categoryId) {
-            return category;
+function findPurposeFromId(purposeId) {
+    for (let purpose in questionnaireConfig.QUESTIONNAIRE_PURPOSE_ID_MAP) {
+        if (questionnaireConfig.QUESTIONNAIRE_PURPOSE_ID_MAP[purpose] === purposeId) {
+            return purpose;
         }
     }
 }

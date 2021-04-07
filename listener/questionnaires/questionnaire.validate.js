@@ -13,7 +13,7 @@ const questionnaireOpalDBValidation = {
     'validatePatientSerNumAndLanguage': validatePatientSerNumAndLanguage,
     'validateParamSaveAnswer': validateParamSaveAnswer,
     'validateParamUpdateStatus': validateParamUpdateStatus,
-    'validateQuestionnaireCategory': validateQuestionnaireCategory,
+    'validateQuestionnairePurpose': validateQuestionnairePurpose,
     'validateQuestionnaireSerNum': validateQuestionnaireSerNum,
 };
 
@@ -88,15 +88,15 @@ function validateParamUpdateStatus(requestObject) {
 }
 
 /**
- * @name validateQuestionnaireCategory
- * @desc validation function for the questionnaire category
+ * @name validateQuestionnairePurpose
+ * @desc validation function for the questionnaire purpose
  * @param {object} requestObject
- * @returns {boolean} true if the requestObject contain the category with the correct format, false otherwise
+ * @returns {boolean} true if the requestObject contain the purpose with the correct format, false otherwise
  */
-function validateQuestionnaireCategory(requestObject) {
+function validateQuestionnairePurpose(requestObject) {
     return (
-        requestObject.hasOwnProperty('Parameters') && requestObject.Parameters.hasOwnProperty('category') &&
-        questionnaireConfig.QUESTIONNAIRE_CATEGORY_ID_MAP.hasOwnProperty(requestObject.Parameters.category.toUpperCase())
+        requestObject.hasOwnProperty('Parameters') && requestObject.Parameters.hasOwnProperty('purpose') &&
+        questionnaireConfig.QUESTIONNAIRE_PURPOSE_ID_MAP.hasOwnProperty(requestObject.Parameters.purpose.toUpperCase())
     );
 }
 

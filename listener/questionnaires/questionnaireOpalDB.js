@@ -65,8 +65,8 @@ function getQuestionnaireInOpalDB(requestObject) {
  */
 function getQuestionnaireList(requestObject) {
 
-    if (!questionnaireValidation.validateQuestionnaireCategory(requestObject)) {
-        const paramErrMessage = "Error getting questionnaire list: the requestObject does not have the correct parameter category";
+    if (!questionnaireValidation.validateQuestionnairePurpose(requestObject)) {
+        const paramErrMessage = "Error getting questionnaire list: the requestObject does not have the correct parameter purpose";
         logger.log("error", paramErrMessage);
         return Promise.reject(new Error(paramErrMessage));
     }
@@ -76,7 +76,7 @@ function getQuestionnaireList(requestObject) {
 
             if (questionnaireValidation.validatePatientSerNumAndLanguage(patientSerNumAndLanguageRow)) {
                 // get questionnaire list
-                return questionnaires.getQuestionnaireList(patientSerNumAndLanguageRow[0], requestObject.Parameters.category);
+                return questionnaires.getQuestionnaireList(patientSerNumAndLanguageRow[0], requestObject.Parameters.purpose);
             } else {
                 const questionnaireSerNumLanguageErrMessage = "Error getting questionnaire list: No matching PatientSerNum or/and Language found in opalDB";
                 logger.log("error", questionnaireSerNumLanguageErrMessage);
@@ -138,14 +138,14 @@ function getQuestionnaire(requestObject) {
 
 /**
  * getQuestionnaireUnreadNumber
- * @desc Returns a promise containing the number of unread (e.g. 'New') questionnaires of a given category for a particular user.
+ * @desc Returns a promise containing the number of unread (e.g. 'New') questionnaires of a given purpose for a particular user.
  * @param {object} requestObject
  * @return {Promise} Returns a promise that contains the number of unread questionnaires
  */
 function getQuestionnaireUnreadNumber(requestObject) {
 
-    if (!questionnaireValidation.validateQuestionnaireCategory(requestObject)) {
-        const paramErrMessage = "Error getting number of unread questionnaires: the requestObject does not have the correct parameter category";
+    if (!questionnaireValidation.validateQuestionnairePurpose(requestObject)) {
+        const paramErrMessage = "Error getting number of unread questionnaires: the requestObject does not have the correct parameter purpose";
         logger.log("error", paramErrMessage);
         return Promise.reject(new Error(paramErrMessage));
     }
@@ -154,7 +154,7 @@ function getQuestionnaireUnreadNumber(requestObject) {
         .then(function (patientSerNum) {
             if (questionnaireValidation.validatePatientSerNum(patientSerNum)) {
                 // get number of unread questionnaires
-                return questionnaires.getQuestionnaireUnreadNumber(patientSerNum[0], requestObject.Parameters.category);
+                return questionnaires.getQuestionnaireUnreadNumber(patientSerNum[0], requestObject.Parameters.purpose);
             } else {
                 const unreadNumberErrMessage = "Error getting number of unread questionnaires: No matching PatientSerNum found in opalDB";
                 logger.log("error", unreadNumberErrMessage);

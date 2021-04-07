@@ -62,16 +62,16 @@ FUNCTIONS TO GET QUESTIONNAIRES
  * @desc this function get a list of questionnaire belonging to an user.
  * @param {object} opalPatientSerNumAndLanguage object containing PatientSerNum and Language as property.
  *                 These information comes from OpalDB
- * @param {string} category string indicating the category of the questionnaire list requested.
- *                 The categories can be found in QUESTIONNAIRE_CATEGORY_ID_MAP of the questionnaireConfig.json file.
+ * @param {string} purpose string indicating the purpose of the questionnaire list requested.
+ *                 The purposes can be found in QUESTIONNAIRE_PURPOSE_ID_MAP of the questionnaireConfig.json file.
  * @returns {promise}
  */
-function getQuestionnaireList(opalPatientSerNumAndLanguage, category) {
+function getQuestionnaireList(opalPatientSerNumAndLanguage, purpose) {
     let r = q.defer();
 
     // get questionnaire list
     runQuery(questionnaireQueries.getQuestionnaireListQuery(),
-        [opalPatientSerNumAndLanguage.PatientSerNum, findCategoryId(category), opalPatientSerNumAndLanguage.Language])
+        [opalPatientSerNumAndLanguage.PatientSerNum, findPurposeId(purpose), opalPatientSerNumAndLanguage.Language])
         .then(function (queryResult) {
 
             if (!questionnaireValidation.hasValidProcedureStatus(queryResult)) {
@@ -143,18 +143,18 @@ function getQuestionnaire(opalPatientSerNumAndLanguage, answerQuestionnaire_Id) 
 
 /**
  * getQuestionnaireUnreadNumber
- * @desc this function gets the number of unread (e.g. 'New') questionnaires in a given category belonging to an user.
+ * @desc this function gets the number of unread (e.g. 'New') questionnaires in a given purpose belonging to an user.
  * @param {object} opalPatientSerNum object containing PatientSerNum as a property.
  *                 This information comes from OpalDB
- * @param {string} category string indicating the category of the questionnaire list requested.
- *                 The categories can be found in QUESTIONNAIRE_CATEGORY_ID_MAP of the questionnaireConfig.json file.
+ * @param {string} purpose string indicating the purpose of the questionnaire list requested.
+ *                 The purposes can be found in QUESTIONNAIRE_PURPOSE_ID_MAP of the questionnaireConfig.json file.
  * @returns {promise}
  */
-function getQuestionnaireUnreadNumber(opalPatientSerNum, category) {
+function getQuestionnaireUnreadNumber(opalPatientSerNum, purpose) {
     let r = q.defer();
 
     // get number of unread questionnaires
-    runQuery(questionnaireQueries.getNumberUnreadQuery(), [findCategoryId(category), opalPatientSerNum.PatientSerNum])
+    runQuery(questionnaireQueries.getNumberUnreadQuery(), [findPurposeId(purpose), opalPatientSerNum.PatientSerNum])
         .then(function (queryResult) {
             if (!questionnaireValidation.validateUnreadNumber(queryResult)) {
                 logger.log("error", "Error getting number of unread questionnaires: query error");
@@ -204,13 +204,13 @@ function getQuestionOptions(questionAndTypeMap, languageId) {
 }
 
 /**
- * findCategoryId
- * @desc helper function to map the category string sent from the front-end to its ID in the database
- * @param {string} categoryString
- * @returns {number} The category ID in the database
+ * findPurposeId
+ * @desc helper function to map the purpose string sent from the front-end to its ID in the database
+ * @param {string} purposeString
+ * @returns {number} The purpose ID in the database
  */
-function findCategoryId(categoryString) {
-    return questionnaireConfig.QUESTIONNAIRE_CATEGORY_ID_MAP[categoryString.toUpperCase()];
+function findPurposeId(purposeString) {
+    return questionnaireConfig.QUESTIONNAIRE_PURPOSE_ID_MAP[purposeString.toUpperCase()];
 }
 
 /*
