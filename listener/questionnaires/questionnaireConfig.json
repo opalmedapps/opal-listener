@@ -15,7 +15,9 @@
     "QUESTIONNAIRE_CATEGORY_ID_MAP": {
         "CLINICAL": 1,
         "RESEARCH": 2,
-        "CONSENT": 3,
-        "STUDY": 4
+        "QUALITY": 3,
+        "CONSENT": 4,
+        "CLERICAL": 5,
+        "OPAL": 6
     }
 }

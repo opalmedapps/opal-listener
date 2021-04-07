@@ -138,7 +138,7 @@ function formatQuestionnaire(questionnaireDataArray, sectionDataArray, questionD
     // decode html
     questionnaireDataArray[0].description = utility.htmlspecialchars_decode(questionnaireDataArray[0].description);
     questionnaireDataArray[0].instruction = utility.htmlspecialchars_decode(questionnaireDataArray[0].instruction);
-    questionnaireDataArray[0].questionnaire_category = findCategoryFromId(questionnaireDataArray[0].questionnaire_category_id);
+    questionnaireDataArray[0].questionnaire_category = findCategoryFromId(questionnaireDataArray[0].purpose_id);
 
     let sections = {};
 

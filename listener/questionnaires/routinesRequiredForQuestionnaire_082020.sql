@@ -86,7 +86,7 @@ BEGIN
 			getDisplayName(q.description,language_id) as description,
 			getDisplayName(q.instruction,language_id) as instruction, 
 			q.optionalFeedback as allow_questionnaire_feedback,
-			q.questionnaireCategoryId as questionnaire_category_id
+			q.purposeId as purpose_id
 		from answerQuestionnaire aq 
 			left join questionnaire q on (aq.questionnaireId = q.ID)
 		where aq.ID = i_answerQuestionnaireId
@@ -276,7 +276,7 @@ DELIMITER ;
 DELIMITER //
 CREATE DEFINER=`root`@`localhost` PROCEDURE `getQuestionnaireList`(
 	IN `i_externalPatientId` VARCHAR(64),
-	IN `i_categoryId` BIGINT,
+	IN `i_purposeId` BIGINT,
 	IN `i_isoLang` VARCHAR(2)
 
 )
@@ -327,7 +327,7 @@ BEGIN
 		WHERE aq.deleted = 0
 			AND q.deleted = 0
 			AND q.final = 1
-			AND q.questionnaireCategoryId = i_categoryId
+			AND q.purposeId = i_purposeId
 			AND aq.patientId = 
 				(SELECT ID
 				FROM patient
