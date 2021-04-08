@@ -45,6 +45,15 @@ exports.getQuestionOptionsQuery = function () {
     return "CALL getQuestionOptions(?, ?, ?);";
 }
 
+exports.getQuestionnairePurposeQuery = function () {
+    return `SELECT d.content as purpose
+        FROM dictionary d, purpose p, answerQuestionnaire aq LEFT JOIN questionnaire q ON q.ID = aq.questionnaireId
+            WHERE d.contentId = p.title 
+                AND p.ID = q.purposeId 
+                AND d.languageId = 2 
+                AND aq.ID = ?;`
+}
+
 exports.getNumberUnreadQuery = function () {
     return `SELECT COUNT(*) as numberUnread
         FROM answerQuestionnaire aq LEFT JOIN questionnaire q ON q.ID = aq.questionnaireId

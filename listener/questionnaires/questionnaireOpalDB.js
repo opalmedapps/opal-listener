@@ -10,6 +10,7 @@ const {OpalSQLQueryRunner} = require("../sql/opal-sql-query-runner");
 exports.getQuestionnaireInOpalDB = getQuestionnaireInOpalDB;
 exports.getQuestionnaireList = getQuestionnaireList;
 exports.getQuestionnaire = getQuestionnaire;
+exports.getQuestionnairePurpose = getQuestionnairePurpose;
 exports.getQuestionnaireUnreadNumber = getQuestionnaireUnreadNumber;
 exports.questionnaireSaveAnswer = questionnaireSaveAnswer;
 exports.questionnaireUpdateStatus = questionnaireUpdateStatus;
@@ -134,6 +135,31 @@ function getQuestionnaire(requestObject) {
                 });
         }
     });
+}
+
+/**
+ * getQuestionnairePurpose
+ * @desc Returns a promise containing the purpose of a given questionnaire.
+ * @param {object} requestObject
+ * @return {Promise} Returns a promise that contains the questionnaire purpose.
+ */
+function getQuestionnairePurpose(requestObject) {
+    if (!questionnaireValidation.validatePatientQuestionnaireSerNum(requestObject)) {
+        const paramErrMessage = "Error getting questionnaire purpose: the requestObject does not have the correct parameter qp_ser_num";
+        logger.log("error", paramErrMessage);
+        return Promise.reject(new Error(paramErrMessage));
+    }
+
+    return questionnaires.getQuestionnairePurpose(requestObject.Parameters.qp_ser_num)
+        .then(function (result) {
+            let obj = {};
+            obj.Data = result;
+            return obj;
+        })
+        .catch(function (error) {
+            logger.log("error", "Error getting questionnaire purpose", error);
+            throw new Error(error);
+        });
 }
 
 /**

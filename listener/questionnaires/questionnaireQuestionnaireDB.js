@@ -49,6 +49,7 @@ function runQuery(query, parameters = null) {
 
 exports.getQuestionnaireList = getQuestionnaireList;
 exports.getQuestionnaire = getQuestionnaire;
+exports.getQuestionnairePurpose= getQuestionnairePurpose;
 exports.getQuestionnaireUnreadNumber = getQuestionnaireUnreadNumber;
 exports.saveAnswer = saveAnswer;
 exports.updateQuestionnaireStatusInQuestionnaireDB = updateQuestionnaireStatusInQuestionnaireDB;
@@ -135,6 +136,32 @@ function getQuestionnaire(opalPatientSerNumAndLanguage, answerQuestionnaire_Id) 
         })
         .catch(function (err) {
             logger.log("error", "Error getting questionnaire, " + err);
+            r.reject(err);
+        })
+
+    return r.promise;
+}
+
+/**
+ * getQuestionnairePurpose
+ * @desc this function gets the quetionnaire purpose of a given questionnaire.
+ * @param {number} answerQuestionnaireId  The unique Id of the answerQuestionnaire table.
+ * @returns {promise}
+ */
+function getQuestionnairePurpose(answerQuestionnaireId) {
+    let r = q.defer();
+
+    runQuery(questionnaireQueries.getQuestionnairePurposeQuery(), [answerQuestionnaireId])
+        .then(function (queryResult) {
+            if (!questionnaireValidation.validatePurpose(queryResult)) {
+                logger.log("error", "Error getting questionnaire purpose: query error");
+                r.reject(new Error('Error getting questionnaire purpose: query error'));
+            } else {
+                r.resolve(queryResult[0]);
+            }
+        })
+        .catch(function (err) {
+            logger.log("error", "Error getting questionnaire purpose, " + err);
             r.reject(err);
         })
 

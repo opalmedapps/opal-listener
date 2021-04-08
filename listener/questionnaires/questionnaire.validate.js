@@ -132,6 +132,7 @@ const questionnaireQuestionnaireDBValidation = {
     'validateSliderAnswer': validateSliderAnswer,
     'validateRadioButtonAnswer': validateRadioButtonAnswer,
     'validateCheckboxAnswer': validateCheckboxAnswer,
+    'validatePurpose': validatePurpose,
     'validateUnreadNumber': validateUnreadNumber,
 }
 
@@ -328,6 +329,16 @@ function validateSliderAnswer(answerArray) {
  */
 function validateRadioButtonAnswer(answerArray) {
     return validateAnswerArrayLen1(answerArray) && !isNaN(parseInt(answerArray[0].answer_value));
+}
+
+/**
+ * validatePurpose
+ * @desc verify that the query result has the correct property (purpose)
+ * @param {object} queryResult
+ * @returns {boolean} true if the result has required property, false otherwise
+ */
+ function validatePurpose(queryResult) {
+    return queryResult[0].hasOwnProperty('purpose') && queryResult[0].purpose;
 }
 
 /**

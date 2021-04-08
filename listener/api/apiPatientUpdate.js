@@ -174,6 +174,13 @@ exports.getQuestionnaireInOpalDB = questionnaires.getQuestionnaireInOpalDB;
 exports.getQuestionnaire = questionnaires.getQuestionnaire;
 
 /**
+ * Gets the purpose of the current questionnaire.
+ * @param {object} requestObject
+ * @returns {Promise}
+ */
+ exports.getQuestionnairePurpose = questionnaires.getQuestionnairePurpose;
+
+/**
  * Gets the number of unread (e.g. 'New') questionnaires.
  * @param {object} requestObject
  * @returns {Promise}

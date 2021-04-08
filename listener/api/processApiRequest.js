@@ -32,6 +32,7 @@ const LEGACYAPI = {
     'QuestionnaireInOpalDBFromSerNum': apiPatientUpdate.getQuestionnaireInOpalDB,
     'QuestionnaireList': apiPatientUpdate.getQuestionnaireList,
     'Questionnaire': apiPatientUpdate.getQuestionnaire,
+    'QuestionnairePurpose': apiPatientUpdate.getQuestionnairePurpose,
     'QuestionnaireNumberUnread': apiPatientUpdate.getQuestionnaireUnreadNumber,
     'EducationalMaterialRating': apiHospitalUpdate.inputEducationalMaterialRating,
     'QuestionnaireSaveAnswer': apiHospitalUpdate.questionnaireSaveAnswer,
