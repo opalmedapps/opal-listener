@@ -76,6 +76,16 @@ exports.patientAppointmentsTableFields=function()
           "where HM2.HospitalMapSerNum = getLevel(A2.ScheduledStartTime, A2.ResourceDescription, A2.HospitalMapSerNum);";
 };
 
+/// TODO: DB fields & corresponding queries subject to change
+exports.patientDicomTableFields=function()
+{
+    return "SELECT D.DicomSerNum, D.Name_EN, D.Name_FR, D.Path, D.FolderName, D.ReadStatus, D.DateAdded FROM Dicom D, Patient P, Users U WHERE U.UserTypeSerNum=P.PatientSerNum AND D.PatientSerNum=P.PatientSerNum AND U.Username LIKE ?" // and D.LastUpdated > ?"
+}
+
+exports.getDicomContentQuery = function()
+{
+    return "SELECT D.DicomSerNum, D.Path, D.FolderName FROM Dicom D, Patient P, Users U WHERE D.DicomSerNum = ? AND D.PatientSerNum=P.PatientSerNum AND P.PatientSerNum=U.UserTypeSerNum AND U.Username = ?";
+};
 exports.patientDocumentTableFields=function()
 {
     return "SELECT DISTINCT " +

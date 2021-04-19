@@ -13,6 +13,7 @@
     "MYSQL_DATABASE": "",
     "HOST": ""
   },
+  "DICOM_PATH": "",
   "DOCUMENTS_PATH": "",
   "DOCTOR_PATH": "",
   "CHECKIN_PATH": "",
