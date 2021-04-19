@@ -21,6 +21,7 @@
     "axios": "1.13.2",
     "cross-env": "10.1.0",
     "crypto-js": "4.2.0",
+    "dicom-parser": "1.8.7",
     "dotenv": "17.2.3",
     "express-validator": "7.3.0",
     "firebase-admin": "13.5.0",

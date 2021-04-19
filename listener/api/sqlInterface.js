@@ -4,6 +4,7 @@
 
 import axios from 'axios';
 import config from '../config-adaptor.js';
+import dicomParser from 'dicom-parser';
 import eduMaterialConfig from '../educational-material/eduMaterialConfig.json' with { type: "json" };
 import filesystem from 'fs';
 import logger from '../logs/logger.js';
@@ -708,6 +709,53 @@ async function setCheckInUsername(requestObject, appointmentSerNumArray) {
     await runSqlQuery(queries.setCheckInUsername(), [requestObject.UserID, [appointmentSerNumArray]]);
 }
 
+/** TODO: ADD ERROR PROCESSING & FIX NAMES
+ * getDicom
+ * @desc fetches dicom contents from DB
+ * @param requestObject
+ * @return {Promise}
+ */
+function getDicom(requestObject) {
+
+    let r=Q.defer();
+    runSqlQuery(queries.patientDicomTableFields(),requestObject.UserID)//requestObject.Parameters.timestamp
+        .then((rows)=>{
+            r.resolve({Response:'success', Data:rows})
+        }).catch((err)=>{
+        r.reject({Response:'error', Reason:err});
+    });
+    return r.promise;
+}
+
+// // get dicom content
+// TODO: ADD ERROR PROCESSING & FIX NAMES
+function getDicomContent(requestObject) {
+
+    let r = Q.defer();
+    let documents = requestObject.Parameters;
+    let userID = requestObject.UserID;
+    if(!(typeof documents.constructor !=='undefined'&&documents.constructor=== Array)){
+        r.reject({Response:'error',Reason:'Not an array'});
+    }else{
+        runSqlQuery(queries.getDicomContentQuery(), [[documents],userID]).then((rows)=>{
+            if(rows.length === 0) {
+                r.resolve({Response:'success',Data:'DocumentNotFound'});
+            } else {
+                LoadDicoms(rows).then(function(documents) {
+                    // if(documents.length === 1) r.resolve({Response:'success',Data:documents[0]});
+                    // else r.resolve({Response:'success',Data:documents});
+                    r.resolve({Response:'success',Data:documents});
+                }).catch(function (err) {
+                    r.reject({Response:'error', Reason:err});
+                });
+            }
+        }).catch((err)=>{
+            r.reject({Response:'error',Reason:err});
+        });
+    }
+    return r.promise;
+}
+
 /**
  * getDocumentsContent
  * @desc fetches a document's content from DB
@@ -1047,6 +1095,184 @@ async function getPatientFromEmail(email) {
         Reason: `Patient not found using email: ${email}`,
     };
     return rows[0];
+}
+
+/** TODO: ADD ERROR PROCESSING ETC
+ * LoadDicoms
+ * @desc Loads the contents of RTSTRUCT and RTPLAN files
+ * @param rows
+ * @return {Promise}
+ */
+function LoadDicoms(rows) {
+
+    const defer = Q.defer();
+
+    if (rows.length === 0) { return defer.resolve([]); }
+
+    rows.forEach
+    for (let key = 0; key < rows.length; key++) {
+
+        var folderpath = config.DICOM_PATH + rows[key].Path + rows[key].FolderName;
+
+        try{
+            var hasRTPlan = false;
+            var hasRTStruct = false;
+            var data = {}
+            data.beams = {}
+
+            filesystem.readdirSync(folderpath).forEach(function(file){
+                // console.log(file)
+                var bufferArray = filesystem.readFileSync(folderpath+file)
+                var dicomData = dicomParser.parseDicom(bufferArray);
+                var modality = dicomData.string('x00080060');
+                // console.log("*****************************************")
+                // console.log(modality)
+
+
+
+                if (modality === 'RTPLAN'){
+                    hasRtPlan = true;
+                    data.hasMLC = false;
+
+                    data.patientPosition = dicomData.elements.x300a0180.items[0].dataSet.string('x00185100');
+
+                    var doseReferenceSequence = dicomData.elements.x300a0010.items;
+                    doseReferenceSequence.forEach(function(dose){
+                        if (dose.dataSet.string('x300a0026')){
+                            data.dose = dose.dataSet.string('x300a0026') + ' Gy';
+                        }
+                    })
+
+
+
+                    data.numFractions = parseInt(dicomData.elements.x300a0070.items[0].dataSet.string('x300a0078'))
+                    data.numBeams = parseInt(dicomData.elements.x300a0070.items[0].dataSet.string('x300a0080'))
+
+                    var beamSequence = dicomData.elements.x300a00b0.items;
+                    var beamNumber, gantryAngle, isocenter, controlPt, beamPositionSequence, jawType, X, Y, SAD;
+                    var beamEnergy = [];
+
+                    beamSequence.forEach(function(beam){
+
+                        SAD =  parseFloat(beam.dataSet.string('x300a00b4'))
+                        beamNumber = beam.dataSet.string('x300a00c0')
+
+                        data.radiationType = beam.dataSet.string('x300a00c6')
+
+                        controlPt = beam.dataSet.elements.x300a0111.items[0]
+
+                        gantryAngle = parseInt(controlPt.dataSet.string('x300a011e'))
+                        isocenter = controlPt.dataSet.string('x300a012c').split("\\").map(Number);
+                        var energy = controlPt.dataSet.string('x300a0114') + ((data.radiationType.toUpperCase() === 'PHOTON') ? ' MV' : ' MeV')
+                        if (!beamEnergy.includes(energy)){
+                            beamEnergy.push(energy)
+                        }
+
+                        beamPositionSequence = controlPt.dataSet.elements.x300a011a.items
+
+                        beamPositionSequence.forEach(function(beamPosition){
+                            jawType = beamPosition.dataSet.string('x300a00b8')
+
+
+                            if (jawType == 'X' || jawType == 'ASYMX'){
+                                X = beamPosition.dataSet.string('x300a011c').split("\\").map(Number)
+                            } else if (jawType == 'Y' || jawType == 'ASYMY'){
+                                Y = beamPosition.dataSet.string('x300a011c').split("\\").map(Number)
+                            } else if (jawType.includes('MLC') && !data.hasMLC){
+                                data.hasMLC = true;
+                            }
+
+                        })
+
+                        data.beamEnergy = beamEnergy;
+
+                        data.beams[beamNumber] = {
+                            SAD: SAD,
+                            isocenter: isocenter,
+                            gantryAngle: gantryAngle,
+                            X1: X[0],
+                            X2: X[1],
+                            Y1: Y[0],
+                            Y2: Y[1]
+                        }
+
+                    })
+                } else if (modality === 'RTSTRUCT'){
+
+                    // TODO: Get contour data
+                    /*
+                    var ROINumber;
+                    var ROIName;
+
+                    var structureSetROISequence = dicomData.elements.x30060020.items;
+
+                    // structureSetROISequence.forEach(function(sequence){
+                    for (var i = 0; i < structureSetROISequence.length; i++){
+                        ROIName = structureSetROISequence[i].dataSet.string('x30060026')
+                        if (ROIName.toLowerCase().includes("body") || ROIName.toLowerCase().includes("skin") || ROIName.toLowerCase().includes("corps") ){
+                            ROINumber = parseInt(structureSetROISequence[i].dataSet.string('x30060022'))
+                            console.log(ROIName)
+                            break;
+                        }
+
+                    }
+
+                    var ROIContourSequence = dicomData.elements.x30060039.items;
+                    var refROINumber, contours;
+                    // ROIContourSequence.forEach(function(contourSequence){
+
+                    for (var i = 0; i < ROIContourSequence.length; i++){
+                        refROINumber = parseInt(ROIContourSequence[i].dataSet.string('x30060084'))
+                        if (refROINumber === ROINumber){
+
+                            contours = ROIContourSequence[i].dataSet.elements.x30060040.items
+                            break
+                        }
+
+                    }
+
+
+                    var slice;
+                    var firstIteration = true;
+
+                    contours.forEach(function(contour){
+
+                        slice = contour.dataSet.string('x30060050').split("\\").map(Number);
+                        data.contours.push(slice)
+                        // if (firstIteration){
+                        //     renderSliceCap(slice)
+                        //     topZ = slice[2]
+                        //     firstIteration = false;
+                        // }
+                        // renderSlice(slice)
+                        // bottomZ = slice[2]
+
+                    })
+                    */
+                    // renderSliceCap(slice)
+
+
+                    // renderElements()
+                }
+
+            })
+
+
+
+
+        } catch(err) {
+            if (err.code == "ENOENT"){
+                defer.reject("No file found");
+            }
+            else {
+                throw err;
+            }
+        }
+    }
+    // console.log(data)
+    // console.log("**********************************************************")
+    defer.resolve(data)
+    return defer.promise;
 }
 
 /**
@@ -1444,6 +1670,8 @@ export default {
     login,
     logout,
     refresh,
+    getDicom,
+    getDicomContent,
     getDocumentsContent,
     updateAccountField,
     inputFeedback,

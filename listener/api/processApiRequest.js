@@ -22,6 +22,8 @@ const LEGACYAPI = {
     'AccountChange': sqlInterface.updateAccountField,
     'Checkin': sqlInterface.checkIn,
     'DeviceIdentifier': sqlInterface.updateDeviceIdentifier,
+    'Dicom': sqlInterface.getDicom,
+    'DicomContent': sqlInterface.getDicomContent,
     'DocumentContent': sqlInterface.getDocumentsContent,
     'EducationalMaterialRating': sqlInterface.inputEducationalMaterialRating,
     'EducationalPackageContents': sqlInterface.getPackageContents,
