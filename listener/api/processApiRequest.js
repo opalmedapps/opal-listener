@@ -24,6 +24,8 @@ const LEGACYAPI = {
     'CheckCheckin': apiPatientUpdate.checkCheckin,
     'Checkin': apiHospitalUpdate.checkIn,
     'CheckinUpdate': apiPatientUpdate.checkinUpdate,
+    'Dicom': apiPatientUpdate.getDicom, 
+    'DicomContent': apiPatientUpdate.getDicomContent,
     'DocumentContent': apiPatientUpdate.getDocumentsContent,
     'Feedback': apiHospitalUpdate.inputFeedback,
     'MapLocation': apiPatientUpdate.getMapLocation,

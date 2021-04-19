@@ -93,6 +93,18 @@ exports.getPackageContents = function(requestObject){
     return sqlInterface.getPackageContents(requestObject);
 };
 
+//Get Dicom Content
+exports.getDicom=function(requestObject)
+{
+   return sqlInterface.getDicom(requestObject);
+};
+
+//Get Dicom Content
+exports.getDicomContent=function(requestObject)
+{
+   return sqlInterface.getDicomContent(requestObject);
+};
+
 //Get Document Content
 exports.getDocumentsContent=function(requestObject)
 {
