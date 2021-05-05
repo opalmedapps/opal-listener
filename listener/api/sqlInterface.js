@@ -590,7 +590,8 @@ exports.updateDeviceIdentifier = function(requestObject, parameters) {
 
     let identifiers = parameters || requestObject.Parameters;
     let deviceType = null;
-    
+
+
     //Validation deviceType
     if (identifiers.deviceType === 'browser') {
         deviceType = 3;
@@ -602,12 +603,12 @@ exports.updateDeviceIdentifier = function(requestObject, parameters) {
         r.reject({Response:'error', Reason:'Incorrect device type'});
         return r.promise;
     }
-    let appVersion = requestObject.AppVersion;
+
     let email = requestObject.UserEmail;
 
     getPatientFromEmail(email).then(function(user){
 
-        exports.runSqlQuery(queries.updateDeviceIdentifiers(),[user.PatientSerNum, requestObject.DeviceId, identifiers.registrationId, deviceType, appVersion, requestObject.Token, identifiers.registrationId, requestObject.Token])
+        exports.runSqlQuery(queries.updateDeviceIdentifiers(),[user.PatientSerNum, requestObject.DeviceId, identifiers.registrationId, deviceType,requestObject.Token, identifiers.registrationId, requestObject.Token])
             .then(()=>{
                 logger.log('debug', 'successfully updated device identifiers');
                 r.resolve({Response:'success'});
