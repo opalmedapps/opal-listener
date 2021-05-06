@@ -9,6 +9,7 @@ const Mail              = require('./../mailer/mailer.js');
 const utility           = require('./../utility/utility');
 const logger            = require('./../logs/logger');
 const {OpalSQLQueryRunner} = require("../sql/opal-sql-query-runner");
+const THREE             = require('three');
 
 var exports = module.exports = {};
 
@@ -973,6 +974,7 @@ exports.getPasswordForVerification = function(email) {
     for (let key = 0; key < rows.length; key++) {
 
         var folderpath = config.DICOM_PATH + rows[key].Path + rows[key].FolderName;
+        console.log(folderpath)
 
         try{
             var hasRTPlan = false;
@@ -981,15 +983,11 @@ exports.getPasswordForVerification = function(email) {
             data.beams = {}
 
             filesystem.readdirSync(folderpath).forEach(function(file){
-                // console.log(file)
+
                 var bufferArray = filesystem.readFileSync(folderpath+file)
 
                 var dicomData = dicomParser.parseDicom(bufferArray); 
                 var modality = dicomData.string('x00080060');
-                // console.log("*****************************************")
-                // console.log(modality)
-
-                
 
                 if (modality === 'RTPLAN'){
                     hasRtPlan = true;
@@ -997,13 +995,19 @@ exports.getPasswordForVerification = function(email) {
 
                     data.patientPosition = dicomData.elements.x300a0180.items[0].dataSet.string('x00185100');
 
+                    var otherDose
                     var doseReferenceSequence = dicomData.elements.x300a0010.items;
                     doseReferenceSequence.forEach(function(dose){
                         if (dose.dataSet.string('x300a0026')){
                             data.dose = dose.dataSet.string('x300a0026') + ' Gy';
+                        } else if (dose.dataSet.string('x300a0023')){
+                            otherDose = dose.dataSet.string('x300a0023') + 'Gy';
                         }
                     })
-                    
+
+                    if (data.dose === undefined){
+                        data.dose= otherDose
+                    }         
     
     
                     data.numFractions = parseInt(dicomData.elements.x300a0070.items[0].dataSet.string('x300a0078'))
@@ -1063,8 +1067,6 @@ exports.getPasswordForVerification = function(email) {
                         let zi = isocenter[2]//.z;
 
                         let angle = gantryAngle * Math.PI / 180;
-                        console.log("++++++++++++++++++++++++++++++++")
-                        console.log(angle)
 
                         let beamSource = [xi + SAD*Math.sin(angle), yi - SAD*Math.cos(angle), zi];
 
@@ -1082,15 +1084,10 @@ exports.getPasswordForVerification = function(email) {
                         beamPoints.field.push(c4)
 
                         data.beams[beamNumber].beamPoints = beamPoints
-                        console.log(data)
-                        console.log(typeof(data.beams[beamNumber].SAD))
                         
                     })
                 } else if (modality === 'RTSTRUCT'){
-                    // data.Content = bufferArray
-                    // data.content = dicomData;
 
-                    // TODO: Get contour data
                     
                  
                     var ROINumber;
@@ -1098,12 +1095,10 @@ exports.getPasswordForVerification = function(email) {
 
                     var structureSetROISequence = dicomData.elements.x30060020.items;
                     
-                    // structureSetROISequence.forEach(function(sequence){
                     for (var i = 0; i < structureSetROISequence.length; i++){
                         ROIName = structureSetROISequence[i].dataSet.string('x30060026')
                         if (ROIName.toLowerCase().includes("body") || ROIName.toLowerCase().includes("skin") || ROIName.toLowerCase().includes("corps") ){
                             ROINumber = parseInt(structureSetROISequence[i].dataSet.string('x30060022'))
-                            console.log(ROIName)
                             break;
                         }
 
@@ -1111,8 +1106,7 @@ exports.getPasswordForVerification = function(email) {
 
                     var ROIContourSequence = dicomData.elements.x30060039.items;
                     var refROINumber, contours;
-                    // ROIContourSequence.forEach(function(contourSequence){
-                    
+
                     for (var i = 0; i < ROIContourSequence.length; i++){
                         refROINumber = parseInt(ROIContourSequence[i].dataSet.string('x30060084'))
                         if (refROINumber === ROINumber){
@@ -1123,101 +1117,68 @@ exports.getPasswordForVerification = function(email) {
 
                     }
 
-                    // render3D.renderSlices(contours)
-                    // data.bodyContour = render3D.renderSlices(contours)
-                    // data.STRUCT = contours;
-
-
-                    var shape = new THREE.Shape();
-                    shape.moveTo(0,0);
-                    shape.lineTo(1.5,0)
-                    shape.lineTo(1.5,1)
-                    shape.lineTo( -1.5, 1);
-                    shape.lineTo(-1.5,0)
-                    shape.lineTo( 0, 0 );
-
-
-
-
-                    var slice = contours[0].dataSet.string('x30060050').split("\\").map(Number);
-                    var slice2 = contours[0].dataSet.string('x30060050').split("\\").map(Number);
-                    let colour = 0xA1AFBF//0x657383//0x29293d//3104B4//0B4C5F//// 0x//0xa29093 //0x669999
-                    var array = [];
-
-                    // var geo, mesh;
-
-
-                    
-                    // console.log(slice[2]); 
-// var slices = [];
-//                     contourData.forEach(function(contour){
-//                         slices.push.apply(slices, contour.dataSet.string('x30060050').split("\\").map(Number));
-//                     })
-
-                    let test = {}
+                    data.struct = {}
+                    let test = {} 
                     for (var j=0; j < contours.length; j++){
                         let slice = contours[j].dataSet.string('x30060050').split("\\").map(Number);
                         // console.log(slice.length)
                         let num = slice[2]
                         test[num] = [];
-                        for (let i = 0; i < slice.length; i+=33){
-                            test[num].push(slice[i], slice[i+1])
-                            // array.push(new THREE.Vector3(slice[i], slice[i+1], slice[i+2]))  
+                        let array = [];
+                        let testArray = [];
+
+                        if (j==0){
+                            data.firstSlice = num;
+                        } else if (j == contours.length - 1){
+                            data.lastSlice = num;
                         }
+
+                        if (j==1){
+                            data.sliceThickness = Math.abs(data.firstSlice - num)
+                        }
+
+                        var increment
+                        if (slice.length/3 < 50){
+                            increment = 3;
+                            console.log("under 50:",slice.length/3)
+                        } else {
+                            increment = Math.ceil(slice.length/3/50)*3;
+                            if (slice.length/increment < 50) increment = Math.floor(slice.length/3/50)*3 
+                            // else if (slice.length/increment >=51) increment = Math.ceil(slice.length/3/50)*3
+                            console.log("over50:",slice.length/increment)
+                            console.log("increment:",increment)
+                            if (slice.length/increment >= 51) console.log(slice.length/(increment+3))
+                        }
+                    
+
+
+                        if(slice.length/2 >= 50){
+                        increment = 3;
+                        for (let i = 0; i < slice.length ; i+=increment){
+
+                            // test[num].push(slice[i], slice[i+1])
+                             array.push(slice[i], slice[i+1])
+                            testArray.push(new THREE.Vector2(slice[i], slice[i+1]))  
+                        }
+                        testArray.push(new THREE.Vector2(slice[0], slice[1]))
+
+                        if (data.struct[num] == undefined){
+                            data.struct[num] = []
+                        }
+
+                        let curve = new THREE.SplineCurve(testArray)
+                         const points = curve.getPoints(60)
+                         let newpoints = []
+                         points.forEach(function(pt){
+                             newpoints.push(pt.x,pt.y)
+                         })
+                        data.struct[num].push(newpoints)
                     }
-                    // for (var j=0; j < 20; j++){
-                    //     let slice = contours[j].dataSet.string('x30060050').split("\\").map(Number);
-                    //     console.log(slice.length)
-                    //     for (let i = 0; i < slice.length; i+=3){
+                }
 
-                    //         array.push(new THREE.Vector3(slice[i], slice[i+1], slice[i+2]))  
-                    //     }
-                    // }
-
-                    
-                    // for (let i = 0; i < slice2.length; i+=21){
-                    //     array.push(new THREE.Vector3(slice2[i], slice2[i+1], slice2[i+2]))  
-                    // }
-                    console.log("DONE LOOP PUSH")
-                    
-                    var sampleClosedSpline = new THREE.CatmullRomCurve3( array, true);
-                    // console.log("made sampleclosedspine variable")
-                    // // var tube = new THREE.TubeBufferGeometry( sampleClosedSpline, 64, 2, 4, true);
-                    // var geo = new THREE.ExtrudeBufferGeometry(shape, {extrudePath:sampleClosedSpline,steps:500})
-                    // console.log("made geo variable")
-                    // var mesh = new THREE.Mesh(geo, new THREE.MeshPhongMaterial({color:colour, side:THREE.DoubleSide, shininess:40})) //LineBasicMaterial())//
-                    // console.log("MADE GEO AND MESH")
-                    // // console.log(mesh)
-
-                    // var group = new THREE.Group();
-                    // group.add(mesh)
-                    ////////////////////
-                    data.struct = test;
-
-                    /*
-                    var slice;
-                    var firstIteration = true;
-                    data.contours = [];
-
-                    contours.forEach(function(contour){
-
-                        slice = contour.dataSet.string('x30060050').split("\\").map(Number);
-                        data.contours.push(slice)
-                        // if (firstIteration){
-                        //     renderSliceCap(slice)
-                        //     topZ = slice[2]
-                        //     firstIteration = false;
-                        // }
-                        // renderSlice(slice)
-                        // bottomZ = slice[2]
-
-                    })
-                    
-                    // renderSliceCap(slice)
-
-
-                    // renderElements()
-                    */
+                    for (var key in data.struct){
+                        data.struct[key] = JSON.stringify(data.struct[key])
+                    }  
                 }
 
             })
@@ -1234,8 +1195,6 @@ exports.getPasswordForVerification = function(email) {
             }
         }
     }
-    // console.log(data)
-    console.log("**********************************************************")
     defer.resolve(data)
     return defer.promise;
 }
