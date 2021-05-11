@@ -25,6 +25,7 @@
     "dotenv": "17.2.3",
     "express-validator": "7.3.0",
     "firebase-admin": "13.5.0",
+    "jpeg-js": "0.4.3",
     "html-to-text": "9.0.5",
     "keyv": "5.5.4",
     "moment": "2.30.1",

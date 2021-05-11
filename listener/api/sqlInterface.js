@@ -7,6 +7,7 @@ import config from '../config-adaptor.js';
 import dicomParser from 'dicom-parser';
 import eduMaterialConfig from '../educational-material/eduMaterialConfig.json' with { type: "json" };
 import filesystem from 'fs';
+import jpeg from 'jpeg-js';
 import logger from '../logs/logger.js';
 import Mail from '../mailer/mailer.js';
 import OpalSQLQueryRunner from '../sql/opal-sql-query-runner.js';
@@ -718,8 +719,10 @@ async function setCheckInUsername(requestObject, appointmentSerNumArray) {
  */
 function getDicom(requestObject) {
 
+    let dicomId = requestObject.Parameters[0]
+
     let r=Q.defer();
-    runSqlQuery(queries.patientDicomTableFields(),requestObject.UserID)//requestObject.Parameters.timestamp
+    runSqlQuery(queries.patientDicomTableFields(),[dicomId, requestObject.UserID])//requestObject.Parameters.timestamp
         .then((rows)=>{
             r.resolve({Response:'success', Data:rows})
         }).catch((err)=>{
@@ -742,6 +745,7 @@ function getDicomContent(requestObject) {
             if(rows.length === 0) {
                 r.resolve({Response:'success',Data:'DocumentNotFound'});
             } else {
+                if (rows[0].DicomTypeId===1){
                 LoadDicoms(rows).then(function(documents) {
                     // if(documents.length === 1) r.resolve({Response:'success',Data:documents[0]});
                     // else r.resolve({Response:'success',Data:documents});
@@ -749,6 +753,13 @@ function getDicomContent(requestObject) {
                 }).catch(function (err) {
                     r.reject({Response:'error', Reason:err});
                 });
+            } else if (rows[0].DicomTypeId===0){
+                LoadDicomImgs(rows).then(function(documents){
+                    r.resolve({Response:'success',Data:documents});
+                }).catch(function (err) {
+                    r.reject({Response:'error', Reason:err});
+                });
+            }
             }
         }).catch((err)=>{
             r.reject({Response:'error',Reason:err});
@@ -1098,6 +1109,83 @@ async function getPatientFromEmail(email) {
     return rows[0];
 }
 
+function LoadDicomImgs(rows){
+
+    const defer = Q.defer();
+
+    if (rows.length === 0) { return defer.resolve([]); }
+
+
+    for (let key = 0; key < rows.length; key++) {
+
+        var folderpath = config.DICOM_PATH + rows[key].Path + rows[key].FolderName;
+
+        try{
+            var data = {}
+            data.beams = {}
+            filesystem.readdirSync(folderpath).forEach(function(file){
+                var bufferArray;
+                if (file.includes(".jpg")){
+                    bufferArray = JSON.stringify(filesystem.readFileSync(folderpath+file,'base64'))
+                    data.img = bufferArray
+
+                } else if (file.includes(".dcm")) {
+
+                    bufferArray = filesystem.readFileSync(folderpath+file)
+
+                    var dicomData = dicomParser.parseDicom(bufferArray);
+                    data.modality = dicomData.string('x00080060');
+                    data.date = dicomData.string('x00080020');
+                    var pixelDataElement = dicomData.elements.x7fe00010;
+
+                    var pixelData = new Uint16Array( dicomData.byteArray.buffer, pixelDataElement.dataOffset, pixelDataElement.length / 2);
+
+                    var pixelarray = Array.from(pixelData)
+
+                    let min = pixelarray[0]
+                    let max = pixelarray[0]
+                    for (i=1; i < pixelarray.length; i++){
+                        let current = pixelarray[i]
+                        if (current < min) min = current
+                        else if (current > max) max = current
+                    }
+
+                    for (var i = 0; i <pixelarray.length; i++){
+                        pixelarray[i] = Math.round(255*(pixelarray[i]-min)/(max - min))
+                    }
+
+                    let rgb_array = [];
+                    for (let i=0; i <array.length; i++ ){
+                        for (let j =0; j < 3; j++){
+                            rgb_array.push(array[i])
+                        }
+                        rgb_array.push(1)
+
+                    }
+                    var rawImageData = {
+                        data: rgb_array,
+                        width: 512,
+                        height: 512,
+                    };
+                    var jpegImageData = jpeg.encode(rawImageData, 50);
+
+                    filesystem.writeFileSync(folderpath+'image.jpeg', jpegImageData.data);
+                }
+            })
+
+        } catch(err) {
+            if (err.code == "ENOENT"){
+                defer.reject("No file found");
+            }
+            else {
+                throw err;
+            }
+        }
+    }
+    defer.resolve(data)
+    return defer.promise;
+}
+
 /** TODO: ADD ERROR PROCESSING ETC
  * LoadDicoms
  * @desc Loads the contents of RTSTRUCT and RTPLAN files
@@ -1110,7 +1198,7 @@ function LoadDicoms(rows) {
 
     if (rows.length === 0) { return defer.resolve([]); }
 
-    rows.forEach
+
     for (let key = 0; key < rows.length; key++) {
 
         var folderpath = config.DICOM_PATH + rows[key].Path + rows[key].FolderName;
@@ -1123,7 +1211,7 @@ function LoadDicoms(rows) {
             data.beams = {}
 
             filesystem.readdirSync(folderpath).forEach(function(file){
-
+                data.file = file
                 var bufferArray = filesystem.readFileSync(folderpath+file)
 
                 var dicomData = dicomParser.parseDicom(bufferArray);
