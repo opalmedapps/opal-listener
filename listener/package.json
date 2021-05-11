@@ -8,6 +8,7 @@
     "dicom-parser": "^1.8.7",
     "express-validator": "^6.4.0",
     "firebase-admin": "^8.10.0",
+    "jpeg-js": "^0.4.3",
     "moment": "^2.24.0",
     "mysql": "^2.10.2",
     "nodemailer": "^4.0.1",
