@@ -1118,16 +1118,21 @@ function LoadDicomImgs(rows){
 
     for (let key = 0; key < rows.length; key++) {
 
+        var jpgExists = false;
         var folderpath = config.DICOM_PATH + rows[key].Path + rows[key].FolderName;
+
+        if (filesystem.existsSync(folderpath+"jpg/")) jpgExists = true;
 
         try{
             var data = {}
-            data.beams = {}
             filesystem.readdirSync(folderpath).forEach(function(file){
                 var bufferArray;
-                if (file.includes(".jpg")){
-                    bufferArray = JSON.stringify(filesystem.readFileSync(folderpath+file,'base64'))
-                    data.img = bufferArray
+                if (file.includes("jpg")){
+
+                    filesystem.readdirSync(folderpath+"jpg/").forEach(function(jpgfile){
+                        bufferArray = JSON.stringify(filesystem.readFileSync(folderpath+"jpg/"+jpgfile,'base64'))
+                        data.img = bufferArray
+                    })
 
                 } else if (file.includes(".dcm")) {
 
@@ -1136,40 +1141,46 @@ function LoadDicomImgs(rows){
                     var dicomData = dicomParser.parseDicom(bufferArray);
                     data.modality = dicomData.string('x00080060');
                     data.date = dicomData.string('x00080020');
-                    var pixelDataElement = dicomData.elements.x7fe00010;
 
-                    var pixelData = new Uint16Array( dicomData.byteArray.buffer, pixelDataElement.dataOffset, pixelDataElement.length / 2);
+                    if (!jpgExists){
+                        var pixelDataElement = dicomData.elements.x7fe00010;
 
-                    var pixelarray = Array.from(pixelData)
+                        var pixelData = new Uint16Array( dicomData.byteArray.buffer, pixelDataElement.dataOffset, pixelDataElement.length / 2);
 
-                    let min = pixelarray[0]
-                    let max = pixelarray[0]
-                    for (i=1; i < pixelarray.length; i++){
-                        let current = pixelarray[i]
-                        if (current < min) min = current
-                        else if (current > max) max = current
-                    }
+                        var pixelarray = Array.from(pixelData)
 
-                    for (var i = 0; i <pixelarray.length; i++){
-                        pixelarray[i] = Math.round(255*(pixelarray[i]-min)/(max - min))
-                    }
-
-                    let rgb_array = [];
-                    for (let i=0; i <array.length; i++ ){
-                        for (let j =0; j < 3; j++){
-                            rgb_array.push(array[i])
+                        let min = pixelarray[0]
+                        let max = pixelarray[0]
+                        for (i=1; i < pixelarray.length; i++){
+                            let current = pixelarray[i]
+                            if (current < min) min = current
+                            else if (current > max) max = current
                         }
-                        rgb_array.push(1)
 
+                        for (var i = 0; i <pixelarray.length; i++){
+                            pixelarray[i] = Math.round(255*(pixelarray[i]-min)/(max - min))
+                        }
+
+                        let rgb_array = [];
+                        for (let i=0; i <pixelarray.length; i++ ){
+                            for (let j =0; j < 3; j++){
+                                rgb_array.push(pixelarray[i])
+                            }
+                            rgb_array.push(1)
+
+                        }
+                        var rawImageData = {
+                            data: rgb_array,
+                            width: 512,
+                            height: 512,
+                        };
+                        var jpegImageData = jpeg.encode(rawImageData, 50);
+                        if (!jpgExists){
+                            filesystem.mkdirSync(folderpath + "jpg/");
+                            jpgExists = true
+                        }
+                        filesystem.writeFileSync(folderpath+"jpg/"+ 'image.jpg', jpegImageData.data);
                     }
-                    var rawImageData = {
-                        data: rgb_array,
-                        width: 512,
-                        height: 512,
-                    };
-                    var jpegImageData = jpeg.encode(rawImageData, 50);
-
-                    filesystem.writeFileSync(folderpath+'image.jpeg', jpegImageData.data);
                 }
             })
 
