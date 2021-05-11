@@ -643,9 +643,9 @@ exports.addToActivityLog=function(requestObject)
     if (typeof Token === "undefined") Token = requestObject.meta.Token;
     if (typeof AppVersion === "undefined") AppVersion = requestObject.meta.AppVersion;
 
-	// Ignore LogPatientAction to avoid double-logging -->> Refer to table PatientActionLog
-	if (Request !== "LogPatientAction") {
-    exports.runSqlQuery(queries.logActivity(),[Request, UserID, DeviceId, Token, AppVersion])
+    // Ignore LogPatientAction to avoid double-logging --> Refer to table PatientActionLog
+    if (Request !== "LogPatientAction") {
+        exports.runSqlQuery(queries.logActivity(),[Request, UserID, DeviceId, Token, AppVersion])
         .then(()=>{
             logger.log('verbose', "Success logging request of type: "+Request);
             r.resolve({Response:'success'});
@@ -653,10 +653,10 @@ exports.addToActivityLog=function(requestObject)
             logger.log('error', "Error logging request of type: "+Request, err);
             r.reject({Response:'error', Reason:err});
         });
-	}
-	else {
-		r.resolve({Response:'success', Reason:'Skip logging; already logged'});
-	}
+    }
+    else {
+        r.resolve({Response:'success', Reason:'Skip logging; already logged'});
+    }
     return r.promise;
 };
 
