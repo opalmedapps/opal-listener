@@ -1143,7 +1143,7 @@ function LoadDicomImgs(rows){
                     data.modality = dicomData.string('x00080060');
                     data.date = dicomData.string('x00080020');
 
-                    if (!jpgExists && index%2==1){
+                    if (!jpgExists && (index%2==1||numFiles<75)){
                         var slice = dicomData.string('x00200013');
 
                         var pixelDataElement = dicomData.elements.x7fe00010;
@@ -1162,7 +1162,9 @@ function LoadDicomImgs(rows){
 
 
                         var newPixelArray =[]
-                        var len =  Math.sqrt(pixelarray.length)
+                        var len =  (dicomData.int16('x00280011'))//Math.sqrt(pixelarray.length)
+                        var rows = (dicomData.int16('x00280010'))
+
                         let x=0;
                         let avg = 0
                         while (x <= pixelarray.length-len){
@@ -1183,8 +1185,8 @@ function LoadDicomImgs(rows){
 
                         var rawImageData = {
                             data: rgb_array,
-                            width: 256,
-                            height: 256,
+                            width: len/2,
+                            height: rows/2,
                         };
                         var jpegImageData = jpeg.encode(rawImageData, 30);
                         if (!filesystem.existsSync(folderpath+"jpg/")){
