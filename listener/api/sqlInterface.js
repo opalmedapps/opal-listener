@@ -1120,21 +1120,22 @@ function LoadDicomImgs(rows){
 
         var jpgExists = false;
         var folderpath = config.DICOM_PATH + rows[key].Path + rows[key].FolderName;
+        var index = 1;
 
         if (filesystem.existsSync(folderpath+"jpg/")) jpgExists = true;
 
         try{
             var data = {}
-            filesystem.readdirSync(folderpath).forEach(function(file){
+            data.img = []
+
+
+            var files =  filesystem.readdirSync(folderpath);
+            var numFiles = files.length
+            files.forEach(function(file){
+
                 var bufferArray;
-                if (file.includes("jpg")){
 
-                    filesystem.readdirSync(folderpath+"jpg/").forEach(function(jpgfile){
-                        bufferArray = JSON.stringify(filesystem.readFileSync(folderpath+"jpg/"+jpgfile,'base64'))
-                        data.img = bufferArray
-                    })
-
-                } else if (file.includes(".dcm")) {
+                if (file.includes(".dcm")) {
 
                     bufferArray = filesystem.readFileSync(folderpath+file)
 
@@ -1142,7 +1143,9 @@ function LoadDicomImgs(rows){
                     data.modality = dicomData.string('x00080060');
                     data.date = dicomData.string('x00080020');
 
-                    if (!jpgExists){
+                    if (!jpgExists && index%2==1){
+                        var slice = dicomData.string('x00200013');
+
                         var pixelDataElement = dicomData.elements.x7fe00010;
 
                         var pixelData = new Uint16Array( dicomData.byteArray.buffer, pixelDataElement.dataOffset, pixelDataElement.length / 2);
@@ -1157,32 +1160,55 @@ function LoadDicomImgs(rows){
                             else if (current > max) max = current
                         }
 
-                        for (var i = 0; i <pixelarray.length; i++){
-                            pixelarray[i] = Math.round(255*(pixelarray[i]-min)/(max - min))
+
+                        var newPixelArray =[]
+                        var len =  Math.sqrt(pixelarray.length)
+                        let x=0;
+                        let avg = 0
+                        while (x <= pixelarray.length-len){
+                            avg = (pixelarray[x]+pixelarray[x+1]+pixelarray[x+len]+pixelarray[x+1+len])/4
+                            newPixelArray.push(Math.round(255*(avg-min)/(max - min)))
+                            if (((x+2)/len)%2===1){
+                                x = x+len+2
+                            } else {x+=2}
                         }
 
                         let rgb_array = [];
-                        for (let i=0; i <pixelarray.length; i++ ){
+                        for (let i=0; i <newPixelArray.length; i++ ){
                             for (let j =0; j < 3; j++){
-                                rgb_array.push(pixelarray[i])
+                                rgb_array.push(newPixelArray[i])
                             }
                             rgb_array.push(1)
-
                         }
+
                         var rawImageData = {
                             data: rgb_array,
-                            width: 512,
-                            height: 512,
+                            width: 256,
+                            height: 256,
                         };
-                        var jpegImageData = jpeg.encode(rawImageData, 50);
-                        if (!jpgExists){
+                        var jpegImageData = jpeg.encode(rawImageData, 30);
+                        if (!filesystem.existsSync(folderpath+"jpg/")){
                             filesystem.mkdirSync(folderpath + "jpg/");
-                            jpgExists = true
                         }
-                        filesystem.writeFileSync(folderpath+"jpg/"+ 'image.jpg', jpegImageData.data);
+                        filesystem.writeFileSync(folderpath+"jpg/"+ (slice)+'.jpg', jpegImageData.data);
+
+                    }
+                    index++
+                    if (index > numFiles){
+                        jpgExists = true;
                     }
                 }
+
             })
+
+            if (jpgExists){
+                let jpgfiles = filesystem.readdirSync(folderpath+"jpg/").sort((a,b) => {return parseInt(a.slice(0,a.length-4))-parseInt(b.slice(0,b.length-4))})
+
+                jpgfiles.forEach(function(jpgfile){
+                    bufferArray = (filesystem.readFileSync(folderpath+"jpg/"+jpgfile,'base64'))
+                    data.img.push(bufferArray)
+                })
+            }
 
         } catch(err) {
             if (err.code == "ENOENT"){
@@ -1193,7 +1219,7 @@ function LoadDicomImgs(rows){
             }
         }
     }
-    defer.resolve(data)
+    defer.resolve(JSON.stringify(data))
     return defer.promise;
 }
 
