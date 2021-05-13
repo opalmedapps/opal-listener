@@ -178,7 +178,7 @@ exports.patientTasksTableFields=function()
  * @returns {string}
  */
 exports.patientStudyTableFields=function(){
-    return "SELECT S.ID, S.title_EN, S.title_FR, S.description_EN, S.description_FR, S.investigator, S.startDate, S.endDate, S.creationDate FROM study S, Patient P, patientStudy PS, Users U WHERE U.UserTypeSerNum=P.PatientSerNum AND P.PatientSerNum = PS.patientId AND S.ID = PS.studyID AND U.Username LIKE ?";
+    return "SELECT S.ID, S.consentQuestionnaireId, S.title_EN, S.title_FR, S.description_EN, S.description_FR, S.investigator, S.email, S.phone, S.phoneExt, S.startDate, S.endDate, S.creationDate FROM study S, Patient P, patientStudy PS, Users U WHERE U.UserTypeSerNum=P.PatientSerNum AND P.PatientSerNum = PS.patientId AND S.ID = PS.studyID AND U.Username LIKE ?";
 }
 
 /**
