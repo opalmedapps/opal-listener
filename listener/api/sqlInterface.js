@@ -9,6 +9,7 @@ const utility           = require('./../utility/utility');
 const logger            = require('./../logs/logger');
 const {OpalSQLQueryRunner} = require("../sql/opal-sql-query-runner");
 const eduMaterialConfig = require('./../educational-material/eduMaterialConfig.json');
+const studiesConfig     = require('./../studies/studiesConfig.json')
 
 var exports = module.exports = {};
 
@@ -380,6 +381,10 @@ exports.sendMessage=function(requestObject) {
     let r=Q.defer();
     exports.runSqlQuery(queries.patientStudyTableFields(),[requestObject.UserID])
         .then((rows)=>{
+            for (var j = 0; j < rows.length; j++) {
+                rows[j].consentStatus = studiesConfig.STUDY_CONSENT_STATUS_MAP[rows[j].consentStatus];
+            }
+                
             r.resolve({Response:'success', Data:rows});
         }).catch((err)=>{
             r.reject({Response:'error', Reason:err});
