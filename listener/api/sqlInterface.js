@@ -278,8 +278,6 @@ exports.updateReadStatus=function(userId, parameters)
 
     let table, serNum;
 
-    console.log("******************")
-    console.log(parameters)
     if(parameters && parameters.Field && parameters.Id && requestMappings.hasOwnProperty(parameters.Field) ) {
         ({table, serNum} = requestMappings[parameters.Field]);
 
