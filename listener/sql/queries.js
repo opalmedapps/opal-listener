@@ -357,6 +357,15 @@ exports.updateReadStatus=function()
     `;
 };
 
+exports.updateConsentStatus=function()
+{
+    return `
+        UPDATE patientStudy PS, study S, Patient P, Users U 
+        SET PS.consentStatus = ? 
+        WHERE S.ID = PS.studyId AND S.consentQuestionnaireId = ? AND P.PatientSerNum = PS.patientId AND P.PatientSerNum = U.UserTypeSerNum AND U.Username LIKE ?  
+    `;
+};
+
 exports.getPatientDeviceLastActivity=function()
 {
     return "SELECT * FROM PatientActivityLog WHERE Username=? AND DeviceId=? ORDER BY ActivitySerNum DESC LIMIT 1;";

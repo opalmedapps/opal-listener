@@ -410,6 +410,35 @@ exports.getStudyQuestionnaires=function(requestObject) {
 };
 
 /**
+ * @name studyUpdateStatus
+ * @desc Update consent status for a study.
+ * @param {object} requestObject
+ * @return {Promise}
+ */
+ exports.studyUpdateStatus=function(requestObject)
+ {
+    let r = Q.defer();
+
+    let parameters = requestObject.Parameters;
+    
+    if(parameters && parameters.questionnaire_id && parameters.status) {
+        // get number corresponding to consent status string
+        let statusNumber = Object.keys(studiesConfig.STUDY_CONSENT_STATUS_MAP).find(key => studiesConfig.STUDY_CONSENT_STATUS_MAP[key] === parameters.status);
+
+        exports.runSqlQuery(queries.updateConsentStatus(),[statusNumber, parameters.questionnaire_id, requestObject.UserID]).then(()=>{
+            r.resolve({Response:'success'});
+        }).catch((err)=>{
+            r.reject({Response:'error', Reason:err});
+        });
+
+    }else {
+        r.reject({Response: 'error', Reason: 'Invalid parameters'});
+    }
+    return r.promise;
+ };
+ 
+
+/**
  * CHECKIN FUNCTIONALITY
  * ============================================================
  */
