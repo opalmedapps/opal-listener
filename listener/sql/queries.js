@@ -178,7 +178,7 @@ exports.patientTasksTableFields=function()
  * @returns {string}
  */
 exports.patientStudyTableFields=function(){
-    return `SELECT S.ID, S.title_EN, S.title_FR, S.description_EN, S.description_FR, S.investigator, S.email, S.phone, S.phoneExt, S.startDate, S.endDate, S.creationDate, PS.consentStatus, PS.readStatus, Q.QuestionnaireSerNum, QC.QuestionnaireName_EN, QC.QuestionnaireName_FR 
+    return `SELECT S.ID, S.title_EN, S.title_FR, S.description_EN, S.description_FR, S.investigator, S.email, S.phone, S.phoneExt, S.startDate, S.endDate, S.creationDate, PS.ID as patientStudyId, PS.consentStatus, PS.ReadStatus, Q.QuestionnaireSerNum, QC.QuestionnaireName_EN, QC.QuestionnaireName_FR 
             FROM study S, Patient P, patientStudy PS, Users U, QuestionnaireControl QC
             INNER JOIN Questionnaire Q ON QC.QuestionnaireControlSerNum = Q.QuestionnaireControlSerNum
             WHERE U.UserTypeSerNum=P.PatientSerNum AND P.PatientSerNum = PS.patientId AND Q.PatientSerNum = P.PatientSerNum AND S.ID = PS.studyID AND QC.QuestionnaireDBSerNum = S.consentQuestionnaireId AND U.Username LIKE ?`

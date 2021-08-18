@@ -98,6 +98,10 @@ const requestMappings =
             numberOfLastUpdated: 2,
             table: 'Announcement',
             serNum: 'AnnouncementSerNum'
+        },
+        'patientStudy': {
+            table: 'patientStudy',
+            serNum: 'ID'
         }
     };
 
@@ -273,6 +277,9 @@ exports.updateReadStatus=function(userId, parameters)
     let r = Q.defer();
 
     let table, serNum;
+
+    console.log("******************")
+    console.log(parameters)
     if(parameters && parameters.Field && parameters.Id && requestMappings.hasOwnProperty(parameters.Field) ) {
         ({table, serNum} = requestMappings[parameters.Field]);
 
