@@ -151,6 +151,12 @@ exports.logPatientRequest = function(requestObject) {
     return sqlInterface.addToActivityLog(requestObject);
 };
 
+// API call to log user out
+exports.logout = function(requestObject) {
+    // For now, the only purpose of the logout request is to record a timestamp in PatientActivityLog (done separately in logPatientRequest)
+    return Promise.resolve({Response: "Successful logout"});
+};
+
 /**
  * For questionnaire V2 (2019 version of qplus questionnaire front-end). Getting the list of questionnaires belonging to a patient
  * @param {object} requestObject

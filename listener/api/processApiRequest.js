@@ -17,6 +17,7 @@ const LEGACYAPI = {
     'Log': apiPatientUpdate.logActivity,
     'LogPatientAction': apiPatientUpdate.logPatientAction,
     'Login': apiPatientUpdate.login,
+    'Logout': apiPatientUpdate.logout,
     'Resume': apiPatientUpdate.resume,
     'Refresh': apiPatientUpdate.refresh,
     'AccountChange': apiHospitalUpdate.accountChange,
