@@ -1,3 +1,15 @@
+Version 1.4.1.0:
+ - OPAL-935: Bug fixes in the lab results' SQL queries (#37)
+ - Merge pull request #36 from Sable/OPAL-852
+ - Jira task OPAL-830: Added the new request to log the patient logout time. (#32)
+ - Add appVersion info to patientDeviceIdentifier
+ - Revert "Add appVersion info to patientDeviceIdentifier"
+ - Add appVersion info to patientDeviceIdentifier
+ - Second attempt to remove the URL fix (#35)
+ - Opal 922 (#34)
+ - Fix bug in Announcement and TxtMessage for URL (#33)
+ - Patches for the covid-19 (#30)
+
 Version 1.4.0.0:
  - Fix new test results module (#26)
  - -- hot fix for the new test result queries (#25)
