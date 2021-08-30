@@ -722,7 +722,7 @@ function getDicom(requestObject) {
     let dicomId = requestObject.Parameters[0]
 
     let r=Q.defer();
-    runSqlQuery(queries.patientDicomTableFields(),[dicomId, requestObject.UserID])//requestObject.Parameters.timestamp
+    runSqlQuery(queries.patientDicomTableFields(),[dicomId, requestObject.UserID]) //requestObject.Parameters.timestamp
         .then((rows)=>{
             r.resolve({Response:'success', Data:rows})
         }).catch((err)=>{
