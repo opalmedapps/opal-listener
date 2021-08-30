@@ -475,10 +475,10 @@ function getCheckedInAppointments(patientSerNum){
  */
  exports.getDicom = function(requestObject) {
 
-     let dicomId = requestObject.Parameters[0]
+    let dicomId = requestObject.Parameters[0]
 
     let r=Q.defer();
-    exports.runSqlQuery(queries.patientDicomTableFields(),[dicomId, requestObject.UserID])//requestObject.Parameters.timestamp
+    exports.runSqlQuery(queries.patientDicomTableFields(),[dicomId, requestObject.UserID]) //requestObject.Parameters.timestamp
         .then((rows)=>{
             r.resolve({Response:'success', Data:rows})
         }).catch((err)=>{
@@ -514,7 +514,7 @@ exports.getDicomContent = function(requestObject) {
                     r.resolve({Response:'success',Data:documents});
                 }).catch(function (err) {
                     r.reject({Response:'error', Reason:err});
-                }); 
+                });
             }
             }
         }).catch((err)=>{
@@ -982,7 +982,7 @@ function LoadDicomImgs(rows){
 
     if (rows.length === 0) { return defer.resolve([]); }
 
-    
+
     for (let key = 0; key < rows.length; key++) {
 
         var jpgExists = false; // true if jpeg files already saved at image folder path
@@ -1005,7 +1005,7 @@ function LoadDicomImgs(rows){
 
                 // If file is DICOM image
                 if (file.includes(".dcm")) {
-        
+
                     // Read buffer array and parse as dicom file
                     bufferArray = filesystem.readFileSync(folderpath+file)
                     var dicomData = dicomParser.parseDicom(bufferArray); 
@@ -1034,8 +1034,8 @@ function LoadDicomImgs(rows){
 
                         // Convert pixel values from HU to 0-255 values and average every group of four pixels together (minimize data transfer)
                         // TODO bug fix: only works when img row length divisible by 2
-                        // TODO: some images are much higher resolution (mammography or x-ray higher than CT), so in the future the image should 
-                        //       be reduced by a number relative to the original resolution and not just in half each time. 
+                        // TODO: some images are much higher resolution (mammography or x-ray higher than CT), so in the future the image should
+                        //       be reduced by a number relative to the original resolution and not just in half each time.
                         var newPixelArray =[];
                         var len =  (dicomData.int16('x00280011'));
                         var rows = (dicomData.int16('x00280010'));
@@ -1070,7 +1070,7 @@ function LoadDicomImgs(rows){
                             height: rows/2,
                         };
 
-                        // Encode RGB image array to JPEG 
+                        // Encode RGB image array to JPEG
                         var jpegImageData = jpeg.encode(rawImageData, 30);
 
                         // Create jpg/ folder in the current folder path
@@ -1080,7 +1080,7 @@ function LoadDicomImgs(rows){
 
                         // Save jpeg into jpg/ folder with the slice number as the name (to ensure order is kept)
                         filesystem.writeFileSync(folderpath+"jpg/"+ (slice)+'.jpg', jpegImageData.data);
-            
+
                     }
 
                     index++;
@@ -1089,21 +1089,21 @@ function LoadDicomImgs(rows){
                     if (index > numFiles){
                         jpgExists = true;
                     }
-                }   
-                      
+                }
+
             })
 
             // If/when jpeg files exist, upload them to be sent to frontend
             if (jpgExists){
-                // Sort files read to maintain slice order 
+                // Sort files read to maintain slice order
                 let jpgfiles = filesystem.readdirSync(folderpath+"jpg/").sort((a,b) => {return parseInt(a.slice(0,a.length-4))-parseInt(b.slice(0,b.length-4))})
 
                 // Read buffer array
                 jpgfiles.forEach(function(jpgfile){
                     bufferArray = (filesystem.readFileSync(folderpath+"jpg/"+jpgfile,'base64'))
                     data.img.push(bufferArray)
-                })        
-            }   
+                })
+            }
 
         } catch(err) {
             if (err.code == "ENOENT"){
@@ -1128,12 +1128,12 @@ function LoadDicomImgs(rows){
  * @return {Promise}
  */
  function LoadDicoms(rows) {
-    
+
     const defer = Q.defer();
 
     if (rows.length === 0) { return defer.resolve([]); }
 
-    
+
     for (let key = 0; key < rows.length; key++) {
 
         var folderpath = config.DICOM_PATH + rows[key].Path + rows[key].FolderName;
