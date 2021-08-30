@@ -640,7 +640,7 @@ exports.updateDeviceIdentifier = function(requestObject, parameters) {
 
     let identifiers = parameters || requestObject.Parameters;
     let deviceType = null;
-
+    let appVersion = requestObject.AppVersion;
 
     //Validation deviceType
     if (identifiers.deviceType === 'browser') {
@@ -658,7 +658,7 @@ exports.updateDeviceIdentifier = function(requestObject, parameters) {
 
     getPatientFromEmail(email).then(function(user){
 
-        exports.runSqlQuery(queries.updateDeviceIdentifiers(),[user.PatientSerNum, requestObject.DeviceId, identifiers.registrationId, deviceType,requestObject.Token, identifiers.registrationId, requestObject.Token])
+        exports.runSqlQuery(queries.updateDeviceIdentifiers(),[user.PatientSerNum, requestObject.DeviceId, identifiers.registrationId, deviceType, appVersion, requestObject.Token, identifiers.registrationId, requestObject.Token])
             .then(()=>{
                 logger.log('debug', 'successfully updated device identifiers');
                 r.resolve({Response:'success'});
@@ -692,9 +692,9 @@ exports.addToActivityLog=function(requestObject)
     if (typeof Token === "undefined") Token = requestObject.meta.Token;
     if (typeof AppVersion === "undefined") AppVersion = requestObject.meta.AppVersion;
 
-	// Ignore LogPatientAction to avoid double-logging -->> Refer to table PatientActionLog
-	if (Request !== "LogPatientAction") {
-    exports.runSqlQuery(queries.logActivity(),[Request, UserID, DeviceId, Token, AppVersion])
+    // Ignore LogPatientAction to avoid double-logging --> Refer to table PatientActionLog
+    if (Request !== "LogPatientAction") {
+        exports.runSqlQuery(queries.logActivity(),[Request, UserID, DeviceId, Token, AppVersion])
         .then(()=>{
             logger.log('verbose', "Success logging request of type: "+Request);
             r.resolve({Response:'success'});
@@ -702,10 +702,10 @@ exports.addToActivityLog=function(requestObject)
             logger.log('error', "Error logging request of type: "+Request, err);
             r.reject({Response:'error', Reason:err});
         });
-	}
-	else {
-		r.resolve({Response:'success', Reason:'Skip logging; already logged'});
-	}
+    }
+    else {
+        r.resolve({Response:'success', Reason:'Skip logging; already logged'});
+    }
     return r.promise;
 };
 
