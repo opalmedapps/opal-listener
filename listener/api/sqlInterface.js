@@ -474,10 +474,8 @@ function getCheckedInAppointments(patientSerNum){
  */
  exports.getDicom = function(requestObject) {
 
-    let dicomId = requestObject.Parameters[0]
-
     let r=Q.defer();
-    exports.runSqlQuery(queries.patientDicomTableFields(),[dicomId, requestObject.UserID]) //requestObject.Parameters.timestamp
+    exports.runSqlQuery(queries.patientDicomTableFields(),requestObject.UserID)//requestObject.Parameters.timestamp
         .then((rows)=>{
             r.resolve({Response:'success', Data:rows})
         }).catch((err)=>{
@@ -500,15 +498,13 @@ exports.getDicomContent = function(requestObject) {
             if(rows.length === 0) {
                 r.resolve({Response:'success',Data:'DocumentNotFound'});
             } else {
-                if (rows[0].DicomTypeId===1){
-                    LoadDicoms(rows).then(function(documents) {
-                        // if(documents.length === 1) r.resolve({Response:'success',Data:documents[0]});
-                        // else r.resolve({Response:'success',Data:documents});
-                        r.resolve({Response:'success',Data:documents});
-                    }).catch(function (err) {
-                        r.reject({Response:'error', Reason:err});
-                    });
-                }
+                LoadDicoms(rows).then(function(documents) {
+                    // if(documents.length === 1) r.resolve({Response:'success',Data:documents[0]});
+                    // else r.resolve({Response:'success',Data:documents});
+                    r.resolve({Response:'success',Data:documents});
+                }).catch(function (err) {
+                    r.reject({Response:'error', Reason:err});
+                });
             }
         }).catch((err)=>{
             r.reject({Response:'error',Reason:err});
