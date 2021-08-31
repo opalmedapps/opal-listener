@@ -711,15 +711,15 @@ async function setCheckInUsername(requestObject, appointmentSerNumArray) {
     await runSqlQuery(queries.setCheckInUsername(), [requestObject.UserID, [appointmentSerNumArray]]);
 }
 
-/** TODO: ADD ERROR PROCESSING & FIX NAMES
- * getDicom
- * @desc fetches dicom contents from DB
+/** TODO: ADD ERROR PROCESSING
+ * @name getDicom
+ * @desc fetches dicom info from DB
  * @param requestObject
  * @return {Promise}
  */
 function getDicom(requestObject) {
 
-    let dicomId = requestObject.Parameters[0]
+    let dicomId = requestObject.Parameters[0];
 
     let r=Q.defer();
     runSqlQuery(queries.patientDicomTableFields(),[dicomId, requestObject.UserID]) //requestObject.Parameters.timestamp
@@ -731,8 +731,12 @@ function getDicom(requestObject) {
     return r.promise;
 }
 
-// // get dicom content
-// TODO: ADD ERROR PROCESSING & FIX NAMES
+/** TODO: ADD ERROR PROCESSING & FIX NAMES
+ * @name getDicomContent
+ * @desc fetches dicom content (image or RT) of specified file
+ * @param requestObject
+ * @return {Promise}
+ */
 function getDicomContent(requestObject) {
 
     let r = Q.defer();
@@ -743,23 +747,23 @@ function getDicomContent(requestObject) {
     }else{
         runSqlQuery(queries.getDicomContentQuery(), [[documents],userID]).then((rows)=>{
             if(rows.length === 0) {
-                r.resolve({Response:'success',Data:'DocumentNotFound'});
+                r.resolve({Response:'success',Data:'DicomNotFound'});
             } else {
                 if (rows[0].DicomTypeId===1){
-                LoadDicoms(rows).then(function(documents) {
-                    // if(documents.length === 1) r.resolve({Response:'success',Data:documents[0]});
-                    // else r.resolve({Response:'success',Data:documents});
-                    r.resolve({Response:'success',Data:documents});
-                }).catch(function (err) {
-                    r.reject({Response:'error', Reason:err});
-                });
-            } else if (rows[0].DicomTypeId===0){
-                LoadDicomImgs(rows).then(function(documents){
-                    r.resolve({Response:'success',Data:documents});
-                }).catch(function (err) {
-                    r.reject({Response:'error', Reason:err});
-                });
-            }
+                    LoadDicoms(rows).then(function(documents) {
+                        // if(documents.length === 1) r.resolve({Response:'success',Data:documents[0]});
+                        // else r.resolve({Response:'success',Data:documents});
+                        r.resolve({Response:'success',Data:documents});
+                    }).catch(function (err) {
+                        r.reject({Response:'error', Reason:err});
+                    });
+                } else if (rows[0].DicomTypeId===0){
+                    LoadDicomImgs(rows).then(function(documents){
+                        r.resolve({Response:'success',Data:documents});
+                    }).catch(function (err) {
+                        r.reject({Response:'error', Reason:err});
+                    });
+                }
             }
         }).catch((err)=>{
             r.reject({Response:'error',Reason:err});
@@ -1159,7 +1163,7 @@ function LoadDicomImgs(rows){
 
                         // Extract pixel data and convert to array
                         var pixelDataElement = dicomData.elements.x7fe00010;
-                        var pixelData = new Uint16Array( dicomData.byteArray.buffer, pixelDataElement.dataOffset, pixelDataElement.length / 2);
+                        var pixelData = new Uint16Array(dicomData.byteArray.buffer, pixelDataElement.dataOffset, pixelDataElement.length / 2);
                         var pixelarray = Array.from(pixelData);
 
                         // Find minimum and maximum pixel values (needed to convert from HU to 0-255 pixel values)
@@ -1260,7 +1264,7 @@ function LoadDicomImgs(rows){
 }
 
 /** TODO: ADD ERROR PROCESSING ETC
- * LoadDicoms
+ * @name LoadDicoms
  * @desc Loads the contents of RTSTRUCT and RTPLAN files
  * @param rows
  * @return {Promise}
@@ -1271,48 +1275,49 @@ function LoadDicoms(rows) {
 
     if (rows.length === 0) { return defer.resolve([]); }
 
-
     for (let key = 0; key < rows.length; key++) {
 
         var folderpath = config.DICOM_PATH + rows[key].Path + rows[key].FolderName;
-        console.log(folderpath)
 
         try{
             var hasRTPlan = false;
             var hasRTStruct = false;
-            var data = {}
-            data.beams = {}
+
+            var data = {}; // Data to be sent to frontend
+            data.beams = {};
 
             filesystem.readdirSync(folderpath).forEach(function(file){
-                data.file = file
-                var bufferArray = filesystem.readFileSync(folderpath+file)
 
+                // Load buffer array and parse file with dicom-parser
+                var bufferArray = filesystem.readFileSync(folderpath+file);
                 var dicomData = dicomParser.parseDicom(bufferArray);
-                var modality = dicomData.string('x00080060');
 
-                if (modality === 'RTPLAN'){
+                var modality = dicomData.string('x00080060'); // RTPLAN or RTSTRUCT
+
+                if (modality === 'RTPLAN'){ // BEAM 3D RECONSTRUCTION AND TEXT PARAMETER EXTRACTION
                     hasRtPlan = true;
-                    data.hasMLC = false;
+                    data.hasMLC = false; // true if plan uses multileaf collimators (MLC)
 
-                    data.patientPosition = dicomData.elements.x300a0180.items[0].dataSet.string('x00185100');
+                    data.patientPosition = dicomData.elements.x300a0180.items[0].dataSet.string('x00185100'); // Patient Position: "HFS", "FFS", etc.
 
-                    var otherDose
+                    var otherDose;
                     var doseReferenceSequence = dicomData.elements.x300a0010.items;
                     doseReferenceSequence.forEach(function(dose){
                         if (dose.dataSet.string('x300a0026')){
-                            data.dose = dose.dataSet.string('x300a0026') + ' Gy';
+                            data.dose = dose.dataSet.string('x300a0026') + ' Gy'; // Target Prescription Dose
                         } else if (dose.dataSet.string('x300a0023')){
-                            otherDose = dose.dataSet.string('x300a0023') + 'Gy';
+                            otherDose = dose.dataSet.string('x300a0023') + 'Gy'; // Delivery Maximum Dose
                         }
                     })
 
+                    // If no target perscription dose, use delivery maximum dose
                     if (data.dose === undefined){
-                        data.dose= otherDose
+                        data.dose = otherDose;
                     }
 
 
-                    data.numFractions = parseInt(dicomData.elements.x300a0070.items[0].dataSet.string('x300a0078'))
-                    data.numBeams = parseInt(dicomData.elements.x300a0070.items[0].dataSet.string('x300a0080'))
+                    data.numFractions = parseInt(dicomData.elements.x300a0070.items[0].dataSet.string('x300a0078')); // Number of Fractions
+                    data.numBeams = parseInt(dicomData.elements.x300a0070.items[0].dataSet.string('x300a0080')); // Number of Beams
 
                     var beamSequence = dicomData.elements.x300a00b0.items;
                     var beamNumber, gantryAngle, isocenter, controlPt, beamPositionSequence, jawType, X, Y, SAD;
@@ -1320,31 +1325,33 @@ function LoadDicoms(rows) {
 
                     beamSequence.forEach(function(beam){
 
-                        SAD =  parseFloat(beam.dataSet.string('x300a00b4'))
-                        beamNumber = beam.dataSet.string('x300a00c0')
+                        SAD =  parseFloat(beam.dataSet.string('x300a00b4')); // Source-Axis Distance (between beam source and isoscentre)
+                        beamNumber = beam.dataSet.string('x300a00c0'); // Number identifying current beam (no real meaning)
 
-                        data.radiationType = beam.dataSet.string('x300a00c6')
+                        data.radiationType = beam.dataSet.string('x300a00c6'); // Radiation Type (e.g. photon, electron)
 
-                        controlPt = beam.dataSet.elements.x300a0111.items[0]
+                        controlPt = beam.dataSet.elements.x300a0111.items[0]; // All relevant info is within the first control point
 
-                        gantryAngle = parseInt(controlPt.dataSet.string('x300a011e'))
-                        isocenter = controlPt.dataSet.string('x300a012c').split("\\").map(Number);
-                        var energy = controlPt.dataSet.string('x300a0114') + ((data.radiationType.toUpperCase() === 'PHOTON') ? ' MV' : ' MeV')
+                        gantryAngle = parseInt(controlPt.dataSet.string('x300a011e')); // Gantry Angle
+                        isocenter = controlPt.dataSet.string('x300a012c').split("\\").map(Number); // Isocentre Position
+
+                        // Add unit to particle type (MV for photon, MeV for electron) and save in array to account for multiple energies
+                        var energy = controlPt.dataSet.string('x300a0114') + ((data.radiationType.toUpperCase() === 'PHOTON') ? ' MV' : ' MeV');
                         if (!beamEnergy.includes(energy)){
-                            beamEnergy.push(energy)
+                            beamEnergy.push(energy);
                         }
 
-                        beamPositionSequence = controlPt.dataSet.elements.x300a011a.items
+                        beamPositionSequence = controlPt.dataSet.elements.x300a011a.items;
 
                         beamPositionSequence.forEach(function(beamPosition){
-                            jawType = beamPosition.dataSet.string('x300a00b8')
+                            jawType = beamPosition.dataSet.string('x300a00b8'); // RT Beam Limiting Device Type
 
 
                             if (jawType == 'X' || jawType == 'ASYMX'){
-                                X = beamPosition.dataSet.string('x300a011c').split("\\").map(Number)
+                                X = beamPosition.dataSet.string('x300a011c').split("\\").map(Number);
                             } else if (jawType == 'Y' || jawType == 'ASYMY'){
-                                Y = beamPosition.dataSet.string('x300a011c').split("\\").map(Number)
-                            } else if (jawType.includes('MLC') && !data.hasMLC){
+                                Y = beamPosition.dataSet.string('x300a011c').split("\\").map(Number);
+                            } else if (jawType.includes('MLC') && !data.hasMLC){ // Multi Leaf Collimator
                                 data.hasMLC = true;
                             }
 
@@ -1352,6 +1359,8 @@ function LoadDicoms(rows) {
 
                         data.beamEnergy = beamEnergy;
 
+                        // Reconstructing the beams in 3D
+                        // Data structure sent to frontend for each beam
                         data.beams[beamNumber] = {
                             SAD: SAD,
                             isocenter: isocenter,
@@ -1360,85 +1369,94 @@ function LoadDicoms(rows) {
                             X2: X[1],
                             Y1: Y[0],
                             Y2: Y[1]
-                        }
+                        };
 
+                        // Isocentre x,y,z coordinates
+                        let xi = isocenter[0];
+                        let yi = isocenter[1];
+                        let zi = isocenter[2];
 
-                        let xi = isocenter[0]//.x;
-                        let yi = isocenter[1]//.y;
-                        let zi = isocenter[2]//.z;
-
+                        // Convert gantry angle to radians
                         let angle = gantryAngle * Math.PI / 180;
 
+                        // Calculate beam source (starting point in gantry)
                         let beamSource = [xi + SAD*Math.sin(angle), yi - SAD*Math.cos(angle), zi];
 
+                        // Calculate four corners of beam field at isocentre
                         let c1 = [xi + X[0]*Math.cos(angle), yi + X[0]*Math.sin(angle), zi + Y[1]]
                         let c2 = [xi + X[1]*Math.cos(angle), yi + X[1]*Math.sin(angle), zi + Y[1]]
                         let c3 = [xi + X[1]*Math.cos(angle), yi + X[1]*Math.sin(angle), zi + Y[0]]
                         let c4 = [xi + X[0]*Math.cos(angle), yi + X[0]*Math.sin(angle), zi + Y[0]]
 
+                        // Add each point to array
                         var beamPoints = [];
                         beamPoints.field = [];
-                        beamPoints.beamSource = beamSource
-                        beamPoints.field.push(c1)
-                        beamPoints.field.push(c2)
-                        beamPoints.field.push(c3)
-                        beamPoints.field.push(c4)
+                        beamPoints.beamSource = beamSource;
+                        beamPoints.field.push(c1);
+                        beamPoints.field.push(c2);
+                        beamPoints.field.push(c3);
+                        beamPoints.field.push(c4);
 
-                        data.beams[beamNumber].beamPoints = beamPoints
+                        data.beams[beamNumber].beamPoints = beamPoints;
 
                     })
-                } else if (modality === 'RTSTRUCT'){
 
 
+                } else if (modality === 'RTSTRUCT'){ // BODY 3D RECONSTRUCTION
 
                     var ROINumber;
                     var ROIName;
 
                     var structureSetROISequence = dicomData.elements.x30060020.items;
 
+                    // Find the structure number corresponding to the body contour (name is "body", "skin" or "corps")
                     for (var i = 0; i < structureSetROISequence.length; i++){
-                        ROIName = structureSetROISequence[i].dataSet.string('x30060026')
+                        ROIName = structureSetROISequence[i].dataSet.string('x30060026'); // Structure name
                         if (ROIName.toLowerCase().includes("body") || ROIName.toLowerCase().includes("skin") || ROIName.toLowerCase().includes("corps") ){
-                            ROINumber = parseInt(structureSetROISequence[i].dataSet.string('x30060022'))
+                            ROINumber = parseInt(structureSetROISequence[i].dataSet.string('x30060022'));
                             break;
                         }
-
                     }
 
                     var ROIContourSequence = dicomData.elements.x30060039.items;
                     var refROINumber, contours;
 
+                    // Get the contour data corresponding to the reference number
                     for (var i = 0; i < ROIContourSequence.length; i++){
-                        refROINumber = parseInt(ROIContourSequence[i].dataSet.string('x30060084'))
+                        refROINumber = parseInt(ROIContourSequence[i].dataSet.string('x30060084'));
                         if (refROINumber === ROINumber){
-
-                            contours = ROIContourSequence[i].dataSet.elements.x30060040.items
-                            break
+                            contours = ROIContourSequence[i].dataSet.elements.x30060040.items;
+                            break;
                         }
-
                     }
 
-                    data.struct = {}
-                    let test = {}
+                    data.struct = {}; // stores final body structure data sent to front end
+                    let test = {};
+
+                    // Loop through ecah contour (stored in a seperate array for each slice)
                     for (var j=0; j < contours.length; j++){
-                        let slice = contours[j].dataSet.string('x30060050').split("\\").map(Number);
-                        // console.log(slice.length)
-                        let num = slice[2]
+                        let slice = contours[j].dataSet.string('x30060050').split("\\").map(Number); // Map to array of numbers
+                        let num = slice[2]; // the 2nd index (3rd entry) is the z value (height) of the slice.
+
+                        /* Note: to save space, instead of repeating the z value for a slice as [x1,y1,z,x2,y2,z,x3,y3,z...]
+                        *        it will be structured as an object with z as the key and the array of x,y values as the value
+                        *        i.e. data.struct = { z: [x1,y1,x2,y2,x3,y3....], ...}
+                        */
+
+
                         test[num] = [];
                         let array = [];
                         let testArray = [];
 
+                        // z value of first and last slices (used in frontend to centre the camera in the scene)
                         if (j==0){
                             data.firstSlice = num;
                         } else if (j == contours.length - 1){
                             data.lastSlice = num;
                         }
 
-                        if (j==1){
-                            data.sliceThickness = Math.abs(data.firstSlice - num)
-                        }
 
-                        var increment
+                        var increment;
                         if (slice.length/3 < 50){
                             increment = 3;
                             console.log("under 50:",slice.length/3)
@@ -1467,25 +1485,25 @@ function LoadDicoms(rows) {
                                 data.struct[num] = []
                             }
 
-                            let curve = new THREE.SplineCurve(testArray)
-                            const points = curve.getPoints(60)
-                            let newpoints = []
+                            // Fit slice contour data to a spline curve and extract 60 points
+                            // This ensures each slice has the same number of evenly spaced points for easier rendering
+                            let curve = new THREE.SplineCurve(testArray);
+                            const points = curve.getPoints(60);
+                            let newpoints = [];
                             points.forEach(function(pt){
-                                newpoints.push(pt.x,pt.y)
+                                newpoints.push(pt.x,pt.y);
                             })
-                            data.struct[num].push(newpoints)
+                            data.struct[num].push(newpoints);
                         }
                     }
 
+                    // Stringify each slice array for faster data transfer
                     for (var key in data.struct){
-                        data.struct[key] = JSON.stringify(data.struct[key])
+                        data.struct[key] = JSON.stringify(data.struct[key]);
                     }
                 }
 
             })
-
-
-
 
         } catch(err) {
             if (err.code == "ENOENT"){
