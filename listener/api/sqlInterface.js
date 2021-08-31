@@ -1436,7 +1436,7 @@ function LoadDicoms(rows) {
                     // Loop through ecah contour (stored in a seperate array for each slice)
                     for (var j=0; j < contours.length; j++){
                         let slice = contours[j].dataSet.string('x30060050').split("\\").map(Number); // Map to array of numbers
-                        let num = slice[2]; // the 2nd index (3rd entry) is the z value (height) of the slice.
+                        let z = slice[2]; // the 2nd index (3rd entry) is the z value (height) of the slice.
 
                         /* Note: to save space, instead of repeating the z value for a slice as [x1,y1,z,x2,y2,z,x3,y3,z...]
                         *        it will be structured as an object with z as the key and the array of x,y values as the value
@@ -1444,57 +1444,37 @@ function LoadDicoms(rows) {
                         */
 
 
-                        test[num] = [];
-                        let array = [];
-                        let testArray = [];
+                        let contourArray = [];
 
                         // z value of first and last slices (used in frontend to centre the camera in the scene)
                         if (j==0){
-                            data.firstSlice = num;
+                            data.firstSlice = z;
                         } else if (j == contours.length - 1){
-                            data.lastSlice = num;
+                            data.lastSlice = z;
                         }
 
+                        // Convert each point to a THREE.JS 2D vector (needed for fitting to THREE.js type curve later)
+                        for (let i = 0; i < slice.length ; i+=3){
+                            contourArray.push(new THREE.Vector2(slice[i], slice[i+1]))
+                        }
+                        contourArray.push(new THREE.Vector2(slice[0], slice[1])) // adds back first point for loop
 
-                        var increment;
-                        if (slice.length/3 < 50){
-                            increment = 3;
-                            console.log("under 50:",slice.length/3)
-                        } else {
-                            increment = Math.ceil(slice.length/3/50)*3;
-                            if (slice.length/increment < 50) increment = Math.floor(slice.length/3/50)*3
-                            // else if (slice.length/increment >=51) increment = Math.ceil(slice.length/3/50)*3
-                            console.log("over50:",slice.length/increment)
-                            console.log("increment:",increment)
-                            if (slice.length/increment >= 51) console.log(slice.length/(increment+3))
+                        if (data.struct[z] == undefined){
+                            data.struct[z] = []
                         }
 
+                        // Fit slice contour data to a spline curve and extract 60 points
+                        // This ensures each slice has the same number of evenly spaced points for easier rendering
+                        let curve = new THREE.SplineCurve(contourArray);
+                        const points = curve.getPoints(60); // Increase for smoother render, decrease for quicker data transfer
 
+                        // Convert 2D vector object to plain array [x1,xy1,x2,y2,...]
+                        let contourPointsfromFit = [];
+                        points.forEach(function(pt){
+                            contourPointsfromFit.push(pt.x,pt.y);
+                        })
 
-                        if(slice.length/2 >= 50){
-                            increment = 3;
-                            for (let i = 0; i < slice.length ; i+=increment){
-
-                                // test[num].push(slice[i], slice[i+1])
-                                array.push(slice[i], slice[i+1])
-                                testArray.push(new THREE.Vector2(slice[i], slice[i+1]))
-                            }
-                            testArray.push(new THREE.Vector2(slice[0], slice[1]))
-
-                            if (data.struct[num] == undefined){
-                                data.struct[num] = []
-                            }
-
-                            // Fit slice contour data to a spline curve and extract 60 points
-                            // This ensures each slice has the same number of evenly spaced points for easier rendering
-                            let curve = new THREE.SplineCurve(testArray);
-                            const points = curve.getPoints(60);
-                            let newpoints = [];
-                            points.forEach(function(pt){
-                                newpoints.push(pt.x,pt.y);
-                            })
-                            data.struct[num].push(newpoints);
-                        }
+                        data.struct[z].push(contourPointsfromFit); // save x,y points from fit to object under key value of z
                     }
 
                     // Stringify each slice array for faster data transfer
