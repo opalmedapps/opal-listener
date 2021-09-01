@@ -1109,6 +1109,12 @@ async function getPatientFromEmail(email) {
     return rows[0];
 }
 
+/** TODO: ADD ERROR PROCESSING ETC
+ * LoadDicomImgs
+ * @desc Loads the images from dicom files and converts to jpeg
+ * @param rows
+ * @return {Promise}
+ */
 function LoadDicomImgs(rows){
 
     const defer = Q.defer();
@@ -1118,69 +1124,83 @@ function LoadDicomImgs(rows){
 
     for (let key = 0; key < rows.length; key++) {
 
-        var jpgExists = false;
+        var jpgExists = false; // true if jpeg files already saved at image folder path
         var folderpath = config.DICOM_PATH + rows[key].Path + rows[key].FolderName;
         var index = 1;
 
         if (filesystem.existsSync(folderpath+"jpg/")) jpgExists = true;
 
         try{
-            var data = {}
-            data.img = []
+            var data = {}; // data to return to frontend
+            data.img = []; // stores images
 
 
             var files =  filesystem.readdirSync(folderpath);
-            var numFiles = files.length
+            var numFiles = files.length;
+
             files.forEach(function(file){
 
                 var bufferArray;
 
+                // If file is DICOM image
                 if (file.includes(".dcm")) {
 
+                    // Read buffer array and parse as dicom file
                     bufferArray = filesystem.readFileSync(folderpath+file)
-
                     var dicomData = dicomParser.parseDicom(bufferArray);
+
+                    // Retrieve modality (e.g. MRI, CT, etc.) and date tags
                     data.modality = dicomData.string('x00080060');
                     data.date = dicomData.string('x00080020');
 
+                    // If there are more than 75 images in the sequence, skip every second one to save space
                     if (!jpgExists && (index%2==1||numFiles<75)){
                         var slice = dicomData.string('x00200013');
 
+                        // Extract pixel data and convert to array
                         var pixelDataElement = dicomData.elements.x7fe00010;
-
                         var pixelData = new Uint16Array( dicomData.byteArray.buffer, pixelDataElement.dataOffset, pixelDataElement.length / 2);
+                        var pixelarray = Array.from(pixelData);
 
-                        var pixelarray = Array.from(pixelData)
-
-                        let min = pixelarray[0]
-                        let max = pixelarray[0]
+                        // Find minimum and maximum pixel values (needed to convert from HU to 0-255 pixel values)
+                        let min = pixelarray[0];
+                        let max = pixelarray[0];
                         for (i=1; i < pixelarray.length; i++){
-                            let current = pixelarray[i]
-                            if (current < min) min = current
-                            else if (current > max) max = current
+                            let current = pixelarray[i];
+                            if (current < min) min = current;
+                            else if (current > max) max = current;
                         }
 
+                        // Convert pixel values from HU to 0-255 values and average every group of four pixels together (minimize data transfer)
+                        // TODO bug fix: only works when img row length divisible by 2
+                        // TODO: some images are much higher resolution (mammography or x-ray higher than CT), so in the future the image should
+                        //       be reduced by a number relative to the original resolution and not just in half each time.
+                        var newPixelArray =[];
+                        var len =  (dicomData.int16('x00280011'));
+                        var rows = (dicomData.int16('x00280010'));
 
-                        var newPixelArray =[]
-                        var len =  (dicomData.int16('x00280011'))//Math.sqrt(pixelarray.length)
-                        var rows = (dicomData.int16('x00280010'))
+                        let x = 0;
+                        let avg = 0;
 
-                        let x=0;
-                        let avg = 0
-                        while (x <= pixelarray.length-len){
-                            avg = (pixelarray[x]+pixelarray[x+1]+pixelarray[x+len]+pixelarray[x+1+len])/4
-                            newPixelArray.push(Math.round(255*(avg-min)/(max - min)))
+                        while (x <= pixelarray.length-len){ // Loop until second to last row (final row accounted for in previous iteration)
+                            avg = (pixelarray[x]+pixelarray[x+1]+pixelarray[x+len]+pixelarray[x+1+len])/4; // Average four pixels
+                            newPixelArray.push(Math.round(255*(avg-min)/(max - min))); // Convert HU to 0-255 based on min and max HU values
+
+                            // Increment x by 2 unless at end of row, skip to next row
                             if (((x+2)/len)%2===1){
-                                x = x+len+2
-                            } else {x+=2}
+                                x = x+len+2;
+                            } else {
+                                x += 2;
+                            }
                         }
 
+                        // Create RGB array with 3 colour channels (needed for jpeg encoding)
                         let rgb_array = [];
                         for (let i=0; i <newPixelArray.length; i++ ){
                             for (let j =0; j < 3; j++){
-                                rgb_array.push(newPixelArray[i])
+                                rgb_array.push(newPixelArray[i]);
                             }
-                            rgb_array.push(1)
+                            rgb_array.push(1);
                         }
 
                         var rawImageData = {
@@ -1188,14 +1208,23 @@ function LoadDicomImgs(rows){
                             width: len/2,
                             height: rows/2,
                         };
+
+                        // Encode RGB image array to JPEG
                         var jpegImageData = jpeg.encode(rawImageData, 30);
+
+                        // Create jpg/ folder in the current folder path
                         if (!filesystem.existsSync(folderpath+"jpg/")){
                             filesystem.mkdirSync(folderpath + "jpg/");
                         }
+
+                        // Save jpeg into jpg/ folder with the slice number as the name (to ensure order is kept)
                         filesystem.writeFileSync(folderpath+"jpg/"+ (slice)+'.jpg', jpegImageData.data);
 
                     }
-                    index++
+
+                    index++;
+
+                    // Once done iterating through all dicom files, set jpgExists to true
                     if (index > numFiles){
                         jpgExists = true;
                     }
@@ -1203,9 +1232,12 @@ function LoadDicomImgs(rows){
 
             })
 
+            // If/when jpeg files exist, upload them to be sent to frontend
             if (jpgExists){
+                // Sort files read to maintain slice order
                 let jpgfiles = filesystem.readdirSync(folderpath+"jpg/").sort((a,b) => {return parseInt(a.slice(0,a.length-4))-parseInt(b.slice(0,b.length-4))})
 
+                // Read buffer array
                 jpgfiles.forEach(function(jpgfile){
                     bufferArray = (filesystem.readFileSync(folderpath+"jpg/"+jpgfile,'base64'))
                     data.img.push(bufferArray)
@@ -1221,6 +1253,8 @@ function LoadDicomImgs(rows){
             }
         }
     }
+
+    // Stringify array of buffer arrays for faster data transfer
     defer.resolve(JSON.stringify(data))
     return defer.promise;
 }
