@@ -1,3 +1,8 @@
+Version 1.4.3.0:
+ - OPAL-919: Update to cordova-android 10 (with associated changes) (!42)
+ - Move template folder to the root of the repository
+ - Update template for use in GitLab
+
 Version 1.4.2.0:
  - OPAL-856: Support for multi-site MRNs
  - OPAL-1096 (hotfix): Reactivate the lab results publishing flag (#41)
