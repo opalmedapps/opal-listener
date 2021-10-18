@@ -1,3 +1,6 @@
+Version 1.4.3.1:
+ - OPAL-919 (additional): Add SSL certificate to https file download requests (!43)
+
 Version 1.4.3.0:
  - OPAL-919: Update to cordova-android 10 (with associated changes) (!42)
  - Move template folder to the root of the repository
