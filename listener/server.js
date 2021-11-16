@@ -112,7 +112,12 @@ function handleRequest(requestType, snapshot){
     const headers = {key: snapshot.key, objectRequest: snapshot.val()};
     processRequest(headers).then(function(response){
 
-        console.log("response", response);
+        // Print the response contents (shortened if too long)
+        try {
+            console.log("response", JSON.parse(utility.stringifyShort(response)));
+        }
+        catch(error) { console.error("Failed to print the response due to a formatting issue:", error) }
+
         // Log before uploading to Firebase. Check that it was not a simple log
         // if (response.Headers.RequestObject.Request !== 'Log') logResponse(response);
         uploadToFirebase(response, requestType);
