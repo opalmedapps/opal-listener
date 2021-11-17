@@ -26,8 +26,8 @@ exports.request = function(options) {
 
         // Validate input
         if (!options) reject(error("cannot make a request without an options parameter"));
-        else if (!options.hasOwnProperty("url")) reject(error("the 'url' parameter is required to make a request"));
-        else if (!options.hasOwnProperty("method")) reject(error("the 'method' parameter is required to make a request via the request utility"));
+        else if (!options.url || options.url === "") reject(error("the 'url' parameter is required to make a request"));
+        else if (!options.method || options.method === "") reject(error("the 'method' parameter is required to make a request via the request utility"));
         else {
             // Add an SSL certificate to the request's options if a certificate is provided for this listener
             try {

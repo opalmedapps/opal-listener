@@ -25,11 +25,11 @@ class FileRequest {
             encoding: null, // Allows conversion to base64
         };
 
-        let result = await requestUtility.request(options);
+        let { response, body } = await requestUtility.request(options);
 
         return {
-            contentType: result.response.headers["content-type"],
-            base64Data: Buffer.from(result.body).toString('base64'),
+            contentType: response.headers["content-type"],
+            base64Data: Buffer.from(body).toString('base64'),
         };
     }
 }

@@ -6,6 +6,8 @@ const opalQueries = require('../sql/queries');
 const questionnaireValidation = require('./questionnaire.validate');
 const logger = require('./../logs/logger');
 const {OpalSQLQueryRunner} = require("../sql/opal-sql-query-runner");
+const config = require("../config");
+const requestUtility = require("../utility/requestUtility");
 
 exports.getQuestionnaireInOpalDB = getQuestionnaireInOpalDB;
 exports.getQuestionnaireList = getQuestionnaireList;
@@ -170,48 +172,49 @@ function questionnaireSaveAnswer(requestObject) {
 
 /**
  * @name questionnaireUpdateStatus
- * @desc this function is used to update the questionnaire status in both the OpalDB and the questionnaireDB
+ * @desc Updates the questionnaire status in both the OpalDB and the QuestionnaireDB.
+ *       Also notifies the OIE if the questionnaire's new status is completed.
  * @param {object} requestObject
- * @returns {Promise}
+ * @returns {Promise<{Response: string}>} Resolves with a "success" response, or rejects with an error.
  */
-function questionnaireUpdateStatus(requestObject) {
-    return new Promise(function (resolve, reject) {
-        // check arguments
-        if (!questionnaireValidation.validateParamUpdateStatus(requestObject)) {
-            logger.log("error", "Error updating status: the requestObject does not have the required parameters");
-            reject(new Error('Error updating status: the requestObject does not have the required parameters'));
+async function questionnaireUpdateStatus(requestObject) {
+    // Validate the parameters
+    if (!questionnaireValidation.validateParamUpdateStatus(requestObject)) {
+        throw new Error('Error updating status: the requestObject does not have the required parameters');
+    }
 
-        } else {
-            let patientSerNumOpalDB;
+    // 1. update the status in the answerQuestionnaire table in questionnaire DB
+    // First, get the patientSerNum in the opal database
+    let patientSerNumAndLanguageRow = await OpalSQLQueryRunner.run(opalQueries.patientTableFields(), [requestObject.UserID, lastUpdatedDateForGettingPatient]);
 
-            // 1. update the status in the answerQuestionnaire table in questionnaire DB
-            // get patientSerNum in the opal database
-            OpalSQLQueryRunner.run(opalQueries.patientTableFields(), [requestObject.UserID, lastUpdatedDateForGettingPatient])
-                .then(function (patientSerNumAndLanguageRow) {
-                    // check returns
-                    if (!questionnaireValidation.validatePatientSerNumAndLanguage(patientSerNumAndLanguageRow)) {
-                        logger.log("error", "Error updating status: No matching PatientSerNum found in opalDB");
-                        reject(new Error('Error updating status: No matching PatientSerNum found in opalDB'));
-                    } else {
-                        patientSerNumOpalDB = patientSerNumAndLanguageRow[0].PatientSerNum;
-                        return questionnaires.updateQuestionnaireStatusInQuestionnaireDB(requestObject.Parameters.answerQuestionnaire_id, requestObject.Parameters.new_status, requestObject.AppVersion);
-                    }
+    if (!questionnaireValidation.validatePatientSerNumAndLanguage(patientSerNumAndLanguageRow)) {
+        throw new Error('Error updating status: No matching PatientSerNum found in opalDB');
+    }
 
-                }).then(function (isCompleted) {
+    const isCompleted = await questionnaires.updateQuestionnaireStatusInQuestionnaireDB(requestObject.Parameters.answerQuestionnaire_id, requestObject.Parameters.new_status, requestObject.AppVersion);
 
-                    // 2. update the status in the questionnaire table of the opal DB if completed
-                    if (isCompleted === 1) {
-                        return OpalSQLQueryRunner.run(questionnaireQueries.updateQuestionnaireStatus(), [isCompleted, requestObject.Parameters.answerQuestionnaire_id]);
-                        // TODO: do we rollback if this fails + insert log into DB
-                    } else {
-                        resolve({Response: 'success'});
-                    }
-                }).then(function () {
-                    resolve({Response: 'success'});
-                }).catch(function (err) {
-                    logger.log("error", "Error updating status", err);
-                    reject(err);
-                });
+    if (isCompleted === 1) {
+
+        // 2. update the status in the questionnaire table of the opal DB if completed
+        await OpalSQLQueryRunner.run(questionnaireQueries.updateQuestionnaireStatus(), [isCompleted, requestObject.Parameters.answerQuestionnaire_id]);
+        // TODO: do we rollback if this fails + insert log into DB
+
+        // 3. If the questionnaire is completed, notify the OIE. If an error occurs, don't cause the whole function to fail.
+        try {
+            logger.log("info", "Notifying the OIE that a questionnaire was completed.");
+            if (!config.QUESTIONNAIRE_COMPLETED_PATH || config.QUESTIONNAIRE_COMPLETED_PATH === "") {
+                throw "No value was provided for QUESTIONNAIRE_COMPLETED_PATH in the config file.";
+            }
+            let options = {
+                method: "post",
+                url: config.QUESTIONNAIRE_COMPLETED_PATH,
+            };
+            await requestUtility.request(options);
         }
-    });
+        catch (error) {
+            logger.log("error", `Failed to send notification of completed questionnaire to the OIE: ${JSON.stringify(error)}`);
+        }
+    }
+
+    return {Response: 'success'};
 }
