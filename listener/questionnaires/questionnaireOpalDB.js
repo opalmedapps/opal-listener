@@ -7,6 +7,7 @@ const questionnaireValidation = require('./questionnaire.validate');
 const logger = require('./../logs/logger');
 const {OpalSQLQueryRunner} = require("../sql/opal-sql-query-runner");
 const config = require("../config");
+const utility = require("../utility/utility");
 const requestUtility = require("../utility/requestUtility");
 
 exports.getQuestionnaireInOpalDB = getQuestionnaireInOpalDB;
@@ -212,7 +213,7 @@ async function questionnaireUpdateStatus(requestObject) {
             await requestUtility.request(options);
         }
         catch (error) {
-            logger.log("error", `Failed to send notification of completed questionnaire to the OIE: ${JSON.stringify(error)}`);
+            logger.log("error", `Failed to send notification of completed questionnaire to the OIE: ${utility.stringifyShort(error)}`);
         }
     }
 
