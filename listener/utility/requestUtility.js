@@ -22,7 +22,7 @@ const utility           = require("../utility/utility");
 exports.request = function(options) {
     return new Promise((resolve, reject) => {
         // Helper function
-        let error = (errMsg) => { return `Error making request: ${errMsg}. Options provided: ${JSON.stringify(options)}` };
+        let error = (errMsg) => { return `Error making request: ${errMsg}. Options provided: ${utility.stringifyShort(options)}` };
 
         // Validate input
         if (!options) reject(error("cannot make a request without an options parameter"));
