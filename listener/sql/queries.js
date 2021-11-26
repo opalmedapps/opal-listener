@@ -18,14 +18,11 @@ exports.patientTableFields=function()
 exports.patientDoctorTableFields=function()
 {
 	return "SELECT ifnull(D.FirstName, '') FirstName, ifnull(D.LastName, '') LastName, D.DoctorSerNum, PD.PrimaryFlag, PD.OncologistFlag, ifnull(D.Email, '') Email, ifnull(D.Phone, '') Phone, ifnull(D.ProfileImage, '') ProfileImage, ifnull(D.Address, '') Address,	ifnull(D.BIO_EN, '') Bio_EN, ifnull(D.BIO_FR, '') Bio_FR FROM Doctor D, PatientDoctor PD, Patient P, Users U WHERE U.Username Like ? AND P.PatientSerNum=U.UserTypeSerNum AND PD.PatientSerNum = P.PatientSerNum AND D.DoctorSerNum = PD.DoctorSerNum AND (D.LastUpdated > ? OR PD.LastUpdated > ?);";
-
-    // return "SELECT Doctor.FirstName, Doctor.LastName, Doctor.DoctorSerNum, PatientDoctor.PrimaryFlag, PatientDoctor.OncologistFlag, Doctor.Email,Doctor.Phone, Doctor.ProfileImage, Doctor.Address FROM Doctor, PatientDoctor, Patient, Users WHERE Users.Username Like ? AND Patient.PatientSerNum=Users.UserTypeSerNum AND PatientDoctor.PatientSerNum = Patient.PatientSerNum AND Doctor.DoctorSerNum = PatientDoctor.DoctorSerNum AND (Doctor.LastUpdated > ? OR PatientDoctor.LastUpdated > ?);";
 };
 
 exports.patientDiagnosisTableFields=function()
 {
    return "SELECT D.CreationDate, getDiagnosisDescription(D.DiagnosisCode,'EN') Description_EN, getDiagnosisDescription(D.DiagnosisCode,'FR') Description_FR FROM Diagnosis D, Patient P, Users U WHERE U.UserTypeSerNum=P.PatientSerNum AND D.PatientSerNum = P.PatientSerNum AND U.Username Like ? AND D.LastUpdated > ?;";
-    // return "SELECT Diagnosis.CreationDate, Diagnosis.Description_EN, Diagnosis.Description_FR FROM Diagnosis, Patient, Users WHERE Users.UserTypeSerNum=Patient.PatientSerNum AND Diagnosis.PatientSerNum = Patient.PatientSerNum AND Users.Username Like ? AND Diagnosis.LastUpdated > ?;";
 };
 
 exports.patientMessageTableFields=function()
@@ -143,15 +140,41 @@ exports.patientAnnouncementsTableFields=function()
 
 exports.patientEducationalMaterialTableFields=function()
 {
-    return "SELECT DISTINCT EduMat.EducationalMaterialSerNum, EduControl.ShareURL_EN, EduControl.ShareURL_FR, EduControl.EducationalMaterialControlSerNum, " +
-    " EduMat.DateAdded, EduMat.ReadStatus, EduControl.EducationalMaterialType_EN, EduControl.EducationalMaterialType_FR, EduControl.Name_EN, EduControl.Name_FR, " +
-    " EduControl.URL_EN, EduControl.URL_FR, Phase.Name_EN as PhaseName_EN, Phase.Name_FR as PhaseName_FR " +
-    " FROM Users, Patient, EducationalMaterialControl as EduControl, EducationalMaterial as EduMat, PhaseInTreatment as Phase, EducationalMaterialTOC as TOC " +
-    " WHERE (EduMat.EducationalMaterialControlSerNum = EduControl.EducationalMaterialControlSerNum OR " +
-    " (TOC.ParentSerNum = EduMat.EducationalMaterialControlSerNum AND TOC.EducationalMaterialControlSerNum = EduControl.EducationalMaterialControlSerNum)) " +
-    " AND Phase.PhaseInTreatmentSerNum = EduControl.PhaseInTreatmentSerNum AND  EduMat.PatientSerNum = Patient.PatientSerNum AND Patient.PatientSerNum = Users.UserTypeSerNum " +
-    " AND Users.Username = ? AND (EduMat.LastUpdated > ? OR EduControl.LastUpdated > ? OR Phase.LastUpdated > ? OR TOC.LastUpdated > ?) " +
-    " order by FIELD(PhaseName_EN,'Prior To Treatment','During Treatment','After Treatment') ;";
+    return `
+        SET @wsUSER = ?;
+
+        SELECT DISTINCT * FROM 
+        (
+            SELECT EduMat.EducationalMaterialSerNum, EduControl.ShareURL_EN, EduControl.ShareURL_FR, 
+                EduControl.EducationalMaterialControlSerNum,  EduMat.DateAdded, EduMat.ReadStatus, 
+                EduControl.EducationalMaterialType_EN, EduControl.EducationalMaterialType_FR, EduControl.Name_EN, 
+                EduControl.Name_FR,  EduControl.URL_EN, EduControl.URL_FR, Phase.Name_EN as PhaseName_EN, Phase.Name_FR as PhaseName_FR
+            FROM Users, Patient, EducationalMaterialControl as EduControl, 
+                EducationalMaterial as EduMat, PhaseInTreatment as PHASE
+            WHERE EduMat.EducationalMaterialControlSerNum = EduControl.EducationalMaterialControlSerNum 
+                AND Phase.PhaseInTreatmentSerNum = EduControl.PhaseInTreatmentSerNum 
+                AND  EduMat.PatientSerNum = Patient.PatientSerNum 
+                AND Patient.PatientSerNum = Users.UserTypeSerNum  
+                AND Users.Username = @wsUser		
+            UNION
+            
+            SELECT EduMat.EducationalMaterialSerNum, EduControl.ShareURL_EN, EduControl.ShareURL_FR, 
+                EduControl.EducationalMaterialControlSerNum,  EduMat.DateAdded, EduMat.ReadStatus, 
+                EduControl.EducationalMaterialType_EN, EduControl.EducationalMaterialType_FR, EduControl.Name_EN, 
+                EduControl.Name_FR,  EduControl.URL_EN, EduControl.URL_FR, Phase.Name_EN as PhaseName_EN, 
+                Phase.Name_FR as PhaseName_FR
+            FROM Users, Patient, EducationalMaterialControl as EduControl, 
+                EducationalMaterial as EduMat, PhaseInTreatment as Phase, 
+                EducationalMaterialTOC as TOC  
+            WHERE TOC.ParentSerNum = EduMat.EducationalMaterialControlSerNum 
+                AND TOC.EducationalMaterialControlSerNum = EduControl.EducationalMaterialControlSerNum
+                AND Phase.PhaseInTreatmentSerNum = EduControl.PhaseInTreatmentSerNum 
+                AND  EduMat.PatientSerNum = Patient.PatientSerNum 
+                AND Patient.PatientSerNum = Users.UserTypeSerNum  
+                AND Users.Username = @wsUser
+            ) AS A
+        order by FIELD(PhaseName_EN,'Prior To Treatment','During Treatment','After Treatment')
+        ;`;
 };
 
 exports.patientEducationalMaterialContents=function()
