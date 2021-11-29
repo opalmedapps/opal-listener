@@ -140,41 +140,40 @@ exports.patientAnnouncementsTableFields=function()
 
 exports.patientEducationalMaterialTableFields=function()
 {
-    return `
-        SET @wsUSER = ?;
-
-        SELECT DISTINCT * FROM 
-        (
-            SELECT EduMat.EducationalMaterialSerNum, EduControl.ShareURL_EN, EduControl.ShareURL_FR, 
-                EduControl.EducationalMaterialControlSerNum,  EduMat.DateAdded, EduMat.ReadStatus, 
-                EduControl.EducationalMaterialType_EN, EduControl.EducationalMaterialType_FR, EduControl.Name_EN, 
-                EduControl.Name_FR,  EduControl.URL_EN, EduControl.URL_FR, Phase.Name_EN as PhaseName_EN, Phase.Name_FR as PhaseName_FR
-            FROM Users, Patient, EducationalMaterialControl as EduControl, 
-                EducationalMaterial as EduMat, PhaseInTreatment as PHASE
-            WHERE EduMat.EducationalMaterialControlSerNum = EduControl.EducationalMaterialControlSerNum 
-                AND Phase.PhaseInTreatmentSerNum = EduControl.PhaseInTreatmentSerNum 
-                AND  EduMat.PatientSerNum = Patient.PatientSerNum 
-                AND Patient.PatientSerNum = Users.UserTypeSerNum  
-                AND Users.Username = @wsUser		
-            UNION
-            
-            SELECT EduMat.EducationalMaterialSerNum, EduControl.ShareURL_EN, EduControl.ShareURL_FR, 
-                EduControl.EducationalMaterialControlSerNum,  EduMat.DateAdded, EduMat.ReadStatus, 
-                EduControl.EducationalMaterialType_EN, EduControl.EducationalMaterialType_FR, EduControl.Name_EN, 
-                EduControl.Name_FR,  EduControl.URL_EN, EduControl.URL_FR, Phase.Name_EN as PhaseName_EN, 
-                Phase.Name_FR as PhaseName_FR
-            FROM Users, Patient, EducationalMaterialControl as EduControl, 
-                EducationalMaterial as EduMat, PhaseInTreatment as Phase, 
-                EducationalMaterialTOC as TOC  
-            WHERE TOC.ParentSerNum = EduMat.EducationalMaterialControlSerNum 
-                AND TOC.EducationalMaterialControlSerNum = EduControl.EducationalMaterialControlSerNum
-                AND Phase.PhaseInTreatmentSerNum = EduControl.PhaseInTreatmentSerNum 
-                AND  EduMat.PatientSerNum = Patient.PatientSerNum 
-                AND Patient.PatientSerNum = Users.UserTypeSerNum  
-                AND Users.Username = @wsUser
-            ) AS A
-        order by FIELD(PhaseName_EN,'Prior To Treatment','During Treatment','After Treatment')
-        ;`;
+    return "        SET @wsUSER = ?; " +
+    " " +
+    "        SELECT DISTINCT * FROM  " +
+    "        ( " +
+    "            SELECT EduMat.EducationalMaterialSerNum, EduControl.ShareURL_EN, EduControl.ShareURL_FR,  " +
+    "                EduControl.EducationalMaterialControlSerNum,  EduMat.DateAdded, EduMat.ReadStatus,  " +
+    "                EduControl.EducationalMaterialType_EN, EduControl.EducationalMaterialType_FR, EduControl.Name_EN,  " +
+    "                EduControl.Name_FR,  EduControl.URL_EN, EduControl.URL_FR, Phase.Name_EN as PhaseName_EN, Phase.Name_FR as PhaseName_FR " +
+    "            FROM Users, Patient, EducationalMaterialControl as EduControl,  " +
+    "                EducationalMaterial as EduMat, PhaseInTreatment as PHASE " +
+    "            WHERE EduMat.EducationalMaterialControlSerNum = EduControl.EducationalMaterialControlSerNum  " +
+    "                AND Phase.PhaseInTreatmentSerNum = EduControl.PhaseInTreatmentSerNum  " +
+    "                AND  EduMat.PatientSerNum = Patient.PatientSerNum  " +
+    "                AND Patient.PatientSerNum = Users.UserTypeSerNum   " +
+    "                AND Users.Username = @wsUser " +
+    "            UNION " +
+    " " +
+    "            SELECT EduMat.EducationalMaterialSerNum, EduControl.ShareURL_EN, EduControl.ShareURL_FR,  " +
+    "                EduControl.EducationalMaterialControlSerNum,  EduMat.DateAdded, EduMat.ReadStatus,  " +
+    "                EduControl.EducationalMaterialType_EN, EduControl.EducationalMaterialType_FR, EduControl.Name_EN,  " +
+    "                EduControl.Name_FR,  EduControl.URL_EN, EduControl.URL_FR, Phase.Name_EN as PhaseName_EN,  " +
+    "                Phase.Name_FR as PhaseName_FR " +
+    "            FROM Users, Patient, EducationalMaterialControl as EduControl,  " +
+    "                EducationalMaterial as EduMat, PhaseInTreatment as Phase,  " +
+    "                EducationalMaterialTOC as TOC   " +
+    "            WHERE TOC.ParentSerNum = EduMat.EducationalMaterialControlSerNum  " +
+    "                AND TOC.EducationalMaterialControlSerNum = EduControl.EducationalMaterialControlSerNum " +
+    "                AND Phase.PhaseInTreatmentSerNum = EduControl.PhaseInTreatmentSerNum  " +
+    "                AND  EduMat.PatientSerNum = Patient.PatientSerNum  " +
+    "                AND Patient.PatientSerNum = Users.UserTypeSerNum   " +
+    "                AND Users.Username = @wsUser " +
+    "            ) AS A " +
+    "        order by FIELD(PhaseName_EN,'Prior To Treatment','During Treatment','After Treatment') " +
+    "        ; ";
 };
 
 exports.patientEducationalMaterialContents=function()
