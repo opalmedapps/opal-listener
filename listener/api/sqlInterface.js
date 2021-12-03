@@ -87,7 +87,7 @@ const requestMappings =
         'EducationalMaterial': {
             sql: queries.patientEducationalMaterialTableFields(),
             processFunction: getEducationTableOfContents,
-            numberOfLastUpdated: 5,
+            numberOfLastUpdated: 4,
             table: 'EducationalMaterial',
             serNum: 'EducationalMaterialSerNum'
         },
