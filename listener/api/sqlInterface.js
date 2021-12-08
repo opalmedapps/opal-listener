@@ -3,7 +3,7 @@ const filesystem        = require('fs');
 const Q                 = require('q');
 const queries           = require('./../sql/queries.js');
 const config            = require('./../config.json');
-const request           = require('request');
+const requestUtility    = require("../utility/request-utility");
 const Mail              = require('./../mailer/mailer.js');
 const utility           = require('./../utility/utility');
 const logger            = require('./../logs/logger');
@@ -400,8 +400,8 @@ exports.checkIn = async function (requestObject) {
                 let mrnSite = mrnObj.Hospital_Identifier_Type_Code;
 
                 try {
-                    // Check into the patient's appointments via a call to ORMS
-                    await checkIntoAriaAndMedi(mrn, mrnSite);
+                    // Check into the patient's appointments via a call to the OIE
+                    await checkIntoOIE(mrn, mrnSite);
                     logger.log("verbose", `Success checking in PatientSerNum = ${patientSerNum} using MRN = ${mrn} (site = ${mrnSite})`);
                     success = true;
                     break;
@@ -422,42 +422,25 @@ exports.checkIn = async function (requestObject) {
 };
 
 /**
- * @description Calls the OIE in order to check in the patient on Aria and Medivisit.
+ * @description Calls the OIE to check the patient in on external systems (e.g. Aria, Medivisit).
  * @param {string} mrn One of the patient's medical record numbers.
  * @param {string} mrnSite The site to which the MRN belongs.
- * @returns {Promise} Resolves if check-in succeeds, otherwise rejects with an error.
+ * @returns {Promise<void>} Resolves if check-in succeeds, otherwise rejects with an error.
  */
-function checkIntoAriaAndMedi(mrn, mrnSite) {
-    return new Promise((resolve, reject) => {
-        // Validate the existence of the check-in path
-        if (!config.CHECKIN_PATH || config.CHECKIN_PATH === "") reject("No value was provided for CHECKIN_PATH in the config file");
+async function checkIntoOIE(mrn, mrnSite) {
+    // Validate the existence of the check-in path
+    if (!config.CHECKIN_PATH || config.CHECKIN_PATH === "") throw "No value was provided for CHECKIN_PATH in the config file";
 
-        let options = {
-            url: config.CHECKIN_PATH,
-            json: true,
-            body: {
-                "mrn": mrn,
-                "site": mrnSite,
-                "room": config.CHECKIN_ROOM,
-            },
-        };
+    let options = {
+        json: true,
+        body: {
+            "mrn": mrn,
+            "site": mrnSite,
+            "room": config.CHECKIN_ROOM,
+        },
+    };
 
-        // Add an SSL certificate to the request's options if using https
-        try {
-            if (options.url.includes("https")) ssl.attachCertificate(options);
-        }
-        catch (error) { reject(error); return }
-
-        request.post(options, function(error, response, body) {
-            logger.log('verbose', 'Checked into aria and medi - response: ' + JSON.stringify(response));
-            logger.log('verbose', 'Checked into aria and medi - body: ' + JSON.stringify(body));
-
-            if (error) reject(error);
-            else if (!response) reject("No response received");
-            else if (response.statusCode !== 200) reject(`Request returned with a response status other than '200 OK': status = ${response.statusCode}, body = ${JSON.stringify(body)}`);
-            else resolve();
-        });
-    });
+    await requestUtility.request("post", config.CHECKIN_PATH, options);
 }
 
 /**

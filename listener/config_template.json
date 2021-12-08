@@ -22,6 +22,7 @@
   "CHECKIN_PATH": "",
   "CHECKIN_ROOM": "",
   "PFP_PATH": "",
+  "QUESTIONNAIRE_COMPLETED_PATH": "Path notified when a questionnaire is completed",
   "FIREBASE_ADMIN_KEY": "",
   "DATABASE_URL": "",
   "LATEST_STABLE_VERSION": "",
