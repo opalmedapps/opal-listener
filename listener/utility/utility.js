@@ -4,7 +4,6 @@ const nacl              = require('tweetnacl');
 const stablelibbase64   = require('@stablelib/base64');
 const crypto            = require('crypto');
 const Q                 = require('q');
-const logger            = require('./../logs/logger');
 
 
 //crypto.DEFAULT_ENCODING = 'hex';
@@ -287,4 +286,25 @@ exports.htmlspecialchars_decode = function (string, quoteStyle) {
     }
 
     return string.replace(/&amp;/g, '&');
-}
+};
+
+/**
+ * @description Stringifies an object, while truncating any string or array that's too long to improve readability.
+ * @param {Object} object - The object to stringify.
+ * @returns {string} A shortened stringified version of the object.
+ */
+exports.stringifyShort = object => {
+    const charThreshold = 1000; // The number of characters past which to truncate a string value
+    const arrayThreshold = 300; // The number of elements past which to truncate an array value
+    const charsToLeave = 100; // The number of characters to leave when truncating a string value
+
+    return JSON.stringify(object, (key, value) => {
+        if (typeof value === "string" && value.length > charThreshold) {
+            return value.substr(0, charsToLeave) + "...";
+        }
+        else if (Array.isArray(value) && value.length > arrayThreshold) {
+            return "[Array]" // Arrays cannot be spliced in a stringify replacer function (see docs for details)
+        }
+        else return value;
+    });
+};
