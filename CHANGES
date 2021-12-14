@@ -1,3 +1,7 @@
+Version 1.4.4.0:
+ - OPAL-1162: Notify the OIE when a questionnaire is completed (!45)
+ - OPAL-1168 - Optimizing the Educational Material Query
+
 Version 1.4.3.1:
  - OPAL-919 (additional): Add SSL certificate to https file download requests (!43)
 
