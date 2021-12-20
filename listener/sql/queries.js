@@ -2,20 +2,27 @@ var exports=module.exports={};
 //Get Patient table information for a particular patient
 exports.patientTableFields=function()
 {
-    return "SELECT Patient.PatientSerNum, Patient.TestUser, Patient.FirstName, Patient.LastName, Patient.TelNum, Patient.PatientId, Patient.Email, Patient.Alias, Patient.Language, Patient.EnableSMS,Patient.ProfileImage, Patient.SSN, Patient.AccessLevel FROM Patient, Users WHERE Users.Username LIKE ? AND Users.UserTypeSerNum=Patient.PatientSerNum AND Patient.LastUpdated > ?"
+    /* Note: "" AS PatientId
+     *       This was added to make the Account tab display nothing instead of the Patient's MRN
+     *       The PatientId attribute can be removed after qplus PR #829 is merged
+     * -SB */
+    return `SELECT p.PatientSerNum, p.TestUser, p.FirstName, p.LastName, p.TelNum, "" AS PatientId, p.Email, p.Alias,
+                   p.Language, p.EnableSMS, p.ProfileImage, p.SSN, p.AccessLevel
+            FROM Patient p, Users u
+            WHERE u.Username = ?
+              AND u.UserTypeSerNum = p.PatientSerNum
+              AND p.LastUpdated > ?
+            ;`
 };
 
 exports.patientDoctorTableFields=function()
 {
 	return "SELECT ifnull(D.FirstName, '') FirstName, ifnull(D.LastName, '') LastName, D.DoctorSerNum, PD.PrimaryFlag, PD.OncologistFlag, ifnull(D.Email, '') Email, ifnull(D.Phone, '') Phone, ifnull(D.ProfileImage, '') ProfileImage, ifnull(D.Address, '') Address,	ifnull(D.BIO_EN, '') Bio_EN, ifnull(D.BIO_FR, '') Bio_FR FROM Doctor D, PatientDoctor PD, Patient P, Users U WHERE U.Username Like ? AND P.PatientSerNum=U.UserTypeSerNum AND PD.PatientSerNum = P.PatientSerNum AND D.DoctorSerNum = PD.DoctorSerNum AND (D.LastUpdated > ? OR PD.LastUpdated > ?);";
-
-    // return "SELECT Doctor.FirstName, Doctor.LastName, Doctor.DoctorSerNum, PatientDoctor.PrimaryFlag, PatientDoctor.OncologistFlag, Doctor.Email,Doctor.Phone, Doctor.ProfileImage, Doctor.Address FROM Doctor, PatientDoctor, Patient, Users WHERE Users.Username Like ? AND Patient.PatientSerNum=Users.UserTypeSerNum AND PatientDoctor.PatientSerNum = Patient.PatientSerNum AND Doctor.DoctorSerNum = PatientDoctor.DoctorSerNum AND (Doctor.LastUpdated > ? OR PatientDoctor.LastUpdated > ?);";
 };
 
 exports.patientDiagnosisTableFields=function()
 {
    return "SELECT D.CreationDate, getDiagnosisDescription(D.DiagnosisCode,'EN') Description_EN, getDiagnosisDescription(D.DiagnosisCode,'FR') Description_FR FROM Diagnosis D, Patient P, Users U WHERE U.UserTypeSerNum=P.PatientSerNum AND D.PatientSerNum = P.PatientSerNum AND U.Username Like ? AND D.LastUpdated > ?;";
-    // return "SELECT Diagnosis.CreationDate, Diagnosis.Description_EN, Diagnosis.Description_FR FROM Diagnosis, Patient, Users WHERE Users.UserTypeSerNum=Patient.PatientSerNum AND Diagnosis.PatientSerNum = Patient.PatientSerNum AND Users.Username Like ? AND Diagnosis.LastUpdated > ?;";
 };
 
 exports.patientMessageTableFields=function()
@@ -133,15 +140,40 @@ exports.patientAnnouncementsTableFields=function()
 
 exports.patientEducationalMaterialTableFields=function()
 {
-    return "SELECT DISTINCT EduMat.EducationalMaterialSerNum, EduControl.ShareURL_EN, EduControl.ShareURL_FR, EduControl.EducationalMaterialControlSerNum, " +
-    " EduMat.DateAdded, EduMat.ReadStatus, EduControl.EducationalMaterialType_EN, EduControl.EducationalMaterialType_FR, EduControl.Name_EN, EduControl.Name_FR, " +
-    " EduControl.URL_EN, EduControl.URL_FR, Phase.Name_EN as PhaseName_EN, Phase.Name_FR as PhaseName_FR " +
-    " FROM Users, Patient, EducationalMaterialControl as EduControl, EducationalMaterial as EduMat, PhaseInTreatment as Phase, EducationalMaterialTOC as TOC " +
-    " WHERE (EduMat.EducationalMaterialControlSerNum = EduControl.EducationalMaterialControlSerNum OR " +
-    " (TOC.ParentSerNum = EduMat.EducationalMaterialControlSerNum AND TOC.EducationalMaterialControlSerNum = EduControl.EducationalMaterialControlSerNum)) " +
-    " AND Phase.PhaseInTreatmentSerNum = EduControl.PhaseInTreatmentSerNum AND  EduMat.PatientSerNum = Patient.PatientSerNum AND Patient.PatientSerNum = Users.UserTypeSerNum " +
-    " AND Users.Username = ? AND (EduMat.LastUpdated > ? OR EduControl.LastUpdated > ? OR Phase.LastUpdated > ? OR TOC.LastUpdated > ?) " +
-    " order by FIELD(PhaseName_EN,'Prior To Treatment','During Treatment','After Treatment') ;";
+    return `SELECT A.EducationalMaterialSerNum, A.ShareURL_EN, A.ShareURL_FR, A.EducationalMaterialControlSerNum, A.DateAdded, 
+                A.ReadStatus, A.EducationalMaterialType_EN, A.EducationalMaterialType_FR, A.Name_EN, A.Name_FR, A.URL_EN,
+                A.URL_FR, A.PhaseName_EN, A.PhaseName_FR
+            FROM Patient P, Users U, (
+                SELECT EduMat.PatientSerNum, EduMat.EducationalMaterialSerNum, EduControl.ShareURL_EN, EduControl.ShareURL_FR, 
+                    EduControl.EducationalMaterialControlSerNum, EduMat.DateAdded, EduMat.ReadStatus, 
+                    EduControl.EducationalMaterialType_EN, EduControl.EducationalMaterialType_FR, EduControl.Name_EN, 
+                    EduControl.Name_FR,  EduControl.URL_EN, EduControl.URL_FR, Phase.Name_EN as PhaseName_EN, 
+                    Phase.Name_FR as PhaseName_FR, EduMat.LastUpdated EM_LastUpdated, EduControl.LastUpdated EC_LastUpdated, 
+                    Phase.LastUpdated P_LastUpdated, '0000-00-00 00:00:00' TOC_LastUpdated
+                FROM EducationalMaterialControl as EduControl, EducationalMaterial as EduMat, PhaseInTreatment as Phase
+                WHERE EduMat.EducationalMaterialControlSerNum = EduControl.EducationalMaterialControlSerNum 
+                    AND Phase.PhaseInTreatmentSerNum = EduControl.PhaseInTreatmentSerNum
+                UNION
+                SELECT EduMat.PatientSerNum, EduMat.EducationalMaterialSerNum, EduControl.ShareURL_EN, EduControl.ShareURL_FR, 
+                    EduControl.EducationalMaterialControlSerNum, EduMat.DateAdded, EduMat.ReadStatus, 
+                    EduControl.EducationalMaterialType_EN, EduControl.EducationalMaterialType_FR, EduControl.Name_EN, 
+                    EduControl.Name_FR,  EduControl.URL_EN, EduControl.URL_FR, Phase.Name_EN as PhaseName_EN, 
+                    Phase.Name_FR as PhaseName_FR, EduMat.LastUpdated EM_LastUpdated, EduControl.LastUpdated EC_LastUpdated, 
+                    Phase.LastUpdated P_LastUpdated, TOC.LastUpdated TOC_LastUpdated
+                FROM EducationalMaterialControl as EduControl, EducationalMaterial as EduMat, PhaseInTreatment as Phase, 
+                    EducationalMaterialTOC as TOC
+                WHERE TOC.ParentSerNum = EduMat.EducationalMaterialControlSerNum 
+                    AND TOC.EducationalMaterialControlSerNum = EduControl.EducationalMaterialControlSerNum
+                    AND Phase.PhaseInTreatmentSerNum = EduControl.PhaseInTreatmentSerNum 
+                ) AS A
+            WHERE P.PatientSerNum = A.PatientSerNum
+                AND P.PatientSerNum = U.UserTypeSerNum  
+                AND U.Username = ?
+                AND (A.EM_LastUpdated > ?
+                    OR A.EC_LastUpdated > ?
+                    OR A.P_LastUpdated > ?
+                    OR A.TOC_LastUpdated > ?)
+            ;`;
 };
 
 exports.patientEducationalMaterialContents=function()
@@ -206,11 +238,6 @@ exports.setNewPassword=function()
     return "UPDATE Users SET Password = ? WHERE UserTypeSerNum = ?";
 };
 
-//For checkin
-exports.getAppointmentAriaSer=function()
-{
-    return "SELECT Appointment.AppointmentAriaSer FROM Patient, Users, Appointment WHERE Users.Username = ? AND Appointment.AppointmentSerNum = ? AND Patient.PatientSerNum = Users.UserTypeSerNum ";
-};
 exports.checkin=function()
 {
     return "UPDATE Appointment, Patient, Users SET Appointment.Checkin=1, Appointment.SessionId=? WHERE Appointment.AppointmentSerNum=? AND Appointment.PatientSerNum = Patient.PatientSerNum AND Patient.PatientSerNum = Users.UserTypeSerNum AND Users.Username = ? ";
@@ -346,27 +373,6 @@ exports.insertEducationalMaterialRatingQuery=function()
     return "INSERT INTO `EducationalMaterialRating`(`EducationalMaterialRatingSerNum`, `EducationalMaterialControlSerNum`, `PatientSerNum`, `RatingValue`, `SessionId`, `LastUpdated`) VALUES (NULL,?,?,?,?,NULL)";
 };
 
-exports.getPatientAriaSerQuery = function()
-{
-    return "SELECT Patient.PatientAriaSer, Patient.PatientId FROM Patient, Users WHERE Patient.PatientSerNum = Users.UserTypeSerNum && Users.Username = ?"
-};
-
-exports.getPatientId= function()
-{
-    return "SELECT Patient.PatientId FROM Patient, Users WHERE Patient.PatientSerNum = Users.UserTypeSerNum && Users.Username = ?"
-};
-
-/**
- * Returns the query needed to get a patient's serNum
- * @return {string}
- */
-exports.getPatientSerNum = function()
-{
-    return `Select Patient.PatientSerNum
-            From Patient
-            Where Patient.PatientId = ?`
-};
-
 exports.getTrustedDevice = function () {
     return "SELECT pdi.Trusted FROM PatientDeviceIdentifier pdi, Users u WHERE pdi.PatientSerNum = u.UserTypeSerNum AND u.Username = ? AND DeviceId = ?"
 };
@@ -383,6 +389,19 @@ exports.getPatientForPatientMembers = function() {
     return "SELECT FirstName, LastName, Email, Website, ProfileImage, Bio_EN, Bio_FR  FROM PatientsForPatientsPersonnel;";
 };
 
+/**
+ * @description Retrieves all of a patient's MRNs from the Patient_Hospital_Identifier table
+ * @author Stacey Beard
+ * @date 2021-02-26
+ * @returns {string}
+ */
+exports.getMRNs = function() {
+    return `
+        SELECT PHI.MRN, PHI.Hospital_Identifier_Type_Code FROM Patient_Hospital_Identifier PHI
+        WHERE PHI.PatientSerNum = ?
+        ;
+    `
+};
 
 /**
  * CHECKIN QUERIES
