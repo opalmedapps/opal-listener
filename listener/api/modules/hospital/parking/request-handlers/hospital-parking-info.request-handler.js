@@ -9,20 +9,16 @@ class HospitalParkingRequestHandler extends ApiRequestHandler {
      * @returns {Promise<{data: {site: string, url: string}}>}
      */
     static async handleRequest(requestObject){
-        logger.log("info", `Requesting parking information from the Python API using the following hospitalKey: ${requestObject.parameters['hospitalKey']}`);
+        logger.log("info", `Requesting parking information from the Python API using the following ${requestObject.parameters['hospitalKey']} hospitalKey and ${requestObject.parameters['language']} language`);
 
-        const hospitalParking = new HospitalParking(requestObject.parameters['hospitalKey']);
+        const hospitalParking = new HospitalParking(
+            requestObject.parameters['hospitalKey'],
+            requestObject.parameters['language']
+        );
 
         return {
             "data": await hospitalParking.getParkingSiteUrl()
         }
-
-        // return {
-        //     "data": {
-        //         "site": "site_name",
-        //         "url": requestObject.parameters['hospitalKey']
-        //     }
-        // };
     }
 }
 

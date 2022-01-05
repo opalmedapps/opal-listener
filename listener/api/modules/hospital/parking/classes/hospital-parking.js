@@ -2,10 +2,12 @@ const requestUtility    = require("../../../../../utility/request-utility");
 
 class HospitalParking {
     /**
-     * @param hospitalKey
+     * @param {string} hospitalKey
+     * @param {string} language
      */
-    constructor(hospitalKey) {
+    constructor(hospitalKey, language) {
         this._hospitalKey = hospitalKey;
+        this._language = language.toLowerCase();
     }
 
     /**
@@ -17,16 +19,26 @@ class HospitalParking {
     async getParkingSiteUrl() {
 
         //TODO: fix - store url in a config file
-        let url = 'http://127.0.0.1:8000/api/hospital-settings/sites/';
+        let url = 'http://127.0.0.1:8000/api/hospital-settings/institutions/';
+
+        // let options = {
+        //     'Accept': 'application/json',
+        //     'Accept-Charset': 'utf-8',
+        //     'Accept-Language': 'fr'
+        // };
 
         let options = {
-            'Accept': 'application/json',
-            'Accept-Charset': 'utf-8'
+            'headers': {
+                'Accept': 'application/json',
+                'Accept-Charset': 'utf-8',
+                'Accept-Language': this._language
+            }
         };
 
         let { response, body } = await requestUtility.request("get", url, options);
 
-        return body;
+        //TODO: add body validation
+        return JSON.parse(body);
     }
 }
 
