@@ -4,7 +4,7 @@ const logger = require("../../../../../logs/logger");
 
 class HospitalParkingRequestHandler extends ApiRequestHandler {
     /**
-     * Handler for the ParkingInfo request, returns parking url related to a given hospital
+     * Handler for the ParkingInfo request, returns parking sites related to a given hospital
      * @param {OpalRequest} requestObject
      * @returns {Promise<{data: {site: string, url: string}}>}
      */
@@ -12,12 +12,13 @@ class HospitalParkingRequestHandler extends ApiRequestHandler {
         logger.log("info", `Requesting parking information from the Python API using the following ${requestObject.parameters['hospitalKey']} hospitalKey and ${requestObject.parameters['language']} language`);
 
         const hospitalParking = new HospitalParking(
-            requestObject.parameters['hospitalKey'],
+            requestObject.parameters['patientSerNum'],
+            requestObject.parameters['institutionCode'],
             requestObject.parameters['language']
         );
 
         return {
-            "data": await hospitalParking.getParkingSiteUrl()
+            "data": await hospitalParking.getParkingSiteUrls()
         }
     }
 }

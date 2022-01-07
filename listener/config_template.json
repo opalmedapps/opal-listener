@@ -13,6 +13,13 @@
     "MYSQL_DATABASE": "",
     "HOST": ""
   },
+  "SETTINGS_API_BACKEND": {
+    "URL_ROOT": "",
+    "API_ENDPOINTS": {
+      "SITES": "",
+      "INSTITUTIONS": ""
+    }
+  },
   "SSL": {
     "CERTIFICATE_FILE": "Path to the server's SSL certificate file, such as client.crt",
     "CERTIFICATE_AUTHORITY_FILE": "Path to the server's SSL certificate authority file, such as ca.cert.pem"
