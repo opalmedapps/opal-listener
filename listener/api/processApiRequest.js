@@ -1,12 +1,13 @@
 var exports = module.exports = {};
-const Q                     = require('q');
 const apiPatientUpdate      = require('./apiPatientUpdate.js');
 const apiHospitalUpdate     = require('./apiHospitalUpdate.js');
 const security              = require('./../security/security');
 const logger                = require('./../logs/logger');
+
 // New API handlers
-const tests = require("./modules/test-results");
-const updateSecurityQuestionAnswer = require("./modules/patient/security-questions");
+const fileRequest = require("./modules/file-request");
+const securityQuestions = require("./modules/patient/security-questions");
+const testResults = require("./modules/test-results");
 
 /**
  * API HANDLERS FOR GENERAL REQUESTS
@@ -51,9 +52,13 @@ exports.securityAPI = {
 };
 /**
  * New API handlers
- * @type {{PatientTestDates: {(OpalRequest): Promise<*>, (*): Promise<void>}, PatientTestTypeResults: {(OpalRequest): Promise<OpalResponseError|*>, (*): Promise<void>}, PatientTestDateResultsHandler: {(OpalRequest): Promise<OpalResponseError|*>, (*): Promise<void>}, PatientTestTypes: {(OpalRequest): Promise<*>, (*): Promise<void>}, SecurityQuestionAnswerList: {(OpalRequest): Promise<*>, (*): Promise<void>}, UpdateSecurityQuestionAnswer: {(OpalRequest): Promise<OpalResponseError|*>, (*): Promise<void>}}}
+ * @type {{PatientTestDates: PatientTestCollectedDatesHandler, UpdateSecurityQuestionAnswer: UpdateSecurityQuestionAnswerRequestHandler, PatientTestTypeResults: PatientTestTypeResultsHandler, PatientTestDateResults: PatientTestCollectedDateResultsHandler, PatientTestTypes: PatientTestTypesHandler, RequestFile: FileRequestHandler, SecurityQuestionAnswerList: GetSecurityQuestionAnswerListRequestHandler}}
  */
-const API = {...tests, ...updateSecurityQuestionAnswer};
+const API = {
+    ...fileRequest,
+    ...securityQuestions,
+    ...testResults,
+};
 
 /**
  * processRequest

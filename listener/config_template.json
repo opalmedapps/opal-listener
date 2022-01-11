@@ -13,11 +13,16 @@
     "MYSQL_DATABASE": "",
     "HOST": ""
   },
+  "SSL": {
+    "CERTIFICATE_FILE": "Path to the server's SSL certificate file, such as client.crt",
+    "CERTIFICATE_AUTHORITY_FILE": "Path to the server's SSL certificate authority file, such as ca.cert.pem"
+  },
   "DOCUMENTS_PATH": "",
   "DOCTOR_PATH": "",
   "CHECKIN_PATH": "",
-  "VERIFYCHECKIN_PATH": "",
+  "CHECKIN_ROOM": "",
   "PFP_PATH": "",
+  "QUESTIONNAIRE_COMPLETED_PATH": "Path notified when a questionnaire is completed",
   "FIREBASE_ADMIN_KEY": "",
   "DATABASE_URL": "",
   "LATEST_STABLE_VERSION": "",

@@ -1,3 +1,19 @@
+Version 1.4.4.0:
+ - OPAL-1162: Notify the OIE when a questionnaire is completed (!45)
+ - OPAL-1168 - Optimizing the Educational Material Query
+
+Version 1.4.3.1:
+ - OPAL-919 (additional): Add SSL certificate to https file download requests (!43)
+
+Version 1.4.3.0:
+ - OPAL-919: Update to cordova-android 10 (with associated changes) (!42)
+ - Move template folder to the root of the repository
+ - Update template for use in GitLab
+
+Version 1.4.2.0:
+ - OPAL-856: Support for multi-site MRNs
+ - OPAL-1096 (hotfix): Reactivate the lab results publishing flag (#41)
+
 Version 1.4.1.0:
  - OPAL-935: Bug fixes in the lab results' SQL queries (#37)
  - Merge pull request #36 from Sable/OPAL-852
