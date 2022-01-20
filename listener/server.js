@@ -23,54 +23,39 @@ const processApi        = require('./api/processApiRequest');
 const admin             = require("firebase-admin");
 const utility           = require('./utility/utility.js');
 const q                 = require("q");
-const config            = require('./config.json');
 const logger            = require('./logs/logger.js');
 const cp                = require('child_process');
 
-const FIREBASE_DEBUG = !!process.env.FIREBASE_DEBUG;
 
-/*********************************************
- * INITIALIZE
- *********************************************/
+// NOTE: Listener launching steps have been moved to src/app.js
 
-// Initialize firebase connection
-const serviceAccount = require(config.FIREBASE_ADMIN_KEY);
-
-admin.initializeApp({
-	credential: admin.credential.cert(serviceAccount),
-	databaseURL: config.DATABASE_URL
-});
-
-// if(FIREBASE_DEBUG) admin.database.enableLogging(true);
-
-// Enable firebase logging
-admin.database.enableLogging(false);
-
-// Get reference to correct data element
-const db = admin.database();
-const ref = db.ref(config.FIREBASE_ROOT_BRANCH);
-const heartbeatRef = ref.child('/users/heartbeat');
-
-logger.log('debug', 'INITIALIZED APP IN DEBUG MODE');
-
-// Ensure there is no leftover data on the firebase root branch
-ref.set(null)
-	.catch(function (error) {
-		logger.log('error', 'Cannot reset firebase', {
-			error:error
-		})
-	});
-
-
-logger.log('info','Initialize listeners: ');
-listenForRequest('requests');
-listenForRequest('passwordResetRequests');
-spawnCronJobs();
-
+let db;
+let ref;
+let heartbeatRef;
 
 /*********************************************
  * FUNCTIONS
  *********************************************/
+
+/**
+ * @description Temporary function used to support the legacy structure of this file.
+ *              Called by src/app.js to pass a Firebase database object to this file.
+ * @param {Firebase} firebase The Firebase database object to use.
+ */
+function setFirebaseConnection(firebase) {
+    db = firebase.database;
+    ref = db.ref(firebase.root);
+    heartbeatRef = ref.child('/users/heartbeat');
+
+    // Ensure there is no leftover data on the firebase root branch
+    ref.set(null)
+    .catch(function (error) {
+        logger.log('error', 'Cannot reset firebase', {
+            error:error
+        })
+    });
+}
+exports.setFirebaseConnection = setFirebaseConnection;
 
 /**
  * listenForRequest
@@ -99,6 +84,7 @@ function listenForRequest(requestType){
 	        logError(error);
         });
 }
+exports.listenForRequest = listenForRequest;
 
 /**
  * handleRequest
@@ -453,6 +439,7 @@ function spawnCronJobs(){
 	spawnClearDBRequest();
 	spawnHeartBeatDB();
 }
+exports.spawnCronJobs = spawnCronJobs;
 
 /**
  * @name spawnClearRequest
