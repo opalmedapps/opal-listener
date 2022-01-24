@@ -1,31 +1,73 @@
-# opal-listener
+# Opal-listener
 This is the Opal app's backend listener that sits between Firebase and OpalDB.
 
 ## Getting Started
 
 These instructions will get you a copy of the project up and running on your local machine for development and testing purposes. See deployment for notes on how to deploy the project on a live system.
-- **NOTE:** These instructions are incomplete, and only
- concerned themselves with running the backend quickly,
-  and assuming that all the dependencies and config files
-  are already ready and configured.
-  There is a more complete
-tutorial on how to get Opal-backend development environment at
-[Opal Backend Tutorial](https://github.com/Opal-teaching/opal-backend-wiki.git)
 
 ### Prerequisites
 
-There are only three requirements needed to run the backend, and the second requirement is only needed to run in a live setting with actual clinical data.
+These are the requirements to run a local listener app. The second requirement is only needed to run in a live setting with actual clinical data.
 
 1) Install [Node.js](https://nodejs.org/en/download/)
 2) (**Only required if wanting to access live data**) Have access to clinical computer in the MedPhys department
+3) Install [Docker](https://docs.docker.com/get-docker/) (Should you choose the docker installation)
+4) Configure a test DB. It is suggested to use Docker to run your local database. [Instruction here](https://gitlab.com/opalmedapps/db-docker). You can, alternatively, setup a local mysql server using XAMP/MAMP by following [these instructions](https://gitlab.com/opal-teaching/opal-backend-wiki/-/blob/master/backend-installation.md#database)
+5) Setup firebase app. You can follow [these instruction](https://gitlab.com/opal-teaching/opal-backend-wiki/-/blob/master/backend-installation.md#firebase) to complete the setup.
 
-**Note:** If you are wanting to test the backend without real clinical data then you will need to configure your own mySQL DB with test data. That is out of the scope of this README and will require aid from a existing Opal developer.
+### Installing with Docker
+The project contains a `Dockerfile` and  `docker.compose.yml` files to build and run the app within a Docker container. Either for production like setup or development using a local volume.
 
-### Installing
+##### Step 1 | Add Firebase configuration
+Copy your firebase admin key file in the `listener/firebase` directory located at the root of the project.
+> The content of this directory is ignore by versioning
 
-If running in a testing environment, you will first need to configure a test DB. This will need to be done with an Opal developer who access to OpalDB and can give you a test file to create a testing DB.
+##### Step 2 | App configuration
+Copy and rename `config_template.json` to `config.json`. Then edit the required fields. You should at least need to change these fields:
+```
+MYSQL_USERNAME: "The database user name",
+MYSQL_PASSWORD: "The database password",
+MYSQL_DATABASE: "The name of the OpalDB",
+MYSQL_DATABASE_QUESTIONNAIRE: "The name of the QuestionnaireDB",
+MYSQL_DATABASE_PORT: "3306",
+MYSQL_DATABASE_HOST: "host.docker.internal",
+HOST: "host.docker.internal",
+FIREBASE_ADMIN_KEY: "/app/firebase/THE_NAME_OF_YOU_FIRE.json,
+DATABASE_URL: "This value can be found in the web_config.txt file in your firebase folder",
+LATEST_STABLE_VERSION: "0.0.1",
+FIREBASE_ROOT_BRANCH: "dev3/A0",
+```
 
-Second thing that needs to be done is make sure all the references in /listener/config.json are correct. Currently they are pointing to locations on the Opal server.
+> Leave all other variables blank by setting them to empty double quotes: ""
+
+> Notice that the host names are `host.docker.internal` and NOT `localhost`. This is required for a container to call a localhost service on the host system.
+
+> When running the app using Docker, your firebase admin key file is copied in the container for it to be accessible.
+
+##### Step 3 | Install the NPM pakages
+Run the following command in the `listener` folder to install NPM dependencies and dev dependencies:
+```
+npm install
+```
+
+
+##### Step 4 | Build the Docker image
+To build the Docker image and run the container, running the following command at the root of the project
+```
+docker compose up 
+```
+
+The project also contains a `docker-compose.prod.yml` This file is used to build an image and a container with an attached volume and a different start command. You can use this file should you want a non-developpement set up. To use this file run the command:
+```
+docker compose -f docker-compose.prod.yml up --build
+```
+
+> More information about Docker compose can be found [here](https://docs.docker.com/compose/)
+
+
+### Installing with NodeJs
+
+Make sure all the references in /listener/config.json are correct. Currently they are pointing to locations on the Opal server.
 
 Once the configurations are set up properly, you need to install all the dependencies:
 
@@ -122,10 +164,6 @@ We use [SemVer](http://semver.org/) for versioning. For the versions available, 
 * **James Brace** - *Initial work*
 * **David Hererra** - *Initial work*
 
-See also the list of [contributors](https://github.com/your/project/contributors) who participated in this project.
-
 ## License
 
 This project is licensed under the MIT License - see the [LICENSE.md](LICENSE.md) file for details
-
-
