@@ -1,6 +1,7 @@
 # config files
 listener/config.json
 listener/firebase/*
+src/config/config.json
 
 # Logs
 logs
