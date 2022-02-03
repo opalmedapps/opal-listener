@@ -4,6 +4,7 @@
  */
 
 const { param, validationResult } = require("express-validator");
+const { ValidationError } = require('./param-validator-error');
 
 class Validator {
     /**
@@ -19,7 +20,7 @@ class Validator {
         await Promise.all(validators.map(validator => validator.run(paramsObject)));
         const errors = validationResult(paramsObject);
 
-        if (!errors.isEmpty()) throw errors;
+        if (!errors.isEmpty()) throw new ValidationError(errors);
     }
 }
 

@@ -4,7 +4,7 @@
   "scripts": {
     "start": "node src/app.js",
     "watch": "nodemon src/app.js",
-    "test": "./node_modules/.bin/mocha --reporter spec"
+    "test": "mocha \"./src/**/*.test.*\""
   },
   "dependencies": {
     "@stablelib/base64": "0.7.2",
@@ -22,6 +22,7 @@
   },
   "devDependencies": {
     "chai": "4.2.0",
+    "chai-as-promised": "7.1.1",
     "chai-datetime": "1.5.0",
     "mocha": "7.1.1",
     "nodemon": "2.0.15",
