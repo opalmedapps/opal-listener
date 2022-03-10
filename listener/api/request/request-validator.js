@@ -33,7 +33,7 @@ class RequestValidator {
 		if(validation.isValid) {
 
 			if (!this.versionIsSecure(request)) {
-				logger.log('error', 'Invalid version: ' + request.meta.AppVersion);
+				logger.log('error', `Invalid version: ${request.meta.AppVersion}`);
 				r.reject(new OpalResponseError(5, 'Received request from unsafe app version', request, 'Unsafe App Version'));
 			}
 
@@ -54,7 +54,7 @@ class RequestValidator {
 						r.resolve(request);
 					})
 					.catch((err)=>{
-						logger.log('error', 'Unable to decrypt due to: ' + JSON.stringify(err));
+						logger.log('error', `Unable to decrypt due to: ${JSON.stringify(err)}`);
 						r.reject(new OpalResponseError(1, 'Unable to decrypt request', request, err));
 					});
 				}
@@ -62,7 +62,7 @@ class RequestValidator {
 				r.reject(new OpalResponseError(1, 'Unable get user encryption', request, err));
 			});
 		}else{
-			logger.log('error', 'invalid request due to: ' + JSON.stringify(validation.errors));
+			logger.log('error', `invalid request due to: ${JSON.stringify(validation.errors)}`);
 			r.reject(new OpalResponseError(2, 'Unable to process request', request, 'Missing request parameters: ' + validation.errors));
 		}
 		return r.promise;

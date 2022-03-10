@@ -69,7 +69,7 @@ const API = {
 exports.processRequest=function(requestObject) {
     const type = requestObject.type;
     // Old requests
-    logger.log('debug', 'Processing request of type: ' + type);
+    logger.log('debug', `Processing request of type: ${type}`);
     if (LEGACYAPI.hasOwnProperty(type)) {
         return LEGACYAPI[type](requestObject.toLegacy());
     // New request format

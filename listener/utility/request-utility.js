@@ -42,8 +42,8 @@ exports.request = function(method, url, options) {
             catch (error) { logger.log('warn', `Making https request without a certificate: ${error}`) }
 
             request(options, function(err, response, body) {
-                logger.log('verbose', 'Request response: ' + utility.stringifyShort(response));
-                logger.log('verbose', 'Request response body: ' + utility.stringifyShort(body));
+                logger.log('verbose', `Request response: ${utility.stringifyShort(response)}`);
+                logger.log('verbose', `Request response body: ${utility.stringifyShort(body)}`);
 
                 if (err && err.message) reject(error(JSON.stringify(err.message)));
                 else if (err) reject(error(JSON.stringify(err)));
