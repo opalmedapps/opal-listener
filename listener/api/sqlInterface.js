@@ -138,15 +138,15 @@ exports.runWaitingRoomSqlQuery = function(query, parameters, processRawFunction)
     return new Promise((resolve, reject) => {
         waitingRoomPool.getConnection((err, connection) => {
             if (err) {
-                logger.log('error', err)
+                logger.log('error', 'waiting room connection error', err)
                 return reject(err)
             }
             logger.log('debug', `grabbed waiting room connection: ${connection}`)
-            logger.log('info', 'Successfully grabbed connection from waiting room pool and about to perform following query: ', {query: query})
+            logger.log('info', 'Successfully grabbed connection from waiting room pool and about to perform following query: ', query)
             const que = connection.query(query, parameters, (err, rows, fields) => {
                 connection.release();
                 if (err) {
-                    logger.log('error', err)
+                    logger.log('error', 'waiting room query error', err)
                     return reject(err)
                 }
                 logger.log('info', 'Successfully performed query on waiting room database', {query: que.sql, response: JSON.stringify(rows)});
@@ -187,8 +187,8 @@ exports.getPatientTableFields = function(userId,timestamp,arrayTables) {
         }
         r.resolve({Data:objectToFirebase,Response:'success'});
     },function(error){
-        logger.log('error', 'Problems querying the database due to ' + error);
-        r.reject({Response:'error',Reason:'Problems querying the database due to ' + error});
+        logger.log('error', `Problems querying the database due to ${error}`);
+        r.reject({Response:'error',Reason:`Problems querying the database due to ${error}`});
     });
     return r.promise;
 };
@@ -339,21 +339,18 @@ exports.logPatientAction = function(requestObject){
 
                 }).catch((err)=>{
                     let errorReason3 = 'Error logging the patient action in the database.';
-                    logger.log('error', errorReason3);
-                    logger.log('error', JSON.stringify(err));
+                    logger.log('error', errorReason3, err);
                     r.reject({Response:'error',Reason:errorReason3});
                 });
             }
             else {
                 let errorReason2 = 'No PatientSerNum found when looking up the user in the database.';
-                logger.log('error', errorReason2);
-                logger.log('error', JSON.stringify(err));
+                logger.log('error', errorReason2, err);
                 r.reject({Response:'error',Reason:errorReason2});
             }
         }).catch((err) => {
             let errorReason1 = 'Error looking up the user\'s PatientSerNum in the database.';
-            logger.log('error', errorReason1);
-            logger.log('error', JSON.stringify(err));
+            logger.log('error', errorReason1, err);
             r.reject({Response:'error',Reason:errorReason1});
         });
     }
@@ -620,7 +617,7 @@ exports.updateDeviceIdentifier = function(requestObject, parameters) {
 
     let r = Q.defer();
 
-    logger.log('debug', 'in update device id with : ' + JSON.stringify(requestObject));
+    logger.log('debug', `in update device id with : ${JSON.stringify(requestObject)}`);
 
     let identifiers = parameters || requestObject.Parameters;
     let deviceType = null;
@@ -647,13 +644,13 @@ exports.updateDeviceIdentifier = function(requestObject, parameters) {
                 logger.log('debug', 'successfully updated device identifiers');
                 r.resolve({Response:'success'});
             }).catch((error)=>{
-                let errorMessage = 'Error updating device identifiers due to ' + JSON.stringify(error);
-                logger.log('error', errorMessage);
+                let errorMessage = 'Error updating device identifiers due to ';
+                logger.log('error', errorMessage, error);
                 r.reject({Response:'error', Reason: errorMessage});
             });
     }).catch((error)=>{
-        let errorMessage = 'Error getting patient fields due to ' + JSON.stringify(error);
-        logger.log('error', errorMessage);
+        let errorMessage = 'Error getting patient fields due to ';
+        logger.log('error', errorMessage, error);
         r.reject({Response:'error', Reason: errorMessage});
     });
     return r.promise;
@@ -779,14 +776,12 @@ exports.getPackageContents = function(requestObject){
 
             }).catch((err)=>{
                 let errorReason2 = 'Error attaching tables of contents to package materials.';
-                logger.log('error', errorReason2);
-                logger.log('error', JSON.stringify(err));
+                logger.log('error', errorReason2, err);
                 r.reject({Response:'error',Reason:errorReason2});
             });
         }).catch((err)=>{
             let errorReason1 = 'Error getting package contents from the database.';
-            logger.log('error', errorReason1);
-            logger.log('error', JSON.stringify(err));
+            logger.log('error', errorReason1, err);
             r.reject({Response:'error',Reason:errorReason1});
         });
     }
@@ -1301,7 +1296,7 @@ function mapRefreshedDataToNotifications(results, notifications) {
         resultsArray = resultsArray.concat(results[key]);
     });
 
-    logger.log('debug', 'results array: ' + JSON.stringify(resultsArray));
+    logger.log('debug', `results array: ${JSON.stringify(resultsArray)}`);
 
     // For each notification, find it's associated item in the results array and create a tuple
     return notifications.map(notif => {
