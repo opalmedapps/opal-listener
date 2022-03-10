@@ -41,7 +41,7 @@ exports.verifySecurityAnswer=function(requestKey,requestObject,patient)
 
 
     logger.log('debug', 'in verify security answer');
-    logger.log('debug', 'patient: ' + JSON.stringify(patient));
+    logger.log('debug', `patient: ${JSON.stringify(patient)}`);
     //TO VERIFY, PASS SECURITY ANSWER THROUGH HASH THAT TAKES A WHILE TO COMPUTE, SIMILAR TO HOW THEY DO PASSWORD CHECKS
     // utility.generatePBKDFHash(key,key);
 
@@ -64,7 +64,7 @@ exports.verifySecurityAnswer=function(requestKey,requestObject,patient)
     utility.decrypt(requestObject.Parameters, key)
         .then(params => {
 
-            logger.log('debug', 'params: ' + JSON.stringify(params));
+            logger.log('debug', `params: ${JSON.stringify(params)}`);
 
             unencrypted = params;
 
@@ -139,7 +139,7 @@ exports.securityQuestion=function(requestKey,requestObject) {
         .then((params) => {
             unencrypted = params;
 
-            logger.log('debug', 'Unencrypted: ' + JSON.stringify(unencrypted));
+            logger.log('debug', `Unencrypted: ${JSON.stringify(unencrypted)}`);
 
             let email = requestObject.UserEmail;
             let password = unencrypted.Password;
@@ -147,7 +147,7 @@ exports.securityQuestion=function(requestKey,requestObject) {
             //Then this means this is a login attempt
             if (password) {
                 return getSecurityQuestion(requestKey, requestObject, unencrypted).then(function (response) {
-                    logger.log('debug', 'Successfully got security question with response: ' + JSON.stringify(response));
+                    logger.log('debug', `Successfully got security question with response: ${JSON.stringify(response)}`);
                     return response
                 });
             } else {

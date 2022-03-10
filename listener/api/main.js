@@ -25,7 +25,7 @@ module.exports = {
  */
 function requestFormatter({key,request}) {
 
-	logger.log('debug', 'request object in request formatter: ' + JSON.stringify(request));
+	logger.log('debug', `request object in request formatter: ${JSON.stringify(request)}`);
 	return RequestValidator.validate(key, request)
 		.then( opalReq => { //opalReq of type, OpalRequest
 
@@ -34,7 +34,7 @@ function requestFormatter({key,request}) {
 
 			return processApiRequest.processRequest(opalReq).then((data)=>
 			{
-				logger.log('debug', 'Successfully processed request: ' + data);
+				logger.log('debug', 'Successfully processed request: ', data);
                 logger.log('info', 'Successfully processed request');
 				return (new OpalResponseSuccess(data, opalReq)).toLegacy();
 			}).catch((err)=>{
