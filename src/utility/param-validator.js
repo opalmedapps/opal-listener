@@ -3,7 +3,7 @@
  * @author David Herrera, Stacey Beard
  */
 
-const { param, validationResult } = require("express-validator");
+const { param, validationResult } = require('express-validator');
 const { ValidationError } = require('./param-validator-error');
 
 class Validator {
@@ -16,7 +16,7 @@ class Validator {
      *                          by express-validator.
      */
     static async validate(object, validators) {
-        const paramsObject = { "params": object };
+        const paramsObject = { params: object };
         await Promise.all(validators.map(validator => validator.run(paramsObject)));
         const errors = validationResult(paramsObject);
 
@@ -26,5 +26,5 @@ class Validator {
 
 exports.Validator = Validator;
 
-// Note: param is exported alongside Validator to shorten necessary imports in files that use this utility.
+// Export param alongside Validator to shorten imports in files that use this utility.
 exports.param = param;

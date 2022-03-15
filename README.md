@@ -84,9 +84,52 @@ Once that is done, you can start the app by running the following command in the
 node server.js
 ```
 
+### Strangler Fig
+
+The listener is currently following the strangler fig design pattern to develop a new version while maintaining the old one.
+  * Legacy code is stored in the `listener` folder.
+    - Note: the sub-folder `api/modules` represents an improvement over the legacy structure,
+      but is still part of the old version. It may make its way into the new version in some form.
+  * New code is stored in the `src` folder. The entry-point for running the listener is `src/app.js`.
+    The following best-practice improvements are applied to all new code in this folder:
+    - Documentation using JSDoc.
+      * Each file and method must have a JSDoc comment.
+    - Static analysis using ESLint.
+    - Unit testing using Mocha & Chai.
+    - Object-oriented structure using JavaScript classes.
+    - Improved folder and file structure (one purpose per file).
+
+### Project Configurations
+
+#### Eslint
+
+This project uses ESLint to statically analyze its source code. ESLint analysis should only be applied to new files in the 
+context of strangler fig (i.e. files in the `src` folder). When running ESLint using npm (`npm run lint`), this is done automatically.
+However, to use ESLint's in-line warnings while developing, your IDE may need to be configured to enable ESLine and not to target the entire project.
+
+##### VSCode
+
+_TBA_
+
+##### PhpStorm
+
+Configure PhpStorm to use ESLint, and only on the `src` directory.
+
+1. Go to `File > Settings/Preferences > Languages & Frameworks > JavaScript > Code Quality Tools > ESLint`.
+2. Select `Manual ESLint configuration`.
+3. Next to `Run for files`, enter the following expression: `{src/**/*,src/*}.{js,ts,jsx,tsx}`.
+
+Configure PhpStorm to use LF line endings for all new files in the project (_TBD if EditorConfig auto-sets this_):
+
+1. Go to `File > Settings/Preferences > Editor > Code Style`.
+2. Next to `Scheme`, select `Project`.
+3. Next to `Line separator`, select `Unix and macOS (\n)`.
+
 ## Running the tests
 
 Explain how to run the automated tests for this system
+
+_TBA_
 
 ## Deployment
 

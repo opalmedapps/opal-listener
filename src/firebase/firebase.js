@@ -3,8 +3,8 @@
  * @author Stacey Beard, David Herrera, Robert Maglieri
  */
 
-const admin                = require("firebase-admin");
-const { param, Validator } = require("../utility/param-validator");
+const admin = require('firebase-admin');
+const { param, Validator } = require('../utility/param-validator');
 
 class Firebase {
     /**
@@ -18,7 +18,7 @@ class Firebase {
      *              Only available after running the init function.
      * @type string
      */
-    root = "";
+    root = '';
 
     /**
      * @description Configuration object used to instantiate the connection to the Firebase database.
@@ -31,9 +31,9 @@ class Firebase {
      * @type {ValidationChain[]}
      */
     static #configValidators = [
-        param("DATABASE_URL").exists().isURL(),
-        param("ADMIN_KEY_PATH").exists(),
-        param("ROOT_BRANCH").exists(),
+        param('DATABASE_URL').exists().isURL(),
+        param('ADMIN_KEY_PATH').exists(),
+        param('ROOT_BRANCH').exists(),
     ];
 
     /**
@@ -46,7 +46,8 @@ class Firebase {
 
     /**
      * @description Initializes the connection to the Firebase database represented by the config attribute.
-     * @returns {Promise<void>} Rejects with an error if any of the provided options in the config attribute are invalid.
+     * @returns {Promise<void>} Rejects with an error if any of the provided options in the config attribute
+     *                          are invalid.
      */
     async init() {
         await Validator.validate(this.#config, Firebase.#configValidators);

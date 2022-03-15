@@ -8,8 +8,8 @@ class ValidationError extends Error {
      * @param validationResult Object returned by the validationResult function of express-validator.
      */
     constructor(validationResult) {
-        super("Param validation failed");
-        this.name = "ValidationError";
+        super('Param validation failed');
+        this.name = 'ValidationError';
         this.details = validationResult;
     }
 }
