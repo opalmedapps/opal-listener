@@ -1,3 +1,14 @@
+Version 1.5.1.0:
+ - OPAL-1223: chore(deps): update testing packages (chai, mocha) (!56)
+ - OPAL-1223: chore(deps): update utilities (stablelib, express-validator, moment, nodemailer, q, request) (!55)
+ - OPAL-1223: chore(deps): update mysql (!54)
+ - OPAL-1223: chore(deps): update firebase-admin (!53)
+ - OPAL-1223: chore(deps): update crypto packages (crypto-js, tweetnacl) (!52)
+
+Version 1.5.0.0:
+ - Modify path in docker.compose.yml to work on windows system
+ - Added docker support
+
 Version 1.4.4.0:
  - OPAL-1162: Notify the OIE when a questionnaire is completed (!45)
  - OPAL-1168 - Optimizing the Educational Material Query

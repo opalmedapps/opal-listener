@@ -8,39 +8,56 @@
  *                  file 'LICENSE.txt', which is part of this source code package.
  */
 
-const winston = require('winston');
+const {createLogger, format, transports} = require('winston');
 
-winston.level = (process.env.NODE_ENV === 'production') ? 'info' : 'debug';
+// Choose log level according to environement.
+const LoggerLevel = process.env.NODE_ENV === 'production' ? 'info' : 'debug';
 
-console.log("Initialize Winston with level: " + winston.level);
+// Set custom format for login.
+const opalLogFormat = format.printf((info) => {
+    const { level, message, timestamp, data } = info;
+    let formattedData = formatErrorData(data);
+    return `${timestamp} - ${level.toUpperCase()}: ${message}${formattedData ? `: ${formattedData}` : ''}`;
+});
 
-const levels = {
-    error: 0,
-    warn: 1,
-    info: 2,
-    verbose: 3,
-    debug: 4,
-};
+// Format error data according to data type passed to the logger wraper
+const formatErrorData = (data) => {
+    if (typeof data === 'undefined') return '';
+    if (typeof data === 'object' && data instanceof Error === false) return JSON.stringify(data);
 
-winston.configure({
+    return data;
+}
+
+// Initialize winston logger
+const WinstonLogger = createLogger({
+    // Set level log level
+    level: LoggerLevel,
+    // Set log format output in the log file
+    format: format.combine(
+        format.timestamp({format: 'YYYY-MM-DD HH:mm:ss'}),
+        format.json(),
+        opalLogFormat
+    ),
     transports: [
-        // Output all debug events and higher to console
-        new (winston.transports.Console)({
-            level: 'debug',
-            json: false,
-            timestamp: true
-        }),
-        // Store all info events and higher to the opal.log file
-        new (winston.transports.File)({
-            filename: './listener/logs/opal-info.log',
-            level: 'info',
-            json: true,
-            timestamp: true
-        })
+        // Log level info and above in the log file.
+        new transports.File({ filename:'./listener/logs/opal-info.log', level: 'info'}),
+        new transports.Console({level: 'debug'})
+    ],
+    exceptionHandlers: [
+        // Log uncaught exceptions to a different file and console.
+        new transports.File({ filename: './listener/logs/opal-uncaughtExceptions.log'}),
+        new transports.Console({level: 'debug'})
     ]
 });
 
-// Log all uncaught exceptions to a separate file
-if(process.env.NODE_ENV === 'production') winston.handleExceptions(new winston.transports.File({ filename: './logs/opal-uncaughtExceptions.log' }));
+// Wrappe logger to allow 3rd arguments to be of any type.
+const logWrapper = (level, message, data) => {
+    WinstonLogger.log(level, message, {data: data});
+}
 
-module.exports = winston;
+WinstonLogger.log('info', `Initialized Winston with level: ${LoggerLevel}`);
+
+module.exports = {
+    ...WinstonLogger,
+    log: logWrapper,
+};

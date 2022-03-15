@@ -50,9 +50,7 @@ function setFirebaseConnection(firebase) {
     // Ensure there is no leftover data on the firebase root branch
     ref.set(null)
     .catch(function (error) {
-        logger.log('error', 'Cannot reset firebase', {
-            error:error
-        })
+        logger.log('error', 'Cannot reset firebase', error);
     });
 }
 exports.setFirebaseConnection = setFirebaseConnection;
@@ -63,16 +61,15 @@ exports.setFirebaseConnection = setFirebaseConnection;
  * @desc Listen for firebase changes and send responses for requests
  */
 function listenForRequest(requestType){
-    logger.log('info','Starting '+ requestType+' listener.');
+    logger.log('info',`Starting ${requestType} listener.`);
 
     //disconnect any existing listeners..
     ref.child(requestType).off();
 
     ref.child(requestType).on('child_added',
         function(snapshot){
-            logger.log('debug', 'Received request from Firebase: ', JSON.stringify(snapshot.val()));
+            logger.log('debug', 'Received request from Firebase: ', snapshot.val());
             logger.log('info', 'Received request from Firebase: ', snapshot.val().Request);
-
             if(snapshot.val().Request === 'HeartBeat'){
                 logger.log('debug', 'Handling heartbeat request');
                 handleHeartBeat(snapshot.val())
@@ -157,7 +154,6 @@ function logError(err, requestObject, requestKey)
  */
 function processRequest(headers){
 
-    // logger.log('debug', 'Processing request: ' + JSON.stringify(headers));
     logger.log('info', 'Processing request');
 
     const r = q.defer();
@@ -186,7 +182,7 @@ function processRequest(headers){
         mainRequestApi.apiRequestFormatter(requestKey, requestObject)
             .then(function(results){
 
-                logger.log('debug', 'results: ' + utility.stringifyShort(results));
+                logger.log('debug', `results: ${utility.stringifyShort(results)}`);
                 r.resolve(results);
             })
     }
@@ -379,7 +375,7 @@ function incrementStringParenthesisNumber(stringToIncrement) {
  */
 function completeRequest(headers, key)
 {
-    logger.log('debug', 'Removing request from Firebase after uploading response: ' + key);
+    logger.log('debug', `Removing request from Firebase after uploading response: ${key}`);
 	return ref.child(key).child(headers.RequestKey).set(null)
 		.catch(function (error) {
 			logger.error('Error writing to firebase', {error:error});
@@ -405,7 +401,7 @@ function handleHeartBeat(data){
 	fs.appendFile(filename, JSON.stringify(HeartBeat)  + "\n", function (err) {
 	  if (err) {
 			// Log any errors
-			logger.log('error', err);
+			logger.log('error', 'Error reporting heartbeat', err);
 	  }
 	});
 

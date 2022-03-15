@@ -8,5 +8,5 @@ services:
     ports:
       - 8080:80
     volumes:
-      - $PWD/listener:/app
+      - ./listener:/app
     command: npm run watch

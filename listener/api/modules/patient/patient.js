@@ -29,7 +29,7 @@ class Patient {
 			throw err;
 		}
 		if (results.length === 0) {
-			logger.log("error", `Patient with username ${username} not found`,results);
+			logger.log("error", `Patient with username ${username} not found`, results);
 			throw new ValidationError(`Patient with username ${username} not found`);
 		}
 		let patientRows = results[0];
