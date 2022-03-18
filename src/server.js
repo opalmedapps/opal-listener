@@ -5,7 +5,7 @@
 
 const config = require('./config/config.json');
 const { Firebase } = require('./firebase/firebase');
-const legacyServer = require('../listener/server');
+const legacyServer = require('../listener/legacy-server');
 const logger = require('../listener/logs/logger');
 
 launch().then(() => {

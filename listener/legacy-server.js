@@ -1,5 +1,5 @@
 /*
- * Filename     :   server.js
+ * Filename     :   legacy-server.js
  * Description  :   This script listens for changes to config.FIREBASE_ROOT_BRANCH in firebase, reads those changes and
  *                  writes a response back to firebase.
  * Created by   :   David Herrera, Robert Maglieri
@@ -27,7 +27,7 @@ const logger            = require('./logs/logger.js');
 const cp                = require('child_process');
 
 
-// NOTE: Listener launching steps have been moved to src/app.js
+// NOTE: Listener launching steps have been moved to src/server.js
 
 let db;
 let ref;
@@ -39,7 +39,7 @@ let heartbeatRef;
 
 /**
  * @description Temporary function used to support the legacy structure of this file.
- *              Called by src/app.js to pass a Firebase database object to this file.
+ *              Called by src/server.js to pass a Firebase database object to this file.
  * @param {Firebase} firebase The Firebase database object to use.
  */
 function setFirebaseConnection(firebase) {

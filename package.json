@@ -7,8 +7,8 @@
     "jsdoc:nix": "./node_modules/.bin/jsdoc src -r -c jsdoc.config.json -d docs",
     "jsdoc:windows": "node_modules\\.bin\\jsdoc src -r -c jsdoc.config.json -d docs",
     "test": "mocha \"./src/**/*.test.*\"",
-    "start": "node src/app.js",
-    "watch": "nodemon src/app.js"
+    "start": "node src/server.js",
+    "watch": "nodemon src/server.js"
   },
   "dependencies": {
     "@stablelib/base64": "1.0.1",

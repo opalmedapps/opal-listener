@@ -81,7 +81,7 @@ npm install
 Once that is done, you can start the app by running the following command in the listener directory:
 
 ```
-node server.js
+npm run start
 ```
 
 ### Strangler Fig
@@ -90,7 +90,7 @@ The listener is currently following the strangler fig design pattern to develop 
   * Legacy code is stored in the `listener` folder.
     - Note: the sub-folder `api/modules` represents an improvement over the legacy structure,
       but is still part of the old version. It may make its way into the new version in some form.
-  * New code is stored in the `src` folder. The entry-point for running the listener is `src/app.js`.
+  * New code is stored in the `src` folder. The entry-point for running the listener is `src/server.js`.
     The following best-practice improvements are applied to all new code in this folder:
     - Documentation using JSDoc.
       * Each file and method must have a JSDoc comment.
@@ -181,11 +181,10 @@ git fetch
 git checkout <branch>
 ```
 
-- Navigate to listener directory 
 - Start new PM2 process
 
 ```
-pm2 start server.js --name <name-of-process>
+pm2 start src/server.js --name <name-of-process>
 ```
 
 ## Built With
