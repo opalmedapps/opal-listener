@@ -101,11 +101,11 @@ The listener is currently following the strangler fig design pattern to develop 
 
 ### Project Configurations
 
-#### Eslint
+#### ESLint
 
-This project uses ESLint to statically analyze its source code. ESLint analysis should only be applied to new files in the 
-context of strangler fig (i.e. files in the `src` folder). When running ESLint using npm (`npm run lint`), this is done automatically.
-However, to use ESLint's in-line warnings while developing, your IDE may need to be configured to enable ESLine and not to target the entire project.
+This project uses ESLint to statically analyze its source code. It has been configured to only analyze new files in the 
+context of strangler fig (i.e. to ignore files in the `listener` folder).
+If warnings don't appear automatically while developing, you may need to manually enable ESLint in your IDE.
 
 ##### VSCode
 
@@ -113,11 +113,10 @@ _TBA_
 
 ##### PhpStorm
 
-Configure PhpStorm to use ESLint, and only on the `src` directory.
+Configure PhpStorm to use ESLint.
 
 1. Go to `File > Settings/Preferences > Languages & Frameworks > JavaScript > Code Quality Tools > ESLint`.
-2. Select `Manual ESLint configuration`.
-3. Next to `Run for files`, enter the following expression: `{src/**/*,src/*}.{js,ts,jsx,tsx}`.
+2. Select `Automatic ESLint configuration`.
 
 Configure PhpStorm to use LF line endings for all new files in the project (_TBD if EditorConfig auto-sets this_):
 
