@@ -4,7 +4,7 @@ listener/firebase/*
 src/config/config.json
 
 # Generated documentation
-docs/
+docs/generated
 
 # Logs
 logs

@@ -84,21 +84,6 @@ Once that is done, you can start the app by running the following command in the
 npm run start
 ```
 
-### Strangler Fig
-
-The listener is currently following the strangler fig design pattern to develop a new version while maintaining the old one.
-  * Legacy code is stored in the `listener` folder.
-    - Note: the sub-folder `api/modules` represents an improvement over the legacy structure,
-      but is still part of the old version. It may make its way into the new version in some form.
-  * New code is stored in the `src` folder. The entry-point for running the listener is `src/server.js`.
-    The following best-practice improvements are applied to all new code in this folder:
-    - Documentation using JSDoc.
-      * Each file and method must have a JSDoc comment.
-    - Static analysis using ESLint.
-    - Unit testing using Mocha & Chai.
-    - Object-oriented structure using JavaScript classes.
-    - Improved folder and file structure (one purpose per file).
-
 ### Project Configurations
 
 #### ESLint
@@ -123,6 +108,13 @@ Configure PhpStorm to use LF line endings for all new files in the project (_TBD
 1. Go to `File > Settings/Preferences > Editor > Code Style`.
 2. Next to `Scheme`, select `Project`.
 3. Next to `Line separator`, select `Unix and macOS (\n)`.
+
+## Documentation
+
+To generate and view the project documentation, follow the steps below.
+
+1. Generate the documentation using `npm run docs`.
+2. Using your IDE, right-click on the file `docs/generated/index.html` and select the option to open it in a browser.
 
 ## Running the tests
 
