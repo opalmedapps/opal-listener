@@ -18,7 +18,8 @@
     "API_ENDPOINTS": {
       "SITES": "",
       "INSTITUTIONS": ""
-    }
+    },
+    "AUTH_TOKEN": ""
   },
   "SSL": {
     "CERTIFICATE_FILE": "Path to the server's SSL certificate file, such as client.crt",

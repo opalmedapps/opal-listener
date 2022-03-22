@@ -49,6 +49,7 @@ class HospitalParking {
                 "institution__code__iexact": this._institutionCode
             },
             "headers": {
+                "Authorization": "Token " + config.SETTINGS_API_BACKEND.AUTH_TOKEN,
                 "Accept": "application/json",
                 "Accept-Charset": "utf-8",
                 "Accept-Language": this._language
