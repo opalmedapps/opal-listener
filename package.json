@@ -2,7 +2,7 @@
   "name": "opal-listener",
   "version": "1.0.0",
   "scripts": {
-    "lint": "eslint **/*.{js,ts,jsx,tsx}",
+    "lint": "eslint src/**/*.{js,ts,jsx,tsx}",
     "docs": "run-script-os",
     "docs:nix": "./node_modules/.bin/jsdoc src README.md -c docs/jsdoc.config.json",
     "docs:windows": ".\\node_modules\\.bin\\jsdoc src README.md -c docs/jsdoc.config.json",

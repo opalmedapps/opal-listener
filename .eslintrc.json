@@ -19,6 +19,7 @@
     "brace-style": ["error", "stroustrup"],
     "func-names": 0,
     "indent": ["error", 4],
+    "linebreak-style": 0,
     "max-len": ["error", { "code": 120 }],
     "mocha/prefer-arrow-callback": 2,
     "no-use-before-define": ["error", { "functions": false }],
