@@ -15,6 +15,17 @@ yarn-error.log*
 heartbeat.log*
 heartbeatdb.log*
 
+# IDE: PhpStorm
+.idea/
+
+# IDE: VSCode
+.vscode/*
+!.vscode/settings.json
+!.vscode/tasks.json
+!.vscode/launch.json
+!.vscode/extensions.json
+*.code-workspace
+
 # Runtime data
 pids
 *.pid
@@ -67,7 +78,6 @@ typings/
 # dotenv environment variables file
 .env
 
-.idea/
 node_modules
 credentials.js
 *.swp
