@@ -118,9 +118,14 @@ To generate and view the project documentation, follow the steps below.
 
 ## Running the tests
 
-Explain how to run the automated tests for this system
+Unit tests for this repository are run using the Mocha test framework. Test files should be in the `src` directory
+(or any of its subdirectories), and should have a name in the format `*.test.*`.
 
-_TBA_
+To run the tests:
+
+```sh
+npm test
+```
 
 ## Deployment
 
