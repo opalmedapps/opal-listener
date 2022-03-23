@@ -1,4 +1,5 @@
 The listener is currently following the strangler fig design pattern to develop a new version while maintaining the old one.
+
 * Legacy code is stored in the `listener` folder.
     - Note: the sub-folder `api/modules` represents an improvement over the legacy structure,
       but is still part of the old version. It may make its way into the new version in some form.
@@ -6,7 +7,10 @@ The listener is currently following the strangler fig design pattern to develop 
   The following best-practice improvements are applied to all new code in this folder:
     - Documentation using JSDoc.
         * Each file and method must have a JSDoc comment.
+        * `npm run docs`
     - Static analysis using ESLint.
+        * `npm run lint`
     - Unit testing using Mocha & Chai.
+        * `npm test`
     - Object-oriented structure using JavaScript classes.
     - Improved folder and file structure (one purpose per file).
