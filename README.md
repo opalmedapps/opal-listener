@@ -90,24 +90,16 @@ npm run start
 
 This project uses ESLint to statically analyze its source code. It has been configured to only analyze new files in the 
 context of strangler fig (i.e. to ignore files in the `listener` folder).
-If warnings don't appear automatically while developing, you may need to manually enable ESLint in your IDE.
+Follow the steps below to enable ESLint in your IDE.
 
 ##### VSCode
 
-_TBA_
+To enable ESLint in VSCode, install the recommended plugin [ESLint by Microsoft](https://marketplace.visualstudio.com/items?itemName=dbaeumer.vscode-eslint).
 
 ##### PhpStorm
 
-Configure PhpStorm to use ESLint.
-
 1. Go to `File > Settings/Preferences > Languages & Frameworks > JavaScript > Code Quality Tools > ESLint`.
 2. Select `Automatic ESLint configuration`.
-
-Configure PhpStorm to use LF line endings for all new files in the project (_TBD if EditorConfig auto-sets this_):
-
-1. Go to `File > Settings/Preferences > Editor > Code Style`.
-2. Next to `Scheme`, select `Project`.
-3. Next to `Line separator`, select `Unix and macOS (\n)`.
 
 ## Documentation
 
