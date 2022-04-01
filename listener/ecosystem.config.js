@@ -2,7 +2,7 @@ module.exports = {
     apps : [
         {
             name: "opal-listener",
-            script: "server.js",
+            script: "legacy-server.js",
             watch: true,
             env: {
                 "NODE_ENV": "development"
