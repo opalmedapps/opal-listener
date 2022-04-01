@@ -11,7 +11,7 @@
  * HEARTBEAT DEPENDENCIES
  */
 const admin    = require("firebase-admin");
-const config   = require('./../config.json');
+const config   = require('./../config-adaptor');
 const logger   = require('./../logs/logger');
 
 
