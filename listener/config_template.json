@@ -18,7 +18,6 @@
     "CERTIFICATE_AUTHORITY_FILE": "Path to the server's SSL certificate authority file, such as ca.cert.pem"
   },
   "DOCUMENTS_PATH": "",
-  "DOCTOR_PATH": "",
   "CHECKIN_PATH": "",
   "CHECKIN_ROOM": "",
   "PFP_PATH": "",
