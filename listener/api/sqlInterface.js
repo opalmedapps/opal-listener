@@ -1333,3 +1333,4 @@ function refresh (fields, requestObject) {
 
     return r.promise;
 }
+

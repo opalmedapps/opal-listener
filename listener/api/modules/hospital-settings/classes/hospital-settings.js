@@ -61,3 +61,4 @@ class HospitalSettings {
 }
 
 module.exports = {HospitalSettings};
+

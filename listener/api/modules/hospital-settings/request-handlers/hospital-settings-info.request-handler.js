@@ -50,3 +50,4 @@ class HospitalSettingsRequestHandler extends ApiRequestHandler {
 }
 
 module.exports = HospitalSettingsRequestHandler;
+
