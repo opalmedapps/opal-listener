@@ -8,7 +8,7 @@ const logger                = require('./../logs/logger');
 const fileRequest = require("./modules/file-request");
 const securityQuestions = require("./modules/patient/security-questions");
 const testResults = require("./modules/test-results");
-const parkingInfo = require("./modules/hospital/parking");
+const parkingInfo = require("./modules/hospital-settings");
 
 /**
  * API HANDLERS FOR GENERAL REQUESTS

@@ -494,6 +494,8 @@ async function getMRNs(patientSerNum) {
     else return rows;
 }
 
+exports.getMRNs = getMRNs;
+
 /**
  * getDocumentsContent
  * @desc fetches a document's content from DB

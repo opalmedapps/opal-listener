@@ -13,13 +13,13 @@
     "MYSQL_DATABASE": "",
     "HOST": ""
   },
-  "SETTINGS_API_BACKEND": {
-    "URL_ROOT": "",
+  "NEW_OPAL_ADMIN": {
+    "HOST": "<[String] Host address of the new opalAdmin implemented in Django (e.g., http://host.docker.internal:8000)>",
     "API_ENDPOINTS": {
-      "SITES": "",
-      "INSTITUTIONS": ""
+      "SITES": "/api/sites/",
+      "INSTITUTIONS": "/api/institutions/"
     },
-    "AUTH_TOKEN": ""
+    "AUTH_TOKEN": "<[String] Authorization token for accessing the endpoints. See 'Authentication' section in the new opalAdmin documentation>"
   },
   "SSL": {
     "CERTIFICATE_FILE": "Path to the server's SSL certificate file, such as client.crt",
