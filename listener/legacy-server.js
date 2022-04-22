@@ -42,16 +42,9 @@ let heartbeatRef;
  *              Called by src/server.js to pass a Firebase database object to this file.
  * @param {Firebase} firebase The Firebase database object to use.
  */
-function setFirebaseConnection(firebase) {
-    db = firebase.database;
-    ref = db.ref(firebase.root);
+function setFirebaseConnection(datbaseRef) {
+    ref = datbaseRef;
     heartbeatRef = ref.child('/users/heartbeat');
-
-    // Ensure there is no leftover data on the firebase root branch
-    ref.set(null)
-    .catch(function (error) {
-        logger.log('error', 'Cannot reset firebase', error);
-    });
 }
 exports.setFirebaseConnection = setFirebaseConnection;
 
@@ -108,6 +101,7 @@ function handleRequest(requestType, snapshot){
         uploadToFirebase(response, requestType);
     });
 }
+exports.handleRequest = handleRequest;
 
 /**
  * logResponse
@@ -256,7 +250,7 @@ function uploadToFirebase(response, key) {
 		});
 	});
 }
-
+exports.uploadToFirebase = uploadToFirebase;
 /**
  * validateKeysForFirebase
  * @author Stacey Beard
