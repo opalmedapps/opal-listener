@@ -34,14 +34,14 @@ const waitingRoomPool = mysql.createPool(waitingRoomDbCredentials);
  ******************************/
 
 /**
- * Table mappings and process data functions for results obtained from the database.
- * Two formats of sub-objects are possible:
- *     1- Mappings with an 'sql' attribute are processed directly in this file, by executing the resulting query.
- *        'numberOfLastUpdated' represents the number of times to insert a timestamp in the sql to get only new results
- *        updated after a given timestamp.
- *     2- Mappings with a 'module' attribute are redirected to the `listener/api/module` folder to be served by
- *        a request handler there.
- *     Note: either format can have an optional 'processFunction' attribute, which is run on the result before returning it.
+ * @description Table mappings and process data functions for results obtained from the database.
+ *              Two formats of sub-objects are possible:
+ *                1- Mappings with an 'sql' attribute are processed directly in this file, by executing the resulting query.
+ *                   'numberOfLastUpdated' represents the number of times to insert a timestamp in the sql to get only
+ *                   new results updated after a given timestamp.
+ *                2- Mappings with a 'module' attribute are redirected to the `listener/api/module` folder to be served
+ *                   by a request handler there.
+ *              Note: either format can have an optional 'processFunction' attribute, which is run on the result before returning it.
  *
  * Deprecated: {Doctors: {sql, processFunction: loadImageDoctor, numberOfLastUpdated: number}, Tasks: {sql, numberOfLastUpdated: number}}
  */
