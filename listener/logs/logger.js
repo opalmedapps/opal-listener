@@ -30,6 +30,8 @@ const formatErrorData = (data) => {
 
 // Initialize winston logger
 const WinstonLogger = createLogger({
+    // Silent logger when runing unit tests.
+    silent: process.env.DISABLED_LOGGING === 'true',
     // Set level log level
     level: LoggerLevel,
     // Set log format output in the log file
