@@ -75,7 +75,7 @@ class PatientTestResultQuery {
 						AND ptr.TestExpressionSerNum = te.TestExpressionSerNum
 						AND te.TestControlSerNum = tc.TestControlSerNum
 						AND tc.PublishFlag = 1
-                        AND (ptr.LastUpdated > ? OR te.LastUpdated > ? OR tc.LastUpdated > ?)
+						AND (ptr.LastUpdated > ? OR te.LastUpdated > ? OR tc.LastUpdated > ?)
 					ORDER BY collectedDateTime DESC;`,
 				params);
 	}
@@ -131,8 +131,8 @@ class PatientTestResultQuery {
 						AND ptr.TestExpressionSerNum = te.TestExpressionSerNum
 						AND te.TestControlSerNum = tc.TestControlSerNum
 						AND tc.PublishFlag = 1
-                        AND (ptr.LastUpdated > ? OR te.LastUpdated > ? OR tc.LastUpdated > ?)
-                     ORDER BY name_EN;`,
+						AND (ptr.LastUpdated > ? OR te.LastUpdated > ? OR tc.LastUpdated > ?)
+					ORDER BY name_EN;`,
 				params);
 	}
 	/**
