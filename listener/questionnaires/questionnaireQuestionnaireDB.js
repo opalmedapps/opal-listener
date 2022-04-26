@@ -12,7 +12,7 @@ const format = require('./questionnaireFormatting');
 *Connecting to mysql database
 */
 const questionnaireDBCredentials = {
-    host: credentials.HOST,
+    host: credentials.MYSQL_DATABASE_HOST,
     user: credentials.MYSQL_USERNAME,
     password: credentials.MYSQL_PASSWORD,
     database: credentials.MYSQL_DATABASE_QUESTIONNAIRE,
