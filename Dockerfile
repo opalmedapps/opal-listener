@@ -4,6 +4,7 @@ COPY ./package*.json ./
 # `--only=prod` Only install production dependencies
 RUN npm install --only=prod
 
-# Copy both code sources (legacy listener and new folder)
+# Copy all code sources
 COPY ./listener ./listener
+COPY ./legacy-registration ./legacy-registration
 COPY ./src ./src
