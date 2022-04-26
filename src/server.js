@@ -6,6 +6,7 @@
 const config = require('./config/config.json');
 const { Firebase } = require('./firebase/firebase');
 const legacyServer = require('../listener/legacy-server');
+const legacyRegistrationServer = require('../legacy-registration/legacy-server');
 const legacyLogger = require('../listener/logs/logger');
 const { RequestHandler } = require('./core/request-handler');
 
@@ -33,6 +34,9 @@ async function launch() {
     legacyServer.setFirebaseConnection(firebase.getDataBaseRef);
     requestHandler.listenToRequests('requests');
     requestHandler.listenToRequests('passwordResetRequests');
+
+    legacyRegistrationServer.setFirebaseConnection(firebase);
+    legacyRegistrationServer.listenForRequest('requests');
 
     legacyServer.spawnCronJobs();
 }

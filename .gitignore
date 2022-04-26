@@ -1,5 +1,6 @@
 # config files
 listener/config.json
+legacy-registration/config.json
 listener/firebase/*
 src/config/config.json
 src/config/firebase/
@@ -8,8 +9,8 @@ src/config/firebase/
 docs/generated
 
 # Logs
-logs
-*.log
+logs/*.log
+*/logs/*.log
 npm-debug.log*
 yarn-debug.log*
 yarn-error.log*

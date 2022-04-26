@@ -61,6 +61,8 @@ class Firebase {
         });
 
         this.database = firebaseDBObject.database();
+        // verify that the connection was successful
+        await firebaseDBObject.database().getRules();
 
         // Save the root branch in a variable for easy access
         this.root = this.#config.ROOT_BRANCH;
