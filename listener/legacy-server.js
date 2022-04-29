@@ -40,10 +40,10 @@ let heartbeatRef;
 /**
  * @description Temporary function used to support the legacy structure of this file.
  *              Called by src/server.js to pass a Firebase database object to this file.
- * @param {Firebase} firebase The Firebase database object to use.
+ * @param {Reference}} databaseRef The Firebase database reference to use.
  */
-function setFirebaseConnection(datbaseRef) {
-    ref = datbaseRef;
+function setFirebaseConnection(databaseRef) {
+    ref = databaseRef;
     heartbeatRef = ref.child('/users/heartbeat');
 }
 exports.setFirebaseConnection = setFirebaseConnection;
@@ -202,6 +202,8 @@ function encryptResponse(response)
 		return Promise.resolve(response);
 	}
 }
+// Export for legacy-registration
+exports.encryptResponse = encryptResponse;
 
 /**
  * uploadToFirebase
@@ -313,6 +315,8 @@ function validateKeysForFirebase(objectToValidate) {
     } // Validate the next sub-object in the stack until there are none left
     return objectToValidate;
 }
+// Export for legacy-registration
+exports.validateKeysForFirebase = validateKeysForFirebase;
 
 /**
  * incrementStringParenthesisNumber
