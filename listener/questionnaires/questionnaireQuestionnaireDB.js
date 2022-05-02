@@ -61,6 +61,7 @@ FUNCTIONS TO GET QUESTIONNAIRES
  * @param {object} opalPatientSerNumAndLanguage object containing PatientSerNum and Language as property. These information comes from OpalDB
  * @returns {promise}
  */
+// TODO add lastUpdated
 function getQuestionnaireList(opalPatientSerNumAndLanguage) {
     let r = q.defer();
 
