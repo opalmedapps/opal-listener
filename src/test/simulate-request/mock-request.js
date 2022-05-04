@@ -1,8 +1,7 @@
-/* eslint-disable max-len */
 /**
- * @description unencripted mock request
+ * @file unencrypted mock request
+ * @author David Gagne
  */
-
 const CryptoJs = require('crypto-js');
 
 const requestData = {
