@@ -308,3 +308,16 @@ exports.stringifyShort = object => {
         else return value;
     });
 };
+
+/**
+ * @description Adds an item several times at the end of an array (returns a new copy of the array).
+ * @param {Array} array - The array to which to add the item.
+ * @param {*} item - The item to add.
+ * @param {number} numTimes - The number of times to add the item.
+ * @returns {Array} A copy of the original array, with the new items added.
+ */
+exports.addSeveralToArray = (array, item, numTimes) => {
+    let arrCopy = [...array];
+    for (let i = 0; i < numTimes; i++) arrCopy.push(item);
+    return arrCopy;
+};
