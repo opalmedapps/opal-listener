@@ -40,7 +40,7 @@ mocha:
   script:
     - npm install mocha-junit-reporter --no-save
     - npx mocha --version
-    - npx mocha --reporter mocha-junit-reporter --reporter-options mochaFile=junit.xml './src/**/*.test.*'
+    - npx mocha --reporter mocha-junit-reporter --reporter-options mochaFile=junit.xml './src/**/*.test.*' './listener/**/*.test.*'
   artifacts:
     when: always
     reports:
@@ -54,7 +54,7 @@ coverage:
   script:
     - npx nyc --version
     # record coverage across complete codebase to show progress over time
-    - npx nyc --all --reporter cobertura mocha './src/**/*.test.*'
+    - npx nyc --all --reporter cobertura mocha './src/**/*.test.*' './listener/**/*.test.*'
     - npx nyc report
   # see: https://docs.gitlab.com/ee/ci/pipelines/settings.html#test-coverage-examples
   # Extract branch coverage instead of statement coverage

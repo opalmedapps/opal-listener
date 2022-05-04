@@ -2,7 +2,6 @@ var exports = module.exports = {};
 var Q = require('q');
 var sqlInterface = require('./sqlInterface.js');
 var utility = require('./../utility/utility.js');
-var validate = require('./../utility/validate.js');
 var queries = require('./../sql/queries.js');
 var logger = require('./../logs/logger.js');
 const questionnaires = require('./../questionnaires/questionnaireOpalDB.js');
@@ -36,11 +35,10 @@ exports.refresh = function (requestObject) {
     var fields =parameters.Fields;
     var timestamp=parameters.Timestamp;
 
-    if(!validate("Defined",fields))
-    {
+    if (!fields) {
       r.reject({Response:'error',Reason:'Undefined Parameters'});
     }
-    if(fields=='All'){
+    else if (fields == 'All') {
       sqlInterface.getPatientTableFields(UserId,timestamp).then(function(objectToFirebase){
         objectToFirebase.Data = utility.resolveEmptyResponse(objectToFirebase.Data);
         r.resolve(objectToFirebase);
@@ -49,9 +47,6 @@ exports.refresh = function (requestObject) {
       });
     }else {
       if(!(typeof fields.constructor !=='undefined'&&fields.constructor=== Array)) fields=[fields];
-        if (!validate('RefreshArray', fields)) {
-            r.reject({Reason:'Incorrect refresh parameters',Response:'error'});
-        }
         sqlInterface.getPatientTableFields(UserId, timestamp, fields).then(function (rows) {
             rows.Data=utility.resolveEmptyResponse(rows.Data);
             r.resolve(rows);

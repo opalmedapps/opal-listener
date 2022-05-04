@@ -1,5 +1,6 @@
 const moment = require("moment");
 const mysql = require("mysql");
+const utility = require("./../../../../utility/utility.js");
 
 /**
  *  Class encapsulates all the queries pertaining the patient test results.
@@ -55,30 +56,41 @@ class PatientTestResultQuery {
 	 * Query to return the collected dates the patient had tests for the test types
 	 * that are aliased.
 	 * @param {string|number} patientSerNum PatientSerNum in the DB
+     * @param {Date} lastUpdated - Only items with 'LastUpdated' after this time are returned.
 	 */
-	static getTestDatesQuery(patientSerNum) {
+	static getTestDatesQuery(patientSerNum, lastUpdated) {
+        let numLastUpdated = 3;
+        let params = [patientSerNum];
+        params = utility.addSeveralToArray(params, lastUpdated, numLastUpdated);
+
 		return mysql.format(`
 					SELECT DISTINCT CollectedDateTime as collectedDateTime
-					FROM 
-						PatientTestResult as ptr, 
+					FROM
+						PatientTestResult as ptr,
 						TestExpression as te,
 						/* TestControl: only aliased lab results are sent to the app */
 						TestControl as tc
-					WHERE 
+					WHERE
 						ptr.PatientSerNum = ?
 						AND ptr.TestExpressionSerNum = te.TestExpressionSerNum
 						AND te.TestControlSerNum = tc.TestControlSerNum
 						AND tc.PublishFlag = 1
-					ORDER BY collectedDateTime DESC;`, 
-				[patientSerNum]);
+						AND (ptr.LastUpdated > ? OR te.LastUpdated > ? OR tc.LastUpdated > ?)
+					ORDER BY collectedDateTime DESC;`,
+				params);
 	}
 
 	/**
 	 * Query to return all test types for the patient including the latest results for the given type
 	 * @param {string|number} patientSerNum PatientSerNum in the DB
+     * @param {Date} lastUpdated - Only items with 'LastUpdated' after this time are returned.
 	 * @returns {string} query test types for the patient
 	 */
-	static getTestTypesQuery(patientSerNum) {
+	static getTestTypesQuery(patientSerNum, lastUpdated) {
+        let numLastUpdated = 3;
+        let params = [patientSerNum];
+        params = utility.addSeveralToArray(params, lastUpdated, numLastUpdated);
+
 		// Coalesce gets the first non-null value, in this case that's the last test value
 		return mysql.format(
 					`SELECT
@@ -119,8 +131,9 @@ class PatientTestResultQuery {
 						AND ptr.TestExpressionSerNum = te.TestExpressionSerNum
 						AND te.TestControlSerNum = tc.TestControlSerNum
 						AND tc.PublishFlag = 1
-						ORDER BY name_EN;`,
-				[patientSerNum])
+						AND (ptr.LastUpdated > ? OR te.LastUpdated > ? OR tc.LastUpdated > ?)
+					ORDER BY name_EN;`,
+				params);
 	}
 	/**
 	 * Returns results for the given test type given a TestExpressionSerNum
