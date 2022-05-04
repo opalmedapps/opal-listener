@@ -2,8 +2,6 @@
 const legacyListenerUtils = require('../../../listener/utility/utility');
 
 
-var exports = module.exports = {};
-
 /**
      resolveEmptyResponse
      @desc Returns empty response, function used by refresh, resume, login

@@ -1,4 +1,3 @@
-var exports = module.exports = {};
 var Q = require('q');
 var sqlInterface = require('./sqlInterface.js');
 var utility = require('./../utility/utility.js');
