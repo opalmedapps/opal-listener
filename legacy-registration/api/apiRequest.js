@@ -3,7 +3,6 @@
 const apiFunctionRequest = require('../api/apiFunctions.js');
 const logger = require('../logs/logger.js');
 
-var exports = module.exports = {};
 const Q = require('q');
 
 

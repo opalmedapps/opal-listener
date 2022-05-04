@@ -4,7 +4,6 @@
  * Created by   :   Stacey Beard
  * Date         :   2021-11-15
  */
-var exports             = module.exports = {};
 const logger            = require("../logs/logger");
 const request           = require('request');
 const ssl               = require("../security/ssl");
