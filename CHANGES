@@ -1,3 +1,16 @@
+Version 1.7.0.0:
+ - QSCCD-238: Remove module.exports = {} to fix code navigation (!80)
+ - QSCCD-46: Make labs requests (type and date list) accessible via 'Refresh' (!66)
+ - chore(deps): update dependency mocha to v9.2.2
+ - Bugfix: Fixed issue where docker container where in UTF and offset with host
+ - Configure Renovate
+ - ci: Make config available to tests (QSCCD-227)
+ - refactor: Move registration-listener code into this codebase (QSCCD-204)
+ - QSCCD-208: Added 'request-handler' to listen to firebase request on the new part of listener.
+ - ci: Add GitLab pipeline (QSCCD-206)
+ - QSCCD-73: Label listener content for TRT and TRP as deprecated
+ - QSCCD-58 Removed table PhaseInTreatment and related code (!59)
+
 Version 1.6.0.0:
  - QSCCD-196: Set up new part of the listener following strangler fig (!58)
  - OPAL-1217: Updated winston logger to fix circle dependency issue (!51)
