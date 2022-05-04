@@ -79,7 +79,6 @@ class SimulateRequest {
      * @description Init Firebase connection and trigger upload, add Firebase server timespamp, trigger firebase upload.
      */
     async initFirebase() {
-        this.#config.FIREBASE.ADMIN_KEY_PATH = await SimulateRequest.getFirebaseAdminKey();
         this.#firebase = new Firebase(this.#config.FIREBASE);
         await this.#firebase.init();
     }
