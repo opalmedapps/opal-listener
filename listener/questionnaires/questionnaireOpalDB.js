@@ -1,5 +1,3 @@
-var exports = module.exports = {};
-
 const questionnaireQueries = require('./questionnaireQueries.js');
 const questionnaires = require('./questionnaireQuestionnaireDB.js');
 const opalQueries = require('../sql/queries');

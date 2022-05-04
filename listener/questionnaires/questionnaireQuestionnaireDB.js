@@ -1,4 +1,3 @@
-var exports = module.exports = {};
 var mysql = require('mysql');
 var q = require('q');
 var credentials = require('./../config-adaptor');

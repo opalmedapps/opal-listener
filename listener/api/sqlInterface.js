@@ -10,8 +10,6 @@ const logger            = require('./../logs/logger');
 const {OpalSQLQueryRunner} = require("../sql/opal-sql-query-runner");
 const testResults       = require("./modules/test-results");
 
-var exports = module.exports = {};
-
 /******************************
  * MAPPINGS
  ******************************/
