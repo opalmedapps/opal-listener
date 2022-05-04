@@ -14,8 +14,6 @@ const ssl = require('../security/ssl.js')
 const Q = require('q');
 const { sendMail } = require('./utility/mail.js');
 
-var exports = module.exports = {};
-
 // Insert user IP address.
 exports.insertIPLog = function (requestObject) {
     return new Promise((resolve, reject) => {
