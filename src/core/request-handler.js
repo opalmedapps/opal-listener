@@ -78,7 +78,7 @@ class RequestHandler {
         const validatedRequest = await legacyRequestValidator.validate(requestKey, JustClone(requestObject));
         try {
             const response = (validatedRequest.type === 'api')
-                ? ApiRequest.makeRequest()
+                ? await ApiRequest.makeRequest(validatedRequest)
                 : await legacyMainRequestApi.apiRequestFormatter(requestKey, requestObject);
             return response;
         }
