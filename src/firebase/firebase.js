@@ -68,8 +68,18 @@ class Firebase {
         this.root = this.#config.ROOT_BRANCH;
     }
 
+    /**
+     * @returns {object} Getter for Firebase database reference.
+     */
     get getDataBaseRef() {
         return this.database.ref(this.root);
+    }
+
+    /**
+     * @returns {object} Getter for Firebase server time representation
+     */
+    static get getDatabaseTimeStamp() {
+        return admin.database.ServerValue.TIMESTAMP;
     }
 
     /**
