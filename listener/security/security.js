@@ -3,7 +3,6 @@ var q = require('q');
 var utility=require('./../utility/utility.js');
 const logger            = require('./../logs/logger');
 
-var exports=module.exports={};
 const FIVE_MINUTES = 300000;
 
 exports.resetPasswordRequest=function(requestKey, requestObject)

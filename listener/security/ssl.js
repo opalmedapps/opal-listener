@@ -4,7 +4,6 @@
  * Created by   :   Stacey Beard
  * Date         :   2021-09-15
  */
-var exports             = module.exports = {};
 const config            = require("../config-adaptor");
 const fs                = require('fs');
 

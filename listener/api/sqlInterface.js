@@ -8,17 +8,22 @@ const Mail              = require('./../mailer/mailer.js');
 const utility           = require('./../utility/utility');
 const logger            = require('./../logs/logger');
 const {OpalSQLQueryRunner} = require("../sql/opal-sql-query-runner");
-const ssl               = require('../security/ssl');
-
-var exports = module.exports = {};
+const testResults       = require("./modules/test-results");
 
 /******************************
  * MAPPINGS
  ******************************/
 
 /**
- * Table mappings and process data functions for results obtained from the database. Exporting function for testing purposes.
- * @type {{Patient: {sql, processFunction: loadProfileImagePatient, numberOfLastUpdated: number}, Documents: {sql, numberOfLastUpdated: number, table: string, serNum: string}, Doctors: {sql, processFunction: loadImageDoctor, numberOfLastUpdated: number}, Diagnosis: {sql, numberOfLastUpdated: number}, Appointments: {sql, numberOfLastUpdated: number, processFunction: combineResources, table: string, serNum: string}, Notifications: {sql, numberOfLastUpdated: number, table: string, serNum: string}, Tasks: {sql, numberOfLastUpdated: number}, TxTeamMessages: {sql, numberOfLastUpdated: number, table: string, serNum: string}, EducationalMaterial: {sql, processFunction: getEducationTableOfContents, numberOfLastUpdated: number, table: string, serNum: string}, Announcements: {sql, numberOfLastUpdated: number, table: string, serNum: string}}}
+ * @description Table mappings and process data functions for results obtained from the database.
+ *              Two formats of sub-objects are possible:
+ *                1- Mappings with an 'sql' attribute are processed directly in this file, by executing the resulting query.
+ *                   'numberOfLastUpdated' represents the number of times to insert a timestamp in the sql to get only
+ *                   new results updated after a given timestamp.
+ *                2- Mappings with a 'module' attribute are redirected to the `listener/api/module` folder to be served
+ *                   by a request handler there.
+ *              Note: either format can have an optional 'processFunction' attribute, which is run on the result before returning it.
+ *
  * Deprecated: {Doctors: {sql, processFunction: loadImageDoctor, numberOfLastUpdated: number}, Tasks: {sql, numberOfLastUpdated: number}}
  */
 const requestMappings =
@@ -87,6 +92,14 @@ const requestMappings =
             numberOfLastUpdated: 2,
             table: 'Announcement',
             serNum: 'AnnouncementSerNum'
+        },
+        'PatientTestDates': {
+            module: testResults,
+            processFunction: result => result.data.collectedDates
+        },
+        'PatientTestTypes': {
+            module: testResults,
+            processFunction: result => result.data.testTypes
         }
     };
 
@@ -129,6 +142,14 @@ exports.getPatientTableFields = function(userId,timestamp,arrayTables) {
     var timestp = (timestamp)?timestamp:0;
     const objectToFirebase = {};
     let index = 0;
+
+    // Validate the arrayTables
+    let invalidCategory = arrayTables.find(e => !requestMappings.hasOwnProperty(e));
+    if (invalidCategory) {
+        r.reject({Response:'error', Reason:`Incorrect refresh parameter: ${invalidCategory}`});
+        return r.promise;
+    }
+
     Q.all(preparePromiseArrayFields(userId,timestp,arrayTables)).then(function(response){
         if(arrayTables) {
             for (let i = 0; i < arrayTables.length; i++) {
@@ -158,8 +179,6 @@ exports.getPatientTableFields = function(userId,timestamp,arrayTables) {
  * @return {Promise}
  */
 function processSelectRequest(table, userId, timestamp) {
-    const r = Q.defer();
-
     const requestMappingObject = requestMappings[table];
 
     let date = new Date(0);
@@ -167,28 +186,31 @@ function processSelectRequest(table, userId, timestamp) {
         date=new Date(Number(timestamp));
     }
 
-    const paramArray = [userId];
-    if(requestMappingObject.numberOfLastUpdated>0){
-        for (let i = 0; i < requestMappingObject.numberOfLastUpdated; i++) {
-            paramArray.push(date);
-        }
-    }
+    let paramArray = [userId];
+    paramArray = utility.addSeveralToArray(paramArray, date, requestMappingObject.numberOfLastUpdated);
 
-    if(requestMappingObject.hasOwnProperty('sql')) {
-        exports.runSqlQuery(requestMappingObject.sql,paramArray, requestMappingObject.processFunction).then(function(rows) {
-            r.resolve(rows);
-        },function(err) {
-            r.reject(err);
-        });
-    }else{
-        requestMappingObject.processFunction(userId,timestamp).then(function(rows) {
-            r.resolve(rows);
-        },function(err) {
-            r.reject(err);
-        });
+    // Request mappings with a 'module' attribute use request handlers in the `listener/api/modules` folder
+    if (requestMappingObject.hasOwnProperty('module')) {
+        return new Promise((resolve, reject) => {
+            requestMappingObject.module[table].handleRequest({
+                meta: {
+                    UserID: userId
+                },
+                params: {
+                    Date: timestamp,
+                },
+            }).then(result => {
+                if (requestMappingObject.processFunction) resolve(requestMappingObject.processFunction(result));
+                else resolve(result);
+            }).catch(reject);
+        })
     }
-
-    return r.promise;
+    else if (requestMappingObject.hasOwnProperty('sql')) {
+        return exports.runSqlQuery(requestMappingObject.sql,paramArray, requestMappingObject.processFunction);
+    }
+    else {
+        return requestMappingObject.processFunction(userId,timestamp);
+    }
 }
 
 /**

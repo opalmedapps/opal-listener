@@ -1,4 +1,3 @@
-var exports = module.exports = {};
 const sqlInterface = require('./sqlInterface.js');
 const logger = require('./../logs/logger.js');
 const questionnaires = require('./../questionnaires/questionnaireOpalDB.js');

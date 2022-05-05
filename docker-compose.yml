@@ -5,6 +5,8 @@ services:
     container_name: opal-listener
     image: opalmedapps/listener:latest
     build: .
+    environment:
+      - TZ=EST5EDT
     volumes:
       - ./listener:/app/listener
       - ./legacy-registration:/app/legacy-registration
