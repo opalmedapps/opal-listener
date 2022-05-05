@@ -135,6 +135,7 @@ For help on creating new documentation pages, refer to {@tutorial creating-docum
 
 ## Running the tests
 
+### Unit tests
 Unit tests for this repository are run using the Mocha test framework. Test files should be in the `src` directory
 (or any of its subdirectories), and should have a name in the format `*.test.*`.
 
@@ -143,6 +144,17 @@ To run the tests:
 ```sh
 npm test
 ```
+
+### Using the request simulator
+It is possible to simulate a request from the Opal app, for testing, by using the simulate request script. There are two way to do so:
+
+Using the npm script `simulateRequest` which will use the default request data specified in the file `src/test/simulate-request/mock-request.js`
+or
+Instantiate the `SimulateRequest` class and pass the mock request as an argument `new SimulateRequest(MockRequestData);`.
+
+Note that the mock request data need to have the same structure as `src/test/simulate-request/mock-request.js`.
+
+You also need to specify the correct firebase `UserID` that is linked to your local development setup and database.
 
 ## Deployment
 
