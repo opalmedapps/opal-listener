@@ -75,9 +75,9 @@ class RequestHandler {
         const requestKey = snapshot.key;
         const requestObject = snapshot.val();
         // We need to clone the Obj to prevent double decryption, which cause a failure, while using the legacy code.
-        const requestType = await legacyRequestValidator.validate(requestKey, JustClone(requestObject));
+        const validatedRequest = await legacyRequestValidator.validate(requestKey, JustClone(requestObject));
         try {
-            const response = (requestType.type === 'api')
+            const response = (validatedRequest.type === 'api')
                 ? ApiRequest.makeRequest()
                 : await legacyMainRequestApi.apiRequestFormatter(requestKey, requestObject);
             return response;
