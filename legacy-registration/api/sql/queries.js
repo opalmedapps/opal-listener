@@ -39,32 +39,14 @@ exports.getSiteAndMrn = function() {
 };
 
 exports.getPatient = function() {
-    return "SELECT \n" +
-        "\tpatient.*, \n" +
-        "\t`phi`.MRN,\n" +
-        "\t`hit`.Description_EN AS hospital_name_EN,\n" +
-        "\t`hit`.Description_FR AS hospital_name_FR\n" +
-        "FROM Patient patient\n" +
-        "JOIN Patient_Hospital_Identifier `phi` ON `phi`.PatientSerNum = patient.PatientSerNum\n" +
-        "JOIN Hospital_Identifier_Type `hit` ON `hit`.code = `phi`.Hospital_Identifier_Type_Code\n" +
-        "WHERE patient.SSN = ?;";
+    return "SELECT patient.*, `phi`.MRN, `hit`.Description_EN AS hospital_name_EN, `hit`.Description_FR AS hospital_name_FR FROM Patient patient JOIN Patient_Hospital_Identifier `phi` ON `phi`.PatientSerNum = patient.PatientSerNum JOIN Hospital_Identifier_Type `hit` ON `hit`.code = `phi`.Hospital_Identifier_Type_Code WHERE patient.SSN = ?;";
 };
 
 exports.getRamqByMRN = function() {
-    return "SELECT \n" +
-        "\tpatient.SSN \n" +
-        "FROM Patient patient\n" +
-        "JOIN Patient_Hospital_Identifier `phi` ON `phi`.PatientSerNum = patient.PatientSerNum\n" +
-        "WHERE `phi`.MRN = ?;";
+    return "SELECT patient.SSN FROM Patient patient JOIN Patient_Hospital_Identifier `phi` ON `phi`.PatientSerNum = patient.PatientSerNum WHERE `phi`.MRN = ?;";
 };
 
 exports.getMRNByRegistrationCode = function() {
-    return "SELECT \n" +
-        "\tphi.MRN AS MRN,\n" +
-        "\tregister.RegistrationCode AS RegistrationCode,\n" +
-        "\tregister.Status AS Status\n" +
-        "FROM OpalDB.Patient_Hospital_Identifier phi\n" +
-        "JOIN registerdb.registrationcode register ON `phi`.PatientSerNum = register.PatientSerNum\n" +
-        "WHERE register.FirebaseBranch = ?;";
+    return "SELECT phi.MRN AS MRN, register.RegistrationCode AS RegistrationCode, register.Status AS Status FROM OpalDB.Patient_Hospital_Identifier phi JOIN registerdb.registrationcode register ON `phi`.PatientSerNum = register.PatientSerNum WHERE register.FirebaseBranch = ?;";
 }
 
