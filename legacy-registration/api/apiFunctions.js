@@ -81,26 +81,30 @@ exports.getTermsandAgreementDocuments = function (requestObject) {
 
 // get patient Info
 exports.getPatientInfo = async function(requestObject) {
-    let result = undefined;
+    let data = undefined;
+    let result = 'SUCCESS';
     try {
-        result = await sqlInterface.getPatient(requestObject);
-        result = typeof result[0] == 'object' ? result[0] : undefined;
+        data = await sqlInterface.getPatient(requestObject);
+        data = typeof data[0] == 'object' ? data[0] : undefined;
     } catch (error) {
         logger.log('error', `An error occurred while getting patient info (for ${requestObject.Parameters.Fields.ramq}): ${JSON.stringify(error)}`);
+        result = 'FAILURE';
     }
-    return { Data: result, Result: 'SUCCESS' };
+    return { Data: data, Result: result };
 };
 
 // get patient Info
 exports.getRamqByMRN = async function(requestObject) {
-    let result = undefined;
+    let data = undefined;
+    let result = 'SUCCESS';
     try {
-        result = await sqlInterface.getRamqByMRN(requestObject);
-        result = typeof result[0] == 'object' ? result[0] : undefined;
+        data = await sqlInterface.getRamqByMRN(requestObject);
+        data = typeof data[0] == 'object' ? data[0] : undefined;
     } catch (error) {
         logger.log('error', `An error occurred while getting RAMQ (for ${requestObject.Parameters.Fields.ramq}): ${JSON.stringify(error)}`);
+        result = 'FAILURE';
     }
-    return { Data: result, Result: 'SUCCESS' };
+    return { Data: data, Result: result };
 };
 
 // Register patient
