@@ -81,20 +81,26 @@ exports.getTermsandAgreementDocuments = function (requestObject) {
 
 // get patient Info
 exports.getPatientInfo = async function(requestObject) {
-    return new Promise((resolve, reject) => {
-        sqlInterface.getPatient(requestObject).then((members) => {
-            resolve({ Data: members[0], Result: 'SUCCESS' });
-        }).catch((err) => reject({ Response: error, Reason: err }));
-    });
+    let result = undefined;
+    try {
+        result = await sqlInterface.getPatient(requestObject);
+        result = typeof result[0] == 'object' ? result[0] : undefined;
+    } catch (error) {
+        logger.log('error', `An error occurred while getting patient info (for ${requestObject.Parameters.Fields.ramq}): ${JSON.stringify(error)}`);
+    }
+    return { Data: result, Result: 'SUCCESS' };
 };
 
 // get patient Info
 exports.getRamqByMRN = async function(requestObject) {
-    return new Promise((resolve, reject) => {
-        sqlInterface.getRamqByMRN(requestObject).then((members) => {
-            resolve({ Data: members[0], Result: 'SUCCESS' });
-        }).catch((err) => reject({ Response: error, Reason: err }));
-    });
+    let result = undefined;
+    try {
+        result = await sqlInterface.getRamqByMRN(requestObject);
+        result = typeof result[0] == 'object' ? result[0] : undefined;
+    } catch (error) {
+        logger.log('error', `An error occurred while getting RAMQ (for ${requestObject.Parameters.Fields.ramq}): ${JSON.stringify(error)}`);
+    }
+    return { Data: result, Result: 'SUCCESS' };
 };
 
 // Register patient
