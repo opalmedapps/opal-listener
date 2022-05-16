@@ -79,6 +79,24 @@ exports.getTermsandAgreementDocuments = function (requestObject) {
     });
 };
 
+// get patient Info
+exports.getPatientInfo = async function(requestObject) {
+    return new Promise((resolve, reject) => {
+        sqlInterface.getPatient(requestObject).then((members) => {
+            resolve({ Data: members[0], Result: 'SUCCESS' });
+        }).catch((err) => reject({ Response: error, Reason: err }));
+    });
+};
+
+// get patient Info
+exports.getRamqByMRN = async function(requestObject) {
+    return new Promise((resolve, reject) => {
+        sqlInterface.getRamqByMRN(requestObject).then((members) => {
+            resolve({ Data: members[0], Result: 'SUCCESS' });
+        }).catch((err) => reject({ Response: error, Reason: err }));
+    });
+};
+
 // Register patient
 exports.registerPatient = async function(requestObject) {
     try {

@@ -31,33 +31,62 @@ class RequestValidator {
             //    r.reject(new opalResponseError(5, 'Received request from unsafe app version', request, 'Unsafe App Version'));
             //}
 
-            //Gets user password for decrypting
-            sqlInterface.getRequestEncryption(requestObject).then(function (rows) {
+            const RAMQhash = utility.hash('ramq');
+            const MRNhash = utility.hash('mrn');
 
-                logger.log('debug', 'Processing getRequestEncryption function and fetched the result: ' + rows);
+            if (requestObject.EncryptionType == RAMQhash) {
+                //Gets user password for decrypting
+                sqlInterface.getRequestEncryption(requestObject).then(function (rows) {
 
-                if (rows[0].length > 1 || rows[0].length === 0) {
-                    //Rejects requests if username returns more than one password
-                    r.reject(new opalResponseError(1, 'Potential Injection Attack, invalid password for encryption', request, 'Invalid credentials'));
-                } else {
+                    logger.log('debug', 'Processing getRequestEncryption function and fetched the result: ' + rows);
 
-                    let RegistrationCode = rows[0][0].RegistrationCode;
-                    let RAMQ = rows[0][0].RAMQ;
+                    if (rows[0].length > 1 || rows[0].length === 0) {
+                        //Rejects requests if username returns more than one password
+                        r.reject(new opalResponseError(1, 'Potential Injection Attack, invalid password for encryption', request, 'Invalid credentials'));
+                    } else {
 
-                    utility.decrypt({ req: request.type, params: request.parameters }, RegistrationCode, RAMQ)
-                        .then((dec) => {
-                            request.setAuthenticatedInfo(RAMQ, RegistrationCode, dec.req, dec.params);
-                            r.resolve(request);
-                        })
-                        .catch((err) => {
-                            logger.log('error', 'Unable to decrypt due to: ' + JSON.stringify(err));
-                            r.reject(new opalResponseError(2, 'Unable to decrypt request', request, err));
-                        });
-                }
-            }).catch((err) => {
-                r.reject(new opalResponseError(2, 'Unable get user encryption', request, err));
+                        let RegistrationCode = rows[0][0].RegistrationCode;
+                        let RAMQ = rows[0][0].RAMQ;
+
+                        utility.decrypt({ req: request.type, params: request.parameters }, RegistrationCode, RAMQ)
+                            .then((dec) => {
+                                request.setAuthenticatedInfo(RAMQ, RegistrationCode, dec.req, dec.params);
+                                r.resolve(request);
+                            })
+                            .catch((err) => {
+                                logger.log('error', 'Unable to decrypt due to: ' + JSON.stringify(err));
+                                r.reject(new opalResponseError(2, 'Unable to decrypt request', request, err));
+                            });
+                    }
+                }).catch((err) => {
+                    r.reject(new opalResponseError(2, 'Unable get user encryption', request, err));
                 });
+            } else if (requestObject.EncryptionType == MRNhash) {
+                // get MRN codes by Encrypted registration code
+                sqlInterface.getMRNByRegistrationCode(requestObject).then(function (rows) {
 
+                    // Check if the MRN code input by the user is in MRN code list
+                    const validMRNInfo = rows.find(row => {return utility.hash(row.MRN) == requestObject.EncryptionId});
+                    if (validMRNInfo == undefined) {
+                        r.reject(new opalResponseError(1, 'Potential Injection Attack, invalid password for encryption', request, 'Invalid credentials'));
+                    } else {
+                        let RegistrationCode = validMRNInfo.RegistrationCode;
+                        let MRN = validMRNInfo.MRN;
+
+                        utility.decrypt({ req: request.type, params: request.parameters }, RegistrationCode, MRN)
+                            .then((dec) => {
+                                request.setAuthenticatedInfo(MRN, RegistrationCode, dec.req, dec.params);
+                                r.resolve(request);
+                            })
+                            .catch((err) => {
+                                logger.log('error', 'Unable to decrypt due to: ' + JSON.stringify(err));
+                                r.reject(new opalResponseError(2, 'Unable to decrypt request', request, err));
+                            });
+                    }
+                }).catch((err) => {
+                    r.reject(new opalResponseError(2, 'Unable get user encryption', request, err));
+                });
+            }
         } else {
             logger.log('error', 'invalid request due to: ' + JSON.stringify(validation.errors));
             r.reject(new opalResponseError(2, 'Unable to process request', request, 'Missing request parameters: ' + validation.errors));

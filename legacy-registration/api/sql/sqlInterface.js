@@ -48,13 +48,23 @@ let LastName = "";
 
 /**
  * getRequestEncryption
- * @desc Gets user registration code for encrypting/decrypting to return ramq
+ * @desc Gets user registration code for encrypting/decrypting to return ramq. listener internal function
  * @param requestObject
  * @return {Promise}
  */
 exports.getRequestEncryption = function (requestObject) {
     return exports.runOpaldbSqlQuery(queries.getRequestEncryption(), [requestObject.BranchName]);
 };
+
+/**
+ getMRNByRegistrationCode
+ @desc get the MRN codes by patient registration code. listener internal function
+ @param requestObject
+ @return {Promise}
+ **/
+exports.getMRNByRegistrationCode = function (requestObject) {
+    return exports.runOpaldbSqlQuery(queries.getMRNByRegistrationCode(), [requestObject.BranchName]);
+}
 
 
 /**
@@ -253,6 +263,51 @@ exports.getSiteAndMrn = function (requestObject) {
         })
         .catch((error) => {
             logger.log('error', 'Problems querying patient Site and Mrn due to ' + error);
+            r.reject(error);
+        });
+
+    return r.promise;
+};
+
+
+/**
+ getPatient
+ @desc If the patient Id is available, get list of patient hospital and mrn if there is any.
+ @param requestObject
+ @return {Promise}
+ **/
+exports.getPatient = function (requestObject) {
+    let r = Q.defer();
+    let Parameters = requestObject.Parameters.Fields;
+
+    exports.runOpaldbSqlQuery(queries.getPatient(), [Parameters.ramq])
+        .then((rows) => {
+            r.resolve(rows);
+        })
+        .catch((error) => {
+            logger.log('error', 'Problems querying getPatient due to ' + error);
+            r.reject(error);
+        });
+
+    return r.promise;
+};
+
+/**
+ getRamqByMRN
+ @desc get RAMQ code by MRN code.
+ @param requestObject
+ @return {Promise}
+ **/
+exports.getRamqByMRN = function (requestObject) {
+    let r = Q.defer();
+    let Parameters = requestObject.Parameters.Fields;
+
+    exports.runOpaldbSqlQuery(queries.getRamqByMRN(), [Parameters.mrn])
+        .then((rows) => {
+            r.resolve(rows);
+        })
+        .catch((error) => {
+            logger.log('error', 'Problems querying getRamqByMRN due to ' + error);
             r.reject(error);
         });
 
