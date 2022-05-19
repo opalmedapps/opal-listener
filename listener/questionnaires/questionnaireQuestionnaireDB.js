@@ -59,30 +59,24 @@ FUNCTIONS TO GET QUESTIONNAIRES
  * getQuestionnaireList
  * @desc this function get a list of questionnaire belonging to an user.
  * @param {object} opalPatientSerNumAndLanguage object containing PatientSerNum and Language as property. These information comes from OpalDB
+ * @param {Date} [lastUpdated] - If provided, only items with 'LastUpdated' after this time are returned.
  * @returns {promise}
  */
-// TODO add lastUpdated
-function getQuestionnaireList(opalPatientSerNumAndLanguage) {
-    let r = q.defer();
+async function getQuestionnaireList(opalPatientSerNumAndLanguage, lastUpdated=0) {
+    const params = [
+        opalPatientSerNumAndLanguage.PatientSerNum,
+        opalPatientSerNumAndLanguage.Language,
+    ]
+    let queryResult = await runQuery(questionnaireQueries.getQuestionnaireListQuery(), params);
 
-    // get questionnaire list
-    runQuery(questionnaireQueries.getQuestionnaireListQuery(),
-        [opalPatientSerNumAndLanguage.PatientSerNum, opalPatientSerNumAndLanguage.Language])
-        .then(function (queryResult) {
+    if (!questionnaireValidation.hasValidProcedureStatus(queryResult)) {
+        logger.log("error", "Error getting questionnaire list: query error");
+        throw new Error('Error getting questionnaire list: query error');
+    }
 
-            if (!questionnaireValidation.hasValidProcedureStatus(queryResult)) {
-                logger.log("error", "Error getting questionnaire list: query error");
-                r.reject(new Error('Error getting questionnaire list: query error'));
-            } else {
-                r.resolve(queryResult[0]);
-            }
-        })
-        .catch(function (err) {
-            logger.log("error", `Error getting questionnaire list, ${err}`);
-            r.reject(err);
-        })
-
-    return r.promise;
+    // To limit unnecessary processing, skip the filter if no lastUpdated was provided
+    const result = lastUpdated ? queryResult[0].filter(row => new Date(row.last_updated) > lastUpdated) : queryResult[0];
+    return result;
 }
 
 /**
