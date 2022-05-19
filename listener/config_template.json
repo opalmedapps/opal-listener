@@ -30,6 +30,7 @@
     "port": 465,
     "username": "registration@opalmedapps.ca",
     "password": "",
-    "from": "Opal Registration <registration@opalmedapps.ca>"
+    "from": "Opal Registration <registration@opalmedapps.ca>",
+    "tls_reject_unauthorized": true
   }
 }
