@@ -35,6 +35,11 @@ class SimulateRequest {
     #firebase;
 
     /**
+     * Type of request to send request to either legacy using 'request value or new structure using 'api' default value.
+     */
+    #requestType = 'api';
+
+    /**
      * @param {object} requestData  Mock request to be encrypt and upload to firebase. Simulate a app request
      * @description Upload a mock request to firebase to be picked up by the listener
      *              This file need to be run inside the docker container using the command:
@@ -113,7 +118,7 @@ class SimulateRequest {
      * @description Upload the mock request to firebase db. Which trigger the listener's pipeline.
      */
     uploadToFirebase() {
-        this.#firebase.getDataBaseRef.child('requests').push(this.#requestData).then(response => {
+        this.#firebase.getDataBaseRef.child(this.#requestType).push(this.#requestData).then(response => {
             legacyLogger.log('debug', `Firebase request push succes with key: ${response.key}`);
             process.exit();
         }).catch(error => {
