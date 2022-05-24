@@ -1,6 +1,6 @@
 const nodemailer = require('nodemailer');
 
-function sendMail(config, recipient, subject, text) {
+function sendMail(config, recipient, subject, text, html) {
     let transporter = nodemailer.createTransport({
         host: config.host,
         port: config.port,
@@ -21,6 +21,7 @@ function sendMail(config, recipient, subject, text) {
         to: recipient,
         subject: subject,
         text: text,
+        html: html,
     };
 
     return transporter.sendMail(message);
