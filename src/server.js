@@ -29,11 +29,13 @@ async function launch() {
 
     legacyLogger.log('debug', 'Setting Firebase request listeners');
 
-    const requestHandler = new RequestHandler(firebase.getDataBaseRef);
+    const requestHandler = new RequestHandler(firebase);
     // Still need pass the database reference to make the legacy-server work for the moment
     legacyServer.setFirebaseConnection(firebase.getDataBaseRef);
-    requestHandler.listenToRequests('requests');
-    requestHandler.listenToRequests('passwordResetRequests');
+    legacyServer.listenForRequest('requests');
+    legacyServer.listenForRequest('passwordResetRequests');
+
+    requestHandler.listenToRequests('api');
 
     legacyRegistrationServer.setFirebaseConnection(firebase);
     legacyRegistrationServer.listenForRequest('requests');
