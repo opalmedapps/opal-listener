@@ -7,7 +7,6 @@ src/config/firebase/
 
 # Generated documentation
 docs/generated
-docs/public
 
 # Logs
 logs/*.log

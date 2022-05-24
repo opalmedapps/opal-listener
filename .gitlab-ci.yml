@@ -79,6 +79,6 @@ pages:
     - npm run docs
   artifacts:
     paths:
-      - docs/public/
+      - public
   # rules:
   #   - if: $CI_COMMIT_REF_NAME == $CI_DEFAULT_BRANCH
