@@ -8,8 +8,10 @@ const utility = require('./utility/utility.js');
 const config = require('../config-adaptor');
 const opalRequest = require('./request/request.js');
 const logger = require('../logs/logger.js');
-const request = require('request')
-const ssl = require('../security/ssl.js')
+const request = require('request');
+const ssl = require('../security/ssl.js');
+const path = require('path');
+const fs = require('fs');
 
 const Q = require('q');
 const { sendMail } = require('./utility/mail.js');
@@ -105,8 +107,8 @@ exports.registerPatient = async function(requestObject) {
         // Registration is considered successful at this point.
         // I.e., don't fail the whole registration if an error occurs now and only log an error.
         try {
-            let {subject, body} = getEmailContent(requestObject.Parameters.Fields.language);
-            await sendMail(config.SMTP, email, subject, body.join('\n'));
+            let {subject, body, htmlStream} = getEmailContent(requestObject.Parameters.Fields.language);
+            await sendMail(config.SMTP, email, subject, body.join('\n'), htmlStream);
         }
         catch (error) {
             logger.log('error', `An error occurred while sending the confirmation email (for ${requestObject.Parameters.Fields.email}): ${JSON.stringify(error)}`);
@@ -241,23 +243,28 @@ function deleteFirebaseBranch(parameter) {
 };
 
 /**
- * @description Returns the subject and body of the registration email in the given language.
+ * @description Returns the subject, body and HTML stream of the registration email in the given language.
  * @param {string} language - The two-character (capitalized) string of the language to send the email in.
- * @returns {Object} Returns an object with subject and body.
+ * @returns {Object} Returns an object with subject, body and html stream.
  * @throws Throws an error if the given language is not supported.
  */
 function getEmailContent(language) {
     let data;
+    let htmlStream;
 
     if (language == 'EN') {
         data = require('../email/confirmation_en.json');
+        htmlStream = fs.createReadStream(path.resolve(__dirname, '../email/confirmation_en.html'));
     }
     else if (language == 'FR') {
         data = require('../email/confirmation_fr.json');
+        htmlStream = fs.createReadStream(path.resolve(__dirname, '../email/confirmation_fr.html'));
     }
     else {
         throw `No email content for language '${language}' available`;
     }
+
+    data.htmlStream = htmlStream
 
     return data;
 }
