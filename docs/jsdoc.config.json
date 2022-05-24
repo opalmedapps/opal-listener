@@ -2,7 +2,7 @@
   "opts": {
     "template": "node_modules/tui-jsdoc-template",
     "encoding": "utf8",
-    "destination": "docs/generated",
+    "destination": "docs/public",
     "recurse": true,
     "tutorials": "docs/source"
   },
