@@ -14,7 +14,8 @@ const API = {
     'AccessLevelList': apiFunctionRequest.getAccessLevelList,
     'LanguageList': apiFunctionRequest.getLanguageList,
     'TermsandAggreementDocuments': apiFunctionRequest.getTermsandAgreementDocuments,
-    'RegisterPatient': apiFunctionRequest.registerPatient
+    'RegisterPatient': apiFunctionRequest.registerPatient,
+    'GetPatientInfo': apiFunctionRequest.getPatientInfo,
 };
 
 /**
