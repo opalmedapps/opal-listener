@@ -259,6 +259,16 @@ exports.getSiteAndMrn = function (requestObject) {
     return r.promise;
 };
 
+/**
+ getPatient
+ @desc If the patient Id is available, get list of patient hospital and mrn if there is any.
+ @param requestObject
+ @return {Promise}
+ **/
+exports.getPatient = function (requestObject) {
+    let parameters = requestObject.Parameters.Fields;
+    return exports.runOpaldbSqlQuery(queries.getPatient(), [parameters.ramq]);
+};
 
 /**
     runOpaldbSqlQuery
