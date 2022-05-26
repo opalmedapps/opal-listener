@@ -77,8 +77,9 @@ pages:
   script:
     - npx jsdoc --version
     - npm run docs
+    - mv docs/generated/ public/
   artifacts:
     paths:
-      - docs/generated/
+      - public
   rules:
     - if: $CI_COMMIT_REF_NAME == $CI_DEFAULT_BRANCH
