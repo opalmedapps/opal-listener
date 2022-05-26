@@ -16,7 +16,11 @@ const fs = require('fs');
 const Q = require('q');
 const { sendMail } = require('./utility/mail.js');
 
-// Insert user IP address.
+/**
+ * @description Insert user IP address.
+ * @param {Object} requestObject - The calling request's requestObject.
+ * @returns {Promise<void>} Resolves if the call completes successfully, or rejects with an error.
+ */
 exports.insertIPLog = function (requestObject) {
     return new Promise((resolve, reject) => {
 
@@ -27,7 +31,11 @@ exports.insertIPLog = function (requestObject) {
     });
 };
 
-// Validate user IP address.
+/**
+ * @description Validate user IP address.
+ * @param {Object} requestObject - The calling request's requestObject.
+ * @returns {Promise<void>} Resolves if the call completes successfully, or rejects with an error.
+ */
 exports.validateIP = function (requestObject) {
     return new Promise((resolve, reject) => {
         sqlInterface.validateIP(requestObject).then((members) => {
@@ -36,7 +44,11 @@ exports.validateIP = function (requestObject) {
     });
 };
 
-// Validate user input and search the user
+/**
+ * @description Validate user input and search the user.
+ * @param {Object} requestObject - The calling request's requestObject.
+ * @returns {Promise<void>} Resolves if the call completes successfully, or rejects with an error.
+ */
 exports.validateInputs = function (requestObject) {
     return new Promise((resolve, reject) => {
         sqlInterface.validateInputs(requestObject).then((members) => {
@@ -45,7 +57,11 @@ exports.validateInputs = function (requestObject) {
     });
 };
 
-// Get all security questions
+/**
+ * @description Get all security questions.
+ * @param {Object} requestObject - The calling request's requestObject.
+ * @returns {Promise<void>} Resolves if the call completes successfully, or rejects with an error.
+ */
 exports.getSecurityQuestionsList = function (requestObject) {
     return new Promise((resolve, reject) => {
         sqlInterface.getSecurityQuestionsList(requestObject).then((members) => {
@@ -54,7 +70,11 @@ exports.getSecurityQuestionsList = function (requestObject) {
     });
 };
 
-// Fetch the Opal level of accesss list
+/**
+ * @description Fetch the Opal level of accesss list.
+ * @param {Object} requestObject - The calling request's requestObject.
+ * @returns {Promise<void>} Resolves if the call completes successfully, or rejects with an error.
+ */
 exports.getAccessLevelList = function (requestObject) {
     return new Promise((resolve, reject) => {
         sqlInterface.getAccessLevelList(requestObject).then((members) => {
@@ -63,7 +83,11 @@ exports.getAccessLevelList = function (requestObject) {
     });
 };
 
-// Get the Opal app language list
+/**
+ * @description Get the Opal app language list.
+ * @param {Object} requestObject - The calling request's requestObject.
+ * @returns {Promise<void>} Resolves if the call completes successfully, or rejects with an error.
+ */
 exports.getLanguageList = function (requestObject) {
     return new Promise((resolve, reject) => {
         sqlInterface.getLanguageList(requestObject).then((members) => {
@@ -72,7 +96,11 @@ exports.getLanguageList = function (requestObject) {
     });
 };
 
-// Get the terms and agreement docuemnts
+/**
+ * @description Get the terms and agreement docuemnts.
+ * @param {Object} requestObject - The calling request's requestObject.
+ * @returns {Promise<void>} Resolves if the call completes successfully, or rejects with an error.
+ */
 exports.getTermsandAgreementDocuments = function (requestObject) {
     return new Promise((resolve, reject) => {
         sqlInterface.getTermsandAgreementDocuments(requestObject).then((members) => {
@@ -81,7 +109,12 @@ exports.getTermsandAgreementDocuments = function (requestObject) {
     });
 };
 
-// get patient Info
+/**
+ * @description Get a patient data info.
+ * @param {Object} requestObject - The calling request's requestObject.
+ * @returns { Data: response, Result: result }
+ * @throws Throws an error if a required field is not present in the given request.
+ */
 exports.getPatientInfo = async function(requestObject) {
     let response = undefined;
     let result = 'FAILURE';
@@ -97,7 +130,12 @@ exports.getPatientInfo = async function(requestObject) {
     return { Data: response, Result: result };
 };
 
-// insert patient data
+/**
+ * @description Insert a patient record.
+ * @param {Object} requestObject - The calling request's requestObject.
+ * @returns { Data: response, Result: result }
+ * @throws Throws an error if a required field is not present in the given request.
+ */
 exports.insertPatient = async function(requestObject) {
     requestObject.Parameters.Fields = arraySanitization(requestObject.Parameters.Fields);
     validateRequest(requestObject, [
@@ -123,7 +161,12 @@ exports.insertPatient = async function(requestObject) {
     return { Data: response, Result: result };
 };
 
-// insert patient hospital identifier data
+/**
+ * @description Insert a record of patient hospital identifier.
+ * @param {Object} requestObject - The calling request's requestObject.
+ * @returns { Data: response, Result: result }
+ * @throws Throws an error if a required field is not present in the given request.
+ */
 exports.insertPatientHospitalIdentifier = async function(requestObject) {
     requestObject.Parameters.Fields = arraySanitization(requestObject.Parameters.Fields);
     validateRequest(requestObject, ['patientSerNum', 'mrn', 'site']);
@@ -142,7 +185,12 @@ exports.insertPatientHospitalIdentifier = async function(requestObject) {
     return { Data: response, Result: result };
 };
 
-// validate patient data
+/**
+ * @description Validate patient data.
+ * @param {Object} requestObject - The calling request's requestObject.
+ * @returns { Data: response, Result: result }
+ * @throws Throws an error if a required field is not present in the given request.
+ */
 exports.validatePatient = async function(requestObject) {
     requestObject.Parameters.Fields = arraySanitization(requestObject.Parameters.Fields);
     validateRequest(requestObject, ['patientSerNum']);
@@ -161,7 +209,12 @@ exports.validatePatient = async function(requestObject) {
     return { Data: response, Result: result };
 };
 
-// get LabResult History
+/**
+ * @description Get Lab Result History.
+ * @param {Object} requestObject - The calling request's requestObject.
+ * @returns { Data: response, Result: result }
+ * @throws Throws an error if a required field is not present in the given request.
+ */
 exports.getLabResultHistory = async function(requestObject) {
     requestObject.Parameters.Fields = arraySanitization(requestObject.Parameters.Fields);
     validateRequest(requestObject, ['codeGenerateLoginLink', 'patientId', 'site']);
@@ -181,7 +234,12 @@ exports.getLabResultHistory = async function(requestObject) {
 };
 
 
-// Register patient
+/**
+ * @description Register a patient
+ * @param {Object} requestObject - The calling request's requestObject.
+ * @returns { Data: result}
+ * @throws Throws an error if a required field is not present in the given request.
+ */
 exports.registerPatient = async function(requestObject) {
     try {
         validateRegisterPatientRequest(requestObject);
