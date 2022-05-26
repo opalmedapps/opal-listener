@@ -223,7 +223,7 @@ exports.registerPatient = function (requestObject) {
     let r = Q.defer();
     let Parameters = requestObject.Parameters.Fields;
 
-    exports.runOpaldbSqlQuery(queries.InsertPatient(), [Parameters.ramq, Parameters.email, Parameters.password, Parameters.uniqueId, Parameters.securityQuestion1, Parameters.answer1, Parameters.securityQuestion2, Parameters.answer2, Parameters.securityQuestion3, Parameters.answer3, Parameters.language, Parameters.accessLevel, Parameters.accessLevelSign, Parameters.termsandAggreementId, Parameters.termsandAggreementSign])
+    exports.runOpaldbSqlQuery(queries.updatePatient(), [Parameters.ramq, Parameters.email, Parameters.password, Parameters.uniqueId, Parameters.securityQuestion1, Parameters.answer1, Parameters.securityQuestion2, Parameters.answer2, Parameters.securityQuestion3, Parameters.answer3, Parameters.language, Parameters.accessLevel, Parameters.accessLevelSign, Parameters.termsandAggreementId, Parameters.termsandAggreementSign])
         .then((rows) => {
 
             r.resolve(rows);

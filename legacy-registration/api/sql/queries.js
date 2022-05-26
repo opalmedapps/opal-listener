@@ -30,8 +30,20 @@ exports.getTermsandAgreementDocuments = function () {
     return "CALL reg_getTermsandAggrementDocuments(?);";
 };
 
-exports.InsertPatient = function () {
-    return "SELECT reg_UpdatePatientInfo(?,?,?,?,?,?,?,?,?,?,?,?,?,?,?) AS Result; ";
+exports.updatePatient = function () {
+    return "SELECT reg_UpdatePatientInfo(?,?,?,?,?,?,?,?,?,?,?,?,?,?,?) AS Result;";
+};
+
+exports.insertPatient = function () {
+    return "SELECT insertPatient(?,?,?,?,?,?) AS Result;";
+};
+
+exports.insertPatientHospitalIdentifier = function () {
+    return "SELECT reg_insertPatientHospitalIdentifier(?,?,?) AS Result;";
+};
+
+exports.validatePatient = function () {
+    return "SELECT validatePatient(?) AS Result;";
 };
 
 exports.getSiteAndMrn = function() {
