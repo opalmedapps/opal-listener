@@ -83,14 +83,19 @@ exports.getTermsandAgreementDocuments = function (requestObject) {
 
 // get patient Info
 exports.getPatientInfo = async function(requestObject) {
-    let result = undefined;
+    let response = undefined;
+    let result = 'FAILURE';
     try {
-            result = await sqlInterface.getPatient(requestObject);
-            result = typeof result[0] == 'object' ? result[0] : undefined;
+        response = await sqlInterface.getPatient(requestObject);
+        if (typeof response[0] == 'object') {
+            response = response[0];
+            result = 'SUCCESS';
+        }
     } catch (error) {
         logger.log('error', `An error occurred while getting patient info (for ${requestObject.Parameters.Fields.ramq}): ${JSON.stringify(error)}`);
+        result = 'FAILURE';
     }
-    return { Data: result, Result: 'SUCCESS' };
+    return { Data: response, Result: result };
 };
 
 // insert patient data
@@ -102,17 +107,22 @@ exports.insertPatient = async function(requestObject) {
         'sex',
         'dateOfBirth',
         'telNum',
-        'SSN'
+        'ramq'
     ]);
 
-    let result = undefined;
+    let response = undefined;
+    let result = 'FAILURE';
     try {
-        result = await sqlInterface.insertPatient(requestObject);
-        result = typeof result[0] == 'object' ? result[0] : undefined;
+        response = await sqlInterface.insertPatient(requestObject);
+        if (typeof response[0] == 'object') {
+            response = response[0];
+            result = 'SUCCESS';
+        }
     } catch (error) {
         logger.log('error', `An error occurred while inserting a patient data (for ${requestObject.Parameters.Fields.SSN}): ${JSON.stringify(error)}`);
+        result = 'FAILURE';
     }
-    return { Data: result, Result: 'SUCCESS' };
+    return { Data: response, Result: result };
 };
 
 // insert patient hospital identifier data
@@ -120,14 +130,19 @@ exports.insertPatientHospitalIdentifier = async function(requestObject) {
     requestObject.Parameters.Fields = arraySanitization(requestObject.Parameters.Fields);
     validateRequest(requestObject, ['patientSerNum', 'mrn', 'site']);
 
-    let result = undefined;
+    let response = undefined;
+    let result = 'FAILURE';
     try {
-        result = await sqlInterface.insertPatientHospitalIdentifier(requestObject);
-        result = typeof result[0] == 'object' ? result[0] : undefined;
+        response = await sqlInterface.insertPatientHospitalIdentifier(requestObject);
+        if (typeof response[0] == 'object') {
+            response = response[0];
+            result = 'SUCCESS';
+        }
     } catch (error) {
         logger.log('error', `An error occurred while inserting patient hospital indentifier (for ${requestObject.Parameters.Fields.mrn}): ${JSON.stringify(error)}`);
+        result = 'FAILURE';
     }
-    return { Data: result, Result: 'SUCCESS' };
+    return { Data: response, Result: result };
 };
 
 // validate patient data
@@ -135,14 +150,19 @@ exports.validatePatient = async function(requestObject) {
     requestObject.Parameters.Fields = arraySanitization(requestObject.Parameters.Fields);
     validateRequest(requestObject, ['patientSerNum']);
 
-    let result = undefined;
+    let response = undefined;
+    let result = 'FAILURE';
     try {
-        result = await sqlInterface.validatePatient(requestObject);
-        result = typeof result[0] == 'object' ? result[0] : undefined;
+        response = await sqlInterface.validatePatient(requestObject);
+        if (typeof response[0] == 'object') {
+            response = response[0];
+            result = 'SUCCESS';
+        }
     } catch (error) {
         logger.log('error', `An error occurred while inserting a patient data (for ${requestObject.Parameters.Fields.patientSerNum}): ${JSON.stringify(error)}`);
+        result = 'FAILURE';
     }
-    return { Data: result, Result: 'SUCCESS' };
+    return { Data: response, Result: result };
 };
 
 // get LabResult History
@@ -150,14 +170,19 @@ exports.getLabResultHistory = async function(requestObject) {
     requestObject.Parameters.Fields = arraySanitization(requestObject.Parameters.Fields);
     validateRequest(requestObject, ['codeGenerateLoginLink', 'patientId', 'site']);
 
-    let result = undefined;
+    let response = undefined;
+    let result = 'FAILURE';
     try {
-        result = await sqlInterface.getLabResultHistory(requestObject);
-        result = typeof result[0] == 'object' ? result[0] : undefined;
+        response = await sqlInterface.getLabResultHistory(requestObject);
+        if (typeof response[0] == 'object') {
+            response = response[0];
+            result = 'SUCCESS';
+        }
     } catch (error) {
-        logger.log('error', `An error occurred while calling getLabResultHistory (for ${requestObject.Parameters.Fields.patientSerNum}): ${JSON.stringify(error)}`);
+        logger.log('error', `An error occurred while getting lab result history (for ${requestObject.Parameters.Fields.patientSerNum}): ${JSON.stringify(error)}`);
+        result = 'FAILURE';
     }
-    return { Data: result, Result: 'SUCCESS' };
+    return { Data: response, Result: result };
 };
 
 
