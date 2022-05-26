@@ -93,7 +93,6 @@ exports.getPatientInfo = async function(requestObject) {
         }
     } catch (error) {
         logger.log('error', `An error occurred while getting patient info (for ${requestObject.Parameters.Fields.ramq}): ${JSON.stringify(error)}`);
-        result = 'FAILURE';
     }
     return { Data: response, Result: result };
 };
@@ -120,7 +119,6 @@ exports.insertPatient = async function(requestObject) {
         }
     } catch (error) {
         logger.log('error', `An error occurred while inserting a patient data (for ${requestObject.Parameters.Fields.SSN}): ${JSON.stringify(error)}`);
-        result = 'FAILURE';
     }
     return { Data: response, Result: result };
 };
@@ -140,7 +138,6 @@ exports.insertPatientHospitalIdentifier = async function(requestObject) {
         }
     } catch (error) {
         logger.log('error', `An error occurred while inserting patient hospital indentifier (for ${requestObject.Parameters.Fields.mrn}): ${JSON.stringify(error)}`);
-        result = 'FAILURE';
     }
     return { Data: response, Result: result };
 };
@@ -160,7 +157,6 @@ exports.validatePatient = async function(requestObject) {
         }
     } catch (error) {
         logger.log('error', `An error occurred while inserting a patient data (for ${requestObject.Parameters.Fields.patientSerNum}): ${JSON.stringify(error)}`);
-        result = 'FAILURE';
     }
     return { Data: response, Result: result };
 };
@@ -180,7 +176,6 @@ exports.getLabResultHistory = async function(requestObject) {
         }
     } catch (error) {
         logger.log('error', `An error occurred while getting lab result history (for ${requestObject.Parameters.Fields.patientSerNum}): ${JSON.stringify(error)}`);
-        result = 'FAILURE';
     }
     return { Data: response, Result: result };
 };
