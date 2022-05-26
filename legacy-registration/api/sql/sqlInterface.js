@@ -228,7 +228,7 @@ exports.insertPatient = function (requestObject) {
         parameters.sex,
         parameters.dateOfBirth,
         parameters.telNum,
-        parameters.SSN,
+        parameters.ramq,
     ]);
 };
 
