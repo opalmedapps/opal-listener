@@ -19,7 +19,6 @@ const API = {
     'InsertPatient': apiFunctionRequest.insertPatient,
     'InsertPatientHospitalIdentifier': apiFunctionRequest.insertPatientHospitalIdentifier,
     'ValidatePatient': apiFunctionRequest.validatePatient,
-    'GetLabResultHistory': apiFunctionRequest.getLabResultHistory,
 };
 
 /**
