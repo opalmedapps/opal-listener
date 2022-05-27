@@ -209,6 +209,30 @@ exports.validatePatient = async function(requestObject) {
     return { Data: response, Result: result };
 };
 
+/**
+ * @description Get Lab Result History.
+ * @param {Object} requestObject - The calling request's requestObject.
+ * @returns { Data: response, Result: result }
+ * @throws Throws an error if a required field is not present in the given request.
+ */
+exports.getLabResultHistory = async function(requestObject) {
+    requestObject.Parameters.Fields = arraySanitization(requestObject.Parameters.Fields);
+    validateRequest(requestObject, ['codeGenerateLoginLink', 'patientId', 'site']);
+
+    let response = undefined;
+    let result = 'FAILURE';
+    try {
+        response = await sqlInterface.getLabResultHistory(requestObject);
+        if (typeof response[0] == 'object') {
+            response = response[0];
+            result = 'SUCCESS';
+        }
+    } catch (error) {
+        logger.log('error', `An error occurred while getting lab result history (for ${requestObject.Parameters.Fields.patientSerNum}): ${JSON.stringify(error)}`);
+    }
+    return { Data: response, Result: result };
+};
+
 
 /**
  * @description Register a patient

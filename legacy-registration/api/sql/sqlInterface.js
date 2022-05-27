@@ -5,6 +5,7 @@ const Q = require('q');
 const queries = require('../sql/queries.js');
 const logger = require('../../logs/logger.js');
 const config = require('../../config-adaptor');
+const axios = require('axios');
 
 /** OPAL DATABASE CONFIGURATIONS **/
 const opaldbCredentials = {
@@ -257,6 +258,25 @@ exports.validatePatient = function (requestObject) {
     return exports.runRegistrationSqlQuery(queries.validatePatient(), [
         parameters.patientSerNum
     ]);
+};
+
+// Get patient lab result history
+exports.getLabResultHistory = function (requestObject) {
+    let r = Q.defer();
+    let parameters = requestObject.Parameters.Fields
+    const url = parameters.codeGenerateLoginLink;
+    const data = {
+        PatientId: parameters.patientId,
+        Site: parameters.site
+    };
+    axios.post(url, data)
+        .then((response) => {
+            r.resolve(response);
+        }).catch((err) => {
+        logger.log('error', 'Problems calling getLabResultHistory due to ' + error);
+        r.reject(error);
+    });
+    return r.promise;
 };
 
 /**
