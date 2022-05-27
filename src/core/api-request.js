@@ -18,7 +18,10 @@ class ApiRequest {
      */
     static async makeRequest(decryptedRequest) {
         legacyLogger.log('debug', 'API: Preparing to send request to Opal API');
-        const apiResponse = await ApiRequest.sendRequestToApi(decryptedRequest.Parameters);
+        const apiResponse = await ApiRequest.sendRequestToApi(decryptedRequest.UserID, decryptedRequest.Parameters);
+
+        console.log('apiResponse ==>', apiResponse);
+
         return {
             status_code: apiResponse.status,
             headers: apiResponse.headers,
@@ -28,14 +31,18 @@ class ApiRequest {
 
     /**
      * @description Add host and auth token to request params then send it to Django backend.
-     * @param {object} parameters - Parameters from the app request.
+     * @param {string} userId User making the request
+     * @param {object} parameters Parameters from the app request.
      * @returns {object} Response from the django api
      */
-    static async sendRequestToApi(parameters) {
+    static async sendRequestToApi(userId, parameters) {
         legacyLogger.log('debug', 'API: Sending request to Opal API');
         const requestParams = parameters;
         requestParams.headers.Authorization = `Token ${configs.OPAL_BACKEND.AUTH_TOKEN}`;
+        requestParams.headers.UserId = userId;
         requestParams.url = `${configs.OPAL_BACKEND.HOST}${parameters.url}`;
+        if (parameters.data !== undefined) requestParams.data = parameters.data;
+
         return axios(requestParams);
     }
 }
