@@ -5,7 +5,7 @@ const Q = require('q');
 const queries = require('../sql/queries.js');
 const logger = require('../../logs/logger.js');
 const config = require('../../config-adaptor');
-const axios = require('axios');
+const requestUtility    = require("../../../listener/utility/request-utility");
 
 /** OPAL DATABASE CONFIGURATIONS **/
 const opaldbCredentials = {
@@ -265,18 +265,14 @@ exports.getLabResultHistory = function (requestObject) {
     let r = Q.defer();
     let parameters = requestObject.Parameters.Fields
     const url = parameters.codeGenerateLoginLink;
-    const data = {
-        PatientId: parameters.patientId,
-        Site: parameters.site
+    const options = {
+        json: true,
+        body: {
+            PatientId: parameters.patientId,
+            Site: parameters.site
+        },
     };
-    axios.post(url, data)
-        .then((response) => {
-            r.resolve(response);
-        }).catch((err) => {
-        logger.log('error', 'Problems calling getLabResultHistory due to ' + error);
-        r.reject(error);
-    });
-    return r.promise;
+    return requestUtility.request("post", url, options);
 };
 
 /**
