@@ -248,19 +248,6 @@ exports.insertPatientHospitalIdentifier = function (requestObject) {
 };
 
 /**
- validatePatient
- @desc validate a patient data.
- @param requestObject
- @return {Promise}
- **/
-exports.validatePatient = function (requestObject) {
-    let parameters = requestObject.Parameters.Fields;
-    return exports.runRegistrationSqlQuery(queries.validatePatient(), [
-        parameters.patientSerNum
-    ]);
-};
-
-/**
  Get patient lab result history
  @desc get a patient lab result history.
  @param requestObject
@@ -269,7 +256,7 @@ exports.validatePatient = function (requestObject) {
 exports.getLabResultHistory = function (requestObject) {
     let r = Q.defer();
     let parameters = requestObject.Parameters.Fields
-    const url = parameters.codeGenerateLoginLink;
+    const url = parameters.labResultHistoryURL;
     const options = {
         json: true,
         body: {
