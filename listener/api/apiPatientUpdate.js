@@ -131,6 +131,7 @@ exports.logout = function(requestObject) {
 
 /**
  * For questionnaire V2 (2019 version of qplus questionnaire front-end). Getting the list of questionnaires belonging to a patient
+ * @deprecated Since QSCCD-230
  * @param {object} requestObject
  * @returns {Promise}
  */
