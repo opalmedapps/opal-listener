@@ -9,6 +9,7 @@ const utility           = require('./../utility/utility');
 const logger            = require('./../logs/logger');
 const {OpalSQLQueryRunner} = require("../sql/opal-sql-query-runner");
 const testResults       = require("./modules/test-results");
+const questionnaires    = require("./modules/questionnaires");
 
 /******************************
  * MAPPINGS
@@ -100,7 +101,11 @@ const requestMappings =
         'PatientTestTypes': {
             module: testResults,
             processFunction: result => result.data.testTypes
-        }
+        },
+        'QuestionnaireList': {
+            module: questionnaires,
+            processFunction: result => result.data.questionnaireList
+        },
     };
 
 

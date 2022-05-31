@@ -10,13 +10,15 @@ class Patient {
 	 * @param {string} firstName
 	 * @param {string} lastName
 	 * @param {string} email
+	 * @param {string} language - The language string for the patient, as stored in OpalDB ('FR', 'EN').
 	 */
 	constructor(patientSerNum = 0, firstName = "", lastName = "",
-	            email = "") {
+	            email = "", language = "") {
 		this.patientSerNum = Number(patientSerNum);
 		this.firstName = firstName;
 		this.lastName = lastName;
 		this.email = email;
+		this.language = language;
 	}
 
 	static async getPatientByUsername(username = "") {
@@ -33,7 +35,7 @@ class Patient {
 			throw new ValidationError(`Patient with username ${username} not found`);
 		}
 		let patientRows = results[0];
-		return new Patient(patientRows.PatientSerNum, patientRows.FirstName, patientRows.LastName, patientRows.Email);
+		return new Patient(patientRows.PatientSerNum, patientRows.FirstName, patientRows.LastName, patientRows.Email, patientRows.Language);
 	}
 }
 
