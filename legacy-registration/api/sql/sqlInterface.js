@@ -260,7 +260,12 @@ exports.validatePatient = function (requestObject) {
     ]);
 };
 
-// Get patient lab result history
+/**
+ Get patient lab result history
+ @desc get a patient lab result history.
+ @param requestObject
+ @return {Promise}
+ **/
 exports.getLabResultHistory = function (requestObject) {
     let r = Q.defer();
     let parameters = requestObject.Parameters.Fields
