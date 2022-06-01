@@ -143,8 +143,14 @@ exports.registerPatient = async function(requestObject) {
         // Before registering the patient, create their firebase user account with decrypted email and password
         // This is required to store their firebase UID as well
         let email = requestObject.Parameters.Fields.email;
-        let uid = await firebaseFunction.createFirebaseAccount(email, requestObject.Parameters.Fields.password);
-        logger.log('info', 'Created firebase user account: ' + uid);
+        let uid = '';
+        if (requestObject.Parameters.Fields.accountExists == '0') {
+            uid = await firebaseFunction.createFirebaseAccount(email, requestObject.Parameters.Fields.password);
+            logger.log('info', 'Created firebase user account: ' + uid);
+        } else {
+            uid = await firebaseFunction.getFirebaseAccountByEmail(email);
+            logger.log('info', 'Got firebase user account: ' + uid);
+        }
 
         // Assign the unique ID and encrypted password to the request object
         requestObject.Parameters.Fields.uniqueId = uid;
@@ -152,8 +158,12 @@ exports.registerPatient = async function(requestObject) {
 
         // Register the patient in the database
         logger.log('info', `Registering the patient with these parameters: ${JSON.stringify(requestObject)}`);
-        let result = await sqlInterface.registerPatient(requestObject);
+        let result = await sqlInterface.insertPatient(requestObject);
         logger.log('debug', `Register patient response: ${JSON.stringify(result)}`);
+        result = await sqlInterface.insertPatientHospitalIdentifier(requestObject);
+        logger.log('debug', `Register patient hospital identifier response: ${JSON.stringify(result)}`);
+        result = await sqlInterface.getLabResultHistory(requestObject);
+        logger.log('debug', `Register get lab result history response: ${JSON.stringify(result)}`);
 
         // Delete the unique firebase branch
         deleteFirebaseBranch(requestObject.BranchName);
