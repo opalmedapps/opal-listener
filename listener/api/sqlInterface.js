@@ -61,7 +61,7 @@ const requestMappings =
             serNum: 'AppointmentSerNum'
         },
         'Notifications': {
-            sql: queries.patientNotificationsTableFields(),
+            sql: queries.userNotificationsTableFields(),
             numberOfLastUpdated: 0,
             table: 'Notification',
             serNum: 'NotificationSerNum'
@@ -364,14 +364,14 @@ exports.sendMessage=function(requestObject) {
  */
 exports.checkIn = async function (requestObject) {
     try {
-        const patientSerNum = requestObject.Parameters.PatientSerNum;
+        const userSerNum = requestObject.Parameters.userSerNum;
 
-        if (await hasAlreadyAttemptedCheckin(patientSerNum) === false) {
+        if (await hasAlreadyAttemptedCheckin(userSerNum) === false) {
             let success = false;
             let lastError;
 
             // Get the patient's MRNs (used in the check-in call to ORMS)
-            let mrnList = await getMRNs(patientSerNum);
+            let mrnList = await getMRNs(userSerNum);
 
             // Attempt a check-in on each of the patient's MRNs on a loop until one of the calls is successful
             for (let i = 0; i < mrnList.length; i++) {
@@ -382,18 +382,18 @@ exports.checkIn = async function (requestObject) {
                 try {
                     // Check into the patient's appointments via a call to the OIE
                     await checkIntoOIE(mrn, mrnSite);
-                    logger.log("verbose", `Success checking in PatientSerNum = ${patientSerNum} using MRN = ${mrn} (site = ${mrnSite})`);
+                    logger.log("verbose", `Success checking in userSerNum = ${userSerNum} using MRN = ${mrn} (site = ${mrnSite})`);
                     success = true;
                     break;
                 }
                 catch (error) {
-                    logger.log("verbose", `Failed to check in PatientSerNum = ${patientSerNum} using MRN = ${mrn} (site = ${mrnSite}); error: ${error}`);
+                    logger.log("verbose", `Failed to check in userSerNum = ${userSerNum} using MRN = ${mrn} (site = ${mrnSite}); error: ${error}`);
                     lastError = error;
                 }
             }
             // Check whether the check-in call succeeded, or all attempts failed
             // On a success, return all checked-in appointments to the app
-            if (success) return await getCheckedInAppointments(patientSerNum);
+            if (success) return await getCheckedInAppointments(userSerNum);
             else throw lastError;
         }
         else return [];
@@ -425,14 +425,14 @@ async function checkIntoOIE(mrn, mrnSite) {
 
 /**
  * Queries the database to see if any patient push notifications exist for the user today, hence whether or not they have attempted to check in already
- * @param patientSerNum
+ * @param userSerNum
  * @returns {Promise}
  */
-function hasAlreadyAttemptedCheckin(patientSerNum){
+function hasAlreadyAttemptedCheckin(userSerNum){
     return new Promise((resolve, reject) => {
-        if(!patientSerNum) reject("No Patient SerNum Provided");
+        if(!userSerNum) reject("No Patient SerNum Provided");
         else {
-            exports.runSqlQuery(queries.getPatientCheckinPushNotifications(), [patientSerNum]).then((rows) => {
+            exports.runSqlQuery(queries.getUserCheckinPushNotifications(), [userSerNum]).then((rows) => {
                 if (rows.length === 0) resolve(false);
                 // YM 2018-05-25 - Temporary putting as false for now to bypass the checking of notification table.
                 //                 Technically, it should be checking the appointment table.
@@ -448,12 +448,12 @@ exports.checkCheckin = hasAlreadyAttemptedCheckin;
 
 /**
  * Gets and returns all of a patients appointments on today's date
- * @param patientSerNum
+ * @param userSerNum
  * @return {Promise}
  */
-function getCheckedInAppointments(patientSerNum){
+function getCheckedInAppointments(userSerNum){
     return new Promise((resolve, reject) => {
-        exports.runSqlQuery(queries.getTodaysCheckedInAppointments(), [patientSerNum])
+        exports.runSqlQuery(queries.getTodaysCheckedInAppointments(), [userSerNum])
             .then(rows => resolve({Response:'success', Data: rows}))
             .catch(err => reject({Response: 'error', Reason: err}));
     })
