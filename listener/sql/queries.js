@@ -450,36 +450,41 @@ exports.getTodaysCheckedInAppointments = function() {
 };
 
 /**
- * NOTIFICATION QUERIES
- * ================================
+ * @desc Query that returns all notifications for a user with LastUpdated values after a given timestamp.
+ * @returns {string} The query.
  */
-
 exports.patientNotificationsTableFields=function()
 {
-    return "SELECT Notification.NotificationSerNum, " +
-        "Notification.DateAdded, " +
-        "Notification.ReadStatus, " +
-        "Notification.RefTableRowSerNum, " +
-        "NotificationControl.NotificationType, " +
-        "NotificationControl.Name_EN, " +
-        "NotificationControl.Name_FR, " +
-        "NotificationControl.Description_EN, " +
-        "NotificationControl.Description_FR, " +
-        "Notification.RefTableRowTitle_EN, " +
-        "Notification.RefTableRowTitle_FR " +
-        "" +
-        "FROM Notification, " +
-        "NotificationControl, " +
-        "Patient, " +
-        "Users " +
-        "" +
-        "WHERE " +
-        "NotificationControl.NotificationControlSerNum = Notification.NotificationControlSerNum " +
-        "AND Notification.PatientSerNum=Patient.PatientSerNum " +
-        "AND Patient.PatientSerNum=Users.UserTypeSerNum " +
-        "AND Users.Username= ? ";
+    return `SELECT
+                n.NotificationSerNum,
+                n.DateAdded,
+                n.ReadStatus,
+                n.RefTableRowSerNum,
+                nc.NotificationType,
+                nc.Name_EN,
+                nc.Name_FR,
+                nc.Description_EN,
+                nc.Description_FR,
+                n.RefTableRowTitle_EN,
+                n.RefTableRowTitle_FR
+            FROM
+                Notification n,
+                NotificationControl nc,
+                Patient p,
+                Users u
+            WHERE nc.NotificationControlSerNum = n.NotificationControlSerNum
+                AND n.PatientSerNum = p.PatientSerNum
+                AND p.PatientSerNum = u.UserTypeSerNum
+                AND u.Username = ?
+                AND (n.LastUpdated > ? OR nc.LastUpdated > ?)
+            ;
+    `;
 };
 
+/**
+ * @deprecated Since QSCCD-125. This query is redundant to patientNotificationsTableFields.
+ * @returns {string}
+ */
 exports.getNewNotifications=function() {
     return "SELECT Notification.NotificationSerNum, " +
         "Notification.DateAdded," +

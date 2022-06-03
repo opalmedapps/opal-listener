@@ -28,6 +28,7 @@ const LEGACYAPI = {
     'Feedback': apiHospitalUpdate.inputFeedback,
     'MapLocation': apiPatientUpdate.getMapLocation,
     'Message': apiHospitalUpdate.sendMessage,
+    // Deprecated API entry: 'NotificationsNew', since QSCCD-125
     'NotificationsNew': apiHospitalUpdate.getNewNotifications,
     'EducationalPackageContents': apiPatientUpdate.getPackageContents,
     'QuestionnaireInOpalDBFromSerNum': apiPatientUpdate.getQuestionnaireInOpalDB,

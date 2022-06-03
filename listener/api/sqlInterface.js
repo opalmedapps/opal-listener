@@ -62,7 +62,7 @@ const requestMappings =
         },
         'Notifications': {
             sql: queries.patientNotificationsTableFields(),
-            numberOfLastUpdated: 0,
+            numberOfLastUpdated: 2,
             table: 'Notification',
             serNum: 'NotificationSerNum'
         },
@@ -1193,10 +1193,10 @@ exports.setTrusted = function(requestObject)
 
 /**
  * Returns a promise containing all new notifications
+ * @deprecated Since QSCCD-125. This function provides duplicate functionality to 'Notifications' in requestMappings.
  * @param {object} requestObject the request
  * @returns {Promise} Returns a promise that contains the notification data
  */
-
 exports.getNewNotifications = function(requestObject){
     let r = Q.defer();
 
@@ -1220,6 +1220,7 @@ exports.getNewNotifications = function(requestObject){
 /**
  * Takes in a list of notifications and the original requestObject and returns a list of tuples that contains the notifications
  * and their associated content
+ * @deprecated Since QSCCD-125
  * @param notifications
  * @param requestObject
  * @returns {Promise<any>}
@@ -1268,6 +1269,9 @@ function assocNotificationsWithItems(notifications, requestObject){
     })
 }
 
+/**
+ * @deprecated Since QSCCD-125
+ */
 function mapRefreshedDataToNotifications(results, notifications) {
 
     logger.log('debug', 'notifications: ' + JSON.stringify(notifications));
@@ -1302,6 +1306,9 @@ function mapRefreshedDataToNotifications(results, notifications) {
     });
 }
 
+/**
+ * @deprecated Since QSCCD-125
+ */
 function refresh (fields, requestObject) {
     let r = Q.defer();
     let UserId=requestObject.UserID;
