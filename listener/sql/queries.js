@@ -99,41 +99,59 @@ exports.patientAppointmentsTableFields=function()
           "where HM2.HospitalMapSerNum = getLevel(A2.ScheduledStartTime, A2.ResourceDescription, A2.HospitalMapSerNum);";
 };
 
-exports.patientDocumentTableFields=function()
-{
-    return "SELECT DISTINCT " +
-        "case " +
-        "   when instr(Document.FinalFileName, '/') = 0 then Document.FinalFileName " +
-        "   when instr(Document.FinalFileName, '/') > 0 then substring(Document.FinalFileName, instr(Document.FinalFileName, '/') + 1, length(Document.FinalFileName)) " +
-        "end FinalFileName, " +
-        "Alias.AliasName_EN, " +
-        "Alias.AliasName_FR, " +
-        "Document.ReadStatus, " +
-        "Alias.AliasDescription_EN, " +
-        "Alias.AliasDescription_FR, " +
-        "Document.DocumentSerNum, " +
-        "Document.ApprovedTimeStamp, " +
-        "Document.CreatedTimeStamp, " +
-        "Staff.FirstName, " +
-        "Staff.LastName, " +
-        "Alias.ColorTag, " +
-        "emc.URL_EN, " +
-        "emc.URL_FR " +
-        "" +
-        "FROM " +
-        "Document " +
-        "INNER JOIN Patient ON Patient.PatientSerNum = Document.PatientSerNum " +
-        "INNER JOIN AliasExpression ON AliasExpression.AliasExpressionSerNum = Document.AliasExpressionSerNum " +
-        "INNER JOIN Alias ON Alias.AliasSerNum = AliasExpression.AliasSerNum " +
-        "INNER JOIN Users ON Users.UserTypeSerNum = Patient.PatientSerNum " +
-        "INNER JOIN Staff ON Staff.StaffSerNum = Document.ApprovedBySerNum " +
-        "LEFT JOIN EducationalMaterialControl emc ON emc.EducationalMaterialControlSerNum = Alias.EducationalMaterialControlSerNum " +
-        "" +
-        "WHERE " +
-        "Patient.AccessLevel = 3 " +
-        "AND Users.Username LIKE ? " +
-        "AND (Document.LastUpdated > ? OR Alias.LastUpdated > ?);";
-};
+/**
+ * @desc Query that returns the patient's documents.
+ * @param {boolean} [selectOne] If provided, only one document with a specific SerNum is returned.
+ * @returns {string} The query.
+ */
+function patientDocumentTableFields(selectOne=false) {
+    return `SELECT DISTINCT
+                case
+                   when instr(Document.FinalFileName, '/') = 0 then Document.FinalFileName
+                   when instr(Document.FinalFileName, '/') > 0 then substring(Document.FinalFileName, instr(Document.FinalFileName, '/') + 1, length(Document.FinalFileName))
+                end FinalFileName,
+                Alias.AliasName_EN,
+                Alias.AliasName_FR,
+                Document.ReadStatus,
+                Alias.AliasDescription_EN,
+                Alias.AliasDescription_FR,
+                Document.DocumentSerNum,
+                Document.ApprovedTimeStamp,
+                Document.CreatedTimeStamp,
+                Staff.FirstName,
+                Staff.LastName,
+                Alias.ColorTag,
+                emc.URL_EN,
+                emc.URL_FR
+            FROM
+                Document
+                INNER JOIN Patient ON Patient.PatientSerNum = Document.PatientSerNum
+                INNER JOIN AliasExpression ON AliasExpression.AliasExpressionSerNum = Document.AliasExpressionSerNum
+                INNER JOIN Alias ON Alias.AliasSerNum = AliasExpression.AliasSerNum
+                INNER JOIN Users ON Users.UserTypeSerNum = Patient.PatientSerNum
+                INNER JOIN Staff ON Staff.StaffSerNum = Document.ApprovedBySerNum
+                LEFT JOIN EducationalMaterialControl emc ON emc.EducationalMaterialControlSerNum = Alias.EducationalMaterialControlSerNum
+            WHERE
+                Patient.AccessLevel = 3
+                AND Users.Username = ?
+                ${selectOne ? 'AND Document.DocumentSerNum = ?' : ''}
+                ${!selectOne ? 'AND (Document.LastUpdated > ? OR Alias.LastUpdated > ?)' : ''}
+            ;
+    `;
+}
+
+/**
+ * @desc Returns a query that fetches all of a patient's documents.
+ * @returns {string} The query.
+ */
+exports.patientDocumentsAll = () => patientDocumentTableFields(false);
+
+/**
+ * @desc Returns a query that fetches one of a patient's documents.
+ * @returns {string} The query.
+ */
+exports.patientDocumentsOne = () => patientDocumentTableFields(true);
+
 exports.getDocumentsContentQuery = function()
 {
     return "SELECT Document.DocumentSerNum, " +

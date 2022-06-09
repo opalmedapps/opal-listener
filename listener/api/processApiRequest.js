@@ -5,6 +5,7 @@ const logger                = require('./../logs/logger');
 
 // New API handlers
 const fileRequest = require("./modules/file-request");
+const general = require('./modules/general');
 const securityQuestions = require("./modules/patient/security-questions");
 const testResults = require("./modules/test-results");
 
@@ -57,6 +58,7 @@ exports.securityAPI = {
  */
 const API = {
     ...fileRequest,
+    ...general,
     ...securityQuestions,
     ...testResults,
 };

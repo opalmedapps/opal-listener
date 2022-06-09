@@ -35,9 +35,9 @@ const requestMappings =
             numberOfLastUpdated: 1
         },
         'Documents': {
-            sql: queries.patientDocumentTableFields(),
+            sql: queries.patientDocumentsAll(),
+            sqlSingleItem: queries.patientDocumentsOne(),
             numberOfLastUpdated: 2,
-            //processFunction:LoadDocuments,
             table: 'Document',
             serNum: 'DocumentSerNum'
         },
@@ -117,12 +117,11 @@ const requestMappings =
 
 /**
  * getSqlApiMapping
- * @return {{Patient: {sql, processFunction: loadProfileImagePatient, numberOfLastUpdated: number}, Documents: {sql, numberOfLastUpdated: number, table: string, serNum: string}, Doctors: {sql, processFunction: loadImageDoctor, numberOfLastUpdated: number}, Diagnosis: {sql, numberOfLastUpdated: number}, Appointments: {sql, numberOfLastUpdated: number, processFunction: combineResources, table: string, serNum: string}, Notifications: {sql, numberOfLastUpdated: number, table: string, serNum: string}, Tasks: {sql, numberOfLastUpdated: number}, TxTeamMessages: {sql, numberOfLastUpdated: number, table: string, serNum: string}, EducationalMaterial: {sql, processFunction: getEducationTableOfContents, numberOfLastUpdated: number, table: string, serNum: string}, Announcements: {sql, numberOfLastUpdated: number, table: string, serNum: string}}}
+ * @return {Object}
  */
 exports.getSqlApiMappings = function() {
     return requestMappings;
 };
-
 
 /**
  * runSqlQuery function runs query, its kept due to the many references
