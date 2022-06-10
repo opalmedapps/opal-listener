@@ -195,10 +195,36 @@ function patientTxTeamMessageTableFields(selectOne=false) {
     `;
 }
 
-exports.patientAnnouncementsTableFields=function()
-{
-    return "SELECT Announcement.AnnouncementSerNum, Announcement.DateAdded, Announcement.ReadStatus, PostControl.PostType, PostControl.Body_EN, PostControl.Body_FR, PostControl.PostName_EN, PostControl.PostName_FR FROM PostControl, Announcement, Users, Patient WHERE PostControl.PostControlSerNum = Announcement.PostControlSerNum AND Announcement.PatientSerNum=Patient.PatientSerNum AND Patient.PatientSerNum=Users.UserTypeSerNum AND Users.Username= ? AND (Announcement.LastUpdated > ? OR PostControl.LastUpdated > ?);";
-};
+/**
+ * @desc Query that returns the patient's announcements.
+ * @param {boolean} [selectOne] If provided, only one announcement with a specific SerNum is returned.
+ * @returns {string} The query.
+ */
+function patientAnnouncementTableFields(selectOne=false) {
+    return `SELECT
+                Announcement.AnnouncementSerNum,
+                Announcement.DateAdded,
+                Announcement.ReadStatus,
+                PostControl.PostType,
+                PostControl.Body_EN,
+                PostControl.Body_FR,
+                PostControl.PostName_EN,
+                PostControl.PostName_FR
+            FROM
+                PostControl,
+                Announcement,
+                Users,
+                Patient
+            WHERE
+                PostControl.PostControlSerNum = Announcement.PostControlSerNum
+                AND Announcement.PatientSerNum = Patient.PatientSerNum
+                AND Patient.PatientSerNum = Users.UserTypeSerNum
+                AND Users.Username = ?
+                ${selectOne ? 'AND Announcement.AnnouncementSerNum = ?' : ''}
+                ${!selectOne ? 'AND (Announcement.LastUpdated > ? OR PostControl.LastUpdated > ?)' : ''}
+            ;
+    `;
+}
 
 exports.patientEducationalMaterialTableFields=function()
 {
@@ -564,6 +590,9 @@ exports.getNewNotifications=function() {
  *   1. All: returns the whole list of items for a patient.
  *   2. One: returns a single item sent to a patient based on its SerNum.
  */
+
+exports.patientAnnouncementsAll = () => patientAnnouncementTableFields(false);
+exports.patientAnnouncementsOne = () => patientAnnouncementTableFields(true);
 
 exports.patientAppointmentsAll = () => patientAppointmentTableFields(false);
 exports.patientAppointmentsOne = () => patientAppointmentTableFields(true);

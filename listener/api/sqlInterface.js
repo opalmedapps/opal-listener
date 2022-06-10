@@ -90,7 +90,8 @@ const requestMappings =
             serNum: 'EducationalMaterialSerNum'
         },
         'Announcements': {
-            sql: queries.patientAnnouncementsTableFields(),
+            sql: queries.patientAnnouncementsAll(),
+            sqlSingleItem: queries.patientAnnouncementsOne(),
             processFunction: decodePostMessages,
             numberOfLastUpdated: 2,
             table: 'Announcement',
