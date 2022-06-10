@@ -42,7 +42,7 @@ const requestMappings =
             serNum: 'DocumentSerNum'
         },
         /**
-         * Deprecated
+         * Deprecated: 'Doctors'
          */
         'Doctors': {
             sql: queries.patientDoctorTableFields(),
@@ -68,14 +68,15 @@ const requestMappings =
             serNum: 'NotificationSerNum'
         },
         /**
-         * Deprecated
+         * Deprecated: 'Tasks'
          */
         'Tasks': {
             sql: queries.patientTasksTableFields(),
             numberOfLastUpdated: 2
         },
         'TxTeamMessages': {
-            sql: queries.patientTeamMessagesTableFields(),
+            sql: queries.patientTxTeamMessagesAll(),
+            sqlSingleItem: queries.patientTxTeamMessagesOne(),
             processFunction: decodePostMessages,
             numberOfLastUpdated: 2,
             table: 'TxTeamMessage',

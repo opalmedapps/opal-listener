@@ -51,7 +51,7 @@ exports.patientMessageTableFields=function()
  * @param {boolean} [selectOne] If provided, only one appointment with a specific SerNum is returned.
  * @returns {string} The query.
  */
-function patientAppointmentsTableFields(selectOne) {
+function patientAppointmentTableFields(selectOne) {
     return `SELECT
                 IfNull(HM2.MapUrl, '') AS MapUrl,
                 IfNull(HM2.MapUrl_EN, '') AS MapUrl_EN,
@@ -114,18 +114,6 @@ function patientAppointmentsTableFields(selectOne) {
 }
 
 /**
- * @desc Returns a query that fetches all of a patient's appointments.
- * @returns {string} The query.
- */
-exports.patientAppointmentsAll = () => patientAppointmentsTableFields(false);
-
-/**
- * @desc Returns a query that fetches one of a patient's appointments.
- * @returns {string} The query.
- */
-exports.patientAppointmentsOne = () => patientAppointmentsTableFields(true);
-
-/**
  * @desc Query that returns the patient's documents.
  * @param {boolean} [selectOne] If provided, only one document with a specific SerNum is returned.
  * @returns {string} The query.
@@ -166,18 +154,6 @@ function patientDocumentTableFields(selectOne=false) {
     `;
 }
 
-/**
- * @desc Returns a query that fetches all of a patient's documents.
- * @returns {string} The query.
- */
-exports.patientDocumentsAll = () => patientDocumentTableFields(false);
-
-/**
- * @desc Returns a query that fetches one of a patient's documents.
- * @returns {string} The query.
- */
-exports.patientDocumentsOne = () => patientDocumentTableFields(true);
-
 exports.getDocumentsContentQuery = function()
 {
     return "SELECT Document.DocumentSerNum, " +
@@ -188,10 +164,36 @@ exports.getDocumentsContentQuery = function()
         "FROM Document, Patient, Users WHERE Document.DocumentSerNum IN ? AND Document.PatientSerNum = Patient.PatientSerNum AND Patient.PatientSerNum = Users.UserTypeSerNum AND Users.Username = ?";
 };
 
-exports.patientTeamMessagesTableFields=function()
-{
-    return "SELECT TxRecords.TxTeamMessageSerNum, TxRecords.DateAdded, TxRecords.ReadStatus, Post.PostType, Post.Body_EN, Post.Body_FR, Post.PostName_EN, Post.PostName_FR FROM PostControl as Post, TxTeamMessage as TxRecords, Patient, Users WHERE Post.PostControlSerNum=TxRecords.PostControlSerNum AND TxRecords.PatientSerNum=Patient.PatientSerNum AND Patient.PatientSerNum=Users.UserTypeSerNum AND Users.Username= ? AND (TxRecords.LastUpdated > ? OR Post.LastUpdated > ?);";
-};
+/**
+ * @desc Query that returns the patient's treating team messages.
+ * @param {boolean} [selectOne] If provided, only one treating team message with a specific SerNum is returned.
+ * @returns {string} The query.
+ */
+function patientTxTeamMessageTableFields(selectOne=false) {
+    return `SELECT
+                TxRecords.TxTeamMessageSerNum,
+                TxRecords.DateAdded,
+                TxRecords.ReadStatus,
+                Post.PostType,
+                Post.Body_EN,
+                Post.Body_FR,
+                Post.PostName_EN,
+                Post.PostName_FR
+            FROM
+                PostControl as Post,
+                TxTeamMessage as TxRecords,
+                Patient,
+                Users
+            WHERE
+                Post.PostControlSerNum = TxRecords.PostControlSerNum
+                AND TxRecords.PatientSerNum = Patient.PatientSerNum
+                AND Patient.PatientSerNum = Users.UserTypeSerNum
+                AND Users.Username = ?
+                ${selectOne ? 'AND TxRecords.TxTeamMessageSerNum = ?' : ''}
+                ${!selectOne ? 'AND (TxRecords.LastUpdated > ? OR Post.LastUpdated > ?)' : ''}
+            ;
+    `;
+}
 
 exports.patientAnnouncementsTableFields=function()
 {
@@ -555,3 +557,19 @@ exports.getNewNotifications=function() {
         "AND Notification.ReadStatus = 0 " +
         "AND (Notification.DateAdded > ? OR NotificationControl.DateAdded > ?);";
 };
+
+/*
+ * Named functions used to access different versions of a query.
+ * Each patient data query has two versions:
+ *   1. All: returns the whole list of items for a patient.
+ *   2. One: returns a single item sent to a patient based on its SerNum.
+ */
+
+exports.patientAppointmentsAll = () => patientAppointmentTableFields(false);
+exports.patientAppointmentsOne = () => patientAppointmentTableFields(true);
+
+exports.patientDocumentsAll = () => patientDocumentTableFields(false);
+exports.patientDocumentsOne = () => patientDocumentTableFields(true);
+
+exports.patientTxTeamMessagesAll = () => patientTxTeamMessageTableFields(false);
+exports.patientTxTeamMessagesOne = () => patientTxTeamMessageTableFields(true);
