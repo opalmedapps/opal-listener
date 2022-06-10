@@ -54,7 +54,8 @@ const requestMappings =
             numberOfLastUpdated: 1
         },
         'Appointments': {
-            sql: queries.patientAppointmentsTableFields(),
+            sql: queries.patientAppointmentsAll(),
+            sqlSingleItem: queries.patientAppointmentsOne(),
             numberOfLastUpdated: 5,
             processFunction: combineResources,
             table: 'Appointment',

@@ -46,58 +46,84 @@ exports.patientMessageTableFields=function()
     return "SELECT Messages.MessageSerNum, Messages.LastUpdated, Messages.SenderRole, Messages.ReceiverRole, Messages.SenderSerNum, Messages.ReceiverSerNum, Messages.MessageContent, Messages.ReadStatus, Messages.MessageDate FROM Messages, Patient, Users WHERE Patient.PatientSerNum=Users.UserTypeSerNum AND ((Messages.ReceiverRole='Patient' AND Patient.PatientSerNum = Messages.ReceiverSerNum) OR (Messages.SenderRole='Patient' AND Patient.PatientSerNum = Messages.SenderSerNum)) AND Users.Username Like ? AND Messages.LastUpdated > ? ORDER BY Messages.MessageDate ASC;";
 };
 
-exports.patientAppointmentsTableFields=function()
-{
+/**
+ * @desc Query that returns the patient's appointments.
+ * @param {boolean} [selectOne] If provided, only one appointment with a specific SerNum is returned.
+ * @returns {string} The query.
+ */
+function patientAppointmentsTableFields(selectOne) {
+    return `SELECT
+                IfNull(HM2.MapUrl, '') AS MapUrl,
+                IfNull(HM2.MapUrl_EN, '') AS MapUrl_EN,
+                IfNull(HM2.MapUrl_FR, '') AS MapUrl_FR,
+                IfNull(HM2.MapName_EN, '') AS MapName_EN,
+                IfNull(HM2.MapName_FR, '') AS MapName_FR,
+                IfNull(HM2.MapDescription_EN, '') AS MapDescription_EN,
+                IfNull(HM2.MapDescription_FR, '') AS MapDescription_FR,
+                A2.*
+            FROM
+                HospitalMap HM2,
+                (
+                    SELECT
+                        Appt.AppointmentSerNum,
+                        A.AliasSerNum,
+                        concat(if(Appt.Status = 'Cancelled', '[Cancelled] - ', ''), getTranslation('Alias', 'AliasName_EN', IfNull(A.AliasName_EN, ''), A.AliasSerNum)) AS AppointmentType_EN,
+                        concat(if(Appt.Status = 'Cancelled', convert('[Annulé] - ' using utf8), ''), IfNull(A.AliasName_FR, '')) AS AppointmentType_FR,
+                        IfNull(A.AliasDescription_EN, '') AS AppointmentDescription_EN,
+                        IfNull(A.AliasDescription_FR, '') AS AppointmentDescription_FR,
+                        IfNull(AE.Description, '') AS ResourceDescription,
+                        Appt.ScheduledStartTime,
+                        Appt.ScheduledEndTime,
+                        Appt.Checkin,
+                        Appt.SourceDatabaseSerNum,
+                        Appt.AppointmentAriaSer,
+                        Appt.ReadStatus,
+                        R.ResourceName,
+                        R.ResourceType,
+                        Appt.Status,
+                        IfNull(Appt.RoomLocation_EN, '') AS RoomLocation_EN,
+                        IfNull(Appt.RoomLocation_FR, '') AS RoomLocation_FR,
+                        Appt.LastUpdated,
+                        IfNull(emc.URL_EN, '') AS URL_EN,
+                        IfNull(emc.URL_FR, '') AS URL_FR,
+                        IfNull(AC.CheckinPossible, 0) AS CheckinPossible,
+                        IfNull(AC.CheckinInstruction_EN, '') AS CheckinInstruction_EN,
+                        IfNull(AC.CheckinInstruction_FR, '') AS CheckinInstruction_FR,
+                        A.HospitalMapSerNum
+                    FROM
+                        Appointment Appt
+                        INNER JOIN ResourceAppointment RA ON RA.AppointmentSerNum = Appt.AppointmentSerNum
+                        INNER JOIN Resource R ON RA.ResourceSerNum = R.ResourceSerNum
+                        INNER JOIN AliasExpression AE ON AE.AliasExpressionSerNum = Appt.AliasExpressionSerNum
+                        INNER JOIN Alias A ON AE.AliasSerNum = A.AliasSerNum
+                        LEFT JOIN HospitalMap HM ON HM.HospitalMapSerNum = A.HospitalMapSerNum
+                        INNER JOIN AppointmentCheckin AC ON AE.AliasSerNum = AC.AliasSerNum
+                        LEFT JOIN EducationalMaterialControl emc ON emc.EducationalMaterialControlSerNum = A.EducationalMaterialControlSerNum
+                    WHERE
+                        Appt.PatientSerNum = (SELECT P.PatientSerNum FROM Patient P, Users U WHERE U.Username = ? AND U.UserTypeSerNum = P.PatientSerNum)
+                        AND Appt.State = 'Active'
+                        AND Appt.Status <> 'Deleted'
+                        ${selectOne ? 'AND Appt.AppointmentSerNum = ?' : ''}
+                        ${!selectOne ? 'AND (Appt.LastUpdated > ? OR A.LastUpdated > ? OR AE.LastUpdated > ? OR R.LastUpdated > ? OR HM.LastUpdated > ?)' : ''}
+                    ORDER BY Appt.AppointmentSerNum, ScheduledStartTime
+                ) as A2
+            WHERE
+                HM2.HospitalMapSerNum = getLevel(A2.ScheduledStartTime, A2.ResourceDescription, A2.HospitalMapSerNum)
+            ;
+    `;
+}
 
-  return  "select 	IfNull(HM2.MapUrl, '') AS MapUrl, " +
-          	"IfNull(HM2.MapUrl_EN, '') AS MapUrl_EN, " +
-      			"IfNull(HM2.MapUrl_FR, '') AS MapUrl_FR, " +
-      			"IfNull(HM2.MapName_EN, '') AS MapName_EN, " +
-      			"IfNull(HM2.MapName_FR, '') AS MapName_FR, " +
-      			"IfNull(HM2.MapDescription_EN, '') AS MapDescription_EN, " +
-      			"IfNull(HM2.MapDescription_FR, '') AS MapDescription_FR, " +
-      			"A2.* " +
-          "from HospitalMap HM2, " +
-  	         "( SELECT Appt.AppointmentSerNum, " +
-                  "A.AliasSerNum, " +
-                  "concat(if(Appt.Status = 'Cancelled', '[Cancelled] - ', ''), getTranslation('Alias', 'AliasName_EN', IfNull(A.AliasName_EN, ''), A.AliasSerNum)) AS AppointmentType_EN, " +
-                  "concat(if(Appt.Status = 'Cancelled', convert('[Annulé] - ' using utf8), ''), IfNull(A.AliasName_FR, '')) AS AppointmentType_FR, " +
-                  "IfNull(A.AliasDescription_EN, '') AS AppointmentDescription_EN, " +
-                  "IfNull(A.AliasDescription_FR, '') AS AppointmentDescription_FR, " +
-                  "IfNull(AE.Description, '') AS ResourceDescription, " +
-                  "Appt.ScheduledStartTime, " +
-                  "Appt.ScheduledEndTime, " +
-                  "Appt.Checkin, " +
-                  "Appt.SourceDatabaseSerNum, " +
-                  "Appt.AppointmentAriaSer, " +
-                  "Appt.ReadStatus, " +
-                  "R.ResourceName, " +
-                  "R.ResourceType, " +
-                  "Appt.Status, " +
-                  "IfNull(Appt.RoomLocation_EN, '') AS RoomLocation_EN, " +
-                  "IfNull(Appt.RoomLocation_FR, '') AS RoomLocation_FR, " +
-                  "Appt.LastUpdated, " +
-                  "IfNull(emc.URL_EN, '') AS URL_EN, " +
-                  "IfNull(emc.URL_FR, '') AS URL_FR, " +
-                  "IfNull(AC.CheckinPossible, 0) AS CheckinPossible, " +
-                  "IfNull(AC.CheckinInstruction_EN, '') AS CheckinInstruction_EN, " +
-                  "IfNull(AC.CheckinInstruction_FR, '') AS CheckinInstruction_FR, " +
-                  "A.HospitalMapSerNum " +
-              "FROM Appointment Appt  " +
-                "INNER JOIN ResourceAppointment RA ON RA.AppointmentSerNum = Appt.AppointmentSerNum " +
-                "INNER JOIN Resource R ON RA.ResourceSerNum = R.ResourceSerNum " +
-                "INNER JOIN AliasExpression AE ON AE.AliasExpressionSerNum=Appt.AliasExpressionSerNum " +
-                "INNER JOIN Alias A ON AE.AliasSerNum=A.AliasSerNum " +
-                "LEFT JOIN HospitalMap HM ON HM.HospitalMapSerNum=A.HospitalMapSerNum " +
-                "INNER JOIN AppointmentCheckin AC ON AE.AliasSerNum=AC.AliasSerNum " +
-                "LEFT JOIN EducationalMaterialControl emc ON emc.EducationalMaterialControlSerNum = A.EducationalMaterialControlSerNum " +
-              "WHERE Appt.PatientSerNum = (select P.PatientSerNum from Patient P,  Users U where U.Username = ? and U.UserTypeSerNum = P.PatientSerNum) " +
-                "AND Appt.State = 'Active' " +
-                "AND Appt.Status <> 'Deleted' " +
-                "AND (Appt.LastUpdated > ? OR A.LastUpdated > ? OR AE.LastUpdated > ? OR R.LastUpdated > ? OR HM.LastUpdated > ?) " +
-              "ORDER BY Appt.AppointmentSerNum, ScheduledStartTime ) as A2 " +
-          "where HM2.HospitalMapSerNum = getLevel(A2.ScheduledStartTime, A2.ResourceDescription, A2.HospitalMapSerNum);";
-};
+/**
+ * @desc Returns a query that fetches all of a patient's appointments.
+ * @returns {string} The query.
+ */
+exports.patientAppointmentsAll = () => patientAppointmentsTableFields(false);
+
+/**
+ * @desc Returns a query that fetches one of a patient's appointments.
+ * @returns {string} The query.
+ */
+exports.patientAppointmentsOne = () => patientAppointmentsTableFields(true);
 
 /**
  * @desc Query that returns the patient's documents.
