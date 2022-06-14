@@ -23,23 +23,29 @@ exports.patientDoctorTableFields=function()
 };
 
 /**
- * @description Returns a query to get the patient's diagnoses.
- * @returns {string} The requested query.
+ * @desc Query that returns the patient's diagnoses.
+ * @param {boolean} [selectOne] If provided, only one diagnosis with a specific SerNum is returned.
+ * @returns {string} The query.
  */
-exports.patientDiagnosisTableFields=function()
-{
+function patientDiagnosisTableFields(selectOne) {
     return `SELECT
                 D.DiagnosisSerNum,
                 D.CreationDate,
                 getDiagnosisDescription(D.DiagnosisCode,'EN') Description_EN,
                 getDiagnosisDescription(D.DiagnosisCode,'FR') Description_FR
-            FROM Diagnosis D, Patient P, Users U
-            WHERE U.UserTypeSerNum = P.PatientSerNum
-              AND D.PatientSerNum = P.PatientSerNum
-              AND U.Username = ?
-              AND D.LastUpdated > ?
-            ;`
-};
+            FROM
+                Diagnosis D,
+                Patient P,
+                Users U
+            WHERE
+                U.UserTypeSerNum = P.PatientSerNum
+                AND D.PatientSerNum = P.PatientSerNum
+                AND U.Username = ?
+                ${selectOne ? 'AND D.DiagnosisSerNum = ?' : ''}
+                ${!selectOne ? 'AND D.LastUpdated > ?' : ''}
+            ;
+    `;
+}
 
 exports.patientMessageTableFields=function()
 {
@@ -600,6 +606,9 @@ exports.patientAnnouncementsOne = () => patientAnnouncementTableFields(true);
 
 exports.patientAppointmentsAll = () => patientAppointmentTableFields(false);
 exports.patientAppointmentsOne = () => patientAppointmentTableFields(true);
+
+exports.patientDiagnosesAll = () => patientDiagnosisTableFields(false);
+exports.patientDiagnosesOne = () => patientDiagnosisTableFields(true);
 
 exports.patientDocumentsAll = () => patientDocumentTableFields(false);
 exports.patientDocumentsOne = () => patientDocumentTableFields(true);

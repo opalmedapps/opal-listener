@@ -50,8 +50,11 @@ const requestMappings =
             numberOfLastUpdated: 2
         },
         'Diagnosis': {
-            sql: queries.patientDiagnosisTableFields(),
-            numberOfLastUpdated: 1
+            sql: queries.patientDiagnosesAll(),
+            sqlSingleItem: queries.patientDiagnosesOne(),
+            numberOfLastUpdated: 1,
+            table: 'Diagnosis',
+            serNum: 'DiagnosisSerNum',
         },
         'Appointments': {
             sql: queries.patientAppointmentsAll(),
