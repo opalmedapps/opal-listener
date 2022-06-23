@@ -16,7 +16,8 @@ const requestDataApi = {
     UserID: 'JUYxJadQuhhOkC1TfrAqD4crhi73',
     Parameters: {
         method: 'get',
-        url: '/api/sites',
+        url: '/api/app/home',
+        // url: '/api/institutions/4/',
         headers: {
             'Content-Type': 'application/json',
             'Accept-Language': 'fr',

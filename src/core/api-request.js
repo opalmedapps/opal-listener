@@ -6,6 +6,7 @@
 const axios = require('axios');
 const configs = require('../config/config.json');
 const legacyLogger = require('../../listener/logs/logger');
+const { ErrorHandler } = require('../error/error-handler');
 
 class ApiRequest {
     /**
@@ -40,7 +41,47 @@ class ApiRequest {
         requestParams.url = `${configs.OPAL_BACKEND.HOST}${parameters.url}`;
         if (parameters.data !== undefined) requestParams.data = parameters.data;
 
-        return axios(requestParams);
+        try {
+            return await axios(requestParams);
+        }
+        catch (error) {
+            return ApiRequest.handleApiError(error);
+        }
+    }
+
+    /**
+     * @description Assign correct client facing message return to the app,
+     *              filter out HTML error details that are not optimal for logging,
+     *              prefix log message,
+     *              throw custom opal error
+     * @param {object} error Error details from Axios failure.
+     */
+    static handleApiError(error) {
+        const logMessage = `BACKEND REQUEST: ${error.response.statusText}`;
+        const errorData = ApiRequest.filterOutHTML(error.response.data);
+        let clientMessage;
+        switch (error.response.status) {
+        case 404:
+            clientMessage = 'API_ERROR_NOT_FOUND';
+            break;
+        case 403:
+            clientMessage = 'API_ERROR_UNALLOWED';
+            break;
+        default:
+            clientMessage = 'API_ERROR_INTERNAL';
+            break;
+        }
+
+        throw new ErrorHandler(error.response.status, logMessage, errorData, clientMessage);
+    }
+
+    /**
+     * @description Filter out HTML page return by some Django error.
+     * @param {object} errorData Error data from axios failure.
+     * @returns {object|null} Errordata or null
+     */
+    static filterOutHTML(errorData) {
+        return (typeof errorData === 'string' && errorData.indexOf('<!DOCTYPE') !== -1) ? null : errorData;
     }
 }
 

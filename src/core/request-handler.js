@@ -5,6 +5,7 @@
 const legacyLogger = require('../../listener/logs/logger');
 const { EncryptionUtilities } = require('../encryption/encryption');
 const ApiRequest = require('./api-request');
+const { ErrorHandler } = require('../error/error-handler');
 
 class RequestHandler {
     /**
@@ -40,21 +41,36 @@ class RequestHandler {
      */
     async processRequest(requestType, snapshot) {
         legacyLogger.log('debug', 'API: Processing API request');
+        const encryptionInfo = {};
         try {
-            if (!RequestHandler.validateSnapshot(snapshot)) throw new Error('API: Firebase snapshot invalid');
-            const userId = snapshot.val().UserID;
-            const salt = await EncryptionUtilities.getSalt(userId);
-            const secret = EncryptionUtilities.hash(userId);
-            const decryptedRequest = await EncryptionUtilities.decryptRequest(snapshot.val(), secret, salt);
+            if (!RequestHandler.validateSnapshot(snapshot)) throw new ErrorHandler(400, 'Firebase snapshot invalid');
+            encryptionInfo.userId = snapshot.val().UserID;
+            encryptionInfo.salt = await EncryptionUtilities.getSalt(encryptionInfo.userId);
+            encryptionInfo.secret = EncryptionUtilities.hash(encryptionInfo.userId);
+            const decryptedRequest = await EncryptionUtilities.decryptRequest(
+                snapshot.val(),
+                encryptionInfo.secret,
+                encryptionInfo.salt,
+            );
             const apiResponse = await ApiRequest.makeRequest(decryptedRequest);
-            const encryptedResponse = await EncryptionUtilities.encryptResponse(apiResponse, secret, salt);
-            await this.sendResponse(encryptedResponse, snapshot.key, userId);
-            this.clearRequest(requestType, snapshot.key);
+            const encryptedResponse = await EncryptionUtilities.encryptResponse(
+                apiResponse,
+                encryptionInfo.secret,
+                encryptionInfo.salt,
+            );
+            await this.sendResponse(encryptedResponse, snapshot.key, encryptionInfo.userId);
         }
         catch (error) {
-            legacyLogger.log('error', 'API: CANNOT PROCESS REQUEST', error);
-            this.clearRequest(requestType, snapshot.key);
+            const errorResponse = ErrorHandler.prepareErrorResponse(error);
+            const encryptedResponse = (error.encrypt) ? await EncryptionUtilities.encryptResponse(
+                errorResponse,
+                encryptionInfo.secret,
+                encryptionInfo.salt,
+            ) : errorResponse;
+            await this.sendResponse(encryptedResponse, snapshot.key, encryptionInfo.userId);
         }
+
+        this.clearRequest(requestType, snapshot.key);
     }
 
     /**
