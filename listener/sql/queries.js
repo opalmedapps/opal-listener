@@ -532,7 +532,9 @@ exports.getTodaysCheckedInAppointments = function() {
 };
 
 /**
- * @desc Query that returns all notifications for a user with LastUpdated values after a given timestamp.
+ * @desc Query that returns notifications for a user with LastUpdated values after a given timestamp.
+ *       Until pagination is added to the app, only unread notifications will be returned (not all historical
+ *       notifications), to cut down on the amount of data downloaded to the app.
  * @returns {string} The query.
  */
 exports.patientNotificationsTableFields=function()
@@ -557,6 +559,8 @@ exports.patientNotificationsTableFields=function()
             WHERE nc.NotificationControlSerNum = n.NotificationControlSerNum
                 AND n.PatientSerNum = p.PatientSerNum
                 AND p.PatientSerNum = u.UserTypeSerNum
+                -- For now, only return unread notifications
+                AND n.ReadStatus = 0
                 AND u.Username = ?
                 AND (n.LastUpdated > ? OR nc.LastUpdated > ?)
             ;
