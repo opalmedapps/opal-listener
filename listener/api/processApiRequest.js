@@ -5,6 +5,7 @@ const logger                = require('./../logs/logger');
 
 // New API handlers
 const fileRequest = require("./modules/file-request");
+const general = require('./modules/general');
 const securityQuestions = require("./modules/patient/security-questions");
 const testResults = require("./modules/test-results");
 
@@ -28,6 +29,7 @@ const LEGACYAPI = {
     'Feedback': apiHospitalUpdate.inputFeedback,
     'MapLocation': apiPatientUpdate.getMapLocation,
     'Message': apiHospitalUpdate.sendMessage,
+    // Deprecated API entry: 'NotificationsNew', since QSCCD-125
     'NotificationsNew': apiHospitalUpdate.getNewNotifications,
     'EducationalPackageContents': apiPatientUpdate.getPackageContents,
     'QuestionnaireInOpalDBFromSerNum': apiPatientUpdate.getQuestionnaireInOpalDB,
@@ -56,6 +58,7 @@ exports.securityAPI = {
  */
 const API = {
     ...fileRequest,
+    ...general,
     ...securityQuestions,
     ...testResults,
 };
