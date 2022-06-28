@@ -35,14 +35,14 @@ const requestMappings =
             numberOfLastUpdated: 1
         },
         'Documents': {
-            sql: queries.patientDocumentTableFields(),
+            sql: queries.patientDocumentsAll(),
+            sqlSingleItem: queries.patientDocumentsOne(),
             numberOfLastUpdated: 2,
-            //processFunction:LoadDocuments,
             table: 'Document',
             serNum: 'DocumentSerNum'
         },
         /**
-         * Deprecated
+         * Deprecated: 'Doctors'
          */
         'Doctors': {
             sql: queries.patientDoctorTableFields(),
@@ -50,11 +50,15 @@ const requestMappings =
             numberOfLastUpdated: 2
         },
         'Diagnosis': {
-            sql: queries.patientDiagnosisTableFields(),
-            numberOfLastUpdated: 1
+            sql: queries.patientDiagnosesAll(),
+            sqlSingleItem: queries.patientDiagnosesOne(),
+            numberOfLastUpdated: 1,
+            table: 'Diagnosis',
+            serNum: 'DiagnosisSerNum',
         },
         'Appointments': {
-            sql: queries.patientAppointmentsTableFields(),
+            sql: queries.patientAppointmentsAll(),
+            sqlSingleItem: queries.patientAppointmentsOne(),
             numberOfLastUpdated: 5,
             processFunction: combineResources,
             table: 'Appointment',
@@ -62,33 +66,36 @@ const requestMappings =
         },
         'Notifications': {
             sql: queries.patientNotificationsTableFields(),
-            numberOfLastUpdated: 0,
+            numberOfLastUpdated: 2,
             table: 'Notification',
             serNum: 'NotificationSerNum'
         },
         /**
-         * Deprecated
+         * Deprecated: 'Tasks'
          */
         'Tasks': {
             sql: queries.patientTasksTableFields(),
             numberOfLastUpdated: 2
         },
         'TxTeamMessages': {
-            sql: queries.patientTeamMessagesTableFields(),
+            sql: queries.patientTxTeamMessagesAll(),
+            sqlSingleItem: queries.patientTxTeamMessagesOne(),
             processFunction: decodePostMessages,
             numberOfLastUpdated: 2,
             table: 'TxTeamMessage',
             serNum: 'TxTeamMessageSerNum'
         },
         'EducationalMaterial': {
-            sql: queries.patientEducationalMaterialTableFields(),
+            sql: queries.patientEducationalMaterialAll(),
+            sqlSingleItem: queries.patientEducationalMaterialOne(),
             processFunction: getEducationTableOfContents,
             numberOfLastUpdated: 3,
             table: 'EducationalMaterial',
             serNum: 'EducationalMaterialSerNum'
         },
         'Announcements': {
-            sql: queries.patientAnnouncementsTableFields(),
+            sql: queries.patientAnnouncementsAll(),
+            sqlSingleItem: queries.patientAnnouncementsOne(),
             processFunction: decodePostMessages,
             numberOfLastUpdated: 2,
             table: 'Announcement',
@@ -117,12 +124,11 @@ const requestMappings =
 
 /**
  * getSqlApiMapping
- * @return {{Patient: {sql, processFunction: loadProfileImagePatient, numberOfLastUpdated: number}, Documents: {sql, numberOfLastUpdated: number, table: string, serNum: string}, Doctors: {sql, processFunction: loadImageDoctor, numberOfLastUpdated: number}, Diagnosis: {sql, numberOfLastUpdated: number}, Appointments: {sql, numberOfLastUpdated: number, processFunction: combineResources, table: string, serNum: string}, Notifications: {sql, numberOfLastUpdated: number, table: string, serNum: string}, Tasks: {sql, numberOfLastUpdated: number}, TxTeamMessages: {sql, numberOfLastUpdated: number, table: string, serNum: string}, EducationalMaterial: {sql, processFunction: getEducationTableOfContents, numberOfLastUpdated: number, table: string, serNum: string}, Announcements: {sql, numberOfLastUpdated: number, table: string, serNum: string}}}
+ * @return {Object}
  */
 exports.getSqlApiMappings = function() {
     return requestMappings;
 };
-
 
 /**
  * runSqlQuery function runs query, its kept due to the many references
@@ -1193,10 +1199,10 @@ exports.setTrusted = function(requestObject)
 
 /**
  * Returns a promise containing all new notifications
+ * @deprecated Since QSCCD-125. This function provides duplicate functionality to 'Notifications' in requestMappings.
  * @param {object} requestObject the request
  * @returns {Promise} Returns a promise that contains the notification data
  */
-
 exports.getNewNotifications = function(requestObject){
     let r = Q.defer();
 
@@ -1220,6 +1226,7 @@ exports.getNewNotifications = function(requestObject){
 /**
  * Takes in a list of notifications and the original requestObject and returns a list of tuples that contains the notifications
  * and their associated content
+ * @deprecated Since QSCCD-125
  * @param notifications
  * @param requestObject
  * @returns {Promise<any>}
@@ -1268,6 +1275,9 @@ function assocNotificationsWithItems(notifications, requestObject){
     })
 }
 
+/**
+ * @deprecated Since QSCCD-125
+ */
 function mapRefreshedDataToNotifications(results, notifications) {
 
     logger.log('debug', 'notifications: ' + JSON.stringify(notifications));
@@ -1302,6 +1312,9 @@ function mapRefreshedDataToNotifications(results, notifications) {
     });
 }
 
+/**
+ * @deprecated Since QSCCD-125
+ */
 function refresh (fields, requestObject) {
     let r = Q.defer();
     let UserId=requestObject.UserID;

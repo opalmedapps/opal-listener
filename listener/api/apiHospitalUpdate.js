@@ -57,7 +57,12 @@ exports.inputEducationalMaterialRating= function(requestObject)
   return sqlInterface.inputEducationalMaterialRating(requestObject);
 };
 
-// Get new notifications
+/**
+ * @desc Get new notifications for the current user.
+ * @deprecated Since QSCCD-125. This function provides duplicate functionality to 'Notifications' in requestMappings.
+ * @param requestObject
+ * @returns {*}
+ */
 exports.getNewNotifications = function (requestObject) {
     return sqlInterface.getNewNotifications(requestObject);
 };
