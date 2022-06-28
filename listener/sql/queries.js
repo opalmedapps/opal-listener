@@ -480,6 +480,10 @@ exports.setTrusted = function () {
     return "UPDATE PatientDeviceIdentifier SET Trusted = 1 WHERE DeviceId = ?";
 };
 
+/**
+ * @deprecated
+ * @returns
+ */
 exports.getPatientForPatientMembers = function() {
     return "SELECT FirstName, LastName, Email, Website, ProfileImage, Bio_EN, Bio_FR  FROM PatientsForPatientsPersonnel;";
 };

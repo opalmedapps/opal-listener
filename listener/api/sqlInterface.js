@@ -578,6 +578,7 @@ exports.inputFeedback = function(requestObject) {
 	            let email;
                 let subject;
 	            // Determine if the feedback is for the app or patients committee
+                //deprecated (Patients for Patients will be removed)
 	            if (type === 'pfp'){
 		            email = "patients4patients.contact@gmail.com";
 		            subject = "New Suggestion - Opal";
