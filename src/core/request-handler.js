@@ -5,7 +5,7 @@
 const legacyLogger = require('../../listener/logs/logger');
 const { EncryptionUtilities } = require('../encryption/encryption');
 const ApiRequest = require('./api-request');
-const { ErrorHandler } = require('../error/error-handler');
+const { ErrorHandler } = require('../error/handler');
 
 class RequestHandler {
     /**
@@ -35,15 +35,15 @@ class RequestHandler {
     }
 
     /**
-     * @description Handle requests with requestType 'api'. Then upload response ti Firebase
+     * @description Handle requests with requestType 'api'. Then upload response to Firebase
      * @param {string} requestType Firebase request unique identifier
-     * @param {object} snapshot Data snapshot from firebase
+     * @param {object} snapshot Data snapshot from firebase or and formated error to be handle by the app.
      */
     async processRequest(requestType, snapshot) {
         legacyLogger.log('debug', 'API: Processing API request');
         const encryptionInfo = {};
         try {
-            if (!RequestHandler.validateSnapshot(snapshot)) throw new ErrorHandler(400, 'Firebase snapshot invalid');
+            if (!RequestHandler.validateSnapshot(snapshot)) throw new Error('SNAPSHOT_VALIDATION');
             encryptionInfo.userId = snapshot.val().UserID;
             encryptionInfo.salt = await EncryptionUtilities.getSalt(encryptionInfo.userId);
             encryptionInfo.secret = EncryptionUtilities.hash(encryptionInfo.userId);
@@ -61,8 +61,8 @@ class RequestHandler {
             await this.sendResponse(encryptedResponse, snapshot.key, encryptionInfo.userId);
         }
         catch (error) {
-            const errorResponse = ErrorHandler.prepareErrorResponse(error);
-            const encryptedResponse = (error.encrypt) ? await EncryptionUtilities.encryptResponse(
+            const errorResponse = ErrorHandler.getErrorResponse(error);
+            const encryptedResponse = (errorResponse.encrypt) ? await EncryptionUtilities.encryptResponse(
                 errorResponse,
                 encryptionInfo.secret,
                 encryptionInfo.salt,
