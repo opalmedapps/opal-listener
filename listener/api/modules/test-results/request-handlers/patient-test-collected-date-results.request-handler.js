@@ -21,7 +21,7 @@ class PatientTestCollectedDateResultsHandler extends ApiRequestHandler {
 		const errors = await PatientTestCollectedDateResultsHandler.validate(requestObject.parameters);
 		if (!errors.isEmpty()) {
 			logger.log("error", "Validation Error", errors);
-			throw new ValidationError(errors.errors());
+			throw new ValidationError(errors.errors);
 		}
 		const patient = await Patient.getPatientByUsername(requestObject.meta.UserID);
 		const date = requestObject.parameters.date;
