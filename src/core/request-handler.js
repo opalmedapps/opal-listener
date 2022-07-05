@@ -62,12 +62,12 @@ class RequestHandler {
         }
         catch (error) {
             const errorResponse = ErrorHandler.getErrorResponse(error);
-            const encryptedResponse = (errorResponse.encrypt) ? await EncryptionUtilities.encryptResponse(
+            const response = (errorResponse.encrypt) ? await EncryptionUtilities.encryptResponse(
                 errorResponse,
                 encryptionInfo.secret,
                 encryptionInfo.salt,
             ) : errorResponse;
-            await this.sendResponse(encryptedResponse, snapshot.key, encryptionInfo.userId);
+            await this.sendResponse(response, snapshot.key, encryptionInfo.userId);
         }
 
         this.clearRequest(requestType, snapshot.key);

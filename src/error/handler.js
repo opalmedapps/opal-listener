@@ -13,7 +13,7 @@ class ErrorHandler {
      */
     static getErrorResponse(error) {
         const opalError = ERRORS[error.message] || ERRORS.DEFAULT_ERROR;
-        ErrorHandler.LogError(opalError.logMessage, error.cause);
+        ErrorHandler.logError(opalError.logMessage, error.cause);
         return {
             status_code: opalError.statusCode,
             data: {
@@ -28,7 +28,7 @@ class ErrorHandler {
      * @param {string} message Error message thown
      * @param {object} errorObject Error data
      */
-    static LogError(message, errorObject) {
+    static logError(message, errorObject) {
         legacyLogger.log('error', `API: ${message}`, errorObject);
     }
 }
