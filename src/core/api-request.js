@@ -56,14 +56,18 @@ class ApiRequest {
      * @param {object} error Error details from Axios failure.
      */
     static handleApiError(error) {
-        const errorData = ApiRequest.filterOutHTML(error.response.data);
+        const errorCode = !error.response ? error.code : error.response.status;
+        const errorData = !error.response ? null : ApiRequest.filterOutHTML(error.response.data);
         let opalError;
-        switch (error.response.status) {
+        switch (errorCode) {
         case 404:
             opalError = 'API_NOT_FOUND';
             break;
         case 403:
             opalError = 'API_UNALLOWED';
+            break;
+        case 'ECONNREFUSED':
+            opalError = 'API_NOT_AVAILABLE';
             break;
         default:
             opalError = 'API_INTERNAL';

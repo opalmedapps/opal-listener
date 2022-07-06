@@ -43,6 +43,12 @@ const ERRORS = {
         clientMessage: 'API_ERROR_NOT_FOUND',
         encrypt: true,
     },
+    API_NOT_AVAILABLE: {
+        statusCode: 503,
+        logMessage: 'Cannot reach backend api',
+        clientMessage: 'API_ERROR_NOT_AVAILABLE',
+        encrypt: true,
+    },
     API_UNALLOWED: {
         statusCode: 403,
         logMessage: 'Unallowed request to backend',
