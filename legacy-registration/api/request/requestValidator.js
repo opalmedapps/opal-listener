@@ -20,10 +20,10 @@ class RequestValidator {
 	* @param requestObject
 	*/
     static validate(requestKey, requestObject) {
+        console.log('==>', requestObject);
         const r = q.defer();
         let request = new opalRequest(requestObject, requestKey);
         let validation = this.validateRequestCredentials(request);
-
         if (validation.isValid) {
 
             //if (!this.versionIsSecure(request)) {
@@ -33,7 +33,6 @@ class RequestValidator {
 
             //Gets user password for decrypting
             sqlInterface.getRequestEncryption(requestObject).then(function (rows) {
-
                 logger.log('debug', 'Processing getRequestEncryption function and fetched the result: ' + rows);
 
                 if (rows[0].length > 1 || rows[0].length === 0) {
@@ -43,7 +42,6 @@ class RequestValidator {
 
                     let RegistrationCode = rows[0][0].RegistrationCode;
                     let RAMQ = rows[0][0].RAMQ;
-
                     utility.decrypt({ req: request.type, params: request.parameters }, RegistrationCode, RAMQ)
                         .then((dec) => {
                             request.setAuthenticatedInfo(RAMQ, RegistrationCode, dec.req, dec.params);
