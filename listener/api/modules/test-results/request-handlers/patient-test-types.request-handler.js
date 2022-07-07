@@ -9,8 +9,8 @@ class PatientTestTypesHandler extends ApiRequestHandler {
 	 * @returns {Promise<{data: {patientSerNum: number, testTypes: Object}}>}
 	 */
 	static async handleRequest(requestObject) {
-        const lastUpdated = requestObject.params.Date ? new Date(Number(requestObject.params.Date)) : 0;
-		const patient = await Patient.getPatientByUsername(requestObject.meta.UserID);
+		const lastUpdated = requestObject.params.Date ? new Date(Number(requestObject.params.Date)) : 0;
+		const patient = await PatientTestTypesHandler.getTargetPatient(requestObject);
 		const patientTestResult = new PatientTestResult(patient);
 		return {
 			"data": {
