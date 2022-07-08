@@ -66,3 +66,14 @@ exports.inputEducationalMaterialRating= function(requestObject)
 exports.getNewNotifications = function (requestObject) {
     return sqlInterface.getNewNotifications(requestObject);
 };
+
+/**
+ *@name getVersionUpdates
+ *@requires sqlInterface
+ *@parameter(string) current version of the app
+ *@description Grabs all the version updates according to the current version of the client app
+ */
+exports.getVersionUpdates = function (requestObject)
+{
+    return sqlInterface.getVersionUpdates(requestObject);
+};

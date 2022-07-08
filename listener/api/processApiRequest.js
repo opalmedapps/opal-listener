@@ -41,7 +41,8 @@ const LEGACYAPI = {
     'QuestionnaireUpdateStatus': apiHospitalUpdate.questionnaireUpdateStatus,
     'Read': apiHospitalUpdate.updateReadStatus,
     //Deprecate API entry: 'PFPMembers', since QSCCD-417
-    'PFPMembers': apiPatientUpdate.getPatientsForPatientsMembers
+    'PFPMembers': apiPatientUpdate.getPatientsForPatientsMembers,
+    'VersionUpdates': apiHospitalUpdate.getVersionUpdates,
 };
 
 /**

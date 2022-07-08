@@ -1220,6 +1220,25 @@ exports.getNewNotifications = function(requestObject){
         .catch(error => {
             r.reject(error);
         });
+};
+
+/**
+ * Returns a promise containing all new version updates
+ * @param {object} requestObject the request
+ * @returns {Promise} Returns a promise that contains the notification data
+ */
+exports.getVersionUpdates = function(requestObject){
+    let r = Q.defer();
+
+    const current_version = new Date(Number(requestObject.Parameters.version));
+
+    exports.runSqlQuery(queries.getVersionUpdates(), [current_version])
+        .then(rows => {
+            r.resolve({Data: rows});
+        })
+        .catch(error => {
+            r.reject(error);
+        });
 
     return r.promise
 };

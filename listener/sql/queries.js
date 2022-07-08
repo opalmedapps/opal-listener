@@ -602,6 +602,17 @@ exports.getNewNotifications=function() {
         "AND (Notification.DateAdded > ? OR NotificationControl.DateAdded > ?);";
 };
 
+/**
+ * Get all version updates according to the app current version
+ * @return {string}
+ */
+exports.getVersionUpdates = function() {
+    return `
+        SELECT *
+        FROM Patient;
+   `;
+};
+
 /*
  * Named functions used to access different versions of a query.
  * Each patient data query has two versions:
