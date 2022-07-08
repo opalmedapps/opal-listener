@@ -213,7 +213,6 @@ exports.encryptResponse = encryptResponse;
  */
 function uploadToFirebase(response, key) {
     logger.log('debug', 'Uploading to Firebase');
-    console.log(response);
 	return new Promise((resolve, reject)=>{
 
 		//Need to make a copy of the data, since the encryption key needs to be read
