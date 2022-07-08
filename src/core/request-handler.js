@@ -5,6 +5,7 @@
 const legacyLogger = require('../../listener/logs/logger');
 const { EncryptionUtilities } = require('../encryption/encryption');
 const ApiRequest = require('./api-request');
+const { ErrorHandler } = require('../error/handler');
 const { Firebase } = require('../firebase/firebase');
 
 class RequestHandler {
@@ -38,26 +39,42 @@ class RequestHandler {
      * @description Handle requests with requestType 'api'. Then upload response ti Firebase
      *              Need to add timestamp after encryption to give a valid value to Firebase.
      * @param {string} requestType Firebase request unique identifier
-     * @param {object} snapshot Data snapshot from firebase
+     * @param {object} snapshot Data snapshot from firebase or and formated error to be handle by the app.
      */
     async processRequest(requestType, snapshot) {
         legacyLogger.log('debug', 'API: Processing API request');
+        const encryptionInfo = {};
         try {
-            if (!RequestHandler.validateSnapshot(snapshot)) throw new Error('API: Firebase snapshot invalid');
-            const userId = snapshot.val().UserID;
-            const salt = await EncryptionUtilities.getSalt(userId);
-            const secret = EncryptionUtilities.hash(userId);
-            const decryptedRequest = await EncryptionUtilities.decryptRequest(snapshot.val(), secret, salt);
+            if (!RequestHandler.validateSnapshot(snapshot)) throw new Error('SNAPSHOT_VALIDATION');
+            encryptionInfo.userId = snapshot.val().UserID;
+            encryptionInfo.salt = await EncryptionUtilities.getSalt(encryptionInfo.userId);
+            encryptionInfo.secret = EncryptionUtilities.hash(encryptionInfo.userId);
+            const decryptedRequest = await EncryptionUtilities.decryptRequest(
+                snapshot.val(),
+                encryptionInfo.secret,
+                encryptionInfo.salt,
+            );
             const apiResponse = await ApiRequest.makeRequest(decryptedRequest);
-            const encryptedResponse = await EncryptionUtilities.encryptResponse(apiResponse, secret, salt);
+            const encryptedResponse = await EncryptionUtilities.encryptResponse(
+                apiResponse,
+                encryptionInfo.secret,
+                encryptionInfo.salt,
+            );
+            await this.sendResponse(encryptedResponse, snapshot.key, encryptionInfo.userId);
             encryptedResponse.timestamp = Firebase.getDatabaseTimeStamp;
-            await this.sendResponse(encryptedResponse, snapshot.key, userId);
             this.clearRequest(requestType, snapshot.key);
         }
         catch (error) {
-            legacyLogger.log('error', 'API: CANNOT PROCESS REQUEST', error);
-            this.clearRequest(requestType, snapshot.key);
+            const errorResponse = ErrorHandler.getErrorResponse(error);
+            const response = (errorResponse.encrypt) ? await EncryptionUtilities.encryptResponse(
+                errorResponse,
+                encryptionInfo.secret,
+                encryptionInfo.salt,
+            ) : errorResponse;
+            await this.sendResponse(response, snapshot.key, encryptionInfo.userId);
         }
+
+        this.clearRequest(requestType, snapshot.key);
     }
 
     /**

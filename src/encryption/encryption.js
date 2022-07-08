@@ -14,11 +14,16 @@ class EncryptionUtilities {
      */
     static async encryptResponse(response, secret, salt) {
         legacyLogger.log('debug', 'API: Encrypting response');
-        return legacyUtility.encrypt(
-            response,
-            secret,
-            salt,
-        );
+        try {
+            return legacyUtility.encrypt(
+                response,
+                secret,
+                salt,
+            );
+        }
+        catch (error) {
+            throw new Error('ENCRYPTION', { cause: error });
+        }
     }
 
     /**
@@ -30,20 +35,25 @@ class EncryptionUtilities {
      */
     static async decryptRequest(request, secret, salt) {
         legacyLogger.log('debug', 'API: Decrypting request');
-        const decryptedRequest = await legacyUtility.decrypt(
-            {
-                req: request.Request,
-                params: request.Parameters,
-            },
-            secret,
-            salt,
-        );
+        try {
+            const decryptedRequest = await legacyUtility.decrypt(
+                {
+                    req: request.Request,
+                    params: request.Parameters,
+                },
+                secret,
+                salt,
+            );
 
-        return {
-            ...request,
-            Request: decryptedRequest.req,
-            Parameters: decryptedRequest.params,
-        };
+            return {
+                ...request,
+                Request: decryptedRequest.req,
+                Parameters: decryptedRequest.params,
+            };
+        }
+        catch (error) {
+            throw new Error('DECRYPTION', { cause: error });
+        }
     }
 
     /**
@@ -78,8 +88,13 @@ class EncryptionUtilities {
             LIMIT 1
         `, [userId]);
 
-        const response = await legacyOpalSqlRunner.OpalSQLQueryRunner.run(query);
-        return response[0].AnswerText;
+        try {
+            const response = await legacyOpalSqlRunner.OpalSQLQueryRunner.run(query);
+            return response[0].AnswerText;
+        }
+        catch (error) {
+            throw new Error('ENCRYPTION_SALT', { cause: error });
+        }
     }
 }
 
