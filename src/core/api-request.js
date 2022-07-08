@@ -40,7 +40,50 @@ class ApiRequest {
         requestParams.url = `${configs.OPAL_BACKEND.HOST}${parameters.url}`;
         if (parameters.data !== undefined) requestParams.data = parameters.data;
 
-        return axios(requestParams);
+        try {
+            return await axios(requestParams);
+        }
+        catch (error) {
+            return ApiRequest.handleApiError(error);
+        }
+    }
+
+    /**
+     * @description Assign correct client facing message return to the app,
+     *              filter out HTML error details that are not optimal for logging,
+     *              prefix log message,
+     *              throw custom opal error
+     * @param {object} error Error details from Axios failure.
+     */
+    static handleApiError(error) {
+        const errorCode = !error.response ? error.code : error.response.status;
+        const errorData = !error.response ? null : ApiRequest.filterOutHTML(error.response.data);
+        let opalError;
+        switch (errorCode) {
+        case 404:
+            opalError = 'API_NOT_FOUND';
+            break;
+        case 403:
+            opalError = 'API_UNALLOWED';
+            break;
+        case 'ECONNREFUSED':
+            opalError = 'API_NOT_AVAILABLE';
+            break;
+        default:
+            opalError = 'API_INTERNAL';
+            break;
+        }
+
+        throw new Error(opalError, { cause: errorData });
+    }
+
+    /**
+     * @description Filter out HTML page return by some Django error.
+     * @param {object} errorData Error data from axios failure.
+     * @returns {object|null} Errordata or null
+     */
+    static filterOutHTML(errorData) {
+        return (typeof errorData === 'string' && errorData.indexOf('<!DOCTYPE') !== -1) ? null : errorData;
     }
 }
 
