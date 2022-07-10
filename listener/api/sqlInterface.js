@@ -1220,6 +1220,8 @@ exports.getNewNotifications = function(requestObject){
         .catch(error => {
             r.reject(error);
         });
+
+    return r.promise
 };
 
 /**
@@ -1230,9 +1232,7 @@ exports.getNewNotifications = function(requestObject){
 exports.getVersionUpdates = function(requestObject){
     let r = Q.defer();
 
-    const current_version = new Date(Number(requestObject.Parameters.version));
-
-    exports.runSqlQuery(queries.getVersionUpdates(), [current_version])
+    exports.runSqlQuery(queries.getVersionUpdates(), [requestObject.AppVersion])
         .then(rows => {
             r.resolve({Data: rows});
         })

@@ -609,7 +609,9 @@ exports.getNewNotifications=function() {
 exports.getVersionUpdates = function() {
     return `
         SELECT *
-        FROM Patient;
+        FROM VersionControl
+        WHERE INET_ATON(SUBSTRING_INDEX(CONCAT(version, '.0.0.0'), '.', 4)) > 
+            INET_ATON(SUBSTRING_INDEX(CONCAT(?, '.0.0.0'), '.', 4));
    `;
 };
 
