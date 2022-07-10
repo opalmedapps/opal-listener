@@ -14,7 +14,7 @@ class PatientTestCollectedDateResultsHandler extends ApiRequestHandler {
 	];
 
 	/**
-	 * Request returns the test dates result for the patient. 
+	 * Request returns the test dates result for the patient.
 	 * @param {OpalRequest} requestObject OpalRequest object
 	 */
 	static async handleRequest(requestObject) {
@@ -23,7 +23,7 @@ class PatientTestCollectedDateResultsHandler extends ApiRequestHandler {
 			logger.log("error", "Validation Error", errors);
 			throw new ValidationError(errors.errors);
 		}
-		const patient = await Patient.getPatientByUsername(requestObject.meta.UserID);
+		const patient = await PatientTestCollectedDateResultsHandler.getTargetPatient(requestObject);
 		const date = requestObject.parameters.date;
 		const patientTestResult = new PatientTestResult(patient);
 		return {

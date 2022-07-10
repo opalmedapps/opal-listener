@@ -2,12 +2,6 @@ const sqlInterface = require('./sqlInterface.js');
 const logger = require('./../logs/logger.js');
 const questionnaires = require('./../questionnaires/questionnaireOpalDB.js');
 
-//Send message
-exports.sendMessage=function(requestObject)
-{
-  return sqlInterface.sendMessage(requestObject);
-};
-
 /**
  * This is for questionnaire V2 (inputting a single question's answer for 2019 qplus questionnaire front-end)
  * @param {object} requestObject
@@ -40,6 +34,7 @@ exports.updateReadStatus=function(requestObject)
 };
 
 //Update checkin
+// TODO (QSCCD-106) - Make use of requestObject.TargetPatientID to check in on behalf of others or as self
 exports.checkIn = function (requestObject) {
     return sqlInterface.checkIn(requestObject);
 };
