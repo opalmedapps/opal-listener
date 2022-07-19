@@ -1,7 +1,7 @@
 /* eslint-disable mocha/no-setup-in-describe */
 require('../test/test-setup');
 const { expect } = require('chai');
-const { ErrorHandler } = require('./handler');
+const ErrorHandler = require('./handler');
 const { ERRORS } = require('./const');
 
 describe('Error handler', function () {
