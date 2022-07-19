@@ -1,6 +1,6 @@
 require('../test/test-setup');
 const { expect } = require('chai');
-const { EncryptionUtilities } = require('./encryption');
+const EncryptionUtilities = require('./encryption');
 
 describe('EncryptionUtilities', function () {
     describe('hash()', function () {
