@@ -12,13 +12,14 @@ class ApiRequest {
      * @description Take the validated request uploaded to Firebase and send the Parameters field
      * which represents the axios request to the Django backend. Use legacy server to format the request
      * uploaded to Firebase.
-     * @param {object} decryptedRequest Request decrypted
+     * @param {object} requestParams Request decrypted
      * @returns {object} Formatted request that merge the response from the Django API and
      * the legacy information needed by the app.
      */
-    static async makeRequest(decryptedRequest) {
+    static async makeRequest(requestParams) {
         legacyLogger.log('debug', 'API: Preparing to send request to Opal API');
-        const apiResponse = await ApiRequest.sendRequestToApi(decryptedRequest.UserID, decryptedRequest.Parameters);
+        const userId = requestParams.UserID || 'registration';
+        const apiResponse = await ApiRequest.sendRequestToApi(userId, requestParams.Parameters);
         return {
             status_code: apiResponse.status,
             headers: apiResponse.headers,

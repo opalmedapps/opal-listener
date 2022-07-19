@@ -27,6 +27,27 @@ const requestDataApi = {
 };
 
 /**
+ * Registration sample request
+ */
+const registrationRequest = {
+    Request: 'registration-api',
+    BranchName: 'code12345678',
+    Parameters: {
+        method: 'get',
+        url: '/api/registration/by-hash/',
+        headers: {
+            'Content-Type': 'application/json',
+            'Accept-Language': 'fr',
+        },
+        data: {
+            ipAddress: '192.168.32.1',
+            ramq: 'OTES12345678',
+        },
+    },
+    Timestamp: '',
+};
+
+/**
  * Request representing legacy style
  */
 const requestData = {
@@ -43,4 +64,8 @@ const requestData = {
     UserEmail: 'muhc.app.mobile@gmail.com',
 };
 
-module.exports = requestDataApi;
+module.exports = {
+    registrationRequest,
+    requestData,
+    requestDataApi,
+};

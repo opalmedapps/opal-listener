@@ -33,4 +33,4 @@ class ErrorHandler {
     }
 }
 
-exports.ErrorHandler = ErrorHandler;
+module.exports = ErrorHandler;
