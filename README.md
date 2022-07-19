@@ -32,6 +32,8 @@ Copy and rename `listener/config_template.json` to `listener/config.json`.
 Also copy and rename `src/config/config.template.json` to `src/config/config.json`.
 Then edit the required fields. Across both files, you should at least need to change these fields:
 
+Communication with the django backend needs to be authenticated with an REST API token. You can generate a token following [this procedure](https://opalmedapps.gitlab.io/backend/authentication/). Then add to token to your `src/config/config.json` as shown in the example.
+
 ```
 listener/config.json
 
@@ -52,7 +54,11 @@ FIREBASE: {
   DATABASE_URL: "This value can be found in the web_config.txt file in your firebase folder",
   ADMIN_KEY_PATH: "See value in the comment below",
   ROOT_BRANCH: "dev3/A0",
-  ENABLE_LOGGING: false
+  ENABLE_LOGGING: false,
+  "OPAL_BACKEND": {
+    "HOST": "http://host.docker.internal:8000",
+    "AUTH_TOKEN": "The token generated in django backend"
+  }
 }
 ```
 

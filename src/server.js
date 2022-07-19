@@ -9,6 +9,7 @@ const legacyServer = require('../listener/legacy-server');
 const legacyRegistrationServer = require('../legacy-registration/legacy-server');
 const legacyLogger = require('../listener/logs/logger');
 const { RequestHandler } = require('./core/request-handler');
+const { REQUEST_TYPE } = require('./const');
 
 launch().then(() => {
     legacyLogger.log('info', 'LISTENER LAUNCHED SUCCESSFULLY');
@@ -35,7 +36,8 @@ async function launch() {
     legacyServer.listenForRequest('requests');
     legacyServer.listenForRequest('passwordResetRequests');
 
-    requestHandler.listenToRequests('api');
+    requestHandler.listenToRequests(REQUEST_TYPE.API);
+    requestHandler.listenToRequests(REQUEST_TYPE.REGISTRATION);
 
     legacyRegistrationServer.setFirebaseConnection(firebase);
     legacyRegistrationServer.listenForRequest('requests');
