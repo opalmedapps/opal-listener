@@ -16,7 +16,11 @@ const fs = require('fs');
 const Q = require('q');
 const { sendMail } = require('./utility/mail.js');
 
-// Insert user IP address.
+/**
+ * @description Insert user IP address.
+ * @param {Object} requestObject - The calling request's requestObject.
+ * @returns {Promise<void>} Resolves if the call completes successfully, or rejects with an error.
+ */
 exports.insertIPLog = function (requestObject) {
     return new Promise((resolve, reject) => {
 
@@ -27,7 +31,11 @@ exports.insertIPLog = function (requestObject) {
     });
 };
 
-// Validate user IP address.
+/**
+ * @description Validate user IP address.
+ * @param {Object} requestObject - The calling request's requestObject.
+ * @returns {Promise<void>} Resolves if the call completes successfully, or rejects with an error.
+ */
 exports.validateIP = function (requestObject) {
     return new Promise((resolve, reject) => {
         sqlInterface.validateIP(requestObject).then((members) => {
@@ -36,7 +44,11 @@ exports.validateIP = function (requestObject) {
     });
 };
 
-// Validate user input and search the user
+/**
+ * @description Validate user input and search the user.
+ * @param {Object} requestObject - The calling request's requestObject.
+ * @returns {Promise<void>} Resolves if the call completes successfully, or rejects with an error.
+ */
 exports.validateInputs = function (requestObject) {
     return new Promise((resolve, reject) => {
         sqlInterface.validateInputs(requestObject).then((members) => {
@@ -45,7 +57,11 @@ exports.validateInputs = function (requestObject) {
     });
 };
 
-// Get all security questions
+/**
+ * @description Get all security questions.
+ * @param {Object} requestObject - The calling request's requestObject.
+ * @returns {Promise<void>} Resolves if the call completes successfully, or rejects with an error.
+ */
 exports.getSecurityQuestionsList = function (requestObject) {
     return new Promise((resolve, reject) => {
         sqlInterface.getSecurityQuestionsList(requestObject).then((members) => {
@@ -54,7 +70,11 @@ exports.getSecurityQuestionsList = function (requestObject) {
     });
 };
 
-// Fetch the Opal level of accesss list
+/**
+ * @description Fetch the Opal level of accesss list.
+ * @param {Object} requestObject - The calling request's requestObject.
+ * @returns {Promise<void>} Resolves if the call completes successfully, or rejects with an error.
+ */
 exports.getAccessLevelList = function (requestObject) {
     return new Promise((resolve, reject) => {
         sqlInterface.getAccessLevelList(requestObject).then((members) => {
@@ -63,7 +83,11 @@ exports.getAccessLevelList = function (requestObject) {
     });
 };
 
-// Get the Opal app language list
+/**
+ * @description Get the Opal app language list.
+ * @param {Object} requestObject - The calling request's requestObject.
+ * @returns {Promise<void>} Resolves if the call completes successfully, or rejects with an error.
+ */
 exports.getLanguageList = function (requestObject) {
     return new Promise((resolve, reject) => {
         sqlInterface.getLanguageList(requestObject).then((members) => {
@@ -72,7 +96,11 @@ exports.getLanguageList = function (requestObject) {
     });
 };
 
-// Get the terms and agreement docuemnts
+/**
+ * @description Get the terms and agreement docuemnts.
+ * @param {Object} requestObject - The calling request's requestObject.
+ * @returns {Promise<void>} Resolves if the call completes successfully, or rejects with an error.
+ */
 exports.getTermsandAgreementDocuments = function (requestObject) {
     return new Promise((resolve, reject) => {
         sqlInterface.getTermsandAgreementDocuments(requestObject).then((members) => {
@@ -81,20 +109,33 @@ exports.getTermsandAgreementDocuments = function (requestObject) {
     });
 };
 
-// get patient Info
+/**
+ * @description Get a patient data info.
+ * @param {Object} requestObject - The calling request's requestObject.
+ * @returns { Data: response, Result: result }
+ * @throws Throws an error if a required field is not present in the given request.
+ */
 exports.getPatientInfo = async function(requestObject) {
-    let result = undefined;
+    let response = undefined;
+    let result = 'FAILURE';
     try {
-            result = await sqlInterface.getPatient(requestObject);
-            result = typeof result[0] == 'object' ? result[0] : undefined;
+        response = await sqlInterface.getPatient(requestObject);
+        if (typeof response[0] == 'object') {
+            response = response[0];
+            result = 'SUCCESS';
+        }
     } catch (error) {
         logger.log('error', `An error occurred while getting patient info (for ${requestObject.Parameters.Fields.ramq}): ${JSON.stringify(error)}`);
     }
-    return { Data: result, Result: 'SUCCESS' };
+    return { Data: response, Result: result };
 };
 
-
-// Register patient
+/**
+ * @description Register a patient
+ * @param {Object} requestObject - The calling request's requestObject.
+ * @returns { Data: result}
+ * @throws Throws an error if a required field is not present in the given request.
+ */
 exports.registerPatient = async function(requestObject) {
     try {
         validateRegisterPatientRequest(requestObject);
@@ -280,4 +321,25 @@ function getEmailContent(language) {
     data.htmlStream = htmlStream
 
     return data;
+}
+
+
+/**
+ * @description Validates the request parameters with expected request fields.
+ * @param {Object} requestObject - The calling request's requestObject.
+ * @returns {void}
+ * @throws Throws an error if a required field is not present in the given request.
+ */
+function validateRequest(requestObject, requiredFields) {
+    if (!requestObject.Parameters || !requestObject.Parameters.Fields) {
+        throw 'requestObject is missing Parameters.Fields'
+    }
+    // Helper function
+    let fieldExists = name => requestObject.Parameters.Fields[name] && requestObject.Parameters.Fields[name] !== "";
+
+    for (let field of requiredFields) {
+        if (!fieldExists(field)) {
+            throw `Required field '${field}' missing in request fields`
+        }
+    }
 }
