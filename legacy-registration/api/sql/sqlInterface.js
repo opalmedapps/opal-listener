@@ -5,6 +5,7 @@ const Q = require('q');
 const queries = require('../sql/queries.js');
 const logger = require('../../logs/logger.js');
 const config = require('../../config-adaptor');
+const requestUtility    = require("../../../listener/utility/request-utility");
 
 /** OPAL DATABASE CONFIGURATIONS **/
 const opaldbCredentials = {
@@ -214,6 +215,59 @@ exports.getTermsandAgreementDocuments = function (requestObject) {
 }
 
 /**
+ insertPatient
+ @desc insert a patient record.
+ @param requestObject
+ @return {Promise}
+ **/
+exports.insertPatient = function (requestObject) {
+    let parameters = requestObject.Parameters.Fields;
+    return exports.runOpaldbSqlQuery(queries.insertPatient(), [
+        parameters.firstName,
+        parameters.lastName,
+        parameters.sex,
+        parameters.dateOfBirth,
+        parameters.telNum,
+        parameters.ramq,
+    ]);
+};
+
+/**
+ insertPatientHospitalIdentifier
+ @desc insert a patient hospital identifier record.
+ @param requestObject
+ @return {Promise}
+ **/
+exports.insertPatientHospitalIdentifier = function (requestObject) {
+    let parameters = requestObject.Parameters.Fields;
+    return exports.runOpaldbSqlQuery(queries.insertPatientHospitalIdentifier(), [
+        parameters.patientSerNum,
+        parameters.mrn,
+        parameters.site,
+    ]);
+};
+
+/**
+ Get patient lab result history
+ @desc get a patient lab result history.
+ @param requestObject
+ @return {Promise}
+ **/
+exports.getLabResultHistory = function (requestObject) {
+    let r = Q.defer();
+    let parameters = requestObject.Parameters.Fields
+    const url = parameters.labResultHistoryURL;
+    const options = {
+        json: true,
+        body: {
+            PatientId: parameters.patientId,
+            Site: parameters.site
+        },
+    };
+    return requestUtility.request("post", url, options);
+};
+
+/**
      registerPatient
      @desc If patient entered all the information, this function will insert the patient data into the database.
      @param requestObject
@@ -223,7 +277,7 @@ exports.registerPatient = function (requestObject) {
     let r = Q.defer();
     let Parameters = requestObject.Parameters.Fields;
 
-    exports.runOpaldbSqlQuery(queries.InsertPatient(), [Parameters.ramq, Parameters.email, Parameters.password, Parameters.uniqueId, Parameters.securityQuestion1, Parameters.answer1, Parameters.securityQuestion2, Parameters.answer2, Parameters.securityQuestion3, Parameters.answer3, Parameters.language, Parameters.accessLevel, Parameters.accessLevelSign, Parameters.termsandAggreementId, Parameters.termsandAggreementSign])
+    exports.runOpaldbSqlQuery(queries.updatePatient(), [Parameters.ramq, Parameters.email, Parameters.password, Parameters.uniqueId, Parameters.securityQuestion1, Parameters.answer1, Parameters.securityQuestion2, Parameters.answer2, Parameters.securityQuestion3, Parameters.answer3, Parameters.language, Parameters.accessLevel, Parameters.accessLevelSign, Parameters.termsandAggreementId, Parameters.termsandAggreementSign])
         .then((rows) => {
 
             r.resolve(rows);
