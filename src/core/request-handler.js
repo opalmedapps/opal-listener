@@ -31,7 +31,7 @@ class RequestHandler {
     listenToRequests(requestType) {
         legacyLogger.log('debug', 'API: Starting request listener');
         let databaseRef = this.#databaseRef.child(requestType);
-        if (requestType == 'registration-api') {
+        if (requestType === 'registration-api') {
             databaseRef = this.#databaseRef.child('registration').child(requestType);
         }
         databaseRef.off();
