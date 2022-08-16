@@ -30,8 +30,12 @@ class RequestHandler {
      */
     listenToRequests(requestType) {
         legacyLogger.log('debug', 'API: Starting request listener');
-        this.#databaseRef.child(requestType).off();
-        this.#databaseRef.child(requestType).on('child_added', async snapshot => this.processRequest(
+        let databaseRef = this.#databaseRef.child(requestType);
+        if (requestType == 'registration-api') {
+            databaseRef = this.#databaseRef.child('registration').child(requestType);
+        }
+        databaseRef.off();
+        databaseRef.on('child_added', async snapshot => this.processRequest(
             requestType,
             snapshot,
         ));
@@ -60,7 +64,7 @@ class RequestHandler {
                 encryptionInfo.secret,
                 encryptionInfo.salt,
             );
-            await this.sendResponse(encryptedResponse, snapshot.key, encryptionInfo.userId);
+            await this.sendResponse(encryptedResponse, snapshot.key, encryptionInfo.userId, requestType);
             encryptedResponse.timestamp = Firebase.getDatabaseTimeStamp;
             this.clearRequest(requestType, snapshot.key);
         }
@@ -127,7 +131,7 @@ class RequestHandler {
     async sendResponse(encryptedResponse, firebaseRequestKey, userId, requestType) {
         legacyLogger.log('debug', 'API: Sending response to Firebase');
         const path = (requestType === REQUEST_TYPE.REGISTRATION)
-            ? `users/${firebaseRequestKey}`
+            ? `registration/response/${firebaseRequestKey}`
             : `users/${userId}/${firebaseRequestKey}`;
         await this.#databaseRef.child(path).set(encryptedResponse);
     }
