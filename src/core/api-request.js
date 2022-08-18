@@ -39,7 +39,10 @@ class ApiRequest {
         requestParams.headers.Authorization = `Token ${configs.OPAL_BACKEND.AUTH_TOKEN}`;
         requestParams.headers.Appuserid = userId;
         requestParams.url = `${configs.OPAL_BACKEND.HOST}${parameters.url}`;
+
         if (parameters.data !== undefined) requestParams.data = parameters.data;
+
+        if (parameters.params !== undefined) requestParams.params = parameters.params;
 
         try {
             return await axios(requestParams);
