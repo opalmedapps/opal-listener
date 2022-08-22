@@ -38,7 +38,7 @@ class Patient {
 	/**
 	 * @desc Factory method that returns a Patient object based on an identifier (PatientSerNum or Username).
 	 * @param identifier The identifier used to find the patient (passed as a parameter to the sql).
-	 * @param {string} sql The query used to look up the patient.
+	 * @param {function} sql Function that takes as input the identifier and returns the query used to look up the patient.
 	 * @param {string} identifierNameForLogs The name of the identifier (e.g. 'PatientSerNum'), used to print informative logs.
 	 * @returns {Promise<Patient>} Resolves with a patient object built using the rows found by the query.
 	 */
