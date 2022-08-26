@@ -90,5 +90,6 @@ pages:
 firebase rules dev:
   stage: Development Test
   script:
+    - npm install -g firebase-tools
     - cd firebase/dev
     - firebase deploy --only database
