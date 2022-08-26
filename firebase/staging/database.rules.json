@@ -233,6 +233,10 @@
     "demo": {
       ".read": "auth!==null",
       ".write": "true"
+    },
+    "test-ci-cd-STAGING": {
+      ".read": "auth!==null",
+      ".write": "true"
     }
   }
 }
