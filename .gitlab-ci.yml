@@ -90,5 +90,6 @@ pages:
 firebase rules dev:
   stage: Development Test
   script:
+    - firebase -v
     - cd firebase/dev
     - firebase deploy --only database
