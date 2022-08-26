@@ -85,15 +85,42 @@ pages:
   rules:
     - if: $CI_COMMIT_REF_NAME == $CI_DEFAULT_BRANCH
 
-# Deployment implicitly uses a service account ($GOOGLE_APPLICATION_CREDENTIALS) defined in the GitLab project settings
-# This service account provides permissions for editing Firebase rules.
-firebase rules dev:
+# Deployment implicitly uses a service account assigned to $GOOGLE_APPLICATION_CREDENTIALS below
+# These service accounts provide permissions for editing Firebase rules.
+.firebase rules:
   stage: Development Test
+  before_script:
+    - npm install -g firebase-tools
+
+firebase rules dev:
+  extends: .firebase rules
   rules:
-    - if: $CI_COMMIT_BRANCH == "QSCCD-465.SB.firebase-rules-2"
+    - if: $CI_COMMIT_BRANCH == "QSCCD-465.SB.firebase-rules"
       changes:
         - firebase/dev/database.rules.json
   script:
-    - npm install -g firebase-tools
     - cd firebase/dev
+    - GOOGLE_APPLICATION_CREDENTIALS = $DEV_GOOGLE_APPLICATION_CREDENTIALS
+    - firebase deploy --only database
+
+firebase rules staging:
+  extends: .firebase rules
+  rules:
+    - if: $CI_COMMIT_BRANCH == "staging"
+      changes:
+        - firebase/staging/database.rules.json
+  script:
+    - cd firebase/staging
+    - GOOGLE_APPLICATION_CREDENTIALS = $STAGING_GOOGLE_APPLICATION_CREDENTIALS
+    - firebase deploy --only database
+
+firebase rules preprod:
+  extends: .firebase rules
+  rules:
+    - if: $CI_COMMIT_BRANCH == "PreProd"
+      changes:
+        - firebase/preprod/database.rules.json
+  script:
+    - cd firebase/preprod
+    - GOOGLE_APPLICATION_CREDENTIALS = $PREPROD_GOOGLE_APPLICATION_CREDENTIALS
     - firebase deploy --only database

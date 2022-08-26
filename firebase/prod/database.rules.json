@@ -1,24 +1,5 @@
 {
   "rules": {
-    "test-deployment-via-ci-cd-again": {
-      ".read": "auth!==null",
-      ".write": "true"
-    },
-    "dev": {
-      "Users": {
-        "$user_id": {
-          ".write": "$user_id === auth.uid",
-          ".read": "$user_id === auth.uid"
-        }
-      },
-      "requests": {
-        "$pushId": {
-          ".read": "auth!==null",
-          ".write": "auth!==null",
-          ".validate": "newData.hasChildren(['Request', 'DeviceId', 'Token', 'UserID'])"
-        }
-      }
-    },
     "dev3":{
       "$hospitalId":{
         "requests": {
@@ -82,21 +63,7 @@
         }
       }
     },
-    "VWR": {
-      ".write": "true",
-      ".read": "true"
-    },
-    "Users": {
-      "$user_id": {
-        "demo": {
-          ".write": "true",
-          ".read": "true"
-        },
-        ".write": "$user_id === auth.uid",
-        ".read": "$user_id === auth.uid"
-      }
-    },
-    "test": {
+    "dev2": {
       "requests": {
         "$request_id": {
           ".write": "auth.uid !== null",
@@ -104,38 +71,87 @@
           ".validate": "newData.hasChildren(['Request', 'DeviceId', 'Token', 'UserID'])&& newData.child('UserID').val() === auth.uid"
         }
       },
+      "passwordResetRequests": {
+        "$request_id": {
+          ".write": "true",
+          ".read": "true"
+        }
+      },
+      "passwordResetResponses": {
+        "$request_id": {
+          ".write": "true",
+          ".read": "true"
+        }
+      },
       "users": {
         "$user_id": {
           "$request_id": {
-            ".write": "auth.uid === $user_id",
-            ".read": "auth.uid === $user_id"
+            ".write":"auth.uid !== null && auth.uid === $user_id",
+            ".read": "auth.uid !== null && auth.uid === $user_id"
+          }
+        }
+      },
+      "logged_in_users": {
+        "$user_id": {
+          ".write":"auth.uid !== null && auth.uid === $user_id",
+          ".read": "auth.uid !== null && auth.uid === $user_id"
+        }
+      }
+    },
+    "registration" : {
+      "branch": {
+        ".write": "false",
+        ".read": "false",
+        "$branchId":{
+          ".read": "true",
+          ".write": "false",
+        }
+      },
+      "requests": {
+        ".read": "false",
+        ".write": "false",
+        "$requestId":{
+          ".read": "false",
+          ".write": "newData.child('BranchName').val() != \"\" && newData.child('BranchName').val() != null && newData.hasChild('BranchName') &&  root.child('registration').child('branch').hasChild(newData.child('BranchName').val())"
+        }
+      },
+      "users": {
+        ".read": "false",
+        ".write": "false",
+        "$requestId":{
+          ".read": "true",
+          ".write": "true"
+        }
+      }
+    },
+    "demo": {
+      "requests": {
+        "$request_id": {
+          ".write": "auth.uid !== null",
+          ".read": "auth.uid !== null",
+          ".validate": "newData.hasChildren(['Request', 'DeviceId', 'Token', 'UserID'])&& newData.child('UserID').val() === auth.uid"
+        }
+      },
+      "passwordResetRequests": {
+        "$request_id": {
+          ".write": "true",
+          ".read": "true"
+        }
+      },
+      "passwordResetResponses": {
+        "$request_id": {
+          ".write": "true",
+          ".read": "true"
+        }
+      },
+      "users": {
+        "$user_id": {
+          "$request_id": {
+            ".write":"auth.uid !== null && auth.uid === $user_id",
+            ".read": "auth.uid !== null && auth.uid === $user_id"
           }
         }
       }
     },
-    "NF": {
-      ".read": true,
-      ".write": true
-    },
-    "dev2": {
-      ".write": "true",
-      ".read": "true"
-    },
-    "dev4": {
-      ".write": "true",
-      ".read": "true"
-    },
-    "dev5": {
-      ".write": "true",
-      ".read": "true"
-    },
-    "dev6": {
-      ".write": "true",
-      ".read": "true"
-    },
-    "demo": {
-      ".read": "auth!==null",
-      ".write": "true"
-    }
   }
 }
