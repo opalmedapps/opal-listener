@@ -1,5 +1,7 @@
 {
   "projects": {
     "default": "opal-registration-beta"
-  }
+  },
+  "targets": {},
+  "etags": {}
 }
