@@ -113,10 +113,6 @@ firebase rules staging:
     - cd firebase/staging
     - export GOOGLE_APPLICATION_CREDENTIALS=$STAGING_GOOGLE_APPLICATION_CREDENTIALS
     - firebase deploy --only database
-  artifacts:
-    expire_in: 1 day
-    paths:
-      - firebase-debug.log
 
 firebase rules preprod:
   extends: .firebase rules

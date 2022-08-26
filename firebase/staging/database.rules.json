@@ -234,7 +234,7 @@
       ".read": "auth!==null",
       ".write": "true"
     },
-    "test-ci-cd-STAGING-2": {
+    "test-ci-cd-STAGING": {
       ".read": "auth!==null",
       ".write": "true"
     }
