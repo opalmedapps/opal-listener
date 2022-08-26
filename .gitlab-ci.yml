@@ -100,7 +100,7 @@ firebase rules dev:
         - firebase/dev/database.rules.json
   script:
     - cd firebase/dev
-    - GOOGLE_APPLICATION_CREDENTIALS=$DEV_GOOGLE_APPLICATION_CREDENTIALS
+    - export GOOGLE_APPLICATION_CREDENTIALS=$DEV_GOOGLE_APPLICATION_CREDENTIALS
     - firebase deploy --only database
 
 firebase rules staging:
@@ -111,7 +111,7 @@ firebase rules staging:
         - firebase/staging/database.rules.json
   script:
     - cd firebase/staging
-    - GOOGLE_APPLICATION_CREDENTIALS=$STAGING_GOOGLE_APPLICATION_CREDENTIALS
+    - export GOOGLE_APPLICATION_CREDENTIALS=$STAGING_GOOGLE_APPLICATION_CREDENTIALS
     - firebase deploy --only database
 
 firebase rules preprod:
@@ -122,5 +122,5 @@ firebase rules preprod:
         - firebase/preprod/database.rules.json
   script:
     - cd firebase/preprod
-    - GOOGLE_APPLICATION_CREDENTIALS=$PREPROD_GOOGLE_APPLICATION_CREDENTIALS
+    - export GOOGLE_APPLICATION_CREDENTIALS=$PREPROD_GOOGLE_APPLICATION_CREDENTIALS
     - firebase deploy --only database
