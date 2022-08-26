@@ -19,6 +19,7 @@ before_script:
   - cp src/config/config.template.json src/config/config.json
 
 stages:
+  - Development Test
   - Static Analysis
   - Test
   - Documentation
@@ -87,7 +88,7 @@ pages:
 # Deployment implicitly uses a service account ($GOOGLE_APPLICATION_CREDENTIALS) defined in the GitLab project settings
 # This service account provides permissions for editing Firebase rules.
 firebase rules dev:
-  stage: Deploy
+  stage: Development Test
   script:
     - cd firebase/dev
     - firebase deploy --only database
