@@ -90,7 +90,7 @@ pages:
 firebase rules dev:
   stage: Development Test
   rules:
-    - if: $CI_COMMIT_BRANCH == "QSCCD-465.SB.firebase-rules"
+    - if: $CI_COMMIT_BRANCH == "QSCCD-465.SB.firebase-rules-2"
       changes:
         - firebase/dev/database.rules.json
   script:
