@@ -89,6 +89,10 @@ pages:
 # This service account provides permissions for editing Firebase rules.
 firebase rules dev:
   stage: Development Test
+  rules:
+    - if: $CI_COMMIT_BRANCH == "QSCCD-465.SB.firebase-rules"
+      changes:
+        - firebase/dev/database.rules.json
   script:
     - npm install -g firebase-tools
     - cd firebase/dev
