@@ -1,6 +1,6 @@
 {
   "rules": {
-    "test-deployment-via-ci-cd-1": {
+    "test-deployment-via-ci-cd-2": {
       ".read": "auth!==null",
       ".write": "true"
     },
