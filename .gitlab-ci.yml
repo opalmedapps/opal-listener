@@ -19,7 +19,6 @@ before_script:
   - cp src/config/config.template.json src/config/config.json
 
 stages:
-  - Development Test
   - Static Analysis
   - Test
   - Documentation
@@ -86,16 +85,16 @@ pages:
     - if: $CI_COMMIT_REF_NAME == $CI_DEFAULT_BRANCH
 
 # Deployment implicitly uses a service account assigned to $GOOGLE_APPLICATION_CREDENTIALS below
-# These service accounts provide permissions for editing Firebase rules.
+# These service accounts provide permissions for editing Firebase rules
 .firebase rules:
-  stage: Development Test
+  stage: Deploy
   before_script:
     - npm install -g firebase-tools
 
 firebase rules dev:
   extends: .firebase rules
   rules:
-    - if: $CI_COMMIT_BRANCH == "QSCCD-465.SB.firebase-rules"
+    - if: $CI_COMMIT_BRANCH == $CI_DEFAULT_BRANCH
       changes:
         - firebase/dev/database.rules.json
   script:
@@ -106,7 +105,7 @@ firebase rules dev:
 firebase rules staging:
   extends: .firebase rules
   rules:
-    - if: $CI_COMMIT_BRANCH == "QSCCD-465.SB.firebase-rules"
+    - if: $CI_COMMIT_BRANCH == "staging"
       changes:
         - firebase/staging/database.rules.json
   script:
@@ -117,7 +116,7 @@ firebase rules staging:
 firebase rules preprod:
   extends: .firebase rules
   rules:
-    - if: $CI_COMMIT_BRANCH == "QSCCD-465.SB.firebase-rules"
+    - if: $CI_COMMIT_BRANCH == "PreProd"
       changes:
         - firebase/preprod/database.rules.json
   script:
