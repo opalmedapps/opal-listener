@@ -1,7 +1,7 @@
 {
   "rules": {
-    "dev3":{
-      "$hospitalId":{
+    "dev3": {
+      "$hospitalId": {
         "requests": {
           "$request_id": {
             ".write": "auth.uid !== null",
@@ -35,19 +35,19 @@
             ".read": "auth.uid !== null && auth.uid === $user_id"
           }
         },
-        "registration" : {
+        "registration": {
           "branch": {
             ".write": "false",
             ".read": "false",
-            "$branchId":{
+            "$branchId": {
               ".read": "true",
-              ".write": "false",
+              ".write": "false"
             }
           },
           "requests": {
             ".read": "false",
             ".write": "false",
-            "$requestId":{
+            "$requestId": {
               ".read": "false",
               ".write": "newData.child('BranchName').val() != \"\"  && newData.child('BranchName').val() != null  && newData.hasChild('BranchName')  &&  root.child('dev3').child($hospitalId).child('registration').child('branch').hasChild(newData.child('BranchName').val())"
             }
@@ -55,7 +55,7 @@
           "users": {
             ".read": "false",
             ".write": "false",
-            "$requestId":{
+            "$requestId": {
               ".read": "true",
               ".write": "true"
             }
@@ -98,19 +98,19 @@
         }
       }
     },
-    "registration" : {
+    "registration": {
       "branch": {
         ".write": "false",
         ".read": "false",
-        "$branchId":{
+        "$branchId": {
           ".read": "true",
-          ".write": "false",
+          ".write": "false"
         }
       },
       "requests": {
         ".read": "false",
         ".write": "false",
-        "$requestId":{
+        "$requestId": {
           ".read": "false",
           ".write": "newData.child('BranchName').val() != \"\" && newData.child('BranchName').val() != null && newData.hasChild('BranchName') &&  root.child('registration').child('branch').hasChild(newData.child('BranchName').val())"
         }
@@ -118,7 +118,7 @@
       "users": {
         ".read": "false",
         ".write": "false",
-        "$requestId":{
+        "$requestId": {
           ".read": "true",
           ".write": "true"
         }
@@ -152,6 +152,6 @@
           }
         }
       }
-    },
+    }
   }
 }
