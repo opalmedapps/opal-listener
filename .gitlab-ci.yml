@@ -106,7 +106,7 @@ firebase rules dev:
 firebase rules staging:
   extends: .firebase rules
   rules:
-    - if: $CI_COMMIT_BRANCH == "QSCCD-465.SB.firebase-rules"
+    - if: $CI_COMMIT_BRANCH == "staging"
       changes:
         - firebase/staging/database.rules.json
   script:
@@ -117,7 +117,7 @@ firebase rules staging:
 firebase rules preprod:
   extends: .firebase rules
   rules:
-    - if: $CI_COMMIT_BRANCH == "PreProd"
+    - if: $CI_COMMIT_BRANCH == "QSCCD-465.SB.firebase-rules"
       changes:
         - firebase/preprod/database.rules.json
   script:
