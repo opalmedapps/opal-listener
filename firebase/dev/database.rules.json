@@ -1,9 +1,5 @@
 {
   "rules": {
-    "test-deployment-via-ci-cd-2": {
-      ".read": "auth!==null",
-      ".write": "true"
-    },
     "dev": {
       "Users": {
         "$user_id": {

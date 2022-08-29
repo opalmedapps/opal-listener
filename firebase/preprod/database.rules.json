@@ -268,10 +268,6 @@
         }
       }
     },
-    "test-ci-cd-PREPROD": {
-      ".read": "auth!==null",
-      ".write": "true"
-    },
     ".write": false,
     ".read": false
   }

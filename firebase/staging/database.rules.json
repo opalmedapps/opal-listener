@@ -1,6 +1,5 @@
 {
   "rules": {
-
     "dev": {
       "Users": {
         "$user_id": {
@@ -231,10 +230,6 @@
       ".read": "true"
     },
     "demo": {
-      ".read": "auth!==null",
-      ".write": "true"
-    },
-    "test-ci-cd-STAGING": {
       ".read": "auth!==null",
       ".write": "true"
     }
