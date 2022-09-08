@@ -43,4 +43,5 @@ async function launch() {
     legacyRegistrationServer.listenForRequest('requests');
 
     legacyServer.spawnCronJobs();
+    legacyRegistrationServer.spawnCronJobs();
 }
