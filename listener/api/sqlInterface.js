@@ -776,15 +776,6 @@ exports.inputEducationalMaterialRating = function(requestObject)
 };
 
 /**
- * updateLogout
- * @param fields
- * @return {Promise}
- */
-exports.updateLogout = function(fields) {
-    return exports.runSqlQuery(queries.updateLogout(), fields);
-};
-
-/**
  * getPatientFromEmail
  * @desc gets patient information based on inputted email
  * @param email
