@@ -749,24 +749,6 @@ exports.setNewPassword=function(password,patientSerNum) {
 };
 
 /**
- * getPatientDeviceLastActivity
- * @desc gets the patient's last active timestamp
- * @param userid
- * @param device
- * @return {Promise}
- */
-exports.getPatientDeviceLastActivity = function(userid,device)
-{
-    let r = Q.defer();
-    exports.runSqlQuery(queries.getPatientDeviceLastActivity(), [userid,device]).then((rows)=>{
-        r.resolve(rows[0]);
-    }).catch((err)=>{
-        r.reject(err);
-    });
-    return r.promise;
-};
-
-/**
  *@module sqlInterface
  *@name inputEducationalMaterialRating
  *@require queries

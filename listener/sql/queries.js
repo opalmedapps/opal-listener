@@ -439,10 +439,6 @@ exports.updateReadStatus=function()
     `;
 };
 
-exports.getPatientDeviceLastActivity=function()
-{
-    return "SELECT * FROM PatientActivityLog WHERE Username=? AND DeviceId=? ORDER BY ActivitySerNum DESC LIMIT 1;";
-};
 exports.insertEducationalMaterialRatingQuery=function()
 {
     return "INSERT INTO `EducationalMaterialRating`(`EducationalMaterialRatingSerNum`, `EducationalMaterialControlSerNum`, `PatientSerNum`, `RatingValue`, `SessionId`, `LastUpdated`) VALUES (NULL,?,?,?,?,NULL)";
