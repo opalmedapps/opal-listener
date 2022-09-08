@@ -21,3 +21,8 @@ footer {
 #resizer {
     background-color: #bada55;
 }
+
+/* Enable numbered lists */
+ol>li {
+    list-style: decimal !important;
+}
