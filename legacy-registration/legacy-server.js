@@ -14,6 +14,7 @@ const admin = require('firebase-admin');
 const mainRequestApi = require('./api/main.js');
 const utility = require('./api/utility/utility.js');
 const config = require('./config-adaptor.js');
+const cron = require('./cron');
 const logger = require('../listener/logs/logger.js');
 const listenerLegacyServer = require('../listener/legacy-server');
 
@@ -214,5 +215,7 @@ function completeRequest(headers, key) {
         });
 }
 
-
-
+function spawnCronJobs() {
+    cron.deleteExpiredBranches();
+}
+exports.spawnCronJobs = spawnCronJobs;
