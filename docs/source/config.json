@@ -9,5 +9,8 @@
   },
   "strangler-fig": {
     "title": "Strangler Fig"
+  },
+  "firebase-rules": {
+    "title": "Firebase Rules"
   }
 }
