@@ -4,6 +4,14 @@
  */
 
 require('dotenv').config();
+const assert = require('assert');
+// Raise AssertionError if environment variables are not set
+assert.ok(process.env.FIREBASE_DATABASE_URL, 'FIREBASE_DATABASE_URL variable must be defined in .env');
+assert.ok(process.env.FIREBASE_ADMIN_KEY_PATH, 'FIREBASE_ADMIN_KEY_PATH variable must be defined in .env');
+assert.ok(process.env.FIREBASE_ROOT_BRANCH, 'FIREBASE_ROOT_BRANCH variable must be defined in .env');
+assert.ok(process.env.FIREBASE_ENABLE_LOGGING, 'FIREBASE_ENABLE_LOGGING variable must be defined in .env');
+assert.ok(process.env.OPAL_BACKEND_HOST, 'OPAL_BACKEND_HOST variable must be defined in .env');
+assert.ok(process.env.OPAL_BACKEND_AUTH_TOKEN, 'OPAL_BACKEND_AUTH_TOKEN variable must be defined in .env');
 
 const { Firebase } = require('./firebase/firebase');
 const legacyServer = require('../listener/legacy-server');
@@ -25,6 +33,7 @@ launch().then(() => {
  * @returns {Promise<void>}
  */
 async function launch() {
+    // We load the config in the launch function so that any improperly set env var will get caught in the catch above
     const firebaseConfig = {
         DATABASE_URL: process.env.FIREBASE_DATABASE_URL,
         ADMIN_KEY_PATH: process.env.FIREBASE_ADMIN_KEY_PATH,
