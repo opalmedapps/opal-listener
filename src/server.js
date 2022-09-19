@@ -3,7 +3,8 @@
  * @author David Herrera, Robert Maglieri, Stacey Beard
  */
 
-const config = require('./config/config.json');
+require('dotenv').config();
+
 const { Firebase } = require('./firebase/firebase');
 const legacyServer = require('../listener/legacy-server');
 const legacyRegistrationServer = require('../legacy-registration/legacy-server');
@@ -24,9 +25,17 @@ launch().then(() => {
  * @returns {Promise<void>}
  */
 async function launch() {
-    const firebase = new Firebase(config.FIREBASE);
+    const firebaseConfig = {
+        DATABASE_URL: process.env.FIREBASE_DATABASE_URL,
+        ADMIN_KEY_PATH: process.env.FIREBASE_ADMIN_KEY_PATH,
+        ROOT_BRANCH: process.env.FIREBASE_ROOT_BRANCH,
+        ENABLE_LOGGING: process.env.FIREBASE_ENABLE_LOGGING,
+    };
+
+    const firebase = new Firebase(firebaseConfig);
+
     await firebase.init();
-    Firebase.enableLogging(config.FIREBASE.ENABLE_LOGGING);
+    Firebase.enableLogging(firebaseConfig.FIREBASE_ENABLE_LOGGING);
 
     legacyLogger.log('debug', 'Setting Firebase request listeners');
 
