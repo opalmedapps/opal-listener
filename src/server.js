@@ -5,14 +5,18 @@
 
 require('dotenv').config();
 const assert = require('assert');
-// Raise AssertionError if environment variables are not set
-assert.ok(process.env.FIREBASE_DATABASE_URL, 'FIREBASE_DATABASE_URL variable must be defined in .env');
-assert.ok(process.env.FIREBASE_ADMIN_KEY_PATH, 'FIREBASE_ADMIN_KEY_PATH variable must be defined in .env');
-assert.ok(process.env.FIREBASE_ROOT_BRANCH, 'FIREBASE_ROOT_BRANCH variable must be defined in .env');
-assert.ok(process.env.FIREBASE_ENABLE_LOGGING, 'FIREBASE_ENABLE_LOGGING variable must be defined in .env');
-assert.ok(process.env.OPAL_BACKEND_HOST, 'OPAL_BACKEND_HOST variable must be defined in .env');
-assert.ok(process.env.OPAL_BACKEND_AUTH_TOKEN, 'OPAL_BACKEND_AUTH_TOKEN variable must be defined in .env');
 
+const environment = [
+    process.env.FIREBASE_DATABASE_URL,
+    process.env.FIREBASE_ADMIN_KEY_PATH,
+    process.env.FIREBASE_ROOT_BRANCH,
+    process.env.FIREBASE_ENABLE_LOGGING,
+    process.env.OPAL_BACKEND_HOST,
+    process.env.OPAL_BACKEND_AUTH_TOKEN];
+// Raise AssertionError if environment variables are not set
+validateEnvironment(environment);
+
+const { AssertionError } = require('assert');
 const { Firebase } = require('./firebase/firebase');
 const legacyServer = require('../listener/legacy-server');
 const legacyRegistrationServer = require('../legacy-registration/legacy-server');
@@ -33,12 +37,14 @@ launch().then(() => {
  * @returns {Promise<void>}
  */
 async function launch() {
-    // We load the config in the launch function so that any improperly set env var will get caught in the catch above
+    // Environment is already validated at this point, however env vars must be stored as strings
+    // Therefore we have to convert any required strings to booleans at this point
+    const loggingBoolean = (process.env.FIREBASE_ENABLE_LOGGING === 'true');
     const firebaseConfig = {
         DATABASE_URL: process.env.FIREBASE_DATABASE_URL,
         ADMIN_KEY_PATH: process.env.FIREBASE_ADMIN_KEY_PATH,
         ROOT_BRANCH: process.env.FIREBASE_ROOT_BRANCH,
-        ENABLE_LOGGING: process.env.FIREBASE_ENABLE_LOGGING,
+        ENABLE_LOGGING: loggingBoolean,
     };
 
     const firebase = new Firebase(firebaseConfig);
@@ -62,4 +68,16 @@ async function launch() {
 
     legacyServer.spawnCronJobs();
     legacyRegistrationServer.spawnCronJobs();
+}
+
+/**
+ * @description Validate the listener environment by checking all
+ *              specified environment variables for truthy-ness
+ * @param {Array} processArr - Environment variables to be validated
+ * @throws {AssertionError}
+ */
+function validateEnvironment(processArr) {
+    processArr.forEach(element => {
+        assert.ok(element, `${element} variable must be defined in .env`);
+    });
 }
