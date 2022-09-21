@@ -71,7 +71,7 @@ class RequestHandler {
                 encryptionInfo.secret,
                 encryptionInfo.salt,
             ) : errorResponse;
-            await this.sendResponse(response, snapshot.key, encryptionInfo.userId, requestType);
+            await this.sendResponse(response, snapshot.key, encryptionInfo?.userId, requestType);
         }
 
         this.clearRequest(requestType, snapshot.key);

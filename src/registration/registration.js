@@ -15,7 +15,7 @@ class Registration {
         // TODO handle decryption using MRNs
         // https://o-hig.atlassian.net/browse/QSCCD-427
         return {
-            salt: response.data.patient.health_insurance_number,
+            salt: response.data.patient.ramq,
             secret: response.data.code,
         };
     }

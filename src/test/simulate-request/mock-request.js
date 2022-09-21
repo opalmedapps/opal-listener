@@ -34,7 +34,7 @@ const registrationRequest = {
     BranchName: 'code12345678',
     Parameters: {
         method: 'get',
-        url: '/api/registration/by-hash/',
+        url: `/api/registration/by-hash/${CryptoJs.SHA512('code12345678')}`,
         headers: {
             'Content-Type': 'application/json',
             'Accept-Language': 'fr',
