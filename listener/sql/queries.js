@@ -355,9 +355,10 @@ exports.getPatientFromEmail=function()
 
 exports.logActivity=function()
 {
-	return `INSERT INTO PatientActivityLog
-                (\`ActivitySerNum\`,\`Request\`,\`Username\`,\`DeviceId\`,\`SessionId\`,\`DateTime\`,\`LastUpdated\`,\`AppVersion\`)
-	        VALUES (NULL, ?, ?, ?, ?, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP, ?)`;
+    return `INSERT INTO PatientActivityLog
+                (ActivitySerNum, Request, Parameters, TargetPatientID, Username, DeviceId, SessionId, DateTime, LastUpdated, AppVersion)
+            VALUES (NULL, ?, ?, ?, ?, ?, ?, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP, ?);
+    `;
 };
 
 /**
