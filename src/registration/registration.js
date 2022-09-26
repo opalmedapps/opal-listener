@@ -9,6 +9,7 @@ regCache.on('error', err => legacyLogger.log('error', err)); // default keyv err
 
 class Registration {
     static async getEncryptionValues(snapshot) {
+        console.log(snapshot);
         const requestParams = {
             Parameters: {
                 method: 'get',
@@ -24,21 +25,16 @@ class Registration {
             const response = await ApiRequest.makeRequest(requestParams);
             await regCache.set('salt', response.data.patient.ramq, config.DATA_CACHE_TIME_TO_LIVE_MINUTES * 60 * 1000);
             await regCache.set('secret', response.data.code, config.DATA_CACHE_TIME_TO_LIVE_MINUTES * 60 * 1000);
-        }
+        } // TODO: Reset clock on lookup
         else {
             legacyLogger.log('info', 'LOADING DATA FROM CACHE');
         }
-
+        // TODO handle decryption using MRNs
+        // https://o-hig.atlassian.net/browse/QSCCD-427
         return {
             salt: await regCache.get('salt'), // .health_insurance_number
             secret: await regCache.get('secret'),
         };
-        // TODO handle decryption using MRNs
-        // https://o-hig.atlassian.net/browse/QSCCD-427
-        // return {
-        //     salt: response.data.patient.ramq, // .health_insurance_number
-        //     secret: response.data.code,
-        // };
     }
 }
 
