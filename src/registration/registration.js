@@ -9,7 +9,6 @@ regCache.on('error', err => legacyLogger.log('error', err)); // default keyv err
 
 class Registration {
     static async getEncryptionValues(snapshot) {
-        console.log(snapshot);
         const requestParams = {
             Parameters: {
                 method: 'get',

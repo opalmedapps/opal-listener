@@ -8,5 +8,6 @@
   "OPAL_BACKEND": {
     "HOST": "http://host.docker.internal:8000",
     "AUTH_TOKEN": "<[String] Authorization token for accessing the endpoints. See 'Authentication' section in the new opalAdmin documentation>"
-  }
+  },
+  "DATA_CACHE_TIME_TO_LIVE_MINUTES": "<[Integer] The number of minutes to store cached variables in-memory before requiring a new api call>"
 }
