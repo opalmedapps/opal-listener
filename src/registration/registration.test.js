@@ -6,7 +6,7 @@ const DefaultRequestData = require('../test/simulate-request/mock-request');
 const legacyUtility = require('../../listener/utility/utility');
 
 describe('Registration', function () {
-    describe('getEncryptionValues()', function() {
+    describe('getEncryptionValues()', function () {
         it('Should return non null salt and secret of length 12', async function () {
             const encryptedBranchName = EncryptionUtilities.hash(DefaultRequestData.registrationRequest.BranchName);
             const encryptedData = await legacyUtility.encrypt(
