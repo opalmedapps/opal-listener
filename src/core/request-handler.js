@@ -49,11 +49,24 @@ class RequestHandler {
         try {
             if (!RequestHandler.validateSnapshot(snapshot)) throw new Error('SNAPSHOT_VALIDATION');
             encryptionInfo = await RequestHandler.getEncryptionInfo(snapshot, requestType);
-            const decryptedRequest = await EncryptionUtilities.decryptRequest(
-                snapshot.val(),
-                encryptionInfo.secret,
-                encryptionInfo.salt,
-            );
+            let decryptedRequest;
+            if (Array.isArray(encryptionInfo.salt)) {
+                const { result, salt } = await EncryptionUtilities.decryptRequestMultipleSalts(
+                    snapshot.val(),
+                    encryptionInfo.secret,
+                    encryptionInfo.salt, // In this case, there are many possible salts (array)
+                );
+                decryptedRequest = result;
+                // Save the salt that successfully decrypted the request (to be used to encrypt the response)
+                encryptionInfo.salt = salt;
+            }
+            else {
+                decryptedRequest = await EncryptionUtilities.decryptRequest(
+                    snapshot.val(),
+                    encryptionInfo.secret,
+                    encryptionInfo.salt,
+                );
+            }
             const apiResponse = await ApiRequest.makeRequest(decryptedRequest);
             const encryptedResponse = await EncryptionUtilities.encryptResponse(
                 apiResponse,
@@ -66,11 +79,12 @@ class RequestHandler {
         }
         catch (error) {
             const errorResponse = ErrorHandler.getErrorResponse(error);
-            const response = (errorResponse.encrypt) ? await EncryptionUtilities.encryptResponse(
-                errorResponse,
-                encryptionInfo.secret,
-                encryptionInfo.salt,
-            ) : errorResponse;
+            const response = errorResponse.encrypt && !Array.isArray(encryptionInfo.salt)
+                ? await EncryptionUtilities.encryptResponse(
+                    errorResponse,
+                    encryptionInfo.secret,
+                    encryptionInfo.salt,
+                ) : errorResponse;
             await this.sendResponse(response, snapshot.key, encryptionInfo?.userId, requestType);
         }
 
