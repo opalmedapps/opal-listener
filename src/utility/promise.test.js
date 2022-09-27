@@ -11,23 +11,25 @@ describe('PromiseUtility', function () {
             return expect(value).to.equal('success');
         });
         it('should reject an AggregateError for a single rejecting promise', async function () {
-            const failure = Promise.reject('error');
+            const failure = Promise.reject(new Error('error'));
             return expect(PromiseUtility.promiseAnyWithIndex([failure])).to.be.rejectedWith(AggregateError);
         });
         it('should resolve to the only resolving promise in an array', async function () {
             const promises = [
-                new Promise(resolve => setTimeout(() => resolve('success 1'), 100)),
-                Promise.resolve('success 2'),
-                Promise.reject(new Error('error')),
+                Promise.reject(new Error('error 1')),
+                Promise.resolve('success 1'),
+                Promise.reject(new Error('error 2')),
             ];
             const { value, index } = await PromiseUtility.promiseAnyWithIndex(promises);
             expect(index).to.equal(1);
-            return expect(value).to.equal('success 2');
+            return expect(value).to.equal('success 1');
         });
         it('should resolve to the first promise to resolve in an array', async function () {
             const promises = [
                 Promise.reject(new Error('error 1')),
-                new Promise(resolve => setTimeout(() => resolve('success 1'), 300)),
+                new Promise(resolve => {
+                    setTimeout(() => resolve('success 1'), 300);
+                }),
                 Promise.reject(new Error('error 2')),
                 Promise.resolve('success 2'),
             ];
