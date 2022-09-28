@@ -6,7 +6,6 @@
 const path = require('path');
 const mysql = require('mysql');
 const fs = require('fs');
-const config = require('../../config/config.json');
 const { Firebase } = require('../../firebase/firebase');
 const DefaultRequestData = require('./mock-request');
 const legacyLogger = require('../../../listener/logs/logger');
@@ -15,11 +14,18 @@ const legacyUtility = require('../../../listener/utility/utility');
 const EncryptionUtilities = require('../../encryption/encryption');
 const { REQUEST_TYPE } = require('../../const');
 
+const firebaseConfig = {
+    DATABASE_URL: process.env.FIREBASE_DATABASE_URL,
+    ADMIN_KEY_PATH: process.env.FIREBASE_ADMIN_KEY_PATH,
+    ROOT_BRANCH: process.env.FIREBASE_ROOT_BRANCH,
+    ENABLE_LOGGING: process.env.FIREBASE_ENABLE_LOGGING === 'true',
+};
+
 class SimulateRequest {
     /**
      * @description App configuration needed to connect to firebase
      */
-    #config;
+    #firebaseConfig;
 
     /**
      * @description Mocked request data
@@ -53,7 +59,7 @@ class SimulateRequest {
      *              Mock request data is located in `./mock-request.js`
      */
     constructor(requestData) {
-        this.#config = config;
+        this.#firebaseConfig = firebaseConfig;
         this.#requestData = requestData;
         this.#requestData.Timestamp = Firebase.getDatabaseTimeStamp;
         if (this.#requestData.Request === REQUEST_TYPE.REGISTRATION) this.#requestType = REQUEST_TYPE.REGISTRATION;
@@ -68,7 +74,7 @@ class SimulateRequest {
      *              4- Upload the result to Firebase
      */
     async makeRequest() {
-        this.#config.FIREBASE.ADMIN_KEY_PATH = await SimulateRequest.getFirebaseAdminKey();
+        this.#firebaseConfig.ADMIN_KEY_PATH = await SimulateRequest.getFirebaseAdminKey();
         await this.initFirebase();
         if (this.#requestData.Request === REQUEST_TYPE.REGISTRATION) {
             await this.encryptRegistrationRequest();
@@ -93,7 +99,7 @@ class SimulateRequest {
      * @description Init Firebase connection and trigger upload, add Firebase server timespamp, trigger firebase upload.
      */
     async initFirebase() {
-        this.#firebase = new Firebase(this.#config.FIREBASE);
+        this.#firebase = new Firebase(this.#firebaseConfig);
         await this.#firebase.init();
     }
 
