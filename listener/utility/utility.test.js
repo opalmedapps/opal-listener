@@ -6,7 +6,7 @@ const { expect } = require('chai');
 const utility = require('../utility/utility.js');
 
 describe('Legacy Utility', function () {
-    describe('#addSeveralToArray()', function () {
+    describe('addSeveralToArray', function () {
         it('should add the right number of elements to an array', function() {
             let arr = ['a', 'b', 'c', 'd'];
             let item = "e";
