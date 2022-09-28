@@ -24,9 +24,18 @@
     "linebreak-style": 0,
     "max-len": ["error", { "code": 120 }],
     "mocha/prefer-arrow-callback": 2,
+    "no-restricted-syntax": ["error", "ForInStatement", "LabeledStatement", "WithStatement"],
     "no-use-before-define": ["error", { "functions": false }],
     "prefer-arrow-callback": 0
   },
+  "overrides": [
+    {
+      "files": ["*.test.js"],
+      "rules": {
+        "no-unused-expressions": "off"
+      }
+    }
+  ],
   "settings": {
     "mocha/additionalCustomNames": [
       { "name": "describeModule", "type": "suite", "interfaces": [ "BDD" ] },
