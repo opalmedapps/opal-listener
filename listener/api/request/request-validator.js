@@ -5,6 +5,7 @@ const OpalRequest = require('./request');
 const {OpalResponseError} = require('../response/response-error');
 const sqlInterface = require('../sqlInterface');
 const utility = require('../../utility/utility');
+const { Version } = require('../../../src/utility/version');
 const logger = require('../../logs/logger');
 const config = require('../../config-adaptor');
 const ApiRequest = require('../../../src/core/api-request.js');
@@ -167,31 +168,15 @@ class RequestValidator {
 	* @returns {boolean}
 	*/
 	static versionIsSecure(request){
-		let app_version = request.meta.AppVersion;
-		let stable_version = config.LATEST_STABLE_VERSION;
-
-		app_version = app_version.split('.');
-		stable_version = stable_version.split('.');
-
-		function isValidPart(x) {
-			return  /^\d+$/.test(x);
+		try {
+			let app_version = request.meta.AppVersion;
+			let stable_version = config.LATEST_STABLE_VERSION;
+			return Version.versionGreaterOrEqual(app_version, stable_version);
 		}
-
-		if (!app_version.every(isValidPart) || !stable_version.every(isValidPart)) {
+		catch (error) {
+			logger.log('error', 'Error while checking the version number of the request', error);
 			return false;
 		}
-
-		for (let i = 0; i < app_version.length; ++i) {
-			if (Number(app_version[i]) > Number(stable_version[i])) {
-				return true;
-			}
-
-			if (Number(app_version[i]) < Number(stable_version[i])) {
-				return false
-			}
-		}
-
-		return true
 	}
 }
 module.exports = RequestValidator;
