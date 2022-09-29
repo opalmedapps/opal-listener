@@ -16,7 +16,7 @@ before_script:
   - npm ci --cache .npm --prefer-offline
   # Set up config files (currently no actual values are needed)
   - cp listener/config_template.json listener/config.json
-  - cp src/config/config.template.json src/config/config.json
+  # TODO: If required, setup .env file in pipeline using gitlab project settings vars or by setting variables directly here.
 
 stages:
   - Static Analysis

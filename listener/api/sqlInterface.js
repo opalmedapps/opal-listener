@@ -118,6 +118,22 @@ const requestMappings =
         },
     };
 
+/**
+ * @desc List of request types for which to omit parameters in PatientActivityLog.
+ *       This is done to avoid logging sensitive information, such as passwords or security answers.
+ *       Each key is the name of a request type. The value represents a test. If the test returns true,
+ *       the requests' parameters are omitted.
+ * @type {object}
+ */
+const omitParametersFromLogs = {
+    AccountChange: params => params.FieldToChange === 'Password',
+    Feedback: () => true,
+    QuestionnaireSaveAnswer: () => true,
+    SecurityQuestion: () => true,
+    UpdateSecurityQuestionAnswer: () => true,
+    VerifyAnswer: () => true,
+}
+
 
 //////////////////////////////////////////////////////////////////
 
@@ -598,17 +614,22 @@ exports.addToActivityLog=function(requestObject)
 {
     let r = Q.defer();
 
-    let {Request, UserID, DeviceId, Token, AppVersion} = requestObject;
+    let {Request, UserID, DeviceId, Token, AppVersion, TargetPatientID, Parameters} = requestObject;
 
     if (typeof Request === "undefined") Request = requestObject.type;
     if (typeof UserID === "undefined") UserID = requestObject.meta.UserID;
     if (typeof DeviceId === "undefined") DeviceId = requestObject.meta.DeviceId;
     if (typeof Token === "undefined") Token = requestObject.meta.Token;
     if (typeof AppVersion === "undefined") AppVersion = requestObject.meta.AppVersion;
+    if (typeof TargetPatientID === "undefined") TargetPatientID = requestObject.meta?.TargetPatientID;
+    if (typeof Parameters === "undefined") Parameters = requestObject.params || requestObject.parameters;
+
+    if (omitParametersFromLogs.hasOwnProperty(Request) && omitParametersFromLogs[Request](Parameters)) Parameters = 'OMITTED';
+    else Parameters = Parameters === 'undefined' ? null : JSON.stringify(Parameters);
 
     // Ignore LogPatientAction to avoid double-logging --> Refer to table PatientActionLog
     if (Request !== "LogPatientAction") {
-        exports.runSqlQuery(queries.logActivity(),[Request, UserID, DeviceId, Token, AppVersion])
+        exports.runSqlQuery(queries.logActivity(),[Request, Parameters, TargetPatientID, UserID, DeviceId, Token, AppVersion])
         .then(()=>{
             logger.log('verbose', "Success logging request of type: "+Request);
             r.resolve({Response:'success'});
@@ -749,24 +770,6 @@ exports.setNewPassword=function(password,patientSerNum) {
 };
 
 /**
- * getPatientDeviceLastActivity
- * @desc gets the patient's last active timestamp
- * @param userid
- * @param device
- * @return {Promise}
- */
-exports.getPatientDeviceLastActivity = function(userid,device)
-{
-    let r = Q.defer();
-    exports.runSqlQuery(queries.getPatientDeviceLastActivity(), [userid,device]).then((rows)=>{
-        r.resolve(rows[0]);
-    }).catch((err)=>{
-        r.reject(err);
-    });
-    return r.promise;
-};
-
-/**
  *@module sqlInterface
  *@name inputEducationalMaterialRating
  *@require queries
@@ -791,15 +794,6 @@ exports.inputEducationalMaterialRating = function(requestObject)
             r.reject({Response:'error',Reason:err});
         });
     return r.promise;
-};
-
-/**
- * updateLogout
- * @param fields
- * @return {Promise}
- */
-exports.updateLogout = function(fields) {
-    return exports.runSqlQuery(queries.updateLogout(), fields);
 };
 
 /**

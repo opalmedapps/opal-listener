@@ -4,9 +4,12 @@
  */
 
 const axios = require('axios');
-const configs = require('../config/config.json');
 const legacyLogger = require('../../listener/logs/logger');
 
+const configs = {
+    OPAL_BACKEND_HOST: process.env.OPAL_BACKEND_HOST,
+    OPAL_BACKEND_AUTH_TOKEN: process.env.OPAL_BACKEND_AUTH_TOKEN,
+};
 class ApiRequest {
     /**
      * @description Take the validated request uploaded to Firebase and send the Parameters field
@@ -36,9 +39,10 @@ class ApiRequest {
     static async sendRequestToApi(userId, parameters) {
         legacyLogger.log('debug', 'API: Sending request to Opal API');
         const requestParams = parameters;
-        requestParams.headers.Authorization = `Token ${configs.OPAL_BACKEND.AUTH_TOKEN}`;
+
+        requestParams.headers.Authorization = `Token ${configs.OPAL_BACKEND_AUTH_TOKEN}`;
         requestParams.headers.Appuserid = userId;
-        requestParams.url = `${configs.OPAL_BACKEND.HOST}${parameters.url}`;
+        requestParams.url = `${configs.OPAL_BACKEND_HOST}${parameters.url}`;
 
         if (parameters.data !== undefined) requestParams.data = parameters.data;
 

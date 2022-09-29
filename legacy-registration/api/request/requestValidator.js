@@ -24,12 +24,6 @@ class RequestValidator {
         let request = new opalRequest(requestObject, requestKey);
         let validation = this.validateRequestCredentials(request);
         if (validation.isValid) {
-
-            //if (!this.versionIsSecure(request)) {
-            //    logger.log('error', 'Invalid version: ' + request.meta.AppVersion);
-            //    r.reject(new opalResponseError(5, 'Received request from unsafe app version', request, 'Unsafe App Version'));
-            //}
-
             //Gets user password for decrypting
             sqlInterface.getRequestEncryption(requestObject).then(function (rows) {
                 logger.log('debug', 'Processing getRequestEncryption function and fetched the result: ' + rows);
@@ -84,40 +78,6 @@ class RequestValidator {
         }, true);
 
         return { isValid: isValid, errors: errors }
-    }
-
-	/**
-	* Checks to see if the version of the incoming request is equal or greater than the latest stable version.
-	* The idea is to block access to data if the app is not deemed safe.
-	* @param request
-	* @returns {boolean}
-	*/
-    static versionIsSecure(request) {
-        let app_version = request.meta.AppVersion;
-        let stable_version = config.LATEST_STABLE_VERSION;
-
-        app_version = app_version.split('.');
-        stable_version = stable_version.split('.');
-
-        function isValidPart(x) {
-            return /^\d+$/.test(x);
-        }
-
-        if (!app_version.every(isValidPart) || !stable_version.every(isValidPart)) {
-            return false;
-        }
-
-        for (let i = 0; i < app_version.length; ++i) {
-            if (Number(app_version[i]) > Number(stable_version[i])) {
-                return true;
-            }
-
-            if (Number(app_version[i]) < Number(stable_version[i])) {
-                return false
-            }
-        }
-
-        return true
     }
 }
 module.exports = RequestValidator;
