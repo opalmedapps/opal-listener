@@ -43,21 +43,6 @@ const opalPool = mysql.createPool(opaldbCredentials);
  **/
 const registerPool = mysql.createPool(registerdbCredentials);
 
-// Declare variable for storing user name
-let FirstName = ""
-let LastName = "";
-
-/**
- * getRequestEncryption
- * @desc Gets user registration code for encrypting/decrypting to return ramq
- * @param requestObject
- * @return {Promise}
- */
-exports.getRequestEncryption = function (requestObject) {
-    return exports.runOpaldbSqlQuery(queries.getRequestEncryption(), [requestObject.BranchName]);
-};
-
-
 /**
      insertIPLog
      @desc Insert the user IP each time they attempt to register this log will be used to block abusive

@@ -8,13 +8,13 @@ class PromiseUtility {
      *              by also returning its index.
      *              Background: Promise.any() is used to find the first Promise in an array to succeed.
      *              See: https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Promise/any
-     * @param {Promise[]} promises An array of promises where we only care about the first one to succeed
-     *                             (or if they all fail).
+     * @param {Promise[]} promiseArray An array of promises where we only care about the first one to succeed
+     *                                 (or if they all fail).
      * @returns {Promise<unknown>} Resolves to an object containing the value and index of the first promise to resolve,
      *                             or rejects with an AggregateError if all promises reject.
      */
-    static async promiseAnyWithIndex(promises) {
-        if (!Array.isArray(promises)) throw new Error('promiseAnyWithIndex must be called with an array as input');
+    static async promiseAnyWithIndex(promiseArray) {
+        const promises = Array.isArray(promiseArray) ? promiseArray : [promiseArray];
         return new Promise((resolve, reject) => {
             let first = true;
             promises.forEach((promise, index) => {
@@ -24,7 +24,7 @@ class PromiseUtility {
                         resolve({ value, index });
                     }
                 }).catch(() => {
-                    // Prevents uncaught errors from any failed promises
+                    // Empty catch block prevents uncaught errors from failed promises
                 });
             });
             Promise.allSettled(promises).then(results => {

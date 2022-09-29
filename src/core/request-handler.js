@@ -49,24 +49,7 @@ class RequestHandler {
         try {
             if (!RequestHandler.validateSnapshot(snapshot)) throw new Error('SNAPSHOT_VALIDATION');
             encryptionInfo = await RequestHandler.getEncryptionInfo(snapshot, requestType);
-            let decryptedRequest;
-            if (Array.isArray(encryptionInfo.salt)) {
-                const { result, salt } = await EncryptionUtilities.decryptRequestMultipleSalts(
-                    snapshot.val(),
-                    encryptionInfo.secret,
-                    encryptionInfo.salt, // In this case, there are many possible salts (array)
-                );
-                decryptedRequest = result;
-                // Save the salt that successfully decrypted the request (to be used to encrypt the response)
-                encryptionInfo.salt = salt;
-            }
-            else {
-                decryptedRequest = await EncryptionUtilities.decryptRequest(
-                    snapshot.val(),
-                    encryptionInfo.secret,
-                    encryptionInfo.salt,
-                );
-            }
+            const decryptedRequest = Registration.decryptOneOrManySalts(snapshot.val(), encryptionInfo);
             const apiResponse = await ApiRequest.makeRequest(decryptedRequest);
             const encryptedResponse = await EncryptionUtilities.encryptResponse(
                 apiResponse,

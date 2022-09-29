@@ -2,10 +2,8 @@
 
 const opalRequest = require('./request.js');
 const opalResponseError = require('../response/responseError.js');
-const utility = require('../utility/utility.js');
-const sqlInterface = require('../sql/sqlInterface');
 const logger = require('../../logs/logger.js');
-const config = require('../../config-adaptor');
+const Registration = require('../../../src/registration/registration');
 
 const q = require('q');
 /**
@@ -25,32 +23,22 @@ class RequestValidator {
         let validation = this.validateRequestCredentials(request);
         if (validation.isValid) {
             //Gets user password for decrypting
-            sqlInterface.getRequestEncryption(requestObject).then(function (rows) {
-                logger.log('debug', 'Processing getRequestEncryption function and fetched the result: ' + rows);
-
-                if (rows[0].length > 1 || rows[0].length === 0) {
-                    //Rejects requests if username returns more than one password
-                    r.reject(new opalResponseError(1, 'Potential Injection Attack, invalid password for encryption', request, 'Invalid credentials'));
-                } else {
-
-                    let RegistrationCode = rows[0][0].RegistrationCode;
-                    let RAMQ = rows[0][0].RAMQ;
-                    utility.decrypt({ req: request.type, params: request.parameters }, RegistrationCode, RAMQ)
-                        .then((dec) => {
-                            request.setAuthenticatedInfo(RAMQ, RegistrationCode, dec.req, dec.params);
-                            r.resolve(request);
-                        })
-                        .catch((err) => {
-                            logger.log('error', 'Unable to decrypt due to: ' + JSON.stringify(err));
-                            r.reject(new opalResponseError(2, 'Unable to decrypt request', request, err));
-                        });
-                }
+            Registration.getEncryptionValues(requestObject).then(function (encryptionInfo) {
+                logger.log('debug', 'Got encryption info for decryption');
+                let objectToDecrypt = { req: request.type, params: request.parameters };
+                Registration.decryptOneOrManySalts(objectToDecrypt, encryptionInfo).then((decryptedRequest) => {
+                    request.setAuthenticatedInfo(encryptionInfo.salt, encryptionInfo.secret, decryptedRequest.req, decryptedRequest.params);
+                    r.resolve(request);
+                })
+                .catch((err) => {
+                    logger.log('error', 'Unable to decrypt legacy registration request', err);
+                    r.reject(new opalResponseError(2, 'Unable to decrypt request', request, err));
+                });
             }).catch((err) => {
                 r.reject(new opalResponseError(2, 'Unable get user encryption', request, err));
-                });
-
+            });
         } else {
-            logger.log('error', 'invalid request due to: ' + JSON.stringify(validation.errors));
+            logger.log('error', 'Invalid legacy registration request', validation.errors);
             r.reject(new opalResponseError(2, 'Unable to process request', request, 'Missing request parameters: ' + validation.errors));
         }
         return r.promise;

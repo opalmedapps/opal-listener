@@ -3,7 +3,7 @@ const { expect } = require('chai');
 const PromiseUtility = require('./promise');
 
 describe('PromiseUtility', function () {
-    describe('promiseAnyWithIndex()', function () {
+    describe('promiseAnyWithIndex', function () {
         it('should resolve to the result of a single promise', async function () {
             const success = Promise.resolve('success');
             const { value, index } = await PromiseUtility.promiseAnyWithIndex([success]);
