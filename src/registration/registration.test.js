@@ -16,20 +16,19 @@ const originalObj = {
     },
 };
 const secret = 'secret';
-const salt = 'salt';
 
 describe('Registration', function () {
     describe('decryptOneOrManySalts', function () {
         it('should fail when given a single wrong salt', async function () {
             const obj = clone(originalObj);
-            await EncryptionUtilities.encryptResponse(obj, secret, salt);
+            await EncryptionUtilities.encryptResponse(obj, secret, 'salt');
             const promise = Registration.decryptOneOrManySalts(obj, { secret, salt: 'wrong-salt' });
             return expect(promise).to.be.rejectedWith(Error, 'DECRYPTION');
         });
         it('should succeed when given a single correct salt', async function () {
             const obj = clone(originalObj);
-            await EncryptionUtilities.encryptResponse(obj, secret, salt);
-            const result = await Registration.decryptOneOrManySalts(obj, { secret, salt });
+            await EncryptionUtilities.encryptResponse(obj, secret, 'salt');
+            const result = await Registration.decryptOneOrManySalts(obj, { secret, salt: 'salt' });
             return expect(result).to.deep.equal(originalObj);
         });
         it('should fail when given an array of wrong salts', async function () {
