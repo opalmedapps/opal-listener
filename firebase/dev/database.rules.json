@@ -71,6 +71,24 @@
               ".write": "true"
             }
           }
+        },
+        "registration-api": {
+          "requests": {
+            ".read": "false",
+            ".write": "false",
+            "$requestId": {
+              ".read": "false",
+              ".write": "newData.child('BranchName').val() != \"\"  && newData.child('BranchName').val() != null  && newData.hasChild('BranchName')  &&  root.child('dev3').child($hospitalId).child('registration').child('branch').hasChild(newData.child('BranchName').val())"
+            }
+          },
+          "responses": {
+            ".read": "false",
+            ".write": "false",
+            "$requestId": {
+              ".read": "true",
+              ".write": "true"
+            }
+          }
         }
       }
     }
