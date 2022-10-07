@@ -60,7 +60,7 @@ class RequestHandler {
                 encryptionInfo.secret,
                 encryptionInfo.salt,
             );
-            await this.sendResponse(encryptedResponse, snapshot.key, encryptionInfo.userId);
+            await this.sendResponse(encryptedResponse, snapshot.key, encryptionInfo.userId, requestType);
             encryptedResponse.timestamp = Firebase.getDatabaseTimeStamp;
             this.clearRequest(requestType, snapshot.key);
         }
@@ -127,7 +127,7 @@ class RequestHandler {
     async sendResponse(encryptedResponse, firebaseRequestKey, userId, requestType) {
         legacyLogger.log('debug', 'API: Sending response to Firebase');
         const path = (requestType === REQUEST_TYPE.REGISTRATION)
-            ? `users/${firebaseRequestKey}`
+            ? `registration-api/responses/${firebaseRequestKey}`
             : `users/${userId}/${firebaseRequestKey}`;
         await this.#databaseRef.child(path).set(encryptedResponse);
     }
