@@ -1,0 +1,7 @@
+{
+    "___COMMENT":"This config file stores the convention used for educational material. It should match with conventions in database.",
+    "EDUMATERIAL_CATEGORY_ID_MAP":{
+        "1":"RESEARCH",
+        "2":"CLINICAL"
+    }
+}

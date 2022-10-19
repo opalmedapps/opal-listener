@@ -73,6 +73,26 @@ exports.getSecurityQuestion = function (requestObject) {
     return sqlInterface.getSecurityQuestion(requestObject);
 };
 
+/**
+*@name getStudies
+*@description Gets the studies associated with the current patient.
+*@param {object} requestObject
+*@returns {Promise}
+*/
+exports.getStudies = function(requestObject) {
+    return sqlInterface.getStudies(requestObject);
+}
+
+/**
+*@name getStudyQuestionnaires
+*@description Gets the questionnaires associated with the current study.
+*@param {object} requestObject
+*@returns {Promise}
+*/
+exports.getStudyQuestionnaires = function(requestObject) {
+    return sqlInterface.getStudyQuestionnaires(requestObject);
+}
+
 // exports.isTrustedDevice = function (requestObject) {
 //     return sqlInterface.isTrustedDevice(requestObject);
 // };
@@ -132,6 +152,20 @@ exports.getQuestionnaireInOpalDB = questionnaires.getQuestionnaireInOpalDB;
  * @returns {Promise}
  */
 exports.getQuestionnaire = questionnaires.getQuestionnaire;
+
+/**
+* Gets the purpose of the current questionnaire.
+* @param {object} requestObject
+* @returns {Promise}
+*/
+exports.getQuestionnairePurpose = questionnaires.getQuestionnairePurpose;
+
+/**
+* Gets the number of unread (e.g. 'New') questionnaires.
+* @param {object} requestObject
+* @returns {Promise}
+*/
+exports.getQuestionnaireUnreadNumber = questionnaires.getQuestionnaireUnreadNumber;
 
 /**
  * @deprecated

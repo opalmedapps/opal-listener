@@ -10,6 +10,8 @@ const {OpalSQLQueryRunner} = require("../sql/opal-sql-query-runner");
 const testResults       = require("./modules/test-results");
 const questionnaires    = require("./modules/questionnaires");
 const { Patient } = require('./modules/patient/patient');
+const eduMaterialConfig = require('./../educational-material/eduMaterialConfig.json');
+const studiesConfig     = require('./../studies/studiesConfig.json');
 
 /******************************
  * MAPPINGS
@@ -116,6 +118,10 @@ const requestMappings =
             module: questionnaires,
             processFunction: result => result.data.questionnaireList
         },
+        'patientStudy': {
+            table: 'patientStudy',
+            serNum: 'ID'
+        }
     };
 
 /**
@@ -228,6 +234,7 @@ exports.updateReadStatus=function(userId, parameters)
     let r = Q.defer();
 
     let table, serNum;
+
     if(parameters && parameters.Field && parameters.Id && requestMappings.hasOwnProperty(parameters.Field) ) {
         ({table, serNum} = requestMappings[parameters.Field]);
 
@@ -325,6 +332,87 @@ exports.getUserPatient = async function(requestObject) {
     return {
         Data: rows[0],
     }
+};
+
+/**
+ * @name getStudies
+ * @desc Gets patient studies based on UserID
+ * @param {object} requestObject
+ * @returns {promise}
+ */
+exports.getStudies = function(requestObject) {
+    let r = Q.defer();
+
+    exports.runSqlQuery(queries.patientStudyTableFields(), [requestObject.UserID])
+        .then((rows) => {
+            for (var j = 0; j < rows.length; j++) {
+                rows[j].consentStatus = studiesConfig.STUDY_CONSENT_STATUS_MAP[rows[j].consentStatus];
+            }
+
+            r.resolve({Response: 'success', Data: rows});
+        })
+        .catch((err) => {
+            r.reject({Response: 'error', Reason: err});
+        });
+
+    return r.promise;
+};
+
+/**
+ * @name getStudyQuestionnaires
+ * @desc Gets study questionnaires based on studyID
+ * @param {object} requestObject
+ * @returns {promise}
+ */
+exports.getStudyQuestionnaires = function(requestObject) {
+    let r = Q.defer();
+
+    exports.runSqlQuery(queries.getStudyQuestionnairesQuery(), [requestObject.Parameters.studyID])
+        .then((rows) => {
+            r.resolve({Response: 'success', Data: rows});
+        })
+        .catch((err) => {
+            r.reject({Response: 'error', Reason: err});
+        });
+
+    return r.promise;
+};
+
+/**
+ * @name studyUpdateStatus
+ * @desc Update consent status for a study.
+ * @param {object} requestObject
+ * @return {Promise}
+ */
+exports.studyUpdateStatus = function(requestObject)
+{
+    let r = Q.defer();
+
+    let parameters = requestObject.Parameters;
+
+    if (parameters && parameters.questionnaire_id && parameters.status) {
+        // get number corresponding to consent status string
+        let statusNumber = Object.keys(
+            studiesConfig.STUDY_CONSENT_STATUS_MAP
+        ).find(
+            key => studiesConfig.STUDY_CONSENT_STATUS_MAP[key] === parameters.status
+        );
+
+        exports.runSqlQuery(
+            queries.updateConsentStatus(),
+            [statusNumber, parameters.questionnaire_id, requestObject.UserID]
+        ).then(() => {
+            r.resolve({Response: 'success'});
+        })
+        .catch((err)=>{
+            r.reject({Response: 'error', Reason: err});
+        });
+
+    } else {
+        r.reject({Response: 'error', Reason: 'Invalid parameters'});
+    }
+
+    return r.promise;
 };
 
 /**
@@ -956,6 +1044,7 @@ function decodePostMessages(rows){
 }
 
 //Obtains the educational material table of contents and adds it to the pertinent materials
+// Also adds educational material category string based on category ID
 function getEducationTableOfContents(rows)
 {
     var r = Q.defer();
@@ -989,6 +1078,9 @@ function getEducationTableOfContents(rows)
                 if(results[i].length !== 0)
                 {
                     for (var j = 0; j < rows.length; j++) {
+                        // Add edu material category name based on its ID
+                        rows[j].Category = eduMaterialConfig.EDUMATERIAL_CATEGORY_ID_MAP[rows[j].EducationalMaterialCategoryId].toLowerCase();
+
                         if(rows[j].EducationalMaterialControlSerNum ==results[i][0].ParentSerNum)
                         {
                             rows[j].TableContents = results[i];

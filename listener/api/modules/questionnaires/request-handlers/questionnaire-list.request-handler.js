@@ -11,6 +11,7 @@ class QuestionnaireListHandler extends ApiRequestHandler {
     static async handleRequest(requestObject) {
         const lastUpdated = requestObject.params.Date ? new Date(Number(requestObject.params.Date)) : 0;
         const patient = await QuestionnaireListHandler.getTargetPatient(requestObject);
+        const purpose = requestObject.Parameters.purpose;
 
         const patientInfoSubset = {
             PatientSerNum: patient.patientSerNum,
@@ -19,7 +20,7 @@ class QuestionnaireListHandler extends ApiRequestHandler {
         return {
             data: {
                 patientSerNum: patient.patientSerNum,
-                questionnaireList: await questionnaireQuestionnaireDB.getQuestionnaireList(patientInfoSubset, lastUpdated),
+                questionnaireList: await questionnaireQuestionnaireDB.getQuestionnaireList(patientInfoSubset, purpose, lastUpdated),
             },
         };
     }

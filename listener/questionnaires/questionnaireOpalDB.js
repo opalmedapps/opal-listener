@@ -10,6 +10,8 @@ const requestUtility = require("../utility/request-utility");
 exports.getQuestionnaireInOpalDB = getQuestionnaireInOpalDB;
 exports.getQuestionnaireList = getQuestionnaireList;
 exports.getQuestionnaire = getQuestionnaire;
+exports.getQuestionnairePurpose = getQuestionnairePurpose;
+exports.getQuestionnaireUnreadNumber = getQuestionnaireUnreadNumber;
 exports.questionnaireSaveAnswer = questionnaireSaveAnswer;
 exports.questionnaireUpdateStatus = questionnaireUpdateStatus;
 
@@ -63,15 +65,27 @@ function getQuestionnaireInOpalDB(requestObject) {
  */
 function getQuestionnaireList(requestObject) {
 
+    if (!questionnaireValidation.validateQuestionnairePurpose(requestObject)) {
+        const paramErrMessage = "Error getting questionnaire list: the requestObject does not have the correct parameter purpose";
+        logger.log("error", paramErrMessage);
+        return Promise.reject(new Error(paramErrMessage));
+    }
+
     return OpalSQLQueryRunner.run(opalQueries.patientTableFieldsForUser(), [requestObject.UserID])
         .then(function (patientSerNumAndLanguageRow) {
 
             if (questionnaireValidation.validatePatientSerNumAndLanguage(patientSerNumAndLanguageRow)) {
+                const lastUpdated = requestObject.params.Date ? new Date(Number(requestObject.params.Date)) : 0;
                 // get questionnaire list
-                return questionnaires.getQuestionnaireList(patientSerNumAndLanguageRow[0]);
+                return questionnaires.getQuestionnaireList(
+                    patientSerNumAndLanguageRow[0],
+                    requestObject.Parameters.purpose,
+                    lastUpdated
+                );
             } else {
-                logger.log("error", "Error getting questionnaire list: No matching PatientSerNum or/and Language found in opalDB");
-                throw new Error('Error getting questionnaire list: No matching PatientSerNum or/and Language found in opalDB');
+                const questionnaireSerNumLanguageErrMessage = "Error getting questionnaire list: No matching PatientSerNum or/and Language found in opalDB";
+                logger.log("error", questionnaireSerNumLanguageErrMessage);
+                throw new Error(questionnaireSerNumLanguageErrMessage);
             }
         })
         .then(function (result) {
@@ -96,8 +110,10 @@ function getQuestionnaire(requestObject) {
 
     return new Promise(function (resolve, reject) {
         // check argument
-        if (!questionnaireValidation.validatingPatientQuestionnaireSerNum(requestObject)) {
-            reject(new Error('Error getting questionnaire: the requestObject does not have the required parameter qp_ser_num'));
+        if (!questionnaireValidation.validatePatientQuestionnaireSerNum(requestObject)) {
+            const paramErrMessage = "Error getting questionnaire: the requestObject does not have the required parameter qp_ser_num";
+            logger.log("error", paramErrMessage);
+            reject(new Error(paramErrMessage));
 
         } else {
             // get language in the database
@@ -108,8 +124,9 @@ function getQuestionnaire(requestObject) {
                         // get questionnaire belonging to that qp_ser_num
                         return questionnaires.getQuestionnaire(patientSerNumAndLanguageRow[0], requestObject.Parameters.qp_ser_num);
                     } else {
-                        logger.log("error", "Error getting questionnaire: No matching PatientSerNum or/and Language found in opalDB");
-                        reject(new Error('Error getting questionnaire: No matching PatientSerNum or/and Language found in opalDB'));
+                        const questionnaireSerNumLanguageErrMessage = "Error getting questionnaire: No matching PatientSerNum or/and Language found in opalDB";
+                        logger.log("error", questionnaireSerNumLanguageErrMessage);
+                        reject(new Error(questionnaireSerNumLanguageErrMessage));
                     }
                 })
                 .then(function (result) {
@@ -125,6 +142,67 @@ function getQuestionnaire(requestObject) {
     });
 }
 
+/**
+ * getQuestionnairePurpose
+ * @desc Returns a promise containing the purpose of a given questionnaire.
+ * @param {object} requestObject
+ * @return {Promise} Returns a promise that contains the questionnaire purpose.
+ */
+function getQuestionnairePurpose(requestObject) {
+    if (!questionnaireValidation.validatePatientQuestionnaireSerNum(requestObject)) {
+        const paramErrMessage = "Error getting questionnaire purpose: the requestObject does not have the correct parameter qp_ser_num";
+        logger.log("error", paramErrMessage);
+        return Promise.reject(new Error(paramErrMessage));
+    }
+
+    return questionnaires.getQuestionnairePurpose(requestObject.Parameters.qp_ser_num)
+        .then(function (result) {
+            let obj = {};
+            obj.Data = result;
+            return obj;
+        })
+        .catch(function (error) {
+            logger.log("error", "Error getting questionnaire purpose", error);
+            throw new Error(error);
+        });
+}
+
+/**
+ * getQuestionnaireUnreadNumber
+ * @desc Returns a promise containing the number of unread (e.g. 'New') questionnaires of a given purpose for a particular user.
+ * @param {object} requestObject
+ * @return {Promise} Returns a promise that contains the number of unread questionnaires
+ */
+function getQuestionnaireUnreadNumber(requestObject) {
+
+    if (!questionnaireValidation.validateQuestionnairePurpose(requestObject)) {
+        const paramErrMessage = "Error getting number of unread questionnaires: the requestObject does not have the correct parameter purpose";
+        logger.log("error", paramErrMessage);
+        return Promise.reject(new Error(paramErrMessage));
+    }
+
+    return OpalSQLQueryRunner.run(opalQueries.getPatientSerNumFromUserID(), [requestObject.UserID])
+        .then(function (patientSerNum) {
+            if (questionnaireValidation.validatePatientSerNum(patientSerNum)) {
+                // get number of unread questionnaires
+                return questionnaires.getQuestionnaireUnreadNumber(patientSerNum[0], requestObject.Parameters.purpose);
+            } else {
+                const unreadNumberErrMessage = "Error getting number of unread questionnaires: No matching PatientSerNum found in opalDB";
+                logger.log("error", unreadNumberErrMessage);
+                throw new Error(unreadNumberErrMessage);
+            }
+        })
+        .then(function (result) {
+            let obj = {};
+            obj.Data = result;
+            return obj;
+        })
+        .catch(function (error) {
+            logger.log("error", "Error getting number of unread questionnaires", error);
+            throw new Error(error);
+        });
+}
+
 /*
 FUNCTIONS TO SAVE ANSWERS (QUESTIONNAIRE V2)
  */
@@ -138,8 +216,9 @@ function questionnaireSaveAnswer(requestObject) {
     return new Promise(function (resolve, reject) {
         // check argument
         if (!questionnaireValidation.validateParamSaveAnswer(requestObject)) {
-            logger.log("error", "Error saving answer: the requestObject does not have the required parameters");
-            reject(new Error('Error saving answer: the requestObject does not have the required parameters'));
+            const paramErrMessage = "Error saving answer: the requestObject does not have the required parameters";
+            logger.log("error", paramErrMessage);
+            reject(new Error(paramErrMessage));
 
         } else {
             // get language in the opal database
@@ -150,8 +229,9 @@ function questionnaireSaveAnswer(requestObject) {
                         // save answer in questionnaire DB
                         return questionnaires.saveAnswer(patientSerNumAndLanguageRow[0], requestObject.Parameters, requestObject.AppVersion);
                     } else {
-                        logger.log("error", "Error saving answer: No matching PatientSerNum or/and Language found in opalDB");
-                        reject(new Error('Error saving answer: No matching PatientSerNum or/and Language found in opalDB'));
+                        const questionnaireSerNumLanguageErrMessage = "Error saving answer: No matching PatientSerNum or/and Language found in opalDB";
+                        logger.log("error", questionnaireSerNumLanguageErrMessage);
+                        reject(new Error(questionnaireSerNumLanguageErrMessage));
                     }
 
                 })
@@ -178,18 +258,29 @@ function questionnaireSaveAnswer(requestObject) {
 async function questionnaireUpdateStatus(requestObject) {
     // Validate the parameters
     if (!questionnaireValidation.validateParamUpdateStatus(requestObject)) {
-        throw new Error('Error updating status: the requestObject does not have the required parameters');
+        const paramErrMessage = "Error updating status: the requestObject does not have the required parameters";
+        logger.log("error", paramErrMessage);
+        throw new Error(paramErrMessage);
     }
 
     // 1. update the status in the answerQuestionnaire table in questionnaire DB
     // First, get the patientSerNum in the opal database
-    let patientSerNumAndLanguageRow = await OpalSQLQueryRunner.run(opalQueries.patientTableFieldsForUser(), [requestObject.UserID]);
+    let patientSerNumAndLanguageRow = await OpalSQLQueryRunner.run(
+        opalQueries.patientTableFieldsForUser(),
+        [requestObject.UserID]
+    );
 
     if (!questionnaireValidation.validatePatientSerNumAndLanguage(patientSerNumAndLanguageRow)) {
-        throw new Error('Error updating status: No matching PatientSerNum found in opalDB');
+        const questionnaireSerNumLanguageErrMessage = "Error updating status: No matching PatientSerNum found in opalDB";
+        logger.log("error", questionnaireSerNumLanguageErrMessage);
+        throw new Error(questionnaireSerNumLanguageErrMessage);
     }
 
-    const isCompleted = await questionnaires.updateQuestionnaireStatusInQuestionnaireDB(requestObject.Parameters.answerQuestionnaire_id, requestObject.Parameters.new_status, requestObject.AppVersion);
+    const isCompleted = await questionnaires.updateQuestionnaireStatusInQuestionnaireDB(
+        requestObject.Parameters.answerQuestionnaire_id,
+        requestObject.Parameters.new_status,
+        requestObject.AppVersion
+    );
 
     if (isCompleted === 1) {
 
@@ -206,7 +297,10 @@ async function questionnaireUpdateStatus(requestObject) {
             await requestUtility.request("post", config.QUESTIONNAIRE_COMPLETED_PATH, { json: true });
         }
         catch (error) {
-            logger.log("error", `Failed to send notification of completed questionnaire to the OIE: ${JSON.stringify(error)}`);
+            logger.log(
+                "error",
+                `Failed to send notification of completed questionnaire to the OIE: ${JSON.stringify(error)}`
+            );
         }
     }
 
