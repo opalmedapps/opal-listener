@@ -3,6 +3,7 @@
  * @file Upload a mock request to firebase to simulate a request from the app.
  * @author David Gagne
  */
+require('dotenv').config();
 const path = require('path');
 const mysql = require('mysql');
 const fs = require('fs');
@@ -63,6 +64,7 @@ class SimulateRequest {
         this.#requestData = requestData;
         this.#requestData.Timestamp = Firebase.getDatabaseTimeStamp;
         if (this.#requestData.Request === REQUEST_TYPE.REGISTRATION) this.#requestType = REQUEST_TYPE.REGISTRATION;
+        else if (this.#requestData.RequestType) this.#requestType = REQUEST_TYPE[this.#requestData.RequestType];
         this.makeRequest();
     }
 
@@ -76,7 +78,7 @@ class SimulateRequest {
     async makeRequest() {
         this.#firebaseConfig.ADMIN_KEY_PATH = await SimulateRequest.getFirebaseAdminKey();
         await this.initFirebase();
-        if (this.#requestData.Request === REQUEST_TYPE.REGISTRATION) {
+        if (this.#requestType === REQUEST_TYPE.REGISTRATION || this.#requestType === REQUEST_TYPE.REGISTRATION_LEGACY) {
             await this.encryptRegistrationRequest();
         }
         else {
@@ -107,20 +109,19 @@ class SimulateRequest {
      * @description Encrypt mock request for registration.
      */
     async encryptRegistrationRequest() {
-        const encryptedBranchName = EncryptionUtilities.hash(this.#requestData.BranchName);
         const encryptedData = await legacyUtility.encrypt(
             {
                 request: this.#requestData.Request,
                 params: this.#requestData.Parameters,
             },
-            this.#requestData.BranchName,
-            this.#requestData.Parameters.data.ramq,
+            this.#requestData.SimulatedEncryption.secret,
+            this.#requestData.SimulatedEncryption.salt,
         );
+        delete this.#requestData.SimulatedEncryption;
 
         this.#requestData = {
             ...this.#requestData,
             Request: encryptedData.request,
-            BranchName: encryptedBranchName,
             Parameters: encryptedData.params,
         };
     }
@@ -186,6 +187,6 @@ class SimulateRequest {
 }
 
 // Create a new instance with a default mock request to be able to run the script via a npm command
-new SimulateRequest(DefaultRequestData.registrationRequest);
+new SimulateRequest(DefaultRequestData.requestRegistrationApi);
 
 exports.SimulateRequest = SimulateRequest;

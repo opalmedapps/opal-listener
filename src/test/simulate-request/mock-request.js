@@ -27,24 +27,41 @@ const requestDataApi = {
 };
 
 /**
- * Registration sample request
+ * Registration request for the new Django API
  */
-const registrationRequest = {
+const requestRegistrationApi = {
     Request: 'registration-api',
-    BranchName: 'code12345678',
+    BranchName: CryptoJs.SHA512('code12345678').toString(),
     Parameters: {
         method: 'get',
-        url: '/api/registration/by-hash/',
+        url: `/api/registration/by-hash/${CryptoJs.SHA512('code12345678')}`,
         headers: {
             'Content-Type': 'application/json',
             'Accept-Language': 'fr',
         },
-        data: {
-            ipAddress: '192.168.32.1',
-            ramq: 'OTES12345678',
-        },
     },
     Timestamp: '',
+    SimulatedEncryption: {
+        secret: 'code12345678',
+        salt: 'OTES12345678',
+    },
+};
+
+/**
+ * Legacy registration request
+ */
+const requestRegistration = {
+    RequestType: 'REGISTRATION_LEGACY',
+    Request: 'SecurityQuestionsList',
+    BranchName: CryptoJs.SHA512('code12345678').toString(),
+    Parameters: {
+        Fields: 'OTES12345678',
+    },
+    Timestamp: '',
+    SimulatedEncryption: {
+        secret: 'code12345678',
+        salt: 'OTES12345678',
+    },
 };
 
 /**
@@ -65,7 +82,8 @@ const requestData = {
 };
 
 module.exports = {
-    registrationRequest,
+    requestRegistration,
+    requestRegistrationApi,
     requestData,
     requestDataApi,
 };
