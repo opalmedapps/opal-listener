@@ -214,6 +214,7 @@ function patientAnnouncementTableFields(selectOne=false) {
                 Announcement.AnnouncementSerNum,
                 Announcement.DateAdded,
                 Announcement.ReadStatus,
+                PostControl.PostControlSerNum,
                 PostControl.PostType,
                 PostControl.Body_EN,
                 PostControl.Body_FR,
