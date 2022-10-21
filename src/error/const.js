@@ -15,7 +15,13 @@ const ERRORS = {
     },
     ENCRYPTION_SALT: {
         statusCode: 500,
-        logMessage: 'Error getting salt value',
+        logMessage: 'Error getting encryption salt value',
+        clientMessage: 'ERROR_ENCRYPTION',
+        encrypt: false,
+    },
+    ENCRYPTION_SECRET: {
+        statusCode: 500,
+        logMessage: 'Error getting encryption secret value',
         clientMessage: 'ERROR_ENCRYPTION',
         encrypt: false,
     },
