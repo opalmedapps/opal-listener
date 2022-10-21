@@ -1,7 +1,3 @@
-exports.getRequestEncryption = function () {
-    return "CALL reg_BranchSearch(?);";
-};
-
 exports.insertIPLog = function () {
     return "SELECT insertIPLog(?) AS Result;";
 };

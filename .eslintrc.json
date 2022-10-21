@@ -17,6 +17,7 @@
     "mocha"
   ],
   "rules": {
+    "arrow-body-style": 0,
     "arrow-parens": ["error", "as-needed"],
     "brace-style": ["error", "stroustrup"],
     "func-names": 0,

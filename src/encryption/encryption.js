@@ -3,6 +3,7 @@ const mysql = require('mysql');
 const legacyOpalSqlRunner = require('../../listener/sql/opal-sql-query-runner');
 const legacyLogger = require('../../listener/logs/logger');
 const legacyUtility = require('../../listener/utility/utility');
+const PromiseUtility = require('../utility/promise');
 
 class EncryptionUtilities {
     /**
@@ -53,6 +54,43 @@ class EncryptionUtilities {
         }
         catch (error) {
             throw new Error('DECRYPTION', { cause: error });
+        }
+    }
+
+    /**
+     * @description Decrypts a request by trying several possible candidates as the salt value.
+     *              Returns both the decrypted result and the salt that succeeded in the decryption.
+     *              Calls 'decryptRequest' to do the decryption work.
+     * @param {object} request The request to decrypt.
+     * @param {string} secret The value to use as the encryption secret.
+     * @param {string[]} saltArray An array of possible salt values to use to decrypt.
+     * @returns {Promise<{result, salt}>} An object with the decrypted result and the correct salt used to decrypt.
+     */
+    static async decryptRequestMultipleSalts(request, secret, saltArray) {
+        if (!Array.isArray(saltArray)) {
+            throw new Error('DECRYPTION', {
+                cause: "decryptRequestMultipleSalts can only be called with an Array as the 'saltArray' param",
+            });
+        }
+
+        const promises = saltArray.map(salt => this.decryptRequest(request, secret, salt));
+        try {
+            // Return the first of the promises to succeed
+            const { value, index } = await PromiseUtility.promiseAnyWithIndex(promises);
+            legacyLogger.log('debug', 'Found salt with which to decrypt request');
+            return {
+                result: value,
+                salt: saltArray[index],
+            };
+        }
+        catch (aggregateErr) {
+            // If none of the promises succeed, decryption has failed
+            throw new Error('DECRYPTION', {
+                cause: {
+                    message: 'Failed multi-decryption attempts with all possible salt values provided.',
+                    individualErrors: aggregateErr.errors,
+                },
+            });
         }
     }
 
