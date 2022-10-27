@@ -9,14 +9,14 @@ This file stores all queries related to the questionnaire system
  */
 
 exports.getQuestionnaireInOpalDBFromSerNum = function () {
-    return `SELECT 
+    return `SELECT
                 q.QuestionnaireSerNum AS questionnaireSerNum,
                 q.QuestionnaireControlSerNum AS questionnaireControlSerNum,
                 q.PatientQuestionnaireDBSerNum AS answerQuestionnaireId,
                 q.CompletedFlag AS completedFlag,
                 q.CompletionDate AS completionDate,
                 q.LastUpdated AS lastUpdated
-            FROM Questionnaire q 
+            FROM Questionnaire q
             WHERE q.QuestionnaireSerNum = ?;`
 };
 
@@ -44,7 +44,7 @@ exports.getQuestionOptionsQuery = function () {
 }
 
 exports.saveAnswerQuery = function () {
-    return "call saveAnswer(?,?,?,?,?,?,?);";
+    return "call saveAnswer(?,?,?,?,?,?,?,?);";
 }
 
 exports.insertAnswerTextbox = function () {

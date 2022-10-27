@@ -171,36 +171,37 @@ FUNCTIONS TO SAVE QUESTIONNAIRE
  * @desc this saves the answer of one question only
  * @param {object} opalPatientSerNumAndLanguage must contain PatientSerNum and Language as properties. This should be gotten directly from the OpalDB
  * @param {object} param the parameters passed from the front-end. The calling function must verify its properties.
- * @param {String} appVersion a string denoting the version of the app.
+ * @param {string} appVersion a string denoting the version of the app.
+ * @param {string} respondentUsername the username of the user answering the questionnaire.
  * @returns {Promise}
  */
-function saveAnswer(opalPatientSerNumAndLanguage, param, appVersion) {
+function saveAnswer(opalPatientSerNumAndLanguage, param, appVersion, respondentUsername) {
 
     let r = q.defer();
     let isoLang = opalPatientSerNumAndLanguage.Language;
     let answerId;
 
     /*
-    author of update should be patientId(in questionnaireDB) + '_APP_' + appVersion
+        author of update should be patientId(in QuestionnaireDB) + '_APP_' + appVersion
 
-    1. get patientId and questionnaireId from answerQuestionnaire_id
-    2. update status from new to in progress using answerQuestionnaire_id
-    3. verify if the answerSection exist for that answerQuestionnaire_id
-        3.1 if it exist take that ID as answerSectionId
-            and verify if the answer exists for that ID
-                3.1.1 if it exists, mark it as deleted, go to 4.
-                3.1.2 if it does not exist, go to 4.
-        3.2 if it does not exist, create one, and take the insertId as answerSectionId
-    4. use answerSectionId from 3. and section_id, question_id, is_skipped, question_type_id from the param, questionnaireId from 1., and language from the opal db to insert into the answer table
-    5. using the insertId from 4. and using answer array and question_type_id from param, insert into the sub-answer tables
-     */
+        1. get patientId, questionnaireId and respondentUsername from answerQuestionnaire_id
+        2. update status from new to in progress using answerQuestionnaire_id (if the questionnaire is not locked by another user) and set the lock to the current user
+        3. verify if the answerSection exist for that answerQuestionnaire_id
+            3.1 if it exist take that ID as answerSectionId
+                and verify if the answer exists for that ID
+                    3.1.1 if it exists, mark it as deleted, go to 4.
+                    3.1.2 if it does not exist, go to 4.
+            3.2 if it does not exist, create one, and take the insertId as answerSectionId
+        4. use answerSectionId from 3. and section_id, question_id, is_skipped, question_type_id from the param, questionnaireId from 1., and language from the db to insert into the answer table
+        5. using the insertId from 4. and using answer array and question_type_id from param, insert into the sub-answer tables
+    */
 
     runQuery(questionnaireQueries.saveAnswerQuery(),
-        [param.answerQuestionnaire_id, param.section_id, param.question_id, param.question_type_id, param.is_skipped, appVersion, isoLang])
+        [param.answerQuestionnaire_id, param.section_id, param.question_id, param.question_type_id, param.is_skipped, respondentUsername, appVersion, isoLang])
         .then(function (queryResult) {
             if (!questionnaireValidation.hasValidProcedureStatusAndInsertId(queryResult)) {
 
-                logger.log("error", "Error saving answer: query unsuccessful");
+                logger.log("error", "Error saving answer: query unsuccessful", queryResult);
                 r.reject(new Error('Error saving answer: query unsuccessful'));
             } else {
                 answerId = queryResult[queryResult.length - 2][0].inserted_answer_id;

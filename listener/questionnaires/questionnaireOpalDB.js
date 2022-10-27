@@ -148,7 +148,7 @@ function questionnaireSaveAnswer(requestObject) {
 
                     if (questionnaireValidation.validatePatientSerNumAndLanguage(patientSerNumAndLanguageRow)) {
                         // save answer in questionnaire DB
-                        return questionnaires.saveAnswer(patientSerNumAndLanguageRow[0], requestObject.Parameters, requestObject.AppVersion);
+                        return questionnaires.saveAnswer(patientSerNumAndLanguageRow[0], requestObject.Parameters, requestObject.AppVersion, requestObject.UserID);
                     } else {
                         logger.log("error", "Error saving answer: No matching PatientSerNum or/and Language found in opalDB");
                         reject(new Error('Error saving answer: No matching PatientSerNum or/and Language found in opalDB'));
