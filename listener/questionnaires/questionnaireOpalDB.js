@@ -148,7 +148,7 @@ function questionnaireSaveAnswer(requestObject) {
 
                     if (questionnaireValidation.validatePatientSerNumAndLanguage(patientSerNumAndLanguageRow)) {
                         // save answer in questionnaire DB
-                        return questionnaires.saveAnswer(patientSerNumAndLanguageRow[0], requestObject.Parameters, requestObject.AppVersion);
+                        return questionnaires.saveAnswer(patientSerNumAndLanguageRow[0], requestObject.Parameters, requestObject.AppVersion, requestObject.UserID);
                     } else {
                         logger.log("error", "Error saving answer: No matching PatientSerNum or/and Language found in opalDB");
                         reject(new Error('Error saving answer: No matching PatientSerNum or/and Language found in opalDB'));
@@ -189,7 +189,12 @@ async function questionnaireUpdateStatus(requestObject) {
         throw new Error('Error updating status: No matching PatientSerNum found in opalDB');
     }
 
-    const isCompleted = await questionnaires.updateQuestionnaireStatusInQuestionnaireDB(requestObject.Parameters.answerQuestionnaire_id, requestObject.Parameters.new_status, requestObject.AppVersion);
+    const isCompleted = await questionnaires.updateQuestionnaireStatusInQuestionnaireDB(
+        requestObject.Parameters.answerQuestionnaire_id,
+        requestObject.Parameters.new_status,
+        requestObject.UserID,
+        requestObject.AppVersion,
+    );
 
     if (isCompleted === 1) {
 
