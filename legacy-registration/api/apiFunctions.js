@@ -140,7 +140,8 @@ exports.registerPatient = async function(requestObject) {
     try {
         validateRegisterPatientRequest(requestObject);
 
-        const patientData = await opalRequest.retrievePatientDataDetailed(requestObject);
+        // Get patient data from new backend
+        //const patientData = await opalRequest.retrievePatientDataDetailed(requestObject);
 
         // Before registering the patient, create their firebase user account with decrypted email and password
         // This is required to store their firebase UID as well

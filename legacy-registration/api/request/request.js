@@ -69,7 +69,6 @@ class opalRequest {
 		};
 		return await ApiRequest.makeRequest(requestParams);
 	}
-    
 }
 
 module.exports = opalRequest;
