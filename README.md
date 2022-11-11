@@ -60,6 +60,9 @@ OPAL_BACKEND_HOST=http://host.docker.internal:8000
 # <[String] Authorization token for accessing the endpoints. See 'Authentication' section in the new opalAdmin documentation>
 OPAL_BACKEND_AUTH_TOKEN=
 
+# Data Cache TTL (in minutes)
+DATA_CACHE_TIME_TO_LIVE_MINUTES=
+
 ```
 
 > FIREBASE_ADMIN_KEY_PATH: If you intend to run the listener in Docker, use "/app/src/config/firebase/NAME_OF_YOUR_ADMIN_KEY_FILE.json".
@@ -70,6 +73,8 @@ OPAL_BACKEND_AUTH_TOKEN=
 > Notice that the host names are `host.docker.internal` and NOT `localhost`. This is required for a container to call a localhost service on the host system.
 
 > When running the app using Docker, your firebase admin key file is copied in the container for it to be accessible.
+
+> DATA_CACHE_TIME_TO_LIVE_MINUTES represents the length of time in minutes the listener will store a given user's salt and secret keys when requesting encryption values. An appropriate length of time is 5-10 minutes.
 
 ##### Step 3 | Install the NPM packages
 Run the following command at the root of the project to install its dependencies.
