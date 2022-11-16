@@ -60,7 +60,7 @@ class opalRequest {
 		const requestParams = {
 			Parameters: {
 				method: 'get',
-				url: `/api/registration/${Parameters?.ramq}/?detailed`,
+				url: `/api/registration/${Parameters?.registrationCode}/?detailed`,
 				headers: {
 					'Content-Type': 'application/json',
 					'Accept-Language': language,
