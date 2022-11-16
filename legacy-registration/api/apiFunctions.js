@@ -144,11 +144,11 @@ exports.registerPatient = async function(requestObject) {
         const patientData = await opalRequest.retrievePatientDataDetailed(requestObject);
 
         // insert patient
-        let legacy_id = await insertPatient(requestObject, patientData.patient);
+        let legacy_id = await insertPatient(requestObject, patientData?.patient);
 
         // insert patient hospital identifier
-        for (let index in patientData.hospital_patients) {
-            await insertPatientHospitalIdentifier(requestObject, atientData.hospital_patients[index], legacy_id);
+        for (let index in patientData?.hospital_patients) {
+            await insertPatientHospitalIdentifier(requestObject, patientData.hospital_patients[index], legacy_id);
         }
 
         // Before registering the patient, create their firebase user account with decrypted email and password
@@ -367,11 +367,11 @@ function validateRequest(requestObject, requiredFields) {
  * @param {Object} requestObject - The calling request's requestObject.
  * @returns {patientSerNum}
  */
-async function insertPatient(requestObject, patientData) {
-    requestObject.Parameters.Fields.firstName = patientData.patient.first_name;
-    requestObject.Parameters.Fields.lastName = patientData.patient.last_name;
-    requestObject.Parameters.Fields.sex = patientData.patient.sex;
-    requestObject.Parameters.Fields.dateOfBirth = patientData.patient.date_of_birth;
+async function insertPatient(requestObject, patient) {
+    requestObject.Parameters.Fields.firstName = patient?.first_name;
+    requestObject.Parameters.Fields.lastName = patient?.last_name;
+    requestObject.Parameters.Fields.sex = patient?.sex;
+    requestObject.Parameters.Fields.dateOfBirth = patient?.date_of_birth;
     return await sqlInterface.insertPatient(requestObject);
 }
 
@@ -382,7 +382,7 @@ async function insertPatient(requestObject, patientData) {
  */
 async function insertPatientHospitalIdentifier(requestObject, hospitalPatient, patientSerNum) {
     requestObject.Parameters.Fields.patientSerNum = patientSerNum;
-    requestObject.Parameters.Fields.mrn = hospitalPatient.mrn;
-    requestObject.Parameters.Fields.site = hospitalPatient.site_code;
+    requestObject.Parameters.Fields.mrn = hospitalPatient?.mrn;
+    requestObject.Parameters.Fields.site = hospitalPatient?.site_code;
     return await sqlInterface.insertPatientHospitalIdentifier(requestObject);
 }
