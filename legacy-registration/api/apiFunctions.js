@@ -392,7 +392,7 @@ function getRegisterParameters(requestObject, legacy_id) {
         },
         'caregiver': {
             'language': requestObject.Parameters.Fields.language,
-            'phone_number': requestObject.Parameters.Fields.phone_number,
+            'phone_number': requestObject.Parameters.Fields.phoneNumber,
         },
         'security_answers': [
             {
