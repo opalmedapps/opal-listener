@@ -143,13 +143,17 @@ exports.registerPatient = async function(requestObject) {
         // Get patient data from new backend
         const patientData = await opalRequest.retrievePatientDataDetailed(requestObject);
 
-        // insert patient
+        // Insert patient
         let legacy_id = await insertPatient(requestObject, patientData?.patient);
 
-        // insert patient hospital identifier
-        for (let index in patientData?.hospital_patients) {
-            await insertPatientHospitalIdentifier(requestObject, patientData.hospital_patients[index], legacy_id);
+        // Insert patient hospital identifier
+        for (const hospital_patient of patientData?.hospital_patients) {
+            await insertPatientHospitalIdentifier(requestObject, hospital_patient, legacy_id);
         }
+
+        // Register patient info to new backend
+        const {request, registerData} = getRegisterParameters(requestObject, legacy_id);
+        await opalRequest.registrationRegister(request, registerData);
 
         // Before registering the patient, create their firebase user account with decrypted email and password
         // This is required to store their firebase UID as well
@@ -360,6 +364,56 @@ function validateRequest(requestObject, requiredFields) {
             throw `Required field '${field}' missing in request fields`
         }
     }
+}
+
+/**
+ * @description getRegisterParameters.
+ * @param {Object} requestObject - The calling request's requestObject.
+ * @returns {Object} registerData {
+        patient: {
+	 		legacy_id: int
+	 	},
+        caregiver: {
+            language: str,
+            phone_number: str,
+        },
+        security_answers: [
+            {
+                question: str,
+                answer: str,
+            },
+        ],
+ * }
+ */
+function getRegisterParameters(requestObject, legacy_id) {
+    const registerData = {
+        'patient': {
+            'legacy_id': legacy_id,
+        },
+        'caregiver': {
+            'language': requestObject.Parameters.Fields.language,
+            'phone_number': requestObject.Parameters.Fields.phone_number,
+        },
+        'security_answers': [
+            {
+                'question': requestObject.Parameters.Fields.securityQuestion1,
+                'answer': requestObject.Parameters.Fields.answer1,
+            },
+            {
+                'question': requestObject.Parameters.Fields.securityQuestion2,
+                'answer': requestObject.Parameters.Fields.answer2,
+            },
+            {
+                'question': requestObject.Parameters.Fields.securityQuestion3,
+                'answer': requestObject.Parameters.Fields.answer3,
+            },
+        ],
+    };
+    const request = {
+        ramq: requestObject.Parameters.Fields.ramq,
+        language: requestObject.Parameters.Fields.language,
+    };
+    return {request: request, registerData: registerData};
 }
 
 /**
