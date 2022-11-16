@@ -147,7 +147,7 @@ exports.registerPatient = async function(requestObject) {
         let legacy_id = await insertPatient(requestObject, patientData.patient);
 
         // insert patient hospital identifier
-        for (let index in atientData.hospital_patients) {
+        for (let index in patientData.hospital_patients) {
             await insertPatientHospitalIdentifier(requestObject, atientData.hospital_patients[index], legacy_id);
         }
 
