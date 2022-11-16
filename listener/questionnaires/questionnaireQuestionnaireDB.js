@@ -390,7 +390,7 @@ function insertAnswerByType(answerId, answerArray, question_typeId) {
  * @param {string} appVersion a string denoting the version of the app. This is used for noting the author of update
  * @returns {Promise} resolve with a boolean denoting whether the questionnaire's new status is completed or not
  */
-function updateQuestionnaireStatusInQuestionnaireDB(answerQuestionnaireId, newStatus, respondentUsername, appVersion) {
+function updateQuestionnaireStatusInQuestionnaireDB(answerQuestionnaireId, newStatus, respondentUsername, appVersion, userDisplayName) {
     let r = q.defer();
 
     let isCompleted = 0;
@@ -403,7 +403,7 @@ function updateQuestionnaireStatusInQuestionnaireDB(answerQuestionnaireId, newSt
         throw new Error("Error updating the questionnaire status: the new status is not in progress, completed, or new");
     }
 
-    runQuery(questionnaireQueries.updateAnswerQuestionnaireStatus(), [answerQuestionnaireId, newStatus, respondentUsername, appVersion])
+    runQuery(questionnaireQueries.updateAnswerQuestionnaireStatus(), [answerQuestionnaireId, newStatus, respondentUsername, appVersion, userDisplayName])
         .then(function (queryResult) {
 
             if (!questionnaireValidation.hasValidProcedureStatus(queryResult)) {
