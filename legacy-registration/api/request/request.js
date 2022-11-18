@@ -2,7 +2,6 @@
  *
  * 
  */
-const q = require('q');
 const ApiRequest = require('../../../src/core/api-request');
 
 class opalRequest {
@@ -38,7 +37,7 @@ class opalRequest {
 	 @desc call the new backend api 'registration/<std:code>/?detailed.
 	 @param requestObject
 	 @return {Promise}
-	 @response data: {
+	 @response {
 	 	hospital_patients: [
 	 		{
 				mrn: int,
@@ -67,7 +66,8 @@ class opalRequest {
 				},
 			},
 		};
-		return await ApiRequest.makeRequest(requestParams);
+		const response = await ApiRequest.makeRequest(requestParams);
+		return response.data;
 	}
 }
 
