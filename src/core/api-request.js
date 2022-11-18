@@ -2,7 +2,7 @@
  * @file relay request uploaded to firebase by the app to the Django backend.
  * @author David Gagne
  */
-
+require('dotenv').config();
 const axios = require('axios');
 const legacyLogger = require('../../listener/logs/logger');
 
