@@ -82,7 +82,7 @@ class ApiRequest {
             break;
         }
 
-        throw new Error(JSON.stringify(error), { cause: errorData });
+        throw new Error(opalError, { cause: errorData });
     }
 
     /**
