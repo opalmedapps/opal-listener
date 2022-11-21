@@ -37,7 +37,7 @@ class opalRequest {
 	 @desc call the new backend api 'registration/<std:code>/?detailed.
 	 @param requestObject
 	 @return {Promise}
-	 @response data: {
+	 @response {
 	 	hospital_patients: [
 	 		{
 				mrn: int,
@@ -59,14 +59,15 @@ class opalRequest {
 		const requestParams = {
 			Parameters: {
 				method: 'get',
-				url: `/api/registration/${Parameters?.ramq}/?detailed`,
+				url: `/api/registration/${Parameters?.registrationCode}/?detailed`,
 				headers: {
 					'Content-Type': 'application/json',
 					'Accept-Language': language,
 				},
 			},
 		};
-		return await ApiRequest.makeRequest(requestParams);
+		const response = await ApiRequest.makeRequest(requestParams);
+		return response.data;
 	}
 }
 
