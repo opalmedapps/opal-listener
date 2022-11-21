@@ -5,7 +5,7 @@ const opalRequest = require('./request');
 const ApiRequest = require('../../../src/core/api-request');
 
 describe('opalRequest.retrievePatientDataDetailed', function () {
-	before(() => {
+	it('retrievePatientDataDetailed success', async function () {
 		sinon.stub(ApiRequest, 'makeRequest')
 			.returns(Promise.resolve({
 				data: {
@@ -24,13 +24,7 @@ describe('opalRequest.retrievePatientDataDetailed', function () {
 					}
 				},
 			}));
-	});
 
-	after(() => {
-		ApiRequest.makeRequest.restore();
-	});
-
-	it('retrievePatientDataDetailed success', async function () {
 		const requestObject = {
 			Parameters: {
 				Fields: {},
@@ -44,5 +38,25 @@ describe('opalRequest.retrievePatientDataDetailed', function () {
 		expect(response.patient).to.have.property('ramq').equal('TESC53511613');
 		expect(response).to.have.property('hospital_patients');
 		expect(response.hospital_patients.length).equal(1);
+
+		ApiRequest.makeRequest.restore();
+	});
+
+	it('retrievePatientDataDetailed failed', async function () {
+		sinon.stub(ApiRequest, 'makeRequest').throws(new Error('API_NOT_FOUND'));
+
+		const requestObject = {
+			Parameters: {
+				Fields: {},
+			},
+		};
+		requestObject.Parameters.Fields.registrationCode = 'CODE12345678';
+		requestObject.Parameters.Fields.language = 'en';
+		try {
+			await opalRequest.retrievePatientDataDetailed(requestObject);
+		} catch (error) {
+			expect(error.message).to.equal('API_NOT_FOUND');
+		}
+
 	});
 });
