@@ -4,7 +4,6 @@ const sinon = require('sinon');
 const opalRequest = require('./request');
 const ApiRequest = require('../../../src/core/api-request');
 
-
 describe('opalRequest', function () {
 	describe('retrievePatientDataDetailed', function () {
 		it('retrievePatientDataDetailed success', async function () {
@@ -32,6 +31,7 @@ describe('opalRequest', function () {
 					Fields: {},
 				},
 			};
+
 			requestObject.Parameters.Fields.registrationCode = 'A0127Q0T50hk';
 			requestObject.Parameters.Fields.language = 'en';
 			const response = await opalRequest.retrievePatientDataDetailed(requestObject);

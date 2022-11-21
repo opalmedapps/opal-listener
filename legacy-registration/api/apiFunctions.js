@@ -367,6 +367,7 @@ function validateRequest(requestObject, requiredFields) {
 }
 
 /**
+<<<<<<< HEAD
  * @description getRegisterParameters.
  * @param {Object} requestObject - The calling request's requestObject.
  * @returns {Object} registerData {
@@ -417,6 +418,8 @@ function getRegisterParameters(requestObject, legacy_id) {
 }
 
 /**
+=======
+>>>>>>> staging
  * @description insert patient with request parameters.
  * @param {Object} requestObject - The calling request's requestObject.
  * @returns {patientSerNum}
