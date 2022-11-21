@@ -144,10 +144,10 @@ exports.registerPatient = async function(requestObject) {
         const patientData = await opalRequest.retrievePatientDataDetailed(requestObject);
 
         // Insert patient
-        let legacy_id = await insertPatient(requestObject, patientData?.data?.patient);
+        let legacy_id = await insertPatient(requestObject, patientData?.patient);
 
         // Insert patient hospital identifier
-        for (const hospital_patient of patientData?.data?.hospital_patients) {
+        for (const hospital_patient of patientData?.hospital_patients) {
             await insertPatientHospitalIdentifier(requestObject, hospital_patient, legacy_id);
         }
 
