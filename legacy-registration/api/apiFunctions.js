@@ -140,6 +140,17 @@ exports.registerPatient = async function(requestObject) {
     try {
         validateRegisterPatientRequest(requestObject);
 
+        // Get patient data from new backend
+        const patientData = await opalRequest.retrievePatientDataDetailed(requestObject);
+
+        // Insert patient
+        let legacy_id = await insertPatient(requestObject, patientData?.patient);
+
+        // Insert patient hospital identifier
+        for (const hospital_patient of patientData?.hospital_patients) {
+            await insertPatientHospitalIdentifier(requestObject, hospital_patient, legacy_id);
+        }
+
         // Before registering the patient, create their firebase user account with decrypted email and password
         // This is required to store their firebase UID as well
         let email = requestObject.Parameters.Fields.email;
@@ -349,4 +360,37 @@ function validateRequest(requestObject, requiredFields) {
             throw `Required field '${field}' missing in request fields`
         }
     }
+}
+
+/**
+ * @description insert patient with request parameters.
+ * @param {Object} requestObject - The calling request's requestObject.
+ * @returns {patientSerNum}
+ */
+async function insertPatient(requestObject, patient) {
+    if (!patient) {
+        const registrationCode = requestObject.Parameters.Fields.registrationCode;
+        throw `Failed to insert Patient to legacyDB due to Patient not exists with registrationCode: ${registrationCode}`;
+    }
+    requestObject.Parameters.Fields.firstName = patient.first_name;
+    requestObject.Parameters.Fields.lastName = patient.last_name;
+    requestObject.Parameters.Fields.sex = patient.sex;
+    requestObject.Parameters.Fields.dateOfBirth = patient.date_of_birth;
+    return await sqlInterface.insertPatient(requestObject);
+}
+
+/**
+ * @description insert patient hospital indetifier with request parameters.
+ * @param {Object} requestObject - The calling request's requestObject.
+ * @returns {void}
+ */
+async function insertPatientHospitalIdentifier(requestObject, hospitalPatient, patientSerNum) {
+    if (!hospitalPatient) {
+        const registrationCode = requestObject.Parameters.Fields.registrationCode;
+        throw  `Failed to insert Patient to legacyDB due to hospitalPatient not exists with registrationCode: ${registrationCode}`;
+    }
+    requestObject.Parameters.Fields.patientSerNum = patientSerNum;
+    requestObject.Parameters.Fields.mrn = hospitalPatient.mrn;
+    requestObject.Parameters.Fields.site = hospitalPatient.site_code;
+    return await sqlInterface.insertPatientHospitalIdentifier(requestObject);
 }
