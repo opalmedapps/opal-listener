@@ -32,12 +32,20 @@ describe('opalRequest.retrievePatientDataDetailed', function () {
 		};
 		requestObject.Parameters.Fields.registrationCode = 'A0127Q0T50hk';
 		requestObject.Parameters.Fields.language = 'en';
-		const response = await opalRequest.retrievePatientDataDetailed(requestObject);
+		await opalRequest.retrievePatientDataDetailed(requestObject);
 
-		expect(response).to.have.property('patient');
-		expect(response.patient).to.have.property('ramq').equal('TESC53511613');
-		expect(response).to.have.property('hospital_patients');
-		expect(response.hospital_patients.length).equal(1);
+		const expectedParameters = {
+			Parameters: {
+				method: 'get',
+				url: `/api/registration/${requestObject.Parameters.Fields.registrationCode}/?detailed`,
+				headers: {
+					'Content-Type': 'application/json',
+					'Accept-Language': requestObject.Parameters.Fields.language,
+				}
+			}
+		};
+		sinon.assert.calledWith(ApiRequest.makeRequest, expectedParameters);
+		sinon.assert.calledOnce(ApiRequest.makeRequest);
 
 		ApiRequest.makeRequest.restore();
 	});
@@ -56,7 +64,20 @@ describe('opalRequest.retrievePatientDataDetailed', function () {
 			await opalRequest.retrievePatientDataDetailed(requestObject);
 		} catch (error) {
 			expect(error.message).to.equal('API_NOT_FOUND');
+			const expectedParameters = {
+				Parameters: {
+					method: 'get',
+					url: `/api/registration/${requestObject.Parameters.Fields.registrationCode}/?detailed`,
+					headers: {
+						'Content-Type': 'application/json',
+						'Accept-Language': requestObject.Parameters.Fields.language,
+					}
+				}
+			};
+			sinon.assert.calledWith(ApiRequest.makeRequest, expectedParameters);
+			sinon.assert.calledOnce(ApiRequest.makeRequest);
 		}
 
+		ApiRequest.makeRequest.restore();
 	});
 });
