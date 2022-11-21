@@ -202,7 +202,8 @@ function saveAnswer(opalPatientSerNumAndLanguage, param, appVersion, respondentU
             if (!questionnaireValidation.hasValidProcedureStatusAndInsertId(queryResult)) {
 
                 logger.log("error", "Error saving answer: query unsuccessful", queryResult);
-                r.reject(new Error('Error saving answer: query unsuccessful'));
+                let cause = getProcedureCode(queryResult);
+                r.reject(new Error('Error saving answer: query unsuccessful', {cause: cause}));
             } else {
                 answerId = queryResult[queryResult.length - 2][0].inserted_answer_id;
 
@@ -408,7 +409,8 @@ function updateQuestionnaireStatusInQuestionnaireDB(answerQuestionnaireId, newSt
 
             if (!questionnaireValidation.hasValidProcedureStatus(queryResult)) {
                 logger.log("error", "Error updating the questionnaire status: query unsuccessful", queryResult);
-                r.reject(new Error('Error updating the questionnaire status: query unsuccessful'));
+                let cause = getProcedureCode(queryResult);
+                r.reject(new Error('Error updating the questionnaire status: query unsuccessful', {cause: cause}));
             } else {
                 r.resolve(isCompleted);
             }
@@ -419,4 +421,18 @@ function updateQuestionnaireStatusInQuestionnaireDB(answerQuestionnaireId, newSt
         });
 
     return r.promise;
+}
+
+/**
+ * @desc Reads the procedure_status returned in a query result, if it exists.
+ * @param queryResult The result returned from running a questionnaires procedure in the database.
+ * @returns {number|undefined} The procedure_status from the query result, or undefined if it's not found.
+ */
+function getProcedureCode(queryResult) {
+    try {
+        return queryResult[0][0].procedure_status;
+    }
+    catch(error) {
+        return undefined;
+    }
 }
