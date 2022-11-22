@@ -388,11 +388,10 @@ function insertAnswerByType(answerId, answerArray, question_typeId) {
  * @param {string} newStatus denote the status to be updated to. It should match the database convention of being either 0,1,2
  * @param {string} respondentUsername the username of the user answering the questionnaire.
  * @param {string} appVersion a string denoting the version of the app. This is used for noting the author of update
+ * @param {string} userDisplayName Questionnaire's respondent first and last name used for display purpose.
  * @returns {Promise} resolve with a boolean denoting whether the questionnaire's new status is completed or not
  */
-function updateQuestionnaireStatusInQuestionnaireDB(answerQuestionnaireId, newStatus, respondentUsername, appVersion) {
-    let r = q.defer();
-
+async function updateQuestionnaireStatusInQuestionnaireDB(answerQuestionnaireId, newStatus, respondentUsername, appVersion, userDisplayName) {
     let isCompleted = 0;
     let newStatusInt = parseInt(newStatus);
 
@@ -403,20 +402,16 @@ function updateQuestionnaireStatusInQuestionnaireDB(answerQuestionnaireId, newSt
         throw new Error("Error updating the questionnaire status: the new status is not in progress, completed, or new");
     }
 
-    runQuery(questionnaireQueries.updateAnswerQuestionnaireStatus(), [answerQuestionnaireId, newStatus, respondentUsername, appVersion])
-        .then(function (queryResult) {
-
-            if (!questionnaireValidation.hasValidProcedureStatus(queryResult)) {
-                logger.log("error", "Error updating the questionnaire status: query unsuccessful", queryResult);
-                r.reject(new Error('Error updating the questionnaire status: query unsuccessful'));
-            } else {
-                r.resolve(isCompleted);
-            }
-
-        }).catch(function (err) {
-            logger.log("error", `Error updating the questionnaire status`, err);
-            r.reject(err);
-        });
-
-    return r.promise;
+    try {
+        const queryResult = await runQuery(questionnaireQueries.updateAnswerQuestionnaireStatus(), [answerQuestionnaireId, newStatus, respondentUsername, appVersion, userDisplayName]);
+        if (!questionnaireValidation.hasValidProcedureStatus(queryResult)) {
+            logger.log("error", "Error updating the questionnaire status: query unsuccessful", queryResult);
+            throw new Error('Error updating the questionnaire status: query unsuccessful');
+        } else {
+            return isCompleted;
+        }
+    } catch (error) {
+        logger.log("error", `Error updating the questionnaire status`, error);
+        return error;
+    }
 }

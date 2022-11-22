@@ -76,5 +76,5 @@ exports.insertAnswerCheckbox = function () {
 }
 
 exports.updateAnswerQuestionnaireStatus = function () {
-    return "call updateAnswerQuestionnaireStatus(?,?,?,?);";
+    return "call updateAnswerQuestionnaireStatus(?,?,?,?,?);";
 }
