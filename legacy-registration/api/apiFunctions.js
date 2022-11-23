@@ -191,6 +191,14 @@ exports.registerPatient = async function(requestObject) {
         }
 
         try {
+            for (const hospital_patient of patientData?.hospital_patients) {
+                await getLabResultHistory(requestObject, hospital_patient, legacy_id);
+            }
+        } catch (error) {
+            logger.log('error', `An error occurred while getting lab result history (for patient ${legacy_id}): ${JSON.stringify(error)}`);
+        }
+
+        try {
             await updatePatientStatusInORMS(requestObject);
         }
         catch (error) {
@@ -447,4 +455,20 @@ async function insertPatientHospitalIdentifier(requestObject, hospitalPatient, p
     requestObject.Parameters.Fields.mrn = hospitalPatient.mrn;
     requestObject.Parameters.Fields.site = hospitalPatient.site_code;
     return await sqlInterface.insertPatientHospitalIdentifier(requestObject);
+}
+
+/**
+ * @description insert patient hospital indetifier with request parameters.
+ * @param {Object} requestObject - The calling request's requestObject.
+ * @returns {void}
+ */
+async function getLabResultHistory(requestObject, hospitalPatient, patientSerNum) {
+    if (!hospitalPatient) {
+        const registrationCode = requestObject.Parameters.Fields.registrationCode;
+        throw  `Failed to insert Patient to legacyDB due to hospitalPatient not exists with registrationCode: ${registrationCode}`;
+    }
+    requestObject.Parameters.Fields.labResultHistoryURL = config.LAB_RESULT_HISTORY;
+    requestObject.Parameters.Fields.patientId = patientSerNum;
+    requestObject.Parameters.Fields.site = hospitalPatient.site_code;
+    return await sqlInterface.getLabResultHistory(requestObject);
 }
