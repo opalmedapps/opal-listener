@@ -37,7 +37,7 @@ exports.refresh = async function(requestObject) {
     if (!fields) throw {Response:'error', Reason:"Undefined 'Fields' in Refresh request"};
     if (!Array.isArray(fields)) fields = [fields];
 
-    let rows = await sqlInterface.getPatientTableFields(patientSerNum, fields, parameters.Timestamp);
+    let rows = await sqlInterface.getPatientTableFields(patientSerNum, fields, parameters.Timestamp, parameters?.purpose);
     rows.Data = utility.resolveEmptyResponse(rows.Data);
 
     return rows;
@@ -72,6 +72,26 @@ exports.getDocumentsContent=function(requestObject)
 exports.getSecurityQuestion = function (requestObject) {
     return sqlInterface.getSecurityQuestion(requestObject);
 };
+
+/**
+*@name getStudies
+*@description Gets the studies associated with the current patient.
+*@param {object} requestObject
+*@returns {Promise}
+*/
+exports.getStudies = function(requestObject) {
+    return sqlInterface.getStudies(requestObject);
+}
+
+/**
+*@name getStudyQuestionnaires
+*@description Gets the questionnaires associated with the current study.
+*@param {object} requestObject
+*@returns {Promise}
+*/
+exports.getStudyQuestionnaires = function(requestObject) {
+    return sqlInterface.getStudyQuestionnaires(requestObject);
+}
 
 // exports.isTrustedDevice = function (requestObject) {
 //     return sqlInterface.isTrustedDevice(requestObject);
@@ -132,6 +152,20 @@ exports.getQuestionnaireInOpalDB = questionnaires.getQuestionnaireInOpalDB;
  * @returns {Promise}
  */
 exports.getQuestionnaire = questionnaires.getQuestionnaire;
+
+/**
+* Gets the purpose of the current questionnaire.
+* @param {object} requestObject
+* @returns {Promise}
+*/
+exports.getQuestionnairePurpose = questionnaires.getQuestionnairePurpose;
+
+/**
+* Gets the number of unread (e.g. 'New') questionnaires.
+* @param {object} requestObject
+* @returns {Promise}
+*/
+exports.getQuestionnaireUnreadNumber = questionnaires.getQuestionnaireUnreadNumber;
 
 /**
  * @deprecated
