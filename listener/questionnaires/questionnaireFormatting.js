@@ -137,6 +137,7 @@ function formatQuestionnaire(questionnaireDataArray, sectionDataArray, questionD
     // decode html
     questionnaireDataArray[0].description = utility.htmlspecialchars_decode(questionnaireDataArray[0].description);
     questionnaireDataArray[0].instruction = utility.htmlspecialchars_decode(questionnaireDataArray[0].instruction);
+    questionnaireDataArray[0].questionnaire_purpose = findPurposeFromId(questionnaireDataArray[0].purpose_id);
 
     let sections = {};
 
@@ -257,4 +258,18 @@ function formatPatientAnswer(status, question, answerObject) {
     }
 
     return patient_answer;
+}
+
+/**
+ * findPurposeFromId
+ * @desc find the purpose string from the purpose ID
+ * @param {number} purposeId the ID of the purpose in the database
+ * @returns {string} the purpose string
+ */
+function findPurposeFromId(purposeId) {
+    for (let purpose in questionnaireConfig.QUESTIONNAIRE_PURPOSE_ID_MAP) {
+        if (questionnaireConfig.QUESTIONNAIRE_PURPOSE_ID_MAP[purpose] === purposeId) {
+            return purpose;
+        }
+    }
 }
