@@ -238,14 +238,21 @@ function patientAnnouncementTableFields(selectOne=false) {
  * @returns {string} The query.
  */
 function patientEducationalMaterialTableFields(selectOne=false) {
-    return `SELECT A.EducationalMaterialSerNum, A.ShareURL_EN, A.ShareURL_FR, A.EducationalMaterialControlSerNum, A.DateAdded,
-                A.ReadStatus, A.EducationalMaterialType_EN, A.EducationalMaterialType_FR, A.Name_EN, A.Name_FR, A.URL_EN, A.URL_FR
+    return `SELECT A.EducationalMaterialSerNum,
+                A.ShareURL_EN, A.ShareURL_FR,
+                A.EducationalMaterialControlSerNum,
+                A.DateAdded,
+                A.ReadStatus,
+                A.EducationalMaterialType_EN, A.EducationalMaterialType_FR,
+                A.Name_EN, A.Name_FR,
+                A.URL_EN, A.URL_FR,
+                A.EduCategoryId
             FROM (
                 SELECT EduMat.PatientSerNum, EduMat.EducationalMaterialSerNum, EduControl.ShareURL_EN, EduControl.ShareURL_FR,
                     EduControl.EducationalMaterialControlSerNum, EduMat.DateAdded, EduMat.ReadStatus,
                     EduControl.EducationalMaterialType_EN, EduControl.EducationalMaterialType_FR, EduControl.Name_EN,
                     EduControl.Name_FR,  EduControl.URL_EN, EduControl.URL_FR, EduMat.LastUpdated EM_LastUpdated,
-                    EduControl.LastUpdated EC_LastUpdated, '0000-00-00 00:00:00' TOC_LastUpdated
+                    EduControl.LastUpdated EC_LastUpdated, '0000-00-00 00:00:00' TOC_LastUpdated, EduControl.EducationalMaterialCategoryId EduCategoryId
                 FROM EducationalMaterialControl as EduControl, EducationalMaterial as EduMat
                 WHERE EduMat.EducationalMaterialControlSerNum = EduControl.EducationalMaterialControlSerNum
                 UNION
@@ -253,7 +260,7 @@ function patientEducationalMaterialTableFields(selectOne=false) {
                     EduControl.EducationalMaterialControlSerNum, EduMat.DateAdded, EduMat.ReadStatus,
                     EduControl.EducationalMaterialType_EN, EduControl.EducationalMaterialType_FR, EduControl.Name_EN,
                     EduControl.Name_FR,  EduControl.URL_EN, EduControl.URL_FR, EduMat.LastUpdated EM_LastUpdated,
-                    EduControl.LastUpdated EC_LastUpdated, TOC.LastUpdated TOC_LastUpdated
+                    EduControl.LastUpdated EC_LastUpdated, TOC.LastUpdated TOC_LastUpdated, EduControl.EducationalMaterialCategoryId EduCategoryId
                 FROM EducationalMaterialControl as EduControl, EducationalMaterial as EduMat,
                     EducationalMaterialTOC as TOC
                 WHERE TOC.ParentSerNum = EduMat.EducationalMaterialControlSerNum
@@ -297,6 +304,27 @@ exports.patientTasksTableFields=function()
         "AND (Task.LastUpdated > ? OR Alias.LastUpdated > ?) " +
         "ORDER BY Task.DueDateTime ASC;";
 };
+
+/**
+ * patientStudyTableFields
+ * @desc Query that returns the studies assigned to a given patient.
+ * @returns {string}
+ */
+exports.patientStudyTableFields=function(){
+    return `SELECT S.ID, S.title_EN, S.title_FR, S.description_EN, S.description_FR, S.investigator, S.email, S.phone, S.phoneExt, S.startDate, S.endDate, S.creationDate, PS.ID as patientStudyId, PS.consentStatus, PS.readStatus as ReadStatus, Q.QuestionnaireSerNum, QC.QuestionnaireName_EN, QC.QuestionnaireName_FR
+            FROM study S, Patient P, patientStudy PS, Users U, QuestionnaireControl QC
+            INNER JOIN Questionnaire Q ON QC.QuestionnaireControlSerNum = Q.QuestionnaireControlSerNum
+            WHERE U.UserTypeSerNum=P.PatientSerNum AND P.PatientSerNum = PS.patientId AND Q.PatientSerNum = P.PatientSerNum AND S.ID = PS.studyID AND QC.QuestionnaireDBSerNum = S.consentQuestionnaireId AND U.Username LIKE ?`
+}
+
+/**
+ * getStudyQuestionnairesQuery
+ * @desc Query that returns the questionnaires assigned to a given study.
+ * @returns {string}
+ */
+exports.getStudyQuestionnairesQuery = function(){
+    return "SELECT QS.questionnaireID, Q.DateAdded, QC.QuestionnaireName_EN, QC.QuestionnaireName_FR FROM questionnaireStudy QS, Questionnaire Q, QuestionnaireControl QC, study S WHERE S.ID = QS.studyID AND QC.QuestionnaireControlSerNum = Q.QuestionnaireControlSerNum AND Q.QuestionnaireSerNum = QS.questionnaireId AND S.ID = ?";
+}
 
 exports.getPatientPasswordForVerification = function()
 {
@@ -417,7 +445,8 @@ exports.getPackageContents = function(){
                    EducationalMaterialControl.ShareURL_EN, EducationalMaterialControl.ShareURL_FR,
                    EducationalMaterialControl.EducationalMaterialType_EN, EducationalMaterialControl.EducationalMaterialType_FR,
                    EducationalMaterialControl.Name_EN, EducationalMaterialControl.Name_FR,
-                   EducationalMaterialControl.URL_EN, EducationalMaterialControl.URL_FR
+                   EducationalMaterialControl.URL_EN, EducationalMaterialControl.URL_FR,
+                   EducationalMaterialControl.EducationalMaterialCategoryId
 
             FROM EducationalMaterialPackageContent, EducationalMaterialControl
 
@@ -432,14 +461,38 @@ exports.updateReadStatus=function()
 {
     return `
         UPDATE ??
-        SET ReadStatus = 1
+        SET ReadStatus = 1, readStatus = 1
         WHERE ??.?? = ?
+    `;
+};
+
+exports.updateConsentStatus = function()
+{
+    return `
+        UPDATE
+            patientStudy PS,
+            study S,
+            Patient P,
+            Users U
+        SET
+            PS.consentStatus = ?
+        WHERE
+            S.ID = PS.studyId
+            AND S.consentQuestionnaireId = ?
+            AND P.PatientSerNum = PS.patientId
+            AND P.PatientSerNum = U.UserTypeSerNum
+            AND U.Username LIKE ?
     `;
 };
 
 exports.insertEducationalMaterialRatingQuery=function()
 {
     return "INSERT INTO `EducationalMaterialRating`(`EducationalMaterialRatingSerNum`, `EducationalMaterialControlSerNum`, `PatientSerNum`, `RatingValue`, `SessionId`, `LastUpdated`) VALUES (NULL,?,?,?,?,NULL)";
+};
+
+exports.getPatientSerNumFromUserID = function()
+{
+    return "SELECT Patient.PatientSerNum FROM Patient, Users WHERE Patient.PatientSerNum = Users.UserTypeSerNum && Users.Username = ?";
 };
 
 exports.getTrustedDevice = function () {
