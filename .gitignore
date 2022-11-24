@@ -3,6 +3,7 @@ listener/config.json
 legacy-registration/config.json
 listener/firebase/*
 src/config/firebase/
+src/config/config.json
 
 # Generated documentation
 docs/generated
