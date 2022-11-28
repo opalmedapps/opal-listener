@@ -2,7 +2,6 @@ const q                   = require('q');
 const processApiRequest   = require('./processApiRequest.js');
 const OpalResponseSuccess = require('./response/response-success');
 const {OpalResponseError}   = require('./response/response-error');
-const OpalResponse   = require('./response/response');
 const RequestValidator    = require('./request/request-validator');
 const logger              = require('../logs/logger.js');
 const {ValidationError} = require("./errors/validation-error");
@@ -35,20 +34,25 @@ function requestFormatter({key,request}) {
 			return processApiRequest.processRequest(opalReq).then((data)=>
 			{
 				logger.log('debug', 'Successfully processed request: ', data);
-                logger.log('info', 'Successfully processed request');
+				logger.log('info', 'Successfully processed request');
 				return (new OpalResponseSuccess(data, opalReq)).toLegacy();
 			}).catch((err)=>{
 				logger.log('error', 'Error processing request', err);
 				if(err instanceof ValidationError){
-					return (new OpalResponseError( 400, err.error, opalReq)).toLegacy();
+					return (new OpalResponseError(400, err.error, opalReq, err.cause)).toLegacy();
 				}else{
-					return (new OpalResponseError( 2, 'Server error, report the error to the hospital',
-						opalReq, JSON.stringify(err))).toLegacy();
+					return (new OpalResponseError(
+						2,
+						'Server error, report the error to the hospital',
+						opalReq,
+						err.cause,
+						JSON.stringify(err)
+					)).toLegacy();
 				}
 			});
-		}).catch( err => {
-            logger.log('error', 'Error validating request', err);
-            return err.toLegacy();
+		}).catch(err => {
+			logger.log('error', 'Error validating request', err);
+			return err.toLegacy();
 		});
 }
 
