@@ -93,7 +93,7 @@ function patientAppointmentTableFields(selectOne) {
                         Appt.Checkin,
                         Appt.SourceDatabaseSerNum,
                         Appt.AppointmentAriaSer,
-                        Appt.ReadStatus,
+                        JSON_CONTAINS(Appt.ReadBy, ?) as ReadStatus,
                         R.ResourceName,
                         R.ResourceType,
                         Appt.Status,
@@ -461,7 +461,7 @@ exports.updateReadStatus=function()
 {
     return `
         UPDATE ??
-        SET ReadStatus = 1, readStatus = 1
+        SET ReadStatus = 1, readStatus = 1, ReadBy = JSON_ARRAY_APPEND(ReadBy,'$', ?)
         WHERE ??.?? = ?
     `;
 };
