@@ -74,7 +74,8 @@ const requestMappings =
             sql: queries.patientNotificationsTableFields(),
             numberOfLastUpdated: 2,
             table: 'Notification',
-            serNum: 'NotificationSerNum'
+            serNum: 'NotificationSerNum',
+            needUserId: true
         },
         /**
          * Deprecated: 'Tasks'

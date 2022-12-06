@@ -573,7 +573,7 @@ exports.patientNotificationsTableFields=function()
     return `SELECT
                 n.NotificationSerNum,
                 n.DateAdded,
-                n.ReadStatus,
+                JSON_CONTAINS(n.ReadBy, ?) as ReadStatus,
                 n.RefTableRowSerNum,
                 nc.NotificationType,
                 nc.Name_EN,
@@ -599,30 +599,36 @@ exports.patientNotificationsTableFields=function()
  * @returns {string}
  */
 exports.getNewNotifications=function() {
-    return "SELECT Notification.NotificationSerNum, " +
-        "Notification.DateAdded," +
-        " Notification.ReadStatus, " +
-        "Notification.RefTableRowSerNum, " +
-        "NotificationControl.NotificationType, " +
-        "NotificationControl.Name_EN, " +
-        "NotificationControl.Name_FR, " +
-        "NotificationControl.Description_EN, " +
-        "NotificationControl.Description_FR, " +
-        "Notification.RefTableRowTitle_EN, " +
-        "Notification.RefTableRowTitle_FR " +
-        "" +
-        "FROM Notification, " +
-        "NotificationControl, " +
-        "Patient, " +
-        "Users " +
-        "" +
-        "WHERE " +
-        "NotificationControl.NotificationControlSerNum = Notification.NotificationControlSerNum " +
-        "AND Notification.PatientSerNum=Patient.PatientSerNum " +
-        "AND Patient.PatientSerNum=Users.UserTypeSerNum " +
-        "AND Users.Username= ? " +
-        "AND Notification.ReadStatus = 0 " +
-        "AND (Notification.DateAdded > ? OR NotificationControl.DateAdded > ?);";
+    return `SELECT
+                Notification.NotificationSerNum,
+                Notification.DateAdded,
+                JSON_CONTAINS(Appt.ReadBy, ?) as ReadStatus,
+                Notification.RefTableRowSerNum,
+                NotificationControl.NotificationType,
+                NotificationControl.Name_EN,
+                NotificationControl.Name_FR,
+                NotificationControl.Description_EN,
+                NotificationControl.Description_FR,
+                Notification.RefTableRowTitle_EN,
+                Notification.RefTableRowTitle_FR
+            FROM
+                Notification,
+                NotificationControl,
+                Patient,
+                Users
+            WHERE
+                NotificationControl.NotificationControlSerNum = Notification.NotificationControlSerNum
+            AND
+                Notification.PatientSerNum=Patient.PatientSerNum
+            AND
+                Patient.PatientSerNum=Users.UserTypeSerNum
+            AND
+                Users.Username= ?
+            AND
+                Notification.ReadStatus = 0
+            AND
+                (Notification.DateAdded > ? OR NotificationControl.DateAdded > ?);
+    `;
 };
 
 /*
