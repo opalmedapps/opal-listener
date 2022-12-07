@@ -17,8 +17,8 @@ class PatientTestResult {
      * @param {Date} [lastUpdated] - Optional date/time; if provided, only items with 'LastUpdated' after this time are returned.
 	 * @returns {Promise<Object>} Returns the test types for the patient
 	 */
-	async getTestTypes(lastUpdated=0) {
-		const query = PatientTestResultQuery.getTestTypesQuery(this._patient.patientSerNum, lastUpdated);
+	async getTestTypes(UserId, lastUpdated=0) {
+		const query = PatientTestResultQuery.getTestTypesQuery(UserId, this._patient.patientSerNum, lastUpdated);
 		let results;
 		try {
 			results = await OpalSQLQueryRunner.run(query);

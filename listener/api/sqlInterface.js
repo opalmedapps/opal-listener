@@ -221,6 +221,7 @@ async function processSelectRequest(userId, category, patientSerNum, timestamp, 
         let result = await mapping.module[category].handleRequest({
             meta: {
                 TargetPatientID: patientSerNum,
+                UserId: userId,
             },
             params: {
                 Date: timestamp,
