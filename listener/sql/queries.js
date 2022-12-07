@@ -242,14 +242,14 @@ function patientEducationalMaterialTableFields(selectOne=false) {
                 A.ShareURL_EN, A.ShareURL_FR,
                 A.EducationalMaterialControlSerNum,
                 A.DateAdded,
-                A.ReadStatus,
+                JSON_CONTAINS(A.ReadBy, ?) as ReadStatus,
                 A.EducationalMaterialType_EN, A.EducationalMaterialType_FR,
                 A.Name_EN, A.Name_FR,
                 A.URL_EN, A.URL_FR,
                 A.EduCategoryId
             FROM (
                 SELECT EduMat.PatientSerNum, EduMat.EducationalMaterialSerNum, EduControl.ShareURL_EN, EduControl.ShareURL_FR,
-                    EduControl.EducationalMaterialControlSerNum, EduMat.DateAdded, EduMat.ReadStatus,
+                    EduControl.EducationalMaterialControlSerNum, EduMat.DateAdded, EduMat.ReadStatus, EduMat.ReadBy,
                     EduControl.EducationalMaterialType_EN, EduControl.EducationalMaterialType_FR, EduControl.Name_EN,
                     EduControl.Name_FR,  EduControl.URL_EN, EduControl.URL_FR, EduMat.LastUpdated EM_LastUpdated,
                     EduControl.LastUpdated EC_LastUpdated, '0000-00-00 00:00:00' TOC_LastUpdated, EduControl.EducationalMaterialCategoryId EduCategoryId
@@ -257,7 +257,7 @@ function patientEducationalMaterialTableFields(selectOne=false) {
                 WHERE EduMat.EducationalMaterialControlSerNum = EduControl.EducationalMaterialControlSerNum
                 UNION
                 SELECT EduMat.PatientSerNum, EduMat.EducationalMaterialSerNum, EduControl.ShareURL_EN, EduControl.ShareURL_FR,
-                    EduControl.EducationalMaterialControlSerNum, EduMat.DateAdded, EduMat.ReadStatus,
+                    EduControl.EducationalMaterialControlSerNum, EduMat.DateAdded, EduMat.ReadStatus, EduMat.ReadBy,
                     EduControl.EducationalMaterialType_EN, EduControl.EducationalMaterialType_FR, EduControl.Name_EN,
                     EduControl.Name_FR,  EduControl.URL_EN, EduControl.URL_FR, EduMat.LastUpdated EM_LastUpdated,
                     EduControl.LastUpdated EC_LastUpdated, TOC.LastUpdated TOC_LastUpdated, EduControl.EducationalMaterialCategoryId EduCategoryId
