@@ -142,7 +142,7 @@ function patientDocumentTableFields(selectOne=false) {
                 end FinalFileName,
                 Alias.AliasName_EN,
                 Alias.AliasName_FR,
-                Document.ReadStatus,
+                JSON_CONTAINS(Document.ReadBy, ?) as ReadStatus,
                 Alias.AliasDescription_EN,
                 Alias.AliasDescription_FR,
                 Document.DocumentSerNum,
@@ -186,7 +186,7 @@ function patientTxTeamMessageTableFields(selectOne=false) {
     return `SELECT
                 TxRecords.TxTeamMessageSerNum,
                 TxRecords.DateAdded,
-                TxRecords.ReadStatus,
+                JSON_CONTAINS(TxRecords.ReadBy, ?) as ReadStatus,
                 Post.PostType,
                 Post.Body_EN,
                 Post.Body_FR,
@@ -213,7 +213,7 @@ function patientAnnouncementTableFields(selectOne=false) {
     return `SELECT
                 Announcement.AnnouncementSerNum,
                 Announcement.DateAdded,
-                Announcement.ReadStatus,
+                JSON_CONTAINS(Announcement.ReadBy, ?) as ReadStatus,
                 PostControl.PostControlSerNum,
                 PostControl.PostType,
                 PostControl.Body_EN,

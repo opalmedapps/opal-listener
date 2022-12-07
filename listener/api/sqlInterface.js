@@ -44,7 +44,8 @@ const requestMappings =
             sqlSingleItem: queries.patientDocumentsOne(),
             numberOfLastUpdated: 2,
             table: 'Document',
-            serNum: 'DocumentSerNum'
+            serNum: 'DocumentSerNum',
+            needUserId: true,
         },
         /**
          * Deprecated: 'Doctors'
@@ -90,7 +91,8 @@ const requestMappings =
             processFunction: decodePostMessages,
             numberOfLastUpdated: 2,
             table: 'TxTeamMessage',
-            serNum: 'TxTeamMessageSerNum'
+            serNum: 'TxTeamMessageSerNum',
+            needUserId: true,
         },
         'EducationalMaterial': {
             sql: queries.patientEducationalMaterialAll(),
@@ -98,7 +100,8 @@ const requestMappings =
             processFunction: getEducationTableOfContents,
             numberOfLastUpdated: 3,
             table: 'EducationalMaterial',
-            serNum: 'EducationalMaterialSerNum'
+            serNum: 'EducationalMaterialSerNum',
+            needUserId: true,
         },
         'Announcements': {
             sql: queries.patientAnnouncementsAll(),
@@ -106,7 +109,8 @@ const requestMappings =
             processFunction: decodePostMessages,
             numberOfLastUpdated: 2,
             table: 'Announcement',
-            serNum: 'AnnouncementSerNum'
+            serNum: 'AnnouncementSerNum',
+            needUserId: true
         },
         'PatientTestDates': {
             module: testResults,

@@ -49,7 +49,7 @@ const WinstonLogger = createLogger({
     exceptionHandlers: [
         // Log uncaught exceptions to a different file and console.
         new transports.File({ filename: './listener/logs/opal-uncaughtExceptions.log'}),
-        new transports.Console({level: 'debug'})
+        // new transports.Console({level: 'debug'})
     ]
 });
 
