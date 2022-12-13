@@ -82,21 +82,21 @@ class PatientTestResultQuery {
 
 	/**
 	 * Query to return all test types for the patient including the latest results for the given type
+     * @param {String} userId - Firebase userId making the request.
 	 * @param {string|number} patientSerNum PatientSerNum in the DB
      * @param {Date} lastUpdated - Only items with 'LastUpdated' after this time are returned.
 	 * @returns {string} query test types for the patient
 	 */
-	static getTestTypesQuery(patientSerNum, lastUpdated) {
+	static getTestTypesQuery(userId, patientSerNum, lastUpdated) {
         let numLastUpdated = 3;
-        let params = [patientSerNum];
+        let params = [userId, patientSerNum];
         params = utility.addSeveralToArray(params, lastUpdated, numLastUpdated);
-
 		// Coalesce gets the first non-null value, in this case that's the last test value
 		return mysql.format(
 					`SELECT
 						ptr.PatientTestResultSerNum as latestPatientTestResultSerNum,
 						te.TestExpressionSerNum as testExpressionSerNum,
-						ptr.ReadStatus as readStatus,
+                        JSON_CONTAINS(ptr.ReadBy, ?) as readStatus,
 						tc.Name_EN as name_EN,
 						tc.Name_FR as name_FR,
 						IfNull((SELECT emc.URL_EN FROM EducationalMaterialControl emc
@@ -183,16 +183,16 @@ class PatientTestResultQuery {
 	 */
 	static getTestResultValuesByTestType(patientSerNum, testExpressionSerNum) {
 		return mysql.format(`
-					SELECT 
-						ptr.PatientTestResultSerNum as patientTestResultSerNum, 
-						ptr.CollectedDateTime as collectedDateTime, 
-						ptr.AbnormalFlag as abnormalFlag,  
+					SELECT
+						ptr.PatientTestResultSerNum as patientTestResultSerNum,
+						ptr.CollectedDateTime as collectedDateTime,
+						ptr.AbnormalFlag as abnormalFlag,
 						ptr.TestValue as testValue,
 						ptr.TestValueNumeric as testValueNumeric
-					FROM 
+					FROM
 						PatientTestResult as ptr
-					WHERE 
-						ptr.PatientSerNum = ? 
+					WHERE
+						ptr.PatientSerNum = ?
 						AND ptr.TestExpressionSerNum = ?
 					ORDER BY CollectedDateTime;`,
 				[patientSerNum, testExpressionSerNum]);
