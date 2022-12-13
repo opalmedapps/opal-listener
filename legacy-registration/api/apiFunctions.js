@@ -140,16 +140,24 @@ exports.registerPatient = async function(requestObject) {
     try {
         validateRegisterPatientRequest(requestObject);
 
+        const backendApiRequest = {
+            registrationCode: requestObject.Parameters.Fields.registrationCode,
+            language: requestObject.Parameters.Fields.language,
+        };
         // Get patient data from new backend
-        const patientData = await opalRequest.retrievePatientDataDetailed(requestObject);
+        const patientData = await opalRequest.retrievePatientDataDetailed(backendApiRequest);
 
         // Insert patient
-        let legacy_id = await insertPatient(requestObject, patientData?.patient);
+        const legacy_id = await insertPatient(requestObject, patientData?.patient);
 
         // Insert patient hospital identifier
         for (const hospital_patient of patientData?.hospital_patients) {
             await insertPatientHospitalIdentifier(requestObject, hospital_patient, legacy_id);
         }
+
+        // Register patient info to new backend
+        const registerData = getRegisterParameters(requestObject, legacy_id);
+        await opalRequest.registrationRegister(backendApiRequest, registerData);
 
         // Before registering the patient, create their firebase user account with decrypted email and password
         // This is required to store their firebase UID as well
@@ -184,6 +192,18 @@ exports.registerPatient = async function(requestObject) {
         }
         catch (error) {
             logger.log('error', `An error occurred while sending the confirmation email (for ${requestObject.Parameters.Fields.email}): ${JSON.stringify(error)}`);
+        }
+
+        try {
+            for (const hospital_patient of patientData?.hospital_patients) {
+                const requestData = {
+                    PatientId: legacy_id,
+                    Site: hospital_patient.site_code,
+                }
+                await opalRequest.getLabResultHistory(config.LAB_RESULT_HISTORY, requestData);
+            }
+        } catch (error) {
+            logger.log('error', `An error occurred while getting lab result history (for patient ${legacy_id}): ${JSON.stringify(error)}`);
         }
 
         try {
@@ -233,6 +253,7 @@ function validateRegisterPatientRequest(requestObject) {
         'securityQuestion3',
         // typo in the frontend
         'termsandAggreementSign',
+        'registrationCode'
     ]
 
     for (let field of requiredFields) {
@@ -363,6 +384,52 @@ function validateRequest(requestObject, requiredFields) {
 }
 
 /**
+ * @description getRegisterParameters.
+ * @param {Object} requestObject - The calling request's requestObject.
+ * @returns {Object} registerData {
+        patient: {
+	 		legacy_id: int
+	 	},
+        caregiver: {
+            language: str,
+            phone_number: str,
+        },
+        security_answers: [
+            {
+                question: str,
+                answer: str,
+            },
+        ],
+ * }
+ */
+function getRegisterData(requestObject, legacy_id) {
+    const registerData = {
+        'patient': {
+            'legacy_id': legacy_id,
+        },
+        'caregiver': {
+            'language': requestObject.Parameters.Fields.language,
+            'phone_number': requestObject.Parameters.Fields.phoneNumber,
+        },
+        'security_answers': [
+            {
+                'question': requestObject.Parameters.Fields.securityQuestion1,
+                'answer': requestObject.Parameters.Fields.answer1,
+            },
+            {
+                'question': requestObject.Parameters.Fields.securityQuestion2,
+                'answer': requestObject.Parameters.Fields.answer2,
+            },
+            {
+                'question': requestObject.Parameters.Fields.securityQuestion3,
+                'answer': requestObject.Parameters.Fields.answer3,
+            },
+        ],
+    };
+    return registerData;
+}
+
+/**
  * @description insert patient with request parameters.
  * @param {Object} requestObject - The calling request's requestObject.
  * @returns {patientSerNum}
@@ -377,20 +444,4 @@ async function insertPatient(requestObject, patient) {
     requestObject.Parameters.Fields.sex = patient.sex;
     requestObject.Parameters.Fields.dateOfBirth = patient.date_of_birth;
     return await sqlInterface.insertPatient(requestObject);
-}
-
-/**
- * @description insert patient hospital indetifier with request parameters.
- * @param {Object} requestObject - The calling request's requestObject.
- * @returns {void}
- */
-async function insertPatientHospitalIdentifier(requestObject, hospitalPatient, patientSerNum) {
-    if (!hospitalPatient) {
-        const registrationCode = requestObject.Parameters.Fields.registrationCode;
-        throw  `Failed to insert Patient to legacyDB due to hospitalPatient not exists with registrationCode: ${registrationCode}`;
-    }
-    requestObject.Parameters.Fields.patientSerNum = patientSerNum;
-    requestObject.Parameters.Fields.mrn = hospitalPatient.mrn;
-    requestObject.Parameters.Fields.site = hospitalPatient.site_code;
-    return await sqlInterface.insertPatientHospitalIdentifier(requestObject);
 }
