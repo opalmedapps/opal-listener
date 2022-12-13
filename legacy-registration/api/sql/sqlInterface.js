@@ -233,26 +233,6 @@ exports.insertPatientHospitalIdentifier = function (requestObject) {
 };
 
 /**
- Get patient lab result history
- @desc get a patient lab result history.
- @param requestObject
- @return {Promise}
- **/
-exports.getLabResultHistory = function (requestObject) {
-    let r = Q.defer();
-    let parameters = requestObject.Parameters.Fields
-    const url = parameters.labResultHistoryURL;
-    const options = {
-        json: true,
-        body: {
-            PatientId: parameters.patientId,
-            Site: parameters.site
-        },
-    };
-    return requestUtility.request("post", url, options);
-};
-
-/**
      registerPatient
      @desc If patient entered all the information, this function will insert the patient data into the database.
      @param requestObject
