@@ -93,7 +93,7 @@ function patientAppointmentTableFields(selectOne) {
                         Appt.Checkin,
                         Appt.SourceDatabaseSerNum,
                         Appt.AppointmentAriaSer,
-                        Appt.ReadStatus,
+                        JSON_CONTAINS(Appt.ReadBy, ?) as ReadStatus,
                         R.ResourceName,
                         R.ResourceType,
                         Appt.Status,
@@ -142,7 +142,7 @@ function patientDocumentTableFields(selectOne=false) {
                 end FinalFileName,
                 Alias.AliasName_EN,
                 Alias.AliasName_FR,
-                Document.ReadStatus,
+                JSON_CONTAINS(Document.ReadBy, ?) as ReadStatus,
                 Alias.AliasDescription_EN,
                 Alias.AliasDescription_FR,
                 Document.DocumentSerNum,
@@ -186,7 +186,7 @@ function patientTxTeamMessageTableFields(selectOne=false) {
     return `SELECT
                 TxRecords.TxTeamMessageSerNum,
                 TxRecords.DateAdded,
-                TxRecords.ReadStatus,
+                JSON_CONTAINS(TxRecords.ReadBy, ?) as ReadStatus,
                 Post.PostType,
                 Post.Body_EN,
                 Post.Body_FR,
@@ -213,7 +213,7 @@ function patientAnnouncementTableFields(selectOne=false) {
     return `SELECT
                 Announcement.AnnouncementSerNum,
                 Announcement.DateAdded,
-                Announcement.ReadStatus,
+                JSON_CONTAINS(Announcement.ReadBy, ?) as ReadStatus,
                 PostControl.PostControlSerNum,
                 PostControl.PostType,
                 PostControl.Body_EN,
@@ -242,14 +242,14 @@ function patientEducationalMaterialTableFields(selectOne=false) {
                 A.ShareURL_EN, A.ShareURL_FR,
                 A.EducationalMaterialControlSerNum,
                 A.DateAdded,
-                A.ReadStatus,
+                JSON_CONTAINS(A.ReadBy, ?) as ReadStatus,
                 A.EducationalMaterialType_EN, A.EducationalMaterialType_FR,
                 A.Name_EN, A.Name_FR,
                 A.URL_EN, A.URL_FR,
                 A.EduCategoryId
             FROM (
                 SELECT EduMat.PatientSerNum, EduMat.EducationalMaterialSerNum, EduControl.ShareURL_EN, EduControl.ShareURL_FR,
-                    EduControl.EducationalMaterialControlSerNum, EduMat.DateAdded, EduMat.ReadStatus,
+                    EduControl.EducationalMaterialControlSerNum, EduMat.DateAdded, EduMat.ReadStatus, EduMat.ReadBy,
                     EduControl.EducationalMaterialType_EN, EduControl.EducationalMaterialType_FR, EduControl.Name_EN,
                     EduControl.Name_FR,  EduControl.URL_EN, EduControl.URL_FR, EduMat.LastUpdated EM_LastUpdated,
                     EduControl.LastUpdated EC_LastUpdated, '0000-00-00 00:00:00' TOC_LastUpdated, EduControl.EducationalMaterialCategoryId EduCategoryId
@@ -257,7 +257,7 @@ function patientEducationalMaterialTableFields(selectOne=false) {
                 WHERE EduMat.EducationalMaterialControlSerNum = EduControl.EducationalMaterialControlSerNum
                 UNION
                 SELECT EduMat.PatientSerNum, EduMat.EducationalMaterialSerNum, EduControl.ShareURL_EN, EduControl.ShareURL_FR,
-                    EduControl.EducationalMaterialControlSerNum, EduMat.DateAdded, EduMat.ReadStatus,
+                    EduControl.EducationalMaterialControlSerNum, EduMat.DateAdded, EduMat.ReadStatus, EduMat.ReadBy,
                     EduControl.EducationalMaterialType_EN, EduControl.EducationalMaterialType_FR, EduControl.Name_EN,
                     EduControl.Name_FR,  EduControl.URL_EN, EduControl.URL_FR, EduMat.LastUpdated EM_LastUpdated,
                     EduControl.LastUpdated EC_LastUpdated, TOC.LastUpdated TOC_LastUpdated, EduControl.EducationalMaterialCategoryId EduCategoryId
@@ -461,7 +461,7 @@ exports.updateReadStatus=function()
 {
     return `
         UPDATE ??
-        SET ReadStatus = 1, readStatus = 1
+        SET ReadStatus = 1, readStatus = 1, ReadBy = JSON_ARRAY_APPEND(ReadBy,'$', ?)
         WHERE ??.?? = ?
     `;
 };
@@ -573,7 +573,7 @@ exports.patientNotificationsTableFields=function()
     return `SELECT
                 n.NotificationSerNum,
                 n.DateAdded,
-                n.ReadStatus,
+                JSON_CONTAINS(n.ReadBy, ?) as ReadStatus,
                 n.RefTableRowSerNum,
                 nc.NotificationType,
                 nc.Name_EN,
@@ -599,30 +599,31 @@ exports.patientNotificationsTableFields=function()
  * @returns {string}
  */
 exports.getNewNotifications=function() {
-    return "SELECT Notification.NotificationSerNum, " +
-        "Notification.DateAdded," +
-        " Notification.ReadStatus, " +
-        "Notification.RefTableRowSerNum, " +
-        "NotificationControl.NotificationType, " +
-        "NotificationControl.Name_EN, " +
-        "NotificationControl.Name_FR, " +
-        "NotificationControl.Description_EN, " +
-        "NotificationControl.Description_FR, " +
-        "Notification.RefTableRowTitle_EN, " +
-        "Notification.RefTableRowTitle_FR " +
-        "" +
-        "FROM Notification, " +
-        "NotificationControl, " +
-        "Patient, " +
-        "Users " +
-        "" +
-        "WHERE " +
-        "NotificationControl.NotificationControlSerNum = Notification.NotificationControlSerNum " +
-        "AND Notification.PatientSerNum=Patient.PatientSerNum " +
-        "AND Patient.PatientSerNum=Users.UserTypeSerNum " +
-        "AND Users.Username= ? " +
-        "AND Notification.ReadStatus = 0 " +
-        "AND (Notification.DateAdded > ? OR NotificationControl.DateAdded > ?);";
+    return `SELECT
+                Notification.NotificationSerNum,
+                Notification.DateAdded,
+                JSON_CONTAINS(Notification.ReadBy, ?) as ReadStatus,
+                Notification.RefTableRowSerNum,
+                NotificationControl.NotificationType,
+                NotificationControl.Name_EN,
+                NotificationControl.Name_FR,
+                NotificationControl.Description_EN,
+                NotificationControl.Description_FR,
+                Notification.RefTableRowTitle_EN,
+                Notification.RefTableRowTitle_FR
+            FROM
+                Notification,
+                NotificationControl,
+                Patient,
+                Users
+            WHERE
+                NotificationControl.NotificationControlSerNum = Notification.NotificationControlSerNum
+            AND Notification.PatientSerNum=Patient.PatientSerNum
+            AND Patient.PatientSerNum=Users.UserTypeSerNum
+            AND Users.Username= ?
+            AND Notification.ReadStatus = 0
+            AND (Notification.DateAdded > ? OR NotificationControl.DateAdded > ?);
+    `;
 };
 
 /*

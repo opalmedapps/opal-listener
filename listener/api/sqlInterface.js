@@ -44,7 +44,8 @@ const requestMappings =
             sqlSingleItem: queries.patientDocumentsOne(),
             numberOfLastUpdated: 2,
             table: 'Document',
-            serNum: 'DocumentSerNum'
+            serNum: 'DocumentSerNum',
+            needUserId: true,
         },
         /**
          * Deprecated: 'Doctors'
@@ -67,13 +68,15 @@ const requestMappings =
             numberOfLastUpdated: 5,
             processFunction: combineResources,
             table: 'Appointment',
-            serNum: 'AppointmentSerNum'
+            serNum: 'AppointmentSerNum',
+            needUserId: true
         },
         'Notifications': {
             sql: queries.patientNotificationsTableFields(),
             numberOfLastUpdated: 2,
             table: 'Notification',
-            serNum: 'NotificationSerNum'
+            serNum: 'NotificationSerNum',
+            needUserId: true
         },
         /**
          * Deprecated: 'Tasks'
@@ -88,7 +91,8 @@ const requestMappings =
             processFunction: decodePostMessages,
             numberOfLastUpdated: 2,
             table: 'TxTeamMessage',
-            serNum: 'TxTeamMessageSerNum'
+            serNum: 'TxTeamMessageSerNum',
+            needUserId: true,
         },
         'EducationalMaterial': {
             sql: queries.patientEducationalMaterialAll(),
@@ -96,7 +100,8 @@ const requestMappings =
             processFunction: getEducationTableOfContents,
             numberOfLastUpdated: 3,
             table: 'EducationalMaterial',
-            serNum: 'EducationalMaterialSerNum'
+            serNum: 'EducationalMaterialSerNum',
+            needUserId: true,
         },
         'Announcements': {
             sql: queries.patientAnnouncementsAll(),
@@ -104,7 +109,8 @@ const requestMappings =
             processFunction: decodePostMessages,
             numberOfLastUpdated: 2,
             table: 'Announcement',
-            serNum: 'AnnouncementSerNum'
+            serNum: 'AnnouncementSerNum',
+            needUserId: true
         },
         'PatientTestDates': {
             module: testResults,
@@ -167,6 +173,7 @@ exports.runSqlQuery = OpalSQLQueryRunner.run;
 
 /**
  * @desc Fetches and returns data for the given patient in an array of categories from requestMappings.
+ * @param {string} userId Firebase userId making the request.
  * @param patientSerNum The PatientSerNum of the patient.
  * @param {string[]} arrayTables The list of categories of data to fetch. Should be keys in requestMappings.
  * @param [timestamp] Optional date/time; if provided, only items with 'LastUpdated' after this time are returned.
@@ -175,6 +182,7 @@ exports.runSqlQuery = OpalSQLQueryRunner.run;
  * @return {Promise}
  */
 exports.getPatientTableFields = async function(
+    userId,
     patientSerNum,
     arrayTables,
     timestamp,
@@ -187,7 +195,7 @@ exports.getPatientTableFields = async function(
     if (invalidCategory) throw {Response: 'error', Reason: `Incorrect refresh parameter: ${invalidCategory}`};
 
     logger.log('verbose', `Processing select requests in the following categories: ${JSON.stringify(arrayTables)}`);
-    let response = await Promise.all(arrayTables.map(category => processSelectRequest(category, patientSerNum, timestamp, purpose)));
+    let response = await Promise.all(arrayTables.map(category => processSelectRequest(userId, category, patientSerNum, timestamp, purpose)));
     // Arrange the return object with categories as keys and each corresponding response as a value
     let responseMapping = Object.fromEntries(arrayTables.map((category, i) => [category, response[i]]));
     return {
@@ -199,13 +207,14 @@ exports.getPatientTableFields = async function(
 /**
  * @desc Processes a request for data in one of the categories of requestMappings.
  *       If available, runs the category's 'processFunction' on the result before returning it.
+ * @param {string} userId Firebase userId making the request.
  * @param {string} category The requested data category. Must be a key in requestMappings.
  * @param patientSerNum The patient's PatientSerNum.
  * @param [timestamp] Optional date/time; if provided, only items with 'LastUpdated' after this time are returned.
  * @param {string} purpose Optional parameter that is used to filter questionnaires and educational materials by purpose. By default is set to "clinical" to support the old versions of the app.
  * @returns {Promise<*>}
  */
-async function processSelectRequest(category, patientSerNum, timestamp, purpose = 'clinical') {
+async function processSelectRequest(userId, category, patientSerNum, timestamp, purpose = 'clinical') {
     const mapping = requestMappings[category];
     let date = timestamp ? new Date(Number(timestamp)) : new Date(0);
 
@@ -214,6 +223,7 @@ async function processSelectRequest(category, patientSerNum, timestamp, purpose 
         let result = await mapping.module[category].handleRequest({
             meta: {
                 TargetPatientID: patientSerNum,
+                UserId: userId,
             },
             params: {
                 Date: timestamp,
@@ -223,7 +233,7 @@ async function processSelectRequest(category, patientSerNum, timestamp, purpose 
         return mapping.processFunction ? mapping.processFunction(result) : result;
     }
     else if (mapping.hasOwnProperty('sql')) {
-        let paramArray = [patientSerNum];
+        let paramArray = mapping.needUserId ? [`"${userId}"`, patientSerNum] : [patientSerNum];
         paramArray = utility.addSeveralToArray(paramArray, date, mapping.numberOfLastUpdated);
         return await exports.runSqlQuery(mapping.sql, paramArray, mapping.processFunction);
     }
@@ -245,8 +255,7 @@ exports.updateReadStatus=function(userId, parameters)
 
     if(parameters && parameters.Field && parameters.Id && requestMappings.hasOwnProperty(parameters.Field) ) {
         ({table, serNum} = requestMappings[parameters.Field]);
-
-        exports.runSqlQuery(queries.updateReadStatus(),[table, table, serNum, parameters.Id]).then(()=>{
+        exports.runSqlQuery(queries.updateReadStatus(),[table, userId, table, serNum, parameters.Id]).then(()=>{
             r.resolve({Response:'success'});
         }).catch((err)=>{
             r.reject({Response:'error', Reason:err});
@@ -1324,7 +1333,7 @@ async function refresh (fields, requestObject) {
     let timestamp = today.setHours(0,0,0,0);
     let patientSerNum = await getSelfPatientSerNum(requestObject.UserID);
 
-    let rows = await exports.getPatientTableFields(patientSerNum, fields, timestamp);
+    let rows = await exports.getPatientTableFields(requestObject.UserID, patientSerNum, fields, timestamp);
     rows.Data = utility.resolveEmptyResponse(rows.Data);
     return rows;
 }
