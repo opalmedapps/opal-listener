@@ -6,6 +6,7 @@ const questionnaireConfig = require('./questionnaireConfig.json');
 const questionnaireQueries = require('./questionnaireQueries.js');
 const questionnaireValidation = require('./questionnaire.validate');
 const format = require('./questionnaireFormatting');
+const QuestionnaireDjango = require('./questionnaireDjango');
 
 /*
 *Connecting to mysql database
@@ -61,11 +62,12 @@ FUNCTIONS TO GET QUESTIONNAIRES
  * getQuestionnaireList
  * @desc this function get a list of questionnaire belonging to an user.
  * @param {object} opalPatientSerNumAndLanguage object containing PatientSerNum and Language as property. These information comes from OpalDB
+ * @param {string} userId The Firebase username of the user requesting the questionnaires list (used to filter questionnaires by respondent).
  * @param {string} purpose string indicating the purpose of the questionnaire list requested. The purposes can be found in QUESTIONNAIRE_PURPOSE_ID_MAP of the questionnaireConfig.json file.
  * @param {Date} [lastUpdated] - If provided, only items with 'LastUpdated' after this time are returned.
  * @returns {promise}
  */
-async function getQuestionnaireList(opalPatientSerNumAndLanguage, purpose, lastUpdated=0) {
+async function getQuestionnaireList(opalPatientSerNumAndLanguage, userId, purpose, lastUpdated=0) {
     const params = [
         opalPatientSerNumAndLanguage.PatientSerNum,
         findPurposeId(purpose),
@@ -78,7 +80,10 @@ async function getQuestionnaireList(opalPatientSerNumAndLanguage, purpose, lastU
     }
 
     // To limit unnecessary processing, skip the filter if no lastUpdated was provided
-    const result = lastUpdated ? queryResult[0].filter(row => new Date(row.last_updated) > lastUpdated) : queryResult[0];
+    let result = lastUpdated ? queryResult[0].filter(row => new Date(row.last_updated) > lastUpdated) : queryResult[0];
+
+    let temp = await QuestionnaireDjango.getCaregiverRelationships(userId);
+
     return result;
 }
 

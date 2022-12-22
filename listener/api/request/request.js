@@ -38,5 +38,4 @@ class RequestMeta {
 		this.UserEmail = UserEmail;
 		this.AppVersion = AppVersion;
 	}
-
 }
