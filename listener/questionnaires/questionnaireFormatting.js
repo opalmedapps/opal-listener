@@ -1,11 +1,17 @@
 const questionnaireValidation = require('./questionnaire.validate');
 const questionnaireConfig = require('./questionnaireConfig.json');
 var utility = require('../utility/utility');
+const QuestionnaireDjango = require('./questionnaireDjango');
 
 exports.getQuestionAndTypeMap = getQuestionAndTypeMap;
 exports.formatAnswer = formatAnswer;
 exports.formatQuestionOptions = formatQuestionOptions;
 exports.formatQuestionnaire = formatQuestionnaire;
+exports.filterByRespondent = filterByRespondent;
+
+// Exported for testing
+exports.filterPatientQuestionnaires = filterPatientQuestionnaires;
+exports.filterCaregiverQuestionnaires = filterCaregiverQuestionnaires;
 
 /**
  * getQuestionAndTypeMap
@@ -272,4 +278,65 @@ function findPurposeFromId(purposeId) {
             return purpose;
         }
     }
+}
+
+/**
+ * @desc Filters a list of questionnaires based on business rules related to their intended respondents.
+ *       The resulting list only contains questionnaires that follow the respondent rules for the given user.
+ *       See sub-functions for details on each business rule.
+ * @param {object[]} list The list of questionnaires to filter.
+ * @param {string} userId The Firebase username of the user making the request.
+ * @param {number} patientSerNum The PatientSerNum of the patient who is the subject of the questionnaires.
+ * @returns {Promise<Object[]>} Resolves to the filtered list of questionnaires, or throws an error if the relationship
+ *                              between the caregiver and the patient cannot be found.
+ */
+async function filterByRespondent(list, userId, patientSerNum) {
+    let relationships = await QuestionnaireDjango.getRelationshipsWithPatient(userId, patientSerNum);
+    if (relationships.length === 0) throw new Error(`Invalid questionnaire request; could not find a relationship between caregiver '${userId}' and PatientSerNum ${patientSerNum}`);
+
+    let canAnswerPatientQuestionnaires = QuestionnaireDjango.caregiverCanAnswerQuestionnaires(relationships);
+    let isSelf = QuestionnaireDjango.caregiverIsSelf(relationships);
+
+    let filteredList = filterPatientQuestionnaires(list, canAnswerPatientQuestionnaires);
+    filteredList = filterCaregiverQuestionnaires(filteredList, isSelf);
+    return filteredList;
+}
+
+/**
+ * @desc Filters a list of questionnaires to remove all those that do not comply with the following business rule:
+ *           "A user can only view and answer respondent=PATIENT questionnaires when they have a relationship with
+ *           the patient that allows answering patient questionnaires."
+ *       Questionnaires with a different respondent type are not touched.
+ * @param {Object[]} list The list of questionnaires to filter. All questionnaires should be for a single patient.
+ * @param canAnswerPatientQuestionnaires A boolean representing whether or not the user can answer patient questionnaires
+ *                                       on behalf of the patient.
+ * @returns {Object[]} The filtered list of questionnaires (where all respondent=PATIENT questionnaires now fit the business rule).
+ */
+function filterPatientQuestionnaires(list, canAnswerPatientQuestionnaires) {
+    const PATIENT = questionnaireConfig.QUESTIONNAIRE_RESPONDENT_ID.PATIENT;
+    return list.filter(questionnaire => {
+        // Keep questionnaires that have respondent PATIENT only if the user is allowed to answer patient questionnaires
+        return (questionnaire.respondent_id === PATIENT && canAnswerPatientQuestionnaires)
+            // For this function, let through all other types of questionnaires
+            || questionnaire.respondent_id !== PATIENT
+    });
+}
+
+/**
+ * @desc Filters a list of questionnaires to remove all those that do not comply with the following business rule:
+ *           "A user can only view and answer respondent=CAREGIVER questionnaires when they have a relationship with
+ *           the patient that is not self."
+ *       Questionnaires with a different respondent type are not checked or filtered out.
+ * @param {Object[]} list The list of questionnaires to filter. All questionnaires should be for a single patient.
+ * @param isSelf A boolean representing whether or not the user is the same person as the patient (is "self").
+ * @returns {Object[]} The filtered list of questionnaires (where all respondent=CAREGIVER questionnaires now fit the business rule).
+ */
+function filterCaregiverQuestionnaires(list, isSelf) {
+    const CAREGIVER = questionnaireConfig.QUESTIONNAIRE_RESPONDENT_ID.CAREGIVER;
+    return list.filter(questionnaire => {
+        // Keep questionnaires that have respondent CAREGIVER only if the user is not the patient (is not "self")
+        return (questionnaire.respondent_id === CAREGIVER && !isSelf)
+            // For this function, let through all other types of questionnaires
+            || questionnaire.respondent_id !== CAREGIVER
+    });
 }

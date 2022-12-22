@@ -6,7 +6,6 @@ const questionnaireConfig = require('./questionnaireConfig.json');
 const questionnaireQueries = require('./questionnaireQueries.js');
 const questionnaireValidation = require('./questionnaire.validate');
 const format = require('./questionnaireFormatting');
-const QuestionnaireDjango = require('./questionnaireDjango');
 
 /*
 *Connecting to mysql database
@@ -68,8 +67,9 @@ FUNCTIONS TO GET QUESTIONNAIRES
  * @returns {promise}
  */
 async function getQuestionnaireList(opalPatientSerNumAndLanguage, userId, purpose, lastUpdated=0) {
+    const patientSerNum = opalPatientSerNumAndLanguage.PatientSerNum;
     const params = [
-        opalPatientSerNumAndLanguage.PatientSerNum,
+        patientSerNum,
         findPurposeId(purpose),
         opalPatientSerNumAndLanguage.Language,
     ]
@@ -79,12 +79,13 @@ async function getQuestionnaireList(opalPatientSerNumAndLanguage, userId, purpos
         throw new Error('Error getting questionnaire list: query error - result does not have a successful procedure status');
     }
 
-    // To limit unnecessary processing, skip the filter if no lastUpdated was provided
-    let result = lastUpdated ? queryResult[0].filter(row => new Date(row.last_updated) > lastUpdated) : queryResult[0];
+    // Filter the list if the user is refreshing to get only new questionnaires
+    let list = lastUpdated ? queryResult[0].filter(row => new Date(row.last_updated) > lastUpdated) : queryResult[0];
 
-    let temp = await QuestionnaireDjango.getCaregiverRelationships(userId);
+    // Filter the list based on respondents. Questionnaires with certain respondent types can only be viewed and answered under specific conditions.
+    list = format.filterByRespondent(list, userId, patientSerNum);
 
-    return result;
+    return list;
 }
 
 /**
