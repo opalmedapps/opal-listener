@@ -156,7 +156,7 @@ exports.registerPatient = async function(requestObject) {
         }
 
         // Register patient info to new backend
-        const registerData = getRegisterParameters(requestObject, legacy_id);
+        const registerData = getRegisterData(requestObject, legacy_id);
         await opalRequest.registrationRegister(backendApiRequest, registerData);
 
         // Before registering the patient, create their firebase user account with decrypted email and password
@@ -384,7 +384,7 @@ function validateRequest(requestObject, requiredFields) {
 }
 
 /**
- * @description getRegisterParameters.
+ * @description getRegisterData.
  * @param {Object} requestObject - The calling request's requestObject.
  * @returns {Object} registerData {
         patient: {
@@ -402,6 +402,7 @@ function validateRequest(requestObject, requiredFields) {
         ],
  * }
  */
+
 function getRegisterData(requestObject, legacy_id) {
     const registerData = {
         'patient': {

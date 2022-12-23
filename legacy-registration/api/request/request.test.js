@@ -23,7 +23,6 @@ describe('opalRequest', function () {
 						}
 					},
 				}));
-
 			const requestObject = {
 				registrationCode: 'A0127Q0T50hk',
 				language: 'fr',
@@ -34,15 +33,12 @@ describe('opalRequest', function () {
 			expect(response.patient).to.have.property('ramq').equal('TESC53511613');
 			expect(response).to.have.property('hospital_patients');
 			expect(response.hospital_patients.length).equal(1);
+			let headers = opalRequest.backendApiHeaders;
+			headers['Accept-Language'] = requestObject.language;
 			const expectedParameters = {
                 method: 'get',
                 url: `${process.env.OPAL_BACKEND_HOST}/api/registration/${requestObject.registrationCode}/?detailed`,
-                headers: {
-                    'Content-Type': 'application/json',
-                    'Accept-Language': requestObject.language,
-                    'Authorization': opalRequest.backendToken,
-                    'Appuserid': opalRequest.appuserid,
-                }
+                headers: headers,
 			};
 			sinon.assert.calledWith(opalRequest.axiosApi, expectedParameters);
 			sinon.assert.calledOnce(opalRequest.axiosApi);
@@ -61,15 +57,12 @@ describe('opalRequest', function () {
 				await opalRequest.retrievePatientDataDetailed(requestObject);
 			} catch (error) {
 				expect(error.message).to.equal('Calling retrievePatientDataDetailed failed');
+				let headers = opalRequest.backendApiHeaders;
+				headers['Accept-Language'] = requestObject.language;
 				const expectedParameters = {
 					method: 'get',
 					url: `${process.env.OPAL_BACKEND_HOST}/api/registration/${requestObject.registrationCode}/?detailed`,
-					headers: {
-						'Content-Type': 'application/json',
-						'Accept-Language': requestObject.language,
-						'Authorization': opalRequest.backendToken,
-						'Appuserid': opalRequest.appuserid,
-					}
+					headers: headers,
 				};
 				sinon.assert.calledWith(opalRequest.axiosApi, expectedParameters);
 				sinon.assert.calledOnce(opalRequest.axiosApi);
@@ -109,15 +102,13 @@ describe('opalRequest', function () {
 			const response = await opalRequest.registrationRegister(request, registerData);
 			expect(response).to.empty;
 
+			let headers = opalRequest.backendApiHeaders;
+			headers['Accept-Language'] = request.language;
+
 			const expectedParameters = {
 				method: 'post',
 				url: `${process.env.OPAL_BACKEND_HOST}/api/registration/${request.registrationCode}/register/`,
-				headers: {
-					'Content-Type': 'application/json',
-					'Accept-Language': request.language,
-					'Authorization': opalRequest.backendToken,
-					'Appuserid': opalRequest.appuserid,
-				},
+				headers: headers,
 				data: registerData,
 			};
 			sinon.assert.calledWith(opalRequest.axiosApi, expectedParameters);
@@ -153,15 +144,14 @@ describe('opalRequest', function () {
 				await await opalRequest.registrationRegister(request, registerData);
 			} catch (error) {
 				expect(error.message).to.equal('Calling registrationRegister failed');
+
+				let headers = opalRequest.backendApiHeaders;
+				headers['Accept-Language'] = request.language;
+
 				const expectedParameters = {
 					method: 'post',
 					url: `${process.env.OPAL_BACKEND_HOST}/api/registration/${request.registrationCode}/register/`,
-					headers: {
-						'Content-Type': 'application/json',
-						'Accept-Language': request.language,
-						'Authorization': opalRequest.backendToken,
-						'Appuserid': opalRequest.appuserid,
-					},
+					headers: headers,
 					data: registerData,
 				};
 				sinon.assert.calledWith(opalRequest.axiosApi, expectedParameters);
