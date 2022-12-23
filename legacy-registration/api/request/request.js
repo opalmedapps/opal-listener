@@ -38,9 +38,11 @@ class opalRequest {
     }
 
     //==========================Rest Apis=======================================
-
-	static backendToken = `Token ${env.OPAL_BACKEND_AUTH_TOKEN}`;
-	static appuserid = 'registration';
+	static backendApiHeaders = {
+		'Authorization': `Token ${env.OPAL_BACKEND_AUTH_TOKEN}`,
+		'Content-Type': 'application/json',
+		'Appuserid': 'registration',
+	}
 
 	/**
 	 axiosApi
@@ -92,17 +94,13 @@ class opalRequest {
 	 }
 	 **/
 	static async retrievePatientDataDetailed(request) {
-		const language = request?.language ? request.language : 'fr';
+		let headers = this.backendApiHeaders;
+		headers['Accept-Language'] = request.language;
 		const url = `${env.OPAL_BACKEND_HOST}/api/registration/${request?.registrationCode}/?detailed`;
 		const requestParams = {
 			method: 'get',
 			url: url,
-			headers: {
-				'Content-Type': 'application/json',
-				'Accept-Language': language,
-				'Authorization': this.backendToken,
-				'Appuserid': this.appuserid,
-			},
+			headers: headers,
 		};
 		const response = await this.axiosApi(requestParams);
 		return response.data;
@@ -134,17 +132,13 @@ class opalRequest {
 	 @return {Promise}
 	 **/
 	static async registrationRegister(request, registerData) {
-		const language = request?.language ? request.language : 'fr';
+		let headers = this.backendApiHeaders;
+		headers['Accept-Language'] = request.language;
 		const url = `${env.OPAL_BACKEND_HOST}/api/registration/${request?.registrationCode}/register/`;
 		const requestParams = {
 			method: 'post',
 			url: url,
-			headers: {
-				'Content-Type': 'application/json',
-				'Accept-Language': language,
-				'Authorization': this.backendToken,
-				'Appuserid': this.appuserid,
-			},
+			headers: headers,
 			data: registerData,
 		};
 		const response = await this.axiosApi(requestParams);
