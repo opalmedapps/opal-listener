@@ -212,7 +212,7 @@ exports.insertPatient = function (requestObject) {
         parameters.lastName,
         parameters.sex,
         parameters.dateOfBirth,
-        parameters.telNum,
+        parameters.phone,
         parameters.ramq,
     ]);
 };
