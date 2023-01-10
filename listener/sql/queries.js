@@ -563,6 +563,15 @@ exports.getTodaysCheckedInAppointments = function() {
 };
 
 /**
+ * @description Set field CheckinUsername based on all the checked-in appointments on today's date
+ * @author Shifeng Chen
+ * @date 2023-01-04
+ */
+exports.setCheckInUsername = function () {
+    return "UPDATE Appointment SET CheckinUsername = ? WHERE AppointmentSerNum IN ?";
+};
+
+/**
  * @desc Query that returns notifications for a user with LastUpdated values after a given timestamp.
  *       Until pagination is added to the app, only unread notifications will be returned (not all historical
  *       notifications), to cut down on the amount of data downloaded to the app.
