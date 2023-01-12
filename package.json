@@ -23,7 +23,7 @@
     "express-validator": "6.14.0",
     "firebase-admin": "11.4.1",
     "keyv": "4.5.0",
-    "moment": "2.29.1",
+    "moment": "2.29.4",
     "mysql": "2.18.1",
     "node-cron": "3.0.2",
     "nodemailer": "6.7.2",
