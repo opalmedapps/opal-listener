@@ -50,6 +50,11 @@
     "sinon": "14.0.2",
     "tui-jsdoc-template": "1.2.2"
   },
+  "overrides": {
+    "tui-jsdoc-template": {
+      "nth-check": "2.0.1"
+    }
+  },
   "keywords": [
     "muhc",
     "opal",
