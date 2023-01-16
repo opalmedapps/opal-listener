@@ -61,25 +61,34 @@ FUNCTIONS TO GET QUESTIONNAIRES
  * getQuestionnaireList
  * @desc this function get a list of questionnaire belonging to an user.
  * @param {object} opalPatientSerNumAndLanguage object containing PatientSerNum and Language as property. These information comes from OpalDB
+ * @param {string} userId The Firebase username of the user requesting the questionnaires list (used to filter questionnaires by respondent).
  * @param {string} purpose string indicating the purpose of the questionnaire list requested. The purposes can be found in QUESTIONNAIRE_PURPOSE_ID_MAP of the questionnaireConfig.json file.
  * @param {Date} [lastUpdated] - If provided, only items with 'LastUpdated' after this time are returned.
  * @returns {promise}
  */
-async function getQuestionnaireList(opalPatientSerNumAndLanguage, purpose, lastUpdated=0) {
+async function getQuestionnaireList(opalPatientSerNumAndLanguage, userId, purpose, lastUpdated=0) {
+    const patientSerNum = opalPatientSerNumAndLanguage.PatientSerNum;
+
+    // Filter the list based on respondents. Questionnaires with certain respondent types can only be viewed and answered under specific conditions.
+    let possibleRespondentIds = await format.getAllowedRespondents(userId, patientSerNum);
+
     const params = [
-        opalPatientSerNumAndLanguage.PatientSerNum,
+        patientSerNum,
         findPurposeId(purpose),
         opalPatientSerNumAndLanguage.Language,
+        `|${possibleRespondentIds.join('|')}|`,  // Possible respondent ids must be passed as a string separated and framed by pipe characters
     ]
+
     let queryResult = await runQuery(questionnaireQueries.getQuestionnaireListQuery(), params);
 
     if (!questionnaireValidation.hasValidProcedureStatus(queryResult)) {
         throw new Error('Error getting questionnaire list: query error - result does not have a successful procedure status');
     }
 
-    // To limit unnecessary processing, skip the filter if no lastUpdated was provided
-    const result = lastUpdated ? queryResult[0].filter(row => new Date(row.last_updated) > lastUpdated) : queryResult[0];
-    return result;
+    // Filter the list if the user is refreshing to get only new questionnaires
+    let list = lastUpdated ? queryResult[0].filter(row => new Date(row.last_updated) > lastUpdated) : queryResult[0];
+
+    return list;
 }
 
 /**
