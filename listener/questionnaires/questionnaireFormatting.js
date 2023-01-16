@@ -1,11 +1,13 @@
 const questionnaireValidation = require('./questionnaire.validate');
 const questionnaireConfig = require('./questionnaireConfig.json');
 var utility = require('../utility/utility');
+const QuestionnaireDjango = require('./questionnaireDjango');
 
 exports.getQuestionAndTypeMap = getQuestionAndTypeMap;
 exports.formatAnswer = formatAnswer;
 exports.formatQuestionOptions = formatQuestionOptions;
 exports.formatQuestionnaire = formatQuestionnaire;
+exports.getAllowedRespondents = getAllowedRespondents;
 
 /**
  * getQuestionAndTypeMap
@@ -272,4 +274,30 @@ function findPurposeFromId(purposeId) {
             return purpose;
         }
     }
+}
+
+/**
+ * @desc Returns a list of allowed respondent IDs to use when querying a list of questionnaires.
+ *       The allowed respondents are based on the relationship between the caregiver and patient, and the
+ *       business rules related to each respondent type.
+ * @param {string} userId The Firebase username of the user making the request.
+ * @param {number} patientSerNum The PatientSerNum of the patient who is the subject of the questionnaires.
+ * @returns {Promise<Object[]>} Resolves to the list of allowed respondents, or throws an error if the relationship
+ *                              between the caregiver and the patient cannot be found.
+ */
+async function getAllowedRespondents(userId, patientSerNum) {
+    let relationships = await QuestionnaireDjango.getRelationshipsWithPatient(userId, patientSerNum);
+    if (relationships.length === 0) throw new Error(`Invalid questionnaire request; could not find a relationship between caregiver '${userId}' and PatientSerNum ${patientSerNum}`);
+
+    let canAnswerPatientQuestionnaires = QuestionnaireDjango.caregiverCanAnswerQuestionnaires(relationships);
+    let isSelf = QuestionnaireDjango.caregiverIsSelf(relationships);
+
+    let allowedRespondents = [];
+
+    // Rule: "A user can only access respondent=PATIENT questionnaires when they have a relationship with the patient that allows answering patient questionnaires."
+    if (canAnswerPatientQuestionnaires) allowedRespondents.push(questionnaireConfig.QUESTIONNAIRE_RESPONDENT_ID.PATIENT);
+    // Rule: "A user can only access respondent=CAREGIVER questionnaires when they don't have a self relationship with the patient."
+    if (!isSelf) allowedRespondents.push(questionnaireConfig.QUESTIONNAIRE_RESPONDENT_ID.CAREGIVER);
+
+    return allowedRespondents;
 }

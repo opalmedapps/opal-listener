@@ -19,5 +19,12 @@
         "CONSENT": 4,
         "CLERICAL": 5,
         "OPAL": 6
+    },
+    "QUESTIONNAIRE_RESPONDENT_ID": {
+        "PATIENT": 1,
+        "CAREGIVER": 2,
+        "CLINICIAN": 3,
+        "CLERK": 4,
+        "REGISTRANT": 5
     }
 }

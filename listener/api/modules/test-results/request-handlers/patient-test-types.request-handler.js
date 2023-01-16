@@ -15,7 +15,7 @@ class PatientTestTypesHandler extends ApiRequestHandler {
 		return {
 			"data": {
 				"patientSerNum": patient.patientSerNum,
-				"testTypes": await patientTestResult.getTestTypes(requestObject.meta.UserId, lastUpdated)
+				"testTypes": await patientTestResult.getTestTypes(requestObject.meta.UserID, lastUpdated)
 			}
 		};
 	}
