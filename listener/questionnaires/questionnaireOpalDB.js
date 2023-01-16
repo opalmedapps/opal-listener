@@ -79,6 +79,7 @@ function getQuestionnaireList(requestObject) {
                 // get questionnaire list
                 return questionnaires.getQuestionnaireList(
                     patientSerNumAndLanguageRow[0],
+                    requestObject.UserID,
                     requestObject.Parameters.purpose,
                     lastUpdated
                 );
