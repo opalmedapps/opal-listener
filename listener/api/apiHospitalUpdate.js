@@ -34,7 +34,6 @@ exports.updateReadStatus=function(requestObject)
 };
 
 //Update checkin
-// TODO (QSCCD-106) - Make use of requestObject.TargetPatientID to check in on behalf of others or as self
 exports.checkIn = function (requestObject) {
     return sqlInterface.checkIn(requestObject);
 };
