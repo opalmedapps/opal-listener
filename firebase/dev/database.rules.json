@@ -47,20 +47,12 @@
           }
         },
         "registration": {
-          "branch": {
-            ".write": "false",
-            ".read": "false",
-            "$branchId": {
-              ".read": "true",
-              ".write": "false"
-            }
-          },
           "requests": {
             ".read": "false",
             ".write": "false",
             "$requestId": {
               ".read": "false",
-              ".write": "newData.child('BranchName').val() != \"\"  && newData.child('BranchName').val() != null  && newData.hasChild('BranchName')  &&  root.child('dev3').child($hospitalId).child('registration').child('branch').hasChild(newData.child('BranchName').val())"
+              ".write": "newData.child('BranchName').val() != \"\"  && newData.child('BranchName').val() != null  && newData.hasChild('BranchName')"
             }
           },
           "users": {
@@ -78,7 +70,7 @@
             ".write": "false",
             "$requestId": {
               ".read": "false",
-              ".write": "newData.child('BranchName').val() != \"\"  && newData.child('BranchName').val() != null  && newData.hasChild('BranchName')  &&  root.child('dev3').child($hospitalId).child('registration').child('branch').hasChild(newData.child('BranchName').val())"
+              ".write": "newData.child('BranchName').val() != \"\"  && newData.child('BranchName').val() != null  && newData.hasChild('BranchName')"
             }
           },
           "responses": {
