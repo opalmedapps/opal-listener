@@ -434,7 +434,8 @@ exports.studyUpdateStatus = async function(requestObject) {
  */
 exports.checkIn = async function (requestObject) {
     try {
-        const patientSerNum = requestObject.Parameters.PatientSerNum;
+        // If there's a TargetPatientID, use it, otherwise get data for self
+        let patientSerNum = requestObject.TargetPatientID ? requestObject.TargetPatientID : await getSelfPatientSerNum(requestObject.UserID);
 
         if (await hasAlreadyAttemptedCheckin(patientSerNum) === false) {
             let success = false;
