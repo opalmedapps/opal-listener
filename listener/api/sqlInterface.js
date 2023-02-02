@@ -462,6 +462,14 @@ exports.checkIn = async function (requestObject) {
                     lastError = error;
                 }
             }
+            // Check in for a specific patient
+            try {
+                await checkedInAppointments(patientSerNum);
+            } catch (error) {
+                logger.log("verbose", `Failed to check in PatientSerNum = ${patientSerNum}`);
+                lastError = error;
+            }
+
             // Check whether the check-in call succeeded, or all attempts failed
             // On a success, return all checked-in appointments to the app
             if (success) {
@@ -530,6 +538,19 @@ exports.checkCheckin = hasAlreadyAttemptedCheckin;
 function getCheckedInAppointments(patientSerNum){
     return new Promise((resolve, reject) => {
         exports.runSqlQuery(queries.getTodaysCheckedInAppointments(), [patientSerNum])
+            .then(rows => resolve({Response:'success', Data: rows}))
+            .catch(err => reject({Response: 'error', Reason: err}));
+    })
+}
+
+/**
+ * Check in the appointments for a specific patient
+ * @param patientSerNum
+ * @return {Promise}
+ */
+function checkedInAppointments(patientSerNum){
+    return new Promise((resolve, reject) => {
+        exports.runSqlQuery(queries.checkInAppointments(), [patientSerNum])
             .then(rows => resolve({Response:'success', Data: rows}))
             .catch(err => reject({Response: 'error', Reason: err}));
     })

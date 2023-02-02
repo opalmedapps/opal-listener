@@ -563,6 +563,19 @@ exports.getTodaysCheckedInAppointments = function() {
 };
 
 /**
+ * Check in the appointments for a specific patient
+ * @return {string}
+ */
+exports.checkInAppointments = function() {
+    return `
+        UPDATE Appointment
+        SET Checkin = 1
+        WHERE Appointment.PatientSerNum = ?
+            AND DATE_FORMAT(Appointment.ScheduledStartTime, '%Y-%m-%d') = DATE_FORMAT(NOW(), '%Y-%m-%d');
+   `
+};
+
+/**
  * @description Set field CheckinUsername based on all the checked-in appointments on today's date
  * @author Shifeng Chen
  * @date 2023-01-04
