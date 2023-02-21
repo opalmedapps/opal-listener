@@ -118,15 +118,16 @@ class EncryptionUtilities {
      * @returns {string} salt value for decryption
      */
     static async getSalt(snapshot) {
-        return EncryptionUtilities.getAnswerText(snapshot.UserID);
+        return EncryptionUtilities.getAnswerText(snapshot.UserID, snapshot.DeviceId);
     }
 
     /**
      * @description SQL query to get security question hash used for encryption and decryption
      * @param {string} userId ID used to retrive salt.
+     * @param {string} deviceId ID of the device use to make the request.
      * @returns {string} Security question hash.
      */
-    static async getAnswerText(userId) {
+    static async getAnswerText(userId, deviceId) {
         const query = mysql.format(`
             SELECT
                 SA.AnswerText
@@ -140,9 +141,9 @@ class EncryptionUtilities {
                 U.UserTypeSerNum = PDI.PatientSerNum
             AND
                 PDI.SecurityAnswerSerNum = SA.SecurityAnswerSerNum
-            ORDER BY PDI.LastUpdated DESC
+            AND PDI.DeviceId = ?
             LIMIT 1
-        `, [userId]);
+        `, [userId, deviceId]);
 
         try {
             const response = await legacyOpalSqlRunner.OpalSQLQueryRunner.run(query);
