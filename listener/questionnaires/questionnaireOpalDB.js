@@ -75,7 +75,7 @@ function getQuestionnaireList(requestObject) {
         .then(function (patientSerNumAndLanguageRow) {
 
             if (questionnaireValidation.validatePatientSerNumAndLanguage(patientSerNumAndLanguageRow)) {
-                const lastUpdated = requestObject.params.Date ? new Date(Number(requestObject.params.Date)) : 0;
+                const lastUpdated = requestObject.params?.Date ? new Date(Number(requestObject.params.Date)) : 0;
                 // get questionnaire list
                 return questionnaires.getQuestionnaireList(
                     patientSerNumAndLanguageRow[0],

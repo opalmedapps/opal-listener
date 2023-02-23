@@ -1,5 +1,6 @@
 const questionnaireConfig = require('./questionnaireConfig.json');
 const logger = require('./../logs/logger');
+const { Version } = require('../../src/utility/version');
 
 /**
  * ==============================================
@@ -109,6 +110,12 @@ function validateParamUpdateStatus(requestObject) {
  * @returns {boolean} true if the requestObject contain the purpose with the correct format, false otherwise
  */
 function validateQuestionnairePurpose(requestObject) {
+    // Compatibility fix for versions 1.12.2 and older that do not provide a purpose
+    if (Version.versionLessOrEqual(requestObject.AppVersion, Version.version_1_12_2)) {
+        requestObject.Parameters = {};
+        requestObject.Parameters.purpose = 'clinical';
+    }
+
     return (
         requestObject?.Parameters?.purpose &&
         questionnaireConfig.QUESTIONNAIRE_PURPOSE_ID_MAP.hasOwnProperty(requestObject.Parameters.purpose.toUpperCase())
