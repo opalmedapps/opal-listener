@@ -1238,7 +1238,7 @@ exports.getNewNotifications = function(requestObject){
 
     let lastUpdated = new Date(Number(requestObject.Parameters.LastUpdated));
 
-    exports.runSqlQuery(queries.getNewNotifications(), [requestObject.UserID, lastUpdated, lastUpdated])
+    exports.runSqlQuery(queries.getNewNotifications(), [requestObject.UserID, requestObject.UserID, lastUpdated, lastUpdated])
         .then(rows => {
             if(rows.length > 0){
                 assocNotificationsWithItems(rows, requestObject)
