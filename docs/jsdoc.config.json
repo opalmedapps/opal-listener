@@ -15,29 +15,5 @@
   "tags": {
     "allowUnknownTags": true,
     "dictionaries": ["jsdoc","closure"]
-  },
-  "templates": {
-    "cleverLinks": false,
-    "css": [
-      "tui-doc-override.css"
-    ],
-    "default": {
-      "staticFiles": {
-        "include": ["docs/styles/"]
-      }
-    },
-    "footerText": "Copyright © 2022 Opal Health Informatics Group (O-HIG)",
-    "logo": {
-      "url": "Opal_Name_Logo_Transparent_Cropped.png",
-      "width": "34px",
-      "height": "18px",
-      "link": ""
-    },
-    "monospaceLinks": false,
-    "name": "Opal Listener Documentation",
-    "tabNames": {
-      "api": "API",
-      "tutorials": "Docs"
-    }
   }
 }
