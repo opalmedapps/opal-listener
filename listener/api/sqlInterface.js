@@ -466,8 +466,13 @@ exports.checkIn = async function (requestObject) {
             // On a success, return all checked-in appointments to the app
             if (success) {
                 let rows = await getCheckedInAppointments(patientSerNum);
+                logger.log("verbose", `Todays checked in appointments ${JSON.stringify(rows)}`);
+                let appSerNums = [];
+                rows['Data'].forEach(function(serNum){
+                    appSerNums.push(serNum['AppointmentSerNum']);
+                });
                 // Set CheckinUsername for all checked-in appointments
-                await setCheckInUsername(requestObject, rows);
+                await setCheckInUsername(requestObject, appSerNums);
                 return rows;
             }
             else throw lastError;
@@ -561,7 +566,7 @@ async function getMRNs(patientSerNum) {
  * @param appointmentSerNumArray
  */
 async function setCheckInUsername(requestObject, appointmentSerNumArray) {
-    await exports.runSqlQuery(queries.setCheckInUsername(), [requestObject.UserID, appointmentSerNumArray]);
+    await exports.runSqlQuery(queries.setCheckInUsername(), [requestObject.UserID, [appointmentSerNumArray]]);
 }
 
 /**
