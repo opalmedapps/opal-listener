@@ -43,17 +43,11 @@
     "eslint-plugin-jsdoc": "38.1.4",
     "eslint-plugin-mocha": "10.0.3",
     "firebase-tools": "11.23.1",
-    "jsdoc": "3.6.10",
+    "jsdoc": "4.0.2",
     "mocha": "9.2.2",
     "nyc": "15.1.0",
     "run-script-os": "1.1.6",
-    "sinon": "14.0.2",
-    "tui-jsdoc-template": "1.2.2"
-  },
-  "overrides": {
-    "tui-jsdoc-template": {
-      "nth-check": "2.0.1"
-    }
+    "sinon": "14.0.2"
   },
   "keywords": [
     "muhc",
