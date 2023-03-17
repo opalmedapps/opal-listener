@@ -138,8 +138,6 @@ class EncryptionUtilities {
             WHERE
                 U.Username = ?
             AND
-                U.UserTypeSerNum = PDI.PatientSerNum
-            AND
                 PDI.SecurityAnswerSerNum = SA.SecurityAnswerSerNum
             AND PDI.DeviceId = ?
             LIMIT 1
