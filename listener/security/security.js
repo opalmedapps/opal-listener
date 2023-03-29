@@ -2,7 +2,7 @@ var sqlInterface=require('./../api/sqlInterface.js');
 var q = require('q');
 var utility=require('./../utility/utility.js');
 const { Version } = require('../../src/utility/version');
-const logger            = require('./../logs/logger');
+const logger = require('./../logs/logger');
 
 const FIVE_MINUTES = 300000;
 
@@ -34,11 +34,10 @@ exports.resetPasswordRequest=function(requestKey, requestObject)
 
 };
 
-exports.verifySecurityAnswer=function(requestKey,requestObject,patient)
+exports.verifySecurityAnswer = async function(requestKey, requestObject, patient)
 {
-    var r = q.defer();
-    var key = patient.AnswerText;
-
+    let r = q.defer();
+    let key = patient.AnswerText;
 
     logger.log('debug', 'in verify security answer');
     logger.log('debug', `patient: ${JSON.stringify(patient)}`);
