@@ -2,7 +2,7 @@ version: '3'
 
 services:
   app:
-    container_name: opal_listener
+    container_name: opal-listener
     image: opalmedapps/listener:latest
     build: .
     environment:
@@ -14,4 +14,3 @@ services:
       - ./legacy-registration:/app/legacy-registration
       - ./src:/app/src
     command: npm run watch:docker
-
