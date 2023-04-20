@@ -620,7 +620,7 @@ exports.updateAccountField=function(requestObject) {
                 });
             //If not a password field update
         }else if(validFields.includes(field)){
-            exports.runSqlQuery(queries.accountChange(), [field, newValue, requestObject.Token, patient.PatientSerNum])
+            exports.runSqlQuery(queries.accountChange(), [field, newValue, patient.PatientSerNum])
                 .then(()=>{
                     r.resolve({Response:'success'});
                 }).catch((err)=>{
@@ -647,7 +647,7 @@ exports.inputFeedback = function(requestObject) {
 		let patientSerNum = patient.PatientSerNum;
 
         if((!type||!feedback)) r.reject({Response:'error',Reason:`Invalid parameter type`});
-        exports.runSqlQuery(queries.inputFeedback(),[ patient.PatientSerNum, feedback, appRating, requestObject.Token ])
+        exports.runSqlQuery(queries.inputFeedback(),[patient.PatientSerNum, feedback, appRating])
             .then(()=>{
 	            let replyTo = null;
 	            let email;
@@ -702,7 +702,7 @@ exports.updateDeviceIdentifier = function(requestObject, parameters) {
 
     let email = requestObject.UserEmail;
     getPatientFromEmail(email).then(() => {
-        exports.runSqlQuery(queries.updateDeviceIdentifiers(),[requestObject.UserID, requestObject.DeviceId, identifiers.registrationId, deviceType, appVersion, requestObject.Token, identifiers.registrationId, requestObject.Token])
+        exports.runSqlQuery(queries.updateDeviceIdentifiers(),[requestObject.UserID, requestObject.DeviceId, identifiers.registrationId, deviceType, appVersion, identifiers.registrationId])
             .then(() => {
                 logger.log('debug', 'successfully updated device identifiers');
                 r.resolve({Response:'success'});
@@ -728,12 +728,11 @@ exports.addToActivityLog=function(requestObject)
 {
     let r = Q.defer();
 
-    let {Request, UserID, DeviceId, Token, AppVersion, TargetPatientID, Parameters} = requestObject;
+    let {Request, UserID, DeviceId, AppVersion, TargetPatientID, Parameters} = requestObject;
 
     if (typeof Request === "undefined") Request = requestObject.type;
     if (typeof UserID === "undefined") UserID = requestObject.meta.UserID;
     if (typeof DeviceId === "undefined") DeviceId = requestObject.meta.DeviceId;
-    if (typeof Token === "undefined") Token = requestObject.meta.Token;
     if (typeof AppVersion === "undefined") AppVersion = requestObject.meta.AppVersion;
     if (typeof TargetPatientID === "undefined") TargetPatientID = requestObject.meta?.TargetPatientID;
     if (typeof Parameters === "undefined") Parameters = requestObject.params || requestObject.parameters;
@@ -743,7 +742,7 @@ exports.addToActivityLog=function(requestObject)
 
     // Ignore LogPatientAction to avoid double-logging --> Refer to table PatientActionLog
     if (Request !== "LogPatientAction") {
-        exports.runSqlQuery(queries.logActivity(),[Request, Parameters, TargetPatientID, UserID, DeviceId, Token, AppVersion])
+        exports.runSqlQuery(queries.logActivity(),[Request, Parameters, TargetPatientID, UserID, DeviceId, AppVersion])
         .then(()=>{
             logger.log('verbose', "Success logging request of type: "+Request);
             r.resolve({Response:'success'});
@@ -900,7 +899,7 @@ exports.inputEducationalMaterialRating = function(requestObject)
     }
 
     exports.runSqlQuery(queries.insertEducationalMaterialRatingQuery(),
-        [EducationalMaterialControlSerNum, PatientSerNum, RatingValue, requestObject.Token])
+        [EducationalMaterialControlSerNum, PatientSerNum, RatingValue])
         .then(()=>{
             r.resolve({Response:'success'});
         }).catch((err)=>{
