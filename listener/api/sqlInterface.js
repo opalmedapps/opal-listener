@@ -12,6 +12,8 @@ const questionnaires    = require("./modules/questionnaires");
 const { Patient } = require('./modules/patient/patient');
 const eduMaterialConfig = require('./../educational-material/eduMaterialConfig.json');
 const studiesConfig     = require('./../studies/studiesConfig.json');
+const SecurityDjango = require('./../security/securityDjango');
+const { Version } = require('../../src/utility/version');
 
 /******************************
  * MAPPINGS
@@ -1172,34 +1174,41 @@ function combineResources(rows)
     return r.promise;
 }
 
-exports.getSecurityQuestion = function (requestObject){
-    var r = Q.defer();
-
+exports.getSecurityQuestion = async function (requestObject){
     logger.log('debug', 'in get secyurity wquestuion in sql interface');
 
-    var obj={};
-    var Data = {};
-    var userEmail = requestObject.UserEmail;
+    try {
+        let queryRows = await exports.runSqlQuery(queries.getSecQuestion(), [requestObject.UserEmail]);
+        console.log('OLD----', queryRows);
+        let apiResponse = await SecurityDjango.getRandomSecurityQuestionAnswer(requestObject.UserID);
+        console.log('NEW----', apiResponse);
+        // TODO test this case
+        if (apiResponse.question === '' || apiResponse.answer === '') throw "No security questions found.";
 
-    exports.runSqlQuery(queries.getSecQuestion(),[userEmail])
-        .then(function (queryRows) {
+        await exports.runSqlQuery(queries.cacheSecurityAnswerFromDjango(), [apiResponse.answer, requestObject.DeviceId, requestObject.UserID]);
 
-            if (queryRows.length != 1 ) r.reject({Response:'error', Reason:'More or less than one question returned'});
-            Data.securityQuestion = {
-                securityQuestion_EN: queryRows[0].QuestionText_EN,
-                securityQuestion_FR: queryRows[0].QuestionText_FR
+        // Security question format read by the app has changed after 1.12.2
+        if (Version.versionLessOrEqual(requestObject.AppVersion, Version.version_1_12_2)) return {
+            Data: {
+                securityQuestion: {
+                    securityQuestion_EN: apiResponse.question,
+                    securityQuestion_FR: apiResponse.question,
+                }
             }
-            obj.Data = Data;
-            return exports.runSqlQuery(queries.setDeviceSecurityAnswer(), [queryRows[0].SecurityAnswerSerNum, requestObject.DeviceId, requestObject.UserID])
-        })
-        .then(function () {
-            r.resolve(obj);
-        })
-        .catch(function (error) {
-            r.reject({Response:'error', Reason:'Error getting security question due to '+error});
-        });
-
-    return r.promise;
+        };
+        else return {
+            Data: {
+                question: apiResponse.question,
+            }
+        }
+    }
+    // TODO test case
+    catch(error) {
+        throw {
+            Response:'error',
+            Reason:'Error getting security question due to '+error
+        };
+    }
 };
 
 exports.setTrusted = function(requestObject)

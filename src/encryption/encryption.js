@@ -127,25 +127,21 @@ class EncryptionUtilities {
      * @param {string} deviceId ID of the device use to make the request.
      * @returns {string} Security question hash.
      */
+    // TODO check calls of this
     static async getAnswerText(userId, deviceId) {
         const query = mysql.format(`
             SELECT
-                SA.AnswerText
+                PDI.SecurityAnswer
             FROM
-                Users U,
-                PatientDeviceIdentifier PDI,
-                SecurityAnswer SA
+                PatientDeviceIdentifier PDI
             WHERE
-                U.Username = ?
-            AND
-                PDI.SecurityAnswerSerNum = SA.SecurityAnswerSerNum
-            AND PDI.DeviceId = ?
-            LIMIT 1
+                PDI.Username = ?
+                AND PDI.DeviceId = ?
         `, [userId, deviceId]);
 
         try {
             const response = await legacyOpalSqlRunner.OpalSQLQueryRunner.run(query);
-            return response[0].AnswerText;
+            return response[0].SecurityAnswer;
         }
         catch (error) {
             throw new Error('ENCRYPTION_SALT', { cause: error });

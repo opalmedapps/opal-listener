@@ -34,80 +34,84 @@ exports.resetPasswordRequest=function(requestKey, requestObject)
 
 };
 
-exports.verifySecurityAnswer=function(requestKey,requestObject,patient)
-{
-    var r = q.defer();
-    var key = patient.AnswerText;
-
-
+exports.verifySecurityAnswer = async (requestKey, requestObject, patient) => {
     logger.log('debug', 'in verify security answer');
     logger.log('debug', `patient: ${JSON.stringify(patient)}`);
-    //TO VERIFY, PASS SECURITY ANSWER THROUGH HASH THAT TAKES A WHILE TO COMPUTE, SIMILAR TO HOW THEY DO PASSWORD CHECKS
-    // utility.generatePBKDFHash(key,key);
 
     if(patient.TimeoutTimestamp != null && requestObject.Timestamp - (new Date(patient.TimeoutTimestamp)).getTime() > FIVE_MINUTES) {
         logger.log('debug', 'resetting security answer attempt');
-	    sqlInterface.resetSecurityAnswerAttempt(requestObject);
-    } else if(patient.Attempt == 5) {
-        //If 5 attempts have already been made, lock the user out for 5 minutes
-	    if(patient.TimeoutTimestamp == null) sqlInterface.setTimeoutSecurityAnswer(requestObject, requestObject.Timestamp);
-        r.resolve({Code: 4, RequestKey:requestKey, Data:"Attempted security answer more than 5 times, please try again in 5 minutes", Headers:{RequestKey:requestKey,RequestObject:requestObject}, Response:'error'});
-        return r.promise;
+        await sqlInterface.resetSecurityAnswerAttempt(requestObject);
     }
-
-    //Wrap decrypt in try-catch because if error is caught that means decrypt was unsuccessful, hence incorrect security answer
+    else if(patient.Attempt == 5) {
+        //If 5 attempts have already been made, lock the user out for 5 minutes
+        if(patient.TimeoutTimestamp == null) sqlInterface.setTimeoutSecurityAnswer(requestObject, requestObject.Timestamp);
+        return {Code: 4, RequestKey:requestKey, Data:"Attempted security answer more than 5 times, please try again in 5 minutes", Headers:{RequestKey:requestKey,RequestObject:requestObject}, Response:'error'};
+    }
 
     let unencrypted = null;
 
     logger.log('debug', 'decrypting');
 
-    utility.decrypt(requestObject.Parameters, key)
-        .then(params => {
+    //Wrap decrypt in try-catch because if error is caught that means decrypt was unsuccessful, hence incorrect security answer
+    try {
+        let params = await utility.decrypt(requestObject.Parameters, patient.SecurityAnswer);
 
-            logger.log('debug', `params: ${JSON.stringify(params)}`);
+        logger.log('debug', `params: ${JSON.stringify(params)}`);
 
-            unencrypted = params;
+        unencrypted = params;
 
-            //If its the right security answer, also make sure is a valid SSN;
-            var response = {};
+        //If its the right security answer, also make sure is a valid SSN;
+        var response = {};
 
-            var ssnValid = unencrypted.SSN && unencrypted.SSN.toUpperCase() === patient.SSN && unencrypted.Answer && unencrypted.Answer === patient.AnswerText;
-            var answerValid = unencrypted.Answer === patient.AnswerText;
-            var isVerified = false;
+        var ssnValid = unencrypted.SSN && unencrypted.SSN.toUpperCase() === patient.SSN && unencrypted.Answer && unencrypted.Answer === patient.SecurityAnswer;
+        var answerValid = unencrypted.Answer === patient.SecurityAnswer;
+        var isVerified = false;
 
-            // Use of RAMQ (SSN) in password reset requests is no longer supported after 1.12.2 (QSCCD-476)
-            if (unencrypted.PasswordReset && Version.versionLessOrEqual(requestObject.AppVersion, Version.version_1_12_2)) {
-                isVerified = ssnValid;
-            } else {
-                isVerified = answerValid;
+        // Use of RAMQ (SSN) in password reset requests is no longer supported after 1.12.2 (QSCCD-476)
+        if (unencrypted.PasswordReset && Version.versionLessOrEqual(requestObject.AppVersion, Version.version_1_12_2)) {
+            isVerified = ssnValid;
+        } else {
+            isVerified = answerValid;
+        }
+
+        if (isVerified) {
+            try {
+                await sqlInterface.setTrusted(requestObject)
+                await sqlInterface.resetSecurityAnswerAttempt(requestObject);
+                return {
+                    RequestKey: requestKey,
+                    Code: 3,
+                    Data: { AnswerVerified: "true" },
+                    Headers: {
+                        RequestKey: requestKey,
+                        RequestObject: requestObject
+                    },
+                    Response: 'success'
+                };
             }
-
-            if (isVerified) {
-                response = { RequestKey:requestKey, Code:3,Data:{AnswerVerified:"true"}, Headers:{RequestKey:requestKey,RequestObject:requestObject},Response:'success'};
-                sqlInterface.setTrusted(requestObject)
-                    .then(function(){
-                        sqlInterface.resetSecurityAnswerAttempt(requestObject);
-                        r.resolve(response);
-                    })
-                    .catch(function(error){
-                        logger.log('error', 'Failed to set the device as trusted', error);
-                        r.reject({ Headers:{RequestKey:requestKey,RequestObject:requestObject}, Code: 2, Data:{},Response:'error', Reason:'Could not set trusted device'});
-                    })
-
-            } else {
-                response = { RequestKey:requestKey, Code:3,Data:{AnswerVerified:"false"}, Headers:{RequestKey:requestKey,RequestObject:requestObject},Response:'success'};
-                r.resolve(response);
+            catch(error) {
+                logger.log('error', 'Failed to set the device as trusted', error);
+                throw {
+                    Headers: {
+                        RequestKey: requestKey,
+                        RequestObject: requestObject
+                    },
+                    Code: 2,
+                    Data: {},
+                    Response: 'error',
+                    Reason: 'Could not set trusted device'
+                };
             }
-
-        })
-        .catch((err) => {
-            //Check if timestamp for lockout is old, if it is reset the security answer attempts
-            logger.log('error', 'increase security answer attempt due to error decrypting', err);
-            sqlInterface.increaseSecurityAnswerAttempt(requestObject);
-            r.resolve({ RequestKey:requestKey, Code:3,Data:{AnswerVerified:"false"}, Headers:{RequestKey:requestKey,RequestObject:requestObject},Response:'success'});
-        });
-
-    return r.promise;
+        } else {
+            return { RequestKey:requestKey, Code:3,Data:{AnswerVerified:"false"}, Headers:{RequestKey:requestKey,RequestObject:requestObject},Response:'success'};
+        }
+    }
+    catch(error) {
+        //Check if timestamp for lockout is old, if it is reset the security answer attempts
+        logger.log('error', 'increase security answer attempt due to error decrypting', error);
+        await sqlInterface.increaseSecurityAnswerAttempt(requestObject);
+        return { RequestKey:requestKey, Code:3,Data:{AnswerVerified:"false"}, Headers:{RequestKey:requestKey,RequestObject:requestObject},Response:'success'};
+    }
 };
 
 exports.setNewPassword=function(requestKey, requestObject, user)
@@ -117,7 +121,7 @@ exports.setNewPassword=function(requestKey, requestObject, user)
     let secret = Version.versionGreaterThan(requestObject.AppVersion, Version.version_1_12_2)
         ? utility.hash(user.Email)
         : utility.hash(user.SSN.toUpperCase());
-    var answer = user.AnswerText;
+    var answer = user.SecurityAnswer;
     const errorResponse = {Headers: {RequestKey:requestKey, RequestObject:requestObject}, Code:2, Data:{}, Response:'error', Reason:'Could not set password'};
 
     logger.log('debug', `Running function setNewPassword for user with UserTypeSerNum = ${user.UserTypeSerNum}`);
@@ -167,41 +171,30 @@ exports.securityQuestion=function(requestKey,requestObject) {
         });
 };
 
-function getSecurityQuestion(requestKey, requestObject, unencrypted){
-
-    let r = q.defer();
-
+async function getSecurityQuestion(requestKey, requestObject, unencrypted) {
     requestObject.Parameters = unencrypted;
-
     logger.log('debug', 'in get security question with: ' + requestObject);
 
-    sqlInterface.updateDeviceIdentifier(requestObject)
-        .then(function () {
-            logger.log('debug', 'finished updating device identifier');
-            return sqlInterface.getSecurityQuestion(requestObject)
-        })
-        .then(function (response) {
-            logger.log('debug', 'updated device id successfully');
-
-            r.resolve({
-                Code:3,
-                Data:response.Data,
-                Headers:{RequestKey:requestKey,RequestObject:requestObject},
-                Response:'success'
-            });
-        })
-        .catch(function (response){
-            logger.log('debug', 'error updating device id');
-            r.resolve({
-                Headers:{RequestKey:requestKey,RequestObject:requestObject},
-                Code: 2,
-                Data:{},
-                Response:'error',
-                Reason:response
-            });
-        });
-
-    return r.promise;
+    try {
+        await sqlInterface.updateDeviceIdentifier(requestObject);
+        let response = await sqlInterface.getSecurityQuestion(requestObject);
+        return {
+            Headers:{RequestKey:requestKey,RequestObject:requestObject},
+            Code:3,
+            Data:response.Data,
+            Response:'success'
+        };
+    }
+    catch(error) {
+        logger.log('error', 'Error getting a security question for the user');
+        return {
+            Headers:{RequestKey:requestKey,RequestObject:requestObject},
+            Code: 2,
+            Data:{},
+            Response:'error',
+            Reason:response
+        };
+    }
 }
 
 var requestMappings = {

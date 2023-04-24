@@ -168,6 +168,7 @@ class SimulateRequest {
      * @param {number} userSerNum - Test user sernum.
      * @returns {object} The latest deviceID used to login and the related security question answer for encryption.
      */
+    // TODO fix this
     static getQuery(userSerNum) {
         return mysql.format(`
             SELECT

@@ -333,27 +333,25 @@ exports.getPatientPasswordForVerification = function()
             WHERE pat.Email= ? AND pat.PatientSerNum = u.UserTypeSerNum`;
 };
 
-
- exports.getPatientFieldsForPasswordReset = function()
- {
+exports.getPatientFieldsForPasswordReset = function()
+{
     return `SELECT DISTINCT
                 pat.SSN,
                 pat.Email,
                 u.Password,
                 u.UserTypeSerNum,
-                sa.AnswerText,
+                pdi.SecurityAnswer,
                 pdi.Attempt,
                 pdi.TimeoutTimestamp
             FROM
                 Users u,
                 Patient pat,
-                SecurityAnswer sa,
                 PatientDeviceIdentifier pdi
             WHERE
                 pat.Email = ? AND pat.PatientSerNum = u.UserTypeSerNum AND pdi.DeviceId = ?
-            AND
-                sa.SecurityAnswerSerNum = pdi.SecurityAnswerSerNum AND sa.PatientSerNum = pat.PatientSerNum`;
- };
+            ;`;
+};
+
 exports.increaseSecurityAnswerAttempt = function()
 {
     return `UPDATE PatientDeviceIdentifier SET Attempt = Attempt + 1 WHERE DeviceId = ?`;
@@ -422,26 +420,32 @@ exports.securityQuestionEncryption=function(){
     return "SELECT Password FROM Users WHERE Username = ?";
 };
 
+// TODO remove "as"
 exports.userEncryption=function()
 {
-    return `SELECT sa.AnswerText
-            FROM Users u, SecurityAnswer sa, PatientDeviceIdentifier pdi
+    return `SELECT
+                pdi.SecurityAnswer as AnswerText
+            FROM
+                Users u,
+                PatientDeviceIdentifier pdi
             WHERE u.Username = ?
-            AND pdi.Username = u.Username
-            AND sa.SecurityAnswerSerNum = pdi.SecurityAnswerSerNum
-            AND pdi.DeviceId = ?
-        `;
+                AND pdi.Username = u.Username
+                AND pdi.DeviceId = ?
+            ;`;
 };
+
     /**
      * @deprecated;
      * @param serNum
      * @returns {string}
      */
+    // TODO check this usage and Security Answer
     exports.getSecurityQuestions=function(serNum)
 {
     return "SELECT SecurityQuestion.QuestionText_EN, SecurityQuestion.QuestionText_FR, SecurityAnswer.AnswerText FROM SecurityQuestion, SecurityAnswer WHERE SecurityAnswer.PatientSerNum="+serNum +" AND SecurityQuestion.SecurityQuestionSerNum = SecurityAnswer.SecurityQuestionSerNum";
 };
 
+    // TODO check this usage and SecurityAnswer
 exports.getSecQuestion=function()
 {
     return `SELECT
@@ -539,6 +543,7 @@ exports.getPatientSerNumFromUserID = function()
     return "SELECT Patient.PatientSerNum FROM Patient, Users WHERE Patient.PatientSerNum = Users.UserTypeSerNum && Users.Username = ?";
 };
 
+// TODO still needed?
 exports.setDeviceSecurityAnswer = function () {
     return `UPDATE
                 PatientDeviceIdentifier
@@ -549,6 +554,17 @@ exports.setDeviceSecurityAnswer = function () {
             AND
                 Username = ?`;
 };
+
+exports.cacheSecurityAnswerFromDjango = () => {
+    return `UPDATE
+                PatientDeviceIdentifier
+            SET
+                SecurityAnswer = ?
+            WHERE
+                DeviceId = ?
+                AND Username = ?
+            ;`;
+}
 
 exports.setTrusted = function () {
     return "UPDATE PatientDeviceIdentifier SET Trusted = 1 WHERE DeviceId = ?";
