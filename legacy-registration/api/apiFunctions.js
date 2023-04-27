@@ -175,6 +175,9 @@ exports.registerPatient = async function(requestObject) {
         requestObject.Parameters.Fields.uniqueId = uid;
         requestObject.Parameters.Fields.password = CryptoJS.SHA512(requestObject.Parameters.Fields.password).toString();
 
+        // Add patient's UUID to the request to allow ORMS patients to participate in studies with wearables
+        requestObject.Parameters.Fields.uuid = patientData?.patient?.uuid;
+
         // Register the patient in the database
         logger.log('info', `Registering the patient with these parameters: ${JSON.stringify(requestObject)}`);
         let result = await sqlInterface.registerPatient(requestObject);
@@ -209,7 +212,7 @@ exports.registerPatient = async function(requestObject) {
             await updatePatientStatusInORMS(requestObject);
         }
         catch (error) {
-            logger.log('error', `An error occurred while updating the patient status via OIE (for ${requestObject.Parameters.Fields.email}): ${JSON.stringify(error)}`);
+            logger.log('error', `An error occurred while updating the patient status via direct call to ORMS (for ${requestObject.Parameters.Fields.email}): ${JSON.stringify(error)}`);
         }
 
         return { Data: result };
@@ -263,7 +266,7 @@ function validateRegisterPatientRequest(requestObject) {
 }
 
 /**
- * @description Makes a post call to the OIE to update the patient's Opal status in ORMS.
+ * @description Makes a POST call to the Online Room Management System (ORMS) to update the patient's Opal status.
  * @param {Object} requestObject - The calling request's requestObject.
  * @returns {Promise<void>} Resolves if the call completes successfully, or rejects with an error.
  */
@@ -273,23 +276,25 @@ async function updatePatientStatusInORMS(requestObject) {
 
     logger.log('debug', 'POST request to ORMS with data' + JSON.stringify(response[0]));
 
-    // Validate the existence of the api path
-    if (!config.OIE.api.url || config.OIE.api.url === "") {
-        throw 'No value was provided for OIE url in the config file';
+    // Validate the existence of the API path
+    if (!config.ORMS.API.URL) {
+        throw 'No value was provided for the ORMS URL in the config file';
     }
-    if (!config.OIE.api.method.updatePatientStatus || config.OIE.api.method.updatePatientStatus === "") {
-        throw 'No value was provided for OIE updatePatientStatus method in the config file';
+    if (!config.ORMS.API.method.updatePatientStatus) {
+        throw 'No value was provided for the ORMS updatePatientStatus method in the config file';
     }
     if (!response || response === []) {
-        throw 'No patient mrn and site were provided in the database';
+        throw "No patient's MRN and Site were provided in the database";
     }
 
     let options = {
-        url: config.OIE.api.url + config.OIE.api.method.updatePatientStatus,
+        url: config.ORMS.API.URL + config.ORMS.API.method.updatePatientStatus,
         json: true,
         body: {
             "mrn": response[0].Mrn,
-            "site": response[0].Site
+            "site": response[0].Site,
+            "opalStatus": 1,  // 1 => registered/active patient; 0 => unregistered/inactive patient
+            "opalUUID": requestObject.Parameters.Fields.uuid,
         },
     };
 
