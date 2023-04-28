@@ -341,7 +341,6 @@ exports.getUserPatientSecurityInfo = function() {
     return `SELECT DISTINCT
                 pat.SSN,
                 pat.Email,
-                u.Password,
                 u.UserTypeSerNum,
                 pdi.SecurityAnswer,
                 pdi.Attempt,
@@ -351,10 +350,11 @@ exports.getUserPatientSecurityInfo = function() {
                 Patient pat,
                 PatientDeviceIdentifier pdi
             WHERE
-                pat.PatientSerNum = u.UserTypeSerNum
-                AND u.UserType = 'Patient'
-                AND pat.Email = ?
+                pdi.Username = ?
                 AND pdi.DeviceId = ?
+                AND u.Username = pdi.Username
+                AND pat.PatientSerNum = u.UserTypeSerNum
+                AND u.UserType = 'Patient'
             ;`;
 };
 

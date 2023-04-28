@@ -869,7 +869,7 @@ exports.setTimeoutSecurityAnswer = function(requestObject, timestamp) {
  * @return {Promise} Resolves to rows containing the user and patient's security information.
  */
 exports.getUserPatientSecurityInfo = requestObject => {
-    return exports.runSqlQuery(queries.getUserPatientSecurityInfo(),[requestObject.UserEmail, requestObject.DeviceId]);
+    return exports.runSqlQuery(queries.getUserPatientSecurityInfo(),[requestObject.UserID, requestObject.DeviceId]);
 };
 
 /**
