@@ -1,106 +1,69 @@
-var sqlInterface=require('./../api/sqlInterface.js');
-var q = require('q');
-var utility=require('./../utility/utility.js');
+const logger = require('./../logs/logger');
+const sqlInterface = require('./../api/sqlInterface.js');
+const utility = require('./../utility/utility.js');
 const { Version } = require('../../src/utility/version');
-const logger            = require('./../logs/logger');
+const OpalResponse = require('../api/response/response');
+const OpalSecurityResponseError = require('../api/response/security-response-error');
+const OpalSecurityResponseSuccess = require('../api/response/security-response-success');
 
 const FIVE_MINUTES = 300000;
+const CODE = OpalResponse.CODE;
+
+const answerVerified = { AnswerVerified: "true" };
+const answerNotVerified = { AnswerVerified: "false" };
+
 
 // TODO format responses
 exports.verifySecurityAnswer = async (requestKey, requestObject) => {
-    let rows = await sqlInterface.getUserPatientSecurityInfo(requestObject);
-    if(rows.length !== 1) {
-        logger.log('error', `getUserPatientSecurityInfo returned ${rows.length} rows when it should have returned 1`);
-        return {
-            Headers: {
-                RequestKey: requestKey,
-                RequestObject: requestObject
-            },
-            Code: 2,
-            Data: {},
-            Response: 'error',
-            Reason: 'Injection attack, incorrect Email'
-        };
-    }
-    let patient = rows[0];
+    logger.log('info', `Verifying security answer for username ${requestObject?.UserID}`);
 
-    logger.log('debug', 'in verify security answer');
-    logger.log('debug', `patient: ${JSON.stringify(patient)}`);
+    // Get security info needed to verify the answer, including the cached answer from PatientDeviceIdentifier.
+    let user = getUserPatientSecurityInfo(requestKey, requestObject);
 
-    if(patient.TimeoutTimestamp != null && requestObject.Timestamp - (new Date(patient.TimeoutTimestamp)).getTime() > FIVE_MINUTES) {
-        logger.log('debug', 'resetting security answer attempt');
+    // TODO test
+    // Handle security answer attempts (resetting the attempts, or blocking the user after too many attempts)
+    if (user.TimeoutTimestamp != null && requestObject.Timestamp - (new Date(user.TimeoutTimestamp)).getTime() > FIVE_MINUTES) {
+        logger.log('verbose', `Resetting number of security answer attempts for username ${requestObject?.UserID}`);
         await sqlInterface.resetSecurityAnswerAttempt(requestObject);
     }
-    else if(patient.Attempt == 5) {
-        //If 5 attempts have already been made, lock the user out for 5 minutes
-        if(patient.TimeoutTimestamp == null) sqlInterface.setTimeoutSecurityAnswer(requestObject, requestObject.Timestamp);
-        return {Code: 4, RequestKey:requestKey, Data:"Attempted security answer more than 5 times, please try again in 5 minutes", Headers:{RequestKey:requestKey,RequestObject:requestObject}, Response:'error'};
+    else if (user.Attempt === 5) {
+        // If 5 attempts have already been made, lock the user out for 5 minutes
+        logger.log('verbose', `Blocking user after reaching 5 security answer attempts for username ${requestObject?.UserID}`);
+        if (user.TimeoutTimestamp == null) await sqlInterface.setTimeoutSecurityAnswer(requestObject, requestObject.Timestamp);
+        throw new OpalSecurityResponseError(CODE.TOO_MANY_ATTEMPTS, "Attempted and failed security answer 5 times", requestKey, requestObject);
     }
 
-    let unencrypted = null;
+    let unencrypted;
 
-    logger.log('debug', 'decrypting');
-
-    //Wrap decrypt in try-catch because if error is caught that means decrypt was unsuccessful, hence incorrect security answer
+    // An error caught during decryption indicates an incorrect security answer
     try {
-        let params = await utility.decrypt(requestObject.Parameters, patient.SecurityAnswer);
-
-        logger.log('debug', `params: ${JSON.stringify(params)}`);
-
-        unencrypted = params;
-
-        //If its the right security answer, also make sure is a valid SSN;
-        var response = {};
-
-        var ssnValid = unencrypted.SSN && unencrypted.SSN.toUpperCase() === patient.SSN && unencrypted.Answer && unencrypted.Answer === patient.SecurityAnswer;
-        var answerValid = unencrypted.Answer === patient.SecurityAnswer;
-        var isVerified = false;
-
-        // Use of RAMQ (SSN) in password reset requests is no longer supported after 1.12.2 (QSCCD-476)
-        if (unencrypted.PasswordReset && Version.versionLessOrEqual(requestObject.AppVersion, Version.version_1_12_2)) {
-            isVerified = ssnValid;
-        } else {
-            isVerified = answerValid;
-        }
-
-        if (isVerified) {
-            try {
-                await sqlInterface.setTrusted(requestObject)
-                await sqlInterface.resetSecurityAnswerAttempt(requestObject);
-                return {
-                    RequestKey: requestKey,
-                    Code: 3,
-                    Data: { AnswerVerified: "true" },
-                    Headers: {
-                        RequestKey: requestKey,
-                        RequestObject: requestObject
-                    },
-                    Response: 'success'
-                };
-            }
-            catch(error) {
-                logger.log('error', 'Failed to set the device as trusted', error);
-                throw {
-                    Headers: {
-                        RequestKey: requestKey,
-                        RequestObject: requestObject
-                    },
-                    Code: 2,
-                    Data: {},
-                    Response: 'error',
-                    Reason: 'Could not set trusted device'
-                };
-            }
-        } else {
-            return { RequestKey:requestKey, Code:3,Data:{AnswerVerified:"false"}, Headers:{RequestKey:requestKey,RequestObject:requestObject},Response:'success'};
-        }
+        logger.log('debug', 'Attempting decryption to verify security answer');
+        unencrypted = await utility.decrypt(requestObject.Parameters, user.SecurityAnswer);
     }
-    catch(error) {
-        //Check if timestamp for lockout is old, if it is reset the security answer attempts
-        logger.log('error', 'increase security answer attempt due to error decrypting', error);
+    catch (error) {
+        logger.log('error', 'Wrong security answer; increasing security answer attempts', error);
         await sqlInterface.increaseSecurityAnswerAttempt(requestObject);
-        return { RequestKey:requestKey, Code:3,Data:{AnswerVerified:"false"}, Headers:{RequestKey:requestKey,RequestObject:requestObject},Response:'success'};
+        return new OpalSecurityResponseSuccess(answerNotVerified, requestKey, requestObject);
     }
+
+    // Confirm the validity of the answer by checking its decrypted value in the request parameters.
+    let answerValid = unencrypted.Answer === user.SecurityAnswer;
+    let isVerified;
+
+    // Use of RAMQ (SSN) in password reset requests is no longer supported after 1.12.2 (QSCCD-476)
+    if (unencrypted.PasswordReset && Version.versionLessOrEqual(requestObject.AppVersion, Version.version_1_12_2)) {
+        let ssnValid = unencrypted.SSN && unencrypted.SSN.toUpperCase() === user.SSN;
+        isVerified = ssnValid && answerValid;
+    }
+    else isVerified = answerValid;
+
+    if (!isVerified) {
+        return new OpalSecurityResponseSuccess(answerNotVerified, requestKey, requestObject);
+    }
+
+    await sqlInterface.setTrusted(requestObject);
+    await sqlInterface.resetSecurityAnswerAttempt(requestObject);
+    return new OpalSecurityResponseSuccess(answerVerified, requestKey, requestObject);
 };
 
 exports.setNewPassword = async function(requestKey, requestObject) {
@@ -135,11 +98,11 @@ exports.setNewPassword = async function(requestKey, requestObject) {
         Reason: 'Could not set password'
     };
 
-    logger.log('debug', `Running function setNewPassword for user with UserTypeSerNum = ${user.UserTypeSerNum}`);
+    logger.log('debug', `Running function setNewPassword for username = ${user.Username}`);
 
     try {
         let unencrypted = await utility.decrypt(requestObject.Parameters, secret, answer);
-        await sqlInterface.setNewPassword(utility.hash(unencrypted.newPassword), user.UserTypeSerNum);
+        await sqlInterface.setNewPassword(utility.hash(unencrypted.newPassword), user.Username);
 
         logger.log('debug', 'successfully updated password');
         return {
@@ -199,4 +162,25 @@ async function getSecurityQuestion(requestKey, requestObject, unencrypted) {
             Reason:response
         };
     }
+}
+
+async function getUserPatientSecurityInfo(requestKey, requestObject) {
+    let rows = await sqlInterface.getUserPatientSecurityInfo(requestObject);
+    if (rows.length !== 1) {
+        logger.log('error', `getUserPatientSecurityInfo returned ${rows.length} rows when it should have returned 1`);
+        let errMessage = rows.length === 0
+            ? 'Failed to find user/patient record'
+            : 'Possible injection attack; too many patient records returned';
+        throw new OpalSecurityResponseError(CODE.SERVER_ERROR, errMessage, requestKey, requestObject);
+    }
+    let userPatient = rows[0];
+
+    // Validate that the returned security info has values for all required parameters
+    let requiredParams = ['Email', 'SecurityAnswer', 'Attempt'];
+    requiredParams.forEach(param => {
+        if (userPatient[param] === null || userPatient[param] === '') {
+            throw new OpalSecurityResponseError(CODE.SERVER_ERROR, `Query for ${param} did not return a value`, requestKey, requestObject);
+        }
+    });
+    return userPatient;
 }

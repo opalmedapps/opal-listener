@@ -25,6 +25,9 @@ const utility           = require('./utility/utility.js');
 const q                 = require("q");
 const logger            = require('./logs/logger.js');
 const cp                = require('child_process');
+const OpalSecurityResponseError = require('./api/response/security-response-error');
+const OpalSecurityResponseSuccess = require('./api/response/security-response-success');
+const OpalResponse      = require('./api/response/response');
 
 
 // NOTE: Listener launching steps have been moved to src/server.js
@@ -144,11 +147,21 @@ function processRequest(headers){
         logger.log('debug', 'Processing security request');
         processApi.securityAPI[requestObject.Request](requestKey, requestObject)
             .then(function (response) {
-                r.resolve(response);
+                if (response instanceof OpalSecurityResponseSuccess) r.resolve(response.toLegacy());
+                else r.resolve(response); // TODO else throw?
             })
             .catch(function (error) {
                 logger.log('error', 'Processing security request failed', error);
-                r.resolve(error);
+                if (error instanceof OpalSecurityResponseError) r.resolve(error.toLegacy());
+                else {
+                    logger.log('error', "Unexpected error during security request", error);
+                    r.resolve((new OpalSecurityResponseError(
+                        OpalResponse.CODE.SERVER_ERROR,
+                        'An unexpected error occurred',
+                        requestKey,
+                        requestObject,
+                    )).toLegacy());
+                }
             });
     } else {
 

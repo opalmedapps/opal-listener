@@ -841,7 +841,7 @@ exports.getPackageContents = function(requestObject){
  * @param requestObject
  */
 exports.increaseSecurityAnswerAttempt = function(requestObject) {
-    return exports.runSqlQuery(queries.increaseSecurityAnswerAttempt(),[requestObject.DeviceId]);
+    return exports.runSqlQuery(queries.increaseSecurityAnswerAttempt(),[requestObject.UserID, requestObject.DeviceId]);
 };
 
 /**
@@ -850,7 +850,7 @@ exports.increaseSecurityAnswerAttempt = function(requestObject) {
  * @param requestObject
  */
 exports.resetSecurityAnswerAttempt = function(requestObject) {
-    return exports.runSqlQuery(queries.resetSecurityAnswerAttempt(),[requestObject.DeviceId]);
+    return exports.runSqlQuery(queries.resetSecurityAnswerAttempt(),[requestObject.UserID, requestObject.DeviceId]);
 };
 
 /**
@@ -860,7 +860,7 @@ exports.resetSecurityAnswerAttempt = function(requestObject) {
  * @param timestamp
  */
 exports.setTimeoutSecurityAnswer = function(requestObject, timestamp) {
-    return exports.runSqlQuery(queries.setTimeoutSecurityAnswer(),[new Date(timestamp), requestObject.DeviceId]);
+    return exports.runSqlQuery(queries.setTimeoutSecurityAnswer(),[new Date(timestamp), requestObject.UserID, requestObject.DeviceId]);
 };
 
 /**
@@ -879,8 +879,8 @@ exports.getUserPatientSecurityInfo = requestObject => {
  * @param patientSerNum
  * @return {Promise}
  */
-exports.setNewPassword=function(password,patientSerNum) {
-    return exports.runSqlQuery(queries.setNewPassword(),[password,patientSerNum]);
+exports.setNewPassword = function(password, username) {
+    return exports.runSqlQuery(queries.setNewPassword(),[password, username]);
 };
 
 /**
@@ -1212,18 +1212,8 @@ exports.getSecurityQuestion = async function (requestObject){
 
 exports.setTrusted = function(requestObject)
 {
-
-    var r = Q.defer();
-    exports.runSqlQuery(queries.setTrusted(),[requestObject.DeviceId])
-        .then(function (queryRows) {
-            r.resolve({Response:'success'});
-        })
-        .catch(function (error) {
-            r.reject({Response:'error', Reason:'Error getting setting trusted device '+error});
-        });
-
-    return r.promise;
-
+    let trusted = requestObject?.Parameters?.Trusted === "true" ? 1 : 0;
+    return exports.runSqlQuery(queries.setTrusted(),[trusted, requestObject.UserID, requestObject.DeviceId]);
 };
 
 /**

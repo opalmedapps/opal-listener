@@ -341,7 +341,6 @@ exports.getUserPatientSecurityInfo = function() {
     return `SELECT DISTINCT
                 pat.SSN,
                 pat.Email,
-                u.UserTypeSerNum,
                 pdi.SecurityAnswer,
                 pdi.Attempt,
                 pdi.TimeoutTimestamp
@@ -352,27 +351,47 @@ exports.getUserPatientSecurityInfo = function() {
             WHERE
                 pdi.Username = ?
                 AND pdi.DeviceId = ?
-                AND u.Username = pdi.Username
-                AND pat.PatientSerNum = u.UserTypeSerNum
+                AND pdi.Username = u.Username
+                AND u.UserTypeSerNum = pat.PatientSerNum
                 AND u.UserType = 'Patient'
             ;`;
 };
 
 exports.increaseSecurityAnswerAttempt = function()
 {
-    return `UPDATE PatientDeviceIdentifier SET Attempt = Attempt + 1 WHERE DeviceId = ?`;
+    return `UPDATE PatientDeviceIdentifier
+            SET Attempt = Attempt + 1
+            WHERE Username = ?
+                AND DeviceId = ?
+            ;`;
 };
+
+/**
+ * @desc Resets the number of security answer attempts made for a user on a device to 0.
+ * @returns {string}
+ */
 exports.resetSecurityAnswerAttempt = function()
 {
-    return `UPDATE PatientDeviceIdentifier SET Attempt = 0, TimeoutTimestamp = NULL WHERE DeviceId = ?`;
+    return `UPDATE PatientDeviceIdentifier
+            SET Attempt = 0,
+                TimeoutTimestamp = NULL
+            WHERE Username = ?
+                AND DeviceId = ?
+            ;`;
 };
+
 exports.setTimeoutSecurityAnswer = function()
 {
-    return `UPDATE PatientDeviceIdentifier SET TimeoutTimestamp = ? WHERE DeviceId = ?`;
+    return `UPDATE PatientDeviceIdentifier
+            SET TimeoutTimestamp = ?
+            WHERE Username = ?
+              AND DeviceId = ?
+            ;`;
 };
+
 exports.setNewPassword=function()
 {
-    return "UPDATE Users SET Password = ? WHERE UserTypeSerNum = ?";
+    return "UPDATE Users SET Password = ? WHERE Username = ?";
 };
 
 exports.checkin=function()
@@ -482,7 +501,8 @@ exports.updateDeviceIdentifiers = function()
                 DeviceType,
                 appVersion,
                 SessionId,
-                Trusted,LastUpdated
+                Trusted,
+                LastUpdated
             ) VALUES (NULL,?,?,?,?,?,?,0,NULL)
             ON DUPLICATE KEY UPDATE RegistrationId = ?, SessionId = ?;`
 };
@@ -573,7 +593,12 @@ exports.cacheSecurityAnswerFromDjango = () => {
 }
 
 exports.setTrusted = function () {
-    return "UPDATE PatientDeviceIdentifier SET Trusted = 1 WHERE DeviceId = ?";
+    return `UPDATE PatientDeviceIdentifier
+            SET Trusted = ?
+            WHERE
+              Username = ?
+              AND DeviceId = ?
+            ;`;
 };
 
 /**
