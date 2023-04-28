@@ -333,8 +333,11 @@ exports.getPatientPasswordForVerification = function()
             WHERE pat.Email= ? AND pat.PatientSerNum = u.UserTypeSerNum`;
 };
 
-exports.getPatientFieldsForPasswordReset = function()
-{
+/**
+ * @desc Query that returns User and Patient information used in security requests.
+ * @returns {string} The query.
+ */
+exports.getUserPatientSecurityInfo = function() {
     return `SELECT DISTINCT
                 pat.SSN,
                 pat.Email,
@@ -348,7 +351,10 @@ exports.getPatientFieldsForPasswordReset = function()
                 Patient pat,
                 PatientDeviceIdentifier pdi
             WHERE
-                pat.Email = ? AND pat.PatientSerNum = u.UserTypeSerNum AND pdi.DeviceId = ?
+                pat.PatientSerNum = u.UserTypeSerNum
+                AND u.UserType = 'Patient'
+                AND pat.Email = ?
+                AND pdi.DeviceId = ?
             ;`;
 };
 

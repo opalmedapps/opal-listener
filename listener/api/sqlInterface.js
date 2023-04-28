@@ -864,13 +864,12 @@ exports.setTimeoutSecurityAnswer = function(requestObject, timestamp) {
 };
 
 /**
- * getPatientFieldsForPasswordReset
- * @desc gets patient fields for password reset
- * @param requestObject
- * @return {Promise}
+ * @desc Gets and returns User and Patient fields used in security requests, such as password resets and verifying security answers.
+ * @param {object} requestObject A security request object.
+ * @return {Promise} Resolves to rows containing the user and patient's security information.
  */
-exports.getPatientFieldsForPasswordReset=function(requestObject) {
-    return exports.runSqlQuery(queries.getPatientFieldsForPasswordReset(),[requestObject.UserEmail, requestObject.DeviceId]);
+exports.getUserPatientSecurityInfo = requestObject => {
+    return exports.runSqlQuery(queries.getUserPatientSecurityInfo(),[requestObject.UserEmail, requestObject.DeviceId]);
 };
 
 /**

@@ -46,7 +46,6 @@ function requestFormatter({key,request}) {
 						'Server error, report the error to the hospital',
 						opalReq,
 						err.cause,
-						JSON.stringify(err)
 					)).toLegacy();
 				}
 			});
