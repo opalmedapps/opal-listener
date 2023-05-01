@@ -24,8 +24,11 @@ class SecurityDjango {
         };
         logger.log('info', "API: Calling backend to get random security question and answer for the user");
         const response = await ApiRequest.makeRequest(requestParams);
-        if (response.data) return response.data;
-        else throw new Error('Failed to get random security question and answer from the backend');
+        if (response?.data) return response.data;
+        else {
+            logger.log('error', 'Error from API call', response);
+            throw new Error('Failed to get random security question and answer from the backend');
+        }
     }
 }
 

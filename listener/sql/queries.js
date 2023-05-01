@@ -470,27 +470,6 @@ exports.userEncryption=function()
     return "SELECT SecurityQuestion.QuestionText_EN, SecurityQuestion.QuestionText_FR, SecurityAnswer.AnswerText FROM SecurityQuestion, SecurityAnswer WHERE SecurityAnswer.PatientSerNum="+serNum +" AND SecurityQuestion.SecurityQuestionSerNum = SecurityAnswer.SecurityQuestionSerNum";
 };
 
-    // TODO check this usage and SecurityAnswer
-exports.getSecQuestion=function()
-{
-    return `SELECT
-                sq.QuestionText_EN,
-                sq.QuestionText_FR,
-                sa.SecurityAnswerSerNum,
-                sa.PatientSerNum
-            FROM
-                SecurityQuestion sq,
-                SecurityAnswer sa,
-                Patient pat
-            WHERE
-                pat.Email = ?
-            AND
-                sa.PatientSerNum = pat.PatientSerNum
-            AND
-                sq.SecurityQuestionSerNum = sa.SecurityQuestionSerNum
-            ORDER BY RAND() LIMIT 1`;
-};
-
 exports.updateDeviceIdentifiers = function()
 {
     return `INSERT INTO PatientDeviceIdentifier(

@@ -58,10 +58,11 @@ const LEGACYAPI = {
  * @type {{SecurityQuestion: *, SetNewPassword: *, VerifyAnswer: *}}
  */
 exports.securityAPI = {
-    'SecurityQuestion': security.securityQuestion,
+    'SecurityQuestion': security.getSecurityQuestion,
     'SetNewPassword': security.setNewPassword,
     'VerifyAnswer': security.verifySecurityAnswer,
 };
+
 /**
  * New API handlers
  * @type {{PatientTestDates: PatientTestCollectedDatesHandler, UpdateSecurityQuestionAnswer: UpdateSecurityQuestionAnswerRequestHandler, PatientTestTypeResults: PatientTestTypeResultsHandler, PatientTestDateResults: PatientTestCollectedDateResultsHandler, PatientTestTypes: PatientTestTypesHandler, RequestFile: FileRequestHandler, SecurityQuestionAnswerList: GetSecurityQuestionAnswerListRequestHandler}}

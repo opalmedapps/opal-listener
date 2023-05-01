@@ -1173,21 +1173,16 @@ function combineResources(rows)
     return r.promise;
 }
 
-exports.getSecurityQuestion = async function (requestObject){
-    logger.log('debug', 'in get secyurity wquestuion in sql interface');
-
+exports.getSecurityQuestion = async function (requestObject) {
     try {
-        let queryRows = await exports.runSqlQuery(queries.getSecQuestion(), [requestObject.UserEmail]);
-        console.log('OLD----', queryRows);
         let apiResponse = await SecurityDjango.getRandomSecurityQuestionAnswer(requestObject.UserID);
-        console.log('NEW----', apiResponse);
-        // TODO test this case
-        if (apiResponse.question === '' || apiResponse.answer === '') throw "No security questions found.";
+        if (apiResponse.question === '' || apiResponse.answer === '') throw "API call returned a blank question or answer";
 
         await exports.runSqlQuery(queries.cacheSecurityAnswerFromDjango(), [apiResponse.answer, requestObject.DeviceId, requestObject.UserID]);
 
         // Security question format read by the app has changed after 1.12.2
         if (Version.versionLessOrEqual(requestObject.AppVersion, Version.version_1_12_2)) return {
+            // To maintain login for 1.12.2 and previous versions, return the one available question for either language
             Data: {
                 securityQuestion: {
                     securityQuestion_EN: apiResponse.question,
@@ -1197,16 +1192,14 @@ exports.getSecurityQuestion = async function (requestObject){
         };
         else return {
             Data: {
-                question: apiResponse.question,
+                securityQuestion: apiResponse.question,
             }
         }
     }
-    // TODO test case
-    catch(error) {
-        throw {
-            Response:'error',
-            Reason:'Error getting security question due to '+error
-        };
+    catch (error) {
+        let errMsg = "Error getting a security question from Django and caching it locally";
+        logger.log('error', errMsg, error);
+        throw new Error(errMsg);
     }
 };
 
