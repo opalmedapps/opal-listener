@@ -18,7 +18,7 @@ exports.verifySecurityAnswer = async (requestKey, requestObject) => {
     logger.log('info', `Verifying security answer for username ${requestObject?.UserID}`);
 
     // Get security info needed to verify the answer, including the cached answer from PatientDeviceIdentifier.
-    let user = getUserPatientSecurityInfo(requestKey, requestObject);
+    let user = await getUserPatientSecurityInfo(requestKey, requestObject);
 
     // TODO test
     // Handle security answer attempts (resetting the attempts, or blocking the user after too many attempts)
@@ -41,7 +41,7 @@ exports.verifySecurityAnswer = async (requestKey, requestObject) => {
         unencrypted = await utility.decrypt(requestObject.Parameters, user.SecurityAnswer);
     }
     catch (error) {
-        logger.log('error', 'Wrong security answer; increasing security answer attempts', error);
+        logger.log('error', 'Wrong security answer (from decryption failure); increasing security answer attempts', error);
         await sqlInterface.increaseSecurityAnswerAttempt(requestObject);
         return new OpalSecurityResponseSuccess(answerNotVerified, requestKey, requestObject);
     }
@@ -58,6 +58,7 @@ exports.verifySecurityAnswer = async (requestKey, requestObject) => {
     else isVerified = answerValid;
 
     if (!isVerified) {
+        logger.log('error', 'Wrong security answer (from verification); increasing security answer attempts');
         return new OpalSecurityResponseSuccess(answerNotVerified, requestKey, requestObject);
     }
 
