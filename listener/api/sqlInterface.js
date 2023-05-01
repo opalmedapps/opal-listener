@@ -613,7 +613,7 @@ exports.updateAccountField=function(requestObject) {
             //Hash the password before storing
             let hashedPassword = utility.hash(newValue);
             //Update database
-            exports.runSqlQuery(queries.setNewPassword(), [hashedPassword, patient.PatientSerNum])
+            exports.runSqlQuery(queries.setNewPassword(), [hashedPassword, requestObject.UserID])
                 .then(()=>{
                     delete requestObject.Parameters.NewValue;
                     r.resolve({Response:'success'});
