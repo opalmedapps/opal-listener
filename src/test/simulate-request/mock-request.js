@@ -12,7 +12,6 @@ const requestDataApi = {
     AppVersion: '100.100.100',
     Request: 'api',
     DeviceId: '',
-    Token: CryptoJs.SHA512('randomString').toString(),
     UserID: 'JUYxJadQuhhOkC1TfrAqD4crhi73',
     Parameters: {
         method: 'get',
@@ -69,9 +68,9 @@ const requestRegistration = {
  */
 const requestData = {
     AppVersion: '100.100.100',
+    RequestType: 'LEGACY',
     Request: 'DeviceIdentifier',
     DeviceId: '',
-    Token: CryptoJs.SHA512('randomString').toString(),
     UserID: 'JUYxJadQuhhOkC1TfrAqD4crhi73',
     Parameters: {
         deviceType: 'browser',
