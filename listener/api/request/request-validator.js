@@ -81,14 +81,15 @@ class RequestValidator {
 	static validateRequestCredentials(request){
 		if(!request.meta || !request.type) return false;
 		//Must have all the properties of a request
-		let prop = ['DeviceId', 'Token', 'UserID','Timestamp','UserEmail', 'AppVersion'];
+		let prop = ['DeviceId', 'UserID','Timestamp','UserEmail', 'AppVersion'];
 		let errors = [];
 
 		let isValid = prop.reduce((valid, property)=>{
 			if(!valid) return false;
 			else {
-				if(!request.meta.hasOwnProperty(property)) errors.push(property);
-				return request.meta.hasOwnProperty(property);
+				let propValid = request.meta.hasOwnProperty(property) && typeof request.meta[property] !== 'undefined';
+				if(!propValid) errors.push(property);
+				return propValid;
 			}
 		},true);
 
