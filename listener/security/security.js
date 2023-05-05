@@ -116,8 +116,8 @@ function confirmValidSecurityAnswer(unencryptedParams, requestObject, user) {
  * @returns {Promise<OpalSecurityResponseSuccess>} Resolves if the password was successfully changed,
  *                                                 or rejects with an OpalSecurityResponseError.
  */
-exports.setNewPassword = async function(requestKey, requestObject) {
-    logger.log('info', `Running function setNewPassword for username = ${requestObject.UserID}`);
+exports.resetPassword = async function(requestKey, requestObject) {
+    logger.log('info', `Running function resetPassword for username = ${requestObject.UserID}`);
 
     // Special case used to set the request's UserID in the case of password reset requests
     await ensureUserIdAvailable(requestObject);

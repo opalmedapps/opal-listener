@@ -59,7 +59,7 @@ const LEGACYAPI = {
  */
 exports.securityAPI = {
     'SecurityQuestion': security.getSecurityQuestion,
-    'SetNewPassword': security.setNewPassword,
+    'SetNewPassword': security.resetPassword,
     'VerifyAnswer': security.verifySecurityAnswer,
 };
 
