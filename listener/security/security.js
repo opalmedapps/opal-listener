@@ -1,4 +1,5 @@
 const logger = require('./../logs/logger');
+const firebase = require('firebase-admin');
 const sqlInterface = require('./../api/sqlInterface.js');
 const utility = require('./../utility/utility.js');
 const { Version } = require('../../src/utility/version');
@@ -17,6 +18,9 @@ const passwordResetSuccess = { PasswordReset: "true" };
 exports.verifySecurityAnswer = async (requestKey, requestObject) => {
     logger.log('info', `Verifying security answer for username ${requestObject?.UserID}`);
 
+    // Special case used to set the request's UserID in the case of password reset requests
+    await ensureUserIdAvailable(requestObject);
+
     // Get security info needed to verify the answer, including the cached answer from PatientDeviceIdentifier.
     let user = await getUserPatientSecurityInfo(requestKey, requestObject);
 
@@ -24,7 +28,6 @@ exports.verifySecurityAnswer = async (requestKey, requestObject) => {
     await handleTooManyAttempts(requestKey, requestObject, user);
 
     let unencrypted;
-
     // An error caught during decryption indicates an incorrect security answer
     try {
         logger.log('debug', 'Attempting decryption to verify security answer');
@@ -36,7 +39,7 @@ exports.verifySecurityAnswer = async (requestKey, requestObject) => {
         return new OpalSecurityResponseSuccess(answerNotVerified, requestKey, requestObject);
     }
 
-    // As an additional confirmation, validate that the provided answer (once decrypted) matched the expected value
+    // As an additional confirmation, validate that the provided answer (once decrypted) matches the expected value
     let isVerified = confirmValidSecurityAnswer(unencrypted, requestObject, user);
     if (!isVerified) {
         logger.log('error', 'Wrong security answer (from verification); increasing security answer attempts');
@@ -79,6 +82,9 @@ function confirmValidSecurityAnswer(unencryptedParams, requestObject, user) {
 exports.setNewPassword = async function(requestKey, requestObject) {
     logger.log('info', `Running function setNewPassword for username = ${requestObject.UserID}`);
 
+    // Special case used to set the request's UserID in the case of password reset requests
+    await ensureUserIdAvailable(requestObject);
+
     // Get security info needed to set a new password
     let user = await getUserPatientSecurityInfo(requestKey, requestObject);
 
@@ -104,8 +110,10 @@ exports.setNewPassword = async function(requestKey, requestObject) {
 
 exports.getSecurityQuestion = async function(requestKey, requestObject) {
     let unencrypted = await utility.decrypt(requestObject.Parameters, utility.hash("none"));
-
     logger.log('debug', `Unencrypted: ${JSON.stringify(unencrypted)}`);
+
+    // Special case used to set the request's UserID in the case of password reset requests
+    await ensureUserIdAvailable(requestObject);
 
     try {
         logger.log('verbose', `Updating device identifiers for user ${requestObject.UserID}`);
@@ -117,8 +125,9 @@ exports.getSecurityQuestion = async function(requestKey, requestObject) {
         return new OpalSecurityResponseSuccess(response.Data, requestKey, requestObject);
     }
     catch(error) {
-        logger.log('error', 'Error getting a security question for the user', error);
-        throw new OpalSecurityResponseError(CODE.SERVER_ERROR, "Error getting a security question for the user", requestKey, requestObject);
+        let errMsg = 'Error getting a security question for the user';
+        logger.log('error', errMsg, error);
+        throw new OpalSecurityResponseError(CODE.SERVER_ERROR, errMsg, requestKey, requestObject);
     }
 };
 
@@ -141,4 +150,23 @@ async function getUserPatientSecurityInfo(requestKey, requestObject) {
         }
     });
     return userPatient;
+}
+
+//
+/**
+ * @desc Ensures that a requestObject has a non-empty UserID parameter, and if not, initializes it.
+         This is required specifically when requesting a security answer for a password reset,
+         because during such a request, the app does not yet have access to the user's Firebase UID.
+         This function looks up the UID value via firebase-admin's auth tool.
+         Note: this function modifies the original requestObject.
+ * @author Stacey Beard
+ * @date 2023-05-04
+ * @param requestObject The security request object to check.
+ * @returns {Promise<void>} Resolves if the addition was successful or if a UserID was already provided.
+ */
+async function ensureUserIdAvailable(requestObject) {
+    if (requestObject.UserID) return;
+    let userRecord = await firebase.auth().getUserByEmail(requestObject.UserEmail);
+    requestObject.UserID = userRecord?.uid;
+    if (!requestObject.UserID) throw 'Failed to look up and set UserID value using the firebase admin tool; no value returned';
 }
