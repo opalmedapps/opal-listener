@@ -8,13 +8,24 @@ const OpalSecurityResponseError = require('../api/response/security-response-err
 const OpalSecurityResponseSuccess = require('../api/response/security-response-success');
 
 const FIVE_MINUTES = 300000;
+
+// Available Opal response error codes
 const CODE = OpalResponse.CODE;
 
+// Commonly returned responses
 const answerVerified = { AnswerVerified: "true" };
 const answerNotVerified = { AnswerVerified: "false" };
 const passwordResetSuccess = { PasswordReset: "true" };
 
-
+/**
+ * @desc Verifies a security answer provided by the user. Notably, if the request parameters fail to decrypt,
+ *       then this is one indication that the wrong answer may have been provided (and used to encrypt the request).
+ * @param {string} requestKey The key (branch) onto which this request was pushed on Firebase.
+ * @param {object} requestObject The security request made by the app.
+ * @returns {Promise<OpalSecurityResponseSuccess>} Resolves if the request successfully completes, whether the answer
+ *                                                 is correct or not. The returned object indicates via 'AnswerVerified'
+ *                                                 whether the user's provided answer was correct or incorrect.
+ */
 exports.verifySecurityAnswer = async (requestKey, requestObject) => {
     logger.log('info', `Verifying security answer for username ${requestObject?.UserID}`);
 
@@ -51,6 +62,15 @@ exports.verifySecurityAnswer = async (requestKey, requestObject) => {
     return new OpalSecurityResponseSuccess(answerVerified, requestKey, requestObject);
 };
 
+/**
+ * @desc Helper function used by verifySecurityAnswer to handle behavior related to too many security answer attempts.
+ *       This function resets the too-many-attempts timeout when applicable, and instigates the timeout when the user
+ *       reaches 5 failed attempts.
+ * @param {string} requestKey The key (branch) onto which this request was pushed on Firebase.
+ * @param {object} requestObject The security request made by the app.
+ * @param {object} user The user/patient object returned by getUserPatientSecurityInfo.
+ * @returns {Promise<void>} Resolves if no issues occur, or rejects with an OpalSecurityResponseError.
+ */
 async function handleTooManyAttempts(requestKey, requestObject, user) {
     // Reset the attempts if the timeout was reached
     if (user.TimeoutTimestamp != null && requestObject.Timestamp - (new Date(user.TimeoutTimestamp)).getTime() > FIVE_MINUTES) {
@@ -65,6 +85,16 @@ async function handleTooManyAttempts(requestKey, requestObject, user) {
     }
 }
 
+/**
+ * @desc Helper function used by verifySecurityAnswer to provide a second level of verification of a security answer.
+ *       While verifySecurityAnswer first checks for decryption success, this function then checks that the 'Answer' provided
+ *       in the request params matches the expected one.
+ *       Also contains a legacy check of the SSN value provided until version 1.12.2.
+ * @param {object} unencryptedParams The request params, after decryption.
+ * @param {object} requestObject The security request made by the app.
+ * @param {object} user The user/patient object returned by getUserPatientSecurityInfo.
+ * @returns {boolean} Returns true if the second validation passes; false otherwise.
+ */
 function confirmValidSecurityAnswer(unencryptedParams, requestObject, user) {
     // Confirm the validity of the answer by checking its decrypted value in the request parameters.
     let answerValid = unencryptedParams.Answer === user.SecurityAnswer;
@@ -79,6 +109,13 @@ function confirmValidSecurityAnswer(unencryptedParams, requestObject, user) {
     return isVerified;
 }
 
+/**
+ * @desc Function used during a password reset request (non-logged-in) to change the user's password.
+ * @param {string} requestKey The key (branch) onto which this request was pushed on Firebase.
+ * @param {object} requestObject The security request made by the app.
+ * @returns {Promise<OpalSecurityResponseSuccess>} Resolves if the password was successfully changed,
+ *                                                 or rejects with an OpalSecurityResponseError.
+ */
 exports.setNewPassword = async function(requestKey, requestObject) {
     logger.log('info', `Running function setNewPassword for username = ${requestObject.UserID}`);
 
@@ -108,6 +145,15 @@ exports.setNewPassword = async function(requestKey, requestObject) {
     }
 };
 
+/**
+ * @desc Gets a security question from the backend to be shown to the user, and caches their answer for use in the listener.
+ *       The cached answer will be used to decrypt all responses during the user's current session.
+ *       This function is also called during the password reset process, where a security question is also presented.
+ * @param {string} requestKey The key (branch) onto which this request was pushed on Firebase.
+ * @param {object} requestObject The security request made by the app.
+ * @returns {Promise<OpalSecurityResponseSuccess>} Resolves to an object containing the security question,
+ *                                                 or rejects with an OpalSecurityResponseError.
+ */
 exports.getSecurityQuestion = async function(requestKey, requestObject) {
     let unencrypted = await utility.decrypt(requestObject.Parameters, utility.hash("none"));
     logger.log('debug', `Unencrypted: ${JSON.stringify(unencrypted)}`);
@@ -131,6 +177,15 @@ exports.getSecurityQuestion = async function(requestKey, requestObject) {
     }
 };
 
+/**
+ * @desc Helper function used to get the user/patient information required for any security request in this file.
+ *       See the SQL query called for details on the returned values.
+ * @param {string} requestKey The key (branch) onto which the request was pushed on Firebase.
+ * @param {object} requestObject The security request made by the app.
+ * @returns {Promise<object>} Resolves to an object containing all required attributes for the user/patient,
+ *                            or rejects with a OpalSecurityResponseError if a single record cannot be found,
+ *                            or if any essential values are missing.
+ */
 async function getUserPatientSecurityInfo(requestKey, requestObject) {
     let rows = await sqlInterface.getUserPatientSecurityInfo(requestObject);
     if (rows.length !== 1) {
@@ -152,7 +207,6 @@ async function getUserPatientSecurityInfo(requestKey, requestObject) {
     return userPatient;
 }
 
-//
 /**
  * @desc Ensures that a requestObject has a non-empty UserID parameter, and if not, initializes it.
          This is required specifically when requesting a security answer for a password reset,
