@@ -7,7 +7,6 @@ const Q = require('q');
 
 
 const API = {
-    'AccessLevelList': apiFunctionRequest.getAccessLevelList,
     'LanguageList': apiFunctionRequest.getLanguageList,
     'TermsandAggreementDocuments': apiFunctionRequest.getTermsandAgreementDocuments,
     'RegisterPatient': apiFunctionRequest.registerPatient,

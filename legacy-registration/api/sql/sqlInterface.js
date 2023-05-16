@@ -25,29 +25,6 @@ const opaldbCredentials = {
  **/
 const opalPool = mysql.createPool(opaldbCredentials);
 
-
-/**
-     getAccessLevelList
-     @desc Fetch the Opal level of access list.
-     @param requestObject
-     @return {Promise}
- **/
-exports.getAccessLevelList = function (requestObject) {
-    let r = Q.defer();
-    let Parameters = requestObject.Parameters.Fields;
-
-    exports.runOpaldbSqlQuery(queries.getAccessLevelList(), [Parameters])
-        .then((rows) => {
-            r.resolve(rows);
-        })
-        .catch((error) => {
-            logger.log('error', 'Problems querying getAccessLevelList due to ' + error);
-            r.reject(error);
-        });
-
-    return r.promise;
-}
-
 /**
      getLanguageList
      @desc Get the Opal app language list(French & English)

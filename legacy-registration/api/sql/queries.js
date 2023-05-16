@@ -1,7 +1,3 @@
-exports.getAccessLevelList = function () {
-    return "CALL reg_getAccessLevelList(?);";
-};
-
 exports.getLanguageList = function () {
     return "CALL reg_getLanguageList(?);";
 };
