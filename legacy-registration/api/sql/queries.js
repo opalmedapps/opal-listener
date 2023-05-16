@@ -1,7 +1,3 @@
-exports.getSecQuestionsList = function () {
-     return "CALL reg_getSecurityQuestions(?);";
-};
-
 exports.getAccessLevelList = function () {
     return "CALL reg_getAccessLevelList(?);";
 };

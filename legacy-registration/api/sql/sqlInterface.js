@@ -27,28 +27,6 @@ const opalPool = mysql.createPool(opaldbCredentials);
 
 
 /**
-     getSecurityQuestionsList
-     @desc Fetch all the security questions from the database if user entered correct RAMQ.
-     @param requestObject
-     @return {Promise}
- **/
-exports.getSecurityQuestionsList = function (requestObject) {
-    let r = Q.defer();
-    let Parameters = requestObject.Parameters.Fields;
-
-    exports.runOpaldbSqlQuery(queries.getSecQuestionsList(), [Parameters])
-        .then((rows) => {
-            r.resolve(rows);
-        })
-        .catch((error) => {
-            logger.log('error', 'Problems querying getSecurityQuestionsList due to ' + error);
-            r.reject(error);
-        });
-
-    return r.promise;
-}
-
-/**
      getAccessLevelList
      @desc Fetch the Opal level of access list.
      @param requestObject

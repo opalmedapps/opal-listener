@@ -17,19 +17,6 @@ const Q = require('q');
 const { sendMail } = require('./utility/mail.js');
 
 /**
- * @description Get all security questions.
- * @param {Object} requestObject - The calling request's requestObject.
- * @returns {Promise<void>} Resolves if the call completes successfully, or rejects with an error.
- */
-exports.getSecurityQuestionsList = function (requestObject) {
-    return new Promise((resolve, reject) => {
-        sqlInterface.getSecurityQuestionsList(requestObject).then((members) => {
-            resolve({ Data: members });
-        }).catch((err) => reject({ Response: error, Reason: err }));
-    });
-};
-
-/**
  * @description Fetch the Opal level of accesss list.
  * @param {Object} requestObject - The calling request's requestObject.
  * @returns {Promise<void>} Resolves if the call completes successfully, or rejects with an error.
