@@ -1,7 +1,3 @@
-exports.getTermsandAgreementDocuments = function () {
-    return "CALL reg_getTermsandAggrementDocuments(?);";
-};
-
 exports.updatePatient = function () {
     return "SELECT reg_UpdatePatientInfo(?,?,?,?,?,?,?,?,?,?,?,?,?,?,?) AS Result;";
 };

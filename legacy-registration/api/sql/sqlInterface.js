@@ -26,28 +26,6 @@ const opaldbCredentials = {
 const opalPool = mysql.createPool(opaldbCredentials);
 
 /**
-     getTermsandAgreementDocuments
-     @desc Get the terms and agreement documents
-     @param requestObject
-     @return {Promise}
- **/
-exports.getTermsandAgreementDocuments = function (requestObject) {
-    let r = Q.defer();
-    let Parameters = requestObject.Parameters.Fields;
-
-    exports.runOpaldbSqlQuery(queries.getTermsandAgreementDocuments(), [Parameters])
-        .then((rows) => {
-            r.resolve(rows);
-        })
-        .catch((error) => {
-            logger.log('error', 'Problems querying getTermsandAgreementDocuments due to ' + error);
-            r.reject(error);
-        });
-
-    return r.promise;
-}
-
-/**
  insertPatient
  @desc insert a patient record.
  @param requestObject
