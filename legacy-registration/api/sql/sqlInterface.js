@@ -25,40 +25,6 @@ const opaldbCredentials = {
  **/
 const opalPool = mysql.createPool(opaldbCredentials);
 
-
-/**
-     SQL POOL CONFIGURATION for registration database
-
-     Deprecated since it is unused.
-
-     @type {Pool}
-     @deprecated
- **/
-const registerPool = mysql.createPool(opaldbCredentials);
-
-/**
-     insertIPLog
-     @desc Insert the user IP each time they attempt to register this log will be used to block abusive
-     @param requestObject
-     @return {Promise}
- **/
-exports.insertIPLog = function (requestObject) {
-    let r = Q.defer();
-    let Parameters = requestObject.Parameters.Fields;
-
-
-    exports.runRegistrationSqlQuery(queries.insertIPLog(), [Parameters.IPAddress])
-        .then((rows) => {
-            r.resolve(rows);
-        })
-        .catch((error) => {
-            logger.log('error', 'Problems querying insertIPLog due to ' + error);
-            r.reject(error);
-        });
-
-    return r.promise;
-}
-
 /**
      validateIP
      @desc Validate the user IP to check if IP is blocked or not.

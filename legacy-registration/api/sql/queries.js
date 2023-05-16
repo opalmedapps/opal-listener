@@ -1,7 +1,3 @@
-exports.insertIPLog = function () {
-    return "SELECT insertIPLog(?) AS Result;";
-};
-
 exports.validateIP = function () {
     return "SELECT validateIP(?) AS Result;";
 };
@@ -44,9 +40,9 @@ exports.getSiteAndMrn = function() {
 
 exports.getPatient = function() {
     return `
-        SELECT patient.FirstName, patient.LastName, patient.TelNum, patient.BlockedStatus, \`phi\`.MRN, \`hit\`.Description_EN AS hospital_name_EN, \`hit\`.Description_FR AS hospital_name_FR 
-        FROM Patient patient 
-        JOIN Patient_Hospital_Identifier \`phi\` ON \`phi\`.PatientSerNum = patient.PatientSerNum 
+        SELECT patient.FirstName, patient.LastName, patient.TelNum, patient.BlockedStatus, \`phi\`.MRN, \`hit\`.Description_EN AS hospital_name_EN, \`hit\`.Description_FR AS hospital_name_FR
+        FROM Patient patient
+        JOIN Patient_Hospital_Identifier \`phi\` ON \`phi\`.PatientSerNum = patient.PatientSerNum
         JOIN Hospital_Identifier_Type \`hit\` ON \`hit\`.code = \`phi\`.Hospital_Identifier_Type_Code WHERE patient.SSN = ?;
     `;
 };
