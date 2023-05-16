@@ -1,7 +1,3 @@
-exports.validateIP = function () {
-    return "SELECT validateIP(?) AS Result;";
-};
-
 exports.validateInputs = function () {
     return "SELECT validateInputs(?,?,?) AS Result;";
 };

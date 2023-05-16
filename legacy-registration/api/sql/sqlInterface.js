@@ -26,28 +26,6 @@ const opaldbCredentials = {
 const opalPool = mysql.createPool(opaldbCredentials);
 
 /**
-     validateIP
-     @desc Validate the user IP to check if IP is blocked or not.
-     @param requestObject
-     @return {Promise}
- **/
-exports.validateIP = function (requestObject) {
-    let r = Q.defer();
-    let Parameters = requestObject.Parameters.Fields;
-
-    exports.runRegistrationSqlQuery(queries.validateIP(), [Parameters.IPAddress])
-        .then((rows) => {
-            r.resolve(rows);
-        })
-        .catch((error) => {
-            logger.log('error', 'Problems querying validateIP due to ' + error);
-            r.reject(error);
-        });
-
-    return r.promise;
-}
-
-/**
      validateInputs
      @desc This function will validate user's firebaseBranchName, registrationcode, RAMQ.
      @param requestObject
