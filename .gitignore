@@ -17,6 +17,10 @@ yarn-error.log*
 heartbeat.log*
 heartbeatdb.log*
 
+# Certificates
+!certs/.gitkeep
+certs/
+
 # IDE: PhpStorm
 .idea/
 

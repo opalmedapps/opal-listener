@@ -1,8 +1,10 @@
 const mysql = require("mysql");
 const logger = require('./../logs/logger');
+
 class SQLQueryRunner {
 	#SQL_QUERY_POOL;
 	#DB_CREDENTIALS;
+
 	constructor(databaseCredentials={}) {
 		this.#DB_CREDENTIALS = databaseCredentials;
 		this.#SQL_QUERY_POOL = mysql.createPool(databaseCredentials);
@@ -17,9 +19,22 @@ class SQLQueryRunner {
 	 * @returns {Promise<any>} Returns a promise with the results from the query
 	 */
 	run(query, parameters = null, postProcessor = null) {
+		let connectionErrorMsg = `Failed to connect to database ${this.#DB_CREDENTIALS.database}`;
+
 		return new Promise((resolve, reject) => {
 			this.#SQL_QUERY_POOL.getConnection(function (err, connection) {
-				logger.log('debug', `Grabbed SQL connection: ${connection}`);
+				logger.log('debug', `Grabbed SQL connection: ${connection}, `
+					+ `with SSL ${process.env.USE_SSL === '1' ? 'enabled': 'disabled'}`);
+				if (err) {
+					logger.log('error', `Failed to establish database connection`, err);
+					reject(connectionErrorMsg);
+					return;
+				}
+				else if (!connection) {
+					reject(connectionErrorMsg);
+					return;
+				}
+
 				const que = connection.query(query, parameters, function (err, rows) {
 					connection.release();
 					if (err) {

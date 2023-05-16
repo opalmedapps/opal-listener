@@ -710,14 +710,14 @@ exports.updateDeviceIdentifier = function(requestObject, parameters) {
                 logger.log('debug', 'successfully updated device identifiers');
                 r.resolve({Response:'success'});
             }).catch((error) => {
-                let errorMessage = 'Error updating device identifiers due to ';
+                let errorMessage = 'Error updating device identifiers due to';
                 logger.log('error', errorMessage, error);
-                r.reject({Response:'error', Reason: errorMessage});
+                r.reject({Response:'error', Reason: `${errorMessage}: ${error}`});
             });
     }).catch((error) => {
-        let errorMessage = 'Error getting patient fields due to ';
+        let errorMessage = 'Error getting patient fields due to';
         logger.log('error', errorMessage, error);
-        r.reject({Response:'error', Reason: errorMessage});
+        r.reject({Response:'error', Reason: `${errorMessage}: ${error}`});
     });
     return r.promise;
 };
