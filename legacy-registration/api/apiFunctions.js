@@ -17,19 +17,6 @@ const Q = require('q');
 const { sendMail } = require('./utility/mail.js');
 
 /**
- * @description Validate user input and search the user.
- * @param {Object} requestObject - The calling request's requestObject.
- * @returns {Promise<void>} Resolves if the call completes successfully, or rejects with an error.
- */
-exports.validateInputs = function (requestObject) {
-    return new Promise((resolve, reject) => {
-        sqlInterface.validateInputs(requestObject).then((members) => {
-            resolve({ Data: members });
-        }).catch((err) => reject({ Response: error, Reason: err }));
-    });
-};
-
-/**
  * @description Get all security questions.
  * @param {Object} requestObject - The calling request's requestObject.
  * @returns {Promise<void>} Resolves if the call completes successfully, or rejects with an error.

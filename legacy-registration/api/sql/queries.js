@@ -1,7 +1,3 @@
-exports.validateInputs = function () {
-    return "SELECT validateInputs(?,?,?) AS Result;";
-};
-
 exports.getSecQuestionsList = function () {
      return "CALL reg_getSecurityQuestions(?);";
 };

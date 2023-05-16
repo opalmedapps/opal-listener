@@ -25,28 +25,6 @@ const opaldbCredentials = {
  **/
 const opalPool = mysql.createPool(opaldbCredentials);
 
-/**
-     validateInputs
-     @desc This function will validate user's firebaseBranchName, registrationcode, RAMQ.
-     @param requestObject
-     @return {Promise}
- **/
-exports.validateInputs = function (requestObject) {
-    let r = Q.defer();
-    let Parameters = requestObject.Parameters.Fields;
-
-    exports.runRegistrationSqlQuery(queries.validateInputs(), [Parameters.FirebaseBranchName, Parameters.RegistrationCode, Parameters.RAMQ])
-        .then((rows) => {
-            r.resolve(rows);
-        })
-        .catch((error) => {
-            logger.log('error', 'Problems querying validateInputs due to ' + error);
-            r.reject(error);
-        });
-
-    return r.promise;
-}
-
 
 /**
      getSecurityQuestionsList
