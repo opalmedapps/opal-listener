@@ -1,7 +1,3 @@
-exports.getLanguageList = function () {
-    return "CALL reg_getLanguageList(?);";
-};
-
 exports.getTermsandAgreementDocuments = function () {
     return "CALL reg_getTermsandAggrementDocuments(?);";
 };

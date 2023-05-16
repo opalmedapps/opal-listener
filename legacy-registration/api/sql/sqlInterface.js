@@ -26,28 +26,6 @@ const opaldbCredentials = {
 const opalPool = mysql.createPool(opaldbCredentials);
 
 /**
-     getLanguageList
-     @desc Get the Opal app language list(French & English)
-     @param requestObject
-     @return {Promise}
- **/
-exports.getLanguageList = function (requestObject) {
-    let r = Q.defer();
-    let Parameters = requestObject.Parameters.Fields;
-
-    exports.runOpaldbSqlQuery(queries.getLanguageList(), [Parameters])
-        .then((rows) => {
-            r.resolve(rows);
-        })
-        .catch((error) => {
-            logger.log('error', 'Problems querying getLanguageList due to ' + error);
-            r.reject(error);
-        });
-
-    return r.promise;
-}
-
-/**
      getTermsandAgreementDocuments
      @desc Get the terms and agreement documents
      @param requestObject
