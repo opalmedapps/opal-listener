@@ -30,12 +30,12 @@ class SQLQueryRunner {
 	 */
 	readSSLCAFile() {
 		try {
-			let filePath = process.env.SSL_CA;
+			let filePath = process.env.NODE_EXTRA_CA_CERTS;
 			return fs.readFileSync(filePath);
 		}
 		catch(error) {
 			logger.log('error', 'Failed to read SSL CA file. SSL is enabled via the USE_SSL environment variable. ' +
-				'Check the path defined in .env under SSL_CA.', error);
+				'Check the path defined in .env as NODE_EXTRA_CA_CERTS.', error);
 			process.exit(1);
 		}
 	}
