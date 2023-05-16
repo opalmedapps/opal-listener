@@ -8,7 +8,6 @@ const Q = require('q');
 
 const API = {
     'RegisterPatient': apiFunctionRequest.registerPatient,
-    'GetPatientInfo': apiFunctionRequest.getPatientInfo,
 };
 
 /**

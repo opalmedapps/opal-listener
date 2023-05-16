@@ -5,7 +5,6 @@ const Q = require('q');
 const queries = require('../sql/queries.js');
 const logger = require('../../logs/logger.js');
 const config = require('../../config-adaptor');
-const requestUtility    = require("../../../listener/utility/request-utility");
 
 /** OPAL DATABASE CONFIGURATIONS **/
 const opaldbCredentials = {
@@ -102,17 +101,6 @@ exports.getSiteAndMrn = function (requestObject) {
         });
 
     return r.promise;
-};
-
-/**
- getPatient
- @desc If the patient Id is available, get list of patient hospital and mrn if there is any.
- @param requestObject
- @return {Promise}
- **/
-exports.getPatient = function (requestObject) {
-    let parameters = requestObject.Parameters.Fields;
-    return exports.runOpaldbSqlQuery(queries.getPatient(), [parameters.ramq]);
 };
 
 /**

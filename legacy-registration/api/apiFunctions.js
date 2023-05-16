@@ -17,27 +17,6 @@ const Q = require('q');
 const { sendMail } = require('./utility/mail.js');
 
 /**
- * @description Get a patient data info.
- * @param {Object} requestObject - The calling request's requestObject.
- * @returns { Data: response, Result: result }
- * @throws Throws an error if a required field is not present in the given request.
- */
-exports.getPatientInfo = async function(requestObject) {
-    let response = undefined;
-    let result = 'FAILURE';
-    try {
-        response = await sqlInterface.getPatient(requestObject);
-        if (typeof response[0] == 'object') {
-            response = response[0];
-            result = 'SUCCESS';
-        }
-    } catch (error) {
-        logger.log('error', `An error occurred while getting patient info (for ${requestObject.Parameters.Fields.ramq}): ${JSON.stringify(error)}`);
-    }
-    return { Data: response, Result: result };
-};
-
-/**
  * @description Register a patient
  * @param {Object} requestObject - The calling request's requestObject.
  * @returns { Data: result}
