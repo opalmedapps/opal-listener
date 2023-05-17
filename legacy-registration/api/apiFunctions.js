@@ -2,9 +2,7 @@
 
 var sqlInterface = require('../api/sql/sqlInterface.js');
 var firebaseFunction = require('../api/firebase/firebaseFunctions.js');
-const admin = require("firebase-admin");
 var CryptoJS = require("crypto-js");
-const utility = require('./utility/utility.js');
 const config = require('../config-adaptor');
 const opalRequest = require('./request/request.js');
 const logger = require('../logs/logger.js');
@@ -13,7 +11,6 @@ const ssl = require('../security/ssl.js');
 const path = require('path');
 const fs = require('fs');
 
-const Q = require('q');
 const { sendMail } = require('./utility/mail.js');
 
 /**
