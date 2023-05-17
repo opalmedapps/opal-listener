@@ -183,9 +183,6 @@ exports.registerPatient = async function(requestObject) {
         let result = await sqlInterface.registerPatient(requestObject);
         logger.log('debug', `Register patient response: ${JSON.stringify(result)}`);
 
-        // Delete the unique firebase branch
-        deleteFirebaseBranch(requestObject.BranchName);
-
         // Registration is considered successful at this point.
         // I.e., don't fail the whole registration if an error occurs now and only log an error.
         try {
@@ -324,20 +321,6 @@ function postPromise(options) {
         });
     });
 }
-
-// Function to delete the firebase branch
-function deleteFirebaseBranch(parameter) {
-
-    const db = admin.database();
-    const ref = db.ref(config.FIREBASE_ROOT_BRANCH + '/branch/' + parameter);
-
-    return ref.once("value", function (snapshot) {
-        if (snapshot.exists()) {
-            logger.log('debug', 'Firebase branch exist with these value in snapshot: ' + snapshot.val());
-            ref.remove();
-        }
-    });
-};
 
 /**
  * @description Returns the subject, body and HTML stream of the registration email in the given language.
