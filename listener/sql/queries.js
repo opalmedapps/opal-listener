@@ -436,10 +436,6 @@ exports.logPatientAction = function(){
             ;`
 };
 
-exports.securityQuestionEncryption=function(){
-    return "SELECT Password FROM Users WHERE Username = ?";
-};
-
 exports.userEncryption=function()
 {
     return `SELECT

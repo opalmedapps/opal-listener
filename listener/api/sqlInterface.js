@@ -763,22 +763,6 @@ exports.addToActivityLog=function(requestObject)
 };
 
 /**
- * @name getFirstEncryption
- * @param requestObject
- */
-exports.getFirstEncryption=function(requestObject) {
-    let r=Q.defer();
-    exports.runSqlQuery(queries.securityQuestionEncryption(),[requestObject.UserID])
-        .then((rows)=>{
-            r.resolve(rows);
-        }).catch((err)=>{
-            r.reject({Response:'error', Reason:err});
-        });
-    return r.promise;
-};
-
-
-/**
  * getEncryption
  * @desc Gets user password for encrypting/decrypting to return security question
  * @param requestObject
