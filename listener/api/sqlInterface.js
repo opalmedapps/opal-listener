@@ -931,24 +931,6 @@ function getPatientFromEmail(email) {
 }
 
 /**
- * @name getPasswordForVerification
- * @desc gets the user's password to crosscheck during login to verify that Firebase and DB passwords are synced
- * @param email
- * @return {Promise}
- */
-exports.getPasswordForVerification = function(email) {
-    let r=Q.defer();
-    exports.runSqlQuery(queries.getPatientPasswordForVerification(), [email])
-        .then((rows)=>{
-            if(rows.length === 0) r.reject({Response:'error',Reason:"No User match in DB"});
-            r.resolve(rows[0]);
-        }).catch((err)=> {
-            r.reject({Response: err, Reason:"Problem Fetching Password for verification"});
-        });
-    return r.promise;
-};
-
-/**
  * LoadDocuments
  * @desc Grabs file object to be loaded
  * @param rows

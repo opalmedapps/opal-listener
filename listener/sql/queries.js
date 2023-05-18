@@ -326,13 +326,6 @@ exports.getStudyQuestionnairesQuery = function(){
     return "SELECT QS.questionnaireID, Q.DateAdded, QC.QuestionnaireName_EN, QC.QuestionnaireName_FR FROM questionnaireStudy QS, Questionnaire Q, QuestionnaireControl QC, study S WHERE S.ID = QS.studyID AND QC.QuestionnaireControlSerNum = Q.QuestionnaireControlSerNum AND Q.QuestionnaireSerNum = QS.questionnaireId AND S.ID = ?";
 }
 
-exports.getPatientPasswordForVerification = function()
-{
-    return `SELECT DISTINCT u.Password
-            FROM Users u, Patient pat
-            WHERE pat.Email= ? AND pat.PatientSerNum = u.UserTypeSerNum`;
-};
-
 /**
  * @desc Query that returns User and Patient information used in security requests.
  * @returns {string} The query.
