@@ -7,15 +7,7 @@ const Q = require('q');
 
 
 const API = {
-    'InsertIPLog': apiFunctionRequest.insertIPLog,
-    'ValidateIP': apiFunctionRequest.validateIP,
-    'ValidateInputs': apiFunctionRequest.validateInputs,
-    'SecurityQuestionsList': apiFunctionRequest.getSecurityQuestionsList,
-    'AccessLevelList': apiFunctionRequest.getAccessLevelList,
-    'LanguageList': apiFunctionRequest.getLanguageList,
-    'TermsandAggreementDocuments': apiFunctionRequest.getTermsandAgreementDocuments,
     'RegisterPatient': apiFunctionRequest.registerPatient,
-    'GetPatientInfo': apiFunctionRequest.getPatientInfo,
 };
 
 /**
@@ -25,7 +17,7 @@ const API = {
      @return {Promise}
  **/
 exports.processRequest = function (requestObject) {
-    
+
     const r = Q.defer();
     const type = requestObject.Request;
 
@@ -36,6 +28,6 @@ exports.processRequest = function (requestObject) {
         logger.log('error', 'Invalid request type: ' + type);
         r.reject('Invalid request type');
     }
-    
+
     return r.promise;
 };
