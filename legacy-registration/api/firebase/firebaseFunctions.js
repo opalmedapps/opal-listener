@@ -24,8 +24,3 @@ exports.getFirebaseAccountByEmail = async function (userEmail) {
     }
     return response?.uid;
 };
-
-exports.deleteFirebaseAccount = async function (uid) {
-    await admin.auth().deleteUser(uid)
-    logger.log('debug', `Successfully delete the firebase account using passed uniqueID: ${uid}`);
-};
