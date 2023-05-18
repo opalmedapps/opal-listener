@@ -51,7 +51,7 @@ const requestRegistrationApi = {
  */
 const requestRegistration = {
     RequestType: 'REGISTRATION_LEGACY',
-    Request: 'SecurityQuestionsList',
+    Request: 'RegisterPatient',
     BranchName: CryptoJs.SHA512('code12345678').toString(),
     Parameters: {
         Fields: 'OTES12345678',
