@@ -23,6 +23,7 @@ These are the requirements to run a local listener app. The second requirement i
 ### Installation
 
 ##### Step 1 | Add Firebase configuration
+
 Copy your firebase admin key file into the `src/config/firebase` directory.
 > The content of this directory is ignore by versioning
 
@@ -34,20 +35,19 @@ Then edit the required fields. Across both files, you should at least need to ch
 
 Communication with the django backend needs to be authenticated with an REST API token. You can generate a token following [this procedure](https://opalmedapps.gitlab.io/backend/authentication/). Then add the token to your `.env` as shown in the example.
 
-```
+```text
 listener/config.json
 
 MYSQL_USERNAME: "The database user name",
 MYSQL_PASSWORD: "The database password",
 MYSQL_DATABASE: "The name of the OpalDB",
 MYSQL_DATABASE_QUESTIONNAIRE: "The name of the QuestionnaireDB",
-MYSQL_DATABASE_REGISTRATION: "The name of the registerdb",
 MYSQL_DATABASE_PORT: 3306,
 MYSQL_DATABASE_HOST: "host.docker.internal",
 LATEST_STABLE_VERSION: "0.0.1"
 ```
 
-```
+```text
 .env (fill out missing fields according to the instructions)
 
 # FIREBASE_DATABASE_URL can be found in the web_config.txt file in your firebase folder
@@ -77,40 +77,48 @@ DATA_CACHE_TIME_TO_LIVE_MINUTES=
 > DATA_CACHE_TIME_TO_LIVE_MINUTES represents the length of time in minutes the listener will store a given user's salt and secret keys when requesting encryption values. An appropriate length of time is 5-10 minutes.
 
 ##### Step 3 | Install the NPM packages
+
 Run the following command at the root of the project to install its dependencies.
-```
+
+```shell
 npm install
 ```
 
 ##### Step 4 | Run the listener
+
 ###### Step 4.1 (option) | Running in Docker
+
 The project contains a `Dockerfile` and  `docker.compose.yml` files to build and run the app within a Docker container, either for a production-like setup or development using a local volume.
 
 Make sure you've filled out the `FIREBASE_ADMIN_KEY_PATH` config with the correct value for running the listener in Docker.
 
 To build the Docker image and run the container, running the following command at the root of the project
-```
+
+```shell
 docker compose up 
 ```
 
-The project also contains a `docker-compose.prod.yml` This file is used to build an image and a container with an attached volume and a different start command. You can use this file should you want a non-developpement set up. To use this file run the command:
-```
+The project also contains a `docker-compose.prod.yml` This file is used to build an image and a container with an attached volume and a different start command. You can use this file should you want a non-development set up. To use this file run the command:
+
+```shell
 docker compose -f docker-compose.prod.yml up --build
 ```
 
 > More information about Docker compose can be found [here](https://docs.docker.com/compose/)
 
 ###### Step 4.2 (option) | Running with Node.js
+
 Make sure you've filled out the `FIREBASE_ADMIN_KEY_PATH` config with the correct value for running the listener with Node.js.
 
 Run the following command at the root of the project.
 
-```
+```shell
 npm run start
 ```
 
 Alternatively, to avoid having to restart the listener every time you make changes to the code while developing, use:
-```
+
+```shell
 npm run watch
 ```
 
@@ -118,7 +126,7 @@ npm run watch
 
 #### ESLint
 
-This project uses ESLint to statically analyze its source code. It has been configured to only analyze new files in the 
+This project uses ESLint to statically analyze its source code. It has been configured to only analyze new files in the
 context of strangler fig (i.e. to ignore files in the `listener` folder).
 
 The rules for this project use the [Airbnb JavaScript Style Guide](https://github.com/airbnb/javascript)
@@ -147,6 +155,7 @@ For help on creating new documentation pages, refer to {@tutorial creating-docum
 ## Running the tests
 
 ### Unit tests
+
 Unit tests for this repository are run using the Mocha test framework. Test files should be in the `src` directory
 (or any of its subdirectories), and should have a name in the format `*.test.*`.
 
@@ -157,6 +166,7 @@ npm test
 ```
 
 ### Using the request simulator
+
 It is possible to simulate a request from the Opal app, for testing, by using the simulate request script. There are two way to do so:
 
 Using the npm script `simulateRequest` which will use the default request data specified in the file `src/test/simulate-request/mock-request.js`
@@ -172,11 +182,12 @@ You also need to specify the correct firebase `UserID` that is linked to your lo
 Deployment is managed by [PM2](https://github.com/Unitech/pm2)
 
 ### Prerequisites
+
 1) Have access to clinical computer and credentials that allow you SSH into Opal servers.
 2) Node should **already** be installed, but if not, you will have to [install the Node runtime yourself](https://nodejs.org/en/download/)
 3) PM2 should **already** be installed, but if not, you will have to install yourself using
 
-```
+```shell
 # Install latest PM2 version
 $ npm install pm2@latest -g
 # Save process list, exit old PM2 & restore all processes
@@ -184,43 +195,45 @@ $ pm2 update
 ```
 
 3) Git should **already** be installed, but if not, you will have to [install Git yourself](https://www.atlassian.com/git/tutorials/install-git)
- 
+
 ### Deployment
+
 There are two use case for deployment: creating a new process and updating a previous. Of course, the latter will be 99% of the use cases.
 
-1) Updating 
+1) Updating
+
 * We assume the environment and codebase is propery installed and configured
 * We assume the repository is cloned 
 * We assume the PM2 process is already created
 
 Go to the directory that corresponds to the branch you want to update.
 
-Pull the latest changes: 
+Pull the latest changes:
 
-```
+```shell
 git pull
 ```
 
 Restart the PM2 process:
 
-```
+```shell
 pm2 restart <name-of-process>
 ```
 
 2) Spawning new process
+
 * We assume the environment and codebase is propery installed and configured
+* Clone the repo into a new directory
+* Switch to the branch that is going to be deployed
 
-- Clone the repo into a new directory
-- Switch to the branch that is going to be deployed
-
-```
+```shell
 git fetch
 git checkout <branch>
 ```
 
-- Start new PM2 process
+* Start new PM2 process
 
-```
+```shell
 pm2 start src/server.js --name <name-of-process>
 ```
 
