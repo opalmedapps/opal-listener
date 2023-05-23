@@ -70,11 +70,6 @@ exports.getDocumentsContent=function(requestObject)
    return sqlInterface.getDocumentsContent(requestObject);
 };
 
-
-exports.getSecurityQuestion = function (requestObject) {
-    return sqlInterface.getSecurityQuestion(requestObject);
-};
-
 /**
 *@name getStudies
 *@description Gets the studies associated with the current patient.
