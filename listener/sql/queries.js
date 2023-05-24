@@ -527,7 +527,7 @@ exports.updateConsentStatus = function()
 
 exports.insertEducationalMaterialRatingQuery=function()
 {
-    return "INSERT INTO `EducationalMaterialRating`(`EducationalMaterialRatingSerNum`, `EducationalMaterialControlSerNum`, `PatientSerNum`, `RatingValue`, `LastUpdated`) VALUES (NULL,?,?,?,NULL)";
+    return "INSERT INTO `EducationalMaterialRating`(`EducationalMaterialRatingSerNum`, `EducationalMaterialControlSerNum`, `PatientSerNum`, `Username`, `RatingValue`, `LastUpdated`) VALUES (NULL,?,?,?,?,NULL)";
 };
 
 exports.getPatientSerNumFromUserID = function()

@@ -903,7 +903,7 @@ exports.inputEducationalMaterialRating = function(requestObject)
     }
 
     exports.runSqlQuery(queries.insertEducationalMaterialRatingQuery(),
-        [EducationalMaterialControlSerNum, PatientSerNum, RatingValue])
+        [EducationalMaterialControlSerNum, PatientSerNum, requestObject.UserID, RatingValue])
         .then(()=>{
             r.resolve({Response:'success'});
         }).catch((err)=>{
