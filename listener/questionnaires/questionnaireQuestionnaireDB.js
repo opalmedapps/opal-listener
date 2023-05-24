@@ -1,4 +1,3 @@
-var mysql = require('mysql');
 var q = require('q');
 var credentials = require('./../config-adaptor');
 const logger = require('./../logs/logger');
@@ -6,11 +5,13 @@ const questionnaireConfig = require('./questionnaireConfig.json');
 const questionnaireQueries = require('./questionnaireQueries.js');
 const questionnaireValidation = require('./questionnaire.validate');
 const format = require('./questionnaireFormatting');
+const SQLQueryRunner = require("../sql/sql-query-runner");
 
-/*
-*Connecting to mysql database
-*/
+/**
+ * @desc QuestionnaireDB connection parameters
+ */
 const questionnaireDBCredentials = {
+    connectionLimit: 10,
     host: credentials.MYSQL_DATABASE_HOST,
     user: credentials.MYSQL_USERNAME,
     password: credentials.MYSQL_PASSWORD,
@@ -19,28 +20,8 @@ const questionnaireDBCredentials = {
     port: credentials.MYSQL_DATABASE_PORT
 };
 
-const questionnairePool = mysql.createPool(questionnaireDBCredentials);
-
-function runQuery(query, parameters = null) {
-    return new Promise((resolve, reject) => {
-        questionnairePool.getConnection(function (err, connection) {
-            logger.log('debug', `Grabbed SQL connection: ${connection}`);
-            const que = connection.query(query, parameters, function (err, rows) {
-                connection.release();
-                if (err) {
-                    logger.log("error", `Failed to execute query: ${que.sql}`, err);
-                    reject(err);
-                }
-                logger.log('info', `Successfully performed query: ${que.sql}`);
-                if (typeof rows !== 'undefined') {
-                    resolve(rows);
-                } else {
-                    resolve([]);
-                }
-            });
-        });
-    });
-}
+let queryRunner = new SQLQueryRunner(questionnaireDBCredentials);
+let runQuery = (...args) => queryRunner.run(...args);
 
 /**
  * From this point is the new questionnaire front-end V2: 19-08-2019

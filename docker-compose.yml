@@ -11,6 +11,7 @@ services:
     env_file:
       - .env
     volumes:
+      - ./certs:/certs
       - ./listener:/app/listener
       - ./legacy-registration:/app/legacy-registration
       - ./src:/app/src
