@@ -122,6 +122,21 @@ Alternatively, to avoid having to restart the listener every time you make chang
 npm run watch
 ```
 
+### SSL [Optional]
+
+Settings are available in this project to allow the listener to use encrypted connections to the databases,
+and when making external requests. Enabling SSL is optional. Note that the instructions below are for a local setup.
+On a server, certificate files may be stored in different locations.
+
+1. Copy your CA public key file (usually called `ca.pem`; generated when
+   [setting up SSL in db-docker](https://gitlab.com/opalmedapps/db-docker#running-the-databases-with-encrypted-connections))
+   to the `certs` folder.
+2. In the `.env` file under `--- SSL Configurations ---`, enable SSL and provide the path to this file.
+3. Restart your Docker container or running listener process.
+
+To ensure that your setup was successful, make sure the listener launches successfully, and that the database queries
+print `Grabbed SQL connection ... with SSL enabled` to the logger, and complete successfully.
+
 ### Project Configurations
 
 #### ESLint
