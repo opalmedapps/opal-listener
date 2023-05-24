@@ -16,7 +16,7 @@ class OpalSQLQueryRunner {
 		password: config.MYSQL_PASSWORD,
 		database: config.MYSQL_DATABASE,
 		dateStrings: true,
-		port: config.MYSQL_DATABASE_PORT
+		port: config.MYSQL_DATABASE_PORT,
 	};
 	static opalQueryInstance = new SQLQueryRunner(this.#OPAL_DB_CREDENTIALS);
 
