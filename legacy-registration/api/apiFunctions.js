@@ -7,7 +7,6 @@ const config = require('../config-adaptor');
 const opalRequest = require('./request/request.js');
 const logger = require('../logs/logger.js');
 const request = require('request');
-const ssl = require('../security/ssl.js');
 const path = require('path');
 const fs = require('fs');
 
@@ -177,9 +176,6 @@ async function updatePatientStatusInORMS(requestObject) {
             "opalUUID": requestObject.Parameters.Fields.uuid,
         },
     };
-
-    // Add an SSL certificate to the request's options if using https
-    if (options.url.includes("https")) ssl.attachCertificate(options);
 
     logger.log('verbose', `Post request to update the patient's Opal Status in ORMS`);
     await postPromise(options);
