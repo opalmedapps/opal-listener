@@ -7,6 +7,7 @@ const questionnaires = require('./../questionnaires/questionnaireOpalDB.js');
 
 /**
  *@name login
+ *@deprecated No longer used after released version 1.12.2, since the app was configured with loading-on-demand (part of UPS).
  *@requires sqlInterface
  *@parameter(string) UserID Patients user ID
  *@description Grabs all the tables for the user and updates them to firebase

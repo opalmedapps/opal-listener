@@ -763,22 +763,6 @@ exports.addToActivityLog=function(requestObject)
 };
 
 /**
- * @name getFirstEncryption
- * @param requestObject
- */
-exports.getFirstEncryption=function(requestObject) {
-    let r=Q.defer();
-    exports.runSqlQuery(queries.securityQuestionEncryption(),[requestObject.UserID])
-        .then((rows)=>{
-            r.resolve(rows);
-        }).catch((err)=>{
-            r.reject({Response:'error', Reason:err});
-        });
-    return r.promise;
-};
-
-
-/**
  * getEncryption
  * @desc Gets user password for encrypting/decrypting to return security question
  * @param requestObject
@@ -929,24 +913,6 @@ function getPatientFromEmail(email) {
         });
     return r.promise;
 }
-
-/**
- * @name getPasswordForVerification
- * @desc gets the user's password to crosscheck during login to verify that Firebase and DB passwords are synced
- * @param email
- * @return {Promise}
- */
-exports.getPasswordForVerification = function(email) {
-    let r=Q.defer();
-    exports.runSqlQuery(queries.getPatientPasswordForVerification(), [email])
-        .then((rows)=>{
-            if(rows.length === 0) r.reject({Response:'error',Reason:"No User match in DB"});
-            r.resolve(rows[0]);
-        }).catch((err)=> {
-            r.reject({Response: err, Reason:"Problem Fetching Password for verification"});
-        });
-    return r.promise;
-};
 
 /**
  * LoadDocuments
