@@ -6,12 +6,10 @@
  */
 const logger            = require("../logs/logger");
 const request           = require('request');
-const ssl               = require("../security/ssl");
 const utility           = require("../utility/utility");
 
 /**
  * @description Promisified version of the 'request' function, which also takes care of some basic error handling.
- *              Attaches SSL certificates before making an https request.
  * @author Stacey Beard
  * @date 2021-11-15
  * @param {string} method - The method used to make the request (e.g. "get", "post", etc.).
@@ -33,12 +31,6 @@ exports.request = function(method, url, options) {
         else {
             // Assemble all options together
             options = { ...options, method: method, url: url };
-
-            // Add an SSL certificate to the request's options if a certificate is provided for this listener
-            try {
-                if (options.url.includes("https")) ssl.attachCertificate(options);
-            }
-            catch (error) { logger.log('warn', `Making https request without a certificate: ${error}`) }
 
             request(options, function(err, response, body) {
                 logger.log('verbose', `Request response: ${utility.stringifyShort(response)}`);
