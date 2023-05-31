@@ -1,6 +1,6 @@
 /**
  *
- * 
+ *
  */
 require('dotenv').config();
 const axios = require('axios');
@@ -12,7 +12,7 @@ const env = {
 };
 
 class opalRequest {
-    
+
 	constructor(reqObj, key, salt='', pass=''){
 		this.type = reqObj.Request;
 		this.parameters = reqObj.Parameters;
@@ -65,6 +65,7 @@ class opalRequest {
 			return await axios(request);
 		} catch (error) {
 			logger.log('error', 'axiosApi call failed', error);
+			logger.log('error', 'axios error details', error?.data);
 			throw error.message;
 		}
 
@@ -75,7 +76,8 @@ class opalRequest {
 	/**
 	 retrievePatientDataDetailed
 	 @desc call the new backend api 'registration/<std:code>/?detailed.
-	 @param requestObject
+	 @param {string} registrationCode The user's registration code.
+	 @param {string} language The user's selected language.
 	 @return {Promise}
 	 @response {
 	 	hospital_patients: [
@@ -93,15 +95,16 @@ class opalRequest {
 	 	}
 	 }
 	 **/
-	static async retrievePatientDataDetailed(request) {
+	static async retrievePatientDataDetailed(registrationCode, language) {
 		let headers = this.backendApiHeaders;
-		headers['Accept-Language'] = request.language;
-		const url = `${env.OPAL_BACKEND_HOST}/api/registration/${request?.registrationCode}/?detailed`;
+		headers['Accept-Language'] = language;
+		const url = `${env.OPAL_BACKEND_HOST}/api/registration/${registrationCode}/?detailed`;
 		const requestParams = {
 			method: 'get',
 			url: url,
 			headers: headers,
 		};
+		logger.log('verbose', 'Calling API to get registration details', url);
 		const response = await this.axiosApi(requestParams);
 		return response.data;
 	}
@@ -109,6 +112,8 @@ class opalRequest {
 	/**
 	 registrationRegister
 	 @desc call the new backend api 'registration/<std:code>/register/.
+	 @param {string} registrationCode The user's registration code.
+	 @param {string} language The user's selected language.
 	 @param request, registerData
 	 request = {
 	 	registrationCode: str,
@@ -131,16 +136,17 @@ class opalRequest {
 	 }
 	 @return {Promise}
 	 **/
-	static async registrationRegister(request, registerData) {
+	static async registrationRegister(registrationCode, language, registerData) {
 		let headers = this.backendApiHeaders;
-		headers['Accept-Language'] = request.language;
-		const url = `${env.OPAL_BACKEND_HOST}/api/registration/${request?.registrationCode}/register/`;
+		headers['Accept-Language'] = language;
+		const url = `${env.OPAL_BACKEND_HOST}/api/registration/${registrationCode}/register/`;
 		const requestParams = {
 			method: 'post',
 			url: url,
 			headers: headers,
 			data: registerData,
 		};
+		logger.log('info', 'Calling API to register patient in the backend', url)
 		const response = await this.axiosApi(requestParams);
 		return response.data;
 	}

@@ -2,9 +2,12 @@ exports.updatePatient = function () {
     return "SELECT reg_UpdatePatientInfo(?,?,?,?,?,?,?,?,?,?,?,?,?,?,?) AS Result;";
 };
 
-exports.insertPatient = function () {
-    return "SELECT insertPatient(?,?,?,?,?,?) AS Result;";
-};
+// TODO delete "insertPatient" function from DB
+exports.insertPatient = () => {
+    return `INSERT INTO Patient(FirstName, LastName, Sex, DateOfBirth, Age, TelNum, EnableSMS, Email, Language, SSN)
+            VALUES (?, ?, ?, ?, TIMESTAMPDIFF(year, ?, now()), ?, 0, ?, ?, ?);
+    `;
+}
 
 exports.insertPatientHospitalIdentifier = function () {
     return "SELECT reg_insertPatientHospitalIdentifier(?,?,?) AS Result;";
