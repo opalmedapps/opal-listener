@@ -104,7 +104,7 @@ class opalRequest {
 			url: url,
 			headers: headers,
 		};
-		logger.log('verbose', 'Calling API to get registration details', url);
+		logger.log('info', 'Calling API to get registration details', url);
 		const response = await this.axiosApi(requestParams);
 		return response.data;
 	}

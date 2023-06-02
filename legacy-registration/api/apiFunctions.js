@@ -25,7 +25,7 @@ exports.registerPatient = async function(requestObject) {
     // TODO check if inserted letter format is ok or if whole string is needed
 
     try {
-        logger.log('info', 'Validating registration request parameters', requestObject?.Parameters?.Fields?.email);
+        logger.log('info', `Validating registration request parameters for ${requestObject?.Parameters?.Fields?.email}`);
         validateRegisterPatientRequest(requestObject);
         const registrationCode = requestObject.Parameters.Fields.registrationCode;
         const language = requestObject.Parameters.Fields.language;
