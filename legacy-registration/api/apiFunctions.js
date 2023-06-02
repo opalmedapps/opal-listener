@@ -52,10 +52,6 @@ exports.registerPatient = async function(requestObject) {
             logger.log('info', `Existing patient detected (legacy_id = ${legacy_id}); skipping inserts into OpalDB');`);
         }
 
-        // Register patient info to new backend
-        const registerData = formatRegisterData(requestObject, legacy_id);
-        await opalRequest.registrationRegister(registrationCode, language, registerData);
-
         // Before registering the patient, create their firebase user account with decrypted email and password
         // This is required to store their firebase UID as well
         let email = requestObject.Parameters.Fields.email;
@@ -67,6 +63,10 @@ exports.registerPatient = async function(requestObject) {
             uid = await firebaseFunction.getFirebaseAccountByEmail(email);
             logger.log('info', `Got firebase user account: ${uid}`);
         }
+
+        // Register patient info to new backend
+        const registerData = formatRegisterData(requestObject, legacy_id, uid);
+        await opalRequest.registrationRegister(registrationCode, language, registerData);
 
         // Assign the unique ID and encrypted password to the request object
         requestObject.Parameters.Fields.uniqueId = uid;
@@ -149,6 +149,9 @@ function validateRegisterPatientRequest(requestObject) {
         'securityQuestion1',
         'securityQuestion2',
         'securityQuestion3',
+        'securityQuestionText1',
+        'securityQuestionText2',
+        'securityQuestionText3',
         // typo in the frontend
         'termsandAggreementSign',
     ]
@@ -270,6 +273,7 @@ function validateRequest(requestObject, requiredFields) {
  * @description Formats the data expected by the backend API for completing registration.
  * @param {Object} requestObject - The calling request's requestObject.
  * @param {int} legacy_id - legacy patient id.
+ * @param {string} firebaseUsername - The caregiver's Firebase username.
  * @returns {Object} registerData {
         patient: {
 	 		legacy_id: int
@@ -287,7 +291,7 @@ function validateRequest(requestObject, requiredFields) {
  * }
  */
 
-function formatRegisterData(requestObject, legacy_id) {
+function formatRegisterData(requestObject, legacy_id, firebaseUsername) {
     const registerData = {
         'patient': {
             'legacy_id': legacy_id,
@@ -295,18 +299,19 @@ function formatRegisterData(requestObject, legacy_id) {
         'caregiver': {
             'language': requestObject.Parameters.Fields.language,
             'phone_number': requestObject.Parameters.Fields.phone,
+            'username': firebaseUsername,
         },
         'security_answers': [
             {
-                'question': requestObject.Parameters.Fields.securityQuestion1,
+                'question': requestObject.Parameters.Fields.securityQuestionText1,
                 'answer': requestObject.Parameters.Fields.answer1,
             },
             {
-                'question': requestObject.Parameters.Fields.securityQuestion2,
+                'question': requestObject.Parameters.Fields.securityQuestionText2,
                 'answer': requestObject.Parameters.Fields.answer2,
             },
             {
-                'question': requestObject.Parameters.Fields.securityQuestion3,
+                'question': requestObject.Parameters.Fields.securityQuestionText3,
                 'answer': requestObject.Parameters.Fields.answer3,
             },
         ],
