@@ -13,16 +13,21 @@ exports.runOpaldbSqlQuery = (...args) => OpalSQLQueryRunner.run(...args);
  @param requestObject
  @return {Promise}
  **/
-exports.insertPatient = function (requestObject) {
+exports.insertPatient = async function (requestObject) {
     let parameters = requestObject.Parameters.Fields;
-    return exports.runOpaldbSqlQuery(queries.insertPatient(), [
+    let result = await exports.runOpaldbSqlQuery(queries.insertPatient(), [
         parameters.firstName,
         parameters.lastName,
         parameters.sex,
         parameters.dateOfBirth,
+        parameters.dateOfBirth,
         parameters.phone,
+        parameters.email,
+        parameters.language.toUpperCase(),
         parameters.ramq,
     ]);
+    if (!result?.insertId) throw "Failed to insert patient record; no insertId was returned";
+    return result.insertId;
 };
 
 /**
