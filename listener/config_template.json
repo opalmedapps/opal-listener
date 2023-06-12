@@ -12,6 +12,7 @@
   "CHECKIN_ROOM": "",
   "_CHECKIN_ROOM_HINT": "OPAL PHONE APP",
   "QUESTIONNAIRE_COMPLETED_PATH": "Path notified when a questionnaire is completed",
+  "LAB_RESULT_HISTORY": "The URL to call to request the patient's lab results history upon registration",
   "LATEST_STABLE_VERSION": "",
   "ORMS": {
     "API": {

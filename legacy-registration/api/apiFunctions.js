@@ -19,94 +19,32 @@ const { sendMail } = require('./utility/mail.js');
  * @throws Throws an error if a required field is not present in the given request.
  */
 exports.registerPatient = async function(requestObject) {
+    const fields = requestObject?.Parameters?.Fields;
     try {
-        logger.log('info', `Validating registration request parameters for ${requestObject?.Parameters?.Fields?.email}`);
-        validateRegisterPatientRequest(requestObject);
-        const registrationCode = requestObject.Parameters.Fields.registrationCode;
-        const language = requestObject.Parameters.Fields.language;
+        // Request validation
+        const registrationData = await prepareAndValidateRegistrationRequest(requestObject);
 
-        // Get patient data from new backend
-        logger.log('info', 'Calling backend API to get registration details');
-        const patientData = await opalRequest.retrievePatientDataDetailed(registrationCode, language);
-        const isNewPatient = patientData !== undefined && patientData.legacy_id !== null;
-
-        // Insert patient in OpalDB
-        let legacy_id;
-        if (isNewPatient) {
-            logger.log('info', 'New patient detected; inserting into OpalDB.Patient');
-            legacy_id = await insertPatient(requestObject, patientData?.patient);
-
-            logger.log('info', 'New patient detected; inserting into OpalDB.Patient_Hospital_Identifier');
-            for (const hospital_patient of patientData?.hospital_patients) {
-                await insertPatientHospitalIdentifier(requestObject, hospital_patient, legacy_id);
-            }
-        }
-        else {
-            legacy_id = patientData.legacy_id;
-            logger.log('info', `Existing patient detected (legacy_id = ${legacy_id}); skipping inserts into OpalDB');`);
-        }
-
-        // Before registering the patient, create their firebase user account with decrypted email and password
-        // This is required to store their firebase UID as well
-        let email = requestObject.Parameters.Fields.email;
-        let uid = '';
-        if (requestObject.Parameters.Fields.accountExists === '0') {
-            uid = await firebaseFunction.createFirebaseAccount(email, requestObject.Parameters.Fields.password);
-            logger.log('info', `Created firebase user account: ${uid}`);
-        } else {
-            uid = await firebaseFunction.getFirebaseAccountByEmail(email);
-            logger.log('info', `Got firebase user account: ${uid}`);
-        }
-
-        // Register patient info to new backend
-        const registerData = formatRegisterData(requestObject, legacy_id, uid);
-        await opalRequest.registrationRegister(registrationCode, language, registerData);
-
-        // Assign the unique ID and encrypted password to the request object
-        requestObject.Parameters.Fields.uniqueId = uid;
-        requestObject.Parameters.Fields.password = CryptoJS.SHA512(requestObject.Parameters.Fields.password).toString();
-
-        // Add patient's UUID to the request to allow ORMS patients to participate in studies with wearables
-        requestObject.Parameters.Fields.uuid = patientData?.patient?.uuid;
-
-        // Register the patient in the database
-        logger.log('info', `Registering the patient with these parameters: ${JSON.stringify(requestObject)}`);
-        let result = await sqlInterface.registerPatient(requestObject);
-        logger.log('debug', `Register patient response: ${JSON.stringify(result)}`);
+        // Registration steps
+        const patientLegacyId = await initializeBasicPatientRow(requestObject, registrationData);
+        const uid = await getOrCreateFirebaseAccount(fields.accountExists, fields.email, fields.password);
+        hashPassword(requestObject);
+        let selfPatientSerNum = await initializeSelfPatient(requestObject, registrationData, patientLegacyId);
+        let userSerNum = await initializeUser(registrationData, uid, fields.password, selfPatientSerNum);
+        await updateSelfPatient(requestObject, selfPatientSerNum);
+        await initializePatientControl(patientLegacyId);
+        await registerInBackend(requestObject, patientLegacyId, userSerNum, uid);
 
         // Registration is considered successful at this point.
         // I.e., don't fail the whole registration if an error occurs now and only log an error.
-        try {
-            let {subject, body, htmlStream} = getEmailContent(requestObject.Parameters.Fields.language);
-            await sendMail(config.SMTP, email, subject, body.join('\n'), htmlStream);
-        }
-        catch (error) {
-            logger.log('error', `An error occurred while sending the confirmation email (for ${requestObject.Parameters.Fields.email}): ${JSON.stringify(error)}`);
-        }
+        await sendConfirmationEmailNoFailure(fields.language, fields.email);
+        await requestLabHistoryNoFailure(registrationData, patientLegacyId);
+        await updatePatientStatusInORMSNoFailure(registrationData);
 
-        try {
-            for (const hospital_patient of patientData?.hospital_patients) {
-                const requestData = {
-                    PatientId: legacy_id,
-                    Site: hospital_patient.site_code,
-                }
-                await opalRequest.getLabResultHistory(config.LAB_RESULT_HISTORY, requestData);
-            }
-        } catch (error) {
-            logger.log('error', `An error occurred while getting lab result history (for patient ${legacy_id}): ${JSON.stringify(error)}`);
-        }
-
-        try {
-            await updatePatientStatusInORMS(requestObject);
-        }
-        catch (error) {
-            logger.log('error', `An error occurred while updating the patient status via direct call to ORMS (for ${requestObject.Parameters.Fields.email}): ${JSON.stringify(error)}`);
-        }
-
-        return { Data: result };
+        // Exact response string expected by the frontend
+        return { Data: [{ Result: 'Successfully Update' }]};
     }
     catch (error) {
-        logger.log('error', `An error occurred while attempting to register patient (${requestObject.Parameters.Fields.email})`, error);
+        logger.log('error', `An error occurred while attempting to register patient (${fields.email})`, error);
 
         // TODO: Make registration transactional; undo lasting changes after a registration failure (e.g. remove the patient from the DB and Firebase).
 
@@ -114,6 +52,27 @@ exports.registerPatient = async function(requestObject) {
         throw 'Error during patient registration. See internal logs for details.';
     }
 };
+
+/**
+ * @description Validates an incoming registration request, and fetches and validates the additional information from
+ *              the backend that's needed to proceed with registration.
+ * @param {object} requestObject The incoming request.
+ * @returns {Promise<object>} Resolves to an object containing the additional registration details from the backend.
+ */
+async function prepareAndValidateRegistrationRequest(requestObject) {
+    logger.log('info', `Validating registration request parameters for ${requestObject?.Parameters?.Fields?.email}`);
+    validateRegisterPatientRequest(requestObject);
+
+    // Get additional data needed for registration from the backend API
+    logger.log('info', 'Calling backend API to get registration details');
+    const registrationData = await opalRequest.retrieveRegistrationDataDetailed(
+        requestObject.Parameters.Fields.registrationCode,
+        requestObject.Parameters.Fields.language
+    );
+    validateRegistrationDataDetailed(registrationData);
+
+    return registrationData;
+}
 
 /**
  * @description Validates the request for the register patient functionality.
@@ -158,40 +117,225 @@ function validateRegisterPatientRequest(requestObject) {
 }
 
 /**
- * @description Makes a POST call to the Online Room Management System (ORMS) to update the patient's Opal status.
- * @param {Object} requestObject - The calling request's requestObject.
- * @returns {Promise<void>} Resolves if the call completes successfully, or rejects with an error.
+ * @description Validates the detailed registration data returned from the backend.
+ * @param registrationData Data object returned when calling the backend's detailed registration endpoint.
  */
-async function updatePatientStatusInORMS(requestObject) {
-    logger.log('info', `Updating the patient's Opal status in ORMS: ${JSON.stringify(requestObject)}`);
-    let response = await sqlInterface.getSiteAndMrn(requestObject);
+function validateRegistrationDataDetailed(registrationData) {
+    const errMsg = (details) => `Invalid registration data received from the backend API: ${details}`;
+    if (!registrationData) throw new Error(errMsg('entire data object is not defined'));
 
-    logger.log('debug', 'POST request to ORMS with data' + JSON.stringify(response[0]));
+    // TODO check nested properties
+    let requiredFields = ['caregiver', 'patient', 'hospital_patients', 'relationship_type'];
 
-    // Validate the existence of the API path
-    if (!config.ORMS.API.URL) {
-        throw 'No value was provided for the ORMS URL in the config file';
+    for (let field of requiredFields) {
+        if (!registrationData[field]) throw new Error(errMsg(`required data field '${field}' is missing`));
     }
-    if (!config.ORMS.API.method.updatePatientStatus) {
-        throw 'No value was provided for the ORMS updatePatientStatus method in the config file';
-    }
-    if (!response || response === []) {
-        throw "No patient's MRN and Site were provided in the database";
-    }
+}
 
-    let options = {
-        url: config.ORMS.API.URL + config.ORMS.API.method.updatePatientStatus,
-        json: true,
-        body: {
-            "mrn": response[0].Mrn,
-            "site": response[0].Site,
-            "opalStatus": 1,  // 1 => registered/active patient; 0 => unregistered/inactive patient
-            "opalUUID": requestObject.Parameters.Fields.uuid,
-        },
-    };
+/**
+ * @description Creates a basic (bare-bones) patient row when one doesn't exist.
+ *              This row will be updated later in the registration process with more detailed information.
+ * @param {object} requestObject The request object.
+ * @param {object} registrationData The detailed registration data sent from the backend.
+ * @returns {Promise<*>} Resolves to the legacy ID (PatientSerNum) of the new row, or of the old row if it already existed.
+ */
+async function initializeBasicPatientRow(requestObject, registrationData) {
+    // Insert patient in OpalDB
+    const isNewPatient = registrationData.legacy_id === null;
+    let patientLegacyId;
+    if (isNewPatient) {
+        logger.log('info', 'New patient detected; inserting into OpalDB.Patient');
+        patientLegacyId = await insertPatient(requestObject, registrationData.patient);
 
-    logger.log('verbose', `Post request to update the patient's Opal Status in ORMS`);
-    await postPromise(options);
+        logger.log('info', 'New patient detected; inserting into OpalDB.Patient_Hospital_Identifier');
+        for (const hospital_patient of registrationData?.hospital_patients) {
+            await insertPatientHospitalIdentifier(requestObject, hospital_patient, patientLegacyId);
+        }
+    }
+    else {
+        patientLegacyId = registrationData.patient.legacy_id;
+        logger.log('info', `Existing patient detected (PatientSerNum = ${patientLegacyId}); skipping inserts into OpalDB');`);
+    }
+    return patientLegacyId;
+}
+
+/**
+ * @description Fetches the user's Firebase account, or creates a new one if it doesn't exist yet.
+ * @param accountExists Whether the user already has an existing account.
+ * @param email The user's email address.
+ * @param password The user's password, used when creating a new account.
+ * @returns {Promise<*>} Resolves to the user's Firebase UID.
+ */
+async function getOrCreateFirebaseAccount(accountExists, email, password) {
+    let uid;
+    if (accountExists === '0') {
+        // The user's decrypted password is required to create a new Firebase account
+        uid = await firebaseFunction.createFirebaseAccount(email, password);
+        logger.log('info', `Created new firebase user account: ${uid}`);
+    }
+    else {
+        uid = await firebaseFunction.getFirebaseAccountByEmail(email);
+        logger.log('info', `Got existing firebase user account: ${uid}`);
+    }
+    return uid;
+}
+
+/**
+ * @description Registers the user in the backend by sending it the missing field values it needs to complete
+ *              the registration. For example, the security answers provided by the user (along with other information)
+ *              must be sent there and saved.
+ * @param requestObject The request object.
+ * @param patientLegacyId The patient's legacy ID (PatientSerNum).
+ * @param userLegacyId The user's legacy ID (UserSerNum).
+ * @param uid The user's Firebase UID.
+ * @returns {Promise<void>}
+ */
+async function registerInBackend(requestObject, patientLegacyId, userLegacyId, uid) {
+    const registerData = formatRegisterData(requestObject, uid, patientLegacyId, userLegacyId);
+    await opalRequest.registrationRegister(requestObject.Parameters.Fields.registrationCode, requestObject.Parameters.Fields.language, registerData);
+}
+
+/**
+ * @description Hashes the user's password and reassigns it to the requestObject.
+ * @param requestObject The request object.
+ */
+function hashPassword(requestObject) {
+    requestObject.Parameters.Fields.password = CryptoJS.SHA512(requestObject.Parameters.Fields.password).toString();
+}
+
+/**
+ * @description Makes sure the registering user has a "self" row in the Patient table.
+ *              If the registration is for a self user who doesn't have a patient row yet, creates a dummy row.
+ *              Otherwise, we rely on the legacy ID that identifies their existing Patient row.
+ * @param requestObject
+ * @param {object} registrationData The detailed registration data sent from the backend.
+ * @param patientLegacyId
+ * @returns {Promise<*>} Resolves to the legacy ID (PatientSerNum) of the user in the Patient table.
+ */
+async function initializeSelfPatient(requestObject, registrationData, patientLegacyId) {
+    const isNewCaregiver = registrationData.caregiver.legacy_id === null;
+    const isSelfRegistration = registrationData.relationship_type.role_type === "SELF"
+    let selfPatientSerNum;
+    if (isNewCaregiver && !isSelfRegistration) selfPatientSerNum = await sqlInterface.insertDummyPatient(
+        registrationData.caregiver.first_name,
+        registrationData.caregiver.lastName,
+        requestObject.Parameters.Fields.email,
+        requestObject.Parameters.Fields.language,
+    );
+    else selfPatientSerNum = patientLegacyId;
+    return selfPatientSerNum;
+}
+
+/**
+ * @description Makes sure the registering caregiver has a row in the Users table.
+ *              If the registration is for a new caregiver who doesn't have a users row yet, creates one.
+ *              Otherwise, we rely on the legacy ID that identifies their existing Users row.
+ * @param {object} registrationData The detailed registration data sent from the backend.
+ * @param {string} uid The user's Firebase UID.
+ * @param {string} password The user's password.
+ * @param {number} selfPatientSerNum The PatientSerNum that represents the user's "self" row in Patients.
+ * @returns {Promise<*>} Resolves to the legacy ID (UserSerNum) of the user in the Users table.
+ */
+async function initializeUser(registrationData, uid, password, selfPatientSerNum) {
+    const isNewCaregiver = registrationData.caregiver.legacy_id === null;
+    let userSerNum;
+    if (isNewCaregiver) userSerNum = await sqlInterface.insertUser(uid, password, selfPatientSerNum);
+    else userSerNum = registrationData.caregiver.legacy_id;
+    return userSerNum;
+}
+
+async function updateSelfPatient(requestObject, selfPatientSerNum) {
+    await sqlInterface.updateSelfPatient(requestObject, selfPatientSerNum);
+}
+
+async function initializePatientControl(patientSerNum) {
+    await sqlInterface.initializePatientControl(patientSerNum);
+}
+
+async function sendConfirmationEmailNoFailure(language, emailAddress) {
+    try {
+        let {subject, body, htmlStream} = getEmailContent(language);
+        await sendMail(config.SMTP, emailAddress, subject, body.join('\n'), htmlStream);
+    }
+    catch (error) {
+        logger.log('error', `An error occurred while sending the confirmation email (for ${emailAddress}): ${JSON.stringify(error)}`);
+    }
+}
+
+/**
+ * @description Calls the lab results history endpoint to trigger collection of a patient's historical lab data.
+ *              Errors that occur during this function's execution are logged and suppressed.
+ * @param {object} registrationData The detailed registration data sent from the backend.
+ * @param patientLegacyId
+ * @returns {Promise<void>}
+ */
+async function requestLabHistoryNoFailure(registrationData, patientLegacyId) {
+    try {
+        for (const hospital_patient of registrationData?.hospital_patients) {
+            const requestData = {
+                PatientId: patientLegacyId,
+                Site: hospital_patient.site_code,
+            }
+            await opalRequest.getLabResultHistory(config.LAB_RESULT_HISTORY, requestData);
+        }
+    } catch (error) {
+        logger.log('error', `An error occurred while getting lab result history (for patient ${patientLegacyId}): ${JSON.stringify(error)}`);
+    }
+}
+
+/**
+ * @description Calls the endpoint to update a patient's Opal status in ORMS.
+ *              Errors that occur during this function's execution are logged and suppressed.
+ * @param {object} registrationData The detailed registration data sent from the backend.
+ * @returns {Promise<void>}
+ */
+async function updatePatientStatusInORMSNoFailure(registrationData) {
+    try {
+        await updatePatientStatusInORMS(registrationData);
+    }
+    catch (error) {
+        logger.log('error', `An error occurred while updating the patient status via direct call to ORMS (for patient UUID ${registrationData.patient.uuid})`, error);
+    }
+}
+
+/**
+ * @description Makes a POST call to the Online Room Management System (ORMS) to update the patient's Opal status.
+ *              Tries calling ORMS using each of the patient's MRNs until one succeeds.
+ * @param registrationData The detailed registration data from the backend.
+ * @returns {Promise<void>} Resolves if at least one of the call succeeds; otherwise, rejects with an error.
+ */
+async function updatePatientStatusInORMS(registrationData) {
+    if (!config?.ORMS?.API?.URL) throw 'No value was provided for the ORMS URL in the config file';
+    if (!config?.ORMS?.API?.method?.updatePatientStatus) throw 'No value was provided for the ORMS updatePatientStatus method in the config file';
+    let success, lastError;
+
+    // Attempt a call on each of the patient's MRNs on a loop until one of the calls is successful
+    for (let {mrn, site} of registrationData.hospital_patients) {
+        let logMsg = message => `${message} for mrn = ${mrn}, site = ${site}`;
+        try {
+            let options = {
+                url: config.ORMS.API.URL + config.ORMS.API.method.updatePatientStatus,
+                json: true,
+                body: {
+                    "mrn": mrn,
+                    "site": site,
+                    "opalStatus": 1,  // 1 => registered/active patient; 0 => unregistered/inactive patient
+                    "opalUUID": registrationData.patient.uuid,
+                },
+            };
+
+            logger.log('info', logMsg(`Updating patient's Opal status in ORMS`));
+            await postPromise(options);
+            logger.log("verbose", logMsg(`Success updating patient's ORMS status`));
+            success = true;
+            break;
+        }
+        catch (error) {
+            logger.log("verbose", logMsg(`Error during attempt to update patient's ORMS status`));
+            lastError = error;
+        }
+    }
+    if (!success) throw lastError;
 }
 
 /**
@@ -242,32 +386,12 @@ function getEmailContent(language) {
     return data;
 }
 
-
-/**
- * @description Validates the request parameters with expected request fields.
- * @param {Object} requestObject - The calling request's requestObject.
- * @returns {void}
- * @throws Throws an error if a required field is not present in the given request.
- */
-function validateRequest(requestObject, requiredFields) {
-    if (!requestObject.Parameters || !requestObject.Parameters.Fields) {
-        throw 'requestObject is missing Parameters.Fields'
-    }
-    // Helper function
-    let fieldExists = name => requestObject.Parameters.Fields[name] && requestObject.Parameters.Fields[name] !== "";
-
-    for (let field of requiredFields) {
-        if (!fieldExists(field)) {
-            throw `Required field '${field}' missing in request fields`
-        }
-    }
-}
-
 /**
  * @description Formats the data expected by the backend API for completing registration.
  * @param {Object} requestObject - The calling request's requestObject.
- * @param {int} legacy_id - legacy patient id.
  * @param {string} firebaseUsername - The caregiver's Firebase username.
+ * @param {int} patientLegacyId - The legacy ID of the patient (PatientSerNum).
+ * @param {int} userLegacyId - The legacy ID of the user (UserSerNum).
  * @returns {Object} registerData {
         patient: {
 	 		legacy_id: int
@@ -284,16 +408,16 @@ function validateRequest(requestObject, requiredFields) {
         ],
  * }
  */
-
-function formatRegisterData(requestObject, legacy_id, firebaseUsername) {
+function formatRegisterData(requestObject, firebaseUsername, patientLegacyId, userLegacyId) {
     const registerData = {
         'patient': {
-            'legacy_id': legacy_id,
+            'legacy_id': patientLegacyId,
         },
         'caregiver': {
             'language': requestObject.Parameters.Fields.language,
             'phone_number': requestObject.Parameters.Fields.phone,
             'username': firebaseUsername,
+            'legacy_id': userLegacyId,
         },
         'security_answers': [
             {
@@ -320,10 +444,6 @@ function formatRegisterData(requestObject, legacy_id, firebaseUsername) {
  * @returns {patientSerNum}
  */
 async function insertPatient(requestObject, patient) {
-    if (!patient) {
-        const registrationCode = requestObject?.Parameters?.Fields?.registrationCode;
-        throw `Failed to insert Patient to legacyDB due to Patient not exists with registrationCode: ${registrationCode}`;
-    }
     requestObject.Parameters.Fields.firstName = patient.first_name;
     requestObject.Parameters.Fields.lastName = patient.last_name;
     requestObject.Parameters.Fields.sex = patient.sex;
