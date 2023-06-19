@@ -141,7 +141,7 @@ function validateRegistrationDataDetailed(registrationData) {
  */
 async function initializeBasicPatientRow(requestObject, registrationData) {
     // Insert patient in OpalDB
-    const isNewPatient = registrationData.legacy_id === null;
+    const isNewPatient = registrationData.patient.legacy_id === null;
     let patientLegacyId;
     if (isNewPatient) {
         logger.log('info', 'New patient detected; inserting into OpalDB.Patient');
@@ -265,15 +265,20 @@ async function sendConfirmationEmailNoFailure(language, emailAddress) {
 /**
  * @description Calls the lab results history endpoint to trigger collection of a patient's historical lab data.
  *              Errors that occur during this function's execution are logged and suppressed.
+ *              Note: If the patient already exists in the system, execution is skipped and historical labs are not requested.
  * @param {object} registrationData The detailed registration data sent from the backend.
  * @param patientLegacyId
  * @returns {Promise<void>}
  */
 async function requestLabHistoryNoFailure(registrationData, patientLegacyId) {
     try {
+        // If the patient already exists in the system, do not pull labs again
+        const isNewPatient = registrationData.patient.legacy_id === null;
+        if (!isNewPatient) return;
+
         for (const hospital_patient of registrationData?.hospital_patients) {
             const requestData = {
-                PatientId: patientLegacyId,
+                PatientId: hospital_patient.mrn,
                 Site: hospital_patient.site_code,
             }
             await opalRequest.getLabResultHistory(config.LAB_RESULT_HISTORY, requestData);
@@ -286,11 +291,16 @@ async function requestLabHistoryNoFailure(registrationData, patientLegacyId) {
 /**
  * @description Calls the endpoint to update a patient's Opal status in ORMS.
  *              Errors that occur during this function's execution are logged and suppressed.
+ *              Note: If the patient already exists in the system, execution is skipped and ORMS status is not updated.
  * @param {object} registrationData The detailed registration data sent from the backend.
  * @returns {Promise<void>}
  */
 async function updatePatientStatusInORMSNoFailure(registrationData) {
     try {
+        // If the patient already exists in the system, do not update their status in ORMS again
+        const isNewPatient = registrationData.patient.legacy_id === null;
+        if (!isNewPatient) return;
+
         await updatePatientStatusInORMS(registrationData);
     }
     catch (error) {
