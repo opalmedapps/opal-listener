@@ -3,19 +3,9 @@
 const apiFunctionRequest = require('../api/apiFunctions.js');
 const logger = require('../logs/logger.js');
 
-const Q = require('q');
-
 
 const API = {
-    'InsertIPLog': apiFunctionRequest.insertIPLog,
-    'ValidateIP': apiFunctionRequest.validateIP,
-    'ValidateInputs': apiFunctionRequest.validateInputs,
-    'SecurityQuestionsList': apiFunctionRequest.getSecurityQuestionsList,
-    'AccessLevelList': apiFunctionRequest.getAccessLevelList,
-    'LanguageList': apiFunctionRequest.getLanguageList,
-    'TermsandAggreementDocuments': apiFunctionRequest.getTermsandAgreementDocuments,
     'RegisterPatient': apiFunctionRequest.registerPatient,
-    'GetPatientInfo': apiFunctionRequest.getPatientInfo,
 };
 
 /**
@@ -24,18 +14,19 @@ const API = {
      @param requestObject
      @return {Promise}
  **/
-exports.processRequest = function (requestObject) {
-    
-    const r = Q.defer();
+exports.processRequest = async function (requestObject) {
     const type = requestObject.Request;
 
-    if (API.hasOwnProperty(type)) {
-        logger.log('debug', 'Processing request of type: ' + type);
-        return API[type](requestObject);
-    } else {
-        logger.log('error', 'Invalid request type: ' + type);
-        r.reject('Invalid request type');
+    if (!API.hasOwnProperty(type)) {
+        throw { Response: 'error', Reason: `Invalid request type: ${type}` };
     }
-    
-    return r.promise;
+
+    logger.log('debug', `Processing request of type: ${type}`);
+    try {
+        return await API[type](requestObject);
+    }
+    catch (error) {
+        logger.log('error', error);
+        throw { Response: 'error', Reason: error };
+    }
 };

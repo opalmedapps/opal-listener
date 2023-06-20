@@ -17,9 +17,9 @@ const LEGACYAPI = {
     'DeviceIdentifier': apiHospitalUpdate.updateDeviceIdentifier,
     'Log': apiPatientUpdate.logActivity,
     'LogPatientAction': apiPatientUpdate.logPatientAction,
+    // Deprecated API entry: 'Login'
     'Login': apiPatientUpdate.login,
     'Logout': apiPatientUpdate.logout,
-    'UserPatient': apiPatientUpdate.getUserPatient,
     'Refresh': apiPatientUpdate.refresh,
     'AccountChange': apiHospitalUpdate.accountChange,
     // Deprecated API entry: 'CheckCheckin'
@@ -58,10 +58,11 @@ const LEGACYAPI = {
  * @type {{SecurityQuestion: *, SetNewPassword: *, VerifyAnswer: *}}
  */
 exports.securityAPI = {
-    'SecurityQuestion': security.securityQuestion,
-    'SetNewPassword': security.resetPasswordRequest,
-    'VerifyAnswer': security.resetPasswordRequest
+    'SecurityQuestion': security.getSecurityQuestion,
+    'SetNewPassword': security.resetPassword,
+    'VerifyAnswer': security.verifySecurityAnswer,
 };
+
 /**
  * New API handlers
  * @type {{PatientTestDates: PatientTestCollectedDatesHandler, UpdateSecurityQuestionAnswer: UpdateSecurityQuestionAnswerRequestHandler, PatientTestTypeResults: PatientTestTypeResultsHandler, PatientTestDateResults: PatientTestCollectedDateResultsHandler, PatientTestTypes: PatientTestTypesHandler, RequestFile: FileRequestHandler, SecurityQuestionAnswerList: GetSecurityQuestionAnswerListRequestHandler}}

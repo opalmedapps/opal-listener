@@ -7,6 +7,7 @@ const questionnaires = require('./../questionnaires/questionnaireOpalDB.js');
 
 /**
  *@name login
+ *@deprecated No longer used after released version 1.12.2, since the app was configured with loading-on-demand (part of UPS).
  *@requires sqlInterface
  *@parameter(string) UserID Patients user ID
  *@description Grabs all the tables for the user and updates them to firebase
@@ -70,11 +71,6 @@ exports.getDocumentsContent=function(requestObject)
    return sqlInterface.getDocumentsContent(requestObject);
 };
 
-
-exports.getSecurityQuestion = function (requestObject) {
-    return sqlInterface.getSecurityQuestion(requestObject);
-};
-
 /**
 *@name getStudies
 *@description Gets the studies associated with the current patient.
@@ -124,13 +120,6 @@ exports.logout = function(requestObject) {
     // For now, the only purpose of the logout request is to record a timestamp in PatientActivityLog (done separately in logPatientRequest)
     return Promise.resolve({Response: "Successful logout"});
 };
-
-/**
- * @desc Gets patient info for the current user.
- * @param requestObject
- * @returns {Promise}
- */
-exports.getUserPatient = requestObject => sqlInterface.getUserPatient(requestObject);
 
 /**
  * For questionnaire V2 (2019 version of qplus questionnaire front-end). Getting the list of questionnaires belonging to a patient

@@ -1,11 +1,45 @@
+const fs = require('fs');
+const logger = require('../logs/logger');
 const mysql = require("mysql");
-const logger = require('./../logs/logger');
+const { ENVIRONMENT } = require("../../src/environment");
+
 class SQLQueryRunner {
 	#SQL_QUERY_POOL;
 	#DB_CREDENTIALS;
+
+	/**
+	 * @desc Instantiates a database connection pool. Uses SSL if enabled.
+	 * @param databaseCredentials The database credentials to use, without any SSL params (these will be added here).
+	 */
 	constructor(databaseCredentials={}) {
-		this.#DB_CREDENTIALS = databaseCredentials;
-		this.#SQL_QUERY_POOL = mysql.createPool(databaseCredentials);
+		// Add SSL parameters if SSL is enabled
+		this.#DB_CREDENTIALS = {
+			...databaseCredentials,
+			...(ENVIRONMENT.DATABASE_USE_SSL === '1' ? {
+					ssl: {
+						ca: this.readSSLCAFile(),
+						rejectUnauthorized: true,
+					}
+				} : undefined
+			),
+		};
+		this.#SQL_QUERY_POOL = mysql.createPool(this.#DB_CREDENTIALS);
+	}
+
+	/**
+	 * @desc Reads the SSL CA file provided as a path in the .env file, under SSL_CA.
+	 * @returns {Buffer} The read file contents.
+	 */
+	readSSLCAFile() {
+		try {
+			let filePath = ENVIRONMENT.SSL_CA;
+			return fs.readFileSync(filePath);
+		}
+		catch (error) {
+			logger.log('error', 'Failed to read SSL CA file. SSL is enabled via the DATABASE_USE_SSL environment variable. ' +
+				'Check the path defined in .env as SSL_CA.', error);
+			process.exit(1);
+		}
 	}
 
 	/**
@@ -17,9 +51,23 @@ class SQLQueryRunner {
 	 * @returns {Promise<any>} Returns a promise with the results from the query
 	 */
 	run(query, parameters = null, postProcessor = null) {
+		let dbName = this.#DB_CREDENTIALS.database;
+		let connectionErrorMsg = `Failed to connect to database ${dbName}`;
+
 		return new Promise((resolve, reject) => {
 			this.#SQL_QUERY_POOL.getConnection(function (err, connection) {
-				logger.log('debug', `Grabbed SQL connection: ${connection}`);
+				logger.log('debug', `Grabbed SQL connection to ${dbName}: ${connection}, `
+					+ `with SSL ${ENVIRONMENT.DATABASE_USE_SSL === '1' ? 'enabled': 'disabled'}`);
+				if (err) {
+					logger.log('error', `Failed to establish database connection`, err);
+					reject(connectionErrorMsg);
+					return;
+				}
+				else if (!connection) {
+					reject(connectionErrorMsg);
+					return;
+				}
+
 				const que = connection.query(query, parameters, function (err, rows) {
 					connection.release();
 					if (err) {

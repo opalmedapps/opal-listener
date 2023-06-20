@@ -49,10 +49,10 @@ class RequestValidator {
 					r.reject(new OpalResponseError(1, 'Potential Injection Attack', request, 'Invalid credentials'));
 				} else {
 
-					let {AnswerText} = rows[0];
-					utility.decrypt({req: request.type, params: request.parameters}, hashedUID, AnswerText)
+					let {SecurityAnswer} = rows[0];
+					utility.decrypt({req: request.type, params: request.parameters}, hashedUID, SecurityAnswer)
 					.then((dec)=>{
-						request.setAuthenticatedInfo(AnswerText, hashedUID, dec.req, dec.params);
+						request.setAuthenticatedInfo(SecurityAnswer, hashedUID, dec.req, dec.params);
 						return RequestValidator.validateRequestPermissions(request);
 					}).then(() => {
 						r.resolve(request);
@@ -81,14 +81,15 @@ class RequestValidator {
 	static validateRequestCredentials(request){
 		if(!request.meta || !request.type) return false;
 		//Must have all the properties of a request
-		let prop = ['DeviceId', 'Token', 'UserID','Timestamp','UserEmail', 'AppVersion'];
+		let prop = ['DeviceId', 'UserID','Timestamp','UserEmail', 'AppVersion'];
 		let errors = [];
 
 		let isValid = prop.reduce((valid, property)=>{
 			if(!valid) return false;
 			else {
-				if(!request.meta.hasOwnProperty(property)) errors.push(property);
-				return request.meta.hasOwnProperty(property);
+				let propValid = request.meta.hasOwnProperty(property) && typeof request.meta[property] !== 'undefined';
+				if(!propValid) errors.push(property);
+				return propValid;
 			}
 		},true);
 
@@ -101,8 +102,6 @@ class RequestValidator {
 	 *       targets patient data); otherwise, this function resolves and the request can proceed.
 	 *       If the request has a TargetPatientID, two checks are performed: first, a legacy check for 'self'
 	 *       in the OpalDB, and second (if no match was found in OpalDB), an API check via the Django backend.
-	 *       NOTE!!! Calling the 'UserPatient' endpoint is a special case, where TargetPatientID gets assigned
-	 *       in this function. This needed to check SELF relationship permissions during login.
 	 * @param {Object} request The request to validate.
 	 * @param {string} request.meta.UserID The ID of the user making the request.
 	 * @param {number} [request.meta.TargetPatientID] The ID of the patient whose data is being requested, if this is
@@ -111,20 +110,6 @@ class RequestValidator {
 	 *                          Otherwise (if permissions fail), rejects with an error.
 	 */
 	static async validateRequestPermissions(request) {
-        // Add TargetPatientID to the request if the calling endpoint (a.k.a., RequestType) is the 'UserPatient'
-        // This will enforce permissions check via the new backend (Django)
-        if (request.type === 'UserPatient') {
-            try {
-                let patientSerNum = await sqlInterface.getSelfPatientSerNum(request.meta.UserID);
-                request.meta.TargetPatientID = patientSerNum;
-            }
-            catch (error) {
-                throw new Error(
-                    `Error during permissions validation for caregiver with Username = '${request.meta.UserID}': ${error} calling 'UserPatient' endpoint.`
-                );
-            }
-        }
-
         const logDetails = `caregiver with Username = '${request.meta.UserID}' requesting data from PatientSerNum = ${request.meta.TargetPatientID}`;
 
 		// Only perform validation on requests with a TargetPatientID

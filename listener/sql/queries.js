@@ -1,5 +1,6 @@
 /**
  * @desc Query that returns patient table fields based on a PatientSerNum.
+ * @deprecated Along with the Patient requestMapping in sqlInterface.
  * @returns {string} The query.
  */
 exports.patientTableFields=function()
@@ -326,68 +327,76 @@ exports.getStudyQuestionnairesQuery = function(){
     return "SELECT QS.questionnaireID, Q.DateAdded, QC.QuestionnaireName_EN, QC.QuestionnaireName_FR FROM questionnaireStudy QS, Questionnaire Q, QuestionnaireControl QC, study S WHERE S.ID = QS.studyID AND QC.QuestionnaireControlSerNum = Q.QuestionnaireControlSerNum AND Q.QuestionnaireSerNum = QS.questionnaireId AND S.ID = ?";
 }
 
-exports.getPatientPasswordForVerification = function()
-{
-    return `SELECT DISTINCT u.Password
-            FROM Users u, Patient pat
-            WHERE pat.Email= ? AND pat.PatientSerNum = u.UserTypeSerNum`;
-};
-
-
- exports.getPatientFieldsForPasswordReset = function()
- {
+/**
+ * @desc Query that returns User and Patient information used in security requests.
+ * @returns {string} The query.
+ */
+exports.getUserPatientSecurityInfo = function() {
     return `SELECT DISTINCT
                 pat.SSN,
-                pat.Email,
-                u.Password,
-                u.UserTypeSerNum,
-                sa.AnswerText,
+                pdi.SecurityAnswer,
                 pdi.Attempt,
                 pdi.TimeoutTimestamp
             FROM
                 Users u,
                 Patient pat,
-                SecurityAnswer sa,
                 PatientDeviceIdentifier pdi
             WHERE
-                pat.Email = ? AND pat.PatientSerNum = u.UserTypeSerNum AND pdi.DeviceId = ?
-            AND
-                sa.SecurityAnswerSerNum = pdi.SecurityAnswerSerNum AND sa.PatientSerNum = pat.PatientSerNum`;
- };
+                pdi.Username = ?
+                AND pdi.DeviceId = ?
+                AND pdi.Username = u.Username
+                AND u.UserTypeSerNum = pat.PatientSerNum
+                AND u.UserType = 'Patient'
+            ;`;
+};
+
 exports.increaseSecurityAnswerAttempt = function()
 {
-    return `UPDATE PatientDeviceIdentifier SET Attempt = Attempt + 1 WHERE DeviceId = ?`;
+    return `UPDATE PatientDeviceIdentifier
+            SET Attempt = Attempt + 1
+            WHERE Username = ?
+                AND DeviceId = ?
+            ;`;
 };
+
+/**
+ * @desc Resets the number of security answer attempts made for a user on a device to 0.
+ * @returns {string}
+ */
 exports.resetSecurityAnswerAttempt = function()
 {
-    return `UPDATE PatientDeviceIdentifier SET Attempt = 0, TimeoutTimestamp = NULL WHERE DeviceId = ?`;
+    return `UPDATE PatientDeviceIdentifier
+            SET Attempt = 0,
+                TimeoutTimestamp = NULL
+            WHERE Username = ?
+                AND DeviceId = ?
+            ;`;
 };
+
 exports.setTimeoutSecurityAnswer = function()
 {
-    return `UPDATE PatientDeviceIdentifier SET TimeoutTimestamp = ? WHERE DeviceId = ?`;
+    return `UPDATE PatientDeviceIdentifier
+            SET TimeoutTimestamp = ?
+            WHERE Username = ?
+                AND DeviceId = ?
+            ;`;
 };
+
 exports.setNewPassword=function()
 {
-    return "UPDATE Users SET Password = ? WHERE UserTypeSerNum = ?";
-};
-
-exports.checkin=function()
-{
-    return "UPDATE Appointment, Patient, Users SET Appointment.Checkin=1, Appointment.SessionId=? WHERE Appointment.AppointmentSerNum=? AND Appointment.PatientSerNum = Patient.PatientSerNum AND Patient.PatientSerNum = Users.UserTypeSerNum AND Users.Username = ? ";
-};
-
-exports.logCheckin = function()
-{
-    return "INSERT INTO `CheckinLog`(`CheckinLogSerNum`, `AppointmentSerNum`, `DeviceId`, `Latitude`, `Longitude`, `Accuracy`, `DateAdded`, `LastUpdated`) VALUES (NULL,?,?,?,?,?,?,NULL)";
+    return `UPDATE Users
+            SET Password = ?
+            WHERE Username = ?
+            ;`;
 };
 
 exports.accountChange=function()
 {
-    return `UPDATE Patient SET ??=?, SessionId=? WHERE PatientSerNum=?`;
+    return `UPDATE Patient SET ??=? WHERE PatientSerNum=?`;
 };
 exports.inputFeedback=function(UserSerNum, content)
 {
-    return "INSERT INTO Feedback (`FeedbackSerNum`,`PatientSerNum`,`FeedbackContent`,`AppRating`,`DateAdded`, `SessionId`, `LastUpdated`) VALUES (NULL,?,?,?,NOW(),?, CURRENT_TIMESTAMP )";
+    return "INSERT INTO Feedback (`FeedbackSerNum`,`PatientSerNum`,`FeedbackContent`,`AppRating`,`DateAdded`, `LastUpdated`) VALUES (NULL,?,?,?,NOW(),CURRENT_TIMESTAMP)";
 };
 
 exports.getPatientFromEmail=function()
@@ -398,8 +407,8 @@ exports.getPatientFromEmail=function()
 exports.logActivity=function()
 {
     return `INSERT INTO PatientActivityLog
-                (ActivitySerNum, Request, Parameters, TargetPatientId, Username, DeviceId, SessionId, DateTime, LastUpdated, AppVersion)
-            VALUES (NULL, ?, ?, ?, ?, ?, ?, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP, ?);
+                (ActivitySerNum, Request, Parameters, TargetPatientId, Username, DeviceId, DateTime, LastUpdated, AppVersion)
+            VALUES (NULL, ?, ?, ?, ?, ?, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP, ?);
     `;
 };
 
@@ -418,48 +427,15 @@ exports.logPatientAction = function(){
             ;`
 };
 
-exports.securityQuestionEncryption=function(){
-    return "SELECT Password FROM Users WHERE Username = ?";
-};
-
 exports.userEncryption=function()
 {
-    return `SELECT sa.AnswerText
-            FROM Users u, SecurityAnswer sa, PatientDeviceIdentifier pdi
-            WHERE u.Username = ?
-            AND pdi.Username = u.Username
-            AND sa.SecurityAnswerSerNum = pdi.SecurityAnswerSerNum
-            AND pdi.DeviceId = ?
-        `;
-};
-    /**
-     * @deprecated;
-     * @param serNum
-     * @returns {string}
-     */
-    exports.getSecurityQuestions=function(serNum)
-{
-    return "SELECT SecurityQuestion.QuestionText_EN, SecurityQuestion.QuestionText_FR, SecurityAnswer.AnswerText FROM SecurityQuestion, SecurityAnswer WHERE SecurityAnswer.PatientSerNum="+serNum +" AND SecurityQuestion.SecurityQuestionSerNum = SecurityAnswer.SecurityQuestionSerNum";
-};
-
-exports.getSecQuestion=function()
-{
     return `SELECT
-                sq.QuestionText_EN,
-                sq.QuestionText_FR,
-                sa.SecurityAnswerSerNum,
-                sa.PatientSerNum
+                pdi.SecurityAnswer
             FROM
-                SecurityQuestion sq,
-                SecurityAnswer sa,
-                Patient pat
-            WHERE
-                pat.Email = ?
-            AND
-                sa.PatientSerNum = pat.PatientSerNum
-            AND
-                sq.SecurityQuestionSerNum = sa.SecurityQuestionSerNum
-            ORDER BY RAND() LIMIT 1`;
+                PatientDeviceIdentifier pdi
+            WHERE pdi.Username = ?
+                AND pdi.DeviceId = ?
+            ;`;
 };
 
 exports.updateDeviceIdentifiers = function()
@@ -471,10 +447,10 @@ exports.updateDeviceIdentifiers = function()
                 RegistrationId,
                 DeviceType,
                 appVersion,
-                SessionId,
-                Trusted,LastUpdated
-            ) VALUES (NULL,?,?,?,?,?,?,0,NULL)
-            ON DUPLICATE KEY UPDATE RegistrationId = ?, SessionId = ?;`
+                Trusted,
+                LastUpdated
+            ) VALUES (NULL,?,?,?,?,?,0,NULL)
+            ON DUPLICATE KEY UPDATE RegistrationId = ?;`
 };
 
 /**
@@ -531,7 +507,7 @@ exports.updateConsentStatus = function()
 
 exports.insertEducationalMaterialRatingQuery=function()
 {
-    return "INSERT INTO `EducationalMaterialRating`(`EducationalMaterialRatingSerNum`, `EducationalMaterialControlSerNum`, `PatientSerNum`, `RatingValue`, `SessionId`, `LastUpdated`) VALUES (NULL,?,?,?,?,NULL)";
+    return "INSERT INTO `EducationalMaterialRating`(`EducationalMaterialRatingSerNum`, `EducationalMaterialControlSerNum`, `PatientSerNum`, `Username`, `RatingValue`, `LastUpdated`) VALUES (NULL,?,?,?,?,NULL)";
 };
 
 exports.getPatientSerNumFromUserID = function()
@@ -539,19 +515,23 @@ exports.getPatientSerNumFromUserID = function()
     return "SELECT Patient.PatientSerNum FROM Patient, Users WHERE Patient.PatientSerNum = Users.UserTypeSerNum && Users.Username = ?";
 };
 
-exports.setDeviceSecurityAnswer = function () {
+exports.cacheSecurityAnswerFromDjango = () => {
     return `UPDATE
                 PatientDeviceIdentifier
             SET
-                SecurityAnswerSerNum = ?
+                SecurityAnswer = ?
             WHERE
                 DeviceId = ?
-            AND
-                Username = ?`;
-};
+                AND Username = ?
+            ;`;
+}
 
 exports.setTrusted = function () {
-    return "UPDATE PatientDeviceIdentifier SET Trusted = 1 WHERE DeviceId = ?";
+    return `UPDATE PatientDeviceIdentifier
+            SET Trusted = ?
+            WHERE Username = ?
+                AND DeviceId = ?
+            ;`;
 };
 
 /**

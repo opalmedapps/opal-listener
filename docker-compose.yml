@@ -1,15 +1,17 @@
-version: '3'
-
 services:
   app:
     container_name: opal-listener
     image: opalmedapps/listener:latest
-    build: .
+    build:
+      context: .
+      args:
+        - NODE_ENV=dev
     environment:
       - TZ=EST5EDT
     env_file:
       - .env
     volumes:
+      - ./certs:/certs
       - ./listener:/app/listener
       - ./legacy-registration:/app/legacy-registration
       - ./src:/app/src

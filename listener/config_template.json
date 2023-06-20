@@ -3,13 +3,8 @@
   "MYSQL_PASSWORD": "",
   "MYSQL_DATABASE": "OpalDB",
   "MYSQL_DATABASE_QUESTIONNAIRE": "",
-  "MYSQL_DATABASE_REGISTRATION": "registerdb",
   "MYSQL_DATABASE_HOST": "host.docker.internal",
   "MYSQL_DATABASE_PORT": 3306,
-  "SSL": {
-    "CERTIFICATE_FILE": "Path to the server's SSL certificate file, such as client.crt",
-    "CERTIFICATE_AUTHORITY_FILE": "Path to the server's SSL certificate authority file, such as ca.cert.pem"
-  },
   "DOCUMENTS_PATH": "",
   "DOCTOR_PATH": "",
   "CHECKIN_PATH": "",

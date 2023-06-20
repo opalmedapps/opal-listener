@@ -25,6 +25,9 @@ const utility           = require('./utility/utility.js');
 const q                 = require("q");
 const logger            = require('./logs/logger.js');
 const cp                = require('child_process');
+const OpalSecurityResponseError = require('./api/response/security-response-error');
+const OpalSecurityResponseSuccess = require('./api/response/security-response-success');
+const OpalResponse      = require('./api/response/response');
 
 
 // NOTE: Listener launching steps have been moved to src/server.js
@@ -134,6 +137,13 @@ function processRequest(headers){
     const r = q.defer();
     const requestKey = headers.key;
     const requestObject = headers.objectRequest;
+    const unexpectedErrorMsg = 'Unexpected error or response during security request';
+    const unexpectedError = new OpalSecurityResponseError(
+        OpalResponse.CODE.SERVER_ERROR,
+        'An unexpected error occurred',
+        requestKey,
+        requestObject,
+    );
 
     // Separate security requests from main requests
     if(processApi.securityAPI.hasOwnProperty(requestObject.Request)) {
@@ -144,11 +154,19 @@ function processRequest(headers){
         logger.log('debug', 'Processing security request');
         processApi.securityAPI[requestObject.Request](requestKey, requestObject)
             .then(function (response) {
-                r.resolve(response);
+                if (response instanceof OpalSecurityResponseSuccess) r.resolve(response.toLegacy());
+                else {
+                    logger.log('error', unexpectedErrorMsg, response);
+                    r.resolve(unexpectedError.toLegacy());
+                }
             })
             .catch(function (error) {
                 logger.log('error', 'Processing security request failed', error);
-                r.resolve(error);
+                if (error instanceof OpalSecurityResponseError) r.resolve(error.toLegacy());
+                else {
+                    logger.log('error', unexpectedErrorMsg, error);
+                    r.resolve(unexpectedError.toLegacy());
+                }
             });
     } else {
 
@@ -396,22 +414,16 @@ function handleHeartBeat(data){
  *********************************************/
 
 /**
- * Spawns three cron jobs:
+ * Spawns cron jobs:
  *  1) clearRequest: clears request from firebase that have not been handled within 5 minute period
  *  2) clearResponses: clears responses from firebase that have not been handled within 5 minute period
  *  3) heartbeat: sends heartbeat request to firebase every 30 secs to get information about listener
-  *
- * 4) ClearDBRequest: clears the heart beat db request from firebase every 2 minutes
- * 5) HeartbeatDB: checks if firebase is connected and then get the stats of the MySQL every 30 seconds
  *
 */
 function spawnCronJobs(){
     spawnClearRequest();
     spawnClearResponses();
     spawnHeartBeat();
-
-	spawnClearDBRequest();
-	spawnHeartBeatDB();
 }
 exports.spawnCronJobs = spawnCronJobs;
 
@@ -439,37 +451,6 @@ function spawnClearRequest(){
         clearRequests.kill();
     });
 }
-
-/**
- * @name spawnClearDBRequest
- * @desc creates clearDBRequest process that clears requests from firebase every 5 minutes
- *
- * By    	: Yick Mo
- * Date	: 2017-12-15
- * NOTES	: This is a copy from spawnClearRequest and modified for clearDBRequest
- *
- */
-function spawnClearDBRequest(){
-    let clearDBRequests = cp.fork(`${__dirname}/cron/clearDBRequests.js`);
-
-    // Handles clearRequest cron events
-    clearDBRequests.on('message', (m) => {
-        logger.log('info', 'PARENT got message:', m);
-    });
-
-    clearDBRequests.on('error', (m) => {
-        logger.log('error','clearRequest cron error:', m);
-        clearDBRequests.kill();
-        if(clearDBRequests.killed){
-            clearDBRequests = cp.fork(`${__dirname}/cron/clearDBRequests.js`);
-        }
-    });
-
-    process.on('exit', function () {
-        clearDBRequests.kill();
-    });
-}
-
 
 /**
  * @name spawnClearResponse
@@ -517,36 +498,6 @@ function spawnHeartBeat(){
 
     process.on('exit', function () {
         heartBeat.kill();
-    });
-
-}
-
-/*********************************************
- * By    	: Yick Mo
- * Date	: 2017-12-15
- * NOTES	: This is a copy from spawnHeartBeat and modified for spawnHeartBeatDB
- *
- *********************************************/
-function spawnHeartBeatDB(){
-    // create new Node child processs
-    let heartBeatDB = cp.fork(`${__dirname}/cron/heartBeatDB.js`);
-
-    // Handles heartBeat cron events
-    heartBeatDB.on('message', (m) => {
-        logger.log('info','PARENT DB got message:', m);
-    });
-
-    heartBeatDB.on('error', (m) => {
-        logger.log('error','heartBeatDB cron error:', m);
-
-        heartBeatDB.kill();
-        if(heartBeatDB.killed){
-            heartBeatDB = cp.fork(`${__dirname}/cron/heartBeatDB.js`);
-        }
-    });
-
-    process.on('exit', function () {
-        heartBeatDB.kill();
     });
 
 }
