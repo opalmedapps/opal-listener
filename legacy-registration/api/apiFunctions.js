@@ -218,7 +218,7 @@ async function initializeSelfPatient(requestObject, registrationData, patientLeg
     let selfPatientSerNum;
     if (isNewCaregiver && !isSelfRegistration) selfPatientSerNum = await sqlInterface.insertDummyPatient(
         registrationData.caregiver.first_name,
-        registrationData.caregiver.lastName,
+        registrationData.caregiver.last_name,
         requestObject.Parameters.Fields.email,
         requestObject.Parameters.Fields.language,
     );
