@@ -122,7 +122,7 @@ function validateRegisterPatientRequest(requestObject) {
  */
 function validateRegistrationDataDetailed(registrationData) {
     const errMsg = (details) => `Invalid registration data received from the backend API: ${details}`;
-    if (!registrationData) throw new Error(errMsg('entire data object is not defined'));
+    if (!registrationData) throw new Error(errMsg('data object is not defined'));
 
     // TODO check nested properties
     let requiredFields = ['caregiver', 'patient', 'hospital_patients', 'relationship_type'];
