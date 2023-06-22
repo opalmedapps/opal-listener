@@ -1,27 +1,23 @@
-<!-- Example title: OPAL-1234: Change the format for sending lab results by type to the app -->
+**By submitting this merge request, I confirm the following:**
+
+* [ ] The merge request title follows the conventional commits convention (see `Backend` project's `README.md`)
+    - `feat`: minor app version will be incremented.
+    - `fix`, `deps`, `perf`: patch app version will be incremented.
+    - `chore`, `ci`, etc.: app version will not be incremented.
+    - See [semantic-release/commit-analyzer](https://github.com/semantic-release/commit-analyzer/blob/master/lib/default-release-rules.js)
+      for complete set of rules.
 
 ### Changes
+<!-- Summary of the changes in this MR. -->
 
-Short summary of the changes in this MR.
-
-* More details.
-* Add bullet points as necessary.
 
 ### Dependencies
 <!-- Link to dependent pull requests. Specify whether the MRs are just related, or require each other to run. Write N/A if there are none. -->
 - **App**: 
 
-### Jira
-<!-- Paste a link to this MR's related Jira issue. -->
-
-
 ### Acceptance Tests
 <!-- Put an x in the checkbox when done. -->
 - [ ] Wrote acceptance tests in this MR's Jira ticket.
 
-### SQL
-<!-- Remove this header if no database changes were made. -->
-<!-- Put an x in the checkbox when done. -->
-
-This MR includes database changes.
-- [ ] Added SQL scripts to this MR's Jira ticket.
+### Jira
+<!-- Dynamic link to this MR's related Jira issue (e.g. "Closes <issue>", "See <issue>"). -->
