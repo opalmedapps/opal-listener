@@ -11,7 +11,8 @@
     "start": "node src/server.js",
     "watch": "nodemon src/server.js",
     "watch:docker": "nodemon -L src/server.js",
-    "simulateRequest": "node src/test/simulate-request"
+    "simulateRequest": "node src/test/simulate-request",
+    "simulateRequestDocker": "docker exec opal-listener node src/test/simulate-request"
   },
   "dependencies": {
     "@stablelib/base64": "1.0.1",
