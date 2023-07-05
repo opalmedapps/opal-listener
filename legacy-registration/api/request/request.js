@@ -74,7 +74,7 @@ class opalRequest {
     // new backend apis
 
 	/**
-	 retrievePatientDataDetailed
+	 retrieveRegistrationDataDetailed
 	 @desc call the new backend api 'registration/<std:code>/?detailed.
 	 @param {string} registrationCode The user's registration code.
 	 @param {string} language The user's selected language.
@@ -95,7 +95,7 @@ class opalRequest {
 	 	}
 	 }
 	 **/
-	static async retrievePatientDataDetailed(registrationCode, language) {
+	static async retrieveRegistrationDataDetailed(registrationCode, language) {
 		let headers = this.backendApiHeaders;
 		headers['Accept-Language'] = language;
 		const url = `${env.OPAL_BACKEND_HOST}/api/registration/${registrationCode}/?detailed`;
@@ -106,6 +106,10 @@ class opalRequest {
 		};
 		logger.log('info', 'Calling API to get registration details', url);
 		const response = await this.axiosApi(requestParams);
+		if (!response || !response.data) {
+			logger.log('error', 'API response has no data', response);
+			throw new Error("API response didn't return any registration data");
+		}
 		return response.data;
 	}
 
@@ -156,7 +160,7 @@ class opalRequest {
 
 	/**
 	 * @description insert patient hospital indetifier with request parameters.
-	 * @param {str} labResultHistoryURL - The URL of the lab result history.
+	 * @param {string} labResultHistoryURL - The URL to call to request the patient's lab result history.
 	 * @param {object} data: {
 	 *     PatientId: str,
      *     Site: str,

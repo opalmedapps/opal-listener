@@ -3,8 +3,8 @@ const sinon = require('sinon');
 const opalRequest = require('./request');
 
 describe('opalRequest', function () {
-	describe('retrievePatientDataDetailed', function () {
-		it('retrievePatientDataDetailed success', async function () {
+	describe('retrieveRegistrationDataDetailed', function () {
+		it('retrieveRegistrationDataDetailed success', async function () {
 			sinon.stub(opalRequest, 'axiosApi')
 				.returns(Promise.resolve({
 					data: {
@@ -19,13 +19,13 @@ describe('opalRequest', function () {
 							first_name: 'Kevin',
 							last_name: 'Chen',
 							ramq: 'TESC53511613',
-							sex: 'M',
+							sex: 'Male',
 						}
 					},
 				}));
 			const registrationCode = 'A0127Q0T50hk';
 			const language = 'fr';
-			const response = await opalRequest.retrievePatientDataDetailed(registrationCode, language);
+			const response = await opalRequest.retrieveRegistrationDataDetailed(registrationCode, language);
 
 			expect(response).to.have.property('patient');
 			expect(response.patient).to.have.property('ramq').equal('TESC53511613');
@@ -44,14 +44,14 @@ describe('opalRequest', function () {
 			opalRequest.axiosApi.restore();
 		});
 
-		it('retrievePatientDataDetailed failed', async function () {
-			sinon.stub(opalRequest, 'axiosApi').throws(new Error('Calling retrievePatientDataDetailed failed'));
+		it('retrieveRegistrationDataDetailed failed', async function () {
+			sinon.stub(opalRequest, 'axiosApi').throws(new Error('Calling retrieveRegistrationDataDetailed failed'));
 			const registrationCode = 'CODE12345678';
 			const language = 'fr';
 			try {
-				await opalRequest.retrievePatientDataDetailed(registrationCode, language);
+				await opalRequest.retrieveRegistrationDataDetailed(registrationCode, language);
 			} catch (error) {
-				expect(error.message).to.equal('Calling retrievePatientDataDetailed failed');
+				expect(error.message).to.equal('Calling retrieveRegistrationDataDetailed failed');
 				let headers = opalRequest.backendApiHeaders;
 				headers['Accept-Language'] = language;
 				const expectedParameters = {
