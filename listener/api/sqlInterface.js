@@ -477,8 +477,6 @@ exports.checkIn = async function (requestObject) {
  * @returns {Promise<void>} Resolves if check-in succeeds, otherwise rejects with an error.
  */
 async function checkIntoOIE(mrn, mrnSite) {
-    // Validate the existence of the check-in path
-    if (!config.CHECKIN_PATH || config.CHECKIN_PATH === "") throw "No value was provided for CHECKIN_PATH in the config file";
 
     let options = {
         json: true,
@@ -489,7 +487,7 @@ async function checkIntoOIE(mrn, mrnSite) {
         },
     };
 
-    await requestUtility.request("post", config.CHECKIN_PATH, options);
+    await requestUtility.request("post", config.CHECKIN_URL, options);
 }
 
 /**
