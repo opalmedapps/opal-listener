@@ -100,7 +100,7 @@ exports.registerPatient = async function(requestObject) {
         // I.e., don't fail the whole registration if an error occurs now and only log an error.
         try {
             let {subject, body, htmlStream} = getEmailContent(requestObject.Parameters.Fields.language);
-            await sendMail(config.SMTP, email, subject, body.join('\n'), htmlStream);
+            await sendMail(config, email, subject, body.join('\n'), htmlStream);
         }
         catch (error) {
             logger.log('error', `An error occurred while sending the confirmation email (for ${requestObject.Parameters.Fields.email}): ${JSON.stringify(error)}`);
@@ -112,7 +112,7 @@ exports.registerPatient = async function(requestObject) {
                     PatientId: legacy_id,
                     Site: hospital_patient.site_code,
                 }
-                await opalRequest.getLabResultHistory(config.LAB_RESULT_HISTORY, requestData);
+                await opalRequest.getLabResultHistory(config.LAB_RESULT_HISTORY_URL, requestData);
             }
         } catch (error) {
             logger.log('error', `An error occurred while getting lab result history (for patient ${legacy_id}): ${JSON.stringify(error)}`);
@@ -190,19 +190,12 @@ async function updatePatientStatusInORMS(requestObject) {
 
     logger.log('debug', 'POST request to ORMS with data' + JSON.stringify(response[0]));
 
-    // Validate the existence of the API path
-    if (!config.ORMS.API.URL) {
-        throw 'No value was provided for the ORMS URL in the config file';
-    }
-    if (!config.ORMS.API.method.updatePatientStatus) {
-        throw 'No value was provided for the ORMS updatePatientStatus method in the config file';
-    }
     if (!response || response === []) {
         throw "No patient's MRN and Site were provided in the database";
     }
 
     let options = {
-        url: config.ORMS.API.URL + config.ORMS.API.method.updatePatientStatus,
+        url: config.ORMS_HOST + config.ORMS_UPDATE_PATIENT_STATUS_URL,
         json: true,
         body: {
             "mrn": response[0].Mrn,
