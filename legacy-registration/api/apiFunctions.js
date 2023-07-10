@@ -362,7 +362,7 @@ async function updatePatientStatusInORMS(registrationData) {
         let logMsg = message => `${message} for mrn = ${mrn}, site = ${site}`;
         try {
             let options = {
-                url: config.ORMS_HOST + config.ORMS_UPDATE_PATIENT_STATUS_URL,
+                url: config.ORMS_UPDATE_PATIENT_STATUS_URL,
                 json: true,
                 body: {
                     "mrn": mrn,
