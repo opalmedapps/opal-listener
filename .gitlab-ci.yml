@@ -131,6 +131,7 @@ pages:
 
 # Deployment implicitly uses a service account assigned to $GOOGLE_APPLICATION_CREDENTIALS below (from values defined in the GitLab project settings)
 # These service accounts provide permissions for editing Firebase rules
+# For details on 'changes' and 'allow_failure' in the child jobs, see: https://docs.gitlab.com/ee/ci/yaml/#ruleschanges
 .firebase rules:
   stage: Deploy
   before_script:
@@ -139,7 +140,8 @@ pages:
 firebase rules dev:
   extends: .firebase rules
   rules:
-    - if: $CI_COMMIT_BRANCH == $CI_DEFAULT_BRANCH
+    # TODO testing, reset to == $CI_DEFAULT_BRANCH
+    - if: $CI_COMMIT_BRANCH == "QSCCD-1069.SB.firebase-rules-QA"
       changes:
         - firebase/dev/database.rules.json
   script:
@@ -147,12 +149,31 @@ firebase rules dev:
     - export GOOGLE_APPLICATION_CREDENTIALS=$DEV_GOOGLE_APPLICATION_CREDENTIALS
     - firebase deploy --only database
 
+firebase rules qa:
+  extends: .firebase rules
+  rules:
+    # TODO testing, reset to == $CI_DEFAULT_BRANCH
+    - if: $CI_COMMIT_BRANCH == "QSCCD-1069.SB.firebase-rules-QA"
+      changes:
+        - firebase/qa/database.rules.json
+      when: manual
+      # Allow pipeline to continue without running this job
+      allow_failure: true
+  script:
+    - cd firebase/qa
+    - export GOOGLE_APPLICATION_CREDENTIALS=$QA_GOOGLE_APPLICATION_CREDENTIALS
+    - firebase deploy --only database
+
 firebase rules staging:
   extends: .firebase rules
   rules:
-    - if: $CI_COMMIT_BRANCH == "staging"
+    # TODO testing, reset to == $CI_DEFAULT_BRANCH
+    - if: $CI_COMMIT_BRANCH == "QSCCD-1069.SB.firebase-rules-QA"
       changes:
         - firebase/staging/database.rules.json
+      when: manual
+      # Allow pipeline to continue without running this job
+      allow_failure: true
   script:
     - cd firebase/staging
     - export GOOGLE_APPLICATION_CREDENTIALS=$STAGING_GOOGLE_APPLICATION_CREDENTIALS
@@ -161,9 +182,12 @@ firebase rules staging:
 firebase rules preprod:
   extends: .firebase rules
   rules:
-    - if: $CI_COMMIT_BRANCH == "PreProd"
+    - if: $CI_COMMIT_BRANCH == $CI_DEFAULT_BRANCH
       changes:
         - firebase/preprod/database.rules.json
+      when: manual
+      # Allow pipeline to continue without running this job
+      allow_failure: true
   script:
     - cd firebase/preprod
     - export GOOGLE_APPLICATION_CREDENTIALS=$PREPROD_GOOGLE_APPLICATION_CREDENTIALS
