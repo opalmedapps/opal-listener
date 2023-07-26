@@ -144,6 +144,8 @@ firebase rules dev:
     - if: $CI_COMMIT_BRANCH == "QSCCD-1069.SB.firebase-rules-QA"
       changes:
         - firebase/dev/database.rules.json
+  environment:
+    name: dev
   script:
     - cd firebase/dev
     - export GOOGLE_APPLICATION_CREDENTIALS=$DEV_GOOGLE_APPLICATION_CREDENTIALS
@@ -159,6 +161,8 @@ firebase rules qa:
       when: manual
       # Allow pipeline to continue without running this job
       allow_failure: true
+  environment:
+    name: qa
   script:
     - cd firebase/qa
     - export GOOGLE_APPLICATION_CREDENTIALS=$QA_GOOGLE_APPLICATION_CREDENTIALS
@@ -174,6 +178,8 @@ firebase rules staging:
       when: manual
       # Allow pipeline to continue without running this job
       allow_failure: true
+  environment:
+    name: staging
   script:
     - cd firebase/staging
     - export GOOGLE_APPLICATION_CREDENTIALS=$STAGING_GOOGLE_APPLICATION_CREDENTIALS
@@ -188,6 +194,8 @@ firebase rules preprod:
       when: manual
       # Allow pipeline to continue without running this job
       allow_failure: true
+  environment:
+    name: preprod
   script:
     - cd firebase/preprod
     - export GOOGLE_APPLICATION_CREDENTIALS=$PREPROD_GOOGLE_APPLICATION_CREDENTIALS
