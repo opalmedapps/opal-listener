@@ -1,0 +1,88 @@
+{
+  "rules": {
+    "___comment": {
+      ".read": "'IMPORTANT' == 'These rules are maintained in the opal-listener project; any changes you make in the Firebase Console will be overwritten.'",
+      ".write": "false"
+    },
+    "dev3": {
+      "$hospitalId": {
+        "api": {
+          "$api_request_id": {
+            ".write": "auth.uid !== null",
+            ".read": "auth.uid !== null",
+            ".validate": "newData.hasChildren(['Request', 'DeviceId', 'UserID']) && newData.child('UserID').val() === auth.uid"
+          }
+        },
+        "requests": {
+          "$request_id": {
+            ".write": "auth.uid !== null",
+            ".read": "auth.uid !== null",
+            ".validate": "newData.hasChildren(['Request', 'DeviceId', 'UserID']) && newData.child('UserID').val() === auth.uid"
+          }
+        },
+        "passwordResetRequests": {
+          "$request_id": {
+            ".write": "true",
+            ".read": "true"
+          }
+        },
+        "passwordResetResponses": {
+          "$request_id": {
+            ".write": "true",
+            ".read": "true"
+          }
+        },
+        "users": {
+          "$user_id": {
+            "$request_id": {
+              ".write":"auth.uid !== null && auth.uid === $user_id",
+              ".read": "auth.uid !== null && auth.uid === $user_id"
+            }
+          }
+        },
+        "logged_in_users": {
+          "$user_id": {
+            ".write":"auth.uid !== null && auth.uid === $user_id",
+            ".read": "auth.uid !== null && auth.uid === $user_id"
+          }
+        },
+        "registration": {
+          "requests": {
+            ".read": "false",
+            ".write": "false",
+            "$requestId": {
+              ".read": "false",
+              ".write": "newData.child('BranchName').val() != \"\"  && newData.child('BranchName').val() != null  && newData.hasChild('BranchName')"
+            }
+          },
+          "users": {
+            ".read": "false",
+            ".write": "false",
+            "$requestId": {
+              ".read": "true",
+              ".write": "true"
+            }
+          }
+        },
+        "registration-api": {
+          "requests": {
+            ".read": "false",
+            ".write": "false",
+            "$requestId": {
+              ".read": "false",
+              ".write": "newData.child('BranchName').val() != \"\"  && newData.child('BranchName').val() != null  && newData.hasChild('BranchName')"
+            }
+          },
+          "responses": {
+            ".read": "false",
+            ".write": "false",
+            "$requestId": {
+              ".read": "true",
+              ".write": "true"
+            }
+          }
+        }
+      }
+    }
+  }
+}
