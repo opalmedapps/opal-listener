@@ -490,7 +490,7 @@ function getCheckedInAppointments(patientSerNum){
  *              This function checks the database once per second, until it detects that check-in was completed,
  *              up to a maximum attempt limit. This should alleviate the race condition by forcing the listener
  *              to wait a bit for the OIE call to fully complete. If check-in has not completed by the time limit,
- *              then an error is returned. Once the race condition is fixed, this function should be deleted.
+ *              then the last faulty result is returned. Once the race condition is fixed, this function should be deleted.
  *
  *              Patch requested by Yick Mo.
  * @param patientSerNum The PatientSerNum of the patient being checked in.
