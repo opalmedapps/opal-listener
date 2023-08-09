@@ -33,5 +33,6 @@ COPY ./package*.json ./
 COPY ./listener ./listener
 COPY ./legacy-registration ./legacy-registration
 COPY ./src ./src
+COPY ./VERSION ./VERSION
 
 CMD [ "npm", "run", "start" ]
