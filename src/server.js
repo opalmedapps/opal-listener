@@ -12,6 +12,7 @@ const legacyRegistrationServer = require('../legacy-registration/legacy-server')
 const legacyLogger = require('../listener/logs/logger');
 const { RequestHandler } = require('./core/request-handler');
 const { REQUEST_TYPE } = require('./const');
+const { Version } = require('./utility/version');
 
 // Raise AssertionError if environment variables are not set
 validateEnvironment(ENVIRONMENT);
@@ -29,6 +30,7 @@ launch().then(() => {
  * @returns {Promise<void>}
  */
 async function launch() {
+    legacyLogger.log('info', `LISTENER VERSION: ${Version.getListenerVersion()}`);
     const firebase = new Firebase(FIREBASE_CONFIG);
 
     await firebase.init();
