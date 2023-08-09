@@ -1,3 +1,96 @@
+Version 1.8.0.0:
+ - fix: add a temporary patch to alleviate check-in race condition issue
+ - ci: add QA environment to Firebase rules deployment job
+ - chore: remove ORMS_HOST environment variable
+ - fix: update RegisterPatient to support non-self registration
+ - chore: replace config.json by .env file
+ - fix: replace updating security answer queries to call backend API
+ - chore: update MR template
+ - feat: add registration api CheckEmailExistsInFirebase (QSCCD-1214)
+ - chore: remove unused UserPatient request
+ - fix: correct errors in "self" patient registration
+ - security: separate SSL into two .env variables
+ - feat(test): add initialize Firebase users utility
+ - chore: remove dead code found from Users table investigation
+ - security: remove old SSL code used to manually attach certificates to requests
+ - security: add support for SSL in legacy-registration
+ - security: add support for SSL in database connections
+ - feat: record the username of the person submitting the rating (listener)
+ - feat: get security questions and answers from Django
+ - refactor: remove registerdb
+ - refactor: remove registration branches functionality and cronjob
+ - chore(deps): update dependency firebase-tools to v11.30.0
+ - ci: build image
+ - fix: remove Token parameter from request objects
+ - feat: call ORMS updateOpalStatus API
+ - fix: update check-permissions endpoint
+ - Revert "QSCCD-812 Temporary DEV/QA separation"
+ - QSCCD-812 Temporary DEV/QA separation
+ - QSCCD-664: Change queries to PatientDeviceIndentifier to save username and security question answer
+ - chore(deps): update dependency jsdoc to v4
+ - fix: extract ser nums from rows so 'setCheckInUsername' query doesn't fail
+ - fix: fix the query function for educational materials in listener (QSCCD-914)
+ - chore(deps): update dependency firebase-tools to v11.23.1
+ - QSCCD-839: Fix questionnaire compatibility with app version 1.12.2 (!157)
+ - QSCCD-838: Fix issue with dual login request's encryption
+ - QSCCD-849: Fix query to properly return notification.
+ - fix: add missing parameter to handleRequest
+ - fix(deps): update dependency nodemon to v2.0.20
+ - chore(deps): update dependency firebase-tools to v11.21.0
+ - QSCCD-115: Validate permissions on check-in requests by using target patient ID
+ - fix: remove branch from Firebase registration rules (QSCCD-803)
+ - QSCCD-88: Filter questionnaires based on respondent (!144)
+ - QSCCD-731: Force update of "nth-check" sub-dependency (!147)
+ - chore(deps): update dependency firebase-tools to v11.20.0
+ - fix(deps): update dependency moment to v2.29.4
+ - fix(deps): update dependency firebase-admin to v11
+ - fix: deps fix register patient (QSCCD-277)
+ - QSCCD-721: Record the User that is Doing the Checking in
+ - Feat: add internal function calling new backend api registration register (QSCCD-669)
+ - QSCCD-626: Mark 'CheckCheckin' request as deprecated (!142)
+ - Feat Add api to get lab result history data (QSCCD-696)
+ - QSCCD-670: Change the usage of `ReadStatus` to `ReadBy` to handle element available for multiple users.
+ - fix(deps): update dependency firebase-tools to v11.16.1
+ - chore(deps): update dependency chai to v4.3.7
+ - QSCCD-91: Fix request language choice for Questionnaire requests (!134)
+ - QSCCD-91: Send questionnaire locking errors to the app (!132)
+ - feat: research menu functionality
+ - QSCCD-707: add questionnaire respondent first and last names in `answerQuestionnaire` table
+ - feat: insert patient in register patient (QSCCD-668)
+ - docs: edit readme with explanation of data cache ttl
+ - feat: add api retrieve patient data from new backend (QSCCD-667)
+ - Feat add api calls add and get firebase user to listener (QSCCD-666)
+ - QSCCD-87: Save questionnaire respondentUsername in the database (!124)
+ - QSCCD-461: Add missing field for multiple patient annoucements filtering
+ - QSCCD-427: Allow multiple possible salts (RAMQ, MRNs) for registration requests (!121)
+ - Feat: Add request service to call registration apis in backend (QSCCD-565)
+ - QSCCD-445: Cache encryption data in-memory for subsequent requests
+ - QSCCD-209: Log request parameters in PatientActivityLog (!119)
+ - QSCCD-476: Change password reset encryption from RAMQ to email (!117)
+ - QSCCD 207 - Feat: Enable environment variables in place of new config.json
+ - QSCCD-465: Add firebase rules to version control and CI/CD (!116)
+ - QSCCD-205: Move registration-firebase into this project as a cron and refactor it (!115)
+ - QSCCD-81: Call permissions API to check caregiver-patient access (!111)
+ - fix: Use requestParams.params for the GET requests
+ - Qsccd-175 migrate the functionalities from opalsignup to opal-listener
+ - QSCCD-410: Registrattion support to new listener structure.
+ - QSCCD-233: Listener new structure error handling.
+ - QSCCD-47: Target patient requests by PatientSerNum (!108)
+ - QSCCD-417 deprecate the Patient For Patients api and call
+ - QSCCD-126: Only send unread notifications to the app (!103)
+ - QSCCD-125: Add ability to request single data items (for Notifications on-demand) (!102)
+ - QSCCD-411: Fix firebase timestamp being encrypt before upload to Firebase
+ - QSCCD-411: Add firebase timestamp to api response
+ - QSCCD-230: Make request for the questionnaire list accessible via 'Refresh' (!89)
+ - QSCCD-48: Fixed request to new backend payload and headers.
+ - OPAL-1082 Added the function get patient info for opal-listener
+ - Fix issue with pipeline building documentation when merging in staging.
+ - QSCCD-247: Fix the diagnosis query to request the DiagnosisSerNum (!82)
+ - feature: Add request to new backend
+ - fix: Add HTML body to sendmail (QSCCD-204)
+ - fix: Add option to allow unauthorized certificates for SMTP (QSCCD-204)
+ - Feature: Create simulate request class to upload test requests to firebase.
+
 Version 1.7.0.0:
  - QSCCD-238: Remove module.exports = {} to fix code navigation (!80)
  - QSCCD-46: Make labs requests (type and date list) accessible via 'Refresh' (!66)
