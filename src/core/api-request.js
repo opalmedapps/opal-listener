@@ -3,6 +3,7 @@
  * @author David Gagne
  */
 const axios = require('axios');
+const { convert } = require('html-to-text');
 const legacyLogger = require('../../listener/logs/logger');
 
 const configs = {
@@ -77,20 +78,27 @@ class ApiRequest {
             opalError = 'API_NOT_AVAILABLE';
             break;
         default:
-            opalError = 'API_INTERNAL';
+            opalError = 'DEFAULT_ERROR';
             break;
         }
 
-        throw new Error(opalError, { cause: errorData });
+        throw new Error(opalError, { cause: errorData || errorCode });
     }
 
     /**
-     * @description Filter out HTML page return by some Django error.
+     * @description Filter out HTML from Django's error page. Only the text from the id="summary" HTML div is returned.
      * @param {object} errorData Error data from axios failure.
-     * @returns {object|null} Errordata or null
+     * @returns {string|object} The extracted summary text from the original HTML, or the input object itself
+     *                          if it isn't HTML.
      */
     static filterOutHTML(errorData) {
-        return (typeof errorData === 'string' && errorData.indexOf('<!DOCTYPE') !== -1) ? null : errorData;
+        return (typeof errorData === 'string' && errorData.indexOf('<!DOCTYPE') !== -1)
+            ? convert(errorData, {
+                baseElements: {
+                    selectors: ['#summary'], // For brevity, only extract info from the summary tag (in Django response)
+                },
+            }).split('\n').join(' ')
+            : errorData;
     }
 }
 

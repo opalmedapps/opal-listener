@@ -186,6 +186,6 @@ class SimulateRequest {
 }
 
 // Create a new instance with a default mock request to be able to run the script via a npm command
-new SimulateRequest(DefaultRequestData.requestRegistration);
+new SimulateRequest(DefaultRequestData.requestRegistrationApi);
 
 exports.SimulateRequest = SimulateRequest;
