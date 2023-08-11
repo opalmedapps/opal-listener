@@ -96,6 +96,8 @@ class ApiRequest {
             ? convert(errorData, {
                 baseElements: {
                     selectors: ['#summary'], // For brevity, only extract info from the summary tag (in Django response)
+                    orderBy: 'occurrence',
+                    returnDomByDefault: false,
                 },
             }).split('\n').join(' ')
             : errorData;
