@@ -182,6 +182,14 @@ function uploadToFirebase(response, key) {
             ref.child(responsePath).set(response).then(function () {
                 logger.log('debug', 'Uploaded to firebase with response header' + JSON.stringify(response));
 
+                // TODO temp testing
+                try {
+                    console.log("Response", response);
+                }
+                catch (error) {
+                    console.error("Failed to print the response due to an issue:", error);
+                }
+
                 completeRequest(headers, key);
 
                 delete responsePath;
