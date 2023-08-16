@@ -1,3 +1,6 @@
+Version 1.8.1.0:
+ - fix: restore Login request for analytics
+
 Version 1.8.0.0:
  - fix: add a temporary patch to alleviate check-in race condition issue
  - ci: add QA environment to Firebase rules deployment job
