@@ -4,17 +4,24 @@ var utility = require('./../utility/utility.js');
 var queries = require('./../sql/queries.js');
 var logger = require('./../logs/logger.js');
 const questionnaires = require('./../questionnaires/questionnaireOpalDB.js');
+const { Version } = require('../../src/utility/version');
 
 /**
  *@name login
- *@deprecated No longer used after released version 1.12.2, since the app was configured with loading-on-demand (part of UPS).
  *@requires sqlInterface
  *@parameter(string) UserID Patients user ID
- *@description Grabs all the tables for the user and updates them to firebase
+ *@description 1.12.2 and prior: Queries and returns all patient data to be available at login.
+ *             After 1.12.2: Doesn't do anything anymore, but was kept to record 'Login' in PatientActivityLog.
  */
 exports.login = async function(requestObject) {
-    let patientSerNum = await sqlInterface.getSelfPatientSerNum(requestObject.UserID);
-    return await sqlInterface.getPatientTableFields(requestObject.UserID, patientSerNum, requestObject.Parameters.Fields, requestObject.Parameters.timestamp);
+    if (Version.versionLessOrEqual(requestObject.meta.AppVersion, Version.version_1_12_2)) {
+        let patientSerNum = await sqlInterface.getSelfPatientSerNum(requestObject.UserID);
+        return await sqlInterface.getPatientTableFields(requestObject.UserID, patientSerNum, requestObject.Parameters.Fields, requestObject.Parameters.timestamp);
+    }
+    else {
+        // The only purpose of the login request is to record a timestamp in PatientActivityLog (done automatically in logPatientRequest)
+        return Promise.resolve({ Response: "Login recorded" });
+    }
 };
 
 /**
