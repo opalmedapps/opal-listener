@@ -108,8 +108,8 @@ exports.insertPatientHospitalIdentifier = function (requestObject) {
  * @param userSerNum The UserSerNum to look up in Users.
  * @returns {*}
  */
-exports.getPatientSerNumFromUserSerNum = async function(legacy_id) {
-    let rows = await exports.runOpaldbSqlQuery(queries.getPatientSerNumFromUserSerNum(), [legacy_id]);
+exports.getPatientSerNumFromUserTypeSerNum = async function(legacy_id) {
+    let rows = await exports.runOpaldbSqlQuery(queries.getPatientSerNumFromUserTypeSerNum(), [legacy_id]);
     if (rows.length === 0) throw new Error("Internal data error: no rows found matching the caregiver's legacy id");
     return rows[0].PatientSerNum;
 };

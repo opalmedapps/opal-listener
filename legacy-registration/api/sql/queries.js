@@ -51,7 +51,7 @@ exports.insertPatientHospitalIdentifier = function () {
     return "SELECT reg_insertPatientHospitalIdentifier(?,?,?) AS Result;";
 };
 
-exports.getPatientSerNumFromUserSerNum = function () {
+exports.getPatientSerNumFromUserTypeSerNum = function () {
     return `SELECT p.PatientSerNum
             FROM Patient p, Users u
             WHERE u.UserTypeSerNum = p.PatientSerNum

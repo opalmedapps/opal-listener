@@ -252,7 +252,7 @@ async function initializeOrGetSelfPatient(requestObject, registrationData, patie
 
     let selfPatientSerNum;
     if (!isNewCaregiver) {
-        selfPatientSerNum = await sqlInterface.getPatientSerNumFromUserSerNum(registrationData.caregiver.legacy_id);
+        selfPatientSerNum = await sqlInterface.getPatientSerNumFromUserTypeSerNum(registrationData.caregiver.legacy_id);
     }
     // Special case: when it's a new caregiver who isn't registering for self, we need to create a dummy self patient row
     else if (!isSelfRegistration) {
