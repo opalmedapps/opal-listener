@@ -62,16 +62,36 @@ class RequestHandler {
         }
         catch (error) {
             const errorResponse = ErrorHandler.getErrorResponse(error);
-            const response = errorResponse.encrypt && !Array.isArray(encryptionInfo.salt)
-                ? await EncryptionUtilities.encryptResponse(
+            let finalResponse;
+            if (RequestHandler.errorResponseCanBeEncrypted(errorResponse, encryptionInfo)) {
+                finalResponse = await EncryptionUtilities.encryptResponse(
                     errorResponse,
                     encryptionInfo.secret,
                     encryptionInfo.salt,
-                ) : errorResponse;
-            await this.sendResponse(response, snapshot.key, encryptionInfo?.userId, requestType);
+                );
+            }
+            else {
+                finalResponse = errorResponse;
+                // Make sure that encrypt is false if we didn't encrypt, to give the right info to the frontend
+                finalResponse.encrypt = false;
+            }
+            await this.sendResponse(finalResponse, snapshot.key, encryptionInfo?.userId, requestType);
         }
 
         this.clearRequest(requestType, snapshot.key);
+    }
+
+    /**
+     * @description Determines if an error response can be encrypted with the available information at hand.
+     * @param {object} errorResponse An error response from ErrorHandler.getErrorResponse.
+     * @param {object} encryptionInfo An object containing an encryption secret and salt.
+     * @returns {boolean} True if the error object can and should be encrypted; false otherwise.
+     */
+    static errorResponseCanBeEncrypted(errorResponse, encryptionInfo) {
+        return errorResponse.encrypt // An error should be encrypted only if indicated in the error object
+            && encryptionInfo?.secret
+            && encryptionInfo?.salt
+            && !Array.isArray(encryptionInfo?.salt); // Can't encrypt if an array of possible salts failed to resolve
     }
 
     /**
