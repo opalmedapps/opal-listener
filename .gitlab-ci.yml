@@ -61,8 +61,6 @@ build image:
     - docker pull $IMAGE_BRANCH || true
     - docker build --cache-from $IMAGE_BRANCH --cache-from $IMAGE_LATEST --tag $IMAGE_BRANCH --tag $IMAGE_LATEST --tag $IMAGE_COMMIT .
     - docker push $IMAGE_BRANCH
-    # TODO testing on dev
-    - docker push $IMAGE_LATEST
     - |
       if [[ "$CI_COMMIT_BRANCH" == "$CI_DEFAULT_BRANCH" ]]; then
         echo "Running on default branch. Pushing latest and commit tags..."
