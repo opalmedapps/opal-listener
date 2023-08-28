@@ -1,3 +1,7 @@
+Version 1.8.2.0:
+ - fix: fix Login request processing for the old version of the app
+ - fix: fix error response encryption (QSCCD-447)
+
 Version 1.8.1.0:
  - fix: restore Login request for analytics
 
