@@ -39,8 +39,8 @@ const ERRORS = {
     },
     DEFAULT_ERROR: {
         statusCode: 500,
-        logMessage: 'Unknown listener error',
-        clientMessage: 'UNKNOWN_ERROR',
+        logMessage: 'Unexpected error',
+        clientMessage: 'UNEXPECTED_ERROR',
         encrypt: false,
     },
     API_NOT_FOUND: {
