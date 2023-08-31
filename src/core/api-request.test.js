@@ -26,8 +26,35 @@ describe('ApiRequest', function () {
     });
 
     describe('filterOutHTML()', function () {
-        it('Should filter out HTML error response and return null', function () {
-            return expect(ApiRequest.filterOutHTML('<!DOCTYPE')).to.be.null;
+        it('should filter HTML and return only the text in the summary div', function () {
+            return expect(ApiRequest.filterOutHTML(`
+                <!DOCTYPE html>
+                <html>
+                    <head></head>
+                    <body>
+                        <p id="summary">Summary text</p>
+                        <p id="details">More details</p>
+                        <p>etc.</p>
+                    </body>
+                </html>
+            `)).to.equal('Summary text');
+        });
+        it('should filter HTML and return blank if there is no summary div', function () {
+            return expect(ApiRequest.filterOutHTML(`
+                <!DOCTYPE html>
+                <html>
+                    <head></head>
+                    <body>
+                        <p>Content</p>
+                    </body>
+                </html>
+            `)).to.equal('');
+        });
+        it('should return the same object when not HTML', function () {
+            return expect(ApiRequest.filterOutHTML({ test: 1 })).to.deep.equal({ test: 1 });
+        });
+        it('should return the same string when not HTML', function () {
+            return expect(ApiRequest.filterOutHTML('value')).to.equal('value');
         });
     });
 });

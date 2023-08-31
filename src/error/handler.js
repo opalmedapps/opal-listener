@@ -12,9 +12,10 @@ class ErrorHandler {
      * @returns {object} Formated error to be upload to Firebase.
      */
     static getErrorResponse(error) {
-        const opalError = ERRORS[error.message] || ERRORS.DEFAULT_ERROR;
+        const errorKey = error.message;
+        const opalError = ERRORS[errorKey] || ERRORS.DEFAULT_ERROR;
         if (!error.cause) legacyLogger.log('error', 'An error occurred', error);
-        ErrorHandler.logError(opalError.logMessage, error.cause);
+        ErrorHandler.logError(`(${opalError.statusCode}) ${errorKey}: ${opalError.logMessage}`, error.cause);
         return {
             status_code: opalError.statusCode,
             data: {
