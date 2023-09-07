@@ -85,7 +85,8 @@ class EncryptionUtilities {
         }
         catch (aggregateErr) {
             // If none of the promises succeed, decryption has failed
-            legacyLogger.log('error', `Decrypt request error, secret: ${secret}, saltArray:${JSON.stringify(saltArray)}`);
+            const message = `Decrypt request error, secret: ${secret}, saltArray:${JSON.stringify(saltArray)}`;
+            legacyLogger.log('error', message);
             throw new Error('DECRYPTION', {
                 cause: {
                     message: 'Failed multi-decryption attempts with all possible salt values provided.',
