@@ -32,6 +32,8 @@ class RequestValidator {
                 })
                 .catch((err) => {
                     logger.log('error', 'Unable to decrypt legacy registration request', err);
+                    const message = `Decryption error, secret: ${encryptionInfo.secret}, saltArray:${JSON.stringify(encryptionInfo.salt)}`;
+                    logger.log('error', message);
                     r.reject(new opalResponseError(2, 'Unable to decrypt request', request, err));
                 });
             }).catch((err) => {
