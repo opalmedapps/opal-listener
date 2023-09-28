@@ -503,6 +503,36 @@ exports.updateConsentStatus = function()
     `;
 };
 
+/**
+ * @name retrieveDatabankConsentForm
+ * @desc Try to retrieve a study consent form id based on the presence of the word databank in the title or code.
+ *       This is a temporary solution, and the somewhat flimsy logic will be removed in Databank Phase 2.
+ * @returns consentQuestionnaireId
+ */
+exports.retrieveDatabankConsentForm = function()
+{
+    return `
+        SELECT
+            s.consentQuestionnaireId
+        FROM
+            study s
+        WHERE
+            s.deleted = 0
+            AND (
+                LOWER(s.title_EN) LIKE '%databank%'
+                OR LOWER(s.code) LIKE '%databank%'
+            )
+            AND (
+                s.startDate IS NULL
+                OR s.startDate <= CURDATE()
+            )
+            AND (
+                s.endDate IS NULL
+                OR s.endDate >= CURDATE()
+            )
+    `;
+};
+
 exports.insertEducationalMaterialRatingQuery=function()
 {
     return "INSERT INTO `EducationalMaterialRating`(`EducationalMaterialRatingSerNum`, `EducationalMaterialControlSerNum`, `PatientSerNum`, `Username`, `RatingValue`, `LastUpdated`) VALUES (NULL,?,?,?,?,NULL)";
