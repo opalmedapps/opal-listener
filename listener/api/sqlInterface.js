@@ -381,6 +381,8 @@ exports.getStudyQuestionnaires = async function(requestObject) {
 /**
  * @name studyUpdateStatus
  * @desc Update consent status for a study.
+ *       QSCCD-1044: We have added temporary `hardcoded` logic here to trigger the Django DatabankConsent api.
+ *                   This can be removed when the databank progresses to 'Phase 2' and has a dedicated section in the app chart or research meu.
  * @param {object} requestObject
  * @return {Promise}
  */
@@ -388,25 +390,72 @@ exports.studyUpdateStatus = async function(requestObject) {
     try {
         let parameters = requestObject.Parameters;
 
-        if (parameters && parameters.questionnaire_id && parameters.status) {
-            // get number corresponding to consent status string
-            let statusNumber = Object.keys(
-                studiesConfig.STUDY_CONSENT_STATUS_MAP
-            ).find(
-                key => studiesConfig.STUDY_CONSENT_STATUS_MAP[key] === parameters.status
-            );
-
-            await exports.runSqlQuery(
-                queries.updateConsentStatus(),
-                [statusNumber, parameters.questionnaire_id, requestObject.UserID]
-            );
-
-            return {Response: 'success'};
-        } else {
-            throw {Response: 'error', Reason: 'Invalid parameters'};
+        // Validate existence of required api parameters
+        if (!parameters || !parameters.questionnaire_id || !parameters.status || !parameters.uuid) {
+            return Promise.reject({Response: 'error', Reason: 'Invalid parameters'});
         }
+
+        // Retrieve number corresponding to consent status string
+        let statusNumber = Object.keys(
+            studiesConfig.STUDY_CONSENT_STATUS_MAP
+        ).find(
+            key => studiesConfig.STUDY_CONSENT_STATUS_MAP[key] === parameters.status
+        );
+
+        // Update status in patientStudy table
+        await exports.runSqlQuery(
+            queries.updateConsentStatus(),
+            [statusNumber, parameters.questionnaire_id, requestObject.UserID]
+        );
+
+        // status 2 is used for 'opalConsented', all other statuses should not trigger the API
+        if (statusNumber==2) {
+            // Make database call to retrieve an active databank consent form id, if it exists
+            let consent_questionnaire_id;
+            try {
+                let results = await exports.runSqlQuery(queries.retrieveDatabankConsentForm());
+                if (results.length > 0 && 'consentQuestionnaireId' in results[0]) {
+                    consent_questionnaire_id = results[0].consentQuestionnaireId;
+                } else {
+                    return Promise.reject({Response: 'error', Reason: 'No databank consent questionnaire found in OpalDB study table matching criteria.'});
+                }
+            }catch (error) {
+                return Promise.reject({Response: 'error', Reason: `Error querying OpalDB: ${error}`});
+            }
+
+            if (consent_questionnaire_id && consent_questionnaire_id==parameters.questionnaire_id){
+                logger.log('info', 'Detected instance of databank consent, calling Backend api.');
+
+                // Finally send Django API to create DatabankConsent instance
+                let options = {
+                    headers: {
+                        "Authorization": `Token ${config.OPAL_BACKEND_AUTH_TOKEN}`,
+                    },
+                    json: true,
+                    body: {
+                        "has_appointments": true,
+                        "has_questionnaires": true,
+                        "has_labs": true,
+                        "has_diagnoses": true,
+                        "has_demographics": true,
+                    },
+                };
+                try {
+                    // TODO: Databank Phase2 replace this call with a put and implement PutAsCreate in Django endpoint to make this more error resistent
+                    //       For example in case a DatabankConsent questionnaire is accidentally sent to the same patient twice, this would give a duplicate entry error in django.
+                    api_url = `${config.OPAL_BACKEND_HOST}/api/patients/<PATIENT_UUID>/databank/consent/`;
+                    await requestUtility.request("post", api_url.replace('<PATIENT_UUID>', parameters.uuid), options);
+                }catch (error) {
+                    return Promise.reject({Response: 'error', Reason: `Error creating DatabankConsent in backend: ${error}`});
+                }
+            }
+        }
+
+        return {Response: 'success'};
     }
-    catch (error) { throw {Response: 'error', Reason: error}; }
+    catch (error) {
+        return Promise.reject({Response: 'error', Reason: `Error updating study consent status: ${error}`});
+    }
 };
 
 /**
