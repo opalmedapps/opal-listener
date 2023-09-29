@@ -213,6 +213,8 @@ function patientAnnouncementTableFields(selectOne=false) {
     return `SELECT
                 Announcement.AnnouncementSerNum,
                 Announcement.DateAdded,
+                Patient.FirstName as PatientFirstName,
+                Patient.LastName as PatientLastName,
                 JSON_CONTAINS(Announcement.ReadBy, ?) as ReadStatus,
                 PostControl.PostControlSerNum,
                 PostControl.PostType,
@@ -222,9 +224,11 @@ function patientAnnouncementTableFields(selectOne=false) {
                 PostControl.PostName_FR
             FROM
                 PostControl,
-                Announcement
+                Announcement,
+                Patient
             WHERE
                 PostControl.PostControlSerNum = Announcement.PostControlSerNum
+                AND Announcement.PatientSerNum = Patient.PatientSerNum
                 AND Announcement.PatientSerNum = ?
                 ${selectOne ? 'AND Announcement.AnnouncementSerNum = ?' : ''}
                 ${!selectOne ? 'AND (Announcement.LastUpdated > ? OR PostControl.LastUpdated > ?)' : ''}
