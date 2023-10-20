@@ -301,10 +301,10 @@ async function initializePatientControl(patientSerNum) {
 async function sendConfirmationEmailNoFailure(language, emailAddress) {
     try {
         let {subject, body, htmlStream} = getEmailContent(language);
-        await sendMail(config.SMTP, emailAddress, subject, body.join('\n'), htmlStream);
+        await sendMail(config, emailAddress, subject, body.join('\n'), htmlStream);
     }
     catch (error) {
-        logger.log('error', `An error occurred while sending the confirmation email (for ${emailAddress}): ${JSON.stringify(error)}`);
+        logger.log('error', `An error occurred while sending the confirmation email (for ${emailAddress})`, error);
     }
 }
 
@@ -326,7 +326,7 @@ async function requestLabHistoryNoFailure(registrationData, patientLegacyId) {
             await opalRequest.getLabResultHistory(config.LAB_RESULT_HISTORY_URL, requestData);
         }
     } catch (error) {
-        logger.log('error', `An error occurred while getting lab result history (for patient ${patientLegacyId}): ${JSON.stringify(error)}`);
+        logger.log('error', `An error occurred while getting lab result history (for patient ${patientLegacyId})`, error);
     }
 }
 
