@@ -124,6 +124,7 @@ const requestMappings =
         },
         'QuestionnaireList': {
             module: questionnaires,
+            moduleSingleItem: questionnaires,
             processFunction: result => result.data.questionnaireList
         },
         'patientStudy': {

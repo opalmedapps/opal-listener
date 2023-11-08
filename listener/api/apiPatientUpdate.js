@@ -139,6 +139,7 @@ exports.getQuestionnaireList = questionnaires.getQuestionnaireList;
 /**
  * For questionnaire V2 (2019 version of qplus questionnaire front-end).
  * Getting the information about a questionnaire stored in OpalDB from its QuestionnaireSerNum
+ * @deprecated Since QSCCD-1559, in released versions after 1.12.2.
  * @param {object} requestObject
  * @returns {Promise}
  */

@@ -33,15 +33,31 @@ class GetOneItemHandler extends ApiRequestHandler {
         let { category, serNum } = requestObject.parameters;
         let serNumInt = parseInt(serNum);
         const patientSerNum = parseInt(requestObject.meta.TargetPatientID);
-
-        // Query the DB to get the requested item
         const requestMappings = sqlInterface.getSqlApiMappings();
-        const itemQuery = requestMappings[category].sqlSingleItem;
-        if (!itemQuery) throw new Error(`GetOneItem request failed: sqlSingleItem not implemented for category '${category}'`);
 
-        const needUserId = requestMappings[category].needUserId;
-        const params = needUserId ? [requestObject.meta.UserID, patientSerNum, serNumInt] : [patientSerNum, serNumInt];
-        const rows = await OpalSQLQueryRunner.run(itemQuery, params, requestMappings[category].processFunction);
+        // Get the SQL query or module
+        const mapping = requestMappings[category];
+        const sqlSingleItem = mapping.sqlSingleItem;
+        const moduleSingleItem = mapping.moduleSingleItem ? mapping.moduleSingleItem[`${category}Single`] : undefined;
+
+        // Call the SQL query or function defined to get the requested item
+        let rows;
+        if (sqlSingleItem) {
+            const needUserId = mapping.needUserId;
+            const params = needUserId ? [requestObject.meta.UserID, patientSerNum, serNumInt] : [patientSerNum, serNumInt];
+            rows = await OpalSQLQueryRunner.run(sqlSingleItem, params, mapping.processFunction);
+        }
+        else if (moduleSingleItem) {
+            return await moduleSingleItem.handleRequest({
+                meta: {
+                    TargetPatientID: patientSerNum,
+                    UserID: requestObject.meta.UserID,
+                },
+                params: requestObject.parameters,
+            });
+            // Note: at this time, mapping.processFunction is not designed to work with single items for modules
+        }
+        else throw new Error(`GetOneItem request failed: Single item processing is not implemented for category '${category}'`);
 
         // The response format is the same as the 'Refresh' request to be able to use these responses interchangeably
         return {
