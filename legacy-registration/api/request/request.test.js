@@ -35,7 +35,7 @@ describe('opalRequest', function () {
 			headers['Accept-Language'] = language;
 			const expectedParameters = {
 				method: 'get',
-				url: `${process.env.OPAL_BACKEND_HOST}/api/registration/${registrationCode}/?detailed`,
+				url: `${process.env.BACKEND_HOST}/api/registration/${registrationCode}/?detailed`,
 				headers: headers,
 			};
 			sinon.assert.calledWith(opalRequest.axiosApi, expectedParameters);
@@ -56,7 +56,7 @@ describe('opalRequest', function () {
 				headers['Accept-Language'] = language;
 				const expectedParameters = {
 					method: 'get',
-					url: `${process.env.OPAL_BACKEND_HOST}/api/registration/${registrationCode}/?detailed`,
+					url: `${process.env.BACKEND_HOST}/api/registration/${registrationCode}/?detailed`,
 					headers: headers,
 				};
 				sinon.assert.calledWith(opalRequest.axiosApi, expectedParameters);
@@ -100,7 +100,7 @@ describe('opalRequest', function () {
 
 			const expectedParameters = {
 				method: 'post',
-				url: `${process.env.OPAL_BACKEND_HOST}/api/registration/${registrationCode}/register/`,
+				url: `${process.env.BACKEND_HOST}/api/registration/${registrationCode}/register/`,
 				headers: headers,
 				data: registerData,
 			};
@@ -141,7 +141,7 @@ describe('opalRequest', function () {
 
 				const expectedParameters = {
 					method: 'post',
-					url: `${process.env.OPAL_BACKEND_HOST}/api/registration/${registrationCode}/register/`,
+					url: `${process.env.BACKEND_HOST}/api/registration/${registrationCode}/register/`,
 					headers: headers,
 					data: registerData,
 				};

@@ -15,8 +15,8 @@ module.exports.MYSQL_PASSWORD = process.env.MYSQL_PASSWORD;
 module.exports.MYSQL_DATABASE = process.env.MYSQL_DATABASE;
 module.exports.MYSQL_DATABASE_QUESTIONNAIRE = process.env.MYSQL_DATABASE_QUESTIONNAIRE;
 module.exports.MYSQL_DATABASE_HOST = process.env.MYSQL_DATABASE_HOST;
-module.exports.OPAL_BACKEND_HOST = process.env.OPAL_BACKEND_HOST;
-module.exports.OPAL_BACKEND_AUTH_TOKEN = process.env.OPAL_BACKEND_AUTH_TOKEN;
+module.exports.BACKEND_HOST = process.env.BACKEND_HOST;
+module.exports.BACKEND_LISTENER_AUTH_TOKEN = process.env.BACKEND_LISTENER_AUTH_TOKEN;
 module.exports.MYSQL_DATABASE_PORT = process.env.MYSQL_DATABASE_PORT;
 // Config settings
 module.exports.DOCUMENTS_PATH = process.env.DOCUMENTS_PATH;
