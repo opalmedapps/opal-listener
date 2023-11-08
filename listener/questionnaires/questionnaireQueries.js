@@ -8,6 +8,10 @@ This file stores all queries related to the questionnaire system
  * ==============================================
  */
 
+/**
+ * @deprecated Since QSCCD-1559, in released versions after 1.12.2.
+ * @returns {string}
+ */
 exports.getQuestionnaireInOpalDBFromSerNum = function () {
     return `SELECT
                 q.QuestionnaireSerNum AS questionnaireSerNum,
@@ -18,6 +22,18 @@ exports.getQuestionnaireInOpalDBFromSerNum = function () {
                 q.LastUpdated AS lastUpdated
             FROM Questionnaire q
             WHERE q.QuestionnaireSerNum = ?;`
+};
+
+/**
+ * @description Query that looks up the answerQuestionnaireId corresponding to a given QuestionnaireSerNum.
+ * @returns {string} The query.
+ */
+exports.getAnswerQuestionnaireIdFromSerNum = () => {
+    return `SELECT q.PatientQuestionnaireDBSerNum AS answerQuestionnaireId
+            FROM Questionnaire q
+            WHERE q.QuestionnaireSerNum = ?
+            ;
+    `
 };
 
 exports.updateQuestionnaireStatus = function () {

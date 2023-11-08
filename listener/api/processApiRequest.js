@@ -30,6 +30,7 @@ const LEGACYAPI = {
     // Deprecated API entry: 'NotificationsNew', since QSCCD-125
     'NotificationsNew': apiHospitalUpdate.getNewNotifications,
     'EducationalPackageContents': apiPatientUpdate.getPackageContents,
+    // Deprecated API entry: 'QuestionnaireInOpalDBFromSerNum', since QSCCD-1559
     'QuestionnaireInOpalDBFromSerNum': apiPatientUpdate.getQuestionnaireInOpalDB,
     // Deprecated API entry: 'QuestionnaireList' is now accessed via sqlInterface's requestMappings (since QSCCD-230)
     'QuestionnaireList': apiPatientUpdate.getQuestionnaireList,
@@ -49,7 +50,7 @@ const LEGACYAPI = {
     'Studies': apiPatientUpdate.getStudies,
     'StudyQuestionnaires': apiPatientUpdate.getStudyQuestionnaires,
     'StudyUpdateStatus': apiHospitalUpdate.studyUpdateStatus,
-    //Deprecate API entry: 'PFPMembers', since QSCCD-417
+    // Deprecated API entry: 'PFPMembers', since QSCCD-417
     'PFPMembers': apiPatientUpdate.getPatientsForPatientsMembers
 };
 
