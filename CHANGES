@@ -1,3 +1,15 @@
+Version 1.10.1.0:
+ - fix: add new default link for French labs and move lab links to .env
+ - fix: add missing UserID request parameter to internal API requests
+ - build(deps): update docker docker tag to v24
+ - fix: add request to get a single questionnaire stub
+ - chore(deps): update eslint
+ - chore(deps): update dependency chai to v4.3.10
+ - build(deps): update node.js to v20.9.0
+ - fix: add registration specific token for access separation
+ - chore: add Fred to test users
+ - fix: improve logging of multi-decryption errors
+
 Version 1.10.0.0:
  - refactor: revert previous changes to studies module
  - chore(deps): update nodejs server to v20.8.0
