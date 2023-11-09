@@ -16,7 +16,9 @@ class ApiRequest {
      * @description Take the validated request uploaded to Firebase and send the Parameters field
      * which represents the axios request to the Django backend. Use legacy server to format the request
      * uploaded to Firebase.
-     * @param {object} requestParams Request decrypted
+     * @param {object} requestParams decrypted request containing a Parameters field with the request parameters
+     *                 and an optional UserID field.
+     *                 For requests coming from the app, the UserID of the authenticated user needs to be provided.
      * @returns {object} Formatted request that merge the response from the Django API and
      * the legacy information needed by the app.
      */

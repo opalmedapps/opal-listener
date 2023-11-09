@@ -54,7 +54,7 @@ class UpdateSecurityQuestionAnswerRequestHandler extends ApiRequestHandler {
             for (var key in questionAnswerArr) {
                 if (Object.hasOwn(questionAnswerArr[key], "questionSerNum") && (questionAnswerArr[key].questionSerNum !== null) && (questionAnswerArr[key].questionSerNum !== undefined)){
                     // Call Backend API to retrieve question from SecurityQuestion model when the active question is selected and updated
-                    apiResponse = await SecurityDjango.getSpecificActiveSecurityQuestion(questionAnswerArr[key].questionSerNum);
+                    apiResponse = await SecurityDjango.getSpecificActiveSecurityQuestion(requestObject.meta.UserID, questionAnswerArr[key].questionSerNum);
                     question = (Language == 'EN') ? apiResponse.title_en : apiResponse.title_fr;
                 }
                 else{
