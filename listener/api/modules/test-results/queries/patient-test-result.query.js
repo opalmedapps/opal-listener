@@ -1,3 +1,4 @@
+const config = require('../../../../config-adaptor');
 const moment = require("moment");
 const mysql = require("mysql");
 const utility = require("./../../../../utility/utility.js");
@@ -26,10 +27,10 @@ class PatientTestResultQuery {
 						ptr.TestExpressionSerNum as testExpressionSerNum,
 						IfNull((Select emc.URL_EN from EducationalMaterialControl emc
 							where tc.EducationalMaterialControlSerNum = emc.EducationalMaterialControlSerNum),
-							"https://labtestsonline.org/tests/") as educationalMaterialURL_EN,
+							"${config.DEFAULT_LAB_EDUCATIONAL_URL_EN}") as educationalMaterialURL_EN,
 						IfNull((Select emc.URL_FR from EducationalMaterialControl emc
 							where tc.EducationalMaterialControlSerNum = emc.EducationalMaterialControlSerNum),
-							"https://labtestsonline.org/tests/") as educationalMaterialURL_FR,
+							"${config.DEFAULT_LAB_EDUCATIONAL_URL_FR}") as educationalMaterialURL_FR,
 						ptr.AbnormalFlag as abnormalFlag,
 						ptr.NormalRange as normalRange,
 						ptr.NormalRangeMin as normalRangeMin,
@@ -56,12 +57,12 @@ class PatientTestResultQuery {
 	 * Query to return the collected dates the patient had tests for the test types
 	 * that are aliased.
 	 * @param {string|number} patientSerNum PatientSerNum in the DB
-     * @param {Date} lastUpdated - Only items with 'LastUpdated' after this time are returned.
+	 * @param {Date} lastUpdated - Only items with 'LastUpdated' after this time are returned.
 	 */
 	static getTestDatesQuery(patientSerNum, lastUpdated) {
-        let numLastUpdated = 3;
-        let params = [patientSerNum];
-        params = utility.addSeveralToArray(params, lastUpdated, numLastUpdated);
+		let numLastUpdated = 3;
+		let params = [patientSerNum];
+		params = utility.addSeveralToArray(params, lastUpdated, numLastUpdated);
 
 		return mysql.format(`
 					SELECT DISTINCT CollectedDateTime as collectedDateTime
@@ -82,29 +83,29 @@ class PatientTestResultQuery {
 
 	/**
 	 * Query to return all test types for the patient including the latest results for the given type
-     * @param {String} userId - Firebase userId making the request.
+	 * @param {String} userId - Firebase userId making the request.
 	 * @param {string|number} patientSerNum PatientSerNum in the DB
-     * @param {Date} lastUpdated - Only items with 'LastUpdated' after this time are returned.
+	 * @param {Date} lastUpdated - Only items with 'LastUpdated' after this time are returned.
 	 * @returns {string} query test types for the patient
 	 */
 	static getTestTypesQuery(userId, patientSerNum, lastUpdated) {
-        let numLastUpdated = 3;
-        let params = [userId, patientSerNum];
-        params = utility.addSeveralToArray(params, lastUpdated, numLastUpdated);
+		let numLastUpdated = 3;
+		let params = [userId, patientSerNum];
+		params = utility.addSeveralToArray(params, lastUpdated, numLastUpdated);
 		// Coalesce gets the first non-null value, in this case that's the last test value
 		return mysql.format(
 					`SELECT
 						ptr.PatientTestResultSerNum as latestPatientTestResultSerNum,
 						te.TestExpressionSerNum as testExpressionSerNum,
-                        JSON_CONTAINS(ptr.ReadBy, ?) as readStatus,
+						JSON_CONTAINS(ptr.ReadBy, ?) as readStatus,
 						tc.Name_EN as name_EN,
 						tc.Name_FR as name_FR,
 						IfNull((SELECT emc.URL_EN FROM EducationalMaterialControl emc
 							WHERE tc.EducationalMaterialControlSerNum = emc.EducationalMaterialControlSerNum),
-							"https://labtestsonline.org/tests/") as educationalMaterialURL_EN,
+							"${config.DEFAULT_LAB_EDUCATIONAL_URL_EN}") as educationalMaterialURL_EN,
 						IfNull((SELECT emc.URL_FR FROM EducationalMaterialControl emc
 							WHERE tc.EducationalMaterialControlSerNum = emc.EducationalMaterialControlSerNum),
-							"https://labtestsonline.org/tests/") as educationalMaterialURL_FR,
+							"${config.DEFAULT_LAB_EDUCATIONAL_URL_FR}") as educationalMaterialURL_FR,
 						ptr.UnitDescription as unitDescription,
 						ptr.CollectedDateTime as latestCollectedDateTime,
 						ptr.AbnormalFlag as latestAbnormalFlag,
@@ -150,10 +151,10 @@ class PatientTestResultQuery {
 						tc.Name_FR as name_FR,
 						IfNull((Select emc.URL_EN from EducationalMaterialControl emc
 							where tc.EducationalMaterialControlSerNum = emc.EducationalMaterialControlSerNum),
-							"https://labtestsonline.org/tests/") as educationalMaterialURL_EN,
+							"${config.DEFAULT_LAB_EDUCATIONAL_URL_EN}") as educationalMaterialURL_EN,
 						IfNull((Select emc.URL_FR from EducationalMaterialControl emc
 							where tc.EducationalMaterialControlSerNum = emc.EducationalMaterialControlSerNum),
-							"https://labtestsonline.org/tests/") as educationalMaterialURL_FR,
+							"${config.DEFAULT_LAB_EDUCATIONAL_URL_FR}") as educationalMaterialURL_FR,
 						ptr.CollectedDateTime as latestCollectedDateTime,
 						ptr.AbnormalFlag as latestAbnormalFlag,
 						ptr.TestValue as latestTestValue,
