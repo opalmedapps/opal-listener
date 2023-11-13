@@ -36,7 +36,8 @@ class PatientTestResultQuery {
 						ptr.NormalRangeMax as normalRangeMax,
 						ptr.TestValue as testValue,
 						ptr.TestValueNumeric as testValueNumeric,
-						ptr.UnitDescription as unitDescription
+						ptr.UnitDescription as unitDescription,
+                        tc.InterpretationRecommended as InterpretationRecommended
 					FROM
 						PatientTestResult as ptr,
 						TestExpression as te,
@@ -48,6 +49,7 @@ class PatientTestResultQuery {
 						AND ptr.TestExpressionSerNum = te.TestExpressionSerNum
 						AND te.TestControlSerNum = tc.TestControlSerNum
 						AND tc.PublishFlag = 1
+                        AND DATE_FORMAT(ptr.AvailableAt, '%Y-%m-%d') <= DATE_FORMAT(NOW(), '%Y-%m-%d')
 					ORDER BY groupName, sequenceNum;`,
 				[moment(date).format("YYYY-MM-DD HH:mm:ss"), patientSerNum]);
 	}
@@ -160,7 +162,8 @@ class PatientTestResultQuery {
 						ptr.NormalRange as normalRange,
 						ptr.NormalRangeMin as normalRangeMin,
 						ptr.NormalRangeMax as normalRangeMax,
-						ptr.UnitDescription as unitDescription
+						ptr.UnitDescription as unitDescription,
+                        tc.InterpretationRecommended as InterpretationRecommended
 					FROM
 						PatientTestResult as ptr,
 						TestExpression as te,
@@ -172,6 +175,7 @@ class PatientTestResultQuery {
 						AND ptr.TestExpressionSerNum = te.TestExpressionSerNum
 						AND te.TestControlSerNum = tc.TestControlSerNum
 						AND tc.PublishFlag = 1
+                        AND DATE_FORMAT(ptr.AvailableAt, '%Y-%m-%d') <= DATE_FORMAT(NOW(), '%Y-%m-%d')
 					ORDER BY latestCollectedDateTime DESC LIMIT 1;`,
 				[patientSerNum, testExpressionSerNum]);
 	}
