@@ -38,7 +38,7 @@ class PatientTestResultQuery {
 						ptr.TestValue as testValue,
 						ptr.TestValueNumeric as testValueNumeric,
 						ptr.UnitDescription as unitDescription,
-                        tc.InterpretationRecommended as InterpretationRecommended
+                        tc.InterpretationRecommended as interpretationRecommended
 					FROM
 						PatientTestResult as ptr,
 						TestExpression as te,
@@ -164,7 +164,7 @@ class PatientTestResultQuery {
 						ptr.NormalRangeMin as normalRangeMin,
 						ptr.NormalRangeMax as normalRangeMax,
 						ptr.UnitDescription as unitDescription,
-                        tc.InterpretationRecommended as InterpretationRecommended
+                        tc.InterpretationRecommended as interpretationRecommended
 					FROM
 						PatientTestResult as ptr,
 						TestExpression as te,
