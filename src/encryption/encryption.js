@@ -88,7 +88,7 @@ class EncryptionUtilities {
             throw new Error('DECRYPTION', {
                 cause: {
                     message: 'Failed multi-decryption attempts with all possible salt values provided.',
-                    individualErrors: aggregateErr.errors,
+                    individualErrors: aggregateErr.errors.map(e => `${e.message} ${e.cause} ${e.stack}`).join(' | '),
                 },
             });
         }

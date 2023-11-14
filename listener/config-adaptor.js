@@ -15,7 +15,8 @@ module.exports.MYSQL_PASSWORD = process.env.MYSQL_PASSWORD;
 module.exports.MYSQL_DATABASE = process.env.MYSQL_DATABASE;
 module.exports.MYSQL_DATABASE_QUESTIONNAIRE = process.env.MYSQL_DATABASE_QUESTIONNAIRE;
 module.exports.MYSQL_DATABASE_HOST = process.env.MYSQL_DATABASE_HOST;
-module.exports.OPAL_BACKEND_HOST = process.env.OPAL_BACKEND_HOST;
+module.exports.BACKEND_HOST = process.env.BACKEND_HOST;
+module.exports.BACKEND_LISTENER_AUTH_TOKEN = process.env.BACKEND_LISTENER_AUTH_TOKEN;
 module.exports.MYSQL_DATABASE_PORT = process.env.MYSQL_DATABASE_PORT;
 // Config settings
 module.exports.DOCUMENTS_PATH = process.env.DOCUMENTS_PATH;
@@ -24,6 +25,8 @@ module.exports.CHECKIN_URL = process.env.CHECKIN_URL;
 module.exports.CHECKIN_ROOM = process.env.CHECKIN_ROOM;
 module.exports.LAB_RESULT_HISTORY_URL = process.env.LAB_RESULT_HISTORY_URL;
 module.exports.QUESTIONNAIRE_COMPLETED_URL = process.env.QUESTIONNAIRE_COMPLETED_URL;
+module.exports.DEFAULT_LAB_EDUCATIONAL_URL_EN = process.env.DEFAULT_LAB_EDUCATIONAL_URL_EN;
+module.exports.DEFAULT_LAB_EDUCATIONAL_URL_FR = process.env.DEFAULT_LAB_EDUCATIONAL_URL_FR;
 module.exports.LATEST_STABLE_VERSION = process.env.LATEST_STABLE_VERSION;
 // ORMS settings API
 module.exports.ORMS_UPDATE_PATIENT_STATUS_URL = process.env.ORMS_UPDATE_PATIENT_STATUS_URL;

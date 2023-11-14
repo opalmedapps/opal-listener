@@ -31,6 +31,7 @@ const requestDataApi = {
 const requestRegistrationApi = {
     Request: 'registration-api',
     BranchName: CryptoJs.SHA512('code12345678').toString(),
+    UserID: process.env.TEST_ACCOUNT_FIREBASE_UID,
     Parameters: {
         method: 'get',
         url: `/api/registration/by-hash/${CryptoJs.SHA512('code12345678')}`,
@@ -53,6 +54,7 @@ const requestRegistration = {
     RequestType: 'REGISTRATION_LEGACY',
     Request: 'RegisterPatient',
     BranchName: CryptoJs.SHA512('A0code123456').toString(),
+    UserID: process.env.TEST_ACCOUNT_FIREBASE_UID,
     Parameters: {
         Fields: {
             accessLevel: '3',

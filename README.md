@@ -1,6 +1,6 @@
 # Opal-listener
 
-[![pipeline status](https://gitlab.com/opalmedapps/opal-listener/badges/staging/pipeline.svg)](https://gitlab.com/opalmedapps/opal-listener/-/commits/staging) [![coverage report](https://gitlab.com/opalmedapps/opal-listener/badges/staging/coverage.svg)](https://gitlab.com/opalmedapps/opal-listener/-/commits/staging) [![Docs](https://img.shields.io/badge/docs-available-brightgreen.svg)](https://opalmedapps.gitlab.io/opal-listener)
+[![pipeline status](https://gitlab.com/opalmedapps/opal-listener/badges/main/pipeline.svg)](https://gitlab.com/opalmedapps/opal-listener/-/commits/main) [![coverage report](https://gitlab.com/opalmedapps/opal-listener/badges/main/coverage.svg)](https://gitlab.com/opalmedapps/opal-listener/-/commits/main) [![Docs](https://img.shields.io/badge/docs-available-brightgreen.svg)](https://opalmedapps.gitlab.io/opal-listener)
 
 This is the Opal app's backend listener that sits between Firebase and OpalDB.
 

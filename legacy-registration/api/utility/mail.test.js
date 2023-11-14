@@ -13,7 +13,14 @@ describe('sendmail()', function () {
       throw new Error('was not supposed to be succeed');
     }
     catch (error) {
-      expect(error.toString()).to.equal('Error: connect ECONNREFUSED 127.0.0.1:587');
+      // Check that the error contains 'Error: connect ECONNREFUSED' string
+      // Note that `nodemailer.createTransport()` method uses native `dns.resolve()` nodejs method
+      // Starting from nodejs v17, `dns.resolve()` method resolves host names to IPv6
+      // Please see:
+      //  - https://nodejs.org/api/dns.html#dnsresolvehostname-rrtype-callback
+      //  - https://nodejs.org/api/dns.html#dnssetdefaultresultorderorder
+      //  - https://nodemailer.com/smtp/
+      expect(error.toString()).to.include('Error: connect ECONNREFUSED');
     }
   });
 

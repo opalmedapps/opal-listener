@@ -3,7 +3,7 @@ default:
     # use node image instead of our own
     # our image runs with user node
     # see: https://gitlab.com/gitlab-org/gitlab-runner/-/issues/2750
-    name: node:16.20.0-alpine3.17
+    name: node:20.9.0-alpine3.18
   # Cache modules in between jobs
   cache:
     key:
@@ -37,9 +37,9 @@ build image:
   stage: Build
   # disable the default cache
   cache: []
-  image: docker:20.10.24
+  image: docker:24.0.7
   services:
-    - docker:20.10.24-dind
+    - docker:24.0.7-dind
   variables:
     # Use TLS https://docs.gitlab.com/ee/ci/docker/using_docker_build.html#tls-enabled
     DOCKER_HOST: tcp://docker:2376
@@ -131,6 +131,7 @@ pages:
 
 # Deployment implicitly uses a service account assigned to $GOOGLE_APPLICATION_CREDENTIALS below (from values defined in the GitLab project settings)
 # These service accounts provide permissions for editing Firebase rules
+# For details on 'changes' and 'allow_failure' in the child jobs, see: https://docs.gitlab.com/ee/ci/yaml/#ruleschanges
 .firebase rules:
   stage: Deploy
   before_script:
@@ -142,17 +143,40 @@ firebase rules dev:
     - if: $CI_COMMIT_BRANCH == $CI_DEFAULT_BRANCH
       changes:
         - firebase/dev/database.rules.json
+  environment:
+    name: dev
   script:
     - cd firebase/dev
     - export GOOGLE_APPLICATION_CREDENTIALS=$DEV_GOOGLE_APPLICATION_CREDENTIALS
     - firebase deploy --only database
 
+firebase rules qa:
+  extends: .firebase rules
+  rules:
+    - if: $CI_COMMIT_BRANCH == $CI_DEFAULT_BRANCH
+      changes:
+        - firebase/qa/database.rules.json
+      when: manual
+      # Allow pipeline to continue without running this job
+      allow_failure: true
+  environment:
+    name: qa
+  script:
+    - cd firebase/qa
+    - export GOOGLE_APPLICATION_CREDENTIALS=$QA_GOOGLE_APPLICATION_CREDENTIALS
+    - firebase deploy --only database
+
 firebase rules staging:
   extends: .firebase rules
   rules:
-    - if: $CI_COMMIT_BRANCH == "staging"
+    - if: $CI_COMMIT_BRANCH == $CI_DEFAULT_BRANCH
       changes:
         - firebase/staging/database.rules.json
+      when: manual
+      # Allow pipeline to continue without running this job
+      allow_failure: true
+  environment:
+    name: staging
   script:
     - cd firebase/staging
     - export GOOGLE_APPLICATION_CREDENTIALS=$STAGING_GOOGLE_APPLICATION_CREDENTIALS
@@ -161,9 +185,14 @@ firebase rules staging:
 firebase rules preprod:
   extends: .firebase rules
   rules:
-    - if: $CI_COMMIT_BRANCH == "PreProd"
+    - if: $CI_COMMIT_BRANCH == $CI_DEFAULT_BRANCH
       changes:
         - firebase/preprod/database.rules.json
+      when: manual
+      # Allow pipeline to continue without running this job
+      allow_failure: true
+  environment:
+    name: preprod
   script:
     - cd firebase/preprod
     - export GOOGLE_APPLICATION_CREDENTIALS=$PREPROD_GOOGLE_APPLICATION_CREDENTIALS
