@@ -1,3 +1,7 @@
+Version 1.10.2.0:
+ - fix: fix crash when submitting consent forms
+ - chore(deps): update dependency eslint-plugin-jsdoc to v46.9.0
+
 Version 1.10.1.0:
  - fix: add new default link for French labs and move lab links to .env
  - fix: add missing UserID request parameter to internal API requests
