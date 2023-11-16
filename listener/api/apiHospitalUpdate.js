@@ -64,5 +64,5 @@ exports.getNewNotifications = function (requestObject) {
 // Update study consent status
 exports.studyUpdateStatus = function (requestObject)
 {
-  sqlInterface.studyUpdateStatus(requestObject);
+    return sqlInterface.studyUpdateStatus(requestObject);
 };
