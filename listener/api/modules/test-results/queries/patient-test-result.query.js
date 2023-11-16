@@ -50,6 +50,7 @@ class PatientTestResultQuery {
 						AND ptr.TestExpressionSerNum = te.TestExpressionSerNum
 						AND te.TestControlSerNum = tc.TestControlSerNum
 						AND tc.PublishFlag = 1
+                        /* use the AvailableAt to determine if the lab result is available to be viewed by the patient */
                         AND DATE_FORMAT(ptr.AvailableAt, '%Y-%m-%d') <= DATE_FORMAT(NOW(), '%Y-%m-%d')
 					ORDER BY groupName, sequenceNum;`,
 				[moment(date).format("YYYY-MM-DD HH:mm:ss"), patientSerNum]);
@@ -79,6 +80,8 @@ class PatientTestResultQuery {
 						AND te.TestControlSerNum = tc.TestControlSerNum
 						AND tc.PublishFlag = 1
 						AND (ptr.LastUpdated > ? OR te.LastUpdated > ? OR tc.LastUpdated > ?)
+                        /* use the AvailableAt to determine if the lab result is available to be viewed by the patient */
+                        AND DATE_FORMAT(ptr.AvailableAt, '%Y-%m-%d') <= DATE_FORMAT(NOW(), '%Y-%m-%d')
 					ORDER BY collectedDateTime DESC;`,
 				params);
 	}
@@ -135,6 +138,8 @@ class PatientTestResultQuery {
 						AND te.TestControlSerNum = tc.TestControlSerNum
 						AND tc.PublishFlag = 1
 						AND (ptr.LastUpdated > ? OR te.LastUpdated > ? OR tc.LastUpdated > ?)
+                        /* use the AvailableAt to determine if the lab result is available to be viewed by the patient */
+                        AND DATE_FORMAT(ptr.AvailableAt, '%Y-%m-%d') <= DATE_FORMAT(NOW(), '%Y-%m-%d')
 					ORDER BY name_EN;`,
 				params);
 	}
@@ -176,6 +181,7 @@ class PatientTestResultQuery {
 						AND ptr.TestExpressionSerNum = te.TestExpressionSerNum
 						AND te.TestControlSerNum = tc.TestControlSerNum
 						AND tc.PublishFlag = 1
+                        /* use the AvailableAt to determine if the lab result is available to be viewed by the patient */
                         AND DATE_FORMAT(ptr.AvailableAt, '%Y-%m-%d') <= DATE_FORMAT(NOW(), '%Y-%m-%d')
 					ORDER BY latestCollectedDateTime DESC LIMIT 1;`,
 				[patientSerNum, testExpressionSerNum]);
@@ -199,6 +205,8 @@ class PatientTestResultQuery {
 					WHERE
 						ptr.PatientSerNum = ?
 						AND ptr.TestExpressionSerNum = ?
+                        /* use the AvailableAt to determine if the lab result is available to be viewed by the patient */
+                        AND DATE_FORMAT(ptr.AvailableAt, '%Y-%m-%d') <= DATE_FORMAT(NOW(), '%Y-%m-%d')
 					ORDER BY CollectedDateTime;`,
 				[patientSerNum, testExpressionSerNum]);
 	}
