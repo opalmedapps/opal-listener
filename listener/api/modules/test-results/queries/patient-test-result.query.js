@@ -125,7 +125,10 @@ class PatientTestResultQuery {
 						(
 							SELECT ptr2.PatientSerNum, ptr2.TestExpressionSerNum, MAX(ptr2.CollectedDateTime) CollectedDateTime
 							FROM PatientTestResult ptr2
-							WHERE ptr2.PatientSerNum = ?
+							WHERE
+							ptr2.PatientSerNum = ?
+							/* use the AvailableAt to determine if the latest test type and value is available to be returned */
+							AND DATE_FORMAT(ptr2.AvailableAt, '%Y-%m-%d') <= DATE_FORMAT(NOW(), '%Y-%m-%d')
 							GROUP BY ptr2.TestExpressionSerNum
 						) as A
 					WHERE
