@@ -683,7 +683,10 @@ exports.inputFeedback = function(requestObject) {
 		            email = "patients4patients.contact@gmail.com";
 		            subject = "New Suggestion - Opal";
 		            replyTo = email;
-	            } else {
+	            } else if(type =='research'){
+                    email = config.OPAL_EMAIL;
+		            subject = "New Research Feedback - Opal - From PatientSerNum: " + patientSerNum;
+                } else {
 		            email = config.OPAL_EMAIL;
 		            subject = "New Feedback - Opal - From PatientSerNum: " + patientSerNum;
 	            }
