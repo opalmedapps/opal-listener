@@ -679,11 +679,11 @@ exports.inputFeedback = function(requestObject) {
                 let subject;
 	            // Determine if the feedback is for the app or patients committee
                 //deprecated (Patients for Patients will be removed)
-	            if (type === 'pfp') {
+                if (type === 'pfp') {
                     email = "patients4patients.contact@gmail.com";
                     subject = "New Suggestion - Opal";
                     replyTo = email;
-                } else if(type =='research') {
+                } else if(type ==='research') {
                     email = config.OPAL_EMAIL;
                     subject = "New Research Feedback - Opal - From PatientSerNum: " + patientSerNum;
                 } else {
