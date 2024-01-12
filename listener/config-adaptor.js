@@ -37,3 +37,8 @@ module.exports.SMTP_USERNAME = process.env.SMTP_USERNAME;
 module.exports.SMTP_PASSWORD = process.env.SMTP_PASSWORD;
 module.exports.SMTP_FROM = process.env.SMTP_FROM;
 module.exports.SMTP_TLS_REJECTED_UNAUTHORIZED = process.env.SMTP_TLS_REJECTED_UNAUTHORIZED;
+//OPAL EMAIL used in `mailer.js`
+module.exports.OPAL_EMAIL=process.env.OPAL_EMAIL;
+// SMTP Default IP and PORT used in `mailer.js`
+module.exports.SMTP_SERVER_IP=process.env.SMTP_SERVER_IP;
+module.exports.SMTP_SERVER_PORT=process.env.SMTP_SERVER_IP;
