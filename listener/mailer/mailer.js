@@ -10,7 +10,7 @@
 
 'use strict';
 const nodemailer = require('nodemailer');
-const config            = require('./../config-adaptor');
+const config = require('./../config-adaptor');
 
 function Mail(){
 
