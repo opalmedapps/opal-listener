@@ -684,7 +684,7 @@ exports.inputFeedback = function(requestObject) {
 		            subject = "New Suggestion - Opal";
 		            replyTo = email;
 	            } else {
-		            email = "opal@muhc.mcgill.ca";
+		            email = config.OPAL_EMAIL;
 		            subject = "New Feedback - Opal - From PatientSerNum: " + patientSerNum;
 	            }
                 (new Mail()).sendMail(email, subject, feedback, replyTo);
