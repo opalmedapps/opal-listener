@@ -679,14 +679,18 @@ exports.inputFeedback = function(requestObject) {
                 let subject;
 	            // Determine if the feedback is for the app or patients committee
                 //deprecated (Patients for Patients will be removed)
-	            if (type === 'pfp'){
-		            email = "patients4patients.contact@gmail.com";
-		            subject = "New Suggestion - Opal";
-		            replyTo = email;
-	            } else {
-		            email = "opal@muhc.mcgill.ca";
-		            subject = "New Feedback - Opal - From PatientSerNum: " + patientSerNum;
-	            }
+                if (type === 'pfp') {
+                    email = "patients4patients.contact@gmail.com";
+                    subject = "New Suggestion - Opal";
+                    replyTo = email;
+                } else if (type === 'research') {
+                    email = config.OPAL_EMAIL;
+                    subject = "New Research Feedback - Opal - From PatientSerNum: " + patientSerNum;
+                } else {
+                    email = config.OPAL_EMAIL;
+                    subject = "New Feedback - Opal - From PatientSerNum: " + patientSerNum;
+                }
+
                 (new Mail()).sendMail(email, subject, feedback, replyTo);
 	            r.resolve({Response:'success'});
             }).catch((err)=>{

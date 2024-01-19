@@ -1,7 +1,7 @@
 /*
  * Filename     :   mailer.js
  * Description  :   Module that send emails using node mailer
- * Created by   :   David Herrera, Robert Maglieri 
+ * Created by   :   David Herrera, Robert Maglieri
  * Date         :   30 Mar 2017
  * Copyright    :   Copyright 2016, HIG, All rights reserved.
  * Licence      :   This file is subject to the terms and conditions defined in
@@ -10,20 +10,21 @@
 
 'use strict';
 const nodemailer = require('nodemailer');
+const config = require('./../config-adaptor');
 
 function Mail(){
-    
+
     // create reusable transporter object using the default SMTP transport
     let transporter = nodemailer.createTransport({
-        host: '172.25.123.208',
-        port: 25
+        host: config.SMTP_SERVER_IP,
+        port: config.SMTP_SERVER_PORT
     });
 
     // setup email data with unicode symbols
 
     this.sendMail = function (recipient, subject, text, replyEmail) {
         let mailOptions = {
-            from: '"Opal" <opal@muhc.mcgill.ca>', // sender address
+            from: `Opal <${config.OPAL_EMAIL}>`, // sender address
             to: recipient, // list of receivers
             subject: subject, // Subject line
             text: text, // plain text body
