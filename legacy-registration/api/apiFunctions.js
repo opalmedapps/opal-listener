@@ -93,7 +93,6 @@ async function prepareAndValidateRegistrationRequest(requestObject) {
     logger.log('info', 'Calling backend API to get registration details');
     const registrationData = await opalRequest.retrieveRegistrationDataDetailed(
         requestObject.Parameters.Fields.registrationCode,
-        requestObject.Parameters.Fields.language
     );
     validateRegistrationDataDetailed(registrationData);
 
@@ -226,7 +225,7 @@ async function initializeOrGetFirebaseAccount(accountExists, email, password) {
  */
 async function registerInBackend(requestObject, patientLegacyId, userLegacyId, uid) {
     const registerData = formatRegisterData(requestObject, uid, patientLegacyId, userLegacyId);
-    await opalRequest.registrationRegister(requestObject.Parameters.Fields.registrationCode, requestObject.Parameters.Fields.language, registerData);
+    await opalRequest.registrationRegister(requestObject.Parameters.Fields.registrationCode, registerData);
 }
 
 /**

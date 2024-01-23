@@ -95,9 +95,8 @@ class opalRequest {
 	 	}
 	 }
 	 **/
-	static async retrieveRegistrationDataDetailed(registrationCode, language) {
+	static async retrieveRegistrationDataDetailed(registrationCode) {
 		let headers = this.backendApiHeaders;
-		headers['Accept-Language'] = language;
 		const url = `${env.BACKEND_HOST}/api/registration/${registrationCode}/?detailed`;
 		const requestParams = {
 			method: 'get',
@@ -141,9 +140,8 @@ class opalRequest {
 	 }
 	 @return {Promise}
 	 **/
-	static async registrationRegister(registrationCode, language, registerData) {
+	static async registrationRegister(registrationCode, registerData) {
 		let headers = this.backendApiHeaders;
-		headers['Accept-Language'] = language;
 		const url = `${env.BACKEND_HOST}/api/registration/${registrationCode}/register/`;
 		const requestParams = {
 			method: 'post',
