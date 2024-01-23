@@ -24,15 +24,13 @@ describe('opalRequest', function () {
 					},
 				}));
 			const registrationCode = 'A0127Q0T50hk';
-			const language = 'fr';
-			const response = await opalRequest.retrieveRegistrationDataDetailed(registrationCode, language);
+			const response = await opalRequest.retrieveRegistrationDataDetailed(registrationCode);
 
 			expect(response).to.have.property('patient');
 			expect(response.patient).to.have.property('ramq').equal('TESC53511613');
 			expect(response).to.have.property('hospital_patients');
 			expect(response.hospital_patients.length).equal(1);
 			let headers = opalRequest.backendApiHeaders;
-			headers['Accept-Language'] = language;
 			const expectedParameters = {
 				method: 'get',
 				url: `${process.env.BACKEND_HOST}/api/registration/${registrationCode}/?detailed`,
@@ -47,13 +45,11 @@ describe('opalRequest', function () {
 		it('retrieveRegistrationDataDetailed failed', async function () {
 			sinon.stub(opalRequest, 'axiosApi').throws(new Error('Calling retrieveRegistrationDataDetailed failed'));
 			const registrationCode = 'CODE12345678';
-			const language = 'fr';
 			try {
-				await opalRequest.retrieveRegistrationDataDetailed(registrationCode, language);
+				await opalRequest.retrieveRegistrationDataDetailed(registrationCode);
 			} catch (error) {
 				expect(error.message).to.equal('Calling retrieveRegistrationDataDetailed failed');
 				let headers = opalRequest.backendApiHeaders;
-				headers['Accept-Language'] = language;
 				const expectedParameters = {
 					method: 'get',
 					url: `${process.env.BACKEND_HOST}/api/registration/${registrationCode}/?detailed`,
@@ -75,7 +71,6 @@ describe('opalRequest', function () {
 				}));
 
 			const registrationCode = 'A0127Q0T50hk';
-			const language = 'en';
 			const registerData = {
 				patient: {
 					legacy_id: '1'
@@ -92,11 +87,10 @@ describe('opalRequest', function () {
 				],
 			}
 
-			const response = await opalRequest.registrationRegister(registrationCode, language, registerData);
+			const response = await opalRequest.registrationRegister(registrationCode, registerData);
 			expect(response).to.empty;
 
 			let headers = opalRequest.backendApiHeaders;
-			headers['Accept-Language'] = language;
 
 			const expectedParameters = {
 				method: 'post',
@@ -114,7 +108,6 @@ describe('opalRequest', function () {
 			sinon.stub(opalRequest, 'axiosApi').throws(new Error('Calling registrationRegister failed'));
 
 			const registrationCode = 'A0127Q0T50hk';
-			const language = 'en';
 			const registerData = {
 				patient: {
 					legacy_id: '1'
@@ -132,12 +125,11 @@ describe('opalRequest', function () {
 			}
 
 			try {
-				await opalRequest.registrationRegister(registrationCode, language, registerData);
+				await opalRequest.registrationRegister(registrationCode, registerData);
 			} catch (error) {
 				expect(error.message).to.equal('Calling registrationRegister failed');
 
 				let headers = opalRequest.backendApiHeaders;
-				headers['Accept-Language'] = language;
 
 				const expectedParameters = {
 					method: 'post',
