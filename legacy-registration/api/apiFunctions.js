@@ -352,8 +352,6 @@ async function updatePatientStatusInORMSNoFailure(registrationData) {
  * @returns {Promise<void>} Resolves if at least one of the call succeeds; otherwise, rejects with an error.
  */
 async function updatePatientStatusInORMS(registrationData) {
-    if (!config?.ORMS?.API?.URL) throw 'No value was provided for the ORMS URL in the config file';
-    if (!config?.ORMS?.API?.method?.updatePatientStatus) throw 'No value was provided for the ORMS updatePatientStatus method in the config file';
     let success, lastError;
 
     // Attempt a call on each of the patient's MRNs on a loop until one of the calls is successful
