@@ -2,6 +2,8 @@ const sqlInterface = require('./sqlInterface.js');
 const logger = require('./../logs/logger.js');
 const questionnaires = require('./../questionnaires/questionnaireOpalDB.js');
 
+exports.omitParametersFromLogs = sqlInterface.omitParametersFromLogs;
+
 /**
  * This is for questionnaire V2 (inputting a single question's answer for 2019 qplus questionnaire front-end)
  * @param {object} requestObject

@@ -9,6 +9,8 @@ const general = require('./modules/general');
 const securityQuestions = require("./modules/patient/security-questions");
 const testResults = require("./modules/test-results");
 
+const omitParametersFromLogs = apiHospitalUpdate.omitParametersFromLogs;
+
 /**
  * API HANDLERS FOR GENERAL REQUESTS
  * @type {Object}
@@ -84,8 +86,11 @@ const API = {
 exports.processRequest=function(requestObject) {
     const type = requestObject.type;
     const target = requestObject.meta.TargetPatientID;
+    let parametersString = JSON.stringify(requestObject.params);
+    if (omitParametersFromLogs.hasOwnProperty(type) && omitParametersFromLogs[type](requestObject.params)) parametersString = 'OMITTED FROM LOGS';
+
     // Old requests
-    logger.log('info', `Processing request of type: '${type}', with params = ${JSON.stringify(requestObject.params)}${target ? ', TargetPatientID = '+target : ''}`);
+    logger.log('info', `Processing request of type: '${type}', with params = ${parametersString}${target ? ', TargetPatientID = '+target : ''}`);
     if (LEGACYAPI.hasOwnProperty(type)) {
         return LEGACYAPI[type](requestObject.toLegacy());
     // New request format
