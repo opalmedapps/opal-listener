@@ -270,7 +270,7 @@ exports.updateReadStatus=function(userId, parameters)
 
     if(parameters && parameters.Field && parameters.Id && requestMappings.hasOwnProperty(parameters.Field) ) {
         ({table, serNum} = requestMappings[parameters.Field]);
-        // Ensure that table is a string type and included to the allowed tables list
+        // Ensure that table is a string type and included in the allowed tables list
         if (typeof table !== 'string' || !allowedTables.includes(table))
             r.reject({Response: 'error', Reason: 'Invalid read status field'});
 
