@@ -22,6 +22,7 @@ class SQLQueryRunner {
 					}
 				} : undefined
 			),
+			stringifyObjects: true,
 		};
 		this.#SQL_QUERY_POOL = mysql.createPool(this.#DB_CREDENTIALS);
 	}
