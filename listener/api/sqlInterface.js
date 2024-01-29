@@ -257,8 +257,23 @@ exports.updateReadStatus=function(userId, parameters)
 
     let table, serNum;
 
+    const allowedTables = [
+        'Announcement',
+        'Appointment',
+        'Diagnosis',
+        'Document',
+        'EducationalMaterial',
+        'Notification',
+        'patientStudy',
+        'TxTeamMessage',
+    ];
+
     if(parameters && parameters.Field && parameters.Id && requestMappings.hasOwnProperty(parameters.Field) ) {
         ({table, serNum} = requestMappings[parameters.Field]);
+        // Ensure that table is a string type and included to the allowed tables list
+        if (typeof table !== 'string' || !allowedTables.includes(table))
+            r.reject({Response: 'error', Reason: 'Invalid read status field'});
+
         exports.runSqlQuery(queries.updateReadStatus(),[table, userId, table, serNum, parameters.Id]).then(()=>{
             r.resolve({Response:'success'});
         }).catch((err)=>{
