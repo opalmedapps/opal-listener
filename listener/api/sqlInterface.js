@@ -134,8 +134,8 @@ const requestMappings =
     };
 
 /**
- * @desc List of request types for which to omit parameters in PatientActivityLog.
- *       This is done to avoid logging sensitive information, such as passwords or security answers.
+ * @desc List of request types for which to omit parameters in PatientActivityLog or the logger.
+ *       This is done to avoid logging sensitive information, such as passwords, security answers or private information.
  *       Each key is the name of a request type. The value represents a test. If the test returns true,
  *       the requests' parameters are omitted.
  * @type {object}
@@ -148,6 +148,7 @@ const omitParametersFromLogs = {
     UpdateSecurityQuestionAnswer: () => true,
     VerifyAnswer: () => true,
 }
+exports.omitParametersFromLogs = omitParametersFromLogs;
 
 
 //////////////////////////////////////////////////////////////////
