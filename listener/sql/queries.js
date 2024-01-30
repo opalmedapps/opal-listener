@@ -609,11 +609,12 @@ exports.setCheckInUsername = function () {
 exports.patientNotificationsTableFields=function()
 {
     return `SELECT
+                p.PatientSerNum,
+                p.FirstName as PatientFirstName,
+                p.LastName as PatientLastName,
                 n.NotificationSerNum,
                 n.DateAdded,
                 JSON_CONTAINS(n.ReadBy, ?) as ReadStatus,
-                p.FirstName as PatientFirstName,
-                p.LastName as PatientLastName,
                 n.RefTableRowSerNum,
                 nc.NotificationType,
                 nc.Name_EN,
