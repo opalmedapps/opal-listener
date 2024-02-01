@@ -394,7 +394,7 @@ exports.setNewPassword=function()
 
 exports.accountChange=function()
 {
-    return `UPDATE Patient SET ??=? WHERE PatientSerNum=?`;
+    return `UPDATE Patient SET Language = ? WHERE PatientSerNum=?`;
 };
 exports.inputFeedback=function(UserSerNum, content)
 {
