@@ -69,24 +69,6 @@ exports.unixToMYSQLTimestamp=function(time) {
 };
 
 /**
- * generatePBKDFHash
- * @desc generates encryption hash using PBKDF2 Hashing Algorithm
- * @param secret
- * @param salt
- * @return {string}
- */
-exports.generatePBKDFHash = function(secret, salt) {
-
-    const derivedKey = CryptoJS.PBKDF2(secret, salt, {
-        keySize: keySizeBits / bitsPerWord,
-        iterations: iterations,
-        hasher: CryptoJS.algo.SHA256,
-    }).toString(CryptoJS.enc.Hex);
-
-    return derivedKey;
-};
-
-/**
  * encrypt
  * @desc Encrypts a response object using PBKDF2 hash as key and NACL as encryption tool
  * @param object
