@@ -215,6 +215,8 @@ exports.encryptResponse = encryptResponse;
  * uploadToFirebase
  * @param response
  * @param key
+ * @param {boolean} useLegacySettings [Temporary, compatibility] If true, the old settings for PBKDF2 are used.
+ *                                    Used for compatibility with app version 1.12.2.
  * @desc Encrypt and upload the response to Firebase
  */
 function uploadToFirebase(response, key, useLegacySettings = false) {
