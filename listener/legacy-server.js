@@ -28,6 +28,7 @@ const cp                = require('child_process');
 const OpalSecurityResponseError = require('./api/response/security-response-error');
 const OpalSecurityResponseSuccess = require('./api/response/security-response-success');
 const OpalResponse      = require('./api/response/response');
+const { Version } = require('../src/utility/version');
 
 
 // NOTE: Listener launching steps have been moved to src/server.js
@@ -89,6 +90,10 @@ function handleRequest(requestType, snapshot){
     logger.log('debug', 'Handling request');
 
     const headers = {key: snapshot.key, objectRequest: snapshot.val()};
+
+    // Temporary code for compatibility with app version 1.12.2
+    let useLegacySettings = Version.versionLessOrEqual(headers.objectRequest.AppVersion, Version.version_1_12_2);
+
     processRequest(headers).then(function(response){
 
         // Print the response contents (shortened if too long)
@@ -101,7 +106,7 @@ function handleRequest(requestType, snapshot){
 
         // Log before uploading to Firebase. Check that it was not a simple log
         // if (response.Headers.RequestObject.Request !== 'Log') logResponse(response);
-        uploadToFirebase(response, requestType);
+        uploadToFirebase(response, requestType, useLegacySettings);
     });
 }
 exports.handleRequest = handleRequest;
@@ -185,18 +190,21 @@ function processRequest(headers){
  * encryptResponse
  * @desc Encrypts the response object before being uploaded to Firebase
  * @param response
+ * @param {boolean} useLegacySettings [Temporary, compatibility] If true, the old settings for PBKDF2 are used.
+ *                                    Used for compatibility with app version 1.12.2.
  * @return {Promise}
  */
-function encryptResponse(response)
+function encryptResponse(response, useLegacySettings = false)
 {
 	let encryptionKey = response.EncryptionKey;
 	let salt = response.Salt;
 	delete response.EncryptionKey;
 	delete response.Salt;
 
-    if(typeof encryptionKey!=='undefined' && encryptionKey!=='') {
-		return utility.encrypt(response, encryptionKey, salt);
-	}else{
+	if (typeof encryptionKey !== 'undefined' && encryptionKey !== '') {
+		return utility.encrypt(response, encryptionKey, salt, useLegacySettings);
+	}
+	else {
 		return Promise.resolve(response);
 	}
 }
@@ -209,7 +217,7 @@ exports.encryptResponse = encryptResponse;
  * @param key
  * @desc Encrypt and upload the response to Firebase
  */
-function uploadToFirebase(response, key) {
+function uploadToFirebase(response, key, useLegacySettings = false) {
     logger.log('debug', 'Uploading to Firebase');
 	return new Promise((resolve, reject)=>{
 
@@ -222,7 +230,7 @@ function uploadToFirebase(response, key) {
          */
         const validResponse = validateKeysForFirebase(response);
 
-        encryptResponse(validResponse).then((response)=>{
+        encryptResponse(validResponse, useLegacySettings).then((response)=>{
 			response.Timestamp = admin.database.ServerValue.TIMESTAMP;
             let path = '';
             if (key === "requests") {
