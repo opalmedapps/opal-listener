@@ -6,7 +6,7 @@ const crypto            = require('crypto');
 const Q                 = require('q');
 // parameters for pbkdf2 function
 const keySizeBits = 256; // Key size in bits for SHA-256
-const iterations = 600000;
+const iterations = 25000;
 const bitsPerWord =  32; // Used to convert keySizeBits, since crypto-js expects key sizes in 32-bit words
 const keySizeBytes = 32; // We need this for crypto package
 
