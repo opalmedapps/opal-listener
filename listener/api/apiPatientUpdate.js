@@ -16,7 +16,17 @@ const { Version } = require('../../src/utility/version');
 exports.login = async function(requestObject) {
     if (Version.versionLessOrEqual(requestObject.AppVersion, Version.version_1_12_2)) {
         let patientSerNum = await sqlInterface.getSelfPatientSerNum(requestObject.UserID);
-        return await sqlInterface.getPatientTableFields(requestObject.UserID, patientSerNum, requestObject.Parameters.Fields, requestObject.Parameters.timestamp);
+        let loginData = await sqlInterface.getPatientTableFields(requestObject.UserID, patientSerNum, requestObject.Parameters.Fields, requestObject.Parameters.timestamp);
+
+        // Filter out notification types that break app version 1.12.2 (most importantly 'NewLabResult')
+        let appBreakingNotifications = ['NewLabResult', 'NewMessage', 'Other'];
+        if (Array.isArray(loginData?.Data?.Notifications)) {
+            loginData.Data.Notifications = loginData.Data.Notifications.filter(
+                notif => !appBreakingNotifications.includes(notif.NotificationType)
+            );
+        }
+
+        return loginData;
     }
     else {
         // The only purpose of the login request is to record a timestamp in PatientActivityLog (done automatically in logPatientRequest)
