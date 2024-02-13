@@ -4,14 +4,16 @@ const nacl              = require('tweetnacl');
 const stablelibbase64   = require('@stablelib/base64');
 const crypto            = require('crypto');
 const Q                 = require('q');
-// parameters for pbkdf2 function
-const keySizeBits = 256; // Key size in bits for SHA-256
+
+// Parameters for PBKDF2
 const iterations = 25000;
-const bitsPerWord =  32; // Used to convert keySizeBits, since crypto-js expects key sizes in 32-bit words
-const keySizeBytes = 32; // We need this for crypto package
+const keySizeBytes = 32;
+const digest = 'sha256';
 
-
-//crypto.DEFAULT_ENCODING = 'hex';
+// [Temporary compatibility with 1.12.2] Legacy parameters for PBKDF2
+const legacyIterations = 1000;
+const legacyKeySizeBytes = 16;
+const legacyDigest = 'sha1';
 
 
 /**
@@ -69,37 +71,26 @@ exports.unixToMYSQLTimestamp=function(time) {
 };
 
 /**
- * generatePBKDFHash
- * @desc generates encryption hash using PBKDF2 Hashing Algorithm
- * @param secret
- * @param salt
- * @return {string}
- */
-exports.generatePBKDFHash = function(secret, salt) {
-
-    const derivedKey = CryptoJS.PBKDF2(secret, salt, {
-        keySize: keySizeBits / bitsPerWord,
-        iterations: iterations,
-        hasher: CryptoJS.algo.SHA256,
-    }).toString(CryptoJS.enc.Hex);
-
-    return derivedKey;
-};
-
-/**
  * encrypt
  * @desc Encrypts a response object using PBKDF2 hash as key and NACL as encryption tool
  * @param object
  * @param secret
  * @param salt
+ * @param {boolean} useLegacySettings [Temporary, compatibility] If true, the old settings for PBKDF2 are used.
+ *                                    Used for compatibility with app version 1.12.2.
  * @returns {Promise}
  * @notes link for NACL encryption documentation: https://tweetnacl.js.org/#/
  */
-exports.encrypt = function(object, secret, salt) {
+exports.encrypt = function(object, secret, salt, useLegacySettings = false) {
     let r = Q.defer();
     const nonce = nacl.randomBytes(nacl.secretbox.nonceLength);
     if (salt) {
-        crypto.pbkdf2(secret, salt, iterations, keySizeBytes, 'sha256', (err, derivedKey) => {
+        // Temporary code for compatibility with app version 1.12.2
+        let iterationsCompatibility = useLegacySettings ? legacyIterations : iterations;
+        let keySizeBytesCompatibility = useLegacySettings ? legacyKeySizeBytes : keySizeBytes;
+        let digestCompatibility = useLegacySettings ? legacyDigest : digest;
+
+        crypto.pbkdf2(secret, salt, iterationsCompatibility, keySizeBytesCompatibility, digestCompatibility, (err, derivedKey) => {
             if (err) {
                 r.reject(err);
             } else {
@@ -121,15 +112,21 @@ exports.encrypt = function(object, secret, salt) {
  * @param object
  * @param secret
  * @param salt
+ * @param {boolean} useLegacySettings [Temporary, compatibility] If true, the old settings for PBKDF2 are used.
+ *                                    Used for compatibility with app version 1.12.2.
  * @returns {Promise}
  * @notes link for NACL encryption documentation: https://tweetnacl.js.org/#/
  */
-exports.decrypt = function(object, secret, salt) {
+exports.decrypt = function(object, secret, salt, useLegacySettings = false) {
     let r = Q.defer();
 
     if (salt) {
+        // Temporary code for compatibility with app version 1.12.2
+        let iterationsCompatibility = useLegacySettings ? legacyIterations : iterations;
+        let keySizeBytesCompatibility = useLegacySettings ? legacyKeySizeBytes : keySizeBytes;
+        let digestCompatibility = useLegacySettings ? legacyDigest : digest;
 
-        crypto.pbkdf2(secret, salt, iterations, keySizeBytes, 'sha256', (err, derivedKey) => {
+        crypto.pbkdf2(secret, salt, iterationsCompatibility, keySizeBytesCompatibility, digestCompatibility, (err, derivedKey) => {
             if (err) {
                 r.reject(err);
             } else {
