@@ -176,4 +176,46 @@ describe('opalRequest', function () {
 			opalRequest.axiosApi.restore();
 		});
 	});
+
+	describe('isCaregiver', function () {
+		it('isCaregiver success', async function () {
+			sinon.stub(opalRequest, 'axiosApi')
+				.returns(Promise.resolve({
+				}));
+			const username = 'ThQKckoll2Y3tXcA1k7iCfGhmeu1';
+			const response = await opalRequest.isCaregiver(username);
+			expect(response.patient).to.have.property('status').equal('200');
+
+			let headers = opalRequest.backendApiHeaders;
+			const expectedParameters = {
+				method: 'get',
+				url: `${process.env.BACKEND_HOST}/api/caregivers/${username}/`,
+				headers: headers,
+			};
+			sinon.assert.calledWith(opalRequest.axiosApi, expectedParameters);
+			sinon.assert.calledOnce(opalRequest.axiosApi);
+
+			opalRequest.axiosApi.restore();
+		});
+
+		it('isCaregiver failed', async function () {
+			sinon.stub(opalRequest, 'axiosApi').throws(new Error('Calling isCaregiver failed'));
+			const username = '3vWyFmdHL2PbXyYiYnUf7wj50Jm1';
+			try {
+				await opalRequest.isCaregiver(username);
+			} catch (error) {
+				expect(error.message).to.equal('Calling isCaregiver failed');
+				let headers = opalRequest.backendApiHeaders;
+				const expectedParameters = {
+					method: 'get',
+					url: `${process.env.BACKEND_HOST}/api/caregivers/${isCaregiver}/`,
+					headers: headers,
+				};
+				sinon.assert.calledWith(opalRequest.axiosApi, expectedParameters);
+				sinon.assert.calledOnce(opalRequest.axiosApi);
+			}
+
+			opalRequest.axiosApi.restore();
+		});
+	});
 });

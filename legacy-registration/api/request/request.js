@@ -182,6 +182,37 @@ class opalRequest {
 		const response = await this.axiosApi(requestParams);
 		return response.data;
 	}
+
+	/**
+	 * @description insert patient hospital indetifier with request parameters.
+	 * @param {string} labResultHistoryURL - The URL to call to request the patient's lab result history.
+	 * @param {object} data: {
+	 *     PatientId: str,
+	 *     Site: str,
+	 * }
+	 * @returns {
+	 *     status: number,
+	 *     headers: object,
+	 *     data: object,
+	 * }
+	 */
+	static async isCaregiver(username) {
+		let headers = this.backendApiHeaders;
+		// const url = `${env.BACKEND_HOST}/api/caregivers/${username}/`;
+		const url = `${env.BACKEND_HOST}/api/app/home/`;
+		const requestParams = {
+			method: 'get',
+			url: url,
+			headers: headers,
+		};
+		logger.log('info', 'Calling API to tell the user is caregiver or not', url);
+		const response = await this.axiosApi(requestParams);
+		if (!response) {
+			logger.log('error', 'API response error', response);
+			throw new Error("API response error");
+		}
+		return response.status;
+	}
 }
 
 module.exports = opalRequest;
