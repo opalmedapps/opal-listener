@@ -130,9 +130,13 @@ exports.resetPassword = async function(requestKey, requestObject) {
         let secret = Version.versionGreaterThan(requestObject.AppVersion, Version.version_1_12_2)
             ? utility.hash(requestObject.UserEmail)
             : utility.hash(user.SSN.toUpperCase());
+
+        // Temporary code for compatibility with app version 1.12.2
+        let useLegacySettings = Version.versionLessOrEqual(requestObject.AppVersion, Version.version_1_12_2);
+
         let answer = user.SecurityAnswer;
 
-        let unencrypted = await utility.decrypt(requestObject.Parameters, secret, answer);
+        let unencrypted = await utility.decrypt(requestObject.Parameters, secret, answer, useLegacySettings);
         await sqlInterface.setNewPassword(utility.hash(unencrypted.newPassword), user.Username);
 
         logger.log('verbose', `Successfully updated password for username = ${requestObject.UserID}`);

@@ -28,6 +28,10 @@ class RequestValidator {
 	static validate(requestKey, requestObject)
 	{
 		const r = q.defer();
+
+		// Temporary code for compatibility with app version 1.12.2
+		let useLegacySettings = Version.versionLessOrEqual(requestObject.AppVersion, Version.version_1_12_2);
+
 		let request = new OpalRequest(requestObject, requestKey);
 
 		let validation = this.validateRequestCredentials(request);
@@ -50,7 +54,7 @@ class RequestValidator {
 				} else {
 
 					let {SecurityAnswer} = rows[0];
-					utility.decrypt({req: request.type, params: request.parameters}, hashedUID, SecurityAnswer)
+					utility.decrypt({req: request.type, params: request.parameters}, hashedUID, SecurityAnswer, useLegacySettings)
 					.then((dec)=>{
 						request.setAuthenticatedInfo(SecurityAnswer, hashedUID, dec.req, dec.params);
 						return RequestValidator.validateRequestPermissions(request);
