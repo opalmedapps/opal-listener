@@ -198,8 +198,7 @@ class opalRequest {
 	 */
 	static async isCaregiver(username) {
 		let headers = this.backendApiHeaders;
-		// const url = `${env.BACKEND_HOST}/api/caregivers/${username}/`;
-		const url = `${env.BACKEND_HOST}/api/app/home/`;
+		const url = `${env.BACKEND_HOST}/api/caregivers/${username}/`;
 		const requestParams = {
 			method: 'get',
 			url: url,
