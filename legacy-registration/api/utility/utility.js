@@ -28,15 +28,6 @@ exports.toMYSQLString = legacyListenerUtils.toMYSQLString;
 exports.unixToMYSQLTimestamp = legacyListenerUtils.unixToMYSQLTimestamp;
 
 /**
-     generatePBKDFHash
-     @desc generates encryption hash using PBKDF2 Hashing Algorithm
-     @param secret
-     @param salt
-     @return {string}
- **/
-exports.generatePBKDFHash = legacyListenerUtils.generatePBKDFHash;
-
-/**
      encrypt
      @desc Encrypts a response object using PBKDF2 hash as key and NACL as encryption tool
      @param object
