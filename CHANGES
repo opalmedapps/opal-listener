@@ -1,3 +1,26 @@
+Version 1.11.0.0:
+ - fix: repair login via app version 1.12.2 (PBKDF2 settings)
+ - fix: reduce iterations on PBKDF2 to temporarily improve app slowness
+ - fix: allow arrays when executing queries
+ - fix:  fix incorrect variable name in for loop
+ - fix: fix returning from within for loop during the parameter type check
+ - fix: update AccountChange SQL query
+ - feat: add patient ser num for caregivers notifications
+ - fix: add type checks for mysql runner
+ - fix: update sql runner config
+ - fix: omit sensitive parameters from the logger
+ - fix: remove check for deprecated ORMS configs
+ - feat: add env variables to src/environment
+ - fix: remove user language when retrieving registration details
+ - fix: filter the lab result in considering the delay settings
+ - feat: make email port and ip and email parametric and handle research feedback
+ - fix(deps): upgrade crypto-js and crypto calls of function pbkfd2 with new parameters
+ - feat: add the patient's name to display on notifications
+ - fix(deps): update dependency winston to v3.11.0
+ - fix(deps): update dependency express-validator to v6.15.0
+ - fix(deps): update dependency nodemailer to v6.9.7
+ - fix(deps): update dependency dotenv to v16.3.1
+
 Version 1.10.2.0:
  - fix: fix crash when submitting consent forms
  - chore(deps): update dependency eslint-plugin-jsdoc to v46.9.0
