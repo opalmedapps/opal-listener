@@ -51,7 +51,7 @@ class PatientTestResultQuery {
 						AND te.TestControlSerNum = tc.TestControlSerNum
 						AND tc.PublishFlag = 1
 						/* use the AvailableAt column to determine if the lab result is available to be viewed by the patient */
-						AND DATE_FORMAT(ptr.AvailableAt, '%Y-%m-%d') <= DATE_FORMAT(NOW(), '%Y-%m-%d')
+						AND ptr.AvailableAt <= NOW()
 					ORDER BY groupName, sequenceNum;`,
 				[moment(date).format("YYYY-MM-DD HH:mm:ss"), patientSerNum]);
 	}
@@ -81,7 +81,7 @@ class PatientTestResultQuery {
 						AND tc.PublishFlag = 1
 						AND (ptr.LastUpdated > ? OR te.LastUpdated > ? OR tc.LastUpdated > ?)
 						/* use the AvailableAt column to determine if the lab result is available to be viewed by the patient */
-						AND DATE_FORMAT(ptr.AvailableAt, '%Y-%m-%d') <= DATE_FORMAT(NOW(), '%Y-%m-%d')
+						AND ptr.AvailableAt <= NOW()
 					ORDER BY collectedDateTime DESC;`,
 				params);
 	}
@@ -128,7 +128,7 @@ class PatientTestResultQuery {
 							WHERE
 							ptr2.PatientSerNum = ?
 							/* use the AvailableAt column to determine if the latest test type and value is available to be returned */
-							AND DATE_FORMAT(ptr2.AvailableAt, '%Y-%m-%d') <= DATE_FORMAT(NOW(), '%Y-%m-%d')
+                            AND ptr2.AvailableAt <= NOW()
 							GROUP BY ptr2.TestExpressionSerNum
 						) as A
 					WHERE
@@ -183,7 +183,7 @@ class PatientTestResultQuery {
 						AND te.TestControlSerNum = tc.TestControlSerNum
 						AND tc.PublishFlag = 1
 						/* use the AvailableAt column to determine if the lab result is available to be viewed by the patient */
-						AND DATE_FORMAT(ptr.AvailableAt, '%Y-%m-%d') <= DATE_FORMAT(NOW(), '%Y-%m-%d')
+						AND ptr.AvailableAt <= NOW()
 					ORDER BY latestCollectedDateTime DESC LIMIT 1;`,
 				[patientSerNum, testExpressionSerNum]);
 	}
@@ -207,7 +207,7 @@ class PatientTestResultQuery {
 						ptr.PatientSerNum = ?
 						AND ptr.TestExpressionSerNum = ?
 						/* use the AvailableAt column to determine if the lab result is available to be viewed by the patient */
-						AND DATE_FORMAT(ptr.AvailableAt, '%Y-%m-%d') <= DATE_FORMAT(NOW(), '%Y-%m-%d')
+						AND ptr.AvailableAt <= NOW()
 					ORDER BY CollectedDateTime;`,
 				[patientSerNum, testExpressionSerNum]);
 	}
