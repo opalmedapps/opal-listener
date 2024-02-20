@@ -15,17 +15,17 @@ const { sendMail } = require('./utility/mail.js');
 /**
  * @description check the user is caregiver or not
  * @param {Object} requestObject - The calling request's requestObject.
- * @returns { Data: result}
+ * @returns { status: result}
  * @throws Throws an error if a required field is not present in the given request.
  */
-exports.isCaregiver = async function(requestObject) {
+exports.caregiverIsAlreadyRegistered = async function(requestObject) {
     try {
         logger.log('info', `Checking user account for email: ${requestObject?.Parameters?.Fields?.email}`);
 
         const email = requestObject?.Parameters?.Fields?.email;
         const uid = await firebaseFunction.getFirebaseAccountByEmail(email);
 
-        const result = await opalRequest.isCaregiver(uid);
+        const result = await opalRequest.caregiverIsAlreadyRegistered(uid);
 
         return {status: result};
     }

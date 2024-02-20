@@ -16,9 +16,18 @@ exports.createFirebaseAccount = async function (userEmail, userPassword) {
     return response?.uid;
 };
 
-// Function to create firebase account
+// Function to get firebase account by email
 exports.getFirebaseAccountByEmail = async function (userEmail) {
     const response = await admin.auth().getUserByEmail(userEmail);
+    if (response?.uid) {
+        logger.log('debug', `Successfully got firebase user account and this is the unique Id: ${response.uid}`);
+    }
+    return response?.uid;
+};
+
+// Function to get firebase account by user uid
+exports.getFirebaseAccountByUserId = async function (IdToken) {
+    const response = await admin.auth().verifyIdToken(IdToken);
     if (response?.uid) {
         logger.log('debug', `Successfully got firebase user account and this is the unique Id: ${response.uid}`);
     }

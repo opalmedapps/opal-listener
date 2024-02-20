@@ -184,19 +184,11 @@ class opalRequest {
 	}
 
 	/**
-	 * @description insert patient hospital indetifier with request parameters.
-	 * @param {string} labResultHistoryURL - The URL to call to request the patient's lab result history.
-	 * @param {object} data: {
-	 *     PatientId: str,
-	 *     Site: str,
-	 * }
-	 * @returns {
-	 *     status: number,
-	 *     headers: object,
-	 *     data: object,
-	 * }
+	 * @desc verify if a user is already a caregiver.
+	 * @param {string} username the user Id on the firebase.
+	 * @returns {number}
 	 */
-	static async isCaregiver(username) {
+	static async caregiverIsAlreadyRegistered(username) {
 		let headers = this.backendApiHeaders;
 		const url = `${env.BACKEND_HOST}/api/caregivers/${username}/`;
 		const requestParams = {
