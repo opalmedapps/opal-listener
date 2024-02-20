@@ -49,7 +49,7 @@
     "mocha": "10.2.0",
     "nyc": "15.1.0",
     "run-script-os": "1.1.6",
-    "sinon": "14.0.2"
+    "sinon": "17.0.1"
   },
   "keywords": [
     "muhc",
