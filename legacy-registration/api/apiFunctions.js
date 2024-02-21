@@ -20,17 +20,17 @@ const { sendMail } = require('./utility/mail.js');
  */
 exports.caregiverIsAlreadyRegistered = async function(requestObject) {
     try {
-        logger.log('info', `Checking user account for email: ${requestObject?.Parameters?.Fields?.email}`);
+        logger.log('info', `Verifying user account for id token: ${requestObject?.Parameters?.Fields?.token}`);
 
-        const email = requestObject?.Parameters?.Fields?.email;
-        const uid = await firebaseFunction.getFirebaseAccountByEmail(email);
+        const token = requestObject?.Parameters?.Fields?.token;
+        const uid = await firebaseFunction.getFirebaseAccountByIdToken(token);
 
         const result = await opalRequest.caregiverIsAlreadyRegistered(uid);
 
         return {status: result};
     }
     catch (error) {
-        logger.log('error', `An error occurred while attempting to check email (${requestObject.Parameters.Fields.email}) exists or not`, error);
+        logger.log('error', `An error occurred while attempting to verify id token (${requestObject.Parameters.Fields.email}) exists or not`, error);
 
         return { Data: error };
     }

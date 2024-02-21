@@ -25,8 +25,8 @@ exports.getFirebaseAccountByEmail = async function (userEmail) {
     return response?.uid;
 };
 
-// Function to get firebase account by user uid
-exports.getFirebaseAccountByUserId = async function (IdToken) {
+// Function to get firebase account by encoded login id token
+exports.getFirebaseAccountByIdToken = async function (IdToken) {
     const response = await admin.auth().verifyIdToken(IdToken);
     if (response?.uid) {
         logger.log('debug', `Successfully got firebase user account and this is the unique Id: ${response.uid}`);
