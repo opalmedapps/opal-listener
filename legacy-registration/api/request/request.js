@@ -202,7 +202,7 @@ class opalRequest {
 			logger.log('error', 'API response error', response);
 			throw new Error("API response error");
 		}
-		return response.status;
+		return response;
 	}
 }
 

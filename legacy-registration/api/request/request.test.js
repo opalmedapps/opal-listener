@@ -184,7 +184,7 @@ describe('opalRequest', function () {
 				}));
 			const username = 'ThQKckoll2Y3tXcA1k7iCfGhmeu1';
 			const response = await opalRequest.caregiverIsAlreadyRegistered(username);
-			expect(response).to.have.property('status').equal('200');
+			expect(response).to.empty;
 
 			let headers = opalRequest.backendApiHeaders;
 			const expectedParameters = {

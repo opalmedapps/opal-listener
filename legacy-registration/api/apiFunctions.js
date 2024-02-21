@@ -27,7 +27,7 @@ exports.caregiverIsAlreadyRegistered = async function(requestObject) {
 
         const result = await opalRequest.caregiverIsAlreadyRegistered(uid);
 
-        return {status: result};
+        return {status: result.status};
     }
     catch (error) {
         logger.log('error', `An error occurred while attempting to verify id token (${requestObject.Parameters.Fields.email}) exists or not`, error);
