@@ -184,7 +184,7 @@ describe('opalRequest', function () {
 				}));
 			const username = 'ThQKckoll2Y3tXcA1k7iCfGhmeu1';
 			const response = await opalRequest.caregiverIsAlreadyRegistered(username);
-			expect(response.patient).to.have.property('status').equal('200');
+			expect(response).to.have.property('status').equal('200');
 
 			let headers = opalRequest.backendApiHeaders;
 			const expectedParameters = {
@@ -208,7 +208,7 @@ describe('opalRequest', function () {
 				let headers = opalRequest.backendApiHeaders;
 				const expectedParameters = {
 					method: 'get',
-					url: `${process.env.BACKEND_HOST}/api/caregivers/${caregiverIsAlreadyRegistered}/`,
+					url: `${process.env.BACKEND_HOST}/api/caregivers/${username}/`,
 					headers: headers,
 				};
 				sinon.assert.calledWith(opalRequest.axiosApi, expectedParameters);
