@@ -186,7 +186,7 @@ class opalRequest {
 	/**
 	 * @desc verify if a user is already a caregiver.
 	 * @param {string} username the user Id on the firebase.
-	 * @returns {number}
+	 * @returns { status: number}
 	 */
 	static async caregiverIsAlreadyRegistered(username) {
 		let headers = this.backendApiHeaders;
