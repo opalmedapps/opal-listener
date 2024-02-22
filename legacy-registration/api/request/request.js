@@ -188,7 +188,7 @@ class opalRequest {
 	 * @param {string} username the user Id on the firebase.
 	 * @returns { status: number}
 	 */
-	static async caregiverIsAlreadyRegistered(username) {
+	static async isCaregiverAlreadyRegistered(username) {
 		let headers = this.backendApiHeaders;
 		const url = `${env.BACKEND_HOST}/api/caregivers/${username}/`;
 		const requestParams = {
@@ -196,7 +196,7 @@ class opalRequest {
 			url: url,
 			headers: headers,
 		};
-		logger.log('info', 'Calling API to tell the user is caregiver or not', url);
+		logger.log('info', 'Calling API to determine if the user is an existing caregiver or not', url);
 		const response = await this.axiosApi(requestParams);
 		if (!response) {
 			logger.log('error', 'API response error', response);

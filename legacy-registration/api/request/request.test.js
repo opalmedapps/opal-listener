@@ -177,13 +177,13 @@ describe('opalRequest', function () {
 		});
 	});
 
-	describe('caregiverIsAlreadyRegistered', function () {
-		it('caregiverIsAlreadyRegistered success', async function () {
+	describe('isCaregiverAlreadyRegistered', function () {
+		it('isCaregiverAlreadyRegistered success', async function () {
 			sinon.stub(opalRequest, 'axiosApi')
 				.returns(Promise.resolve({
 				}));
 			const username = 'ThQKckoll2Y3tXcA1k7iCfGhmeu1';
-			const response = await opalRequest.caregiverIsAlreadyRegistered(username);
+			const response = await opalRequest.isCaregiverAlreadyRegistered(username);
 			expect(response).to.empty;
 
 			let headers = opalRequest.backendApiHeaders;
@@ -198,13 +198,13 @@ describe('opalRequest', function () {
 			opalRequest.axiosApi.restore();
 		});
 
-		it('caregiverIsAlreadyRegistered failed', async function () {
-			sinon.stub(opalRequest, 'axiosApi').throws(new Error('Calling caregiverIsAlreadyRegistered failed'));
+		it('isCaregiverAlreadyRegistered failed', async function () {
+			sinon.stub(opalRequest, 'axiosApi').throws(new Error('Calling isCaregiverAlreadyRegistered failed'));
 			const username = '3vWyFmdHL2PbXyYiYnUf7wj50Jm1';
 			try {
-				await opalRequest.caregiverIsAlreadyRegistered(username);
+				await opalRequest.isCaregiverAlreadyRegistered(username);
 			} catch (error) {
-				expect(error.message).to.equal('Calling caregiverIsAlreadyRegistered failed');
+				expect(error.message).to.equal('Calling isCaregiverAlreadyRegistered failed');
 				let headers = opalRequest.backendApiHeaders;
 				const expectedParameters = {
 					method: 'get',
