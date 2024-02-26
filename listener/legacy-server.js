@@ -35,7 +35,6 @@ const { Version } = require('../src/utility/version');
 
 let db;
 let ref;
-let heartbeatRef;
 
 /*********************************************
  * FUNCTIONS
@@ -48,7 +47,6 @@ let heartbeatRef;
  */
 function setFirebaseConnection(databaseRef) {
     ref = databaseRef;
-    heartbeatRef = ref.child('/users/heartbeat');
 }
 exports.setFirebaseConnection = setFirebaseConnection;
 
@@ -67,12 +65,7 @@ function listenForRequest(requestType){
         function(snapshot){
             logger.log('debug', 'Received request from Firebase: ', snapshot.val());
             logger.log('info', 'Received request from Firebase: ', snapshot.val().Request);
-            if(snapshot.val().Request === 'HeartBeat'){
-                logger.log('debug', 'Handling heartbeat request');
-                handleHeartBeat(snapshot.val())
-            } else {
-                handleRequest(requestType,snapshot);
-            }
+            handleRequest(requestType,snapshot);
         },
         function(error){
             logger.log('error', `Failed to read 'child_added' snapshot while listening to '${requestType}'`, error);
@@ -388,36 +381,6 @@ function completeRequest(headers, key)
 		});
 }
 
-function handleHeartBeat(data){
-    "use strict";
-
-	// Where to write the log file
-	const filename = 'logs/heartbeat.log';
-	var fs = require('fs');
-
-    let HeartBeat = {};
-
-    //Push Heartbeat Back To Firebase
-    HeartBeat.CPU = process.cpuUsage();
-    HeartBeat.Memory = process.memoryUsage();
-    HeartBeat.Timestamp = data.Timestamp;
-
-	// Log the results to the heart beat DB logs
-	// NOTE: The logs are manage by using the  logrotate to control the settings of the log
-	fs.appendFile(filename, JSON.stringify(HeartBeat)  + "\n", function (err) {
-	  if (err) {
-			// Log any errors
-			logger.log('error', 'Error reporting heartbeat', err);
-	  }
-	});
-
-    heartbeatRef.set(HeartBeat)
-        .catch(err => {
-            logger.log('error', 'Error reporting heartbeat', err)
-        })
-
-}
-
 
 /*********************************************
  * CRON
@@ -427,13 +390,11 @@ function handleHeartBeat(data){
  * Spawns cron jobs:
  *  1) clearRequest: clears request from firebase that have not been handled within 5 minute period
  *  2) clearResponses: clears responses from firebase that have not been handled within 5 minute period
- *  3) heartbeat: sends heartbeat request to firebase every 30 secs to get information about listener
  *
 */
 function spawnCronJobs(){
     spawnClearRequest();
     spawnClearResponses();
-    spawnHeartBeat();
 }
 exports.spawnCronJobs = spawnCronJobs;
 
@@ -486,28 +447,4 @@ function spawnClearResponses(){
     process.on('exit', function () {
         clearResponses.kill();
     });
-}
-
-function spawnHeartBeat(){
-    // create new Node child processs
-    let heartBeat = cp.fork(`${__dirname}/cron/heartBeat.js`);
-
-    // Handles heartBeat cron events
-    heartBeat.on('message', (m) => {
-        logger.log('info','PARENT got message:', m);
-    });
-
-    heartBeat.on('error', (m) => {
-        logger.log('error','heartBeat cron error:', m);
-
-        heartBeat.kill();
-        if(heartBeat.killed){
-            heartBeat = cp.fork(`${__dirname}/cron/heartBeat.js`);
-        }
-    });
-
-    process.on('exit', function () {
-        heartBeat.kill();
-    });
-
 }
