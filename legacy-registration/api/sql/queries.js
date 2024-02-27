@@ -52,7 +52,7 @@ exports.insertPatientHospitalIdentifier = function () {
 };
 
 exports.getPatientSerNumFromUserSerNum = function () {
-    return `SELECT p.PatientSerNum
+    return `SELECT p.PatientSerNum, p.TelNum
             FROM Patient p, Users u
             WHERE u.UserTypeSerNum = p.PatientSerNum
               AND u.UserSerNum = ?

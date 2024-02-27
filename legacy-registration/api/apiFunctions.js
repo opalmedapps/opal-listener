@@ -78,9 +78,13 @@ exports.registerPatient = async function(requestObject) {
         if (isNewPatient) await initializePatientMRNs(requestObject, registrationData, patientLegacyId);
         const uid = await initializeOrGetFirebaseAccount(fields.accountExists, fields.email, fields.password);
         hashPassword(requestObject);
-        let selfPatientSerNum = await initializeOrGetSelfPatient(requestObject, registrationData, patientLegacyId);
-        let userSerNum = await initializeOrGetUser(registrationData, uid, fields.password, selfPatientSerNum);
-        await updateSelfPatient(requestObject, selfPatientSerNum);
+        let selfPatient = await initializeOrGetSelfPatient(requestObject, registrationData, patientLegacyId);
+        let userSerNum = await initializeOrGetUser(registrationData, uid, fields.password, selfPatient.PatientSerNum);
+        if (!requestObject.Parameters.Fields.phone) {
+            if (!selfPatient.TelNum) requestObject.Parameters.Fields.phone = undefined;
+            else requestObject.Parameters.Fields.phone = selfPatient.TelNum;
+        }
+        await updateSelfPatient(requestObject, selfPatient.PatientSerNum);
         if (isNewPatient) await initializePatientControl(patientLegacyId);
         await registerInBackend(requestObject, patientLegacyId, userSerNum, uid);
 
@@ -119,6 +123,15 @@ async function prepareAndValidateRegistrationRequest(requestObject) {
         requestObject.Parameters.Fields.registrationCode,
     );
     validateRegistrationDataDetailed(registrationData);
+    const uid = await firebaseFunction.getFirebaseAccountByEmail(
+        requestObject.Parameters.Fields.email,
+    );
+    const result = await opalRequest.isCaregiverAlreadyRegistered(uid);
+    logger.log('info', 'Calling backend API to get registration details');
+    logger.log('info', result.status);
+    if (result.status !== 200) {
+        validateSecurityQuestions(requestObject);
+    }
 
     return registrationData;
 }
@@ -141,19 +154,10 @@ function validateRegisterPatientRequest(requestObject) {
         'accessLevel',
         'accessLevelSign',
         'accountExists',
-        'answer1',
-        'answer2',
-        'answer3',
         'email',
         'language',
         'password',
         'registrationCode',
-        'securityQuestion1',
-        'securityQuestion2',
-        'securityQuestion3',
-        'securityQuestionText1',
-        'securityQuestionText2',
-        'securityQuestionText3',
         // typo in the frontend
         'termsandAggreementSign',
     ]
@@ -178,6 +182,39 @@ function validateRegistrationDataDetailed(registrationData) {
 
     for (let field of requiredFields) {
         if (!registrationData[field]) throw new Error(errMsg(`required data field '${field}' is missing`));
+    }
+}
+
+/**
+ * @description Validates the security questions for the register patient functionality.
+ * @param {Object} requestObject - The calling request's requestObject.
+ * @returns {void}
+ * @throws Throws an error if a required field is not present in the given request.
+ */
+function validateSecurityQuestions(requestObject) {
+    if (!requestObject.Parameters || !requestObject.Parameters.Fields) {
+        throw 'requestObject is missing Parameters.Fields'
+    }
+
+    // Helper function
+    let fieldExists = (name) => { return requestObject.Parameters.Fields[name] && requestObject.Parameters.Fields[name] !== "" };
+
+    let requiredFields = [
+        'answer1',
+        'answer2',
+        'answer3',
+        'securityQuestion1',
+        'securityQuestion2',
+        'securityQuestion3',
+        'securityQuestionText1',
+        'securityQuestionText2',
+        'securityQuestionText3',
+    ]
+
+    for (let field of requiredFields) {
+        if (!fieldExists(field)) {
+            throw `Required field '${field}' missing in request fields`
+        }
     }
 }
 

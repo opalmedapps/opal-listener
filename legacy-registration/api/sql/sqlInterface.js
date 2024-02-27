@@ -111,5 +111,5 @@ exports.insertPatientHospitalIdentifier = function (requestObject) {
 exports.getPatientSerNumFromUserSerNum = async function(userSerNum) {
     let rows = await exports.runOpaldbSqlQuery(queries.getPatientSerNumFromUserSerNum(), [userSerNum]);
     if (rows.length === 0) throw new Error("Internal data error: no rows found matching the caregiver's legacy UserSerNum");
-    return rows[0].PatientSerNum;
+    return rows[0];
 };
