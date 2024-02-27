@@ -330,6 +330,16 @@ exports.getStudyQuestionnairesQuery = function(){
     return "SELECT QS.questionnaireID, Q.DateAdded, QC.QuestionnaireName_EN, QC.QuestionnaireName_FR FROM questionnaireStudy QS, Questionnaire Q, QuestionnaireControl QC, study S WHERE S.ID = QS.studyID AND QC.QuestionnaireControlSerNum = Q.QuestionnaireControlSerNum AND Q.QuestionnaireSerNum = QS.questionnaireId AND S.ID = ?";
 }
 
+exports.getOpalDBQuestionnaire = function() {
+    return `
+    SELECT
+        q.QuestionnaireSerNum AS QuestionnaireSerNum,
+        q.PatientQuestionnaireDBSerNum AS PatientQuestionnaireDBSerNum,
+        q.PatientSerNum AS PatientSerNum
+    FROM Questionnaire q
+    WHERE PatientQuestionnaireDBSerNum = ?;`;
+}
+
 /**
  * @desc Query that returns User and Patient information used in security requests.
  * @returns {string} The query.
@@ -668,6 +678,16 @@ exports.getNewNotifications=function() {
             AND (Notification.DateAdded > ? OR NotificationControl.DateAdded > ?);
     `;
 };
+
+exports.implicitlyReadQuestionnaireNotification = function() {
+    return `
+    UPDATE Notification
+    SET ReadBy = ?, ReadStatus = 1
+    WHERE RefTableRowSerNum = ?
+    AND PatientSerNum = ?
+    AND NotificationControlSerNum = 13;
+`;
+}
 
 /*
  * Named functions used to access different versions of a query.

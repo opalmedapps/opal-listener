@@ -6,6 +6,8 @@ const logger = require('./../logs/logger');
 const {OpalSQLQueryRunner} = require("../sql/opal-sql-query-runner");
 const config = require("../config-adaptor");
 const requestUtility = require("../utility/request-utility");
+const questionnaireConfig = require('./questionnaireConfig.json');
+const ApiRequest = require('../../src/core/api-request');
 
 exports.getQuestionnaireInOpalDB = getQuestionnaireInOpalDB;
 exports.getAnswerQuestionnaireIdFromSerNum = getAnswerQuestionnaireIdFromSerNum;
@@ -237,6 +239,47 @@ async function questionnaireUpdateStatus(requestObject) {
         requestObject.AppVersion,
         requestObject.Parameters.user_display_name || '',
     );
+
+    // Implicitly mark the questionnaire's notification as read once the questionnaire is changed to "in progress".
+    // Note that the notification will be marked as read for the self-user and all caregivers.
+    const newStatusInt = parseInt(requestObject.Parameters.new_status);
+    if (newStatusInt === questionnaireConfig.IN_PROGRESS_QUESTIONNAIRE_STATUS) {
+        const questionnaire = await OpalSQLQueryRunner.run(
+            opalQueries.getOpalDBQuestionnaire(),
+            [requestObject.Parameters.answerQuestionnaire_id],
+        );
+
+        // TODO: make endpoint available for the listener (e.g, change listener permissions in backend)
+        const requestParams = {
+            Parameters: {
+                method: 'get',
+                url: `/api/patients/legacy/${questionnaire[0]['PatientSerNum']}/caregiver-devices/`,
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+            },
+        };
+
+        logger.log('info', "API: Calling backend to get the user's list of caregivers.");
+        const response = await ApiRequest.makeRequest(requestParams);
+        // Silently exit if lister cannot fetch the user's list of caregivers
+        if (!response?.data) return {Response: 'success'};
+
+        let usernames = [];
+        response.data?.caregivers.forEach((caregiver) => usernames.push(`"${caregiver['username']}"`));
+
+        let readBy = usernames.join(', ');
+        readBy = "[" + readBy + "]";
+        const notification = await OpalSQLQueryRunner.run(
+            opalQueries.implicitlyReadQuestionnaireNotification(),
+            [readBy, questionnaire[0]['QuestionnaireSerNum'], questionnaire[0]['PatientSerNum']],
+        );
+
+        return {
+            Response: 'success',
+            QuestionnaireSerNum: questionnaire[0]['QuestionnaireSerNum'],
+        };
+    }
 
     if (isCompleted === 1) {
 
