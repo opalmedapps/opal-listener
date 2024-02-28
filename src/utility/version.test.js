@@ -10,25 +10,18 @@ const { Version } = require('./version');
 
 describe('Version', function () {
     describe('compareVersions', function () {
-        it('should fail when provided with inputs of different lengths (number of parts)', function () {
-            const v1 = '1.2.3.4';
-            const v2 = '1.2.3';
-            expect(() => Version.compareVersions(v1, v2)).to.throw(
-                'Cannot compare two version strings with a different number of parts (dots)',
-            );
-        });
         it('should fail if a version contains a negative number', function () {
             const v1 = '1.2.3';
             const v2 = '1.-2.3';
             expect(() => Version.compareVersions(v1, v2)).to.throw(
-                'Version strings must contain only digits and dots',
+                'Version strings must be of format "major.minor.patch"',
             );
         });
         it('should fail if a version contains illegal characters', function () {
             const v1 = '1.2.a';
             const v2 = '0.0.0';
             expect(() => Version.compareVersions(v1, v2)).to.throw(
-                'Version strings must contain only digits and dots',
+                'Version strings must be of format "major.minor.patch"',
             );
         });
         it('should return -1 when v1 < v2 (small difference)', function () {
