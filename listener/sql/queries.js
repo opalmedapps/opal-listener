@@ -679,16 +679,16 @@ exports.getNewNotifications=function() {
     `;
 };
 
-exports.implicitlyReadQuestionnaireNotification = function() {
+exports.implicitlyReadNotification = function() {
     return `
         UPDATE Notification
-        SET ReadBy = ?, ReadStatus = 1
+        SET ReadBy = JSON_ARRAY_APPEND(ReadBy, '$', ?), ReadStatus = 1
         WHERE RefTableRowSerNum = ?
         AND PatientSerNum = ?
-        AND NotificationControlSerNum = (SELECT
+        AND NotificationControlSerNum IN (SELECT
                                             NotificationControlSerNum
                                         FROM NotificationControl
-                                        WHERE NotificationType = "LegacyQuestionnaire"
+                                        WHERE NotificationType IN (?)
                                     );
     `;
 }
