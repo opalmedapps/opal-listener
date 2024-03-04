@@ -39,7 +39,7 @@ const requestMappings =
         'Patient': {
             sql: queries.patientTableFields(),
             processFunction: loadProfileImagePatient,
-            numberOfLastUpdated: 0
+            numberOfLastUpdated: 0,
         },
         'Documents': {
             sql: queries.patientDocumentsAll(),
@@ -48,6 +48,7 @@ const requestMappings =
             table: 'Document',
             serNum: 'DocumentSerNum',
             needUserId: true,
+            notificationType: ["Document", "UpdDocument"],
         },
         /**
          * Deprecated: 'Doctors'
@@ -55,7 +56,7 @@ const requestMappings =
         'Doctors': {
             sql: queries.patientDoctorTableFields(),
             processFunction: loadImageDoctor,
-            numberOfLastUpdated: 2
+            numberOfLastUpdated: 2,
         },
         'Diagnosis': {
             sql: queries.patientDiagnosesAll(),
@@ -71,21 +72,30 @@ const requestMappings =
             processFunction: combineResources,
             table: 'Appointment',
             serNum: 'AppointmentSerNum',
-            needUserId: true
+            needUserId: true,
+            notificationType: [
+                "AppointmentNew",
+                "AppointmentTimeChange",
+                "AppointmentCancelled",
+                "CheckInNotification",
+                "CheckInError",
+                "NextAppointment",
+                "RoomAssignment",
+            ],
         },
         'Notifications': {
             sql: queries.patientNotificationsTableFields(),
             numberOfLastUpdated: 2,
             table: 'Notification',
             serNum: 'NotificationSerNum',
-            needUserId: true
+            needUserId: true,
         },
         /**
          * Deprecated: 'Tasks'
          */
         'Tasks': {
             sql: queries.patientTasksTableFields(),
-            numberOfLastUpdated: 2
+            numberOfLastUpdated: 2,
         },
         'TxTeamMessages': {
             sql: queries.patientTxTeamMessagesAll(),
@@ -95,6 +105,7 @@ const requestMappings =
             table: 'TxTeamMessage',
             serNum: 'TxTeamMessageSerNum',
             needUserId: true,
+            notificationType: "TxTeamMessage",
         },
         'EducationalMaterial': {
             sql: queries.patientEducationalMaterialAll(),
@@ -104,6 +115,7 @@ const requestMappings =
             table: 'EducationalMaterial',
             serNum: 'EducationalMaterialSerNum',
             needUserId: true,
+            notificationType: "EducationalMaterial",
         },
         'Announcements': {
             sql: queries.patientAnnouncementsAll(),
@@ -112,24 +124,25 @@ const requestMappings =
             numberOfLastUpdated: 2,
             table: 'Announcement',
             serNum: 'AnnouncementSerNum',
-            needUserId: true
+            needUserId: true,
+            notificationType: "Announcement",
         },
         'PatientTestDates': {
             module: testResults,
-            processFunction: result => result.data.collectedDates
+            processFunction: result => result.data.collectedDates,
         },
         'PatientTestTypes': {
             module: testResults,
-            processFunction: result => result.data.testTypes
+            processFunction: result => result.data.testTypes,
         },
         'QuestionnaireList': {
             module: questionnaires,
             moduleSingleItem: questionnaires,
-            processFunction: result => result.data.questionnaireList
+            processFunction: result => result.data.questionnaireList,
         },
         'patientStudy': {
             table: 'patientStudy',
-            serNum: 'ID'
+            serNum: 'ID',
         }
     };
 
@@ -251,15 +264,32 @@ async function processSelectRequest(userId, category, patientSerNum, timestamp, 
  * @param parameters
  * @return {Promise}
  */
-exports.updateReadStatus=function(userId, parameters)
+exports.updateReadStatus = function(userId, parameters)
 {
     let r = Q.defer();
 
     let table, serNum;
 
-    if(parameters && parameters.Field && parameters.Id && requestMappings.hasOwnProperty(parameters.Field) ) {
-        ({table, serNum} = requestMappings[parameters.Field]);
-        exports.runSqlQuery(queries.updateReadStatus(),[table, userId, table, serNum, parameters.Id]).then(()=>{
+    if (
+        parameters
+        && parameters.Field
+        && parameters.Id
+        && parameters.TargetPatientID
+        && requestMappings.hasOwnProperty(parameters.Field)
+    ) {
+        ({table, serNum, notificationType} = requestMappings[parameters.Field]);
+
+        exports.runSqlQuery(
+            queries.updateReadStatus(),
+            [table, userId, table, serNum, parameters.Id],
+        ).then(async () => {
+            if (notificationType) {
+                logger.log('info', `Implicitly marking ${notificationType} notification as read.`);
+                await exports.runSqlQuery(
+                    queries.implicitlyReadNotification(),
+                    [userId, parameters.Id, parameters.TargetPatientID, notificationType],
+                );
+            }
             r.resolve({Response:'success'});
         }).catch((err)=>{
             r.reject({Response:'error', Reason:err});
