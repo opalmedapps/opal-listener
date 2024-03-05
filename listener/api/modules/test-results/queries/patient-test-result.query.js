@@ -128,7 +128,7 @@ class PatientTestResultQuery {
 							WHERE
 							ptr2.PatientSerNum = ?
 							/* use the AvailableAt column to determine if the latest test type and value is available to be returned */
-                            AND ptr2.AvailableAt <= NOW()
+							AND ptr2.AvailableAt <= NOW()
 							GROUP BY ptr2.TestExpressionSerNum
 						) as A
 					WHERE
@@ -210,6 +210,21 @@ class PatientTestResultQuery {
 						AND ptr.AvailableAt <= NOW()
 					ORDER BY CollectedDateTime;`,
 				[patientSerNum, testExpressionSerNum]);
+	}
+
+	/**
+	 * Mark test results as read for a given list of testResultSerNums.
+	 * @param {String} userId - Firebase userId making the request
+	 * @param {Array.<Number>} testResultSerNums Test results that should be marked as read
+	 * @returns String query to mark test results as read for the given list of tests' serial numbers.
+	 */
+	static markTestResultsAsRead(userId, testResultSerNums) {
+		return mysql.format(`
+			UPDATE PatientTestResult
+			SET ReadBy = JSON_ARRAY_APPEND(ReadBy, '$', ?), ReadStatus = 1
+			WHERE PatientTestResultSerNum IN (?);
+		`,
+		[userId, testResultSerNums]);
 	}
 }
 
