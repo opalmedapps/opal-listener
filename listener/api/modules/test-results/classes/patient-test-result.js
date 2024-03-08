@@ -14,12 +14,12 @@ class PatientTestResult {
 
 	/**
 	 * Method gets the test types for the patient
-	 * @param {Date} [lastUpdated] - Optional date/time; if provided, only items with 'LastUpdated' after this time are returned.
 	 * @param {String} userId - Firebase userId making the request.
+	 * @param {Date} [lastUpdated] - Optional date/time; if provided, only items with 'LastUpdated' after this time are returned.
 	 * @returns {Promise<Object>} Returns the test types for the patient
 	 */
 	async getTestTypes(userId, lastUpdated=0) {
-		const query = PatientTestResultQuery.getTestTypesQuery(userId, this._patient.patientSerNum, lastUpdated);
+		const query = PatientTestResultQuery.getTestTypesQuery(`"${userId}"`, this._patient.patientSerNum, lastUpdated);
 		let results;
 		try {
 			results = await OpalSQLQueryRunner.run(query);
@@ -49,11 +49,12 @@ class PatientTestResult {
 
 	/**
 	 * Method gets the test results by date
+	 * @param {String} userId - Firebase userId making the request
 	 * @param {Date} date Date to obtains the results for.
 	 * @returns {Promise<Object>} Returns the test types for for a given date
 	 */
-	async getTestResultsByDate(date) {
-		const query = PatientTestResultQuery.getTestResultsByDateQuery(this._patient.patientSerNum, date);
+	async getTestResultsByDate(userId, date) {
+		const query = PatientTestResultQuery.getTestResultsByDateQuery(`"${userId}"`, this._patient.patientSerNum, date);
 		let results;
 		try {
 			results = await OpalSQLQueryRunner.run(query);
@@ -83,11 +84,12 @@ class PatientTestResult {
 
 	/**
 	 * Method gets the latest result for the given test type
+	 * @param {String} userId - Firebase userId making the request
 	 * @param {number} testTypeSerNum ExpressionSerNum for the test type.
 	 * @returns {Promise<Object>} Returns an test result object containing the latest values for given test types.
 	 */
-	async getLatestTestResultByTestType(testTypeSerNum) {
-		const query = PatientTestResultQuery.getLatestTestResultByTestType(this._patient.patientSerNum,
+	async getLatestTestResultByTestType(userId, testTypeSerNum) {
+		const query = PatientTestResultQuery.getLatestTestResultByTestType(`"${userId}"`, this._patient.patientSerNum,
 			testTypeSerNum);
 		let results;
 		try {
