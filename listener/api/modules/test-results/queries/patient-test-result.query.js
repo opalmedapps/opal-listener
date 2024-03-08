@@ -10,18 +10,19 @@ class PatientTestResultQuery {
 
 	/**
 	 * Returns query to obtain the patients lab tests given a date
+	 * @param {String} userId - Firebase userId making the request
 	 * @param {string|number} patientSerNum PatientSerNum for patient
 	 * @param {Date} date string representation of date in format '2018-05-21'
 	 * @returns string query to obtain the patients lab tests given a date
 	 */
-	static getTestResultsByDateQuery(patientSerNum, date) {
+	static getTestResultsByDateQuery(userId, patientSerNum, date) {
 		return mysql.format(
 					`SELECT
 						ptr.PatientTestResultSerNum as patientTestResultSerNum,
 						IfNull((Select tge.ExpressionName from TestGroupExpression as tge
 							where ptr.TestGroupExpressionSerNum = tge.TestGroupExpressionSerNum), "") as groupName,
 						ptr.SequenceNum as sequenceNum,
-						ptr.ReadStatus as readStatus,
+						JSON_CONTAINS(ptr.ReadBy, ?) as readStatus,
 						tc.Name_EN as name_EN,
 						tc.Name_FR as name_FR,
 						ptr.TestExpressionSerNum as testExpressionSerNum,
@@ -53,7 +54,7 @@ class PatientTestResultQuery {
 						/* use the AvailableAt column to determine if the lab result is available to be viewed by the patient */
 						AND ptr.AvailableAt <= NOW()
 					ORDER BY groupName, sequenceNum;`,
-				[moment(date).format("YYYY-MM-DD HH:mm:ss"), patientSerNum]);
+				[userId, moment(date).format("YYYY-MM-DD HH:mm:ss"), patientSerNum]);
 	}
 
 	/**
@@ -146,15 +147,16 @@ class PatientTestResultQuery {
 	}
 	/**
 	 * Returns results for the given test type given a TestExpressionSerNum
+	 * @param {String} userId - Firebase userId making the request
 	 * @param {number} patientSerNum PatientSerNum to use to build query
 	 * @param {number} testExpressionSerNum TestExpressionSerNum to get results for
 	 * @returns string query for all the test results for the given test type.
 	 */
-	static getLatestTestResultByTestType(patientSerNum, testExpressionSerNum) {
+	static getLatestTestResultByTestType(userId, patientSerNum, testExpressionSerNum) {
 		return mysql.format(
 					`SELECT
 						ptr.PatientTestResultSerNum as latestPatientTestResultSerNum,
-						ptr.ReadStatus as readStatus,
+						JSON_CONTAINS(ptr.ReadBy, ?) as readStatus,
 						tc.Name_EN as name_EN,
 						tc.Name_FR as name_FR,
 						IfNull((Select emc.URL_EN from EducationalMaterialControl emc
@@ -185,7 +187,7 @@ class PatientTestResultQuery {
 						/* use the AvailableAt column to determine if the lab result is available to be viewed by the patient */
 						AND ptr.AvailableAt <= NOW()
 					ORDER BY latestCollectedDateTime DESC LIMIT 1;`,
-				[patientSerNum, testExpressionSerNum]);
+				[userId, patientSerNum, testExpressionSerNum]);
 	}
 	/**
 	 * Returns results for the given test type given a TestExpressionSerNum
