@@ -4,17 +4,10 @@ const nacl              = require('tweetnacl');
 const stablelibbase64   = require('@stablelib/base64');
 const crypto            = require('crypto');
 const Q                 = require('q');
+const { Pbkdf2Cache }   = require('../../src/utility/pbkdf2-cache');
 
-// Parameters for PBKDF2
-const iterations = 25000;
-const keySizeBytes = 32;
-const digest = 'sha256';
-
-// [Temporary compatibility with 1.12.2] Legacy parameters for PBKDF2
-const legacyIterations = 1000;
-const legacyKeySizeBytes = 16;
-const legacyDigest = 'sha1';
-
+// Manages caching of PBKDF2 derived keys, to avoid the need to recompute a key every time a request is made by the same user
+const pbkdf2Cache = new Pbkdf2Cache();
 
 /**
  * resolveEmptyResponse
@@ -85,12 +78,7 @@ exports.encrypt = async function(object, secret, salt, useLegacySettings = false
     const nonce = nacl.randomBytes(nacl.secretbox.nonceLength);
     let key;
     if (salt) {
-        // Temporary code for compatibility with app version 1.12.2
-        const iterationsCompatibility = useLegacySettings ? legacyIterations : iterations;
-        const keySizeBytesCompatibility = useLegacySettings ? legacyKeySizeBytes : keySizeBytes;
-        const digestCompatibility = useLegacySettings ? legacyDigest : digest;
-
-        const derivedKey = crypto.pbkdf2Sync(secret, salt, iterationsCompatibility, keySizeBytesCompatibility, digestCompatibility);
+        const derivedKey = pbkdf2Cache.getKey(secret, salt, useLegacySettings);
         key = derivedKey.toString('hex');
     }
     else {
@@ -115,12 +103,7 @@ exports.encrypt = async function(object, secret, salt, useLegacySettings = false
 exports.decrypt = async function(object, secret, salt, useLegacySettings = false) {
     let key;
     if (salt) {
-        // Temporary code for compatibility with app version 1.12.2
-        const iterationsCompatibility = useLegacySettings ? legacyIterations : iterations;
-        const keySizeBytesCompatibility = useLegacySettings ? legacyKeySizeBytes : keySizeBytes;
-        const digestCompatibility = useLegacySettings ? legacyDigest : digest;
-
-        const derivedKey = crypto.pbkdf2Sync(secret, salt, iterationsCompatibility, keySizeBytesCompatibility, digestCompatibility);
+        const derivedKey = pbkdf2Cache.getKey(secret, salt, useLegacySettings);
         key = derivedKey.toString('hex');
     }
     else {
