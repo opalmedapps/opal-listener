@@ -26,7 +26,7 @@ class Pbkdf2Cache {
      * @param salt
      * @param {boolean} useLegacySettings [Temporary, compatibility] If true, the old settings for PBKDF2 are used.
      *                                    Used for compatibility with app version 1.12.2.
-     * @returns {Buffer}
+     * @returns {string} The string key derived by PBKDF2.
      */
     getKey(secret, salt, useLegacySettings) {
         // Temporary code for compatibility with app version 1.12.2
@@ -34,7 +34,14 @@ class Pbkdf2Cache {
         const keySizeBytesCompatibility = useLegacySettings ? legacyKeySizeBytes : keySizeBytes;
         const digestCompatibility = useLegacySettings ? legacyDigest : digest;
 
-        return crypto.pbkdf2Sync(secret, salt, iterationsCompatibility, keySizeBytesCompatibility, digestCompatibility);
+        const derivedKey = crypto.pbkdf2Sync(
+            secret,
+            salt,
+            iterationsCompatibility,
+            keySizeBytesCompatibility,
+            digestCompatibility,
+        );
+        return derivedKey.toString('hex');
     }
 }
 

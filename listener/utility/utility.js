@@ -78,8 +78,7 @@ exports.encrypt = async function(object, secret, salt, useLegacySettings = false
     const nonce = nacl.randomBytes(nacl.secretbox.nonceLength);
     let key;
     if (salt) {
-        const derivedKey = pbkdf2Cache.getKey(secret, salt, useLegacySettings);
-        key = derivedKey.toString('hex');
+        key = pbkdf2Cache.getKey(secret, salt, useLegacySettings);
     }
     else {
         key = secret;
@@ -103,8 +102,7 @@ exports.encrypt = async function(object, secret, salt, useLegacySettings = false
 exports.decrypt = async function(object, secret, salt, useLegacySettings = false) {
     let key;
     if (salt) {
-        const derivedKey = pbkdf2Cache.getKey(secret, salt, useLegacySettings);
-        key = derivedKey.toString('hex');
+        key = pbkdf2Cache.getKey(secret, salt, useLegacySettings);
     }
     else {
         key = secret;
