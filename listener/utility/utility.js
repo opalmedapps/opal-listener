@@ -81,29 +81,24 @@ exports.unixToMYSQLTimestamp=function(time) {
  * @returns {Promise}
  * @notes link for NACL encryption documentation: https://tweetnacl.js.org/#/
  */
-exports.encrypt = function(object, secret, salt, useLegacySettings = false) {
-    let r = Q.defer();
+exports.encrypt = async function(object, secret, salt, useLegacySettings = false) {
     const nonce = nacl.randomBytes(nacl.secretbox.nonceLength);
+    let key;
     if (salt) {
         // Temporary code for compatibility with app version 1.12.2
-        let iterationsCompatibility = useLegacySettings ? legacyIterations : iterations;
-        let keySizeBytesCompatibility = useLegacySettings ? legacyKeySizeBytes : keySizeBytes;
-        let digestCompatibility = useLegacySettings ? legacyDigest : digest;
+        const iterationsCompatibility = useLegacySettings ? legacyIterations : iterations;
+        const keySizeBytesCompatibility = useLegacySettings ? legacyKeySizeBytes : keySizeBytes;
+        const digestCompatibility = useLegacySettings ? legacyDigest : digest;
 
-        crypto.pbkdf2(secret, salt, iterationsCompatibility, keySizeBytesCompatibility, digestCompatibility, (err, derivedKey) => {
-            if (err) {
-                r.reject(err);
-            } else {
-                const hexKey = derivedKey.toString('hex');
-                const truncatedKey = stablelibutf8.encode(hexKey.substring(0, nacl.secretbox.keyLength));
-                r.resolve(exports.encryptObject(object, truncatedKey, nonce));
-            }
-        });
-    } else {
-        secret = stablelibutf8.encode(secret.substring(0, nacl.secretbox.keyLength));
-        r.resolve(exports.encryptObject(object, secret, nonce));
+        const derivedKey = crypto.pbkdf2Sync(secret, salt, iterationsCompatibility, keySizeBytesCompatibility, digestCompatibility);
+        key = derivedKey.toString('hex');
     }
-    return r.promise;
+    else {
+        key = secret;
+    }
+
+    const truncatedKey = stablelibutf8.encode(key.substring(0, nacl.secretbox.keyLength));
+    return exports.encryptObject(object, truncatedKey, nonce);
 };
 
 /**
@@ -117,41 +112,23 @@ exports.encrypt = function(object, secret, salt, useLegacySettings = false) {
  * @returns {Promise}
  * @notes link for NACL encryption documentation: https://tweetnacl.js.org/#/
  */
-exports.decrypt = function(object, secret, salt, useLegacySettings = false) {
-    let r = Q.defer();
-
+exports.decrypt = async function(object, secret, salt, useLegacySettings = false) {
+    let key;
     if (salt) {
         // Temporary code for compatibility with app version 1.12.2
-        let iterationsCompatibility = useLegacySettings ? legacyIterations : iterations;
-        let keySizeBytesCompatibility = useLegacySettings ? legacyKeySizeBytes : keySizeBytes;
-        let digestCompatibility = useLegacySettings ? legacyDigest : digest;
+        const iterationsCompatibility = useLegacySettings ? legacyIterations : iterations;
+        const keySizeBytesCompatibility = useLegacySettings ? legacyKeySizeBytes : keySizeBytes;
+        const digestCompatibility = useLegacySettings ? legacyDigest : digest;
 
-        crypto.pbkdf2(secret, salt, iterationsCompatibility, keySizeBytesCompatibility, digestCompatibility, (err, derivedKey) => {
-            if (err) {
-                r.reject(err);
-            } else {
-                const hexKey = derivedKey.toString('hex');
-                const truncatedKey = stablelibutf8.encode(hexKey.substring(0, nacl.secretbox.keyLength));
-
-                let decrypted;
-                try {
-                    decrypted = exports.decryptObject(object, truncatedKey);
-                    r.resolve(decrypted);
-                } catch (err) {
-                    r.reject(err);
-                }
-            }
-        });
-    } else {
-        try {
-            var decrypted = exports.decryptObject(object, stablelibutf8.encode(secret.substring(0, nacl.secretbox.keyLength)));
-            r.resolve(decrypted);
-        } catch (err) {
-            r.reject(err);
-        }
+        const derivedKey = crypto.pbkdf2Sync(secret, salt, iterationsCompatibility, keySizeBytesCompatibility, digestCompatibility);
+        key = derivedKey.toString('hex');
+    }
+    else {
+        key = secret;
     }
 
-    return r.promise;
+    const truncatedKey = stablelibutf8.encode(key.substring(0, nacl.secretbox.keyLength));
+    return exports.decryptObject(object, truncatedKey);
 };
 
 //Encrypts an object, array, number, date or string
