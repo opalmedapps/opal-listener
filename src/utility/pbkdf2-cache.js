@@ -26,9 +26,14 @@ class Pbkdf2Cache {
      * @param salt
      * @param {boolean} useLegacySettings [Temporary, compatibility] If true, the old settings for PBKDF2 are used.
      *                                    Used for compatibility with app version 1.12.2.
+     * @callback keyUsageFunction Function which is called after getting the key value.
+     *                            IMPORTANT: this function is used as a test of the cache success.
+     *                            If a cached value is used and this function fails, then the cached value is discarded,
+     *                            the key is re-derived, and the function is called again.
+     *                            Make sure that this function can be called twice without unwanted side effects.
      * @returns {string} The string key derived by PBKDF2.
      */
-    getKey(secret, salt, useLegacySettings) {
+    getKey(secret, salt, useLegacySettings, keyUsageFunction) {
         // Temporary code for compatibility with app version 1.12.2
         const iterationsCompatibility = useLegacySettings ? legacyIterations : iterations;
         const keySizeBytesCompatibility = useLegacySettings ? legacyKeySizeBytes : keySizeBytes;
@@ -41,7 +46,8 @@ class Pbkdf2Cache {
             keySizeBytesCompatibility,
             digestCompatibility,
         );
-        return derivedKey.toString('hex');
+        const key = derivedKey.toString('hex');
+        keyUsageFunction(key);
     }
 }
 

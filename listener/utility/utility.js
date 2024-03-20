@@ -74,18 +74,23 @@ exports.unixToMYSQLTimestamp=function(time) {
  * @returns {Promise}
  * @notes link for NACL encryption documentation: https://tweetnacl.js.org/#/
  */
-exports.encrypt = async function(object, secret, salt, useLegacySettings = false) {
-    const nonce = nacl.randomBytes(nacl.secretbox.nonceLength);
-    let key;
-    if (salt) {
-        key = pbkdf2Cache.getKey(secret, salt, useLegacySettings);
-    }
-    else {
-        key = secret;
-    }
+exports.encrypt = function(object, secret, salt, useLegacySettings = false) {
+    return new Promise((resolve, reject) => {
+        try {
+            if (salt) pbkdf2Cache.getKey(secret, salt, useLegacySettings, continueWithKey);
+            else continueWithKey(secret);
 
-    const truncatedKey = stablelibutf8.encode(key.substring(0, nacl.secretbox.keyLength));
-    return exports.encryptObject(object, truncatedKey, nonce);
+            // The second half of this function is itself wrapped in a function to work with the PBKDF2 cache above
+            function continueWithKey(key) {
+                const truncatedKey = stablelibutf8.encode(key.substring(0, nacl.secretbox.keyLength));
+                const nonce = nacl.randomBytes(nacl.secretbox.nonceLength);
+                resolve(exports.encryptObject(object, truncatedKey, nonce));
+            }
+        }
+        catch (error) {
+            reject(error);
+        }
+    });
 };
 
 /**
@@ -100,16 +105,21 @@ exports.encrypt = async function(object, secret, salt, useLegacySettings = false
  * @notes link for NACL encryption documentation: https://tweetnacl.js.org/#/
  */
 exports.decrypt = async function(object, secret, salt, useLegacySettings = false) {
-    let key;
-    if (salt) {
-        key = pbkdf2Cache.getKey(secret, salt, useLegacySettings);
-    }
-    else {
-        key = secret;
-    }
+    return new Promise((resolve, reject) => {
+        try {
+            if (salt) pbkdf2Cache.getKey(secret, salt, useLegacySettings, continueWithKey);
+            else continueWithKey(secret);
 
-    const truncatedKey = stablelibutf8.encode(key.substring(0, nacl.secretbox.keyLength));
-    return exports.decryptObject(object, truncatedKey);
+            // The second half of this function is itself wrapped in a function to work with the PBKDF2 cache above
+            function continueWithKey(key) {
+                const truncatedKey = stablelibutf8.encode(key.substring(0, nacl.secretbox.keyLength));
+                resolve(exports.decryptObject(object, truncatedKey));
+            }
+        }
+        catch (error) {
+            reject(error);
+        }
+    });
 };
 
 //Encrypts an object, array, number, date or string
