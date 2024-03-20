@@ -75,9 +75,9 @@ exports.unixToMYSQLTimestamp=function(time) {
  * @notes link for NACL encryption documentation: https://tweetnacl.js.org/#/
  */
 exports.encrypt = function(object, secret, salt, useLegacySettings = false) {
-    return new Promise((resolve, reject) => {
+    return new Promise(async (resolve, reject) => {
         try {
-            if (salt) pbkdf2Cache.getKey(secret, salt, useLegacySettings, continueWithKey);
+            if (salt) await pbkdf2Cache.getKey(secret, salt, useLegacySettings, continueWithKey);
             else continueWithKey(secret);
 
             // The second half of this function is itself wrapped in a function to work with the PBKDF2 cache above
@@ -104,10 +104,10 @@ exports.encrypt = function(object, secret, salt, useLegacySettings = false) {
  * @returns {Promise}
  * @notes link for NACL encryption documentation: https://tweetnacl.js.org/#/
  */
-exports.decrypt = async function(object, secret, salt, useLegacySettings = false) {
-    return new Promise((resolve, reject) => {
+exports.decrypt = function(object, secret, salt, useLegacySettings = false) {
+    return new Promise(async (resolve, reject) => {
         try {
-            if (salt) pbkdf2Cache.getKey(secret, salt, useLegacySettings, continueWithKey);
+            if (salt) await pbkdf2Cache.getKey(secret, salt, useLegacySettings, continueWithKey);
             else continueWithKey(secret);
 
             // The second half of this function is itself wrapped in a function to work with the PBKDF2 cache above
