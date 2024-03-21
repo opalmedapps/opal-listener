@@ -42,7 +42,7 @@ class PatientTestTypeResultsHandler extends ApiRequestHandler {
 
 		let testSerNums = [];
 		testValues.forEach((test) => testSerNums.push(test['patientTestResultSerNum']));
-		await patientTests.markTestResultsAsRead(requestObject.meta.UserID, testSerNums);
+		await patientTests.markTestResultsAsRead(userId, testSerNums);
 		return {
 			// Add the properties in latest patient test result
 			"data": Object.assign(result, latestPatientTestResultByType)
