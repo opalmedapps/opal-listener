@@ -224,9 +224,10 @@ class PatientTestResultQuery {
 		return mysql.format(`
 			UPDATE PatientTestResult
 			SET ReadBy = JSON_ARRAY_APPEND(ReadBy, '$', ?), ReadStatus = 1
-			WHERE PatientTestResultSerNum IN (?);
+			WHERE PatientTestResultSerNum IN (?)
+			AND JSON_CONTAINS(ReadBy, ?) = 0;
 		`,
-		[userId, testResultSerNums]);
+		[userId, testResultSerNums, `"${userId}"`]);
 	}
 }
 
