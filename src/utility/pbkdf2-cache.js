@@ -35,6 +35,7 @@ class Pbkdf2Cache {
      *              The validity test and regeneration are done to prevent issues if a cached value becomes stale.
      * @param {string} secret Secret passed to PBKDF2.
      * @param {string} salt Salt passed to PBKDF2.
+     * @param {string} cacheLabel The label (dictionary key) under which to get or store PBKDF2 output.
      * @param {boolean} useLegacySettings [Temporary, compatibility] If true, the old settings for PBKDF2 are used.
      *                                    Used for compatibility with app version 1.12.2.
      * @param {Function} keyUsageFunction Function which is called after getting the key value.
@@ -44,11 +45,9 @@ class Pbkdf2Cache {
      *                                    Make sure this function can be called twice without any unwanted side effects.
      * @returns {Promise<void>} Resolves or rejects when the final keyUsageFunction is done executing.
      */
-    async getKey(secret, salt, useLegacySettings, keyUsageFunction) {
-        // TODO set key based on user and device
-        const cacheLabel = 'testing';
-
+    async getKey(secret, salt, cacheLabel, useLegacySettings, keyUsageFunction) {
         // Get the value from the cache
+        if (!cacheLabel) throw new Error(`Failed to access PBKDF2 cache: an access label must be given: ${cacheLabel}`);
         const cachedValue = await this.cache.get(cacheLabel);
 
         // Cache miss: generate the value and use it
@@ -69,7 +68,7 @@ class Pbkdf2Cache {
             // If the keyUsageFunction fails, the cached value is bad: invalidate it and try again
             legacyLogger.log('debug', 'PBKDF2 cached value was bad; invalidating');
             await this.#invalidate(cacheLabel);
-            await this.getKey(secret, salt, useLegacySettings, keyUsageFunction);
+            await this.getKey(secret, salt, cacheLabel, useLegacySettings, keyUsageFunction);
         }
     }
 

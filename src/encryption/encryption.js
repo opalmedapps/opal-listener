@@ -20,6 +20,7 @@ class EncryptionUtilities {
                 response,
                 secret,
                 salt,
+                'temp',
             );
         }
         catch (error) {
@@ -44,6 +45,7 @@ class EncryptionUtilities {
                 },
                 secret,
                 salt,
+                'temp',
             );
 
             return {

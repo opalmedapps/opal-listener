@@ -136,7 +136,7 @@ exports.resetPassword = async function(requestKey, requestObject) {
 
         let answer = user.SecurityAnswer;
 
-        let unencrypted = await utility.decrypt(requestObject.Parameters, secret, answer, useLegacySettings);
+        let unencrypted = await utility.decrypt(requestObject.Parameters, secret, answer, 'temp', useLegacySettings);
         await sqlInterface.setNewPassword(utility.hash(unencrypted.newPassword), user.Username);
 
         logger.log('verbose', `Successfully updated password for username = ${requestObject.UserID}`);

@@ -195,7 +195,7 @@ function encryptResponse(response, useLegacySettings = false)
 	delete response.Salt;
 
 	if (typeof encryptionKey !== 'undefined' && encryptionKey !== '') {
-		return utility.encrypt(response, encryptionKey, salt, useLegacySettings);
+		return utility.encrypt(response, encryptionKey, salt, 'temp', useLegacySettings);
 	}
 	else {
 		return Promise.resolve(response);

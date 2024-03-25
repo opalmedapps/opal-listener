@@ -54,7 +54,7 @@ class RequestValidator {
 				} else {
 
 					let {SecurityAnswer} = rows[0];
-					utility.decrypt({req: request.type, params: request.parameters}, hashedUID, SecurityAnswer, useLegacySettings)
+					utility.decrypt({req: request.type, params: request.parameters}, hashedUID, SecurityAnswer, 'temp', useLegacySettings)
 					.then((dec)=>{
 						request.setAuthenticatedInfo(SecurityAnswer, hashedUID, dec.req, dec.params);
 						return RequestValidator.validateRequestPermissions(request);

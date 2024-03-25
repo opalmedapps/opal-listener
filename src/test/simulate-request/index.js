@@ -117,6 +117,7 @@ class SimulateRequest {
             },
             this.#requestData.SimulatedEncryption.secret,
             this.#requestData.SimulatedEncryption.salt,
+            'temp',
         );
         delete this.#requestData.SimulatedEncryption;
 
@@ -143,6 +144,7 @@ class SimulateRequest {
             },
             hash,
             secret,
+            'temp',
         );
 
         this.#requestData = {

@@ -64,20 +64,20 @@ exports.unixToMYSQLTimestamp=function(time) {
 };
 
 /**
- * encrypt
- * @desc Encrypts a response object using PBKDF2 hash as key and NACL as encryption tool
- * @param object
- * @param secret
- * @param salt
+ * @description Encrypts a response object.
+ * @param {Object} object The object to encrypt.
+ * @param {string} secret If a salt is provided, this value is used as a "password" passed to PBKDF2 to derive a key.
+ *                        If no salt is provided, this value is used directly as the encryption key.
+ * @param {string} [salt] Optional salt; if provided, it's used with the secret for PBKDF2 to derive an encryption key.
+ * @param {string} [userIdentifier] Required if a salt is provided. Used to look up or store a cached PBKDF2 value.
  * @param {boolean} useLegacySettings [Temporary, compatibility] If true, the old settings for PBKDF2 are used.
  *                                    Used for compatibility with app version 1.12.2.
- * @returns {Promise}
- * @notes link for NACL encryption documentation: https://tweetnacl.js.org/#/
+ * @returns {Promise<Object>} Resolves to the encrypted object.
  */
-exports.encrypt = function(object, secret, salt, useLegacySettings = false) {
+exports.encrypt = function(object, secret, salt, userIdentifier, useLegacySettings = false) {
     return new Promise(async (resolve, reject) => {
         try {
-            if (salt) await pbkdf2Cache.getKey(secret, salt, useLegacySettings, continueWithKey);
+            if (salt) await pbkdf2Cache.getKey(secret, salt, userIdentifier, useLegacySettings, continueWithKey);
             else continueWithKey(secret);
 
             // The second half of this function is itself wrapped in a function to work with the PBKDF2 cache above
@@ -94,20 +94,20 @@ exports.encrypt = function(object, secret, salt, useLegacySettings = false) {
 };
 
 /**
- * decrypt
- * @desc Decrypts a request object so that it can be handled by the server
- * @param object
- * @param secret
- * @param salt
+ * @description Decrypts a request object.
+ * @param {Object} object The object to decrypt.
+ * @param {string} secret If a salt is provided, this value is used as a "password" passed to PBKDF2 to derive a key.
+ *                        If no salt is provided, this value is used directly as the decryption key.
+ * @param {string} [salt] Optional salt; if provided, it's used with the secret for PBKDF2 to derive a decryption key.
+ * @param {string} [userIdentifier] Required if a salt is provided. Used to look up or store a cached PBKDF2 value.
  * @param {boolean} useLegacySettings [Temporary, compatibility] If true, the old settings for PBKDF2 are used.
  *                                    Used for compatibility with app version 1.12.2.
- * @returns {Promise}
- * @notes link for NACL encryption documentation: https://tweetnacl.js.org/#/
+ * @returns {Promise<Object>} Resolves to the decrypted object.
  */
-exports.decrypt = function(object, secret, salt, useLegacySettings = false) {
+exports.decrypt = function(object, secret, salt, userIdentifier, useLegacySettings = false) {
     return new Promise(async (resolve, reject) => {
         try {
-            if (salt) await pbkdf2Cache.getKey(secret, salt, useLegacySettings, continueWithKey);
+            if (salt) await pbkdf2Cache.getKey(secret, salt, userIdentifier, useLegacySettings, continueWithKey);
             else continueWithKey(secret);
 
             // The second half of this function is itself wrapped in a function to work with the PBKDF2 cache above
