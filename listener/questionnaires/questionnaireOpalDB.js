@@ -218,10 +218,16 @@ async function questionnaireSaveAnswer(requestObject) {
     );
     const patientSerNum = questionnaire[0]['PatientSerNum'];
 
-    try {
-        checkPermissionsToAnswerQuestionnaire(requestObject.UserID, patientSerNum, questionnaire);
-    } catch (err) {
-        throw new Error(err.error, { cause: "Not allowed" });
+    logger.log('info', "Checking if caregiver can answer questionnaire.");
+    let canAnswerPatientQuestionnaires = await QuestionnaireDjango.caregiverCanAnswerQuestionnaire(
+        requestObject.UserID,
+        patientSerNum,
+    );
+
+    if (!canAnswerPatientQuestionnaires) {
+        const questionnaireID = questionnaire[0].QuestionnaireSerNum;
+        const errMsg = `The requested questionnaire {${questionnaireID}} can be completed only by patient {${patientSerNum}}.`;
+        throw Error(errMsg, {cause: 'Not allowed'});
     }
 
     let language = await getQuestionnaireLanguage(requestObject);
@@ -251,10 +257,16 @@ async function questionnaireUpdateStatus(requestObject) {
     );
     const patientSerNum = questionnaire[0]['PatientSerNum'];
 
-    try {
-        checkPermissionsToAnswerQuestionnaire(requestObject.UserID, patientSerNum, questionnaire);
-    } catch (err) {
-        throw new Error(err.error, { cause: "Not allowed" });
+    logger.log('info', "Checking if caregiver can answer questionnaire.");
+    let canAnswerPatientQuestionnaires = await QuestionnaireDjango.caregiverCanAnswerQuestionnaire(
+        requestObject.UserID,
+        patientSerNum,
+    );
+
+    if (!canAnswerPatientQuestionnaires) {
+        const questionnaireID = questionnaire[0].QuestionnaireSerNum;
+        const errMsg = `The requested questionnaire {${questionnaireID}} can be completed only by patient {${patientSerNum}}.`;
+        throw Error(errMsg, {cause: 'Not allowed'});
     }
 
     // 1. update the status in the answerQuestionnaire table in questionnaire DB
@@ -351,29 +363,5 @@ async function getQuestionnaireLanguage(requestObject) {
     catch (error) {
         logger.log('error', 'Error getting questionnaire language', error);
         throw new Error('No language was provided in the request or found in OpalDB');
-    }
-}
-
-/**
- * @desc Check if given user is allowed to answer patient's questionnaire.
- *       E.g., RelationshipType.can_answer_questionnaire == true
- *
- * @param {string} userId The Firebase username of the user making the request.
- * @param {number} patientSerNum The PatientSerNum of the care-receiver.
- * @param {object} questionnaire Questionnaire that is being answered by user.
- *
- * @throws {string} Throws an error message if the given user is not allowed to answer questionnaire.
- */
-async function checkPermissionsToAnswerQuestionnaire(username, patientSerNum, questionnaire) {
-    logger.log('info', "Checking if caregiver can answer questionnaire.");
-    let canAnswerPatientQuestionnaires = await QuestionnaireDjango.caregiverCanAnswerQuestionnaire(
-        username,
-        patientSerNum,
-    );
-
-    const questionnaireID = questionnaire[0].QuestionnaireSerNum;
-    if (!canAnswerPatientQuestionnaires) {
-        const errMsg = `The requested questionnaire {${questionnaireID}} can be completed only by patient {${patientSerNum}}.`;
-        throw Error(errMsg, {cause: 'Not allowed'});
     }
 }
