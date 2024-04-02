@@ -51,17 +51,6 @@ class QuestionnaireDjango {
     }
 
     /**
-     * @desc Interprets a list of relationships between a caregiver and a given patient to determine if at least one of
-     *       them allows the caregiver to access patient's list of questionnaires.
-     *       Note! This check does not take into account the relationship's status (confirmed, expired, etc.)
-     * @param {Object[]} relationships The list of relationships to check.
-     * @returns {boolean} True if at least one of the relationships has "can_answer_questionnaire" enabled.
-     */
-    static caregiverCanAccessQuestionnairesList(relationships) {
-        return relationships.some(relationship => relationship.relationship_type.can_answer_questionnaire === true);
-    }
-
-    /**
      * Check if given caregiver can answer patient's questionnaires.
      *
      * @param {string} userId The Firebase username of the user making the request.
