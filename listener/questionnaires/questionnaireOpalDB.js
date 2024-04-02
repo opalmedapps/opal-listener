@@ -212,22 +212,12 @@ async function questionnaireSaveAnswer(requestObject) {
         throw new Error('Error saving answer: the requestObject does not have the required parameters');
     }
 
-    const questionnaire = await OpalSQLQueryRunner.run(
-        opalQueries.getOpalDBQuestionnaire(),
-        [requestObject.Parameters.answerQuestionnaire_id],
-    );
-    const patientSerNum = questionnaire[0]['PatientSerNum'];
+    const patientSerNum = Number(requestObject.TargetPatientID);
 
-    logger.log('info', "Checking if caregiver can answer questionnaire.");
-    let canAnswerPatientQuestionnaires = await QuestionnaireDjango.caregiverCanAnswerQuestionnaire(
-        requestObject.UserID,
-        patientSerNum,
-    );
-
-    if (!canAnswerPatientQuestionnaires) {
-        const questionnaireID = questionnaire[0].QuestionnaireSerNum;
-        const errMsg = `The requested questionnaire {${questionnaireID}} can be completed only by patient {${patientSerNum}}.`;
-        throw Error(errMsg, {cause: 'Not allowed'});
+    try {
+        await checkCaregiverPermissions(requestObject.UserID, patientSerNum);
+    } catch (err) {
+        throw err;
     }
 
     let language = await getQuestionnaireLanguage(requestObject);
@@ -251,22 +241,12 @@ async function questionnaireUpdateStatus(requestObject) {
         throw new Error(paramErrMessage);
     }
 
-    const questionnaire = await OpalSQLQueryRunner.run(
-        opalQueries.getOpalDBQuestionnaire(),
-        [requestObject.Parameters.answerQuestionnaire_id],
-    );
-    const patientSerNum = questionnaire[0]['PatientSerNum'];
+    const patientSerNum = Number(requestObject.TargetPatientID);
 
-    logger.log('info', "Checking if caregiver can answer questionnaire.");
-    let canAnswerPatientQuestionnaires = await QuestionnaireDjango.caregiverCanAnswerQuestionnaire(
-        requestObject.UserID,
-        patientSerNum,
-    );
-
-    if (!canAnswerPatientQuestionnaires) {
-        const questionnaireID = questionnaire[0].QuestionnaireSerNum;
-        const errMsg = `The requested questionnaire {${questionnaireID}} can be completed only by patient {${patientSerNum}}.`;
-        throw Error(errMsg, {cause: 'Not allowed'});
+    try {
+        await checkCaregiverPermissions(requestObject.UserID, patientSerNum);
+    } catch (err) {
+        throw err;
     }
 
     // 1. update the status in the answerQuestionnaire table in questionnaire DB
@@ -283,6 +263,11 @@ async function questionnaireUpdateStatus(requestObject) {
     const newStatusInt = parseInt(requestObject.Parameters.new_status);
     if (newStatusInt === questionnaireConfig.IN_PROGRESS_QUESTIONNAIRE_STATUS) {
         logger.log('info', "Implicitly marking the questionnaire's notification as read.");
+
+        const questionnaire = await OpalSQLQueryRunner.run(
+            opalQueries.getOpalDBQuestionnaire(),
+            [requestObject.Parameters.answerQuestionnaire_id],
+        );
 
         const requestParams = {
             Parameters: {
@@ -363,5 +348,27 @@ async function getQuestionnaireLanguage(requestObject) {
     catch (error) {
         logger.log('error', 'Error getting questionnaire language', error);
         throw new Error('No language was provided in the request or found in OpalDB');
+    }
+}
+
+/**
+ * Check if caregiver has permissions to answer questionnaire.
+ *
+ * @param {string} userId The Firebase username of the user making the request.
+ * @param {number} patientSerNum The PatientSerNum of the care-receiver.
+ *
+ * @throws Throws an error if caregiver does not have permissions to answer the questionnaire.
+ */
+async function checkCaregiverPermissions(userId, patientSerNum) {
+    logger.log('info', "Checking if caregiver can answer questionnaire.");
+
+    let canAnswerPatientQuestionnaires = await QuestionnaireDjango.caregiverCanAnswerQuestionnaire(
+        userId,
+        patientSerNum,
+    );
+
+    if (!canAnswerPatientQuestionnaires) {
+        const errMsg = `The requested questionnaire cannot be completed by this user.`;
+        throw new Error(errMsg, {cause: 'Not allowed'});
     }
 }
