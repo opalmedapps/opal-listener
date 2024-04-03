@@ -47,7 +47,7 @@ class QuestionnaireDjango {
      * @returns {boolean} True if at least one of the relationships has the role type "self".
      */
     static caregiverIsSelf(relationships) {
-        return relationships.some(relationship => relationship.relationship_type.role_type === "SELF");
+        return relationships.every(relationship => relationship.relationship_type.role_type === "SELF");
     }
 
     /**
@@ -61,7 +61,7 @@ class QuestionnaireDjango {
         let relationships = await this.getRelationshipsWithPatient(userId, patientSerNum);
         // Ensure the relationships list contains only confirmed relationships
         relationships = relationships.filter(patientRelationship => patientRelationship.status === 'CON');
-        return relationships.some(relationship => relationship.relationship_type.can_answer_questionnaire === true);
+        return relationships.every(relationship => relationship.relationship_type.can_answer_questionnaire === true);
     }
 }
 
