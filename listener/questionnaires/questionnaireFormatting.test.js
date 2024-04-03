@@ -21,20 +21,20 @@ describe('QuestionnaireFormatting', function () {
         afterEach(function() {
             clearStub();
         });
-        it('should allow no respondents if the user is "self" and cannot answer patient questionnaires', async function() {
+        it('should allow [patient] if the user is "self" and cannot answer patient questionnaires', async function() {
             stubRelationship(false, SELF);
             const respondents = await format.getAllowedRespondents("test", 51);
-            expect(respondents).to.have.deep.members([]);
+            expect(respondents).to.have.deep.members([PATIENT]);
         });
         it('should allow [patient] questionnaires if the user is "self" and can answer patient questionnaires', async function() {
             stubRelationship(true, SELF);
             const respondents = await format.getAllowedRespondents("test", 51);
             expect(respondents).to.have.deep.members([PATIENT]);
         });
-        it('should allow [caregiver] questionnaires if the user is not "self" and cannot answer patient questionnaires', async function() {
+        it('should allow [patient, caregiver] questionnaires if the user is not "self" and cannot answer patient questionnaires', async function() {
             stubRelationship(false, PARENT);
             const respondents = await format.getAllowedRespondents("test", 51);
-            expect(respondents).to.have.deep.members([CAREGIVER]);
+            expect(respondents).to.have.deep.members([PATIENT, CAREGIVER]);
         });
         it('should allow [patient, caregiver] questionnaires if the user is not "self" and can answer patient questionnaires', async function() {
             stubRelationship(true, PARENT);

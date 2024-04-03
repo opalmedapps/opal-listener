@@ -214,11 +214,7 @@ async function questionnaireSaveAnswer(requestObject) {
 
     const patientSerNum = Number(requestObject.TargetPatientID);
 
-    try {
-        await checkCaregiverPermissions(requestObject.UserID, patientSerNum);
-    } catch (err) {
-        throw err;
-    }
+    await checkCaregiverPermissions(requestObject.UserID, patientSerNum);
 
     let language = await getQuestionnaireLanguage(requestObject);
 
@@ -243,11 +239,7 @@ async function questionnaireUpdateStatus(requestObject) {
 
     const patientSerNum = Number(requestObject.TargetPatientID);
 
-    try {
-        await checkCaregiverPermissions(requestObject.UserID, patientSerNum);
-    } catch (err) {
-        throw err;
-    }
+    await checkCaregiverPermissions(requestObject.UserID, patientSerNum);
 
     // 1. update the status in the answerQuestionnaire table in questionnaire DB
     const isCompleted = await questionnaires.updateQuestionnaireStatusInQuestionnaireDB(
