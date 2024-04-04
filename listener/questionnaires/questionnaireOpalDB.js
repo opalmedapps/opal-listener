@@ -281,6 +281,7 @@ async function questionnaireUpdateStatus(requestObject) {
             opalQueries.implicitlyReadNotification(),
             [
                 readBy,
+                readBy,
                 questionnaire[0]['QuestionnaireSerNum'],
                 questionnaire[0]['PatientSerNum'],
                 "LegacyQuestionnaire",
