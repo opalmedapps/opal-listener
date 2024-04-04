@@ -49,7 +49,7 @@ class QuestionnaireDjango {
      */
     static caregiverIsSelf(relationships) {
         // Check only confirmed relationships
-        confirmedRelationships = relationships.filter(patientRelationship => patientRelationship.status === 'CON');
+        let confirmedRelationships = relationships.filter(patientRelationship => patientRelationship.status === 'CON');
         return confirmedRelationships.every(relationship => relationship.relationship_type.role_type === "SELF");
     }
 
@@ -63,7 +63,7 @@ class QuestionnaireDjango {
     static async caregiverCanAnswerQuestionnaire(userId, patientSerNum) {
         let relationships = await this.getRelationshipsWithPatient(userId, patientSerNum);
         // Check only confirmed relationships
-        confirmedRelationships = relationships.filter(patientRelationship => patientRelationship.status === 'CON');
+        let confirmedRelationships = relationships.filter(patientRelationship => patientRelationship.status === 'CON');
         return confirmedRelationships.every(relationship => relationship.relationship_type.can_answer_questionnaire === true);
     }
 }
