@@ -670,7 +670,8 @@ exports.implicitlyReadNotification = function() {
     return `
         UPDATE Notification
         SET ReadBy = JSON_ARRAY_APPEND(ReadBy, '$', ?), ReadStatus = 1
-        WHERE RefTableRowSerNum = ?
+        WHERE JSON_CONTAINS(ReadBy, ?) = 0
+        AND RefTableRowSerNum = ?
         AND PatientSerNum = ?
         AND NotificationControlSerNum IN (SELECT
                                             NotificationControlSerNum
