@@ -25,8 +25,13 @@ const questionnaireOpalDBValidation = {
  * @returns {boolean} true if the qp_ser_num parameter exists and is in correct format, false otherwise
  */
 function validatePatientQuestionnaireSerNum(requestObject) {
-    return (requestObject.hasOwnProperty('Parameters') && requestObject.Parameters.hasOwnProperty('qp_ser_num')
-        && requestObject.Parameters.qp_ser_num !== null && !isNaN(requestObject.Parameters.qp_ser_num));
+    return (
+            requestObject?.TargetPatientID
+            && requestObject.hasOwnProperty('Parameters')
+            && requestObject.Parameters.hasOwnProperty('qp_ser_num')
+            && requestObject.Parameters.qp_ser_num !== null
+            && !isNaN(requestObject.Parameters.qp_ser_num)
+    );
 }
 
 /**
