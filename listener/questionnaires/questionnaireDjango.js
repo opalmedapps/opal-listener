@@ -48,7 +48,9 @@ class QuestionnaireDjango {
      * @returns {boolean} True if all of the confirmed relationships have the role type "self".
      */
     static caregiverIsSelf(relationships) {
-        return relationships.every(relationship => relationship.relationship_type.role_type === "SELF");
+        // Check only confirmed relationships
+        confirmedRelationships = relationships.filter(patientRelationship => patientRelationship.status === 'CON');
+        return confirmedRelationships.every(relationship => relationship.relationship_type.role_type === "SELF");
     }
 
     /**
