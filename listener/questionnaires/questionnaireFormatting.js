@@ -289,13 +289,13 @@ async function getAllowedRespondents(userId, patientSerNum) {
     let relationships = await QuestionnaireDjango.getRelationshipsWithPatient(userId, patientSerNum);
     if (relationships.length === 0) throw new Error(`Invalid questionnaire request; could not find a relationship between caregiver '${userId}' and PatientSerNum ${patientSerNum}`);
 
-    let canAnswerPatientQuestionnaires = QuestionnaireDjango.caregiverCanAnswerQuestionnaires(relationships);
     let isSelf = QuestionnaireDjango.caregiverIsSelf(relationships);
 
     let allowedRespondents = [];
 
-    // Rule: "A user can only access respondent=PATIENT questionnaires when they have a relationship with the patient that allows answering patient questionnaires."
-    if (canAnswerPatientQuestionnaires) allowedRespondents.push(questionnaireConfig.QUESTIONNAIRE_RESPONDENT_ID.PATIENT);
+    // Rule: "A user can only access respondent=PATIENT questionnaires when they have a relationship with the patient."
+    //       "The user is allowed to see all the available questionnaires regardless of the permission to answer questionnaires."
+    allowedRespondents.push(questionnaireConfig.QUESTIONNAIRE_RESPONDENT_ID.PATIENT);
     // Rule: "A user can only access respondent=CAREGIVER questionnaires when they don't have a self relationship with the patient."
     if (!isSelf) allowedRespondents.push(questionnaireConfig.QUESTIONNAIRE_RESPONDENT_ID.CAREGIVER);
 
