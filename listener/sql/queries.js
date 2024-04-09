@@ -69,63 +69,50 @@ function patientDiagnosisTableFields(selectOne) {
  */
 function patientAppointmentTableFields(selectOne) {
     return `SELECT
-                IfNull(HM2.MapUrl, '') AS MapUrl,
-                IfNull(HM2.MapUrl_EN, '') AS MapUrl_EN,
-                IfNull(HM2.MapUrl_FR, '') AS MapUrl_FR,
-                IfNull(HM2.MapName_EN, '') AS MapName_EN,
-                IfNull(HM2.MapName_FR, '') AS MapName_FR,
-                IfNull(HM2.MapDescription_EN, '') AS MapDescription_EN,
-                IfNull(HM2.MapDescription_FR, '') AS MapDescription_FR,
-                A2.*
+                Appt.AppointmentSerNum,
+                A.AliasSerNum,
+                concat(if(Appt.Status = 'Cancelled', '[Cancelled] - ', ''), getTranslation('Alias', 'AliasName_EN', IfNull(A.AliasName_EN, ''), A.AliasSerNum)) AS AppointmentType_EN,
+                concat(if(Appt.Status = 'Cancelled', convert('[Annulé] - ' using utf8), ''), IfNull(A.AliasName_FR, '')) AS AppointmentType_FR,
+                IfNull(A.AliasDescription_EN, '') AS AppointmentDescription_EN,
+                IfNull(A.AliasDescription_FR, '') AS AppointmentDescription_FR,
+                IfNull(AE.Description, '') AS ResourceDescription,
+                Appt.ScheduledStartTime,
+                Appt.ScheduledEndTime,
+                Appt.Checkin,
+                Appt.SourceDatabaseSerNum,
+                Appt.AppointmentAriaSer,
+                JSON_CONTAINS(Appt.ReadBy, ?) as ReadStatus,
+                Appt.Status,
+                IfNull(Appt.RoomLocation_EN, '') AS RoomLocation_EN,
+                IfNull(Appt.RoomLocation_FR, '') AS RoomLocation_FR,
+                Appt.LastUpdated,
+                IfNull(emc.URL_EN, '') AS URL_EN,
+                IfNull(emc.URL_FR, '') AS URL_FR,
+                IfNull(AC.CheckinPossible, 0) AS CheckinPossible,
+                IfNull(AC.CheckinInstruction_EN, '') AS CheckinInstruction_EN,
+                IfNull(AC.CheckinInstruction_FR, '') AS CheckinInstruction_FR,
+                A.HospitalMapSerNum,
+                IfNull(HM.MapUrl, '') AS MapUrl,
+                IfNull(HM.MapUrl_EN, '') AS MapUrl_EN,
+                IfNull(HM.MapUrl_FR, '') AS MapUrl_FR,
+                IfNull(HM.MapName_EN, '') AS MapName_EN,
+                IfNull(HM.MapName_FR, '') AS MapName_FR,
+                IfNull(HM.MapDescription_EN, '') AS MapDescription_EN,
+                IfNull(HM.MapDescription_FR, '') AS MapDescription_FR
             FROM
-                HospitalMap HM2,
-                (
-                    SELECT
-                        Appt.AppointmentSerNum,
-                        A.AliasSerNum,
-                        concat(if(Appt.Status = 'Cancelled', '[Cancelled] - ', ''), getTranslation('Alias', 'AliasName_EN', IfNull(A.AliasName_EN, ''), A.AliasSerNum)) AS AppointmentType_EN,
-                        concat(if(Appt.Status = 'Cancelled', convert('[Annulé] - ' using utf8), ''), IfNull(A.AliasName_FR, '')) AS AppointmentType_FR,
-                        IfNull(A.AliasDescription_EN, '') AS AppointmentDescription_EN,
-                        IfNull(A.AliasDescription_FR, '') AS AppointmentDescription_FR,
-                        IfNull(AE.Description, '') AS ResourceDescription,
-                        Appt.ScheduledStartTime,
-                        Appt.ScheduledEndTime,
-                        Appt.Checkin,
-                        Appt.SourceDatabaseSerNum,
-                        Appt.AppointmentAriaSer,
-                        JSON_CONTAINS(Appt.ReadBy, ?) as ReadStatus,
-                        R.ResourceName,
-                        R.ResourceType,
-                        Appt.Status,
-                        IfNull(Appt.RoomLocation_EN, '') AS RoomLocation_EN,
-                        IfNull(Appt.RoomLocation_FR, '') AS RoomLocation_FR,
-                        Appt.LastUpdated,
-                        IfNull(emc.URL_EN, '') AS URL_EN,
-                        IfNull(emc.URL_FR, '') AS URL_FR,
-                        IfNull(AC.CheckinPossible, 0) AS CheckinPossible,
-                        IfNull(AC.CheckinInstruction_EN, '') AS CheckinInstruction_EN,
-                        IfNull(AC.CheckinInstruction_FR, '') AS CheckinInstruction_FR,
-                        A.HospitalMapSerNum
-                    FROM
-                        Appointment Appt
-                        INNER JOIN ResourceAppointment RA ON RA.AppointmentSerNum = Appt.AppointmentSerNum
-                        INNER JOIN Resource R ON RA.ResourceSerNum = R.ResourceSerNum
-                        INNER JOIN AliasExpression AE ON AE.AliasExpressionSerNum = Appt.AliasExpressionSerNum
-                        INNER JOIN Alias A ON AE.AliasSerNum = A.AliasSerNum
-                        LEFT JOIN HospitalMap HM ON HM.HospitalMapSerNum = A.HospitalMapSerNum
-                        INNER JOIN AppointmentCheckin AC ON AE.AliasSerNum = AC.AliasSerNum
-                        LEFT JOIN EducationalMaterialControl emc ON emc.EducationalMaterialControlSerNum = A.EducationalMaterialControlSerNum
-                    WHERE
-                        Appt.PatientSerNum = ?
-                        AND Appt.State = 'Active'
-                        AND Appt.Status <> 'Deleted'
-                        ${selectOne ? 'AND Appt.AppointmentSerNum = ?' : ''}
-                        ${!selectOne ? 'AND (Appt.LastUpdated > ? OR A.LastUpdated > ? OR AE.LastUpdated > ? OR R.LastUpdated > ? OR HM.LastUpdated > ?)' : ''}
-                    ORDER BY Appt.AppointmentSerNum, ScheduledStartTime
-                ) as A2
+                Appointment Appt
+                INNER JOIN AliasExpression AE ON AE.AliasExpressionSerNum = Appt.AliasExpressionSerNum
+                INNER JOIN Alias A ON AE.AliasSerNum = A.AliasSerNum
+                LEFT JOIN HospitalMap HM ON HM.HospitalMapSerNum = A.HospitalMapSerNum
+                INNER JOIN AppointmentCheckin AC ON AE.AliasSerNum = AC.AliasSerNum
+                LEFT JOIN EducationalMaterialControl emc ON emc.EducationalMaterialControlSerNum = A.EducationalMaterialControlSerNum
             WHERE
-                HM2.HospitalMapSerNum = getLevel(A2.ScheduledStartTime, A2.ResourceDescription, A2.HospitalMapSerNum)
-            ;
+                Appt.PatientSerNum = ?
+                AND Appt.State = 'Active'
+                AND Appt.Status <> 'Deleted'
+                ${selectOne ? 'AND Appt.AppointmentSerNum = ?' : ''}
+                ${!selectOne ? 'AND (Appt.LastUpdated > ? OR A.LastUpdated > ? OR AE.LastUpdated > ? OR HM.LastUpdated > ?)' : ''}
+            ORDER BY Appt.AppointmentSerNum, ScheduledStartTime;
     `;
 }
 
@@ -328,6 +315,16 @@ exports.patientStudyTableFields=function(){
  */
 exports.getStudyQuestionnairesQuery = function(){
     return "SELECT QS.questionnaireID, Q.DateAdded, QC.QuestionnaireName_EN, QC.QuestionnaireName_FR FROM questionnaireStudy QS, Questionnaire Q, QuestionnaireControl QC, study S WHERE S.ID = QS.studyID AND QC.QuestionnaireControlSerNum = Q.QuestionnaireControlSerNum AND Q.QuestionnaireSerNum = QS.questionnaireId AND S.ID = ?";
+}
+
+exports.getOpalDBQuestionnaire = function() {
+    return `
+    SELECT
+        q.QuestionnaireSerNum AS QuestionnaireSerNum,
+        q.PatientQuestionnaireDBSerNum AS PatientQuestionnaireDBSerNum,
+        q.PatientSerNum AS PatientSerNum
+    FROM Questionnaire q
+    WHERE PatientQuestionnaireDBSerNum = ?;`;
 }
 
 /**
@@ -668,6 +665,21 @@ exports.getNewNotifications=function() {
             AND (Notification.DateAdded > ? OR NotificationControl.DateAdded > ?);
     `;
 };
+
+exports.implicitlyReadNotification = function() {
+    return `
+        UPDATE Notification
+        SET ReadBy = JSON_ARRAY_APPEND(ReadBy, '$', ?), ReadStatus = 1
+        WHERE JSON_CONTAINS(ReadBy, ?) = 0
+        AND RefTableRowSerNum = ?
+        AND PatientSerNum = ?
+        AND NotificationControlSerNum IN (SELECT
+                                            NotificationControlSerNum
+                                        FROM NotificationControl
+                                        WHERE NotificationType IN (?)
+                                    );
+    `;
+}
 
 /*
  * Named functions used to access different versions of a query.

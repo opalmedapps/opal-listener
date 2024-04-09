@@ -28,13 +28,13 @@ const cp                = require('child_process');
 const OpalSecurityResponseError = require('./api/response/security-response-error');
 const OpalSecurityResponseSuccess = require('./api/response/security-response-success');
 const OpalResponse      = require('./api/response/response');
+const { Version } = require('../src/utility/version');
 
 
 // NOTE: Listener launching steps have been moved to src/server.js
 
 let db;
 let ref;
-let heartbeatRef;
 
 /*********************************************
  * FUNCTIONS
@@ -47,7 +47,6 @@ let heartbeatRef;
  */
 function setFirebaseConnection(databaseRef) {
     ref = databaseRef;
-    heartbeatRef = ref.child('/users/heartbeat');
 }
 exports.setFirebaseConnection = setFirebaseConnection;
 
@@ -66,12 +65,7 @@ function listenForRequest(requestType){
         function(snapshot){
             logger.log('debug', 'Received request from Firebase: ', snapshot.val());
             logger.log('info', 'Received request from Firebase: ', snapshot.val().Request);
-            if(snapshot.val().Request === 'HeartBeat'){
-                logger.log('debug', 'Handling heartbeat request');
-                handleHeartBeat(snapshot.val())
-            } else {
-                handleRequest(requestType,snapshot);
-            }
+            handleRequest(requestType,snapshot);
         },
         function(error){
             logger.log('error', `Failed to read 'child_added' snapshot while listening to '${requestType}'`, error);
@@ -89,6 +83,10 @@ function handleRequest(requestType, snapshot){
     logger.log('debug', 'Handling request');
 
     const headers = {key: snapshot.key, objectRequest: snapshot.val()};
+
+    // Temporary code for compatibility with app version 1.12.2
+    let useLegacySettings = Version.versionLessOrEqual(headers.objectRequest.AppVersion, Version.version_1_12_2);
+
     processRequest(headers).then(function(response){
 
         // Print the response contents (shortened if too long)
@@ -101,7 +99,7 @@ function handleRequest(requestType, snapshot){
 
         // Log before uploading to Firebase. Check that it was not a simple log
         // if (response.Headers.RequestObject.Request !== 'Log') logResponse(response);
-        uploadToFirebase(response, requestType);
+        uploadToFirebase(response, requestType, useLegacySettings);
     });
 }
 exports.handleRequest = handleRequest;
@@ -185,18 +183,21 @@ function processRequest(headers){
  * encryptResponse
  * @desc Encrypts the response object before being uploaded to Firebase
  * @param response
+ * @param {boolean} useLegacySettings [Temporary, compatibility] If true, the old settings for PBKDF2 are used.
+ *                                    Used for compatibility with app version 1.12.2.
  * @return {Promise}
  */
-function encryptResponse(response)
+function encryptResponse(response, useLegacySettings = false)
 {
 	let encryptionKey = response.EncryptionKey;
 	let salt = response.Salt;
 	delete response.EncryptionKey;
 	delete response.Salt;
 
-    if(typeof encryptionKey!=='undefined' && encryptionKey!=='') {
-		return utility.encrypt(response, encryptionKey, salt);
-	}else{
+	if (typeof encryptionKey !== 'undefined' && encryptionKey !== '') {
+		return utility.encrypt(response, encryptionKey, salt, useLegacySettings);
+	}
+	else {
 		return Promise.resolve(response);
 	}
 }
@@ -207,9 +208,11 @@ exports.encryptResponse = encryptResponse;
  * uploadToFirebase
  * @param response
  * @param key
+ * @param {boolean} useLegacySettings [Temporary, compatibility] If true, the old settings for PBKDF2 are used.
+ *                                    Used for compatibility with app version 1.12.2.
  * @desc Encrypt and upload the response to Firebase
  */
-function uploadToFirebase(response, key) {
+function uploadToFirebase(response, key, useLegacySettings = false) {
     logger.log('debug', 'Uploading to Firebase');
 	return new Promise((resolve, reject)=>{
 
@@ -222,7 +225,7 @@ function uploadToFirebase(response, key) {
          */
         const validResponse = validateKeysForFirebase(response);
 
-        encryptResponse(validResponse).then((response)=>{
+        encryptResponse(validResponse, useLegacySettings).then((response)=>{
 			response.Timestamp = admin.database.ServerValue.TIMESTAMP;
             let path = '';
             if (key === "requests") {
@@ -378,36 +381,6 @@ function completeRequest(headers, key)
 		});
 }
 
-function handleHeartBeat(data){
-    "use strict";
-
-	// Where to write the log file
-	const filename = 'logs/heartbeat.log';
-	var fs = require('fs');
-
-    let HeartBeat = {};
-
-    //Push Heartbeat Back To Firebase
-    HeartBeat.CPU = process.cpuUsage();
-    HeartBeat.Memory = process.memoryUsage();
-    HeartBeat.Timestamp = data.Timestamp;
-
-	// Log the results to the heart beat DB logs
-	// NOTE: The logs are manage by using the  logrotate to control the settings of the log
-	fs.appendFile(filename, JSON.stringify(HeartBeat)  + "\n", function (err) {
-	  if (err) {
-			// Log any errors
-			logger.log('error', 'Error reporting heartbeat', err);
-	  }
-	});
-
-    heartbeatRef.set(HeartBeat)
-        .catch(err => {
-            logger.log('error', 'Error reporting heartbeat', err)
-        })
-
-}
-
 
 /*********************************************
  * CRON
@@ -417,13 +390,11 @@ function handleHeartBeat(data){
  * Spawns cron jobs:
  *  1) clearRequest: clears request from firebase that have not been handled within 5 minute period
  *  2) clearResponses: clears responses from firebase that have not been handled within 5 minute period
- *  3) heartbeat: sends heartbeat request to firebase every 30 secs to get information about listener
  *
 */
 function spawnCronJobs(){
     spawnClearRequest();
     spawnClearResponses();
-    spawnHeartBeat();
 }
 exports.spawnCronJobs = spawnCronJobs;
 
@@ -476,28 +447,4 @@ function spawnClearResponses(){
     process.on('exit', function () {
         clearResponses.kill();
     });
-}
-
-function spawnHeartBeat(){
-    // create new Node child processs
-    let heartBeat = cp.fork(`${__dirname}/cron/heartBeat.js`);
-
-    // Handles heartBeat cron events
-    heartBeat.on('message', (m) => {
-        logger.log('info','PARENT got message:', m);
-    });
-
-    heartBeat.on('error', (m) => {
-        logger.log('error','heartBeat cron error:', m);
-
-        heartBeat.kill();
-        if(heartBeat.killed){
-            heartBeat = cp.fork(`${__dirname}/cron/heartBeat.js`);
-        }
-    });
-
-    process.on('exit', function () {
-        heartBeat.kill();
-    });
-
 }

@@ -3,7 +3,7 @@ default:
     # use node image instead of our own
     # our image runs with user node
     # see: https://gitlab.com/gitlab-org/gitlab-runner/-/issues/2750
-    name: node:20.9.0-alpine3.18
+    name: node:20.12.0-alpine3.19
   # Cache modules in between jobs
   cache:
     key:
@@ -13,18 +13,12 @@ default:
       - .npm/
   before_script:
     - uname -a
-    - node --version
-    - npm --version
-    # Install dependencies and cache within the project directory to cache
-    # See: https://javascript.plainenglish.io/improving-ci-performance-aka-how-to-save-your-money-31ff691360e4
-    - npm ci --include dev --cache .npm --prefer-offline
-    # Set up env files
-    - cp .env.sample .env
+
 
 stages:
   - Build
   - Static Analysis
-  - Test
+  - test
   - Documentation
   - Deploy
 
@@ -33,13 +27,23 @@ stages:
   needs:
     - job: build image
 
+.default_before:
+  before_script:
+    - node --version
+    - npm --version
+    # Install dependencies and cache within the project directory to cache
+    # See: https://javascript.plainenglish.io/improving-ci-performance-aka-how-to-save-your-money-31ff691360e4
+    - npm ci --include dev --cache .npm --prefer-offline
+    # Set up env files
+    - cp .env.sample .env
+
 build image:
   stage: Build
   # disable the default cache
   cache: []
-  image: docker:24.0.7
+  image: docker:26.0.0
   services:
-    - docker:24.0.7-dind
+    - docker:26.0.0-dind
   variables:
     # Use TLS https://docs.gitlab.com/ee/ci/docker/using_docker_build.html#tls-enabled
     DOCKER_HOST: tcp://docker:2376
@@ -71,6 +75,7 @@ build image:
 
 eslint:
   stage: Static Analysis
+  extends: .default_before
   script:
     - npm install eslint-formatter-gitlab --no-save
     - npx eslint --version
@@ -81,7 +86,8 @@ eslint:
       codequality: gl-codequality.json
 
 mocha:
-  stage: Test
+  stage: test
+  extends: .default_before
   script:
     - npm install mocha-junit-reporter --no-save
     - npx mocha --version
@@ -93,7 +99,8 @@ mocha:
         - junit.xml
 
 coverage:
-  stage: Test
+  stage: test
+  extends: .default_before
   needs:
     - job: mocha
   script:
@@ -113,12 +120,14 @@ coverage:
 
 build docs:
   stage: Documentation
+  extends: .default_before
   script:
     - npx jsdoc --version
     - npm run docs
 
 pages:
   stage: Deploy
+  extends: .default_before
   script:
     - npx jsdoc --version
     - npm run docs
@@ -137,6 +146,19 @@ pages:
   before_script:
     - npm install -g firebase-tools
 
+firebase rules demo:
+  extends: .firebase rules
+  rules:
+    - if: $CI_COMMIT_BRANCH == $CI_DEFAULT_BRANCH
+      changes:
+        - firebase/demo/database.rules.json
+  environment:
+    name: demo
+  script:
+    - cd firebase/demo
+    - export GOOGLE_APPLICATION_CREDENTIALS=$DEMO_GOOGLE_APPLICATION_CREDENTIALS
+    - firebase deploy --only database
+
 firebase rules dev:
   extends: .firebase rules
   rules:
@@ -148,6 +170,35 @@ firebase rules dev:
   script:
     - cd firebase/dev
     - export GOOGLE_APPLICATION_CREDENTIALS=$DEV_GOOGLE_APPLICATION_CREDENTIALS
+    - firebase deploy --only database
+
+firebase rules devops:
+  extends: .firebase rules
+  rules:
+    - if: $CI_COMMIT_BRANCH == $CI_DEFAULT_BRANCH
+      changes:
+        - firebase/devops/database.rules.json
+  environment:
+    name: devops
+  script:
+    - cd firebase/devops
+    - export GOOGLE_APPLICATION_CREDENTIALS=$DEVOPS_GOOGLE_APPLICATION_CREDENTIALS
+    - firebase deploy --only database
+
+firebase rules preprod:
+  extends: .firebase rules
+  rules:
+    - if: $CI_COMMIT_BRANCH == $CI_DEFAULT_BRANCH
+      changes:
+        - firebase/preprod/database.rules.json
+      when: manual
+      # Allow pipeline to continue without running this job
+      allow_failure: true
+  environment:
+    name: preprod
+  script:
+    - cd firebase/preprod
+    - export GOOGLE_APPLICATION_CREDENTIALS=$PREPROD_GOOGLE_APPLICATION_CREDENTIALS
     - firebase deploy --only database
 
 firebase rules qa:
@@ -182,18 +233,40 @@ firebase rules staging:
     - export GOOGLE_APPLICATION_CREDENTIALS=$STAGING_GOOGLE_APPLICATION_CREDENTIALS
     - firebase deploy --only database
 
-firebase rules preprod:
-  extends: .firebase rules
-  rules:
-    - if: $CI_COMMIT_BRANCH == $CI_DEFAULT_BRANCH
-      changes:
-        - firebase/preprod/database.rules.json
-      when: manual
-      # Allow pipeline to continue without running this job
-      allow_failure: true
-  environment:
-    name: preprod
-  script:
-    - cd firebase/preprod
-    - export GOOGLE_APPLICATION_CREDENTIALS=$PREPROD_GOOGLE_APPLICATION_CREDENTIALS
-    - firebase deploy --only database
+include:
+  # run pipelines for default branch, tags, and all types of merge request pipelines
+  # to support merge trains
+  # see: https://docs.gitlab.com/ee/ci/pipelines/merge_trains.html#enable-merge-trains
+  # https://gitlab.com/gitlab-org/gitlab/-/blob/master/lib/gitlab/ci/templates/Workflows/MergeRequest-Pipelines.gitlab-ci.yml
+  - template: 'Workflows/MergeRequest-Pipelines.gitlab-ci.yml'
+  # use latest template versions to run security scanning jobs also in merge request pipelines:
+  # https://docs.gitlab.com/ee/user/application_security/index.html#use-security-scanning-tools-with-merge-request-pipelines
+  # Secret Detection: https://docs.gitlab.com/ee/user/application_security/secret_detection/
+  # https://gitlab.com/gitlab-org/gitlab/-/blob/master/lib/gitlab/ci/templates/Jobs/Secret-Detection.latest.gitlab-ci.yml
+  - template: Jobs/Secret-Detection.latest.gitlab-ci.yml
+  # Dependency Scanning: https://docs.gitlab.com/ee/user/application_security/dependency_scanning/
+  # https://gitlab.com/gitlab-org/gitlab/-/blob/master/lib/gitlab/ci/templates/Jobs/Dependency-Scanning.latest.gitlab-ci.yml
+  - template: Jobs/Dependency-Scanning.latest.gitlab-ci.yml
+  # Container Scanning: https://docs.gitlab.com/ee/user/application_security/container_scanning/
+  # https://gitlab.com/gitlab-org/gitlab/-/blob/master/lib/gitlab/ci/templates/Jobs/Container-Scanning.latest.gitlab-ci.yml
+  - template: Jobs/Container-Scanning.latest.gitlab-ci.yml
+  # SAST Scanning: https://docs.gitlab.com/ee/user/application_security/sast/
+  # https://gitlab.com/gitlab-org/gitlab/-/blob/master/lib/gitlab/ci/templates/Jobs/SAST.latest.gitlab-ci.yml
+  - template: Jobs/SAST.latest.gitlab-ci.yml
+
+# Customizations
+#
+
+# Container Scanning
+# https://docs.gitlab.com/ee/user/application_security/container_scanning/#customizing-the-container-scanning-settings
+container_scanning:
+  variables:
+    CS_IMAGE: $CI_REGISTRY_IMAGE:$CI_COMMIT_REF_SLUG
+
+# SAST
+# https://docs.gitlab.com/ee/user/application_security/sast/#available-cicd-variables
+sast:
+  variables:
+    # exclude test files
+    # https://docs.gitlab.com/ee/user/application_security/sast/#vulnerability-filters
+    SAST_EXCLUDED_PATHS: "spec, test, tests, tmp, *.test.js"

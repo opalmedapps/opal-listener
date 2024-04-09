@@ -65,7 +65,7 @@ class opalRequest {
 			return await axios(request);
 		} catch (error) {
 			logger.log('error', 'axiosApi call failed', error);
-			logger.log('error', 'axios error details', error?.data);
+			logger.log('error', 'axios error details', JSON.stringify(error.response.data));
 			throw error.message;
 		}
 

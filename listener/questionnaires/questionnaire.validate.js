@@ -68,6 +68,7 @@ function validatePatientSerNumAndLanguage(queryResponse) {
 function validateParamSaveAnswer(requestObject) {
     let requirements = [
         requestObject.UserID,
+        requestObject.TargetPatientID,
         requestObject.hasOwnProperty('Parameters'),
         requestObject.Parameters.hasOwnProperty('answerQuestionnaire_id'),
         requestObject.Parameters.hasOwnProperty('is_skipped'),
@@ -94,6 +95,7 @@ function validateParamSaveAnswer(requestObject) {
 function validateParamUpdateStatus(requestObject) {
     let requirements = [
         requestObject.UserID,
+        requestObject.TargetPatientID,
         requestObject.hasOwnProperty('Parameters'),
         requestObject.Parameters.hasOwnProperty('answerQuestionnaire_id'),
         requestObject.Parameters.hasOwnProperty('new_status'),

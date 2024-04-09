@@ -39,7 +39,7 @@ const requestMappings =
         'Patient': {
             sql: queries.patientTableFields(),
             processFunction: loadProfileImagePatient,
-            numberOfLastUpdated: 0
+            numberOfLastUpdated: 0,
         },
         'Documents': {
             sql: queries.patientDocumentsAll(),
@@ -48,6 +48,7 @@ const requestMappings =
             table: 'Document',
             serNum: 'DocumentSerNum',
             needUserId: true,
+            notificationType: ["Document", "UpdDocument"],
         },
         /**
          * Deprecated: 'Doctors'
@@ -55,7 +56,7 @@ const requestMappings =
         'Doctors': {
             sql: queries.patientDoctorTableFields(),
             processFunction: loadImageDoctor,
-            numberOfLastUpdated: 2
+            numberOfLastUpdated: 2,
         },
         'Diagnosis': {
             sql: queries.patientDiagnosesAll(),
@@ -67,25 +68,33 @@ const requestMappings =
         'Appointments': {
             sql: queries.patientAppointmentsAll(),
             sqlSingleItem: queries.patientAppointmentsOne(),
-            numberOfLastUpdated: 5,
-            processFunction: combineResources,
+            numberOfLastUpdated: 4,
             table: 'Appointment',
             serNum: 'AppointmentSerNum',
-            needUserId: true
+            needUserId: true,
+            notificationType: [
+                "AppointmentNew",
+                "AppointmentTimeChange",
+                "AppointmentCancelled",
+                "CheckInNotification",
+                "CheckInError",
+                "NextAppointment",
+                "RoomAssignment",
+            ],
         },
         'Notifications': {
             sql: queries.patientNotificationsTableFields(),
             numberOfLastUpdated: 2,
             table: 'Notification',
             serNum: 'NotificationSerNum',
-            needUserId: true
+            needUserId: true,
         },
         /**
          * Deprecated: 'Tasks'
          */
         'Tasks': {
             sql: queries.patientTasksTableFields(),
-            numberOfLastUpdated: 2
+            numberOfLastUpdated: 2,
         },
         'TxTeamMessages': {
             sql: queries.patientTxTeamMessagesAll(),
@@ -95,6 +104,7 @@ const requestMappings =
             table: 'TxTeamMessage',
             serNum: 'TxTeamMessageSerNum',
             needUserId: true,
+            notificationType: "TxTeamMessage",
         },
         'EducationalMaterial': {
             sql: queries.patientEducationalMaterialAll(),
@@ -104,6 +114,7 @@ const requestMappings =
             table: 'EducationalMaterial',
             serNum: 'EducationalMaterialSerNum',
             needUserId: true,
+            notificationType: "EducationalMaterial",
         },
         'Announcements': {
             sql: queries.patientAnnouncementsAll(),
@@ -112,24 +123,25 @@ const requestMappings =
             numberOfLastUpdated: 2,
             table: 'Announcement',
             serNum: 'AnnouncementSerNum',
-            needUserId: true
+            needUserId: true,
+            notificationType: "Announcement",
         },
         'PatientTestDates': {
             module: testResults,
-            processFunction: result => result.data.collectedDates
+            processFunction: result => result.data.collectedDates,
         },
         'PatientTestTypes': {
             module: testResults,
-            processFunction: result => result.data.testTypes
+            processFunction: result => result.data.testTypes,
         },
         'QuestionnaireList': {
             module: questionnaires,
             moduleSingleItem: questionnaires,
-            processFunction: result => result.data.questionnaireList
+            processFunction: result => result.data.questionnaireList,
         },
         'patientStudy': {
             table: 'patientStudy',
-            serNum: 'ID'
+            serNum: 'ID',
         }
     };
 
@@ -251,15 +263,32 @@ async function processSelectRequest(userId, category, patientSerNum, timestamp, 
  * @param parameters
  * @return {Promise}
  */
-exports.updateReadStatus=function(userId, parameters)
+exports.updateReadStatus = function(userId, parameters)
 {
     let r = Q.defer();
 
     let table, serNum;
 
-    if(parameters && parameters.Field && parameters.Id && requestMappings.hasOwnProperty(parameters.Field) ) {
-        ({table, serNum} = requestMappings[parameters.Field]);
-        exports.runSqlQuery(queries.updateReadStatus(),[table, userId, table, serNum, parameters.Id]).then(()=>{
+    if (
+        parameters
+        && parameters.Field
+        && parameters.Id
+        && parameters.TargetPatientID
+        && requestMappings.hasOwnProperty(parameters.Field)
+    ) {
+        ({table, serNum, notificationType} = requestMappings[parameters.Field]);
+
+        exports.runSqlQuery(
+            queries.updateReadStatus(),
+            [table, userId, table, serNum, parameters.Id],
+        ).then(async () => {
+            if (notificationType) {
+                logger.log('info', `Implicitly marking ${notificationType} notification as read.`);
+                await exports.runSqlQuery(
+                    queries.implicitlyReadNotification(),
+                    [userId, userId, parameters.Id, parameters.TargetPatientID, notificationType],
+                );
+            }
             r.resolve({Response:'success'});
         }).catch((err)=>{
             r.reject({Response:'error', Reason:err});
@@ -673,6 +702,7 @@ exports.inputFeedback = function(requestObject) {
 		let patientSerNum = patient.PatientSerNum;
 
         if((!type||!feedback)) r.reject({Response:'error',Reason:`Invalid parameter type`});
+        feedback = feedback.replace(/[\u0100-\uffff]/g, match => `[u+${match.codePointAt(0).toString(16)}]`);
         exports.runSqlQuery(queries.inputFeedback(),[patient.PatientSerNum, feedback, appRating])
             .then(()=>{
 	            let replyTo = null;
@@ -759,7 +789,6 @@ exports.addToActivityLog=function(requestObject)
     let r = Q.defer();
 
     let {Request, UserID, DeviceId, AppVersion, TargetPatientID, Parameters} = requestObject;
-
     if (typeof Request === "undefined") Request = requestObject.type;
     if (typeof UserID === "undefined") UserID = requestObject.meta.UserID;
     if (typeof DeviceId === "undefined") DeviceId = requestObject.meta.DeviceId;
@@ -768,7 +797,7 @@ exports.addToActivityLog=function(requestObject)
     if (typeof Parameters === "undefined") Parameters = requestObject.params || requestObject.parameters;
 
     if (omitParametersFromLogs.hasOwnProperty(Request) && omitParametersFromLogs[Request](Parameters)) Parameters = 'OMITTED';
-    else Parameters = Parameters === 'undefined' ? null : JSON.stringify(Parameters);
+    else Parameters = Parameters === 'undefined' ? undefined : JSON.stringify(Parameters);
 
     // Ignore LogPatientAction to avoid double-logging --> Refer to table PatientActionLog
     if (Request !== "LogPatientAction") {
@@ -1115,57 +1144,6 @@ var LoadAttachments = function (rows ) {
     return r.promise;
 
 };
-
-/**
- * @module sqlInterface
- * @name combineResources
- * @method combineResources
- * @parameters {void}
- * @description Modifies all the appointments for the user to only obtain
- */
-function combineResources(rows)
-{
-    var r = Q.defer();
-    var resource = {};
-    var index = 0;
-    if(rows.length>0)
-    {
-        // ResourceType is set to 'Unknown' if it is empty to prevent a Firebase error due to an empty key. -SB
-        const resourceType1 = !rows[rows.length-1].ResourceType || rows[rows.length-1].ResourceType === ""
-                            ? "Unknown"
-                            : rows[rows.length-1].ResourceType;
-        resource[resourceType1] = rows[rows.length-1].ResourceName;
-
-        for (var i=rows.length-2;i>=0;i--) {
-
-            // ResourceType is set to 'Unknown' if it is empty to prevent a Firebase error due to an empty key. -SB
-            const resourceType2 = !rows[i].ResourceType || rows[i].ResourceType === ""
-                                ? "Unknown"
-                                : rows[i].ResourceType;
-            if(rows[i].AppointmentSerNum == rows[i+1].AppointmentSerNum)
-            {
-                resource[resourceType2] = rows[i].ResourceName;
-                rows.splice(i+1,1);
-            }else{
-                var resourceObject={};
-                for (var key in resource) {
-                    resourceObject[key] = resource[key];
-                }
-                rows[i+1].Resource = resourceObject;
-                resource = {};
-                resource[resourceType2] = rows[i].ResourceName;
-                delete rows[i+1].ResourceName;
-                delete rows[i+1].ResourceType;
-            }
-        }
-        delete rows[0].ResourceName;
-        delete rows[0].ResourceType;
-        rows[0].Resource = resource;
-
-    }
-    r.resolve(rows);
-    return r.promise;
-}
 
 exports.getSecurityQuestion = async function (requestObject) {
     try {

@@ -25,18 +25,13 @@ class Version {
      * @returns {number} -1 if v1 < v2; 0 if v1 = v2; 1 if v1 > v2.
      */
     static compareVersions(v1, v2) {
-        const format = /^[\d.]+$/;
+        const format = /^[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}$/;
         if (!format.test(v1) || !format.test(v2)) {
-            throw new Error(`Version strings must contain only digits and dots; tried to use: '${v1}' and '${v2}'`);
+            throw new Error(`Version strings must be of format "major.minor.patch"; tried to use: '${v1}' and '${v2}'`);
         }
 
         const a = v1.split('.');
         const b = v2.split('.');
-        if (a.length !== b.length) {
-            throw new Error(
-                `Cannot compare two version strings with a different number of parts (dots): '${v1}' and '${v2}'`,
-            );
-        }
         const parts = a.map((aPart, i) => ({ a: Number(aPart), b: Number(b[i]) }));
 
         for (const part of parts) {

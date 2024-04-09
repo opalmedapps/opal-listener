@@ -6,6 +6,9 @@ const logger = require('./../logs/logger');
 const {OpalSQLQueryRunner} = require("../sql/opal-sql-query-runner");
 const config = require("../config-adaptor");
 const requestUtility = require("../utility/request-utility");
+const questionnaireConfig = require('./questionnaireConfig.json');
+const ApiRequest = require('../../src/core/api-request');
+const QuestionnaireDjango = require('./questionnaireDjango');
 
 exports.getQuestionnaireInOpalDB = getQuestionnaireInOpalDB;
 exports.getAnswerQuestionnaireIdFromSerNum = getAnswerQuestionnaireIdFromSerNum;
@@ -208,6 +211,11 @@ async function questionnaireSaveAnswer(requestObject) {
     if (!questionnaireValidation.validateParamSaveAnswer(requestObject)) {
         throw new Error('Error saving answer: the requestObject does not have the required parameters');
     }
+
+    const patientSerNum = Number(requestObject.TargetPatientID);
+
+    await checkCaregiverPermissions(requestObject.UserID, patientSerNum);
+
     let language = await getQuestionnaireLanguage(requestObject);
 
     await questionnaires.saveAnswer(language, requestObject.Parameters, requestObject.AppVersion, requestObject.UserID);
@@ -229,6 +237,10 @@ async function questionnaireUpdateStatus(requestObject) {
         throw new Error(paramErrMessage);
     }
 
+    const patientSerNum = Number(requestObject.TargetPatientID);
+
+    await checkCaregiverPermissions(requestObject.UserID, patientSerNum);
+
     // 1. update the status in the answerQuestionnaire table in questionnaire DB
     const isCompleted = await questionnaires.updateQuestionnaireStatusInQuestionnaireDB(
         requestObject.Parameters.answerQuestionnaire_id,
@@ -237,6 +249,61 @@ async function questionnaireUpdateStatus(requestObject) {
         requestObject.AppVersion,
         requestObject.Parameters.user_display_name || '',
     );
+
+    // Implicitly mark the questionnaire's notification as read once the questionnaire is changed to "in progress".
+    // Note that the notification will be marked as read for the self-user and all caregivers.
+    const newStatusInt = parseInt(requestObject.Parameters.new_status);
+    if (newStatusInt === questionnaireConfig.IN_PROGRESS_QUESTIONNAIRE_STATUS) {
+        logger.log('info', "Implicitly marking the questionnaire's notification as read.");
+
+        const questionnaire = await OpalSQLQueryRunner.run(
+            opalQueries.getOpalDBQuestionnaire(),
+            [requestObject.Parameters.answerQuestionnaire_id],
+        );
+
+        const requestParams = {
+            Parameters: {
+                method: 'get',
+                url: `/api/patients/legacy/${patientSerNum}/caregiver-devices/`,
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+            },
+            UserID: requestObject.UserID,
+        };
+
+        logger.log('info', "API: Calling backend to get the user's list of caregivers.");
+        const response = await ApiRequest.makeRequest(requestParams);
+        // Silently exit if lister cannot fetch the user's list of caregivers
+        if (!response?.data) {
+            logger.log('error', "An error occurred while fetching the patient's list of caregivers.");
+            return {
+                Response: 'success',
+                QuestionnaireSerNum: questionnaire[0]['QuestionnaireSerNum'],
+            };
+        }
+
+        let usernames = [];
+        response.data?.caregivers.forEach((caregiver) => usernames.push(`${caregiver['username']}`));
+
+        let readBy = usernames.join(', ');
+
+        await OpalSQLQueryRunner.run(
+            opalQueries.implicitlyReadNotification(),
+            [
+                readBy,
+                readBy,
+                questionnaire[0]['QuestionnaireSerNum'],
+                patientSerNum,
+                "LegacyQuestionnaire",
+            ],
+        );
+
+        return {
+            Response: 'success',
+            QuestionnaireSerNum: questionnaire[0]['QuestionnaireSerNum'],
+        };
+    }
 
     if (isCompleted === 1) {
 
@@ -274,5 +341,27 @@ async function getQuestionnaireLanguage(requestObject) {
     catch (error) {
         logger.log('error', 'Error getting questionnaire language', error);
         throw new Error('No language was provided in the request or found in OpalDB');
+    }
+}
+
+/**
+ * Check if caregiver has permissions to answer questionnaire.
+ *
+ * @param {string} userId The Firebase username of the user making the request.
+ * @param {number} patientSerNum The PatientSerNum of the care-receiver.
+ *
+ * @throws Throws an error if caregiver does not have permissions to answer the questionnaire.
+ */
+async function checkCaregiverPermissions(userId, patientSerNum) {
+    logger.log('info', "Checking if caregiver can answer questionnaire.");
+
+    let canAnswerPatientQuestionnaires = await QuestionnaireDjango.caregiverCanAnswerQuestionnaire(
+        userId,
+        patientSerNum,
+    );
+
+    if (!canAnswerPatientQuestionnaires) {
+        const errMsg = `The requested questionnaire cannot be completed by this user.`;
+        throw new Error(errMsg, {cause: 'Not allowed'});
     }
 }
