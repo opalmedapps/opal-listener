@@ -284,7 +284,7 @@ async function questionnaireUpdateStatus(requestObject) {
         }
 
         let usernames = [];
-        response.data?.caregivers.forEach((caregiver) => usernames.push(`${caregiver['username']}`));
+        response.data?.caregivers.forEach((caregiver) => usernames.push(`"${caregiver['username']}"`));
 
         let readBy = usernames.join(', ');
 
