@@ -68,8 +68,7 @@ const requestMappings =
         'Appointments': {
             sql: queries.patientAppointmentsAll(),
             sqlSingleItem: queries.patientAppointmentsOne(),
-            numberOfLastUpdated: 5,
-            processFunction: combineResources,
+            numberOfLastUpdated: 4,
             table: 'Appointment',
             serNum: 'AppointmentSerNum',
             needUserId: true,
@@ -287,7 +286,7 @@ exports.updateReadStatus = function(userId, parameters)
                 logger.log('info', `Implicitly marking ${notificationType} notification as read.`);
                 await exports.runSqlQuery(
                     queries.implicitlyReadNotification(),
-                    [userId, parameters.Id, parameters.TargetPatientID, notificationType],
+                    [userId, userId, parameters.Id, parameters.TargetPatientID, notificationType],
                 );
             }
             r.resolve({Response:'success'});
@@ -790,7 +789,6 @@ exports.addToActivityLog=function(requestObject)
     let r = Q.defer();
 
     let {Request, UserID, DeviceId, AppVersion, TargetPatientID, Parameters} = requestObject;
-
     if (typeof Request === "undefined") Request = requestObject.type;
     if (typeof UserID === "undefined") UserID = requestObject.meta.UserID;
     if (typeof DeviceId === "undefined") DeviceId = requestObject.meta.DeviceId;
@@ -799,7 +797,7 @@ exports.addToActivityLog=function(requestObject)
     if (typeof Parameters === "undefined") Parameters = requestObject.params || requestObject.parameters;
 
     if (omitParametersFromLogs.hasOwnProperty(Request) && omitParametersFromLogs[Request](Parameters)) Parameters = 'OMITTED';
-    else Parameters = Parameters === 'undefined' ? null : JSON.stringify(Parameters);
+    else Parameters = Parameters === 'undefined' ? undefined : JSON.stringify(Parameters);
 
     // Ignore LogPatientAction to avoid double-logging --> Refer to table PatientActionLog
     if (Request !== "LogPatientAction") {
@@ -1146,57 +1144,6 @@ var LoadAttachments = function (rows ) {
     return r.promise;
 
 };
-
-/**
- * @module sqlInterface
- * @name combineResources
- * @method combineResources
- * @parameters {void}
- * @description Modifies all the appointments for the user to only obtain
- */
-function combineResources(rows)
-{
-    var r = Q.defer();
-    var resource = {};
-    var index = 0;
-    if(rows.length>0)
-    {
-        // ResourceType is set to 'Unknown' if it is empty to prevent a Firebase error due to an empty key. -SB
-        const resourceType1 = !rows[rows.length-1].ResourceType || rows[rows.length-1].ResourceType === ""
-                            ? "Unknown"
-                            : rows[rows.length-1].ResourceType;
-        resource[resourceType1] = rows[rows.length-1].ResourceName;
-
-        for (var i=rows.length-2;i>=0;i--) {
-
-            // ResourceType is set to 'Unknown' if it is empty to prevent a Firebase error due to an empty key. -SB
-            const resourceType2 = !rows[i].ResourceType || rows[i].ResourceType === ""
-                                ? "Unknown"
-                                : rows[i].ResourceType;
-            if(rows[i].AppointmentSerNum == rows[i+1].AppointmentSerNum)
-            {
-                resource[resourceType2] = rows[i].ResourceName;
-                rows.splice(i+1,1);
-            }else{
-                var resourceObject={};
-                for (var key in resource) {
-                    resourceObject[key] = resource[key];
-                }
-                rows[i+1].Resource = resourceObject;
-                resource = {};
-                resource[resourceType2] = rows[i].ResourceName;
-                delete rows[i+1].ResourceName;
-                delete rows[i+1].ResourceType;
-            }
-        }
-        delete rows[0].ResourceName;
-        delete rows[0].ResourceType;
-        rows[0].Resource = resource;
-
-    }
-    r.resolve(rows);
-    return r.promise;
-}
 
 exports.getSecurityQuestion = async function (requestObject) {
     try {
