@@ -72,12 +72,12 @@ exports.insertUser = async function (username, password, patientSerNum, userType
  * @param selfPatientSerNum The SerNum representing the user's "self" row in the Patient table.
  * @returns {Promise<*>}
  */
-exports.updateSelfPatient = function (requestObject, selfPatientSerNum) {
+exports.updateSelfPatient = function (requestObject, selfPatientSerNum, phone) {
     let fields = requestObject.Parameters.Fields;
     return exports.runOpaldbSqlQuery(queries.updateSelfPatientInfo(), [
         fields.email,
         fields.language.toUpperCase(),
-        fields.phone,
+        phone,
         fields.accessLevel,
         fields.termsandAggreementSign,
         selfPatientSerNum,
@@ -111,5 +111,5 @@ exports.insertPatientHospitalIdentifier = function (requestObject) {
 exports.getPatientSerNumFromUserSerNum = async function(userSerNum) {
     let rows = await exports.runOpaldbSqlQuery(queries.getPatientSerNumFromUserSerNum(), [userSerNum]);
     if (rows.length === 0) throw new Error("Internal data error: no rows found matching the caregiver's legacy UserSerNum");
-    return rows[0];
+    return rows[0].PatientSerNum;
 };
