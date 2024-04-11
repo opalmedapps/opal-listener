@@ -28,12 +28,12 @@ const cp                = require('child_process');
 const OpalSecurityResponseError = require('./api/response/security-response-error');
 const OpalSecurityResponseSuccess = require('./api/response/security-response-success');
 const OpalResponse      = require('./api/response/response');
-const { Version } = require('../src/utility/version');
+const { Version }       = require('../src/utility/version');
+const { Pbkdf2Cache }   = require('../src/utility/pbkdf2-cache.js');
 
 
 // NOTE: Listener launching steps have been moved to src/server.js
 
-let db;
 let ref;
 
 /*********************************************
@@ -83,6 +83,7 @@ function handleRequest(requestType, snapshot){
     logger.log('debug', 'Handling request');
 
     const headers = {key: snapshot.key, objectRequest: snapshot.val()};
+    const cacheLabel = Pbkdf2Cache.getLabel(headers.objectRequest);
 
     // Temporary code for compatibility with app version 1.12.2
     let useLegacySettings = Version.versionLessOrEqual(headers.objectRequest.AppVersion, Version.version_1_12_2);
@@ -99,7 +100,7 @@ function handleRequest(requestType, snapshot){
 
         // Log before uploading to Firebase. Check that it was not a simple log
         // if (response.Headers.RequestObject.Request !== 'Log') logResponse(response);
-        uploadToFirebase(response, requestType, useLegacySettings);
+        uploadToFirebase(response, requestType, cacheLabel, useLegacySettings);
     });
 }
 exports.handleRequest = handleRequest;
@@ -183,11 +184,12 @@ function processRequest(headers){
  * encryptResponse
  * @desc Encrypts the response object before being uploaded to Firebase
  * @param response
+ * @param {string} cacheLabel Label used to look up or store a cached PBKDF2 value.
  * @param {boolean} useLegacySettings [Temporary, compatibility] If true, the old settings for PBKDF2 are used.
  *                                    Used for compatibility with app version 1.12.2.
  * @return {Promise}
  */
-function encryptResponse(response, useLegacySettings = false)
+function encryptResponse(response, cacheLabel, useLegacySettings = false)
 {
 	let encryptionKey = response.EncryptionKey;
 	let salt = response.Salt;
@@ -195,7 +197,7 @@ function encryptResponse(response, useLegacySettings = false)
 	delete response.Salt;
 
 	if (typeof encryptionKey !== 'undefined' && encryptionKey !== '') {
-		return utility.encrypt(response, encryptionKey, salt, 'temp', useLegacySettings);
+		return utility.encrypt(response, encryptionKey, salt, cacheLabel, useLegacySettings);
 	}
 	else {
 		return Promise.resolve(response);
@@ -212,7 +214,7 @@ exports.encryptResponse = encryptResponse;
  *                                    Used for compatibility with app version 1.12.2.
  * @desc Encrypt and upload the response to Firebase
  */
-function uploadToFirebase(response, key, useLegacySettings = false) {
+function uploadToFirebase(response, key, cacheLabel, useLegacySettings = false) {
     logger.log('debug', 'Uploading to Firebase');
 	return new Promise((resolve, reject)=>{
 
@@ -225,7 +227,7 @@ function uploadToFirebase(response, key, useLegacySettings = false) {
          */
         const validResponse = validateKeysForFirebase(response);
 
-        encryptResponse(validResponse, useLegacySettings).then((response)=>{
+        encryptResponse(validResponse, cacheLabel, useLegacySettings).then((response)=>{
 			response.Timestamp = admin.database.ServerValue.TIMESTAMP;
             let path = '';
             if (key === "requests") {
@@ -244,11 +246,11 @@ function uploadToFirebase(response, key, useLegacySettings = false) {
 				completeRequest(headers, key);
 				resolve('done');
 			}).catch(function (error) {
-				logger.error('Error writing to firebase', {error:error});
+				logger.log('error', 'Error writing to firebase', {error:error});
 				reject(error);
 			});
 		}).catch((err)=>{
-			logger.error('Error writing to firebase', {error:err});
+			logger.log('error', 'Error writing to firebase', {error:err});
 			reject(err);
 		});
 	});

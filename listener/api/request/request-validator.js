@@ -9,6 +9,7 @@ const { Version } = require('../../../src/utility/version');
 const logger = require('../../logs/logger');
 const config = require('../../config-adaptor');
 const ApiRequest = require('../../../src/core/api-request.js');
+const { Pbkdf2Cache } = require('../../../src/utility/pbkdf2-cache.js');
 
 /**
 * Library imports
@@ -54,7 +55,8 @@ class RequestValidator {
 				} else {
 
 					let {SecurityAnswer} = rows[0];
-					utility.decrypt({req: request.type, params: request.parameters}, hashedUID, SecurityAnswer, 'temp', useLegacySettings)
+					let cacheLabel = Pbkdf2Cache.getLabel(requestObject);
+					utility.decrypt({req: request.type, params: request.parameters}, hashedUID, SecurityAnswer, cacheLabel, useLegacySettings)
 					.then((dec)=>{
 						request.setAuthenticatedInfo(SecurityAnswer, hashedUID, dec.req, dec.params);
 						return RequestValidator.validateRequestPermissions(request);

@@ -47,12 +47,14 @@ class Pbkdf2Cache {
      */
     async getKey(secret, salt, cacheLabel, useLegacySettings, keyUsageFunction) {
         // Get the value from the cache
-        if (!cacheLabel) throw new Error(`Failed to access PBKDF2 cache: an access label must be given: ${cacheLabel}`);
+        if (!cacheLabel) {
+            throw new Error(`Failed to access PBKDF2 cache; an access label is needed. Provided value: ${cacheLabel}`);
+        }
         const cachedValue = await this.cache.get(cacheLabel);
 
         // Cache miss: generate the value and use it
         if (!cachedValue) {
-            legacyLogger.log('debug', 'PBKDF2 cache miss');
+            legacyLogger.log('debug', `PBKDF2 cache miss for ${cacheLabel}`);
             const newValue = await this.#regenerateKey(cacheLabel, secret, salt, useLegacySettings);
             keyUsageFunction(newValue);
             return;
@@ -61,15 +63,31 @@ class Pbkdf2Cache {
         // Cache hit: test the cached value for validity
         try {
             // If the keyUsageFunction succeeds using the cached value, there's nothing more to do
-            legacyLogger.log('debug', 'PBKDF2 cache hit');
+            legacyLogger.log('debug', `PBKDF2 cache hit for ${cacheLabel}`);
             keyUsageFunction(cachedValue);
         }
         catch (error) {
             // If the keyUsageFunction fails, the cached value is bad: invalidate it and try again
-            legacyLogger.log('debug', 'PBKDF2 cached value was bad; invalidating');
+            legacyLogger.log('debug', `PBKDF2 cached value was bad; invalidating cache for ${cacheLabel}`);
             await this.#invalidate(cacheLabel);
             await this.getKey(secret, salt, cacheLabel, useLegacySettings, keyUsageFunction);
         }
+    }
+
+    /**
+     * @description Puts together a label to identify the current user, under which data can be cached.
+     * @param {object} requestObject The request object from which to get identifying user information.
+     * @returns {string} A label unique to the current user under which data can be cached.
+     */
+    static getLabel(requestObject) {
+        const userID = requestObject.UserID;
+        const deviceID = requestObject.DeviceId;
+        if (!userID || !deviceID) {
+            throw new Error(`Debugging: missing data to build cache label, userID=${userID}, deviceID=${deviceID}`);
+        }
+        const cacheLabel = `${userID}:${deviceID}`;
+        legacyLogger.log('debug', `Cache label assembled: ${cacheLabel}`);
+        return cacheLabel;
     }
 
     /**

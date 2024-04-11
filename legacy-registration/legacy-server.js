@@ -16,6 +16,7 @@ const logger = require('../listener/logs/logger.js');
 const listenerLegacyServer = require('../listener/legacy-server');
 
 const q = require("q");
+const { Pbkdf2Cache } = require('../src/utility/pbkdf2-cache.js');
 
 // NOTE: Listener launching steps have been moved to src/server.js
 
@@ -71,12 +72,13 @@ function handleRequest(requestType, snapshot) {
     logger.log('debug', 'Handling firebase request');
 
     const headers = { key: snapshot.key, objectRequest: snapshot.val() };
+    const cacheLabel = Pbkdf2Cache.getLabel(headers.objectRequest);
 
     processRequest(headers).then(function (response) {
 
         // Log before uploading to Firebase. Check that it was not a simple log
         if (response.Headers.RequestObject.Request !== 'Log') logResponse(response);
-        uploadToFirebase(response, requestType);
+        uploadToFirebase(response, requestType, cacheLabel);
     });
 }
 
@@ -142,7 +144,7 @@ function processRequest(headers) {
      @param key
      @desc Encrypt and upload the response to Firebase
  **/
-function uploadToFirebase(response, key) {
+function uploadToFirebase(response, key, cacheLabel) {
     logger.log('debug', 'Uploading response to Firebase');
 
     return new Promise((resolve, reject) => {
@@ -160,7 +162,7 @@ function uploadToFirebase(response, key) {
         **/
         const validResponse = listenerLegacyServer.validateKeysForFirebase(response);
 
-        listenerLegacyServer.encryptResponse(validResponse).then((response) => {
+        listenerLegacyServer.encryptResponse(validResponse, cacheLabel).then((response) => {
 
             response.Timestamp = admin.database.ServerValue.TIMESTAMP;
             let responsePath = '';

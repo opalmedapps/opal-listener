@@ -14,6 +14,7 @@ const legacyOpalSqlRunner = require('../../../listener/sql/opal-sql-query-runner
 const legacyUtility = require('../../../listener/utility/utility');
 const EncryptionUtilities = require('../../encryption/encryption');
 const { REQUEST_TYPE } = require('../../const');
+const { Pbkdf2Cache } = require('../../utility/pbkdf2-cache');
 
 const firebaseConfig = {
     DATABASE_URL: process.env.FIREBASE_DATABASE_URL,
@@ -117,7 +118,7 @@ class SimulateRequest {
             },
             this.#requestData.SimulatedEncryption.secret,
             this.#requestData.SimulatedEncryption.salt,
-            'temp',
+            Pbkdf2Cache.getLabel(this.#requestData),
         );
         delete this.#requestData.SimulatedEncryption;
 
@@ -144,7 +145,7 @@ class SimulateRequest {
             },
             hash,
             secret,
-            'temp',
+            Pbkdf2Cache.getLabel(this.#requestData),
         );
 
         this.#requestData = {

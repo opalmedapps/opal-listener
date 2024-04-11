@@ -4,6 +4,7 @@ const legacyOpalSqlRunner = require('../../listener/sql/opal-sql-query-runner');
 const legacyLogger = require('../../listener/logs/logger');
 const legacyUtility = require('../../listener/utility/utility');
 const PromiseUtility = require('../utility/promise');
+const { Pbkdf2Cache } = require('../utility/pbkdf2-cache');
 
 class EncryptionUtilities {
     /**
@@ -11,16 +12,17 @@ class EncryptionUtilities {
      * @param {object} response Unencrypted response.
      * @param {string} secret Secret hash use for encryption
      * @param {string} salt Salt use for encryption
+     * @param {string} cacheLabel Label used to look up or store a cached PBKDF2 value.
      * @returns {object} Encrypted response
      */
-    static async encryptResponse(response, secret, salt) {
+    static async encryptResponse(response, secret, salt, cacheLabel) {
         legacyLogger.log('debug', 'API: Encrypting response');
         try {
             return legacyUtility.encrypt(
                 response,
                 secret,
                 salt,
-                'temp',
+                cacheLabel,
             );
         }
         catch (error) {
@@ -38,6 +40,7 @@ class EncryptionUtilities {
     static async decryptRequest(request, secret, salt) {
         legacyLogger.log('debug', 'API: Decrypting request');
         try {
+            const cacheLabel = Pbkdf2Cache.getLabel(request);
             const decryptedRequest = await legacyUtility.decrypt(
                 {
                     req: request.Request,
@@ -45,7 +48,7 @@ class EncryptionUtilities {
                 },
                 secret,
                 salt,
-                'temp',
+                cacheLabel,
             );
 
             return {

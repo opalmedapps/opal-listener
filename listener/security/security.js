@@ -6,6 +6,7 @@ const { Version } = require('../../src/utility/version');
 const OpalResponse = require('../api/response/response');
 const OpalSecurityResponseError = require('../api/response/security-response-error');
 const OpalSecurityResponseSuccess = require('../api/response/security-response-success');
+const { Pbkdf2Cache } = require('../../src/utility/pbkdf2-cache.js');
 
 const FIVE_MINUTES = 300000;
 
@@ -136,7 +137,8 @@ exports.resetPassword = async function(requestKey, requestObject) {
 
         let answer = user.SecurityAnswer;
 
-        let unencrypted = await utility.decrypt(requestObject.Parameters, secret, answer, 'temp', useLegacySettings);
+        let cacheLabel = Pbkdf2Cache.getLabel(requestObject);
+        let unencrypted = await utility.decrypt(requestObject.Parameters, secret, answer, cacheLabel, useLegacySettings);
         await sqlInterface.setNewPassword(utility.hash(unencrypted.newPassword), user.Username);
 
         logger.log('verbose', `Successfully updated password for username = ${requestObject.UserID}`);

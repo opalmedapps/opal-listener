@@ -9,6 +9,7 @@ const ApiRequest = require('./api-request');
 const ErrorHandler = require('../error/handler');
 const { Firebase } = require('../firebase/firebase');
 const { REQUEST_TYPE } = require('../const');
+const { Pbkdf2Cache } = require('../utility/pbkdf2-cache');
 
 class RequestHandler {
     /**
@@ -46,15 +47,18 @@ class RequestHandler {
     async processRequest(requestType, snapshot) {
         legacyLogger.log('debug', `API: Processing API request of type ${requestType}`);
         let encryptionInfo;
+        let cacheLabel;
         try {
             if (!RequestHandler.validateSnapshot(snapshot)) throw new Error('SNAPSHOT_VALIDATION');
             encryptionInfo = await RequestHandler.getEncryptionInfo(snapshot, requestType);
             const decryptedRequest = await Registration.decryptOneOrManySalts(snapshot.val(), encryptionInfo);
             const apiResponse = await ApiRequest.makeRequest(decryptedRequest);
+            cacheLabel = Pbkdf2Cache.getLabel(decryptedRequest);
             const encryptedResponse = await EncryptionUtilities.encryptResponse(
                 apiResponse,
                 encryptionInfo.secret,
                 encryptionInfo.salt,
+                cacheLabel,
             );
             await this.sendResponse(encryptedResponse, snapshot.key, encryptionInfo.userId, requestType);
             encryptedResponse.timestamp = Firebase.getDatabaseTimeStamp;
@@ -68,6 +72,7 @@ class RequestHandler {
                     errorResponse,
                     encryptionInfo.secret,
                     encryptionInfo.salt,
+                    cacheLabel,
                 );
             }
             else {
