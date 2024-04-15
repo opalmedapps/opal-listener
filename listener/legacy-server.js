@@ -28,7 +28,7 @@ const cp                = require('child_process');
 const OpalSecurityResponseError = require('./api/response/security-response-error');
 const OpalSecurityResponseSuccess = require('./api/response/security-response-success');
 const OpalResponse      = require('./api/response/response');
-const { RequestContext } = require('./request-context');
+const { RequestContext } = require('../src/core/request-context.js');
 
 
 // NOTE: Listener launching steps have been moved to src/server.js
