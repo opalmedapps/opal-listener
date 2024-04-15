@@ -11,6 +11,7 @@ const CryptoJs = require('crypto-js');
 const requestDataApi = {
     AppVersion: '100.100.100',
     Request: 'api',
+    RequestType: 'API',
     DeviceId: '',
     UserID: process.env.TEST_ACCOUNT_FIREBASE_UID,
     Parameters: {
@@ -30,6 +31,7 @@ const requestDataApi = {
  */
 const requestRegistrationApi = {
     Request: 'registration-api',
+    RequestType: 'REGISTRATION',
     BranchName: CryptoJs.SHA512('code12345678').toString(),
     UserID: process.env.TEST_ACCOUNT_FIREBASE_UID,
     Parameters: {

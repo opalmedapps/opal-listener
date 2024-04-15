@@ -75,22 +75,6 @@ class Pbkdf2Cache {
     }
 
     /**
-     * @description Puts together a label to identify the current user, under which data can be cached.
-     * @param {object} requestObject The request object from which to get identifying user information.
-     * @returns {string} A label unique to the current user under which data can be cached.
-     */
-    static getLabel(requestObject) {
-        const userID = requestObject.UserID;
-        const deviceID = requestObject.DeviceId;
-        if (!userID || !deviceID) {
-            throw new Error(`Debugging: missing data to build cache label, userID=${userID}, deviceID=${deviceID}`);
-        }
-        const cacheLabel = `${userID}:${deviceID}`;
-        legacyLogger.log('debug', `Cache label assembled: ${cacheLabel}`);
-        return cacheLabel;
-    }
-
-    /**
      * @description Invalidates a value from the cache (deletes it).
      * @param {string} cacheLabel The label under which the value is stored.
      * @returns {Promise<boolean>} Resolves to the result of keyv's delete function.

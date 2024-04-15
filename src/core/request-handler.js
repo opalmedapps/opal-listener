@@ -4,12 +4,11 @@
  */
 const legacyLogger = require('../../listener/logs/logger');
 const EncryptionUtilities = require('../encryption/encryption');
-const Registration = require('../registration/registration');
 const ApiRequest = require('./api-request');
 const ErrorHandler = require('../error/handler');
 const { Firebase } = require('../firebase/firebase');
 const { REQUEST_TYPE } = require('../const');
-const { Pbkdf2Cache } = require('../utility/pbkdf2-cache');
+const { RequestContext } = require('./request-context');
 
 class RequestHandler {
     /**
@@ -26,16 +25,13 @@ class RequestHandler {
     }
 
     /**
-     * @description Listen to firebase request, and upload the response to firebase.
-     * @param  {object} requestType - Resquest data from Opal firebase
+     * @description Listens for firebase requests, and uploads the responses to firebase.
+     * @param {string} requestType The Firebase branch on which to listen, representing a type of request.
      */
-    listenToRequests(requestType) {
-        legacyLogger.log('debug', 'API: Starting request listener');
+    listenForRequests(requestType) {
+        legacyLogger.log('debug', `API: Starting request listener on ${requestType}`);
         this.#databaseRef.child(requestType).off();
-        this.#databaseRef.child(requestType).on('child_added', async snapshot => this.processRequest(
-            requestType,
-            snapshot,
-        ));
+        this.#databaseRef.child(requestType).on('child_added', snapshot => this.processRequest(requestType, snapshot));
     }
 
     /**
@@ -47,20 +43,25 @@ class RequestHandler {
     async processRequest(requestType, snapshot) {
         legacyLogger.log('debug', `API: Processing API request of type ${requestType}`);
         let encryptionInfo;
-        let cacheLabel;
+        let context;
         try {
-            if (!RequestHandler.validateSnapshot(snapshot)) throw new Error('SNAPSHOT_VALIDATION');
-            encryptionInfo = await RequestHandler.getEncryptionInfo(snapshot, requestType);
-            const decryptedRequest = await Registration.decryptOneOrManySalts(snapshot.val(), encryptionInfo);
+            RequestHandler.validateSnapshot(snapshot);
+            context = new RequestContext(requestType, snapshot.val());
+
+            encryptionInfo = await EncryptionUtilities.getEncryptionInfo(context);
+            const decryptedRequest = await EncryptionUtilities.decryptRequestTemp(
+                context,
+                snapshot.val(),
+                encryptionInfo,
+            );
             const apiResponse = await ApiRequest.makeRequest(decryptedRequest);
-            cacheLabel = Pbkdf2Cache.getLabel(decryptedRequest);
             const encryptedResponse = await EncryptionUtilities.encryptResponse(
+                context,
                 apiResponse,
                 encryptionInfo.secret,
                 encryptionInfo.salt,
-                cacheLabel,
             );
-            await this.sendResponse(encryptedResponse, snapshot.key, encryptionInfo.userId, requestType);
+            await this.sendResponse(encryptedResponse, snapshot.key, context.userId, requestType);
             encryptedResponse.timestamp = Firebase.getDatabaseTimeStamp;
             this.clearRequest(requestType, snapshot.key);
         }
@@ -69,10 +70,10 @@ class RequestHandler {
             let finalResponse;
             if (RequestHandler.errorResponseCanBeEncrypted(errorResponse, encryptionInfo)) {
                 finalResponse = await EncryptionUtilities.encryptResponse(
+                    context,
                     errorResponse,
                     encryptionInfo.secret,
                     encryptionInfo.salt,
-                    cacheLabel,
                 );
             }
             else {
@@ -100,33 +101,16 @@ class RequestHandler {
     }
 
     /**
-     * @description Get encryption values according to type of request
-     * @param {object} snapshot Firebase data snapshot.
-     * @param {string} requestType Type of request between "api" or "registration".
-     * @returns {object} Encryption required values
-     */
-    static async getEncryptionInfo(snapshot, requestType) {
-        if (requestType === REQUEST_TYPE.REGISTRATION) {
-            return Registration.getEncryptionValues(snapshot.val());
-        }
-
-        return {
-            userId: snapshot.val().UserID,
-            salt: await EncryptionUtilities.getSalt(snapshot.val(), requestType),
-            secret: await EncryptionUtilities.getSecret(snapshot.val(), requestType),
-        };
-    }
-
-    /**
      * @description High level validation of Firebase snapshot.
      * @param {object} snapshot Data snapshot uploaded from Firebase
-     * @returns {boolean} Return true if the snapshot is valid.
+     * @throws {Error} Throws a SNAPSHOT_VALIDATION error if the snapshot is invalid.
      */
     static validateSnapshot(snapshot) {
-        return (snapshot !== undefined
+        const valid = snapshot !== undefined
             && Object.keys(snapshot).length !== 0
-            && Object.getPrototypeOf(snapshot) !== Object.prototype)
+            && Object.getPrototypeOf(snapshot) !== Object.prototype
             && snapshot.key !== undefined;
+        if (!valid) throw new Error('SNAPSHOT_VALIDATION');
     }
 
     /**

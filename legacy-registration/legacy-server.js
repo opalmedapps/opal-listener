@@ -14,9 +14,9 @@ const admin = require('firebase-admin');
 const mainRequestApi = require('./api/main.js');
 const logger = require('../listener/logs/logger.js');
 const listenerLegacyServer = require('../listener/legacy-server');
+const { RequestContext } = require('../src/core/request-context');
 
 const q = require("q");
-const { Pbkdf2Cache } = require('../src/utility/pbkdf2-cache.js');
 
 // NOTE: Listener launching steps have been moved to src/server.js
 
@@ -72,13 +72,13 @@ function handleRequest(requestType, snapshot) {
     logger.log('debug', 'Handling firebase request');
 
     const headers = { key: snapshot.key, objectRequest: snapshot.val() };
-    const cacheLabel = Pbkdf2Cache.getLabel(headers.objectRequest);
+    const context = new RequestContext(requestType, snapshot.val());
 
-    processRequest(headers).then(function (response) {
+    processRequest(context, headers).then(function (response) {
 
         // Log before uploading to Firebase. Check that it was not a simple log
         if (response.Headers.RequestObject.Request !== 'Log') logResponse(response);
-        uploadToFirebase(response, requestType, cacheLabel);
+        uploadToFirebase(context, response);
     });
 }
 
@@ -117,34 +117,32 @@ function logError(err, requestObject, requestKey) {
 }
 
 /**
-     processRequest
-     @param headers
-     @desc takes in the request read from Firebase and routes it to the correct API handler
- **/
-function processRequest(headers) {
+ * processRequest
+ * @description Takes the request read from Firebase and routes it to the correct API handler.
+ * @param {RequestContext} context The request context.
+ * @param headers
+ */
+function processRequest(context, headers) {
 
-    // logger.log('debug', 'Processing request: ' + JSON.stringify(headers));
     logger.log('info', 'Processing request');
 
     const r = q.defer();
     const requestKey = headers.key;
     const requestObject = headers.objectRequest;
-    mainRequestApi.apiRequestFormatter(requestKey, requestObject)
-        .then(function (results) {
-            logger.log('debug', 'Processed request successfully with response: ' + JSON.stringify(results));
-            r.resolve(results);
-        })
-    //}
+    mainRequestApi.apiRequestFormatter(context, requestKey, requestObject).then(function (results) {
+        logger.log('debug', 'Processed request successfully with response: ' + JSON.stringify(results));
+        r.resolve(results);
+    });
     return r.promise;
 }
 
 /**
-     uploadToFirebase
-     @param response
-     @param key
-     @desc Encrypt and upload the response to Firebase
- **/
-function uploadToFirebase(response, key, cacheLabel) {
+ * uploadToFirebase
+ * @param {RequestContext} context The request context.
+ * @param response
+ * @desc Encrypt and upload the response to Firebase
+ */
+function uploadToFirebase(context, response) {
     logger.log('debug', 'Uploading response to Firebase');
 
     return new Promise((resolve, reject) => {
@@ -162,12 +160,12 @@ function uploadToFirebase(response, key, cacheLabel) {
         **/
         const validResponse = listenerLegacyServer.validateKeysForFirebase(response);
 
-        listenerLegacyServer.encryptResponse(validResponse, cacheLabel).then((response) => {
+        listenerLegacyServer.encryptResponse(context, validResponse).then((response) => {
 
             response.Timestamp = admin.database.ServerValue.TIMESTAMP;
             let responsePath = '';
 
-            if (key === "requests") {
+            if (context.requestType === "requests") {
                 const userId = headers.RequestObject.UserID;
                 const responseBranchId = headers.RequestObject.BranchName;
 
@@ -184,7 +182,7 @@ function uploadToFirebase(response, key, cacheLabel) {
             ref.child(responsePath).set(response).then(function () {
                 logger.log('debug', 'Uploaded to firebase with response header' + JSON.stringify(response));
 
-                completeRequest(headers, key);
+                completeRequest(headers, context.requestType);
 
                 delete responsePath;
                 resolve('done');

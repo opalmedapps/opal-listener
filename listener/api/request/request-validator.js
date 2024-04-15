@@ -9,7 +9,6 @@ const { Version } = require('../../../src/utility/version');
 const logger = require('../../logs/logger');
 const config = require('../../config-adaptor');
 const ApiRequest = require('../../../src/core/api-request.js');
-const { Pbkdf2Cache } = require('../../../src/utility/pbkdf2-cache.js');
 
 /**
 * Library imports
@@ -23,15 +22,13 @@ class RequestValidator {
 
 	/**
 	* validate
+	* @param {RequestContext} context The request context.
 	* @param requestKey
 	* @param requestObject
 	*/
-	static validate(requestKey, requestObject)
+	static validate(context, requestKey, requestObject)
 	{
 		const r = q.defer();
-
-		// Temporary code for compatibility with app version 1.12.2
-		let useLegacySettings = Version.versionLessOrEqual(requestObject.AppVersion, Version.version_1_12_2);
 
 		let request = new OpalRequest(requestObject, requestKey);
 
@@ -55,8 +52,7 @@ class RequestValidator {
 				} else {
 
 					let {SecurityAnswer} = rows[0];
-					let cacheLabel = Pbkdf2Cache.getLabel(requestObject);
-					utility.decrypt({req: request.type, params: request.parameters}, hashedUID, SecurityAnswer, cacheLabel, useLegacySettings)
+					utility.decrypt(context, {req: request.type, params: request.parameters}, hashedUID, SecurityAnswer)
 					.then((dec)=>{
 						request.setAuthenticatedInfo(SecurityAnswer, hashedUID, dec.req, dec.params);
 						return RequestValidator.validateRequestPermissions(request);

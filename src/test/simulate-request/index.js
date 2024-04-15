@@ -14,7 +14,7 @@ const legacyOpalSqlRunner = require('../../../listener/sql/opal-sql-query-runner
 const legacyUtility = require('../../../listener/utility/utility');
 const EncryptionUtilities = require('../../encryption/encryption');
 const { REQUEST_TYPE } = require('../../const');
-const { Pbkdf2Cache } = require('../../utility/pbkdf2-cache');
+const { RequestContext } = require('../../core/request-context');
 
 const firebaseConfig = {
     DATABASE_URL: process.env.FIREBASE_DATABASE_URL,
@@ -112,13 +112,13 @@ class SimulateRequest {
      */
     async encryptRegistrationRequest() {
         const encryptedData = await legacyUtility.encrypt(
+            new RequestContext(REQUEST_TYPE[this.#requestData.RequestType], this.#requestData),
             {
                 request: this.#requestData.Request,
                 params: this.#requestData.Parameters,
             },
             this.#requestData.SimulatedEncryption.secret,
             this.#requestData.SimulatedEncryption.salt,
-            Pbkdf2Cache.getLabel(this.#requestData),
         );
         delete this.#requestData.SimulatedEncryption;
 
@@ -139,13 +139,13 @@ class SimulateRequest {
         const hash = EncryptionUtilities.hash(this.#requestData.UserID);
         const secret = sqlResponse[0].SecurityAnswer;
         const encryptedData = await legacyUtility.encrypt(
+            new RequestContext(REQUEST_TYPE[this.#requestData.RequestType], this.#requestData),
             {
                 request: this.#requestData.Request,
                 params: this.#requestData.Parameters,
             },
             hash,
             secret,
-            Pbkdf2Cache.getLabel(this.#requestData),
         );
 
         this.#requestData = {

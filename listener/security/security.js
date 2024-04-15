@@ -6,7 +6,6 @@ const { Version } = require('../../src/utility/version');
 const OpalResponse = require('../api/response/response');
 const OpalSecurityResponseError = require('../api/response/security-response-error');
 const OpalSecurityResponseSuccess = require('../api/response/security-response-success');
-const { Pbkdf2Cache } = require('../../src/utility/pbkdf2-cache.js');
 
 const FIVE_MINUTES = 300000;
 
@@ -21,13 +20,14 @@ const passwordResetSuccess = { PasswordReset: "true" };
 /**
  * @desc Verifies a security answer provided by the user. Notably, if the request parameters fail to decrypt,
  *       then this is one indication that the wrong answer may have been provided (and used to encrypt the request).
+ * @param {RequestContext} context The request context.
  * @param {string} requestKey The key (branch) onto which this request was pushed on Firebase.
  * @param {object} requestObject The security request made by the app.
  * @returns {Promise<OpalSecurityResponseSuccess>} Resolves if the request successfully completes, whether the answer
  *                                                 is correct or not. The returned object indicates via 'AnswerVerified'
  *                                                 whether the user's provided answer was correct or incorrect.
  */
-exports.verifySecurityAnswer = async (requestKey, requestObject) => {
+exports.verifySecurityAnswer = async (context, requestKey, requestObject) => {
     // Special case used to set the request's UserID in the case of password reset requests
     await ensureUserIdAvailable(requestObject);
 
@@ -43,7 +43,7 @@ exports.verifySecurityAnswer = async (requestKey, requestObject) => {
     // An error caught during decryption indicates an incorrect security answer
     try {
         logger.log('debug', 'Attempting decryption to verify security answer');
-        unencrypted = await utility.decrypt(requestObject.Parameters, user.SecurityAnswer);
+        unencrypted = await utility.decrypt(context, requestObject.Parameters, user.SecurityAnswer);
     }
     catch (error) {
         logger.log('error', 'Wrong security answer (from decryption failure); increasing security answer attempts', error);
@@ -112,12 +112,13 @@ function confirmValidSecurityAnswer(unencryptedParams, requestObject, user) {
 
 /**
  * @desc Function used during a password reset request (non-logged-in) to change the user's password.
+ * @param {RequestContext} context The request context.
  * @param {string} requestKey The key (branch) onto which this request was pushed on Firebase.
  * @param {object} requestObject The security request made by the app.
  * @returns {Promise<OpalSecurityResponseSuccess>} Resolves if the password was successfully changed,
  *                                                 or rejects with an OpalSecurityResponseError.
  */
-exports.resetPassword = async function(requestKey, requestObject) {
+exports.resetPassword = async function(context, requestKey, requestObject) {
     // Special case used to set the request's UserID in the case of password reset requests
     await ensureUserIdAvailable(requestObject);
 
@@ -132,13 +133,9 @@ exports.resetPassword = async function(requestKey, requestObject) {
             ? utility.hash(requestObject.UserEmail)
             : utility.hash(user.SSN.toUpperCase());
 
-        // Temporary code for compatibility with app version 1.12.2
-        let useLegacySettings = Version.versionLessOrEqual(requestObject.AppVersion, Version.version_1_12_2);
-
         let answer = user.SecurityAnswer;
 
-        let cacheLabel = Pbkdf2Cache.getLabel(requestObject);
-        let unencrypted = await utility.decrypt(requestObject.Parameters, secret, answer, cacheLabel, useLegacySettings);
+        let unencrypted = await utility.decrypt(context, requestObject.Parameters, secret, answer);
         await sqlInterface.setNewPassword(utility.hash(unencrypted.newPassword), user.Username);
 
         logger.log('verbose', `Successfully updated password for username = ${requestObject.UserID}`);
@@ -155,13 +152,14 @@ exports.resetPassword = async function(requestKey, requestObject) {
  * @desc Gets a security question from the backend to be shown to the user, and caches their answer for use in the listener.
  *       The cached answer will be used to decrypt all responses during the user's current session.
  *       This function is also called during the password reset process, where a security question is also presented.
+ * @param {RequestContext} context The request context.
  * @param {string} requestKey The key (branch) onto which this request was pushed on Firebase.
  * @param {object} requestObject The security request made by the app.
  * @returns {Promise<OpalSecurityResponseSuccess>} Resolves to an object containing the security question,
  *                                                 or rejects with an OpalSecurityResponseError.
  */
-exports.getSecurityQuestion = async function(requestKey, requestObject) {
-    let unencrypted = await utility.decrypt(requestObject.Parameters, utility.hash("none"));
+exports.getSecurityQuestion = async function(context, requestKey, requestObject) {
+    let unencrypted = await utility.decrypt(context, requestObject.Parameters, utility.hash("none"));
     logger.log('debug', `Unencrypted: ${JSON.stringify(unencrypted)}`);
 
     // Special case used to set the request's UserID in the case of password reset requests

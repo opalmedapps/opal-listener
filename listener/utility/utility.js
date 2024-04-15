@@ -2,8 +2,6 @@ const CryptoJS          = require('crypto-js');
 const stablelibutf8     = require('@stablelib/utf8');
 const nacl              = require('tweetnacl');
 const stablelibbase64   = require('@stablelib/base64');
-const crypto            = require('crypto');
-const Q                 = require('q');
 const { Pbkdf2Cache }   = require('../../src/utility/pbkdf2-cache');
 
 // Manages caching of PBKDF2 derived keys, to avoid the need to recompute a key every time a request is made by the same user
@@ -65,19 +63,17 @@ exports.unixToMYSQLTimestamp=function(time) {
 
 /**
  * @description Encrypts a response object.
+ * @param {RequestContext} context The request context.
  * @param {Object} object The object to encrypt.
  * @param {string} secret If a salt is provided, this value is used as a "password" passed to PBKDF2 to derive a key.
  *                        If no salt is provided, this value is used directly as the encryption key.
  * @param {string} [salt] Optional salt; if provided, it's used with the secret for PBKDF2 to derive an encryption key.
- * @param {string} [cacheLabel] Required if a salt is provided. Used to look up or store a cached PBKDF2 value.
- * @param {boolean} useLegacySettings [Temporary, compatibility] If true, the old settings for PBKDF2 are used.
- *                                    Used for compatibility with app version 1.12.2.
  * @returns {Promise<Object>} Resolves to the encrypted object.
  */
-exports.encrypt = function(object, secret, salt, cacheLabel, useLegacySettings = false) {
+exports.encrypt = function(context, object, secret, salt) {
     return new Promise(async (resolve, reject) => {
         try {
-            if (salt) await pbkdf2Cache.getKey(secret, salt, cacheLabel, useLegacySettings, continueWithKey);
+            if (salt) await pbkdf2Cache.getKey(secret, salt, context.cacheLabel, context.useLegacyPBKDF2Settings, continueWithKey);
             else continueWithKey(secret);
 
             // The second half of this function is itself wrapped in a function to work with the PBKDF2 cache above
@@ -95,19 +91,17 @@ exports.encrypt = function(object, secret, salt, cacheLabel, useLegacySettings =
 
 /**
  * @description Decrypts a request object.
+ * @param {RequestContext} context The request context.
  * @param {Object} object The object to decrypt.
  * @param {string} secret If a salt is provided, this value is used as a "password" passed to PBKDF2 to derive a key.
  *                        If no salt is provided, this value is used directly as the decryption key.
  * @param {string} [salt] Optional salt; if provided, it's used with the secret for PBKDF2 to derive a decryption key.
- * @param {string} [cacheLabel] Required if a salt is provided. Used to look up or store a cached PBKDF2 value.
- * @param {boolean} useLegacySettings [Temporary, compatibility] If true, the old settings for PBKDF2 are used.
- *                                    Used for compatibility with app version 1.12.2.
  * @returns {Promise<Object>} Resolves to the decrypted object.
  */
-exports.decrypt = function(object, secret, salt, cacheLabel, useLegacySettings = false) {
+exports.decrypt = function(context, object, secret, salt) {
     return new Promise(async (resolve, reject) => {
         try {
-            if (salt) await pbkdf2Cache.getKey(secret, salt, cacheLabel, useLegacySettings, continueWithKey);
+            if (salt) await pbkdf2Cache.getKey(secret, salt, context.cacheLabel, context.useLegacyPBKDF2Settings, continueWithKey);
             else continueWithKey(secret);
 
             // The second half of this function is itself wrapped in a function to work with the PBKDF2 cache above
