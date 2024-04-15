@@ -137,7 +137,7 @@ class EncryptionUtilities {
      * @returns {Promise<string>} Resolves to the value of the salt used for encryption and decryption.
      */
     static async getSalt(context) {
-        return this.getAnswerText(context.userId, context.deviceID);
+        return this.getAnswerText(context.userId, context.deviceId);
     }
 
     /**

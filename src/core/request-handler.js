@@ -61,8 +61,8 @@ class RequestHandler {
                 encryptionInfo.secret,
                 encryptionInfo.salt,
             );
-            await this.sendResponse(encryptedResponse, snapshot.key, context.userId, requestType);
             encryptedResponse.timestamp = Firebase.getDatabaseTimeStamp;
+            await this.sendResponse(encryptedResponse, snapshot.key, context.userId, requestType);
             this.clearRequest(requestType, snapshot.key);
         }
         catch (error) {
