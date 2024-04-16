@@ -19,7 +19,8 @@ class RequestContext {
         this.cacheLabel = this.#getCacheLabel();
 
         // Temporary variable for compatibility with app version 1.12.2
-        this.useLegacyPBKDF2Settings = Version.versionLessOrEqual(requestObject.AppVersion, Version.version_1_12_2);
+        this.useLegacyPBKDF2Settings = requestObject.AppVersion
+            && Version.versionLessOrEqual(requestObject.AppVersion, Version.version_1_12_2);
     }
 
     #getCacheLabel() {

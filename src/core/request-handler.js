@@ -2,11 +2,12 @@
  * @file Listen and handle request uploaded to firebase by the app
  * @author David Gagne
  */
-const legacyLogger = require('../../listener/logs/logger');
-const EncryptionUtilities = require('../encryption/encryption');
 const ApiRequest = require('./api-request');
+const Encryption = require('../encryption/encryption');
 const ErrorHandler = require('../error/handler');
 const { Firebase } = require('../firebase/firebase');
+const legacyLogger = require('../../listener/logs/logger');
+const Registration = require('../registration/registration');
 const { REQUEST_TYPE } = require('../const');
 const { RequestContext } = require('./request-context');
 
@@ -44,18 +45,24 @@ class RequestHandler {
         legacyLogger.log('debug', `API: Processing API request of type ${requestType}`);
         let encryptionInfo;
         let context;
-        try {
-            RequestHandler.validateSnapshot(snapshot);
-            context = new RequestContext(requestType, snapshot.val());
 
-            encryptionInfo = await EncryptionUtilities.getEncryptionInfo(context);
-            const decryptedRequest = await EncryptionUtilities.decryptRequestTemp(
-                context,
-                snapshot.val(),
-                encryptionInfo,
-            );
+        try {
+            // Validate and decrypt request
+            RequestHandler.validateSnapshot(snapshot);
+            const requestObject = snapshot.val();
+            context = new RequestContext(requestType, requestObject);
+            encryptionInfo = requestType === REQUEST_TYPE.REGISTRATION
+                ? await Registration.getEncryptionValues(context)
+                : await Encryption.getEncryptionInfo(context);
+            const decryptedRequest = Array.isArray(encryptionInfo.salt)
+                ? await Registration.decryptManySalts(context, requestObject, encryptionInfo)
+                : await Encryption.decryptRequest(context, requestObject, encryptionInfo.secret, encryptionInfo.salt);
+
+            // Process the request
             const apiResponse = await ApiRequest.makeRequest(decryptedRequest);
-            const encryptedResponse = await EncryptionUtilities.encryptResponse(
+
+            // Encrypt and upload response
+            const encryptedResponse = await Encryption.encryptResponse(
                 context,
                 apiResponse,
                 encryptionInfo.secret,
@@ -69,7 +76,7 @@ class RequestHandler {
             const errorResponse = ErrorHandler.getErrorResponse(error);
             let finalResponse;
             if (RequestHandler.errorResponseCanBeEncrypted(errorResponse, encryptionInfo)) {
-                finalResponse = await EncryptionUtilities.encryptResponse(
+                finalResponse = await Encryption.encryptResponse(
                     context,
                     errorResponse,
                     encryptionInfo.secret,

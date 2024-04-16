@@ -5,16 +5,8 @@ const legacyLogger = require('../../listener/logs/logger');
 const legacyUtility = require('../../listener/utility/utility');
 const PromiseUtility = require('../utility/promise');
 const { RequestContext } = require('../core/request-context');
-const Registration = require('../registration/registration');
-const { REQUEST_TYPE } = require('../const');
 
 class EncryptionUtilities {
-    static async decryptRequestTemp(context, requestObject, encryptionInfo) {
-        return Array.isArray(encryptionInfo.salt)
-            ? Registration.decryptManySalts(context, requestObject, encryptionInfo)
-            : this.decryptRequest(context, requestObject, encryptionInfo.secret, encryptionInfo.salt);
-    }
-
     /**
      * @description Encrypt response data to be send to Firebase.
      * @param {RequestContext} context The request context.
@@ -109,13 +101,11 @@ class EncryptionUtilities {
     }
 
     /**
-     * @description Get encryption values according to type of request
+     * @description Gets the encryption values for a standard app request.
      * @param {RequestContext} context The request context.
-     * @returns {Promise<{salt: (string|string[]), secret: string}>} Secret and salt values used for encryption.
-     *          The salt may be an array of possible salts in the case of registration requests.
+     * @returns {Promise<{salt: string, secret: string}>} Secret and salt values used for encryption.
      */
     static async getEncryptionInfo(context) {
-        if (context.requestType === REQUEST_TYPE.REGISTRATION) return Registration.getEncryptionValues(context);
         return {
             salt: await this.getSalt(context),
             secret: await this.getSecret(context),
