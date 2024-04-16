@@ -161,7 +161,7 @@ class SimulateRequest {
      */
     uploadToFirebase() {
         this.#firebase.getDataBaseRef.child(this.#requestType).push(this.#requestData).then(response => {
-            legacyLogger.log('debug', `Firebase request push succes with key: ${response.key}`);
+            legacyLogger.log('debug', `Firebase request push success with key: ${response.key}`);
             process.exit();
         }).catch(error => {
             throw new Error(error);

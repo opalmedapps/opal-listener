@@ -239,16 +239,16 @@ function uploadToFirebase(context, response) {
 				completeRequest(headers, context.requestType);
 				resolve('done');
 			}).catch(function (error) {
-				logger.log('error', 'Error writing to firebase', {error:error});
+				logger.log('error', 'Error writing to firebase', error);
 				reject(error);
 			});
 		}).catch((err)=>{
-			logger.log('error', 'Error writing to firebase', {error:err});
+			logger.log('error', 'Error encrypting response or writing to firebase', err);
 			reject(err);
 		});
 	});
 }
-exports.uploadToFirebase = uploadToFirebase;
+
 /**
  * validateKeysForFirebase
  * @author Stacey Beard

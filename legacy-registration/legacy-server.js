@@ -14,6 +14,7 @@ const admin = require('firebase-admin');
 const mainRequestApi = require('./api/main.js');
 const logger = require('../listener/logs/logger.js');
 const listenerLegacyServer = require('../listener/legacy-server');
+const { REQUEST_TYPE } = require('../src/const.js');
 const { RequestContext } = require('../src/core/request-context.js');
 
 const q = require("q");
@@ -72,7 +73,7 @@ function handleRequest(requestType, snapshot) {
     logger.log('debug', 'Handling firebase request');
 
     const headers = { key: snapshot.key, objectRequest: snapshot.val() };
-    const context = new RequestContext(requestType, snapshot.val());
+    const context = new RequestContext(REQUEST_TYPE.REGISTRATION, snapshot.val());
 
     processRequest(context, headers).then(function (response) {
 
@@ -153,8 +154,6 @@ function uploadToFirebase(context, response) {
 
         logger.log('debug', 'Response header' + JSON.stringify(headers) + ' and requestKey  ' + requestKey);
 
-
-
         /** The last step before encrypting and uploading is checking that all keys are non-empty and contain
              no illegal characters. Otherwise, Firebase will throw an error. -SB
         **/
@@ -163,16 +162,8 @@ function uploadToFirebase(context, response) {
         listenerLegacyServer.encryptResponse(context, validResponse).then((response) => {
 
             response.Timestamp = admin.database.ServerValue.TIMESTAMP;
-            let responsePath = '';
-
-            if (context.requestType === "requests") {
-                const userId = headers.RequestObject.UserID;
-                const responseBranchId = headers.RequestObject.BranchName;
-
-                responsePath = 'users/' + requestKey;
-
-                logger.log('debug', 'Firebase response branch: ' + responsePath);
-            }
+            let responsePath = 'users/' + requestKey;
+            logger.log('debug', 'Firebase response branch: ' + responsePath);
 
             logger.log('debug', 'Response header**' + JSON.stringify(headers) + ' and requestKey  ' + requestKey);
 
@@ -181,17 +172,14 @@ function uploadToFirebase(context, response) {
 
             ref.child(responsePath).set(response).then(function () {
                 logger.log('debug', 'Uploaded to firebase with response header' + JSON.stringify(response));
-
                 completeRequest(headers, context.requestType);
-
-                delete responsePath;
                 resolve('done');
             }).catch(function (error) {
-                logger.log('error', 'Error writing to firebase', { error: error });
+                logger.log('error', 'Error writing to firebase', error);
                 reject(error);
             });
         }).catch((err) => {
-            logger.log('error', 'Error writing to firebase', { error: err });
+            logger.log('error', 'Error encrypting response or writing to firebase', err);
             reject(err);
         });
     });

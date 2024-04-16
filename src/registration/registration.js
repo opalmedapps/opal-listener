@@ -13,15 +13,15 @@ regCache.on('error', err => legacyLogger.log(
 
 // We bind the snapshot branch name to dedicated salt and secret keys for this regCache instance
 // This allows to keep a dedicated datacache for each unique registration code hash
-const getInstanceSalt = context => `salt-${context.BranchName}`;
-const getInstanceSecret = context => `secret-${context.BranchName}`;
+const getInstanceSalt = context => `salt-${context.branchName}`;
+const getInstanceSecret = context => `secret-${context.branchName}`;
 
 class Registration {
     static async getEncryptionValues(context) {
         const requestParams = {
             Parameters: {
                 method: 'get',
-                url: `/api/registration/by-hash/${context.BranchName}`,
+                url: `/api/registration/by-hash/${context.branchName}`,
                 headers: {
                     'Content-Type': 'application/json',
                 },

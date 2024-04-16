@@ -15,7 +15,7 @@ class RequestValidator {
      * @param {RequestContext} context The request context.
      * @param requestKey
      * @param requestObject
-     * @returns {Promise<opalRequest>}
+     * @returns {Promise<Object>}
      */
     static async validate(context, requestKey, requestObject) {
         let request = new opalRequest(requestObject, requestKey);
@@ -41,12 +41,12 @@ class RequestValidator {
             let decryptedRequest = Array.isArray(encryptionInfo.salt)
                 ? await Registration.decryptManySalts(context, objectToDecrypt, encryptionInfo)
                 : await legacyUtility.decrypt(context, objectToDecrypt, encryptionInfo.secret, encryptionInfo.salt);
-            request.setAuthenticatedInfo(encryptionInfo.salt, encryptionInfo.secret, decryptedRequest.Request, decryptedRequest.Parameters);
-            return request;
+            decryptedRequest.setAuthenticatedInfo(encryptionInfo.salt, encryptionInfo.secret, decryptedRequest.Request, decryptedRequest.Parameters);
+            return decryptedRequest;
         }
         catch(error) {
-            logger.log('error', 'Unable to decrypt legacy registration request', err);
-            throw new opalResponseError(2, 'Unable to decrypt request', request, err);
+            logger.log('error', 'Unable to decrypt legacy registration request', error);
+            throw new opalResponseError(2, 'Unable to decrypt request', request, error);
         }
     }
 
