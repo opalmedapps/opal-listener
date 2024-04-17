@@ -19,24 +19,25 @@ class RequestContext {
         this.cacheLabel = this.#getCacheLabel();
 
         // Temporary variable for compatibility with app version 1.12.2
-        this.useLegacyPBKDF2Settings = requestObject.AppVersion
+        this.useLegacyPBKDF2Settings = !!requestObject.AppVersion
             && Version.versionLessOrEqual(requestObject.AppVersion, Version.version_1_12_2);
+    }
+
+    #isRegistrationRequest() {
+        return [REQUEST_TYPE.REGISTRATION, REQUEST_TYPE.REGISTRATION_LEGACY].includes(this.requestType);
     }
 
     #getCacheLabel() {
         let cacheLabel;
-        if ([REQUEST_TYPE.REGISTRATION, REQUEST_TYPE.REGISTRATION_LEGACY].includes(this.requestType)) {
-            if (!this.branchName) {
-                throw new Error(`Debugging: missing data to build cache label, branchName=${this.branchName}`);
-            }
+        const errorMsgRegistration = `Missing data to build cache label, branchName=${this.branchName}`;
+        const errorMsgApp = `Missing data to build cache label, userId=${this.userId} and deviceId=${this.deviceId}`;
+
+        if (this.#isRegistrationRequest()) {
+            if (!this.branchName) throw new Error(errorMsgRegistration);
             cacheLabel = this.branchName;
         }
         else {
-            if (!this.userId || !this.deviceId) {
-                throw new Error(
-                    `Debugging: missing data to build cache label, userId=${this.userId} and deviceId=${this.deviceId}`,
-                );
-            }
+            if (!this.userId || !this.deviceId) throw new Error(errorMsgApp);
             cacheLabel = `${this.userId}:${this.deviceId}`;
         }
         legacyLogger.log('debug', `Cache label assembled: ${cacheLabel}`);

@@ -31,22 +31,21 @@ class RequestValidator {
             logger.log('debug', 'Got encryption info for decryption');
         }
         catch(error) {
-            logger.log('error', 'Unable to get valid user encryption info from the API', err);
-            throw new opalResponseError(2, 'Unable to get valid user encryption info from the API', request, err);
+            logger.log('error', 'Unable to get valid user encryption info from the API', error);
+            throw new opalResponseError(2, 'Unable to get valid user encryption info from the API', request, error);
         }
 
         try {
-            let objectToDecrypt = { Request: request.type, Parameters: request.parameters, BranchName: requestObject.BranchName };
-
-            let decryptedRequest = Array.isArray(encryptionInfo.salt)
-                ? await Registration.decryptManySalts(context, objectToDecrypt, encryptionInfo)
-                : await legacyUtility.decrypt(context, objectToDecrypt, encryptionInfo.secret, encryptionInfo.salt);
-            decryptedRequest.setAuthenticatedInfo(encryptionInfo.salt, encryptionInfo.secret, decryptedRequest.Request, decryptedRequest.Parameters);
-            return decryptedRequest;
+            let infoToDecrypt = { Request: request.type, Parameters: request.parameters };
+            let decryptedInfo = Array.isArray(encryptionInfo.salt)
+                ? await Registration.decryptManySalts(context, infoToDecrypt, encryptionInfo)
+                : await legacyUtility.decrypt(context, infoToDecrypt, encryptionInfo.secret, encryptionInfo.salt);
+            request.setAuthenticatedInfo(encryptionInfo.salt, encryptionInfo.secret, decryptedInfo.Request, decryptedInfo.Parameters);
+            return request;
         }
         catch(error) {
             logger.log('error', 'Unable to decrypt legacy registration request', error);
-            throw new opalResponseError(2, 'Unable to decrypt request', request, error);
+            throw new opalResponseError(1, 'Unable to decrypt request', request, error);
         }
     }
 

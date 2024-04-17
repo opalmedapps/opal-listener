@@ -39,7 +39,7 @@ function requestFormatter(context, { key, request }) {
             });
         }).catch(err => {
             logger.log('error', 'Error validating request', err);
-            return err.toLegacy();
+            return err.toLegacy ? err.toLegacy() : err;
         });
 }
 

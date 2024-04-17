@@ -73,7 +73,7 @@ function handleRequest(requestType, snapshot) {
     logger.log('debug', 'Handling firebase request');
 
     const headers = { key: snapshot.key, objectRequest: snapshot.val() };
-    const context = new RequestContext(REQUEST_TYPE.REGISTRATION, snapshot.val());
+    const context = new RequestContext(REQUEST_TYPE.REGISTRATION_LEGACY, snapshot.val());
 
     processRequest(context, headers).then(function (response) {
 

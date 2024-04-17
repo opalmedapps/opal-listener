@@ -73,6 +73,7 @@ class RequestHandler {
             this.clearRequest(requestType, snapshot.key);
         }
         catch (error) {
+            legacyLogger.log('error', `Error processing request of type ${requestType}`, error);
             const errorResponse = ErrorHandler.getErrorResponse(error);
             let finalResponse;
             if (RequestHandler.errorResponseCanBeEncrypted(errorResponse, encryptionInfo)) {
