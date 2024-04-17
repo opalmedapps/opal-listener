@@ -16,7 +16,7 @@ class RequestContext {
         this.branchName = requestObject.BranchName;
 
         // Label (key) under which to cache encryption information related to this request
-        this.cacheLabel = this.#getCacheLabel();
+        this.cacheLabel = this.#buildCacheLabel();
 
         // Temporary variable for compatibility with app version 1.12.2
         this.useLegacyPBKDF2Settings = !!requestObject.AppVersion
@@ -27,17 +27,17 @@ class RequestContext {
         return [REQUEST_TYPE.REGISTRATION, REQUEST_TYPE.REGISTRATION_LEGACY].includes(this.requestType);
     }
 
-    #getCacheLabel() {
+    #buildCacheLabel() {
         let cacheLabel;
-        const errorMsgRegistration = `Missing data to build cache label, branchName=${this.branchName}`;
-        const errorMsgApp = `Missing data to build cache label, userId=${this.userId} and deviceId=${this.deviceId}`;
 
         if (this.#isRegistrationRequest()) {
-            if (!this.branchName) throw new Error(errorMsgRegistration);
+            if (!this.branchName) throw new Error(`Missing data to build cache label, branchName=${this.branchName}`);
             cacheLabel = this.branchName;
         }
         else {
-            if (!this.userId || !this.deviceId) throw new Error(errorMsgApp);
+            // If some required information is missing, cacheLabel stays undefined, and the cache is later bypassed.
+            // This is normal for some requests that are encrypted differently, such as security requests.
+            if (!this.userId || !this.deviceId) cacheLabel = undefined;
             cacheLabel = `${this.userId}:${this.deviceId}`;
         }
         legacyLogger.log('debug', `Cache label assembled: ${cacheLabel}`);

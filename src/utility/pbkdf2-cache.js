@@ -35,7 +35,8 @@ class Pbkdf2Cache {
      *              The validity test and regeneration are done to prevent issues if a cached value becomes stale.
      * @param {string} secret Secret passed to PBKDF2.
      * @param {string} salt Salt passed to PBKDF2.
-     * @param {string} cacheLabel The label (dictionary key) under which to get or store PBKDF2 output.
+     * @param {string} [cacheLabel] The label (dictionary key) under which to get or store PBKDF2 output.
+     *                              If no value is provided, the cache is bypassed and a new PBKDF2 value is used.
      * @param {boolean} useLegacySettings [Temporary, compatibility] If true, the old settings for PBKDF2 are used.
      *                                    Used for compatibility with app version 1.12.2.
      * @param {Function} keyUsageFunction Function which is called after getting the key value.
@@ -46,10 +47,15 @@ class Pbkdf2Cache {
      * @returns {Promise<void>} Resolves or rejects when the final keyUsageFunction is done executing.
      */
     async getKey(secret, salt, cacheLabel, useLegacySettings, keyUsageFunction) {
-        // Get the value from the cache
+        // If no label is provided, bypass the cache
         if (!cacheLabel) {
-            throw new Error(`Failed to access PBKDF2 cache; an access label is needed. Provided value: ${cacheLabel}`);
+            legacyLogger.log('debug', 'PBKDF2 cache not used for this request');
+            const newValue = await this.#regenerateKey(undefined, secret, salt, useLegacySettings);
+            keyUsageFunction(newValue);
+            return;
         }
+
+        // Get the value from the cache
         const cachedValue = await this.cache.get(cacheLabel);
 
         // Cache miss: generate the value and use it
@@ -85,7 +91,8 @@ class Pbkdf2Cache {
 
     /**
      * @description Regenerates the output of PBKDF2 and saves it to the cache.
-     * @param {string} cacheLabel The label under which the value is stored.
+     * @param {string} [cacheLabel] The label under which the value is stored.
+     *                              If no label is provided, then a new value is generated, but not stored in the cache.
      * @param {string} secret Secret passed to PBKDF2.
      * @param {string} salt Salt passed to PBKDF2.
      * @param {boolean} useLegacySettings [Temporary, compatibility] If true, the old settings for PBKDF2 are used.
@@ -94,7 +101,7 @@ class Pbkdf2Cache {
      */
     async #regenerateKey(cacheLabel, secret, salt, useLegacySettings) {
         // Invalidate the previously cached value
-        await this.#invalidate(cacheLabel);
+        if (cacheLabel) await this.#invalidate(cacheLabel);
 
         // Temporary code for compatibility with app version 1.12.2
         const iterationsCompatibility = useLegacySettings ? legacyIterations : iterations;
@@ -113,7 +120,7 @@ class Pbkdf2Cache {
         legacyLogger.log('debug', 'PBKDF2 generated a new key');
 
         // Store the output in the cache
-        await this.cache.set(cacheLabel, output);
+        if (cacheLabel) await this.cache.set(cacheLabel, output);
         return output;
     }
 }
