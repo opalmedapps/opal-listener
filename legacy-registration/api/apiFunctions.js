@@ -68,7 +68,7 @@ exports.registerPatient = async function(requestObject) {
     const fields = requestObject?.Parameters?.Fields;
     try {
         // Verify User existence
-        const isNewUser = await verifyExistingUser(requestObject);
+        const isNewUser = await verifyNewUser(requestObject);
         // Request validation
         const registrationData = await prepareAndValidateRegistrationRequest(requestObject, isNewUser);
 
@@ -109,22 +109,22 @@ exports.registerPatient = async function(requestObject) {
 /**
  * @description Verify if the incoming registration request is for a new or existing user
  * @param {object} requestObject The incoming request.
- * @returns {Promise<object>} Resolves to an object containing the additional registration details from the backend.
+ * @returns {bool} return true if it is a New user, return false if the user already exists
  */
-async function verifyExistingUser(requestObject) {
-    try {
-        if(requestObject?.Parameters?.Fields?.accessToken !== undefined){
+async function verifyNewUser(requestObject) {
+    if(requestObject?.Parameters?.Fields?.accessToken !== undefined){
+        try {
             const uid = await firebaseFunction.getFirebaseAccountByIdToken(
                 requestObject.Parameters.Fields.accessToken,
             );
             const result = await opalRequest.isCaregiverAlreadyRegistered(uid);
-            return result === 200;
+            return result !== 200;
         }
-        return true;
+        catch (error) {
+            return false;
+        }
     }
-    catch (error) {
-
-    }
+    return true;
 }
 
 /**
