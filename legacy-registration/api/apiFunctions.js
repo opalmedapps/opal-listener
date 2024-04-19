@@ -80,10 +80,10 @@ exports.registerPatient = async function(requestObject) {
         if (isNewPatient) await initializePatientMRNs(requestObject, registrationData, patientLegacyId);
         const uid = await initializeOrGetFirebaseAccount(isNewUser, fields.email, fields.password);
         hashPassword(requestObject);
-        let selfPatient = await initializeOrGetSelfPatient(requestObject, registrationData, patientLegacyId);
-        let userSerNum = await initializeOrGetUser(registrationData, uid, fields.password, selfPatient);
+        let selfPatientSerNum = await initializeOrGetSelfPatient(isNewUser, requestObject, registrationData, patientLegacyId);
+        let userSerNum = await initializeOrGetUser(isNewUser, registrationData, uid, fields.password, selfPatientSerNum);
         const phone = isNewUser? requestObject.Parameters.Fields.phone: undefined;
-        await updateSelfPatient(requestObject, selfPatient, phone);
+        await updateSelfPatient(requestObject, selfPatientSerNum, phone);
         if (isNewPatient) await initializePatientControl(patientLegacyId);
         await registerInBackend(requestObject, patientLegacyId, userSerNum, uid, isNewUser);
 
@@ -121,7 +121,7 @@ async function verifyNewUser(requestObject) {
             return result !== 200;
         }
         catch (error) {
-            return false;
+            logger.log('error', `Error while verifying an existing user: ${error}`)
         }
     }
     return true;
@@ -143,8 +143,8 @@ async function prepareAndValidateRegistrationRequest(requestObject, isNewUser) {
         requestObject.Parameters.Fields.registrationCode,
     );
     validateRegistrationDataDetailed(registrationData);
-    logger.log('info', 'Calling backend API to get registration details');
     if (isNewUser) {
+        logger.log('info', 'Validating registration request parameters for new user');
         validateNewRegisterPatientRequest(requestObject);
     }
 
@@ -322,12 +322,11 @@ function hashPassword(requestObject) {
  * @param patientLegacyId
  * @returns {Promise<*>} Resolves to the legacy ID (PatientSerNum) of the user in the Patient table.
  */
-async function initializeOrGetSelfPatient(requestObject, registrationData, patientLegacyId) {
-    const isNewCaregiver = registrationData.caregiver.legacy_id === null;
+async function initializeOrGetSelfPatient(isNewUser, requestObject, registrationData, patientLegacyId) {
     const isSelfRegistration = registrationData.relationship_type.role_type === "SELF";
 
     let selfPatientSerNum;
-    if (!isNewCaregiver) {
+    if (!isNewUser) {
         selfPatientSerNum = await sqlInterface.getPatientSerNumFromUserSerNum(registrationData.caregiver.legacy_id);
     }
     // Special case: when it's a new caregiver who isn't registering for self, we need to create a dummy self patient row
@@ -355,13 +354,12 @@ async function initializeOrGetSelfPatient(requestObject, registrationData, patie
  * @param {number} selfPatientSerNum The PatientSerNum that represents the user's "self" row in the Patient table.
  * @returns {Promise<*>} Resolves to the legacy ID (UserSerNum) of the user in the Users table.
  */
-async function initializeOrGetUser(registrationData, uid, password, selfPatientSerNum) {
-    const isNewCaregiver = registrationData.caregiver.legacy_id === null;
+async function initializeOrGetUser(isNewUser, registrationData, uid, password, selfPatientSerNum) {
     const isSelfRegistration = registrationData.relationship_type.role_type === "SELF";
     const userType = isSelfRegistration ? 'Patient' : 'Caregiver';
 
     let userSerNum;
-    if (isNewCaregiver) userSerNum = await sqlInterface.insertUser(uid, password, selfPatientSerNum, userType);
+    if (isNewUser) userSerNum = await sqlInterface.insertUser(uid, password, selfPatientSerNum, userType);
     else userSerNum = registrationData.caregiver.legacy_id;
     return userSerNum;
 }
@@ -568,7 +566,6 @@ function formatRegisterData(requestObject, firebaseUsername, patientLegacyId, us
             'caregiver': {
                 'language': requestObject.Parameters.Fields.language,
                 'username': firebaseUsername,
-                'email': requestObject.Parameters.Fields.email,
                 'legacy_id': userLegacyId,
             },
         };
