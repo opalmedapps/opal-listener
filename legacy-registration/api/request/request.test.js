@@ -87,7 +87,7 @@ describe('opalRequest', function () {
 				],
 			}
 
-			const response = await opalRequest.registrationRegister(registrationCode, registerData, true);
+			const response = await opalRequest.registrationRegister(registrationCode, registerData, false);
 			expect(response).to.empty;
 
 			let headers = opalRequest.backendApiHeaders;
@@ -125,7 +125,7 @@ describe('opalRequest', function () {
 			}
 
 			try {
-				await opalRequest.registrationRegister(registrationCode, registerData, true);
+				await opalRequest.registrationRegister(registrationCode, registerData, false);
 			} catch (error) {
 				expect(error.message).to.equal('Calling registrationRegister failed');
 
