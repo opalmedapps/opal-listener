@@ -68,9 +68,9 @@ exports.registerPatient = async function(requestObject) {
     const fields = requestObject?.Parameters?.Fields;
     try {
         // Verify User existence
-        const isNewUser = await verifyNewUser(requestObject);
+        const isExistingUser = await verifyExistingUser(requestObject);
         // Request validation
-        const registrationData = await prepareAndValidateRegistrationRequest(requestObject, isNewUser);
+        const registrationData = await prepareAndValidateRegistrationRequest(requestObject, isExistingUser);
 
         // Variables
         const isNewPatient = registrationData.patient.legacy_id === null;
@@ -78,14 +78,14 @@ exports.registerPatient = async function(requestObject) {
         // Registration steps
         const patientLegacyId = await initializeOrGetBasicPatientRow(requestObject, registrationData);
         if (isNewPatient) await initializePatientMRNs(requestObject, registrationData, patientLegacyId);
-        const uid = await initializeOrGetFirebaseAccount(isNewUser, fields.email, fields.password);
+        const uid = await initializeOrGetFirebaseAccount(isExistingUser, fields.email, fields.password);
         hashPassword(requestObject);
-        let selfPatientSerNum = await initializeOrGetSelfPatient(isNewUser, requestObject, registrationData, patientLegacyId);
-        let userSerNum = await initializeOrGetUser(isNewUser, registrationData, uid, fields.password, selfPatientSerNum);
-        const phone = isNewUser? requestObject.Parameters.Fields.phone: undefined;
+        let selfPatientSerNum = await initializeOrGetSelfPatient(isExistingUser, requestObject, registrationData, patientLegacyId);
+        let userSerNum = await initializeOrGetUser(isExistingUser, registrationData, uid, fields.password, selfPatientSerNum);
+        const phone = isExistingUser? undefined : requestObject.Parameters.Fields.phone;
         await updateSelfPatient(requestObject, selfPatientSerNum, phone);
         if (isNewPatient) await initializePatientControl(patientLegacyId);
-        await registerInBackend(requestObject, patientLegacyId, userSerNum, uid, isNewUser);
+        await registerInBackend(requestObject, patientLegacyId, userSerNum, uid, isExistingUser);
 
         // Registration is considered successful at this point.
         // I.e., don't fail the whole registration if an error occurs now and only log an error.
@@ -109,22 +109,23 @@ exports.registerPatient = async function(requestObject) {
 /**
  * @description Verify if the incoming registration request is for a new or existing user
  * @param {object} requestObject The incoming request.
- * @returns {bool} return true if it is a New user, return false if the user already exists
+ * @returns {string} return the empty string if it is a New user, return the firbase uid if the user already exists
  */
-async function verifyNewUser(requestObject) {
-    if(requestObject?.Parameters?.Fields?.accessToken !== undefined){
+async function verifyExistingUser(requestObject) {
+    if (requestObject?.Parameters?.Fields?.accessToken !== undefined){
         try {
             const uid = await firebaseFunction.getFirebaseAccountByIdToken(
                 requestObject.Parameters.Fields.accessToken,
             );
             const result = await opalRequest.isCaregiverAlreadyRegistered(uid);
-            return result !== 200;
+            if (result !== 200) return '';
+            else return uid;
         }
         catch (error) {
-            logger.log('error', `Error while verifying an existing user: ${error}`)
+            logger.log('error', `Error while verifying an existing user: ${error}`);
         }
     }
-    return true;
+    return '';
 }
 
 /**
@@ -133,7 +134,7 @@ async function verifyNewUser(requestObject) {
  * @param {object} requestObject The incoming request.
  * @returns {Promise<object>} Resolves to an object containing the additional registration details from the backend.
  */
-async function prepareAndValidateRegistrationRequest(requestObject, isNewUser) {
+async function prepareAndValidateRegistrationRequest(requestObject, isExistingUser) {
     logger.log('info', `Validating registration request parameters for ${requestObject?.Parameters?.Fields?.email}`);
     validateRegisterPatientRequest(requestObject);
 
@@ -143,7 +144,7 @@ async function prepareAndValidateRegistrationRequest(requestObject, isNewUser) {
         requestObject.Parameters.Fields.registrationCode,
     );
     validateRegistrationDataDetailed(registrationData);
-    if (isNewUser) {
+    if (!isExistingUser) {
         logger.log('info', 'Validating registration request parameters for new user');
         validateNewRegisterPatientRequest(requestObject);
     }
@@ -159,7 +160,7 @@ async function prepareAndValidateRegistrationRequest(requestObject, isNewUser) {
  */
 function validateRegisterPatientRequest(requestObject) {
     if (!requestObject.Parameters || !requestObject.Parameters.Fields) {
-        throw 'requestObject is missing Parameters.Fields'
+        throw 'requestObject is missing Parameters.Fields';
     }
 
     // Helper function
@@ -179,7 +180,7 @@ function validateRegisterPatientRequest(requestObject) {
 
     for (let field of requiredFields) {
         if (!fieldExists(field)) {
-            throw `Required field '${field}' missing in request fields`
+            throw `Required field '${field}' missing in request fields`;
         }
     }
 }
@@ -208,7 +209,7 @@ function validateRegistrationDataDetailed(registrationData) {
  */
 function validateNewRegisterPatientRequest(requestObject) {
     if (!requestObject.Parameters || !requestObject.Parameters.Fields) {
-        throw 'requestObject is missing Parameters.Fields'
+        throw 'requestObject is missing Parameters.Fields';
     }
 
     // Helper function
@@ -229,7 +230,7 @@ function validateNewRegisterPatientRequest(requestObject) {
 
     for (let field of requiredFields) {
         if (!fieldExists(field)) {
-            throw `Required field '${field}' missing in request fields`
+            throw `Required field '${field}' missing in request fields`;
         }
     }
 }
@@ -276,15 +277,15 @@ async function initializePatientMRNs(requestObject, registrationData, patientLeg
  * @param password The user's password, used when creating a new account.
  * @returns {Promise<*>} Resolves to the user's Firebase UID.
  */
-async function initializeOrGetFirebaseAccount(isNewUser, email, password) {
+async function initializeOrGetFirebaseAccount(isExistingUser, email, password) {
     let uid;
-    if (isNewUser) {
+    if (!isExistingUser) {
         // The user's decrypted password is required to create a new Firebase account
         uid = await firebaseFunction.createFirebaseAccount(email, password);
         logger.log('info', `Created new firebase user account: ${uid}`);
     }
     else {
-        uid = await firebaseFunction.getFirebaseAccountByEmail(email);
+        uid = isExistingUser;
         logger.log('info', `Got existing firebase user account: ${uid}`);
     }
     return uid;
@@ -300,9 +301,9 @@ async function initializeOrGetFirebaseAccount(isNewUser, email, password) {
  * @param uid The user's Firebase UID.
  * @returns {Promise<void>}
  */
-async function registerInBackend(requestObject, patientLegacyId, userLegacyId, uid, isNewUser) {
-    const registerData = formatRegisterData(requestObject, uid, patientLegacyId, userLegacyId, isNewUser);
-    await opalRequest.registrationRegister(requestObject.Parameters.Fields.registrationCode, registerData);
+async function registerInBackend(requestObject, patientLegacyId, userLegacyId, uid, isExistingUser) {
+    const registerData = formatRegisterData(requestObject, uid, patientLegacyId, userLegacyId, isExistingUser);
+    await opalRequest.registrationRegister(requestObject.Parameters.Fields.registrationCode, registerData, isExistingUser);
 }
 
 /**
@@ -322,11 +323,11 @@ function hashPassword(requestObject) {
  * @param patientLegacyId
  * @returns {Promise<*>} Resolves to the legacy ID (PatientSerNum) of the user in the Patient table.
  */
-async function initializeOrGetSelfPatient(isNewUser, requestObject, registrationData, patientLegacyId) {
+async function initializeOrGetSelfPatient(isExistingUser, requestObject, registrationData, patientLegacyId) {
     const isSelfRegistration = registrationData.relationship_type.role_type === "SELF";
 
     let selfPatientSerNum;
-    if (!isNewUser) {
+    if (isExistingUser) {
         selfPatientSerNum = await sqlInterface.getPatientSerNumFromUserSerNum(registrationData.caregiver.legacy_id);
     }
     // Special case: when it's a new caregiver who isn't registering for self, we need to create a dummy self patient row
@@ -354,12 +355,12 @@ async function initializeOrGetSelfPatient(isNewUser, requestObject, registration
  * @param {number} selfPatientSerNum The PatientSerNum that represents the user's "self" row in the Patient table.
  * @returns {Promise<*>} Resolves to the legacy ID (UserSerNum) of the user in the Users table.
  */
-async function initializeOrGetUser(isNewUser, registrationData, uid, password, selfPatientSerNum) {
+async function initializeOrGetUser(isExistingUser, registrationData, uid, password, selfPatientSerNum) {
     const isSelfRegistration = registrationData.relationship_type.role_type === "SELF";
     const userType = isSelfRegistration ? 'Patient' : 'Caregiver';
 
     let userSerNum;
-    if (isNewUser) userSerNum = await sqlInterface.insertUser(uid, password, selfPatientSerNum, userType);
+    if (!isExistingUser) userSerNum = await sqlInterface.insertUser(uid, password, selfPatientSerNum, userType);
     else userSerNum = registrationData.caregiver.legacy_id;
     return userSerNum;
 }
@@ -528,9 +529,9 @@ function getEmailContent(language) {
         ],
  * }
  */
-function formatRegisterData(requestObject, firebaseUsername, patientLegacyId, userLegacyId, isNewUser) {
+function formatRegisterData(requestObject, firebaseUsername, patientLegacyId, userLegacyId, isExistingUser) {
     let registerData;
-    if (isNewUser) {
+    if (!isExistingUser) {
         registerData = {
             'patient': {
                 'legacy_id': patientLegacyId,

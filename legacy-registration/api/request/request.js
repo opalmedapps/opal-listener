@@ -140,10 +140,10 @@ class opalRequest {
 	 }
 	 @return {Promise}
 	 **/
-	static async registrationRegister(registrationCode, registerData, isNewUser) {
+	static async registrationRegister(registrationCode, registerData, isExistingUser) {
 		let headers = this.backendApiHeaders;
         let url = `${env.BACKEND_HOST}/api/registration/${registrationCode}/register/`;
-		if (!isNewUser) {
+		if (isExistingUser) {
             url = url + `?existingUser`;
         }
 		const requestParams = {
