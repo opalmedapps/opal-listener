@@ -31,12 +31,13 @@ class RequestContext {
         let cacheLabel;
 
         if (this.#isRegistrationRequest()) {
+            // For registration requests, branchName should always be defined
             if (!this.branchName) throw new Error(`Missing data to build cache label, branchName=${this.branchName}`);
             cacheLabel = this.branchName;
         }
         else {
-            // If some required information is missing, cacheLabel stays undefined, and the cache is later bypassed.
-            // This is normal for some requests that are encrypted differently, such as security requests.
+            // For app requests, if some info is missing, cacheLabel stays undefined and the cache is later bypassed.
+            // This is normal for some request types that are encrypted differently, such as security requests.
             if (!this.userId || !this.deviceId) cacheLabel = undefined;
             cacheLabel = `${this.userId}:${this.deviceId}`;
         }
