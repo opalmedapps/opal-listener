@@ -119,6 +119,7 @@ class opalRequest {
 	 @param {string} language The user's selected language.
 	 @param {object} registerData The registration data formatted for the API.
 	 @param request, registerData
+     @param {bool} isExistingUser Indicate if the user already exists in the backend
 	 request = {
 	 	registrationCode: str,
 	 	language: str,
