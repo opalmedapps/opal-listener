@@ -68,7 +68,7 @@ exports.registerPatient = async function(requestObject) {
     const fields = requestObject?.Parameters?.Fields;
     try {
         // Verify User existence
-        const isExistingUser = await verifyExistingUser(requestObject);
+        let {isExistingUser, uid} = await verifyExistingUser(requestObject);
         // Request validation
         const registrationData = await prepareAndValidateRegistrationRequest(requestObject, isExistingUser);
 
@@ -78,7 +78,7 @@ exports.registerPatient = async function(requestObject) {
         // Registration steps
         const patientLegacyId = await initializeOrGetBasicPatientRow(requestObject, registrationData);
         if (isNewPatient) await initializePatientMRNs(requestObject, registrationData, patientLegacyId);
-        const uid = await initializeOrGetFirebaseAccount(isExistingUser, fields.email, fields.password);
+        uid = await initializeOrGetFirebaseAccount(uid, fields.email, fields.password);
         hashPassword(requestObject);
         let selfPatientSerNum = await initializeOrGetSelfPatient(isExistingUser, requestObject, registrationData, patientLegacyId);
         let userSerNum = await initializeOrGetUser(isExistingUser, registrationData, uid, fields.password, selfPatientSerNum);
@@ -109,7 +109,7 @@ exports.registerPatient = async function(requestObject) {
 /**
  * @description Verify if the incoming registration request is for a new or existing user
  * @param {object} requestObject The incoming request.
- * @returns {string} return the empty string if it is a New user, return the firbase uid if the user already exists
+ * @returns {} return the empty string if it is a New user, return the firbase uid if the user already exists
  */
 async function verifyExistingUser(requestObject) {
     if (requestObject?.Parameters?.Fields?.accessToken !== undefined){
@@ -118,14 +118,19 @@ async function verifyExistingUser(requestObject) {
                 requestObject.Parameters.Fields.accessToken,
             );
             const result = await opalRequest.isCaregiverAlreadyRegistered(uid);
-            if (result !== 200) return '';
-            else return uid;
+            return {
+                isExistingUser: result === 200,
+                uid: uid,
+            };
         }
         catch (error) {
             logger.log('error', `Error while verifying an existing user: ${error}`);
         }
     }
-    return '';
+    return {
+        isExistingUser: false,
+        uid: '',
+    };
 }
 
 /**
