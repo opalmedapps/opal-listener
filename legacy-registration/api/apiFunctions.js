@@ -109,7 +109,8 @@ exports.registerPatient = async function(requestObject) {
 /**
  * @description Verify if the incoming registration request is for a new or existing user
  * @param {object} requestObject The incoming request.
- * @returns {} return the empty string if it is a New user, return the firbase uid if the user already exists
+ * @returns {object} return a boolean which indicate if the user already exists in system,
+ * and the user firebase user id if exists.
  */
 async function verifyExistingUser(requestObject) {
     if (requestObject?.Parameters?.Fields?.accessToken !== undefined){
@@ -137,7 +138,7 @@ async function verifyExistingUser(requestObject) {
  * @description Validates an incoming registration request, and fetches and validates the additional information from
  *              the backend that's needed to proceed with registration.
  * @param {object} requestObject The incoming request.
- * @param {bool} isExistingUser Indicate if the user already exists in the backend
+ * @param {boolean} isExistingUser Indicate if the user already exists in the backend
  * @returns {Promise<object>} Resolves to an object containing the additional registration details from the backend.
  */
 async function prepareAndValidateRegistrationRequest(requestObject, isExistingUser) {
@@ -278,7 +279,7 @@ async function initializePatientMRNs(requestObject, registrationData, patientLeg
 
 /**
  * @description Fetches the user's Firebase account, or creates a new one if it doesn't exist yet.
- * @param existingUserUid The user id if it's an existing user in firebase.
+ * @param {boolean} existingUserUid The user id if it's an existing user in firebase.
  * @param email The user's email address.
  * @param password The user's password, used when creating a new account.
  * @returns {Promise<*>} Resolves to the user's Firebase UID.
@@ -305,7 +306,7 @@ async function initializeOrGetFirebaseAccount(existingUserUid, email, password) 
  * @param patientLegacyId The patient's legacy ID (PatientSerNum).
  * @param userLegacyId The user's legacy ID (UserSerNum).
  * @param uid The user's Firebase UID.
- * @param {bool} isExistingUser Indicate if the user already exists in the backend
+ * @param {boolean} isExistingUser Indicate if the user already exists in the backend
  * @returns {Promise<void>}
  */
 async function registerInBackend(requestObject, patientLegacyId, userLegacyId, uid, isExistingUser) {
@@ -325,7 +326,7 @@ function hashPassword(requestObject) {
  * @description Makes sure the registering user has a "self" row in the Patient table.
  *              If the registration is for a self user who doesn't have a patient row yet, creates a dummy row.
  *              Otherwise, we rely on the legacy ID that identifies their existing Patient row.
- * @param {bool} isExistingUser Indicate if the user already exists in the backend
+ * @param {boolean} isExistingUser Indicate if the user already exists in the backend
  * @param requestObject
  * @param {object} registrationData The detailed registration data sent from the backend.
  * @param patientLegacyId
@@ -357,7 +358,7 @@ async function initializeOrGetSelfPatient(isExistingUser, requestObject, registr
  * @description Makes sure the registering caregiver has a row in the Users table.
  *              If the registration is for a new caregiver who doesn't have a users row yet, creates one.
  *              Otherwise, we rely on the legacy ID that identifies their existing Users row.
- * @param {bool} isExistingUser Indicate if the user already exists in the backend
+ * @param {boolean} [isExistingUser Indicate if the user already exists in the backend
  * @param {object} registrationData The detailed registration data sent from the backend.
  * @param {string} uid The user's Firebase UID.
  * @param {string} password The user's password.
@@ -522,7 +523,7 @@ function getEmailContent(language) {
  * @param {string} firebaseUsername - The caregiver's Firebase username.
  * @param {int} patientLegacyId - The legacy ID of the patient (PatientSerNum).
  * @param {int} userLegacyId - The legacy ID of the user (UserSerNum).
- * @param {bool} isExistingUser Indicate if the user already exists in the backend
+ * @param {boolean} isExistingUser Indicate if the user already exists in the backend
  * @returns {Object} registerData {
         patient: {
 	 		legacy_id: int
