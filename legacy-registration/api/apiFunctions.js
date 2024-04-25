@@ -14,8 +14,8 @@ const { sendMail } = require('./utility/mail.js');
 
 /**
  * @description check the user is caregiver or not
- * @param {Object} requestObject - The calling request's requestObject.
- * @returns { status: result}
+ * @param {object} requestObject - The calling request's requestObject.
+ * @returns {status: number}
  * @throws Throws an error if a required field is not present in the given request.
  */
 exports.isCaregiverAlreadyRegistered = async function(requestObject) {
@@ -38,8 +38,8 @@ exports.isCaregiverAlreadyRegistered = async function(requestObject) {
 
 /**
  * @description check email exists in firebase or not
- * @param {Object} requestObject - The calling request's requestObject.
- * @returns { Data: result}
+ * @param {object} requestObject - The calling request's requestObject.
+ * @returns { Data: object}
  * @throws Throws an error if a required field is not present in the given request.
  */
 exports.checkEmailExistsInFirebase = async function(requestObject) {
@@ -60,8 +60,8 @@ exports.checkEmailExistsInFirebase = async function(requestObject) {
 
 /**
  * @description Register a patient
- * @param {Object} requestObject - The calling request's requestObject.
- * @returns { Data: result}
+ * @param {object} requestObject - The calling request's requestObject.
+ * @returns {Data: Array}
  * @throws Throws an error if a required field is not present in the given request.
  */
 exports.registerPatient = async function(requestObject) {
@@ -109,7 +109,7 @@ exports.registerPatient = async function(requestObject) {
 /**
  * @description Verify if the incoming registration request is for a new or existing user
  * @param {object} requestObject The incoming request.
- * @returns {object} return a boolean which indicate if the user already exists in system,
+ * @returns {isExistingUser: boolean, uid: string} return a boolean which indicate if the user already exists in system,
  * and the user firebase user id if exists.
  */
 async function verifyExistingUser(requestObject) {
