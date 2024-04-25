@@ -69,21 +69,22 @@ class PatientTestResultQuery {
 		params = utility.addSeveralToArray(params, lastUpdated, numLastUpdated);
 
 		return mysql.format(`
-					SELECT DISTINCT CollectedDateTime as collectedDateTime
-					FROM
-						PatientTestResult as ptr,
-						TestExpression as te,
+                    SELECT DISTINCT
+                        DATE_FORMAT(CONVERT_TZ(CollectedDateTime, 'America/Toronto', 'UTC'), '%Y-%m-%d %H:%i:%sZ') as collectedDateTime
+                    FROM
+                        PatientTestResult as ptr,
+                        TestExpression as te,
 						/* TestControl: only aliased lab results are sent to the app */
 						TestControl as tc
-					WHERE
-						ptr.PatientSerNum = ?
-						AND ptr.TestExpressionSerNum = te.TestExpressionSerNum
+                    WHERE
+                        ptr.PatientSerNum = ?
+                        AND ptr.TestExpressionSerNum = te.TestExpressionSerNum
 						AND te.TestControlSerNum = tc.TestControlSerNum
-						AND tc.PublishFlag = 1
-						AND (ptr.LastUpdated > ? OR te.LastUpdated > ? OR tc.LastUpdated > ?)
-						/* use the AvailableAt column to determine if the lab result is available to be viewed by the patient */
-						AND ptr.AvailableAt <= NOW()
-					ORDER BY collectedDateTime DESC;`,
+                        AND tc.PublishFlag = 1
+                        AND (ptr.LastUpdated > ? OR te.LastUpdated > ? OR tc.LastUpdated > ?)
+                        /* use the AvailableAt column to determine if the lab result is available to be viewed by the patient */
+                        AND ptr.AvailableAt <= NOW()
+                    ORDER BY collectedDateTime DESC;`,
 				params);
 	}
 
