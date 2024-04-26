@@ -279,7 +279,7 @@ async function initializePatientMRNs(requestObject, registrationData, patientLeg
 
 /**
  * @description Fetches the user's Firebase account, or creates a new one if it doesn't exist yet.
- * @param {boolean} existingUserUid The user id if it's an existing user in firebase.
+ * @param [existingUserUid] The user id if it's an existing user in firebase.
  * @param email The user's email address.
  * @param password The user's password, used when creating a new account.
  * @returns {Promise<*>} Resolves to the user's Firebase UID.
