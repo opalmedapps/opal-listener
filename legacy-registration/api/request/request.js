@@ -45,20 +45,20 @@ class opalRequest {
 	}
 
 	/**
-	 axiosApi
-	 @desc basic or raw api for the other apis.
-	 @param request: {
-	 	method: str,
-	 	url: str,
-	 	headers: object,
-	 	data: object,
-	 }
-	 @return the response of axios
-	 @response {
-	 	status: int,
-	 	headers: object,
-	 	data: object,
-	 }
+     * axiosApi
+     * @desc basic or raw api for the other apis.
+     * @param request: {
+     *  method: str,
+     *  url: str,
+     *  headers: object,
+     *  data: object,
+     * }
+     * @return the response of axios
+     * @response {
+     *  status: int,
+     *  headers: object,
+     *  data: object,
+     * }
 	 **/
 	static async axiosApi(request) {
 		try {
@@ -74,26 +74,26 @@ class opalRequest {
     // new backend apis
 
 	/**
-	 retrieveRegistrationDataDetailed
-	 @desc call the new backend api 'registration/<std:code>/?detailed.
-	 @param {string} registrationCode The user's registration code.
-	 @param {string} language The user's selected language.
-	 @return {Promise}
-	 @response {
-	 	hospital_patients: [
-	 		{
-				mrn: int,
-				site_code: str,
-			},
-	 	],
-	 	patient: {
-	 		date_of_birth: date,
-	 		first_name: str,
-	 		last_name: str,
-	 		ramq: str,
-	 		sex: str,
-	 	}
-	 }
+     * retrieveRegistrationDataDetailed
+	 * @desc call the new backend api 'registration/<std:code>/?detailed.
+	 * @param {string} registrationCode The user's registration code.
+	 * @param {string} language The user's selected language.
+	 * @return {Promise}
+	 * @response {
+	 * 	hospital_patients: [
+	 * 		{
+	 *			mrn: int,
+	 *			site_code: str,
+	 *		},
+	 * 	],
+	 * 	patient: {
+	 * 		date_of_birth: date,
+	 * 		first_name: str,
+	 * 		last_name: str,
+	 * 		ramq: str,
+	 * 		sex: str,
+	 * 	}
+	 * }
 	 **/
 	static async retrieveRegistrationDataDetailed(registrationCode) {
 		let headers = this.backendApiHeaders;
@@ -113,36 +113,40 @@ class opalRequest {
 	}
 
 	/**
-	 registrationRegister
-	 @desc call the new backend api 'registration/<std:code>/register/.
-	 @param {string} registrationCode The user's registration code.
-	 @param {string} language The user's selected language.
-	 @param {object} registerData The registration data formatted for the API.
-	 @param request, registerData
-	 request = {
-	 	registrationCode: str,
-	 	language: str,
-	 }
-	 registerData = {
-	 	patient: {
-	 		legacy_id: int
-	 	},
-	 	caregiver: {
-	 		language: str,
-	 		phone_number: str,
-	 	},
-	 	security_answers: [
-	 		{
-				question: str,
-				answer: str,
-			},
-	 	],
-	 }
-	 @return {Promise}
+     * registrationRegister
+     * @desc call the new backend api 'registration/<std:code>/register/.
+     * @param {string} registrationCode The user's registration code.
+     * @param {string} language The user's selected language.
+     * @param {object} registerData The registration data formatted for the API.
+     * @param request, registerData
+     * @param {boolean} isExistingUser Indicate if the user already exists in the backend
+     * request = {
+     *  registrationCode: str,
+     *  language: str,
+     * }
+     * registerData = {
+     *  patient: {
+     *      egacy_id: int
+     *  },
+     *  caregiver: {
+     *      language: str,
+     *      phone_number: str,
+     *  },
+     *  security_answers: [
+     *      {
+     *          question: str,
+     *          answer: str,
+     *      },
+     *  ],
+     * }
+     * @return {Promise}
 	 **/
-	static async registrationRegister(registrationCode, registerData) {
+	static async registrationRegister(registrationCode, registerData, isExistingUser) {
 		let headers = this.backendApiHeaders;
-		const url = `${env.BACKEND_HOST}/api/registration/${registrationCode}/register/`;
+        let url = `${env.BACKEND_HOST}/api/registration/${registrationCode}/register/`;
+		if (isExistingUser) {
+            url = url + `?existingUser`;
+        }
 		const requestParams = {
 			method: 'post',
 			url: url,
@@ -181,6 +185,28 @@ class opalRequest {
 		}
 		const response = await this.axiosApi(requestParams);
 		return response.data;
+	}
+
+	/**
+	 * @desc verify if a user is already a caregiver.
+	 * @param {string} username the user Id on the firebase.
+	 * @returns { status: number}
+	 */
+	static async isCaregiverAlreadyRegistered(username) {
+		let headers = this.backendApiHeaders;
+		const url = `${env.BACKEND_HOST}/api/caregivers/${username}/`;
+		const requestParams = {
+			method: 'get',
+			url: url,
+			headers: headers,
+		};
+		logger.log('info', 'Calling API to determine if the user is an existing caregiver or not', url);
+		const response = await this.axiosApi(requestParams);
+		if (!response) {
+			logger.log('error', 'API response error', response);
+			throw new Error("API response error");
+		}
+		return response;
 	}
 }
 
