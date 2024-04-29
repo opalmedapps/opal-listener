@@ -4,7 +4,7 @@ const opalRequest = require('./request');
 
 describe('opalRequest', function () {
 	describe('retrieveRegistrationDataDetailed', function () {
-		it('retrieveRegistrationDataDetailed success', async function () {
+		it('should retrieveRegistrationDataDetailed function success', async function () {
 			sinon.stub(opalRequest, 'axiosApi')
 				.returns(Promise.resolve({
 					data: {
@@ -42,7 +42,7 @@ describe('opalRequest', function () {
 			opalRequest.axiosApi.restore();
 		});
 
-		it('retrieveRegistrationDataDetailed failed', async function () {
+		it('should retrieveRegistrationDataDetailed function failed', async function () {
 			sinon.stub(opalRequest, 'axiosApi').throws(new Error('Calling retrieveRegistrationDataDetailed failed'));
 			const registrationCode = 'CODE12345678';
 			try {
@@ -64,7 +64,7 @@ describe('opalRequest', function () {
 	});
 
 	describe('registrationRegister', function () {
-		it('registrationRegister success', async function () {
+		it('should registrationRegister function success', async function () {
 			sinon.stub(opalRequest, 'axiosApi')
 				.returns(Promise.resolve({
 					data: {},
@@ -87,7 +87,7 @@ describe('opalRequest', function () {
 				],
 			}
 
-			const response = await opalRequest.registrationRegister(registrationCode, registerData);
+			const response = await opalRequest.registrationRegister(registrationCode, registerData, false);
 			expect(response).to.empty;
 
 			let headers = opalRequest.backendApiHeaders;
@@ -104,7 +104,7 @@ describe('opalRequest', function () {
 			opalRequest.axiosApi.restore();
 		});
 
-		it('registrationRegister failed', async function () {
+		it('should registrationRegister function failed', async function () {
 			sinon.stub(opalRequest, 'axiosApi').throws(new Error('Calling registrationRegister failed'));
 
 			const registrationCode = 'A0127Q0T50hk';
@@ -125,7 +125,7 @@ describe('opalRequest', function () {
 			}
 
 			try {
-				await opalRequest.registrationRegister(registrationCode, registerData);
+				await opalRequest.registrationRegister(registrationCode, registerData, false);
 			} catch (error) {
 				expect(error.message).to.equal('Calling registrationRegister failed');
 
@@ -146,7 +146,7 @@ describe('opalRequest', function () {
 	});
 
 	describe('getLabResultHistory', function () {
-		it('getLabResultHistory success', async function () {
+		it('should getLabResultHistory function success', async function () {
 			sinon.stub(opalRequest, 'axiosApi')
 				.returns(Promise.resolve({
 					data: {},
@@ -172,6 +172,48 @@ describe('opalRequest', function () {
 			}
 			sinon.assert.calledWith(opalRequest.axiosApi, requestParams);
 			sinon.assert.calledOnce(opalRequest.axiosApi);
+
+			opalRequest.axiosApi.restore();
+		});
+	});
+
+	describe('isCaregiverAlreadyRegistered', function () {
+		it('should isCaregiverAlreadyRegistered function success', async function () {
+			sinon.stub(opalRequest, 'axiosApi')
+				.returns(Promise.resolve({
+				}));
+			const username = 'ThQKckoll2Y3tXcA1k7iCfGhmeu1';
+			const response = await opalRequest.isCaregiverAlreadyRegistered(username);
+			expect(response).to.be.empty;
+
+			let headers = opalRequest.backendApiHeaders;
+			const expectedParameters = {
+				method: 'get',
+				url: `${process.env.BACKEND_HOST}/api/caregivers/${username}/`,
+				headers: headers,
+			};
+			sinon.assert.calledWith(opalRequest.axiosApi, expectedParameters);
+			sinon.assert.calledOnce(opalRequest.axiosApi);
+
+			opalRequest.axiosApi.restore();
+		});
+
+		it('should isCaregiverAlreadyRegistered function failed', async function () {
+			sinon.stub(opalRequest, 'axiosApi').throws(new Error('Calling isCaregiverAlreadyRegistered failed'));
+			const username = '3vWyFmdHL2PbXyYiYnUf7wj50Jm1';
+			try {
+				await opalRequest.isCaregiverAlreadyRegistered(username);
+			} catch (error) {
+				expect(error.message).to.equal('Calling isCaregiverAlreadyRegistered failed');
+				let headers = opalRequest.backendApiHeaders;
+				const expectedParameters = {
+					method: 'get',
+					url: `${process.env.BACKEND_HOST}/api/caregivers/${username}/`,
+					headers: headers,
+				};
+				sinon.assert.calledWith(opalRequest.axiosApi, expectedParameters);
+				sinon.assert.calledOnce(opalRequest.axiosApi);
+			}
 
 			opalRequest.axiosApi.restore();
 		});
