@@ -31,5 +31,5 @@ exports.getFirebaseAccountByIdToken = async function (idToken) {
     if (response?.uid) {
         logger.log('debug', `Successfully got firebase user account and this is the unique Id: ${response.uid}`);
     }
-    return response?.uid;
+    return response;
 };

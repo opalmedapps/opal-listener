@@ -23,13 +23,10 @@ module.exports.DOCUMENTS_PATH = process.env.DOCUMENTS_PATH;
 module.exports.DOCTOR_PATH = process.env.DOCTOR_PATH;
 module.exports.CHECKIN_URL = process.env.CHECKIN_URL;
 module.exports.CHECKIN_ROOM = process.env.CHECKIN_ROOM;
-module.exports.LAB_RESULT_HISTORY_URL = process.env.LAB_RESULT_HISTORY_URL;
 module.exports.QUESTIONNAIRE_COMPLETED_URL = process.env.QUESTIONNAIRE_COMPLETED_URL;
 module.exports.DEFAULT_LAB_EDUCATIONAL_URL_EN = process.env.DEFAULT_LAB_EDUCATIONAL_URL_EN;
 module.exports.DEFAULT_LAB_EDUCATIONAL_URL_FR = process.env.DEFAULT_LAB_EDUCATIONAL_URL_FR;
 module.exports.LATEST_STABLE_VERSION = process.env.LATEST_STABLE_VERSION;
-// ORMS settings API
-module.exports.ORMS_UPDATE_PATIENT_STATUS_URL = process.env.ORMS_UPDATE_PATIENT_STATUS_URL;
 // SMTP settings
 module.exports.SMTP_HOST = process.env.SMTP_HOST;
 module.exports.SMTP_PORT = process.env.SMTP_PORT;
