@@ -74,45 +74,6 @@ class opalRequest {
     // new backend apis
 
 	/**
-     * retrieveRegistrationDataDetailed
-	 * @desc call the new backend api 'registration/<std:code>/?detailed.
-	 * @param {string} registrationCode The user's registration code.
-	 * @param {string} language The user's selected language.
-	 * @return {Promise}
-	 * @response {
-	 * 	hospital_patients: [
-	 * 		{
-	 *			mrn: int,
-	 *			site_code: str,
-	 *		},
-	 * 	],
-	 * 	patient: {
-	 * 		date_of_birth: date,
-	 * 		first_name: str,
-	 * 		last_name: str,
-	 * 		ramq: str,
-	 * 		sex: str,
-	 * 	}
-	 * }
-	 **/
-	static async retrieveRegistrationDataDetailed(registrationCode) {
-		let headers = this.backendApiHeaders;
-		const url = `${env.BACKEND_HOST}/api/registration/${registrationCode}/?detailed`;
-		const requestParams = {
-			method: 'get',
-			url: url,
-			headers: headers,
-		};
-		logger.log('info', 'Calling API to get registration details', url);
-		const response = await this.axiosApi(requestParams);
-		if (!response || !response.data) {
-			logger.log('error', 'API response has no data', response);
-			throw new Error("API response didn't return any registration data");
-		}
-		return response.data;
-	}
-
-	/**
      * registrationRegister
      * @desc call the new backend api 'registration/<std:code>/register/.
      * @param {string} registrationCode The user's registration code.
