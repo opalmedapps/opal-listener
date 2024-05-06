@@ -3,66 +3,6 @@ const sinon = require('sinon');
 const opalRequest = require('./request');
 
 describe('opalRequest', function () {
-	describe('retrieveRegistrationDataDetailed', function () {
-		it('should retrieveRegistrationDataDetailed function success', async function () {
-			sinon.stub(opalRequest, 'axiosApi')
-				.returns(Promise.resolve({
-					data: {
-						hospital_patients: [
-							{
-								mrn: '9999993',
-								site_code: 'aaa',
-							},
-						],
-						patient: {
-							date_of_birth: '1985-01-01',
-							first_name: 'Kevin',
-							last_name: 'Chen',
-							ramq: 'TESC53511613',
-							sex: 'Male',
-						}
-					},
-				}));
-			const registrationCode = 'A0127Q0T50hk';
-			const response = await opalRequest.retrieveRegistrationDataDetailed(registrationCode);
-
-			expect(response).to.have.property('patient');
-			expect(response.patient).to.have.property('ramq').equal('TESC53511613');
-			expect(response).to.have.property('hospital_patients');
-			expect(response.hospital_patients.length).equal(1);
-			let headers = opalRequest.backendApiHeaders;
-			const expectedParameters = {
-				method: 'get',
-				url: `${process.env.BACKEND_HOST}/api/registration/${registrationCode}/?detailed`,
-				headers: headers,
-			};
-			sinon.assert.calledWith(opalRequest.axiosApi, expectedParameters);
-			sinon.assert.calledOnce(opalRequest.axiosApi);
-
-			opalRequest.axiosApi.restore();
-		});
-
-		it('should retrieveRegistrationDataDetailed function failed', async function () {
-			sinon.stub(opalRequest, 'axiosApi').throws(new Error('Calling retrieveRegistrationDataDetailed failed'));
-			const registrationCode = 'CODE12345678';
-			try {
-				await opalRequest.retrieveRegistrationDataDetailed(registrationCode);
-			} catch (error) {
-				expect(error.message).to.equal('Calling retrieveRegistrationDataDetailed failed');
-				let headers = opalRequest.backendApiHeaders;
-				const expectedParameters = {
-					method: 'get',
-					url: `${process.env.BACKEND_HOST}/api/registration/${registrationCode}/?detailed`,
-					headers: headers,
-				};
-				sinon.assert.calledWith(opalRequest.axiosApi, expectedParameters);
-				sinon.assert.calledOnce(opalRequest.axiosApi);
-			}
-
-			opalRequest.axiosApi.restore();
-		});
-	});
-
 	describe('registrationRegister', function () {
 		it('should registrationRegister function success', async function () {
 			sinon.stub(opalRequest, 'axiosApi')
