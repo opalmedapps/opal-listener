@@ -19,11 +19,12 @@ module.exports = {
 /**
  * requestFormatter
  * @description handles the api requests by formatting the response obtained from the API
+ * @param {RequestContext} context The request context.
  * @param {key, request}
  * @returns {Promise}
  */
-function requestFormatter({ key, request }) {
-    return requestValidator.validate(key, request)
+function requestFormatter(context, { key, request }) {
+    return requestValidator.validate(context, key, request)
         .then(opalReq => {
             //opalReq of type, OpalRequest
 
@@ -37,20 +38,22 @@ function requestFormatter({ key, request }) {
                 return response.toLegacy();
             });
         }).catch(err => {
-            return err.toLegacy();
+            logger.log('error', 'Error validating request', err);
+            return err.toLegacy ? err.toLegacy() : err;
         });
 }
 
 /**
  * @name requestLegacyWrapper
  * @description Wrapper to make it compatible with current infrastructure
+ * @param {RequestContext} context The request context.
  * @param requestKey
  * @param requestObject
  */
-function requestLegacyWrapper(requestKey, requestObject) {
+function requestLegacyWrapper(context, requestKey, requestObject) {
     let r = q.defer();
 
-    requestFormatter({ key: requestKey, request: requestObject }).then((result) => {
+    requestFormatter(context, { key: requestKey, request: requestObject }).then((result) => {
 
         r.resolve(result);
     }).catch((error) => {
@@ -63,12 +66,11 @@ function requestLegacyWrapper(requestKey, requestObject) {
 /**
  * apiRequestFormatter
  * @desc handles the api requests by formatting the response obtained from the API
+ * @param {RequestContext} context The request context.
  * @param requestKey
  * @param requestObject
  * @returns {Promise}
  */
-
-
-function apiRequestFormatter(requestKey, requestObject) {
-    return requestLegacyWrapper(requestKey, requestObject);
+function apiRequestFormatter(context, requestKey, requestObject) {
+    return requestLegacyWrapper(context, requestKey, requestObject);
 }

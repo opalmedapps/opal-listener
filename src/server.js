@@ -44,8 +44,8 @@ async function launch() {
     legacyServer.listenForRequest('requests');
     legacyServer.listenForRequest('passwordResetRequests');
 
-    requestHandler.listenToRequests(REQUEST_TYPE.API);
-    requestHandler.listenToRequests(REQUEST_TYPE.REGISTRATION);
+    requestHandler.listenForRequests(REQUEST_TYPE.API);
+    requestHandler.listenForRequests(REQUEST_TYPE.REGISTRATION);
 
     legacyRegistrationServer.setFirebaseConnection(firebase);
     legacyRegistrationServer.listenForRequest('requests');
