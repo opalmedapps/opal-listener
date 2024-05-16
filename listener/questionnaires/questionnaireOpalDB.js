@@ -163,6 +163,7 @@ function getQuestionnairePurpose(requestObject) {
 
 /**
  * getQuestionnaireUnreadNumber
+ * @deprecated Functionality now in Django.
  * @desc Returns a promise containing the number of unread (e.g. 'New') questionnaires of a given purpose for a particular user.
  * @param {object} requestObject
  * @return {Promise} Returns a promise that contains the number of unread questionnaires

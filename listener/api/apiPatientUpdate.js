@@ -171,6 +171,7 @@ exports.getQuestionnairePurpose = questionnaires.getQuestionnairePurpose;
 
 /**
 * Gets the number of unread (e.g. 'New') questionnaires.
+* @deprecated Functionality now in Django.
 * @param {object} requestObject
 * @returns {Promise}
 */

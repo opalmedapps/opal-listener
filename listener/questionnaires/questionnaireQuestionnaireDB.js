@@ -152,6 +152,7 @@ function getQuestionnairePurpose(answerQuestionnaireId) {
 
 /**
  * getQuestionnaireUnreadNumber
+ * @deprecated Functionality now in Django.
  * @desc this function gets the number of unread (e.g. 'New') questionnaires in a given purpose belonging to an user.
  * @param {object} opalPatientSerNum object containing PatientSerNum as a property.
  *                 This information comes from OpalDB

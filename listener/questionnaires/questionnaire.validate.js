@@ -31,6 +31,7 @@ function validatePatientQuestionnaireSerNum(requestObject) {
 
 /**
  * @name validatePatientSerNum
+ * @deprecated
  * @desc validate the whether there is a patientSerNum returned from the OpalDB
  * @param {array} queryResponse The response directly from the OpalDB
  * @returns {boolean} true if the response is valid, false otherwise
@@ -368,6 +369,7 @@ function validateRadioButtonAnswer(answerArray) {
 
 /**
  * validateUnreadNumber
+ * @deprecated
  * @desc verify that the query result has the correct property (numberUnread) and type
  * @param {object} queryResult
  * @returns {boolean} true if the result has required property and correct type, false otherwise

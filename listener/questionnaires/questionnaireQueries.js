@@ -68,6 +68,9 @@ exports.getQuestionnairePurposeQuery = function () {
                 AND aq.ID = ?;`
 }
 
+/**
+ * @deprecated
+ */
 exports.getNumberUnreadQuery = function () {
     return `SELECT COUNT(*) as numberUnread
         FROM answerQuestionnaire aq LEFT JOIN questionnaire q ON q.ID = aq.questionnaireId

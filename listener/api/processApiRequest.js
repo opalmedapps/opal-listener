@@ -38,7 +38,7 @@ const LEGACYAPI = {
     'QuestionnaireList': apiPatientUpdate.getQuestionnaireList,
     'Questionnaire': apiPatientUpdate.getQuestionnaire,
     'QuestionnairePurpose': apiPatientUpdate.getQuestionnairePurpose,
-    // TODO: move 'QuestionnaireNumberUnread' endpoint to the new back end APIs
+    // Deprecated API entry: 'QuestionnaireNumberUnread'
     'QuestionnaireNumberUnread': apiPatientUpdate.getQuestionnaireUnreadNumber,
     'EducationalMaterialRating': apiHospitalUpdate.inputEducationalMaterialRating,
     'QuestionnaireSaveAnswer': apiHospitalUpdate.questionnaireSaveAnswer,
