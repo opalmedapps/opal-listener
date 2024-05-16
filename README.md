@@ -1,8 +1,8 @@
-# Opal-listener
+# Listener
 
 [![pipeline status](https://gitlab.com/opalmedapps/opal-listener/badges/main/pipeline.svg)](https://gitlab.com/opalmedapps/opal-listener/-/commits/main) [![coverage report](https://gitlab.com/opalmedapps/opal-listener/badges/main/coverage.svg)](https://gitlab.com/opalmedapps/opal-listener/-/commits/main) [![Docs](https://img.shields.io/badge/docs-available-brightgreen.svg)](https://opalmedapps.gitlab.io/opal-listener)
 
-This is the Opal app's backend listener that sits between Firebase and OpalDB.
+This is the Opal app's backend listener that facilitates communication between the user applications and the Opal PIE (typically running within a hospital network that cannot be accessed from the outside) via Firebase.
 
 ## Getting Started
 
@@ -11,18 +11,16 @@ Refer to the Deployment section below for notes on how to deploy the project on 
 
 ### Prerequisites
 
-These are the requirements to run a local listener app. The second requirement is only needed to run in a live setting with actual clinical data.
+These are the requirements to run a local listener app.
+The second requirement is only needed to run in a live setting with actual clinical data.
 
-1) Install [Node.js](https://nodejs.org/en/download/), either directly or using a Node version manager.
-   Refer to other components in the Opal system (e.g. the app repo), or to this repo's Dockerfile for the correct version number to install.
-2) (**Only required if wanting to access live data**) Have access to clinical computer in the MedPhys department
-3) Install [Docker](https://docs.docker.com/get-docker/) (Should you choose the docker installation)
-4) Configure a test DB. It is suggested to use Docker to run your local database. [Instruction here](https://gitlab.com/opalmedapps/db-docker). You can, alternatively, setup a local mysql server using XAMP/MAMP by following [these instructions](https://gitlab.com/opal-teaching/opal-backend-wiki/-/blob/master/backend-installation.md#database)
-5) Setup firebase app. You can follow [these instruction](https://gitlab.com/opal-teaching/opal-backend-wiki/-/blob/master/backend-installation.md#firebase) to complete the setup.
+1. [Docker](https://docs.docker.com/get-docker/)
+2. Have the [backend](https://gitlab.com/opalmedapps/backend) and [legacy databases](https://gitlab.com/opalmedapps/db-docker) running.
+3. Have your own [Firebase project set up](https://opalmedapps.gitlab.io/development/setup/) and the Firebase admin key file saved
 
 ### Installation
 
-##### Step 1 | Add Firebase configuration
+#### Step 1: Add Firebase configuration
 
 Copy your firebase admin key file into the `src/config/firebase` directory.
 > The content of this directory is ignore by versioning
