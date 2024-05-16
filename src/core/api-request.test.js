@@ -1,5 +1,5 @@
 /* eslint-disable consistent-return */
-require('../test/test-setup');
+require('../test/chai-setup');
 const { expect } = require('chai');
 const ApiRequest = require('./api-request');
 
