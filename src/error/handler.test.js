@@ -1,5 +1,5 @@
 /* eslint-disable mocha/no-setup-in-describe */
-require('../test/test-setup');
+require('../test/chai-setup');
 const { expect } = require('chai');
 const ErrorHandler = require('./handler');
 const { ERRORS } = require('./const');

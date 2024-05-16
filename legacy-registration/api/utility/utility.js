@@ -29,7 +29,7 @@ exports.unixToMYSQLTimestamp = legacyListenerUtils.unixToMYSQLTimestamp;
 
 /**
      encrypt
-     @desc Encrypts a response object using PBKDF2 hash as key and NACL as encryption tool
+     @desc Encrypts a response object.
      @param object
      @param secret
      @param salt
@@ -50,13 +50,7 @@ exports.encrypt = legacyListenerUtils.encrypt;
 
 exports.decrypt = legacyListenerUtils.decrypt;
 
-//Encrypts an object, array, number, date or string
-exports.encryptObject = legacyListenerUtils.encryptObject;
-
 exports.hash = legacyListenerUtils.hash;
-
-//Decryption function, returns an object whose values are all strings
-exports.decryptObject = legacyListenerUtils.decryptObject;
 
 exports.concatUTF8Array = legacyListenerUtils.concatUTF8Array;
 

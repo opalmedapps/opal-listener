@@ -3,7 +3,7 @@
  * @author Stacey Beard
  */
 
-require('../test/test-setup');
+require('../test/chai-setup');
 const { expect } = require('chai');
 
 const { Firebase } = require('./firebase');

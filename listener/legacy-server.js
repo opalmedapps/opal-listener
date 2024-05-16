@@ -28,12 +28,11 @@ const cp                = require('child_process');
 const OpalSecurityResponseError = require('./api/response/security-response-error');
 const OpalSecurityResponseSuccess = require('./api/response/security-response-success');
 const OpalResponse      = require('./api/response/response');
-const { Version } = require('../src/utility/version');
+const { RequestContext } = require('../src/core/request-context.js');
 
 
 // NOTE: Listener launching steps have been moved to src/server.js
 
-let db;
 let ref;
 
 /*********************************************
@@ -83,11 +82,9 @@ function handleRequest(requestType, snapshot){
     logger.log('debug', 'Handling request');
 
     const headers = {key: snapshot.key, objectRequest: snapshot.val()};
+    const context = new RequestContext(requestType, snapshot.val());
 
-    // Temporary code for compatibility with app version 1.12.2
-    let useLegacySettings = Version.versionLessOrEqual(headers.objectRequest.AppVersion, Version.version_1_12_2);
-
-    processRequest(headers).then(function(response){
+    processRequest(context, headers).then(function(response){
 
         // Print the response contents (shortened if too long)
         try {
@@ -99,7 +96,7 @@ function handleRequest(requestType, snapshot){
 
         // Log before uploading to Firebase. Check that it was not a simple log
         // if (response.Headers.RequestObject.Request !== 'Log') logResponse(response);
-        uploadToFirebase(response, requestType, useLegacySettings);
+        uploadToFirebase(context, response);
     });
 }
 exports.handleRequest = handleRequest;
@@ -125,10 +122,11 @@ function logResponse(response){
 
 /**
  * processRequest
+ * @description Takes the request read from Firebase and routes it to the correct API handler.
+ * @param {RequestContext} context The request context.
  * @param headers
- * @desc takes in the request read from Firebase and routes it to the correct API handler
  */
-function processRequest(headers){
+function processRequest(context, headers){
 
     logger.log('info', 'Processing request');
 
@@ -150,7 +148,7 @@ function processRequest(headers){
         processApi.logPatientRequest(requestObject);
 
         logger.log('debug', 'Processing security request');
-        processApi.securityAPI[requestObject.Request](requestKey, requestObject)
+        processApi.securityAPI[requestObject.Request](context, requestKey, requestObject)
             .then(function (response) {
                 if (response instanceof OpalSecurityResponseSuccess) r.resolve(response.toLegacy());
                 else {
@@ -169,7 +167,7 @@ function processRequest(headers){
     } else {
 
         logger.log('debug', 'Processing general request');
-        mainRequestApi.apiRequestFormatter(requestKey, requestObject)
+        mainRequestApi.apiRequestFormatter(context, requestKey, requestObject)
             .then(function(results){
 
                 logger.log('debug', `results: ${utility.stringifyShort(results)}`);
@@ -182,12 +180,11 @@ function processRequest(headers){
 /**
  * encryptResponse
  * @desc Encrypts the response object before being uploaded to Firebase
+ * @param {RequestContext} context The request context.
  * @param response
- * @param {boolean} useLegacySettings [Temporary, compatibility] If true, the old settings for PBKDF2 are used.
- *                                    Used for compatibility with app version 1.12.2.
  * @return {Promise}
  */
-function encryptResponse(response, useLegacySettings = false)
+function encryptResponse(context, response)
 {
 	let encryptionKey = response.EncryptionKey;
 	let salt = response.Salt;
@@ -195,7 +192,7 @@ function encryptResponse(response, useLegacySettings = false)
 	delete response.Salt;
 
 	if (typeof encryptionKey !== 'undefined' && encryptionKey !== '') {
-		return utility.encrypt(response, encryptionKey, salt, useLegacySettings);
+		return utility.encrypt(context, response, encryptionKey, salt);
 	}
 	else {
 		return Promise.resolve(response);
@@ -206,13 +203,11 @@ exports.encryptResponse = encryptResponse;
 
 /**
  * uploadToFirebase
+ * @param {RequestContext} context The request context.
  * @param response
- * @param key
- * @param {boolean} useLegacySettings [Temporary, compatibility] If true, the old settings for PBKDF2 are used.
- *                                    Used for compatibility with app version 1.12.2.
  * @desc Encrypt and upload the response to Firebase
  */
-function uploadToFirebase(response, key, useLegacySettings = false) {
+function uploadToFirebase(context, response) {
     logger.log('debug', 'Uploading to Firebase');
 	return new Promise((resolve, reject)=>{
 
@@ -225,13 +220,13 @@ function uploadToFirebase(response, key, useLegacySettings = false) {
          */
         const validResponse = validateKeysForFirebase(response);
 
-        encryptResponse(validResponse, useLegacySettings).then((response)=>{
+        encryptResponse(context, validResponse).then((response)=>{
 			response.Timestamp = admin.database.ServerValue.TIMESTAMP;
             let path = '';
-            if (key === "requests") {
+            if (context.requestType === "requests") {
                 const userId = headers.RequestObject.UserID;
                 path = 'users/'+userId+'/'+requestKey;
-			} else if (key === "passwordResetRequests") {
+			} else if (context.requestType === "passwordResetRequests") {
 				path = 'passwordResetResponses/'+requestKey;
 			}
 
@@ -241,19 +236,19 @@ function uploadToFirebase(response, key, useLegacySettings = false) {
 
 			ref.child(path).set(response).then(function(){
 				logger.log('debug', 'Uploaded to firebase');
-				completeRequest(headers, key);
+				completeRequest(headers, context.requestType);
 				resolve('done');
 			}).catch(function (error) {
-				logger.error('Error writing to firebase', {error:error});
+				logger.log('error', 'Error writing to firebase', error);
 				reject(error);
 			});
 		}).catch((err)=>{
-			logger.error('Error writing to firebase', {error:err});
+			logger.log('error', 'Error encrypting response or writing to firebase', err);
 			reject(err);
 		});
 	});
 }
-exports.uploadToFirebase = uploadToFirebase;
+
 /**
  * validateKeysForFirebase
  * @author Stacey Beard
