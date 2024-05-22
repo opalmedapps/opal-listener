@@ -1,66 +1,45 @@
-# Opal-listener
+# Listener
 
 [![pipeline status](https://gitlab.com/opalmedapps/opal-listener/badges/main/pipeline.svg)](https://gitlab.com/opalmedapps/opal-listener/-/commits/main) [![coverage report](https://gitlab.com/opalmedapps/opal-listener/badges/main/coverage.svg)](https://gitlab.com/opalmedapps/opal-listener/-/commits/main) [![Docs](https://img.shields.io/badge/docs-available-brightgreen.svg)](https://opalmedapps.gitlab.io/opal-listener)
 
-This is the Opal app's backend listener that sits between Firebase and OpalDB.
+This is Opal's backend listener that facilitates communication between the user applications and the Opal PIE (typically running within a hospital network that cannot be accessed from the outside) via Firebase.
 
 ## Getting Started
 
 These instructions will get you a copy of the project up and running on your local machine for development and testing purposes.
-Refer to the Deployment section below for notes on how to deploy the project on a live system.
 
 ### Prerequisites
 
-These are the requirements to run a local listener app. The second requirement is only needed to run in a live setting with actual clinical data.
+These are the requirements to run the listener locally.
 
-1) Install [Node.js](https://nodejs.org/en/download/), either directly or using a Node version manager.
-   Refer to other components in the Opal system (e.g. the app repo), or to this repo's Dockerfile for the correct version number to install.
-2) (**Only required if wanting to access live data**) Have access to clinical computer in the MedPhys department
-3) Install [Docker](https://docs.docker.com/get-docker/) (Should you choose the docker installation)
-4) Configure a test DB. It is suggested to use Docker to run your local database. [Instruction here](https://gitlab.com/opalmedapps/db-docker). You can, alternatively, setup a local mysql server using XAMP/MAMP by following [these instructions](https://gitlab.com/opal-teaching/opal-backend-wiki/-/blob/master/backend-installation.md#database)
-5) Setup firebase app. You can follow [these instruction](https://gitlab.com/opal-teaching/opal-backend-wiki/-/blob/master/backend-installation.md#firebase) to complete the setup.
+1. [Docker](https://docs.docker.com/get-docker/)
+2. Have the [backend](https://gitlab.com/opalmedapps/backend) and [legacy databases](https://gitlab.com/opalmedapps/db-docker) running.
+3. Have your own [Firebase project set up](https://opalmedapps.gitlab.io/development/setup/) and the Firebase admin key file saved.
 
 ### Installation
 
-##### Step 1 | Add Firebase configuration
+#### Step 1: Add Firebase configuration
 
-Copy your firebase admin key file into the `src/config/firebase` directory.
-> The content of this directory is ignore by versioning
+Copy your Firebase admin key file into the `src/config/` directory.
+The content of this directory is ignored from version control.
 
-##### Step 2 | App configuration
+#### Step 2: Configuration
 
 Copy and rename `.env.sample` to `.env`.
-Then fill out the required fields.
+Then, fill out the fields according to your local installation (most importantly, the Firebase database URL copied from your Firebase project's settings, and the two backend auth tokens).
+Note that the backend auth tokens will have been generated for you when initializing your test data in the backend project.
 
-Communication with the django backend needs to be authenticated with an REST API token. You can generate a token following [this procedure](https://opalmedapps.gitlab.io/backend/authentication/). Then add the token to your `.env` as shown in the example.
+Communication with the backend needs to be authenticated with a REST API token.
+It is assumed that at this point you already have the backend set up with initial data which generated these.
 
-> FIREBASE_DATABASE_URL can be found in the web_config.txt file in your firebase folder
+* The `FIREBASE_DATABASE_URL` can be found in the exported app configuration from Firebase
+* The `FIREBASE_ADMIN_KEY_PATH` defaults to `/app/src/config/firebase-admin-key.json` inside the container (i.e., `src/config/firebase-admin-key.json` in your project)
+* Notice that the host names are `host.docker.internal` and NOT `localhost`. This is required for a container to call a localhost service on the host system.
+* `DATA_CACHE_TIME_TO_LIVE_MINUTES` represents the length of time in minutes the listener will store a given user's salt and secret keys when requesting encryption values
 
-> FIREBASE_ADMIN_KEY_PATH: If you intend to run the listener in Docker, use "/app/src/config/firebase/NAME_OF_YOUR_ADMIN_KEY_FILE.json".
+#### Step 3: Run the listener
 
-> If you intend to run the listener using Node.js, use the absolute path to the Firebase admin key file on your computer (using forward slashes, not backslashes).
-
-> Notice that the host names are `host.docker.internal` and NOT `localhost`. This is required for a container to call a localhost service on the host system.
-
-> When running the app using Docker, your firebase admin key file is copied in the container for it to be accessible.
-
-> DATA_CACHE_TIME_TO_LIVE_MINUTES represents the length of time in minutes the listener will store a given user's salt and secret keys when requesting encryption values. An appropriate length of time is 5-10 minutes.
-
-##### Step 3 | Install the NPM packages
-
-Run the following command at the root of the project to install its dependencies.
-
-```shell
-npm install
-```
-
-##### Step 4 | Run the listener
-
-###### Step 4.1 (option) | Running in Docker
-
-The project contains a `Dockerfile` and  `docker.compose.yml` files to build and run the app within a Docker container, either for a production-like setup or development using a local volume.
-
-Make sure you've filled out the `FIREBASE_ADMIN_KEY_PATH` config with the correct value for running the listener in Docker.
+The project contains `Dockerfile` and  `docker-compose.yml` files to build an image and run the app as a container, either for a production-like setup or development.
 
 To build the Docker image and run the container, running the following command at the root of the project
 
@@ -68,44 +47,27 @@ To build the Docker image and run the container, running the following command a
 docker compose up 
 ```
 
-The project also contains a `docker-compose.prod.yml` This file is used to build an image and a container with an attached volume and a different start command. You can use this file should you want a non-development set up. To use this file run the command:
+More information about Docker compose can be found on the [Docker Compose page](https://docs.docker.com/compose/).
 
-```shell
-docker compose -f docker-compose.prod.yml up --build
-```
-
-> More information about Docker compose can be found [here](https://docs.docker.com/compose/)
-
-###### Step 4.2 (option) | Running with Node.js
-
-Make sure you've filled out the `FIREBASE_ADMIN_KEY_PATH` config with the correct value for running the listener with Node.js.
-
-Run the following command at the root of the project.
-
-```shell
-npm run start
-```
-
-Alternatively, to avoid having to restart the listener every time you make changes to the code while developing, use:
-
-```shell
-npm run watch
-```
-
-### SSL [Optional]
+### SSL/TLS (Optional)
 
 Settings are available in this project to allow the listener to use encrypted connections to the databases,
-and when making external requests. Enabling SSL is optional. Note that the instructions below are for a local setup.
+and when making external requests.
+Enabling SSL is optional.
+Note that the instructions below are for a local setup.
 On a server, certificate files may be stored in different locations.
 
 1. Copy your CA public key file (usually called `ca.pem`; generated when
    [setting up SSL in db-docker](https://gitlab.com/opalmedapps/db-docker#running-the-databases-with-encrypted-connections))
    to the `certs` folder.
 2. In the `.env` file under `--- SSL Configurations ---`, enable SSL and provide the path to this file.
-3. Restart your Docker container or running listener process.
+3. Restart your Docker container via `docker compose up` which forces the container to be recreated.
 
 To ensure that your setup was successful, make sure the listener launches successfully, and that the database queries
 print `Grabbed SQL connection ... with SSL enabled` to the logger, and complete successfully.
+
+If external HTTP requests are intercepted by a proxy (e.g., via deep packet inspection) HTTPS requests might fail if a custom/internal certificate authority is used.
+In this case, provide a certificate bundle that includes this certificate, make it available inside the container, and set the `NODE_EXTRA_CA_CERTS` environment variable.
 
 ### Project Configurations
 
@@ -141,8 +103,10 @@ For help on creating new documentation pages, refer to {@tutorial creating-docum
 
 ### Unit tests
 
-Unit tests for this repository are run using the Mocha test framework. Test files should be in the `src` directory
-(or any of its subdirectories), and should have a name in the format `*.test.*`.
+Unit tests for this repository are run using the Mocha test framework.
+Tests are required for any new code written in the `src` directory (or any of its subdirectories), and test files should have a name in the format `*.test.*`.
+In other (legacy) parts of the project, tests are not necessarily required.
+However, they can still be created to improve coverage or to test new code when the legacy part of the system is modified.
 
 To run the tests:
 
@@ -162,70 +126,9 @@ Note that the mock request data need to have the same structure as `src/test/sim
 
 You also need to specify the correct firebase `UserID` that is linked to your local development setup and database.
 
-## Deployment
-
-Deployment is managed by [PM2](https://github.com/Unitech/pm2)
-
-### Prerequisites
-
-1) Have access to clinical computer and credentials that allow you SSH into Opal servers.
-2) Node should **already** be installed, but if not, you will have to [install the Node runtime yourself](https://nodejs.org/en/download/)
-3) PM2 should **already** be installed, but if not, you will have to install yourself using
-
-```shell
-# Install latest PM2 version
-$ npm install pm2@latest -g
-# Save process list, exit old PM2 & restore all processes
-$ pm2 update
-```
-
-3) Git should **already** be installed, but if not, you will have to [install Git yourself](https://www.atlassian.com/git/tutorials/install-git)
-
-### Deployment
-
-There are two use case for deployment: creating a new process and updating a previous. Of course, the latter will be 99% of the use cases.
-
-1) Updating
-
-* We assume the environment and codebase is propery installed and configured
-* We assume the repository is cloned 
-* We assume the PM2 process is already created
-
-Go to the directory that corresponds to the branch you want to update.
-
-Pull the latest changes:
-
-```shell
-git pull
-```
-
-Restart the PM2 process:
-
-```shell
-pm2 restart <name-of-process>
-```
-
-2) Spawning new process
-
-* We assume the environment and codebase is propery installed and configured
-* Clone the repo into a new directory
-* Switch to the branch that is going to be deployed
-
-```shell
-git fetch
-git checkout <branch>
-```
-
-* Start new PM2 process
-
-```shell
-pm2 start src/server.js --name <name-of-process>
-```
-
 ## Built With
 
 * [Node](https://nodejs.org/en/) - The server-side library used
-* [PM2](https://github.com/Unitech/pm2) - Process Management
 
 ## Contributing
 
@@ -233,7 +136,8 @@ Please read [CONTRIBUTING.md](https://gist.github.com/PurpleBooth/b24679402957c6
 
 ## Versioning
 
-We use [SemVer](http://semver.org/) for versioning. For the versions available, see the [tags on this repository](https://github.com/your/project/tags). 
+We use [SemVer](http://semver.org/) for versioning.
+For the versions available, see the [tags on this repository](https://github.com/your/project/tags).
 
 ## Authors
 
