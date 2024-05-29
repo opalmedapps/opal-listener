@@ -30,7 +30,6 @@ let runQuery = (...args) => queryRunner.run(...args);
 exports.getQuestionnaireList = getQuestionnaireList;
 exports.getQuestionnaire = getQuestionnaire;
 exports.getQuestionnairePurpose= getQuestionnairePurpose;
-exports.getQuestionnaireUnreadNumber = getQuestionnaireUnreadNumber;
 exports.saveAnswer = saveAnswer;
 exports.updateQuestionnaireStatusInQuestionnaireDB = updateQuestionnaireStatusInQuestionnaireDB;
 
@@ -144,36 +143,6 @@ function getQuestionnairePurpose(answerQuestionnaireId) {
         })
         .catch(function (err) {
             logger.log("error", "Error getting questionnaire purpose, " + err);
-            r.reject(err);
-        })
-
-    return r.promise;
-}
-
-/**
- * getQuestionnaireUnreadNumber
- * @desc this function gets the number of unread (e.g. 'New') questionnaires in a given purpose belonging to an user.
- * @param {object} opalPatientSerNum object containing PatientSerNum as a property.
- *                 This information comes from OpalDB
- * @param {string} purpose string indicating the purpose of the questionnaire list requested.
- *                 The purposes can be found in QUESTIONNAIRE_PURPOSE_ID_MAP of the questionnaireConfig.json file.
- * @returns {promise}
- */
-function getQuestionnaireUnreadNumber(opalPatientSerNum, purpose) {
-    let r = q.defer();
-
-    // get number of unread questionnaires
-    runQuery(questionnaireQueries.getNumberUnreadQuery(), [findPurposeId(purpose), opalPatientSerNum.PatientSerNum])
-        .then(function (queryResult) {
-            if (!questionnaireValidation.validateUnreadNumber(queryResult)) {
-                logger.log("error", "Error getting number of unread questionnaires: query error");
-                r.reject(new Error('Error getting number of unread questionnaires: query error'));
-            } else {
-                r.resolve(queryResult[0]);
-            }
-        })
-        .catch(function (err) {
-            logger.log("error", "Error getting number of unread questionnaires, " + err);
             r.reject(err);
         })
 
