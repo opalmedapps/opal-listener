@@ -68,14 +68,6 @@ exports.getQuestionnairePurposeQuery = function () {
                 AND aq.ID = ?;`
 }
 
-exports.getNumberUnreadQuery = function () {
-    return `SELECT COUNT(*) as numberUnread
-        FROM answerQuestionnaire aq LEFT JOIN questionnaire q ON q.ID = aq.questionnaireId
-            WHERE aq.status = 0
-                AND q.purposeId = ?
-                AND aq.patientId = (SELECT ID FROM patient WHERE externalId = ?);`
-}
-
 exports.saveAnswerQuery = function () {
     return "call saveAnswer(?,?,?,?,?,?,?,?);";
 }

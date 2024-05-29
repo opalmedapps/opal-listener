@@ -65,7 +65,7 @@ class RequestValidator {
 					});
 				}
 			}).catch((err)=>{
-				r.reject(new OpalResponseError(1, 'Unable get user encryption', request, err));
+				r.reject(new OpalResponseError(1, 'Unable to get user encryption', request, err));
 			});
 		}else{
 			logger.log('error', `invalid request due to: ${JSON.stringify(validation.errors)}`);
