@@ -19,7 +19,6 @@ const LEGACYAPI = {
     'DeviceIdentifier': apiHospitalUpdate.updateDeviceIdentifier,
     'Log': apiPatientUpdate.logActivity,
     'LogPatientAction': apiPatientUpdate.logPatientAction,
-    // Deprecated API entry: 'Login'
     'Login': apiPatientUpdate.login,
     'Logout': apiPatientUpdate.logout,
     'Refresh': apiPatientUpdate.refresh,
@@ -38,8 +37,6 @@ const LEGACYAPI = {
     'QuestionnaireList': apiPatientUpdate.getQuestionnaireList,
     'Questionnaire': apiPatientUpdate.getQuestionnaire,
     'QuestionnairePurpose': apiPatientUpdate.getQuestionnairePurpose,
-    // TODO: move 'QuestionnaireNumberUnread' endpoint to the new back end APIs
-    'QuestionnaireNumberUnread': apiPatientUpdate.getQuestionnaireUnreadNumber,
     'EducationalMaterialRating': apiHospitalUpdate.inputEducationalMaterialRating,
     'QuestionnaireSaveAnswer': apiHospitalUpdate.questionnaireSaveAnswer,
     'QuestionnaireUpdateStatus': apiHospitalUpdate.questionnaireUpdateStatus,

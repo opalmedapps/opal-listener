@@ -10,7 +10,6 @@ const { Version } = require('../../src/utility/version');
 
 const questionnaireOpalDBValidation = {
     'validatePatientQuestionnaireSerNum': validatePatientQuestionnaireSerNum,
-    'validatePatientSerNum': validatePatientSerNum,
     'validatePatientSerNumAndLanguage': validatePatientSerNumAndLanguage,
     'validateParamSaveAnswer': validateParamSaveAnswer,
     'validateParamUpdateStatus': validateParamUpdateStatus,
@@ -27,19 +26,6 @@ const questionnaireOpalDBValidation = {
 function validatePatientQuestionnaireSerNum(requestObject) {
     return (requestObject.hasOwnProperty('Parameters') && requestObject.Parameters.hasOwnProperty('qp_ser_num')
         && requestObject.Parameters.qp_ser_num !== null && !isNaN(requestObject.Parameters.qp_ser_num));
-}
-
-/**
- * @name validatePatientSerNum
- * @desc validate the whether there is a patientSerNum returned from the OpalDB
- * @param {array} queryResponse The response directly from the OpalDB
- * @returns {boolean} true if the response is valid, false otherwise
- */
-function validatePatientSerNum(queryResponse) {
-    return (queryResponse.length === 1
-        && queryResponse[0].hasOwnProperty('PatientSerNum')
-        && queryResponse[0].PatientSerNum !== undefined
-        && queryResponse[0].PatientSerNum !== null);
 }
 
 /**
@@ -158,7 +144,6 @@ const questionnaireQuestionnaireDBValidation = {
     'validateRadioButtonAnswer': validateRadioButtonAnswer,
     'validateCheckboxAnswer': validateCheckboxAnswer,
     'validatePurpose': validatePurpose,
-    'validateUnreadNumber': validateUnreadNumber,
 }
 
 /**
@@ -364,16 +349,6 @@ function validateRadioButtonAnswer(answerArray) {
  */
  function validatePurpose(queryResult) {
     return queryResult[0].hasOwnProperty('purpose') && queryResult[0].purpose;
-}
-
-/**
- * validateUnreadNumber
- * @desc verify that the query result has the correct property (numberUnread) and type
- * @param {object} queryResult
- * @returns {boolean} true if the result has required property and correct type, false otherwise
- */
-function validateUnreadNumber(queryResult) {
-    return queryResult[0].hasOwnProperty('numberUnread') && !isNaN(parseInt(queryResult[0].numberUnread));
 }
 
 /**
