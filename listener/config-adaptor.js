@@ -27,13 +27,6 @@ module.exports.QUESTIONNAIRE_COMPLETED_URL = process.env.QUESTIONNAIRE_COMPLETED
 module.exports.DEFAULT_LAB_EDUCATIONAL_URL_EN = process.env.DEFAULT_LAB_EDUCATIONAL_URL_EN;
 module.exports.DEFAULT_LAB_EDUCATIONAL_URL_FR = process.env.DEFAULT_LAB_EDUCATIONAL_URL_FR;
 module.exports.LATEST_STABLE_VERSION = process.env.LATEST_STABLE_VERSION;
-// SMTP settings
-module.exports.SMTP_HOST = process.env.SMTP_HOST;
-module.exports.SMTP_PORT = process.env.SMTP_PORT;
-module.exports.SMTP_USERNAME = process.env.SMTP_USERNAME;
-module.exports.SMTP_PASSWORD = process.env.SMTP_PASSWORD;
-module.exports.SMTP_FROM = process.env.SMTP_FROM;
-module.exports.SMTP_TLS_REJECTED_UNAUTHORIZED = process.env.SMTP_TLS_REJECTED_UNAUTHORIZED;
 // OPAL EMAIL used in `mailer.js`
 module.exports.OPAL_EMAIL=process.env.OPAL_EMAIL;
 // SMTP IP and PORT used in `mailer.js`
