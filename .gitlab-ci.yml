@@ -263,6 +263,12 @@ container_scanning:
   variables:
     CS_IMAGE: $CI_REGISTRY_IMAGE:$CI_COMMIT_REF_SLUG
 
+# Secret Detection
+# https://docs.gitlab.com/ee/user/application_security/secret_detection/pipeline/index.html#overriding-the-analyzer-jobs
+secret_detection:
+  # Prevent default access to artifacts from previous stages, to avoid scanning for secrets in the npm cache (.npm)
+  needs: []
+
 # SAST
 # https://docs.gitlab.com/ee/user/application_security/sast/#available-cicd-variables
 sast:
