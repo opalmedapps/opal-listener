@@ -128,6 +128,9 @@ async function getQuestionnaire(requestObject) {
     if (!questionnaireValidation.validatePatientQuestionnaireSerNum(requestObject)) {
         throw new Error('Error getting questionnaire: the requestObject does not have the required parameter qp_ser_num');
     }
+    console.log(requestObject)
+    const patientSerNum = Number(requestObject.TargetPatientID);
+    await checkCaregiverPermissions(requestObject.UserID, patientSerNum);
     let language = await getQuestionnaireLanguage(requestObject);
 
     // get questionnaire belonging to that qp_ser_num
