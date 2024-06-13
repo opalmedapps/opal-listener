@@ -19,13 +19,14 @@ module.exports = {
 /**
  * requestFormatter
  * @description handles the api requests by formatting the response obtained from the API
+ * @param {RequestContext} context The request context.
  * @param {key, request}
  * @returns {Promise}
  */
-function requestFormatter({key,request}) {
+function requestFormatter(context, {key,request}) {
 
 	logger.log('debug', `request object in request formatter: ${JSON.stringify(request)}`);
-	return RequestValidator.validate(key, request)
+	return RequestValidator.validate(context, key, request)
 		.then( opalReq => { //opalReq of type, OpalRequest
 
 			// After they have been decrypted, log all main requests in the table PatientActivityLog. -SB
@@ -51,19 +52,20 @@ function requestFormatter({key,request}) {
 			});
 		}).catch(err => {
 			logger.log('error', 'Error validating request', err);
-			return err.toLegacy();
+			return err.toLegacy ? err.toLegacy() : err;
 		});
 }
 
 /**
  * @name requestLegacyWrapper
  * @description Wrapper to make it compatible with current infrastructure
+ * @param {RequestContext} context The request context.
  * @param requestKey
  * @param requestObject
  */
-function requestLegacyWrapper(requestKey, requestObject) {
+function requestLegacyWrapper(context, requestKey, requestObject) {
 	let r = q.defer();
-	requestFormatter({key: requestKey,request:requestObject})
+	requestFormatter(context, {key: requestKey,request:requestObject})
 		.then((result)=>r.resolve(result)).catch((result)=>r.resolve(result));
 	return r.promise;
 }
@@ -71,12 +73,13 @@ function requestLegacyWrapper(requestKey, requestObject) {
 /**
  * apiRequestFormatter
  * @desc handles the api requests by formatting the response obtained from the API
+ * @param {RequestContext} context The request context.
  * @param requestKey
  * @param requestObject
  * @returns {Promise}
  */
-function apiRequestFormatter(requestKey,requestObject) {
-	return  requestLegacyWrapper(requestKey, requestObject);
+function apiRequestFormatter(context, requestKey,requestObject) {
+	return  requestLegacyWrapper(context, requestKey, requestObject);
 }
 
 

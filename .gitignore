@@ -1,9 +1,5 @@
 # config files
-listener/config.json
-legacy-registration/config.json
-listener/firebase/*
-src/config/firebase/
-src/config/config.json
+src/config/
 
 # Generated documentation
 docs/generated

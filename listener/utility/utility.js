@@ -2,19 +2,7 @@ const CryptoJS          = require('crypto-js');
 const stablelibutf8     = require('@stablelib/utf8');
 const nacl              = require('tweetnacl');
 const stablelibbase64   = require('@stablelib/base64');
-const crypto            = require('crypto');
-const Q                 = require('q');
-
-// Parameters for PBKDF2
-const iterations = 25000;
-const keySizeBytes = 32;
-const digest = 'sha256';
-
-// [Temporary compatibility with 1.12.2] Legacy parameters for PBKDF2
-const legacyIterations = 1000;
-const legacyKeySizeBytes = 16;
-const legacyDigest = 'sha1';
-
+const keyDerivationCache = require('../../src/utility/key-derivation-cache');
 
 /**
  * resolveEmptyResponse
@@ -71,87 +59,38 @@ exports.unixToMYSQLTimestamp=function(time) {
 };
 
 /**
- * encrypt
- * @desc Encrypts a response object using PBKDF2 hash as key and NACL as encryption tool
- * @param object
- * @param secret
- * @param salt
- * @param {boolean} useLegacySettings [Temporary, compatibility] If true, the old settings for PBKDF2 are used.
- *                                    Used for compatibility with app version 1.12.2.
- * @returns {Promise}
- * @notes link for NACL encryption documentation: https://tweetnacl.js.org/#/
+ * @description Encrypts a response object.
+ * @param {RequestContext} context The request context.
+ * @param {Object} object The object to encrypt.
+ * @param {string} secret If a salt is provided, the secret is used as a "password" with the salt to derive a key.
+ *                        If no salt is provided, the secret is used directly as the encryption key.
+ * @param {string} [salt] Optional salt; if provided, it's used with the secret to derive an encryption key.
+ * @returns {Promise<Object>} Resolves to the encrypted object.
  */
-exports.encrypt = function(object, secret, salt, useLegacySettings = false) {
-    let r = Q.defer();
+exports.encrypt = async function(context, object, secret, salt) {
+    const key = salt
+        ? await keyDerivationCache.getKey(secret, salt, context.cacheLabel, context.useLegacyPBKDF2Settings)
+        : secret;
+    const truncatedKey = stablelibutf8.encode(key.substring(0, nacl.secretbox.keyLength));
     const nonce = nacl.randomBytes(nacl.secretbox.nonceLength);
-    if (salt) {
-        // Temporary code for compatibility with app version 1.12.2
-        let iterationsCompatibility = useLegacySettings ? legacyIterations : iterations;
-        let keySizeBytesCompatibility = useLegacySettings ? legacyKeySizeBytes : keySizeBytes;
-        let digestCompatibility = useLegacySettings ? legacyDigest : digest;
-
-        crypto.pbkdf2(secret, salt, iterationsCompatibility, keySizeBytesCompatibility, digestCompatibility, (err, derivedKey) => {
-            if (err) {
-                r.reject(err);
-            } else {
-                const hexKey = derivedKey.toString('hex');
-                const truncatedKey = stablelibutf8.encode(hexKey.substring(0, nacl.secretbox.keyLength));
-                r.resolve(exports.encryptObject(object, truncatedKey, nonce));
-            }
-        });
-    } else {
-        secret = stablelibutf8.encode(secret.substring(0, nacl.secretbox.keyLength));
-        r.resolve(exports.encryptObject(object, secret, nonce));
-    }
-    return r.promise;
+    return exports.encryptObject(object, truncatedKey, nonce);
 };
 
 /**
- * decrypt
- * @desc Decrypts a request object so that it can be handled by the server
- * @param object
- * @param secret
- * @param salt
- * @param {boolean} useLegacySettings [Temporary, compatibility] If true, the old settings for PBKDF2 are used.
- *                                    Used for compatibility with app version 1.12.2.
- * @returns {Promise}
- * @notes link for NACL encryption documentation: https://tweetnacl.js.org/#/
+ * @description Decrypts a request object.
+ * @param {RequestContext} context The request context.
+ * @param {Object} object The object to decrypt.
+ * @param {string} secret If a salt is provided, the secret is used as a "password" with the salt to derive a key.
+ *                        If no salt is provided, the secret is used directly as the encryption key.
+ * @param {string} [salt] Optional salt; if provided, it's used with the secret to derive an encryption key.
+ * @returns {Promise<Object>} Resolves to the decrypted object.
  */
-exports.decrypt = function(object, secret, salt, useLegacySettings = false) {
-    let r = Q.defer();
-
-    if (salt) {
-        // Temporary code for compatibility with app version 1.12.2
-        let iterationsCompatibility = useLegacySettings ? legacyIterations : iterations;
-        let keySizeBytesCompatibility = useLegacySettings ? legacyKeySizeBytes : keySizeBytes;
-        let digestCompatibility = useLegacySettings ? legacyDigest : digest;
-
-        crypto.pbkdf2(secret, salt, iterationsCompatibility, keySizeBytesCompatibility, digestCompatibility, (err, derivedKey) => {
-            if (err) {
-                r.reject(err);
-            } else {
-                const hexKey = derivedKey.toString('hex');
-                const truncatedKey = stablelibutf8.encode(hexKey.substring(0, nacl.secretbox.keyLength));
-
-                let decrypted;
-                try {
-                    decrypted = exports.decryptObject(object, truncatedKey);
-                    r.resolve(decrypted);
-                } catch (err) {
-                    r.reject(err);
-                }
-            }
-        });
-    } else {
-        try {
-            var decrypted = exports.decryptObject(object, stablelibutf8.encode(secret.substring(0, nacl.secretbox.keyLength)));
-            r.resolve(decrypted);
-        } catch (err) {
-            r.reject(err);
-        }
-    }
-
-    return r.promise;
+exports.decrypt = async function(context, object, secret, salt) {
+    const key = salt
+        ? await keyDerivationCache.getKey(secret, salt, context.cacheLabel, context.useLegacyPBKDF2Settings)
+        : secret;
+    const truncatedKey = stablelibutf8.encode(key.substring(0, nacl.secretbox.keyLength));
+    return exports.decryptObject(object, truncatedKey);
 };
 
 //Encrypts an object, array, number, date or string

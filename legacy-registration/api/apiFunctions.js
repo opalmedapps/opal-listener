@@ -1,13 +1,8 @@
 /**  Library Imports **/
 
 var firebaseFunction = require('../api/firebase/firebaseFunctions.js');
-const config = require('../config-adaptor');
 const opalRequest = require('./request/request.js');
 const logger = require('../logs/logger.js');
-const path = require('path');
-const fs = require('fs');
-
-const { sendMail } = require('./utility/mail.js');
 
 /**
  * @description check the user is caregiver or not
@@ -84,10 +79,6 @@ exports.registerPatient = async function(requestObject) {
 
         await registerInBackend(requestObject, email, uid, isExistingUser);
 
-        // Registration is considered successful at this point.
-        // I.e., don't fail the whole registration if an error occurs now and only log an error.
-        await sendConfirmationEmailNoFailure(fields.language, fields.email);
-
         // Exact response string expected by the frontend
         return { Data: [{ Result: 'Successfully Update' }]};
     }
@@ -115,7 +106,7 @@ async function verifyExistingUser(requestObject) {
             );
             const result = await opalRequest.isCaregiverAlreadyRegistered(decodedToken.uid);
             return {
-                isExistingUser: result === 200,
+                isExistingUser: result.status === 200,
                 decodedToken: decodedToken,
             };
         }
@@ -226,44 +217,6 @@ function validateNewRegisterPatientRequest(requestObject) {
 async function registerInBackend(requestObject, email, uid, isExistingUser) {
     const registerData = formatRegisterData(requestObject, uid, email, isExistingUser);
     await opalRequest.registrationRegister(requestObject.Parameters.Fields.registrationCode, registerData, isExistingUser);
-}
-
-async function sendConfirmationEmailNoFailure(language, emailAddress) {
-    try {
-        let {subject, body, htmlStream} = getEmailContent(language);
-        await sendMail(config, emailAddress, subject, body.join('\n'), htmlStream);
-    }
-    catch (error) {
-        logger.log('error', `An error occurred while sending the confirmation email (for ${emailAddress})`, error);
-    }
-}
-
-/**
- * @description Returns the subject, body and HTML stream of the registration email in the given language.
- * @param {string} language - The two-character (capitalized) string of the language to send the email in.
- * @returns {Object} Returns an object with subject, body and html stream.
- * @throws Throws an error if the given language is not supported.
- */
-function getEmailContent(language) {
-    let data;
-    let htmlStream;
-    const languageChoice = language.toUpperCase();
-
-    if (languageChoice === 'EN') {
-        data = require('../email/confirmation_en.json');
-        htmlStream = fs.createReadStream(path.resolve(__dirname, '../email/confirmation_en.html'));
-    }
-    else if (languageChoice === 'FR') {
-        data = require('../email/confirmation_fr.json');
-        htmlStream = fs.createReadStream(path.resolve(__dirname, '../email/confirmation_fr.html'));
-    }
-    else {
-        throw `No email content for language '${languageChoice}' available`;
-    }
-
-    data.htmlStream = htmlStream
-
-    return data;
 }
 
 /**

@@ -1,6 +1,6 @@
 /* eslint-disable no-new */
 /* eslint-disable consistent-return */
-require('../test/test-setup');
+require('../test/chai-setup');
 const { expect } = require('chai');
 const { RequestHandler } = require('./request-handler');
 
@@ -11,14 +11,17 @@ describe('Request Handler', function () {
         });
     });
     describe('validateSnapshot', function () {
-        it('Should return false if snapshot as no key', function () {
-            return expect(RequestHandler.validateSnapshot({ Request: '' })).to.be.false;
+        it("Should throw an error if snapshot has no 'key' attribute", function () {
+            return expect(() => RequestHandler.validateSnapshot({ Request: '' })).to.throw('SNAPSHOT_VALIDATION');
         });
-        it('Should return false when snapshot is empty', function () {
-            return expect(RequestHandler.validateSnapshot({})).to.be.false;
+        it('Should throw an error if snapshot is empty', function () {
+            return expect(() => RequestHandler.validateSnapshot({})).to.throw('SNAPSHOT_VALIDATION');
         });
-        it('Should return false when snapshot is undefined', function () {
-            return expect(RequestHandler.validateSnapshot(undefined)).to.be.false;
+        it('Should throw an error if snapshot is undefined', function () {
+            return expect(() => RequestHandler.validateSnapshot(undefined)).to.throw('SNAPSHOT_VALIDATION');
+        });
+        it('Should throw an error if snapshot is not an object', function () {
+            return expect(() => RequestHandler.validateSnapshot('test')).to.throw('SNAPSHOT_VALIDATION');
         });
     });
 });

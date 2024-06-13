@@ -1,4 +1,4 @@
-require('../test/test-setup');
+require('../test/chai-setup');
 const { expect } = require('chai');
 const PromiseUtility = require('./promise');
 

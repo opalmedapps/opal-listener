@@ -359,7 +359,7 @@ exports.logPatientAction = function(requestObject){
             }
             else {
                 let errorReason2 = 'No PatientSerNum found when looking up the user in the database.';
-                logger.log('error', errorReason2, err);
+                logger.log('error', errorReason2);
                 r.reject({Response:'error',Reason:errorReason2});
             }
         }).catch((err) => {

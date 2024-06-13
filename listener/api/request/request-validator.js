@@ -22,15 +22,13 @@ class RequestValidator {
 
 	/**
 	* validate
+	* @param {RequestContext} context The request context.
 	* @param requestKey
 	* @param requestObject
 	*/
-	static validate(requestKey, requestObject)
+	static validate(context, requestKey, requestObject)
 	{
 		const r = q.defer();
-
-		// Temporary code for compatibility with app version 1.12.2
-		let useLegacySettings = Version.versionLessOrEqual(requestObject.AppVersion, Version.version_1_12_2);
 
 		let request = new OpalRequest(requestObject, requestKey);
 
@@ -54,7 +52,7 @@ class RequestValidator {
 				} else {
 
 					let {SecurityAnswer} = rows[0];
-					utility.decrypt({req: request.type, params: request.parameters}, hashedUID, SecurityAnswer, useLegacySettings)
+					utility.decrypt(context, {req: request.type, params: request.parameters}, hashedUID, SecurityAnswer)
 					.then((dec)=>{
 						request.setAuthenticatedInfo(SecurityAnswer, hashedUID, dec.req, dec.params);
 						return RequestValidator.validateRequestPermissions(request);
@@ -67,7 +65,7 @@ class RequestValidator {
 					});
 				}
 			}).catch((err)=>{
-				r.reject(new OpalResponseError(1, 'Unable get user encryption', request, err));
+				r.reject(new OpalResponseError(1, 'Unable to get user encryption', request, err));
 			});
 		}else{
 			logger.log('error', `invalid request due to: ${JSON.stringify(validation.errors)}`);
