@@ -1,8 +1,8 @@
+const axios             = require('axios');
 const filesystem        = require('fs');
 const Q                 = require('q');
 const queries           = require('./../sql/queries.js');
 const config            = require('./../config-adaptor');
-const requestUtility    = require("../utility/request-utility");
 const Mail              = require('./../mailer/mailer.js');
 const utility           = require('./../utility/utility');
 const logger            = require('./../logs/logger');
@@ -512,17 +512,11 @@ exports.checkIn = async function (requestObject) {
  * @returns {Promise<void>} Resolves if check-in succeeds, otherwise rejects with an error.
  */
 async function checkIntoOIE(mrn, mrnSite) {
-
-    let options = {
-        json: true,
-        body: {
-            "mrn": mrn,
-            "site": mrnSite,
-            "room": config.CHECKIN_ROOM,
-        },
-    };
-
-    await requestUtility.request("post", config.CHECKIN_URL, options);
+    await axios.post(config.CHECKIN_URL, {
+        "mrn": mrn,
+        "site": mrnSite,
+        "room": config.CHECKIN_ROOM,
+    });
 }
 
 /**
