@@ -1,3 +1,4 @@
+const axios = require('axios');
 const questionnaireQueries = require('./questionnaireQueries.js');
 const questionnaires = require('./questionnaireQuestionnaireDB.js');
 const opalQueries = require('../sql/queries');
@@ -5,7 +6,6 @@ const questionnaireValidation = require('./questionnaire.validate');
 const logger = require('./../logs/logger');
 const {OpalSQLQueryRunner} = require("../sql/opal-sql-query-runner");
 const config = require("../config-adaptor");
-const requestUtility = require("../utility/request-utility");
 const questionnaireConfig = require('./questionnaireConfig.json');
 const ApiRequest = require('../../src/core/api-request');
 const QuestionnaireDjango = require('./questionnaireDjango');
@@ -282,10 +282,10 @@ async function questionnaireUpdateStatus(requestObject) {
         // 3. If the questionnaire is completed, notify the OIE. If an error occurs, don't cause the whole function to fail.
         try {
             logger.log("info", "Notifying the OIE that a questionnaire was completed.");
-            if (!config.QUESTIONNAIRE_COMPLETED_URL || config.QUESTIONNAIRE_COMPLETED_URL === "") {
+            if (!config.QUESTIONNAIRE_COMPLETED_URL) {
                 throw "No value was provided for QUESTIONNAIRE_COMPLETED_URL in the config file.";
             }
-            await requestUtility.request("post", config.QUESTIONNAIRE_COMPLETED_URL, { json: true });
+            await axios.post(config.QUESTIONNAIRE_COMPLETED_URL);
         }
         catch (error) {
             logger.log("error", `Failed to send notification of completed questionnaire to the OIE`, error);
