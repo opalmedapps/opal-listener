@@ -27,11 +27,16 @@ class PatientTestCollectedDateResultsHandler extends ApiRequestHandler {
 		const date = requestObject.parameters.date;
 		const userId = requestObject.meta.UserID;
 		const patientTestResult = new PatientTestResult(patient);
+		const testResults = await patientTestResult.getTestResultsByDate(userId, date);
+		let testSerNums = [];
+		testResults.forEach((test) => testSerNums.push(test['patientTestResultSerNum']));
+		await patientTestResult.markTestResultsAsRead(userId, testSerNums);
+
 		return {
 			"data": {
 				"patientSerNum": patient.patientSerNum,
 				"testDate": date,
-				"results": await patientTestResult.getTestResultsByDate(userId, date)
+				"results": testResults
 			}
 		};
 	}

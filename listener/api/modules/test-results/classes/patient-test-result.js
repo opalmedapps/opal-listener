@@ -32,11 +32,16 @@ class PatientTestResult {
 
 	/**
 	 * Method gets the test dates for the patient
+	 * @param {String} userId - Firebase userId making the request
 	 * @param {Date} [lastUpdated] - Optional date/time; if provided, only items with 'LastUpdated' after this time are returned.
 	 * @returns {Promise<Object[]>} Returns the test dates for the patient
 	 */
-	async getTestDates(lastUpdated=0) {
-		const query = PatientTestResultQuery.getTestDatesQuery(this._patient.patientSerNum, lastUpdated);
+	async getTestDates(userId, lastUpdated=0) {
+		const query = PatientTestResultQuery.getTestDatesQuery(
+			`"${userId}"`,
+			this._patient.patientSerNum,
+			lastUpdated,
+		);
 		let results;
 		try {
 			results = await OpalSQLQueryRunner.run(query);
