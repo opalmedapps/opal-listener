@@ -1,4 +1,4 @@
-const requestUtility    = require("../../../../utility/request-utility");
+const axios = require('axios');
 
 /**
  * @description Class representing a request to a file from the internet.
@@ -19,17 +19,17 @@ class FileRequest {
      * @returns {Promise<Object>} Resolves to a data object containing the base64 content and content-type.
      */
     async getFileBase64() {
-        let url = encodeURI(this._url); // Required to work with non-standard characters (such as French characters)
-
-        let options = {
-            encoding: null, // Allows conversion to base64
+        let requestParams = {
+            method: 'get',
+            url: encodeURI(this._url), // Required to work with extended character sets (such as French accent characters)
+            responseType: 'arraybuffer', // Allows conversion to base64
         };
 
-        let { response, body } = await requestUtility.request("get", url, options);
+        let response = await axios(requestParams);
 
         return {
             contentType: response.headers["content-type"],
-            base64Data: Buffer.from(body).toString('base64'),
+            base64Data: Buffer.from(response.data, 'binary').toString('base64'),
         };
     }
 }
