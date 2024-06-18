@@ -60,31 +60,37 @@ class PatientTestResultQuery {
 	/**
 	 * Query to return the collected dates the patient had tests for the test types
 	 * that are aliased.
+	 * @param {String} userId - Firebase userId making the request
 	 * @param {string|number} patientSerNum PatientSerNum in the DB
 	 * @param {Date} lastUpdated - Only items with 'LastUpdated' after this time are returned.
 	 */
-	static getTestDatesQuery(patientSerNum, lastUpdated) {
+	static getTestDatesQuery(userId, patientSerNum, lastUpdated) {
 		let numLastUpdated = 3;
-		let params = [patientSerNum];
+		let params = [userId, patientSerNum];
 		params = utility.addSeveralToArray(params, lastUpdated, numLastUpdated);
 
 		return mysql.format(`
-                    SELECT DISTINCT
-                        DATE_FORMAT(CONVERT_TZ(CollectedDateTime, 'America/Toronto', 'UTC'), '%Y-%m-%d %H:%i:%sZ') as collectedDateTime
-                    FROM
-                        PatientTestResult as ptr,
-                        TestExpression as te,
+					SELECT
+						DATE_FORMAT(CONVERT_TZ(CollectedDateTime, 'America/Toronto', 'UTC'), '%Y-%m-%d %H:%i:%sZ') as collectedDateTime,
+						CASE
+							WHEN COUNT(*) = COUNT(CASE WHEN JSON_CONTAINS(ptr.ReadBy, ?) THEN 1 ELSE NULL END) THEN 1
+							ELSE 0
+						END AS readStatus
+					FROM
+						PatientTestResult as ptr,
+						TestExpression as te,
 						/* TestControl: only aliased lab results are sent to the app */
 						TestControl as tc
-                    WHERE
-                        ptr.PatientSerNum = ?
-                        AND ptr.TestExpressionSerNum = te.TestExpressionSerNum
+					WHERE
+						ptr.PatientSerNum = ?
+						AND ptr.TestExpressionSerNum = te.TestExpressionSerNum
 						AND te.TestControlSerNum = tc.TestControlSerNum
-                        AND tc.PublishFlag = 1
-                        AND (ptr.LastUpdated > ? OR te.LastUpdated > ? OR tc.LastUpdated > ?)
-                        /* use the AvailableAt column to determine if the lab result is available to be viewed by the patient */
-                        AND ptr.AvailableAt <= NOW()
-                    ORDER BY collectedDateTime DESC;`,
+						AND tc.PublishFlag = 1
+						AND (ptr.LastUpdated > ? OR te.LastUpdated > ? OR tc.LastUpdated > ?)
+						/* use the AvailableAt column to determine if the lab result is available to be viewed by the patient */
+						AND ptr.AvailableAt <= NOW()
+					GROUP BY collectedDateTime
+					ORDER BY collectedDateTime DESC;`,
 				params);
 	}
 
@@ -104,7 +110,7 @@ class PatientTestResultQuery {
 					`SELECT
 						ptr.PatientTestResultSerNum as latestPatientTestResultSerNum,
 						te.TestExpressionSerNum as testExpressionSerNum,
-						JSON_CONTAINS(ptr.ReadBy, ?) as readStatus,
+						A.readStatus AS readStatus,
 						tc.Name_EN as name_EN,
 						tc.Name_FR as name_FR,
 						IfNull((SELECT emc.URL_EN FROM EducationalMaterialControl emc
@@ -125,7 +131,14 @@ class PatientTestResultQuery {
 						TestExpression as te,
 						TestControl as tc,
 						(
-							SELECT ptr2.PatientSerNum, ptr2.TestExpressionSerNum, MAX(ptr2.CollectedDateTime) CollectedDateTime
+							SELECT
+								ptr2.PatientSerNum,
+								ptr2.TestExpressionSerNum,
+								MAX(ptr2.CollectedDateTime) CollectedDateTime,
+								CASE
+									WHEN COUNT(*) = COUNT(CASE WHEN JSON_CONTAINS(ptr2.ReadBy, ?) THEN 1 ELSE NULL END) THEN 1
+									ELSE 0
+								END AS readStatus
 							FROM PatientTestResult ptr2
 							WHERE
 							ptr2.PatientSerNum = ?
