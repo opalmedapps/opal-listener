@@ -127,11 +127,24 @@ async function getQuestionnaire(requestObject) {
     if (!questionnaireValidation.validatePatientQuestionnaireSerNum(requestObject)) {
         throw new Error('Error getting questionnaire: the requestObject does not have the required parameter qp_ser_num');
     }
-    let language = await getQuestionnaireLanguage(requestObject);
 
+    const patientSerNum = Number(requestObject.TargetPatientID);
+    let language = await getQuestionnaireLanguage(requestObject);
     // get questionnaire belonging to that qp_ser_num
+    let result = await questionnaires.getQuestionnaire(language, requestObject.Parameters.qp_ser_num);
+    if (result.status !== questionnaireConfig.COMPLETED_QUESTIONNAIRE_STATUS) {
+        //check the caregiver permissions for the user
+        await checkCaregiverPermissions(requestObject.UserID, patientSerNum);
+        //check the questionnaire locking status
+        let respondent = await questionnaires.getRespondentUsername(requestObject.Parameters.qp_ser_num);
+        if (respondent[0]['respondentUsername'] && respondent[0]['respondentUsername'] != requestObject.UserID){
+            const errMsg = `ERROR: another user has already locked this questionnaire.`;
+            throw new Error(errMsg, {cause: '-8'});
+        }
+    }
+
     return {
-        Data: await questionnaires.getQuestionnaire(language, requestObject.Parameters.qp_ser_num),
+        Data: result,
     };
 }
 

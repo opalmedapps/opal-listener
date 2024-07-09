@@ -32,6 +32,7 @@ exports.getQuestionnaire = getQuestionnaire;
 exports.getQuestionnairePurpose= getQuestionnairePurpose;
 exports.saveAnswer = saveAnswer;
 exports.updateQuestionnaireStatusInQuestionnaireDB = updateQuestionnaireStatusInQuestionnaireDB;
+exports.getRespondentUsername = getRespondentUsername;
 
 /*
 FUNCTIONS TO GET QUESTIONNAIRES
@@ -457,5 +458,20 @@ function getProcedureCode(queryResult) {
     }
     catch(error) {
         return undefined;
+    }
+}
+
+/**
+ * getRespondentUsername
+ * @desc Get the respondent username for the required questionnaire, empty string if not exists
+ * @param qp_ser_num The questionnaire serial number
+ * @returns The respondent username, empty string if not exists
+ */
+async function getRespondentUsername(qp_ser_num) {
+    try {
+        return await runQuery(questionnaireQueries.getAnswerQuestionnaireRespondent(), [qp_ser_num]);
+    } catch (error) {
+        logger.log("error", `Error getting the questionnaire respondent`, error);
+        throw error;
     }
 }
