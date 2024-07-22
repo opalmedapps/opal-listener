@@ -18,6 +18,7 @@ const legacyRegistrationServer = require('../legacy-registration/legacy-server')
 const legacyLogger = require('../listener/logs/logger');
 const { RequestHandler } = require('./core/request-handler');
 const { REQUEST_TYPE } = require('./const');
+const { SessionKeyManager } = require('./encryption/session-key-manager');
 const { Version } = require('./utility/version');
 
 // Raise AssertionError if environment variables are not set
@@ -52,6 +53,7 @@ async function launch() {
 
     legacyLogger.log('debug', 'Setting Firebase request listeners');
 
+    await SessionKeyManager.init();
     const requestHandler = new RequestHandler(firebase);
     // Still need pass the database reference to make the legacy-server work for the moment
     legacyServer.setFirebaseConnection(firebase.getDataBaseRef);

@@ -60,6 +60,7 @@ const LEGACYAPI = {
  * @type {{SecurityQuestion: *, SetNewPassword: *, VerifyAnswer: *}}
  */
 exports.securityAPI = {
+    'KeyExchange': security.keyExchange,
     'SecurityQuestion': security.getSecurityQuestion,
     'SetNewPassword': security.resetPassword,
     'VerifyAnswer': security.verifySecurityAnswer,

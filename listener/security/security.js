@@ -5,12 +5,21 @@
 const logger = require('./../logs/logger');
 const firebase = require('firebase-admin');
 const keyDerivationCache = require('../../src/utility/key-derivation-cache');
+const Keyv = require('keyv');
+const { SessionKeyManager } = require('../../src/encryption/session-key-manager');
 const sqlInterface = require('./../api/sqlInterface.js');
 const utility = require('./../utility/utility.js');
 const { Version } = require('../../src/utility/version');
 const OpalResponse = require('../api/response/response');
 const OpalSecurityResponseError = require('../api/response/security-response-error');
 const OpalSecurityResponseSuccess = require('../api/response/security-response-success');
+
+const keyCache = new Keyv({ namespace: 'session-keys' });
+keyCache.on('error', err => logger.log(
+    'error',
+    'KeyV session key data cache error',
+    err,
+));
 
 const FIVE_MINUTES = 300000;
 
@@ -21,6 +30,17 @@ const CODE = OpalResponse.CODE;
 const answerVerified = { AnswerVerified: "true" };
 const answerNotVerified = { AnswerVerified: "false" };
 const passwordResetSuccess = { PasswordReset: "true" };
+
+
+exports.keyExchange = async function(context, requestKey, requestObject) {
+    let params = await utility.decrypt(context, requestObject.Parameters, utility.hash('none'));
+    let sessionKeys = await SessionKeyManager.generateSessionKeys(params.userPublicKey);
+    await keyCache.set(`${requestObject?.UserID}-incoming`, sessionKeys.incoming);
+    await keyCache.set(`${requestObject?.UserID}-outgoing`, sessionKeys.outgoing);
+    console.log('Incoming', await keyCache.get(`${requestObject?.UserID}-incoming`));
+    console.log('Outgoing', await keyCache.get(`${requestObject?.UserID}-outgoing`));
+    return new OpalSecurityResponseSuccess('Session is ready', requestKey, requestObject);
+};
 
 /**
  * @desc Verifies a security answer provided by the user. Notably, if the request parameters fail to decrypt,
