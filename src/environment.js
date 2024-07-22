@@ -29,6 +29,9 @@ const ENVIRONMENT = {
     OPAL_CHECKIN_URL: process.env.OPAL_CHECKIN_URL,
     ORMS_ENABLED: process.env.ORMS_ENABLED === '1',
     SOURCE_SYSTEM_SUPPORTS_CHECKIN: process.env.SOURCE_SYSTEM_SUPPORTS_CHECKIN === '1',
+    KEY_TYPE: process.env.KEY_TYPE,
+    PUBLIC_KEY: process.env.PUBLIC_KEY,
+    PRIVATE_KEY: process.env.PRIVATE_KEY,
 };
 
 /**
