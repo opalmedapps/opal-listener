@@ -2,11 +2,10 @@
 //
 // SPDX-License-Identifier: AGPL-3.0-or-later
 
-const CryptoJS          = require('crypto-js');
 const stablelibutf8     = require('@stablelib/utf8');
 const nacl              = require('tweetnacl');
-const stablelibbase64   = require('@stablelib/base64');
 const keyDerivationCache = require('../../src/utility/key-derivation-cache');
+const sodium = require('libsodium-wrappers');
 
 /**
  * resolveEmptyResponse
@@ -102,7 +101,7 @@ exports.encryptObject=function(object,secret,nonce)
 {
     if(typeof object === 'string')
     {
-        object = stablelibbase64.encode(exports.concatUTF8Array(nonce, nacl.secretbox(stablelibutf8.encode(object),nonce,secret)));
+        object = sodium.to_base64(exports.concatUTF8Array(nonce, nacl.secretbox(stablelibutf8.encode(object),nonce,secret)));
         return object;
     }else{
         for (let key in object) {
@@ -116,7 +115,7 @@ exports.encryptObject=function(object,secret,nonce)
                 if(object[key] instanceof Date )
                 {
                     object[key]=object[key].toISOString();
-                    object[key] = stablelibbase64.encode(exports.concatUTF8Array(nonce, nacl.secretbox(stablelibutf8.encode(object[key]),nonce,secret)));
+                    object[key] = sodium.to_base64(exports.concatUTF8Array(nonce, nacl.secretbox(stablelibutf8.encode(object[key]),nonce,secret)));
 
                 }else{
                     exports.encryptObject(object[key],secret,nonce);
@@ -127,7 +126,7 @@ exports.encryptObject=function(object,secret,nonce)
                 if (typeof object[key] !=='string') {
                     object[key]=String(object[key]);
                 }
-                object[key] = stablelibbase64.encode(exports.concatUTF8Array(nonce,nacl.secretbox(stablelibutf8.encode(object[key]),nonce,secret)));
+                object[key] = sodium.to_base64(exports.concatUTF8Array(nonce,nacl.secretbox(stablelibutf8.encode(object[key]),nonce,secret)));
             }
         }
         return object;
@@ -136,8 +135,7 @@ exports.encryptObject=function(object,secret,nonce)
 };
 
 exports.hash=function(input) {
-    return CryptoJS.SHA512(input).toString();
-    // return CryptoJS.SHA256(input).toString();
+    return sodium.to_hex(sodium.crypto_generichash(sodium.crypto_generichash_BYTES, input));
 };
 
 //Decryption function, returns an object whose values are all strings
@@ -146,8 +144,8 @@ exports.decryptObject=function(object,secret)
     if(typeof object ==='string')
     {
         let enc = splitNonce(object);
-        let object = stablelibutf8.decode(nacl.secretbox.open(enc[1],enc[0],secret));
-        if(object === null) throw new Error('Encryption failed');
+        let object = stablelibutf8.decode(sodium.crypto_secretbox_open_easy(enc[1],enc[0],secret));
+        if(object === null) throw new Error('Decryption failed');
 
     }else{
         for (let key in object)
@@ -157,8 +155,9 @@ exports.decryptObject=function(object,secret)
                 exports.decryptObject(object[key],secret);
             }else {
                 let enc = splitNonce(object[key]);
-                let dec = stablelibutf8.decode(nacl.secretbox.open(enc[1], enc[0], secret));
-                if(dec === null) throw new Error('Encryption failed');
+                // TODO Error: wrong secret key for the given ciphertext
+                let dec = stablelibutf8.decode(sodium.crypto_secretbox_open_easy(enc[1], enc[0], secret));
+                if(dec === null) throw new Error('Decryption failed');
                 object[key] = dec;
             }
         }
@@ -176,7 +175,7 @@ exports.concatUTF8Array = function(a1,a2)
 
 function splitNonce(str)
 {
-    const ar = stablelibbase64.decode(str);
+    const ar = sodium.from_base64(str);
     return [ar.slice(0,nacl.secretbox.nonceLength),ar.slice(nacl.secretbox.nonceLength)];
 }
 
