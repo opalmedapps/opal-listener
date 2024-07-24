@@ -14,6 +14,8 @@ const OpalResponse = require('../api/response/response');
 const OpalSecurityResponseError = require('../api/response/security-response-error');
 const OpalSecurityResponseSuccess = require('../api/response/security-response-success');
 
+// TODO note that none of the new encryption changes are compatible with the old version of the app
+
 const keyCache = new Keyv({ namespace: 'session-keys' });
 keyCache.on('error', err => logger.log(
     'error',
