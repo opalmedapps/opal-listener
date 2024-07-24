@@ -15,7 +15,6 @@
     "simulateRequestDocker": "docker exec opal-listener node src/test/simulate-request"
   },
   "dependencies": {
-    "@stablelib/base64": "1.0.1",
     "@stablelib/utf8": "1.0.2",
     "axios": "1.7.9",
     "cross-env": "7.0.3",
