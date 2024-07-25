@@ -11,10 +11,11 @@ const logger = require('../logs/logger.js');
  * @throws Throws an error if a required field is not present in the given request.
  */
 exports.isCaregiverAlreadyRegistered = async function(requestObject) {
-    try {
-        logger.log('info', `Verifying user account for id token: ${requestObject?.Parameters?.Fields?.token}`);
+    const token = requestObject?.Parameters?.Fields?.token;
 
-        const token = requestObject?.Parameters?.Fields?.token;
+    try {
+        logger.log('info', `Verifying user account for id token: ${token}`);
+
         const decodedToken = await firebaseFunction.getFirebaseAccountByIdToken(token);
 
         const result = await opalRequest.isCaregiverAlreadyRegistered(decodedToken.uid);
