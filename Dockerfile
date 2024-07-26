@@ -1,7 +1,7 @@
 # install dependencies in separate stage to keep node_modules out of app directory
 # npm ci does not seem to be customizable on where to install node_modules/
 # see: https://nickjanetakis.com/blog/best-practices-around-production-ready-web-apps-with-docker-compose#customizing-where-package-dependencies-get-installed
-FROM node:20.16.0-alpine3.20 as dependencies
+FROM node:20.16.0-alpine3.20 AS dependencies
 
 ARG NODE_ENV="production"
 ENV NODE_ENV="${NODE_ENV}"
