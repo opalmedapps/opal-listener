@@ -3,7 +3,7 @@
  * @author Stacey Beard
  */
 // eslint-disable-next-line no-underscore-dangle
-const _sodium = require('libsodium-wrappers');
+const _sodium = require('libsodium-wrappers-sumo');
 const { ENVIRONMENT } = require('../environment');
 
 // Sodium library in its ready state

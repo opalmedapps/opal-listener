@@ -13,6 +13,7 @@ const { Version } = require('../../src/utility/version');
 const OpalResponse = require('../api/response/response');
 const OpalSecurityResponseError = require('../api/response/security-response-error');
 const OpalSecurityResponseSuccess = require('../api/response/security-response-success');
+const sodium = require('libsodium-wrappers-sumo');
 
 // TODO note that none of the new encryption changes are compatible with the old version of the app
 
@@ -35,12 +36,12 @@ const passwordResetSuccess = { PasswordReset: "true" };
 
 
 exports.keyExchange = async function(context, requestKey, requestObject) {
-    let params = await utility.decrypt(context, requestObject.Parameters, utility.hash('none'));
+    let params = await utility.decrypt(context, requestObject.Parameters, sodium.from_hex(utility.hash('none')));
     let sessionKeys = await SessionKeyManager.generateSessionKeys(params.userPublicKey);
-    await keyCache.set(`${requestObject?.UserID}-incoming`, sessionKeys.incoming);
-    await keyCache.set(`${requestObject?.UserID}-outgoing`, sessionKeys.outgoing);
-    console.log('Incoming', await keyCache.get(`${requestObject?.UserID}-incoming`));
-    console.log('Outgoing', await keyCache.get(`${requestObject?.UserID}-outgoing`));
+    await keyCache.set(`${context.userId}-incoming`, sessionKeys.incoming);
+    await keyCache.set(`${context.userId}-outgoing`, sessionKeys.outgoing);
+    console.log('Incoming', await keyCache.get(`${context.userId}-incoming`));
+    console.log('Outgoing', await keyCache.get(`${context.userId}-outgoing`));
     return new OpalSecurityResponseSuccess('Session is ready', requestKey, requestObject);
 };
 
@@ -56,9 +57,14 @@ exports.keyExchange = async function(context, requestKey, requestObject) {
  */
 exports.verifySecurityAnswer = async (context, requestKey, requestObject) => {
     // Special case used to set the request's UserID in the case of password reset requests
-    await ensureUserIdAvailable(requestObject);
+    // await ensureUserIdAvailable(requestObject);
 
     logger.log('info', `Verifying security answer for username ${requestObject?.UserID}`);
+
+    // Get the key to decrypt
+    let key = sodium.from_hex(await keyCache.get(`${context.userId}-incoming`));
+    console.log('Read the following key from storage (incoming)', key);
+    if (!key) throw new OpalSecurityResponseError(CODE.SERVER_ERROR, 'No session key saved for this user', requestKey, requestObject);
 
     // Get security info needed to verify the answer, including the cached answer from PatientDeviceIdentifier.
     let user = await getUserPatientSecurityInfo(requestKey, requestObject);
@@ -67,21 +73,23 @@ exports.verifySecurityAnswer = async (context, requestKey, requestObject) => {
     await handleTooManyAttempts(requestKey, requestObject, user);
 
     let unencrypted;
-    // An error caught during decryption indicates an incorrect security answer
     try {
         logger.log('debug', 'Attempting decryption to verify security answer');
-        unencrypted = await utility.decrypt(context, requestObject.Parameters, user.SecurityAnswer);
+        console.log('Decrypting using', key);
+        unencrypted = await utility.decrypt(context, requestObject.Parameters, key);
     }
     catch (error) {
-        logger.log('error', 'Wrong security answer (from decryption failure); increasing security answer attempts', error);
+        logger.log('error', 'Security answer decryption failure; increasing security answer attempts', error);
         await sqlInterface.increaseSecurityAnswerAttempt(requestObject);
         return new OpalSecurityResponseSuccess(answerNotVerified, requestKey, requestObject);
     }
 
-    // As an additional confirmation, validate that the provided answer (once decrypted) matches the expected value
+    console.log('Finished decrypting', unencrypted, user);
+
+    // Validate that the provided answer (once decrypted) matches the expected value
     let isVerified = confirmValidSecurityAnswer(unencrypted, requestObject, user);
     if (!isVerified) {
-        logger.log('error', 'Wrong security answer (from verification); increasing security answer attempts');
+        logger.log('error', 'Wrong security answer; increasing security answer attempts');
         return new OpalSecurityResponseSuccess(answerNotVerified, requestKey, requestObject);
     }
 
@@ -186,7 +194,7 @@ exports.resetPassword = async function(context, requestKey, requestObject) {
  *                                                 or rejects with an OpalSecurityResponseError.
  */
 exports.getSecurityQuestion = async function(context, requestKey, requestObject) {
-    let unencrypted = await utility.decrypt(context, requestObject.Parameters, utility.hash("none"));
+    let unencrypted = await utility.decrypt(context, requestObject.Parameters, sodium.from_hex(utility.hash("none")));
     logger.log('debug', `Unencrypted: ${JSON.stringify(unencrypted)}`);
 
     // Special case used to set the request's UserID in the case of password reset requests
