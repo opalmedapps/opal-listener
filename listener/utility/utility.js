@@ -5,7 +5,7 @@
 const stablelibutf8     = require('@stablelib/utf8');
 const nacl              = require('tweetnacl');
 const keyDerivationCache = require('../../src/utility/key-derivation-cache');
-const sodium = require('libsodium-wrappers');
+const sodium = require('libsodium-wrappers-sumo');
 
 /**
  * resolveEmptyResponse
@@ -74,8 +74,8 @@ exports.encrypt = async function(context, object, secret, salt) {
     const key = salt
         ? await keyDerivationCache.getKey(secret, salt, context.cacheLabel, context.useLegacyPBKDF2Settings)
         : secret;
-    const truncatedKey = stablelibutf8.encode(key.substring(0, nacl.secretbox.keyLength));
-    const nonce = nacl.randomBytes(nacl.secretbox.nonceLength);
+    const truncatedKey = stablelibutf8.encode(key.substring(0, sodium.crypto_secretbox_KEYBYTES));
+    const nonce = sodium.randombytes_buf(sodium.crypto_secretbox_NONCEBYTES);
     return exports.encryptObject(object, truncatedKey, nonce);
 };
 
@@ -92,7 +92,9 @@ exports.decrypt = async function(context, object, secret, salt) {
     const key = salt
         ? await keyDerivationCache.getKey(secret, salt, context.cacheLabel, context.useLegacyPBKDF2Settings)
         : secret;
-    const truncatedKey = stablelibutf8.encode(key.substring(0, nacl.secretbox.keyLength));
+    console.log('From hexing the following:', key);
+    const keyUint8 = typeof key === 'string' ? sodium.from_hex(key) : key;
+    const truncatedKey = keyUint8.slice(0, sodium.crypto_secretbox_KEYBYTES);
     return exports.decryptObject(object, truncatedKey);
 };
 
@@ -135,7 +137,7 @@ exports.encryptObject=function(object,secret,nonce)
 };
 
 exports.hash=function(input) {
-    return sodium.to_hex(sodium.crypto_generichash(sodium.crypto_generichash_BYTES, input));
+    return sodium.to_hex(sodium.crypto_hash_sha512(input));
 };
 
 //Decryption function, returns an object whose values are all strings
@@ -155,6 +157,8 @@ exports.decryptObject=function(object,secret)
                 exports.decryptObject(object[key],secret);
             }else {
                 let enc = splitNonce(object[key]);
+                console.log('Decrypting with details (to_hex):', sodium.to_hex(secret), sodium.to_hex(enc[0]));
+                console.log('Decrypting with details (as-is):', secret, enc[0]);
                 // TODO Error: wrong secret key for the given ciphertext
                 let dec = stablelibutf8.decode(sodium.crypto_secretbox_open_easy(enc[1], enc[0], secret));
                 if(dec === null) throw new Error('Decryption failed');
@@ -176,7 +180,10 @@ exports.concatUTF8Array = function(a1,a2)
 function splitNonce(str)
 {
     const ar = sodium.from_base64(str);
-    return [ar.slice(0,nacl.secretbox.nonceLength),ar.slice(nacl.secretbox.nonceLength)];
+    return [
+        ar.slice(0, sodium.crypto_secretbox_NONCEBYTES),
+        ar.slice(sodium.crypto_secretbox_NONCEBYTES),
+    ];
 }
 
 //Create copy of object if no nested object
