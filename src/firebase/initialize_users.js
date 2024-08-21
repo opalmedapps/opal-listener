@@ -60,6 +60,12 @@ async function createUsers() {
             password: '12345Opal!!',
             uid: 'a51fba18-3810-4808-9238-4d0e487785c8',
         },
+        // A user registered at another institution
+        {
+            email: 'apptest+ned@opalmedapps.ca',
+            password: '12345Opal!!',
+            uid: '9wajsHGHaMUdDIcepyUJkm4O1pG3',
+        },
     ];
 
     for (const user of userRecords) {
