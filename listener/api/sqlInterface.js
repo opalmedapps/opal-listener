@@ -193,26 +193,19 @@ exports.runSqlQuery = OpalSQLQueryRunner.run;
  * @param {string} userId Firebase userId making the request.
  * @param patientSerNum The PatientSerNum of the patient.
  * @param {string[]} arrayTables The list of categories of data to fetch. Should be keys in requestMappings.
- * @param [timestamp] Optional date/time; if provided, only items with 'LastUpdated' after this time are returned.
+ * @param {object} parameters The parameters provided with the request.
+ * @param [parameters.Timestamp] Optional date/time; if provided, only items with 'LastUpdated' after this time are returned.
  *                    If not provided, all data is returned (a default value of 0 is used to query the database).
- * @param {string} purpose Optional parameter that is used to filter questionnaires and educational materials by purpose. By default is set to "clinical" to support the old versions of the app.
+ * @param {string} [parameters.purpose] Optional parameter that is used to filter questionnaires and educational materials by purpose. By default is set to "clinical" to support the old versions of the app.
  * @return {Promise}
  */
-exports.getPatientTableFields = async function(
-    userId,
-    patientSerNum,
-    arrayTables,
-    timestamp,
-    purpose = 'clinical'
-) {
-    timestamp = timestamp || 0;
-
+exports.getPatientTableFields = async function(userId, patientSerNum, arrayTables, parameters) {
     // Validate the arrayTables
     let invalidCategory = arrayTables.find(e => !requestMappings.hasOwnProperty(e));
     if (invalidCategory) throw {Response: 'error', Reason: `Incorrect refresh parameter: ${invalidCategory}`};
 
     logger.log('verbose', `Processing select requests in the following categories: ${JSON.stringify(arrayTables)}`);
-    let response = await Promise.all(arrayTables.map(category => processSelectRequest(userId, category, patientSerNum, timestamp, purpose)));
+    let response = await Promise.all(arrayTables.map(category => processSelectRequest(userId, category, patientSerNum, parameters)));
     // Arrange the return object with categories as keys and each corresponding response as a value
     let responseMapping = Object.fromEntries(arrayTables.map((category, i) => [category, response[i]]));
     return {
@@ -227,13 +220,14 @@ exports.getPatientTableFields = async function(
  * @param {string} userId Firebase userId making the request.
  * @param {string} category The requested data category. Must be a key in requestMappings.
  * @param patientSerNum The patient's PatientSerNum.
- * @param [timestamp] Optional date/time; if provided, only items with 'LastUpdated' after this time are returned.
- * @param {string} purpose Optional parameter that is used to filter questionnaires and educational materials by purpose. By default is set to "clinical" to support the old versions of the app.
+ * @param {object} parameters The parameters provided with the request.
+ * @param [parameters.timestamp] Optional date/time; if provided, only items with 'LastUpdated' after this time are returned.
+ * @param {string} [parameters.purpose] Optional parameter that is used to filter questionnaires and educational materials by purpose. By default is set to "clinical" to support the old versions of the app.
  * @returns {Promise<*>}
  */
-async function processSelectRequest(userId, category, patientSerNum, timestamp, purpose = 'clinical') {
+async function processSelectRequest(userId, category, patientSerNum, parameters) {
     const mapping = requestMappings[category];
-    let date = timestamp ? new Date(Number(timestamp)) : new Date(0);
+    let date = parameters.timestamp ? new Date(Number(parameters.timestamp)) : new Date(0);
 
     // Request mappings with a 'module' attribute use request handlers in the `listener/api/modules` folder
     if (mapping.hasOwnProperty('module')) {
@@ -243,8 +237,9 @@ async function processSelectRequest(userId, category, patientSerNum, timestamp, 
                 UserID: userId,
             },
             params: {
-                Date: timestamp,
-                purpose: purpose
+                Date: parameters.timestamp,
+                purpose: parameters.purpose,
+                Language: parameters.Language,
             },
         });
         return mapping.processFunction ? mapping.processFunction(result) : result;
@@ -1322,7 +1317,7 @@ async function refresh (fields, requestObject) {
     let timestamp = today.setHours(0,0,0,0);
     let patientSerNum = await getSelfPatientSerNum(requestObject.UserID);
 
-    let rows = await exports.getPatientTableFields(requestObject.UserID, patientSerNum, fields, timestamp);
+    let rows = await exports.getPatientTableFields(requestObject.UserID, patientSerNum, fields, {timestamp});
     rows.Data = utility.resolveEmptyResponse(rows.Data);
     return rows;
 }
