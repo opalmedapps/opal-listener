@@ -66,6 +66,11 @@ async function createUsers() {
             password: '12345Opal!!',
             uid: '9wajsHGHaMUdDIcepyUJkm4O1pG3',
         },
+        {
+            email: 'rory@opalmedapps.ca',
+            password: '12345Opal!!',
+            uid: 'mouj1pqpXrYCl994oSm5wtJT3In2',
+        },
     ];
 
     for (const user of userRecords) {
