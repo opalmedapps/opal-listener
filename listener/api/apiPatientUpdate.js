@@ -16,7 +16,7 @@ const { Version } = require('../../src/utility/version');
 exports.login = async function(requestObject) {
     if (Version.versionLessOrEqual(requestObject.AppVersion, Version.version_1_12_2)) {
         let patientSerNum = await sqlInterface.getSelfPatientSerNum(requestObject.UserID);
-        let loginData = await sqlInterface.getPatientTableFields(requestObject.UserID, patientSerNum, requestObject.Parameters.Fields, requestObject.Parameters.timestamp);
+        let loginData = await sqlInterface.getPatientTableFields(requestObject.UserID, patientSerNum, requestObject.Parameters.Fields, requestObject.Parameters);
 
         // Filter out notification types that break app version 1.12.2 (most importantly 'NewLabResult')
         let appBreakingNotifications = ['NewLabResult', 'NewMessage', 'Other'];
@@ -47,6 +47,7 @@ exports.refresh = async function(requestObject) {
     let UserId = requestObject.UserID;
     let parameters = requestObject.Parameters;
     let fields = parameters.Fields;
+    if (!parameters.purpose) parameters.purpose = 'clinical'; // Default to clinical for legacy requests by app version 1.12.2
 
     // If there's a TargetPatientID, use it, otherwise get data for self
     let patientSerNum = requestObject.TargetPatientID ? requestObject.TargetPatientID : await sqlInterface.getSelfPatientSerNum(UserId);
@@ -55,7 +56,7 @@ exports.refresh = async function(requestObject) {
     if (!fields) throw {Response:'error', Reason:"Undefined 'Fields' in Refresh request"};
     if (!Array.isArray(fields)) fields = [fields];
 
-    let rows = await sqlInterface.getPatientTableFields(UserId, patientSerNum, fields, parameters.Timestamp, parameters?.purpose);
+    let rows = await sqlInterface.getPatientTableFields(UserId, patientSerNum, fields, parameters);
     rows.Data = utility.resolveEmptyResponse(rows.Data);
 
     return rows;
