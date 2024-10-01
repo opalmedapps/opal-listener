@@ -1,8 +1,19 @@
 {
   "$schema": "https://docs.renovatebot.com/renovate-schema.json",
   "extends": [
-    "config:base",
-    ":rebaseStalePrs",
+    "config:recommended",
+    // https://docs.renovatebot.com/presets-default/#pinallexceptpeerdependencies
+    ":pinAllExceptPeerDependencies",
+    // https://docs.renovatebot.com/presets-default/#separatemultiplemajorreleases
+    ":separateMultipleMajorReleases",
+    // https://docs.renovatebot.com/presets-default/#separatepatchreleases
+    ":separatePatchReleases",
+    // set timezone to local one to ensure schedules are run
+    // https://docs.renovatebot.com/configuration-options/#timezone
+    ":timezone(America/Toronto)",
+    // get weekly updates to lighten load
+    // https://docs.renovatebot.com/presets-schedule/#scheduleweekly
+    "schedule:weekly",
     "gitlab>opalmedapps/renovate-bot//presets/docker-alpine.json5",
   ],
   // Extra rules for node images. See: https://github.com/renovatebot/renovate/discussions/29501
@@ -10,6 +21,12 @@
   "ignorePresets": ["workarounds:nodeDockerVersioning"],
   "assignees": ["staceybeard"],
   "labels": ["dependencies"],
+  // Only rebase existing MRs when the branch is conflicted
+  // This avoids getting spammed by updates to existing MRs
+  // We need to rebase branches to fast-forward merge anyway
+  //
+  // https://docs.renovatebot.com/configuration-options/#rebasewhen
+  "rebaseWhen": "conflicted",
   "packageRules": [
     // Change commit type to build for Docker-related updates
     {
