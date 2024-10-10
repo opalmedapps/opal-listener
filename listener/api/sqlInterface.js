@@ -227,7 +227,7 @@ exports.getPatientTableFields = async function(userId, patientSerNum, arrayTable
  */
 async function processSelectRequest(userId, category, patientSerNum, parameters) {
     const mapping = requestMappings[category];
-    let date = parameters.timestamp ? new Date(Number(parameters.timestamp)) : new Date(0);
+    let date = parameters.Timestamp ? new Date(Number(parameters.Timestamp)) : new Date(0);
 
     // Request mappings with a 'module' attribute use request handlers in the `listener/api/modules` folder
     if (mapping.hasOwnProperty('module')) {
@@ -237,7 +237,7 @@ async function processSelectRequest(userId, category, patientSerNum, parameters)
                 UserID: userId,
             },
             params: {
-                Date: parameters.timestamp,
+                Date: parameters.Timestamp,
                 purpose: parameters.purpose,
                 Language: parameters.Language,
             },
