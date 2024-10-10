@@ -292,16 +292,16 @@ async function questionnaireUpdateStatus(requestObject) {
         await OpalSQLQueryRunner.run(questionnaireQueries.updateQuestionnaireStatus(), [isCompleted, requestObject.Parameters.answerQuestionnaire_id]);
         // TODO: do we rollback if this fails + insert log into DB
 
-        // 3. If the questionnaire is completed, notify the OIE. If an error occurs, don't cause the whole function to fail.
+        // 3. If the questionnaire is completed, notify the ORMS directly. If an error occurs, don't cause the whole function to fail.
         try {
-            logger.log("info", "Notifying the OIE that a questionnaire was completed.");
+            logger.log("info", "Notifying the ORMS that a questionnaire was completed.");
             if (!config.QUESTIONNAIRE_COMPLETED_URL) {
                 throw "No value was provided for QUESTIONNAIRE_COMPLETED_URL in the config file.";
             }
             await axios.post(config.QUESTIONNAIRE_COMPLETED_URL);
         }
         catch (error) {
-            logger.log("error", `Failed to send notification of completed questionnaire to the OIE`, error);
+            logger.log("error", `Failed to send notification of completed questionnaire to the ORMS`, error);
         }
     }
 
