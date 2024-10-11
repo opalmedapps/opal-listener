@@ -45,7 +45,7 @@
     "eslint-plugin-mocha": "10.2.0",
     "firebase-tools": "13.14.2",
     "jsdoc": "4.0.3",
-    "mocha": "10.4.0",
+    "mocha": "10.7.3",
     "nyc": "17.1.0",
     "run-script-os": "1.1.6",
     "sinon": "18.0.0"
