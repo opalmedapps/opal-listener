@@ -576,29 +576,6 @@ async function checkInToSystem(mrn, mrnSite, url, sourceSystemID, system) {
 }
 
 /**
- * Queries the database to see if any patient push notifications exist for the user today, hence whether or not they have attempted to check in already
- * @param patientSerNum
- * @returns {Promise}
- */
-function hasAlreadyAttemptedCheckin(patientSerNum){
-    return new Promise((resolve, reject) => {
-        if(!patientSerNum) reject("No Patient SerNum Provided");
-        else {
-            exports.runSqlQuery(queries.getPatientCheckinPushNotifications(), [patientSerNum]).then((rows) => {
-                if (rows.length === 0) resolve(false);
-                // YM 2018-05-25 - Temporary putting as false for now to bypass the checking of notification table.
-                //                 Technically, it should be checking the appointment table.
-                else resolve(false);
-            }).catch((err) => {
-                reject({Response: 'error', Reason: err});
-            })
-        }
-    });
-}
-
-exports.checkCheckin = hasAlreadyAttemptedCheckin;
-
-/**
  * Gets and returns all of a patients appointments on today's date
  * @param patientSerNum
  * @return {Promise}
