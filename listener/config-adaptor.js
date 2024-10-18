@@ -21,8 +21,6 @@ module.exports.MYSQL_DATABASE_PORT = process.env.MYSQL_DATABASE_PORT;
 // Config settings
 module.exports.DOCUMENTS_PATH = process.env.DOCUMENTS_PATH;
 module.exports.DOCTOR_PATH = process.env.DOCTOR_PATH;
-module.exports.CHECKIN_URL = process.env.CHECKIN_URL;
-module.exports.CHECKIN_ROOM = process.env.CHECKIN_ROOM;
 module.exports.QUESTIONNAIRE_COMPLETED_URL = process.env.QUESTIONNAIRE_COMPLETED_URL;
 module.exports.DEFAULT_LAB_EDUCATIONAL_URL_EN = process.env.DEFAULT_LAB_EDUCATIONAL_URL_EN;
 module.exports.DEFAULT_LAB_EDUCATIONAL_URL_FR = process.env.DEFAULT_LAB_EDUCATIONAL_URL_FR;
@@ -32,3 +30,10 @@ module.exports.OPAL_EMAIL=process.env.OPAL_EMAIL;
 // SMTP IP and PORT used in `mailer.js`
 module.exports.SMTP_SERVER_IP=process.env.SMTP_SERVER_IP;
 module.exports.SMTP_SERVER_PORT=process.env.SMTP_SERVER_PORT;
+// Checkins
+module.exports.ORMS_ENABLED = process.env.ORMS_ENABLED;
+module.exports.ORMS_CHECKIN_URL = process.env.ORMS_CHECKIN_URL;
+module.exports.CHECKIN_ROOM = process.env.CHECKIN_ROOM;
+module.exports.SOURCE_SYSTEM_SUPPORTS_CHECKIN = process.env.SOURCE_SYSTEM_SUPPORTS_CHECKIN;
+module.exports.SOURCE_SYSTEM_CHECKIN_URL = process.env.SOURCE_SYSTEM_CHECKIN_URL;
+module.exports.OPAL_CHECKIN_URL = process.env.OPAL_CHECKIN_URL;
