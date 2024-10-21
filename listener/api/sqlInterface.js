@@ -460,7 +460,8 @@ exports.checkIn = async function (requestObject) {
         let mrnList = await getMRNs(patientSerNum);
         let lastError;
         // extract or retrieve sourcesystemid and source ideally from request to support single-appointment checkins
-        logger.log("verbose", requestObject);
+        logger.log("debug", "--------------------------------------------------");
+        logger.log("debug", JSON.stringify(requestObject));
         let sourceSystemID;
         let source;
         // booleans track individual success for each checkin system receiving an api call
@@ -554,18 +555,21 @@ exports.checkIn = async function (requestObject) {
 async function checkInToSystem(mrn, mrnSite, url, sourceSystemID, system) {
     let params = {};
     if (system === "ORMS") {
+        // Currently, orms performs checkin for all of a patients appointments on that day
         params = {
             "mrn": mrn,
             "site": mrnSite,
             "room": config.CHECKIN_ROOM,
         };
     } else if (system === "SOURCE") {
+        // Source does single appointment checkin
         params = {
             "appointmentId": sourceSystemID,
             "location": config.CHECKIN_ROOM,
         };
     } else {
-        // TODO: Fix
+        // Opal does single appointment checkin
+        // TODO: Fix source?
         params = {
             "appointment": sourceSystemID,
             "source": "Aria",
