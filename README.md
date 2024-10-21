@@ -14,7 +14,7 @@ These are the requirements to run the listener locally.
 
 1. [Docker](https://docs.docker.com/get-docker/)
 2. Have the [backend](https://gitlab.com/opalmedapps/backend) and [legacy databases](https://gitlab.com/opalmedapps/db-docker) running.
-3. Have your own [Firebase project set up](https://opalmedapps.gitlab.io/development/setup/) and the Firebase admin key file saved.
+3. Have your own [Firebase project set up](https://docs.opalmedapps.ca/development/setup/#create-a-new-firebase-project) and the Firebase admin key file saved.
 
 ### Installation
 
