@@ -459,33 +459,15 @@ exports.checkIn = async function (requestObject) {
         let patientSerNum = requestObject.TargetPatientID ? requestObject.TargetPatientID : await getSelfPatientSerNum(requestObject.UserID);
         let mrnList = await getMRNs(patientSerNum);
         let lastError;
-        // extract or retrieve sourcesystemid and source ideally from request to support single-appointment checkins
-        logger.log("debug", "--------------------------------------------------");
-        logger.log("debug", JSON.stringify(requestObject));
-        let sourceSystemID;
-        let source;
-        // booleans track individual success for each checkin system receiving an api call
-        // source system and orms true by default in case those systems are not enabled, we still want checkin to succeed
-        let source_system_success = true;
-        let orms_success = true;
-        let opal_success = false;
 
-        // Attempt checkin to source system if enabled
-        if (config.SOURCE_SYSTEM_SUPPORTS_CHECKIN && config.SOURCE_SYSTEM_CHECKIN_URL) {
-            // set source system success false until a successful code is returned
-            source_system_success = false;
-            let mrnObj = mrnList[0];
-            try {
-                // Notify target system of the checkin
-                await checkInToSystem(mrnObj.MRN, mrnObj.Hospital_Identifier_Type_Code, config.SOURCE_SYSTEM_CHECKIN_URL, sourceSystemID, "SOURCE");
-                logger.log("verbose", `Success checking in to source system for PatientSerNum = ${patientSerNum} using MRN = ${mrn} (site = ${mrnSite})`);
-                source_system_success = true;
-            }
-            catch (error) {
-                logger.log("verbose", `Failed to check in to source system for PatientSerNum = ${patientSerNum} using MRN = ${mrn} (site = ${mrnSite}); error: ${error}`);
-                lastError = error;
-            }
-        }
+        // Find sourceSystemName and sourceSystemID for each appointment for the patient
+        let appointmentDetails = await getAppointmentDetailsForPatient(patientSerNum);
+
+        // Success booleans track individual success for each checkin system receiving an api call
+        // source_system and orms are true by default in case those systems are not enabled, we still want checkin to succeed
+        let orms_success = true;
+        let source_system_success = true;
+        let opal_success = false;
 
         // Attempt checkin to orms if enabled
         if (config.ORMS_ENABLED && config.ORMS_CHECKIN_URL) {
@@ -497,7 +479,7 @@ exports.checkIn = async function (requestObject) {
                 let mrnSite = mrnObj.Hospital_Identifier_Type_Code;
                 try {
                     // Notify target system of the checkin
-                    await checkInToSystem(mrn, mrnSite, config.ORMS_CHECKIN_URL, sourceSystemID, "ORMS");
+                    await checkInToSystem(mrn, mrnSite, config.ORMS_CHECKIN_URL, "MEDIVISIT", "XXXXXXXXX", "ORMS");
                     logger.log("verbose", `Success checking in to orms for PatientSerNum = ${patientSerNum} using MRN = ${mrn} (site = ${mrnSite})`);
                     orms_success = true;
                     break;
@@ -509,21 +491,47 @@ exports.checkIn = async function (requestObject) {
             }
         }
 
-        // Attempt checkin to opal backend
-        try {
-            let mrnObj = mrnList[0];
-            let mrn = mrnObj.MRN;
-            let mrnSite = mrnObj.Hospital_Identifier_Type_Code;
-            // Notify target system of the checkin
-            await checkInToSystem(mrn, mrnSite, config.OPAL_CHECKIN_URL, sourceSystemID, "OPAL");
-            logger.log("verbose", `Success checking in to opal for PatientSerNum = ${patientSerNum} using MRN = ${mrn} (site = ${mrnSite})`);
-            opal_success = true;
-        }
-        catch (error) {
-            logger.log("verbose", `Failed to check in to opal for PatientSerNum = ${patientSerNum} using MRN = ${mrn} (site = ${mrnSite}); error: ${error}`);
-            lastError = error;
-        }
+        // Checkin to all appointments for opal and source system via loop
+        // Note: all appointment checkins in this loop must be successful or success variable(s) will be false
+        for (let appointment of appointmentDetails.Data) {
+            let sourceSystemID = appointment.SourceSystemID;
+            let source = appointment.SourceDatabaseName;
+            logger.log("debug", `Check in for appointment ${sourceSystemID} ,  ${source}`);
+            // Attempt checkin to source system if enabled
+            if (config.SOURCE_SYSTEM_SUPPORTS_CHECKIN && config.SOURCE_SYSTEM_CHECKIN_URL) {
+                // set source system success false until a successful code is returned
+                logger.log("debug", `source system enabled ${config.SOURCE_SYSTEM_SUPPORTS_CHECKIN} url ${config.SOURCE_SYSTEM_CHECKIN_URL}`);
+                source_system_success = false;
+                let mrnObj = mrnList[0];
+                try {
+                    // Notify target system of the checkin
+                    await checkInToSystem(mrnObj.MRN, mrnObj.Hospital_Identifier_Type_Code, config.SOURCE_SYSTEM_CHECKIN_URL, source, sourceSystemID, "SOURCE");
+                    logger.log("verbose", `Success checking in to source system for PatientSerNum = ${patientSerNum} using MRN = ${mrn} (site = ${mrnSite})`);
+                    source_system_success = true;
+                }
+                catch (error) {
+                    logger.log("verbose", `Failed to check in to source system for PatientSerNum = ${patientSerNum} using MRN = ${mrn} (site = ${mrnSite}); error: ${error}`);
+                    lastError = error;
+                }
+            }
 
+            // Attempt checkin to opal backend
+            try {
+                let mrnObj = mrnList[0];
+                let mrn = mrnObj.MRN;
+                let mrnSite = mrnObj.Hospital_Identifier_Type_Code;
+                // Notify target system of the checkin
+                logger.log("debug", "Attempt for opal");
+                await checkInToSystem(mrn, mrnSite, config.OPAL_CHECKIN_URL, source, sourceSystemID, "OPAL");
+                logger.log("verbose", `Success checking in to opal for PatientSerNum = ${patientSerNum} using MRN = ${mrn} (site = ${mrnSite})`);
+                opal_success = true;
+            }
+            catch (error) {
+                logger.log("verbose", `Failed to check in to opal for PatientSerNum = ${patientSerNum} using MRN = ${mrn} (site = ${mrnSite}); error: ${error}`);
+                lastError = error;
+            }
+        }
+        logger.log("debug", `Successes: source ${source} orms ${orms_success} opal ${opal_success}`);
         // If all success, get checked in appointments
         if (source_system_success && orms_success && opal_success) {
             let appointments = await getCheckedInAppointments(patientSerNum);
@@ -548,20 +556,21 @@ exports.checkIn = async function (requestObject) {
  *              Orms expects: mrn, site, room
  *              Source Systems typically expect: appointmentId, location
  *              Opal expects: appointment, source
+ * Note: ORMs by default checkins all appointments for today for the patient. Opal backend does single appointment checkin only.
  * @param {string} mrn One of the patient's medical record numbers.
  * @param {string} mrnSite The site to which the MRN belongs.
  * @returns {Promise<void>} Resolves if check-in succeeds, otherwise rejects with an error.
  */
-async function checkInToSystem(mrn, mrnSite, url, sourceSystemID, system) {
+async function checkInToSystem(mrn, mrnSite, url, sourceSystemName, sourceSystemID, targetSystem) {
     let params = {};
-    if (system === "ORMS") {
+    if (targetSystem === "ORMS") {
         // Currently, orms performs checkin for all of a patients appointments on that day
         params = {
             "mrn": mrn,
             "site": mrnSite,
             "room": config.CHECKIN_ROOM,
         };
-    } else if (system === "SOURCE") {
+    } else if (targetSystem === "SOURCE") {
         // Source does single appointment checkin
         params = {
             "appointmentId": sourceSystemID,
@@ -569,15 +578,33 @@ async function checkInToSystem(mrn, mrnSite, url, sourceSystemID, system) {
         };
     } else {
         // Opal does single appointment checkin
-        // TODO: Fix source?
         params = {
             "appointment": sourceSystemID,
-            "source": "Aria",
+            "source": sourceSystemName.toUpperCase(),
         };
     }
-
-    await axios.post(url, params);
+    logger.log("debug", `Requesting check-in for targetSystem=${targetSystem}, URL=${url}, params=${JSON.stringify(params)}`);
+    try {
+        const response = await axios.post(url, params);
+        console.log(`Check-in response: ${JSON.stringify(response.data)}`);
+    } catch (error) {
+        console.error(`Error during check-in: ${error.message}`, error.response ? error.response.data : null);
+    }
 }
+
+/**
+ * Gets the list of source system ids and source systems for each appointment for a patient todays
+ * @param {string} patientSerNum The Opal PatientSerNum
+ * @returns {Promise<*>} Resolves with the appointment source details, or rejects with an error if not found.
+*/
+function getAppointmentDetailsForPatient(patientSerNum){
+    return new Promise((resolve, reject) => {
+        exports.runSqlQuery(queries.getAppointmentDetailsForPatient(), [patientSerNum])
+            .then(rows => resolve({Response:'success', Data: rows}))
+            .catch(err => reject({Response: 'error', Reason: err}));
+    })
+};
+
 
 /**
  * Gets and returns all of a patients appointments on today's date
