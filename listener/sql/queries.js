@@ -71,8 +71,8 @@ function patientAppointmentTableFields(selectOne) {
     return `SELECT
                 Appt.AppointmentSerNum,
                 A.AliasSerNum,
-                concat(if(Appt.Status = 'Cancelled', '[Cancelled] - ', ''), getTranslation('Alias', 'AliasName_EN', IfNull(A.AliasName_EN, ''), A.AliasSerNum)) AS AppointmentType_EN,
-                concat(if(Appt.Status = 'Cancelled', convert('[Annulé] - ' using utf8), ''), IfNull(A.AliasName_FR, '')) AS AppointmentType_FR,
+                concat(if(Appt.Status = 'Cancelled', '[Cancelled] - ', ''), if(Appt.Status = 'Deleted', '[Deleted] - ', ''), getTranslation('Alias', 'AliasName_EN', IfNull(A.AliasName_EN, ''), A.AliasSerNum)) AS AppointmentType_EN,
+                concat(if(Appt.Status = 'Cancelled', convert('[Annulé] - ' using utf8), ''), if(Appt.Status = 'Deleted', convert('[Supprimé] - ' using utf8), ''), IfNull(A.AliasName_FR, '')) AS AppointmentType_FR,
                 IfNull(A.AliasDescription_EN, '') AS AppointmentDescription_EN,
                 IfNull(A.AliasDescription_FR, '') AS AppointmentDescription_FR,
                 IfNull(AE.Description, '') AS ResourceDescription,
@@ -108,8 +108,6 @@ function patientAppointmentTableFields(selectOne) {
                 LEFT JOIN EducationalMaterialControl emc ON emc.EducationalMaterialControlSerNum = A.EducationalMaterialControlSerNum
             WHERE
                 Appt.PatientSerNum = ?
-                AND Appt.State = 'Active'
-                AND Appt.Status <> 'Deleted'
                 ${selectOne ? 'AND Appt.AppointmentSerNum = ?' : ''}
                 ${!selectOne ? 'AND (Appt.LastUpdated > ? OR A.LastUpdated > ? OR AE.LastUpdated > ? OR HM.LastUpdated > ?)' : ''}
             ORDER BY Appt.AppointmentSerNum, ScheduledStartTime;
