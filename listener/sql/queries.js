@@ -673,7 +673,24 @@ exports.implicitlyReadNotification = function() {
                                         WHERE NotificationType IN (?)
                                     );
     `;
-}
+};
+
+/**
+ * Fetch the SourceSystemID and SourceDatabaseSerNum for a patient for todays appointments.
+ * @returns {array} List of ids and database names
+ */
+exports.getAppointmentDetailsForPatient=function() {
+    return `SELECT
+                app.SourceSystemID,
+                app.SourceDatabaseSerNum
+            FROM
+                Appointment app
+            WHERE
+                app.PatientSerNum = ?
+                AND DATE(app.ScheduledStartTime) = CURDATE()
+            ;
+    `;
+};
 
 /*
  * Named functions used to access different versions of a query.

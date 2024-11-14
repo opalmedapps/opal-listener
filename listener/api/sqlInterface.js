@@ -444,6 +444,11 @@ exports.studyUpdateStatus = async function(requestObject) {
 /**
  * checkIn
  * @description Checks the patient into their appointments for the day via the OIE.
+ *  The checkIn process requires notifying multiple different systems of a new patient checkin.
+ *      1) If the hospital source system supports appointment checkins, notify it
+ *      2) If the Opal Wait Room Management system is enabled in this environment, notify it
+ *      3) Always notify the OpalAdmin backend system
+ *
  * @param requestObject
  * @return {Promise}
  */
@@ -451,91 +456,156 @@ exports.checkIn = async function (requestObject) {
     try {
         // If there's a TargetPatientID, use it, otherwise get data for self
         let patientSerNum = requestObject.TargetPatientID ? requestObject.TargetPatientID : await getSelfPatientSerNum(requestObject.UserID);
+        let mrnList = await getMRNs(patientSerNum);
+        let lastError;
 
-        if (await hasAlreadyAttemptedCheckin(patientSerNum) === false) {
-            let success = false;
-            let lastError;
+        // Find sourceDatabaseSerNum and sourceSystemID for each appointment for the patient
+        let appointmentDetails = await getAppointmentDetailsForPatient(patientSerNum);
 
-            // Get the patient's MRNs (used in the check-in call to ORMS)
-            let mrnList = await getMRNs(patientSerNum);
+        // Success booleans track individual success for each checkin system receiving an api call
+        // source_system and orms are true by default in case those systems are not enabled, we still want checkin to succeed
+        let orms_success = true;
+        let source_system_success = true;
+        let opal_success = false;
 
-            // Attempt a check-in on each of the patient's MRNs on a loop until one of the calls is successful
+        // Attempt checkin to orms if enabled
+        if (config.ORMS_ENABLED && config.ORMS_CHECKIN_URL) {
+            orms_success = false;
+            // TODO: Get rid of loop and send full mrnList to reduce API calls, after confirming orms supports mrnList
             for (let i = 0; i < mrnList.length; i++) {
                 let mrnObj = mrnList[i];
                 let mrn = mrnObj.MRN;
                 let mrnSite = mrnObj.Hospital_Identifier_Type_Code;
-
                 try {
-                    // Check into the patient's appointments via a call to the OIE
-                    await checkIntoOIE(mrn, mrnSite);
-                    logger.log("verbose", `Success checking in PatientSerNum = ${patientSerNum} using MRN = ${mrn} (site = ${mrnSite})`);
-                    success = true;
+                    await checkInToSystem(mrn, mrnSite, config.ORMS_CHECKIN_URL, null, null, "ORMS");
+                    logger.log("verbose", `Success checking in to orms for PatientSerNum = ${patientSerNum} using MRN = ${mrn} (site = ${mrnSite})`);
+                    orms_success = true;
                     break;
-                }
-                catch (error) {
-                    logger.log("verbose", `Failed to check in PatientSerNum = ${patientSerNum} using MRN = ${mrn} (site = ${mrnSite}); error: ${error}`);
+                } catch(error){
+                    logger.log("verbose", `Failed to check in to orms for PatientSerNum = ${patientSerNum} using MRN = ${mrn} (site = ${mrnSite}); error: ${error}`);
                     lastError = error;
                 }
             }
-            // Check whether the check-in call succeeded, or all attempts failed
-            // On a success, return all checked-in appointments to the app
-            if (success) {
-                // TODO: once the check-in race condition is fixed, delete the function getCheckedInAppointmentsLoop and change this line to call getCheckedInAppointments.
-                let rows = await getCheckedInAppointmentsLoop(patientSerNum);
-                if (rows.Data && rows.Data.length === 0) throw 'Appointments were not marked as checked-in for this patient in OpalDB';
-
-                logger.log("verbose", `Today's checked in appointments for PatientSerNum = ${patientSerNum}`, rows);
-                let appSerNums = [];
-                rows['Data'].forEach(function(serNum){
-                    appSerNums.push(serNum['AppointmentSerNum']);
-                });
-                // Set CheckinUsername for all checked-in appointments
-                await setCheckInUsername(requestObject, appSerNums);
-                return rows;
-            }
-            else throw lastError;
         }
-        else return [];
+
+        // Checkin to all appointments for opal and source system via loop
+        // Note: all appointment checkins in this loop must be successful or success variable(s) will be false
+        for (let appointment of appointmentDetails) {
+            let sourceSystemID = appointment.SourceSystemID;
+            let source = appointment.SourceDatabaseSerNum;
+
+            // Attempt checkin to source system if enabled
+            if (config.SOURCE_SYSTEM_SUPPORTS_CHECKIN && config.SOURCE_SYSTEM_CHECKIN_URL) {
+                // set source system success false until a successful code is returned
+                source_system_success = false;
+                let mrnObj = mrnList[0];
+                let mrn = mrnObj.MRN;
+                let mrnSite = mrnObj.Hospital_Identifier_Type_Code;
+                try {
+                    await checkInToSystem(mrn, mrnSite, config.SOURCE_SYSTEM_CHECKIN_URL, null, sourceSystemID, "SOURCE");
+                    logger.log("verbose", `Success checking in to source system for PatientSerNum = ${patientSerNum} using ${mrn}-${mrnSite}`);
+                    source_system_success = true;
+                }catch(error){
+                    logger.log("verbose", `Failed to check in to source system for PatientSerNum = ${patientSerNum} using ${mrn}-${mrnSite}; error: ${error}`);
+                    lastError = error;
+                }
+            }
+
+            // Attempt checkin to opal backend
+            let mrnObj = mrnList[0];
+            let mrn = mrnObj.MRN;
+            let mrnSite = mrnObj.Hospital_Identifier_Type_Code;
+            try {
+                await checkInToSystem(mrn, mrnSite, config.OPAL_CHECKIN_URL, source, sourceSystemID, "OPAL");
+                logger.log("verbose", `Success checking in to opal for PatientSerNum = ${patientSerNum} using ${mrn}-${mrnSite}`);
+                opal_success = true;
+            }catch(error){
+                logger.log("verbose", `Failed to check in to opal for PatientSerNum = ${patientSerNum} using ${mrn}-${mrnSite}; error: ${error}`);
+                lastError = error;
+            }
+        }
+        // If all success, get checked in appointments
+        if (source_system_success && orms_success && opal_success) {
+            let appointments = await getCheckedInAppointments(patientSerNum);
+            if (appointments.Data && appointments.Data.length === 0) throw 'Appointments were not marked as checked-in for this patient in OpalDB';
+            logger.log("verbose", `Today's checked in appointments for PatientSerNum = ${patientSerNum}`, appointments);
+            let appSerNums = [];
+            appointments['Data'].forEach(function(serNum){
+                appSerNums.push(serNum['AppointmentSerNum']);
+            });
+            // Set CheckinUsername for all checked-in appointments
+            await setCheckInUsername(requestObject, appSerNums);
+            return appointments;
+        }
+        else throw lastError;
     }
-    catch (error) { throw {Response: 'error', Reason: error}; }
+    catch (error) {
+        logger.log("error", "Uncaught error while processing a checkin request: ", {
+            message: error.message || "No message",
+            stack: error.stack || "No stack trace",
+            response: error.response ? error.response.data : "No response data",
+        });
+        throw {Response: 'error', Reason: error};
+    }
 };
 
 /**
- * @description Calls the OIE to check the patient in on external systems (e.g. Aria, Medivisit).
+ * @description Calls the system to check the patient in
+ *              ORMS expects: mrn, site, room, checkinType (APP/KIOSK/VWR/SMS)
+ *              Source Systems typically expect: appointmentId, location
+ *              Opal expects: source_system_id, source_database
+ * Note: ORMS by default checkins all appointments for today for the patient. Opal backend & source system do single appointment checkin.
  * @param {string} mrn One of the patient's medical record numbers.
  * @param {string} mrnSite The site to which the MRN belongs.
+ * @param {string} url The API checkin url to be called.
+ * @param {integer} sourceSystemSerNum The OpalDB identifier for the source system.
+ * @param {string} sourceSystemID The unique identifier for the appointment from the source system.
+ * @param {string} targetSystem The name of the checkin system being called.
  * @returns {Promise<void>} Resolves if check-in succeeds, otherwise rejects with an error.
  */
-async function checkIntoOIE(mrn, mrnSite) {
-    await axios.post(config.CHECKIN_URL, {
-        "mrn": mrn,
-        "site": mrnSite,
-        "room": config.CHECKIN_ROOM,
-    });
+async function checkInToSystem(mrn, mrnSite, url, sourceSystemSerNum, sourceSystemID, targetSystem) {
+    let data = {};
+    let headers = {'Content-Type': 'application/json'};
+    if (targetSystem === "ORMS") {
+        // Currently, ORMS performs checkin for all of a patients appointments on that day
+        data = {
+            "mrn": mrn,
+            "site": mrnSite,
+            "room": config.CHECKIN_ROOM,
+            "checkinType": "APP",
+        };
+    } else if (targetSystem === "SOURCE") {
+        // Source does single appointment checkin
+        data = {
+            "appointmentId": sourceSystemID,
+            "location": config.CHECKIN_ROOM,
+        };
+    } else {
+        // Opal does single appointment checkin
+        data = {
+            "source_system_id": sourceSystemID,
+            "source_database": sourceSystemSerNum,
+            "checkin": 1,
+        };
+        headers = {
+            'Authorization': `Token ${config.BACKEND_LISTENER_AUTH_TOKEN}`,
+            'Content-Type': 'application/json',
+        };
+
+    }
+    return await axios.post(url, data, {headers: headers});
 }
 
 /**
- * Queries the database to see if any patient push notifications exist for the user today, hence whether or not they have attempted to check in already
- * @param patientSerNum
- * @returns {Promise}
- */
-function hasAlreadyAttemptedCheckin(patientSerNum){
-    return new Promise((resolve, reject) => {
-        if(!patientSerNum) reject("No Patient SerNum Provided");
-        else {
-            exports.runSqlQuery(queries.getPatientCheckinPushNotifications(), [patientSerNum]).then((rows) => {
-                if (rows.length === 0) resolve(false);
-                // YM 2018-05-25 - Temporary putting as false for now to bypass the checking of notification table.
-                //                 Technically, it should be checking the appointment table.
-                else resolve(false);
-            }).catch((err) => {
-                reject({Response: 'error', Reason: err});
-            })
-        }
-    });
+ * Gets the list of source system ids and source systems for each of today's appointments for a patient
+ * @param {string} patientSerNum The Opal PatientSerNum
+ * @returns {Promise<*>} Resolves with the appointment source details, or rejects with an error if not found.
+*/
+function getAppointmentDetailsForPatient(patientSerNum) {
+    return exports.runSqlQuery(queries.getAppointmentDetailsForPatient(), [patientSerNum]);
 }
 
-exports.checkCheckin = hasAlreadyAttemptedCheckin;
+
 
 /**
  * Gets and returns all of a patients appointments on today's date
@@ -548,41 +618,6 @@ function getCheckedInAppointments(patientSerNum){
             .then(rows => resolve({Response:'success', Data: rows}))
             .catch(err => reject({Response: 'error', Reason: err}));
     })
-}
-
-/**
- * @description This function is a TEMPORARY patch, and does not represent the right way of doing things.
- *              Until the check-in race condition is properly fixed, this patch will help restore check-in service in prod.
- *              Race condition: "await checkIntoOIE" resolves as a success BEFORE the check-in status is actually updated in OpalDB,
- *              i.e. before the check-in is fully completed. This causes getCheckedInAppointments to return [],
- *              even upon a successful checkin via the OIE, causing an error in the listener.
- *
- *              This function checks the database once per second, until it detects that check-in was completed,
- *              up to a maximum attempt limit. This should alleviate the race condition by forcing the listener
- *              to wait a bit for the OIE call to fully complete. If check-in has not completed by the time limit,
- *              then the last faulty result is returned. Once the race condition is fixed, this function should be deleted.
- *
- *              Patch requested by Yick Mo.
- * @param patientSerNum The PatientSerNum of the patient being checked in.
- */
-async function getCheckedInAppointmentsLoop(patientSerNum) {
-    // Source: https://stackoverflow.com/questions/14249506/how-can-i-wait-in-node-js-javascript-l-need-to-pause-for-a-period-of-time
-    const waitOneSecond = () => new Promise(resolve => setTimeout(resolve, 1000));
-    const maxNumberOfSeconds = 15;
-    logger.log('verbose', `Waiting for check-in status to be updated in OpalDB for PatientSerNum = ${patientSerNum}`);
-
-    let checkedInAppointments;
-    for (let i = 0; i < maxNumberOfSeconds; i++) {
-        await waitOneSecond();
-        checkedInAppointments = await getCheckedInAppointments(patientSerNum);
-        if (checkedInAppointments.Data && checkedInAppointments.Data.length !== 0) {
-            logger.log('verbose', `Check-in status update was detected in OpalDB for PatientSerNum = ${patientSerNum}`, checkedInAppointments);
-            return checkedInAppointments;
-        }
-        logger.log('verbose', `Check-in status has not yet been updated in OpalDB after ${i+1} ${i+1===1 ? 'second' : 'seconds'} for PatientSerNum = ${patientSerNum}`);
-    }
-    logger.log('verbose', `Check-in timeout of ${maxNumberOfSeconds} seconds reached for PatientSerNum = ${patientSerNum}`, checkedInAppointments);
-    return checkedInAppointments;
 }
 
 /**
