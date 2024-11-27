@@ -387,10 +387,15 @@ exports.setNewPassword=function()
             ;`;
 };
 
-exports.accountChange=function()
+/**
+ * @description Query that looks up a PatientSerNum based on an email.
+ * @returns {string} The query.
+ */
+exports.languageChange = function()
 {
     return `UPDATE Patient SET Language = ? WHERE PatientSerNum=?`;
 };
+
 exports.inputFeedback=function(UserSerNum, content)
 {
     return "INSERT INTO Feedback (`FeedbackSerNum`,`PatientSerNum`,`FeedbackContent`,`AppRating`,`DateAdded`, `LastUpdated`) VALUES (NULL,?,?,?,NOW(),CURRENT_TIMESTAMP)";
