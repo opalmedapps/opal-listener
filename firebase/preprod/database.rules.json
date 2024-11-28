@@ -10,14 +10,14 @@
           "$api_request_id": {
             ".write": "auth.uid !== null",
             ".read": "auth.uid !== null",
-            ".validate": "newData.hasChildren(['Request', 'DeviceId', 'UserID']) && newData.child('UserID').val() === auth.uid"
+            ".validate": "newData.hasChildren(['Request', 'DeviceId', 'UserID']) && newData.child('UserID').val() === auth.uid && newData.child('UserEmail').val() === auth.email"
           }
         },
         "requests": {
           "$request_id": {
             ".write": "auth.uid !== null",
             ".read": "auth.uid !== null",
-            ".validate": "newData.hasChildren(['Request', 'DeviceId', 'UserID']) && newData.child('UserID').val() === auth.uid"
+            ".validate": "newData.hasChildren(['Request', 'DeviceId', 'UserID']) && newData.child('UserID').val() === auth.uid && newData.child('UserEmail').val() === auth.email"
           }
         },
         "passwordResetRequests": {
@@ -89,7 +89,7 @@
         "$request_id": {
           ".write": "auth.uid !== null",
           ".read": "auth.uid !== null",
-          ".validate": "newData.hasChildren(['Request', 'DeviceId', 'Token', 'UserID'])&& newData.child('UserID').val() === auth.uid"
+          ".validate": "newData.hasChildren(['Request', 'DeviceId', 'Token', 'UserID']) && newData.child('UserID').val() === auth.uid && newData.child('UserEmail').val() === auth.email"
         }
       },
       "passwordResetRequests": {
