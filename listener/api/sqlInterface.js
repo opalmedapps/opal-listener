@@ -671,44 +671,39 @@ exports.getDocumentsContent = async function(requestObject) {
 };
 
 /**
- * @name updateAccountField
- * @description Updates the fields in the patient table
- * @param requestObject
+ * @description Updates a user account field to a new value.
+ * @param {object} requestObject The request object.
+ * @param {string} requestObject.UserEmail The user's email, used to find their self PatientSerNum.
+ * @param {string} requestObject.UserID The user's Firebase UID.
+ * @param {string} requestObject.Parameters.FieldToChange The name of the field to update.
+ * @param {string} requestObject.Parameters.NewValue The field's new value.
+ * @returns {Promise<{Response: string}>} Resolves if the field was successfully updated, or rejects with an error.
  */
-exports.updateAccountField=function(requestObject) {
-    let r = Q.defer();
+exports.updateAccountField = async requestObject => {
+    // Validate input
+    const email = requestObject.UserEmail;
+    const uid = requestObject.UserID;
+    const field = requestObject.Parameters?.FieldToChange;
+    const newValue = requestObject.Parameters?.NewValue;
+    if (!email) throw `Missing value of 'UserEmail' parameter: ${email}`;
+    if (!uid) throw `Missing value of 'UserID' parameter: ${uid}`;
+    if (typeof field !== 'string' || !field) throw `Invalid type or missing value of 'FieldToChange' parameter: ${field}`;
+    if (typeof newValue !== 'string' || !newValue) throw `Invalid type or missing value of 'NewValue' parameter: ${newValue}`;
 
-    let email = requestObject.UserEmail;
-    if(!email) r.reject({Response:'error',Reason:`Invalid parameter email`}); //Check for valid email
-    getPatientFromEmail(email).then(function(patient) {
-        //Valid fields
-        let validFields = ['Email', 'TelNum', 'Language'];
-        let field = requestObject.Parameters.FieldToChange;
-        let newValue = requestObject.Parameters.NewValue;
-        if ( !field || !newValue || typeof field !== 'string' || typeof newValue !== 'string')
-            r.resolve({Response:'error',Reason:'Invalid Parameters'});
-        if(field === 'Password') {
-            //Hash the password before storing
-            let hashedPassword = utility.hash(newValue);
-            //Update database
-            exports.runSqlQuery(queries.setNewPassword(), [hashedPassword, requestObject.UserID])
-                .then(()=>{
-                    delete requestObject.Parameters.NewValue;
-                    r.resolve({Response:'success'});
-                }).catch((err)=>{
-	                r.reject({Response:'error',Reason:err});
-                });
-            //If not a password field update
-        }else if(validFields.includes(field)){
-            exports.runSqlQuery(queries.accountChange(), [newValue, patient.PatientSerNum])
-                .then(()=>{
-                    r.resolve({Response:'success'});
-                }).catch((err)=>{
-                    r.reject({Response:'error',Reason:err});
-                });
-        }
-    });
-    return r.promise;
+    let patient = await getPatientFromEmail(email);
+
+    if (field === 'Password') {
+        // Hash the password before storing it
+        const hashedPassword = utility.hash(newValue);
+
+        await exports.runSqlQuery(queries.setNewPassword(), [hashedPassword, uid]);
+        delete requestObject.Parameters.NewValue;
+    }
+    else if (field === 'Language') {
+        await exports.runSqlQuery(queries.languageChange(), [newValue, patient.PatientSerNum]);
+    }
+    else throw `Invalid 'FieldToChange' parameter: ${field}`;
+    return { Response: 'success' };
 };
 
 /**
@@ -976,21 +971,17 @@ exports.inputEducationalMaterialRating = function(requestObject)
 };
 
 /**
- * getPatientFromEmail
- * @desc gets patient information based on inputted email
- * @param email
- * @return {Promise}
+ * @description Gets a user's self PatientSerNum based on their email.
+ * @param {string} email The user's email address.
+ * @return {Promise<{PatientSerNum: number}>} Resolves to an object containing the user's PatientSerNum.
  */
-function getPatientFromEmail(email) {
-    let r = Q.defer();
-    exports.runSqlQuery(queries.getPatientFromEmail(),[email])
-        .then((rows)=>{
-            if(rows.length === 0) r.reject({Response:'error',Reason:"No User match in DB"});
-            r.resolve(rows[0]);
-        }).catch((err)=>{
-            r.reject(err);
-        });
-    return r.promise;
+async function getPatientFromEmail(email) {
+    let rows = await exports.runSqlQuery(queries.getPatientFromEmail(), [email]);
+    if (rows.length === 0) throw {
+        Response: 'error',
+        Reason: `Patient not found using email: ${email}`,
+    };
+    return rows[0];
 }
 
 /**
