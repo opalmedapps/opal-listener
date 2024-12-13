@@ -31,12 +31,12 @@
     // Change commit type to build for Docker-related updates
     {
       "matchDatasources": ["docker"],
-      "semanticCommitType": "build"
+      "semanticCommitType": "build",
     },
     // Group eslint-related updates
     {
-      "matchPackagePatterns": ["eslint"],
-      "groupName": "eslint"
-    }
-  ]
+      "groupName": "eslint",
+      "matchPackageNames": ["/eslint/"],
+    },
+  ],
 }
