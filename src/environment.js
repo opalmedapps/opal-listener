@@ -42,7 +42,7 @@ const FIREBASE_CONFIG = {
  * @description Validate the listener environment by checking all
  *              specified environment variables for truthy-ness
  * @param {object} processArr - Environment variables to be validated
- * @throws {AssertionError}
+ * @throws {assert.AssertionError}
  */
 function validateEnvironment(processArr) {
     Object.keys(processArr).forEach(key => {
