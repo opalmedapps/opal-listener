@@ -29,7 +29,7 @@
     "mysql": "2.18.1",
     "node-cron": "3.0.3",
     "nodemailer": "6.9.16",
-    "nodemon": "3.1.4",
+    "nodemon": "3.1.9",
     "q": "1.5.1",
     "tweetnacl": "1.0.3",
     "winston": "3.17.0"
