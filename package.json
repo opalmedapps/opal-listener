@@ -24,7 +24,7 @@
     "express-validator": "7.2.1",
     "firebase-admin": "13.0.2",
     "html-to-text": "9.0.5",
-    "keyv": "5.1.0",
+    "keyv": "5.2.3",
     "moment": "2.29.4",
     "mysql": "2.18.1",
     "node-cron": "3.0.3",
