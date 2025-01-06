@@ -3,7 +3,7 @@
  *              This is done to limit the need to recompute the output, which is time-consuming.
  * @author Stacey Beard, 2024-03-20
  */
-const Keyv = require('keyv');
+const { Keyv } = require('keyv');
 const crypto = require('crypto');
 const legacyLogger = require('../../listener/logs/logger');
 
