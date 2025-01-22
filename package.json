@@ -56,7 +56,7 @@
     "oncology"
   ],
   "author": "David Herrera",
-  "license": "ISC",
+  "license": "AGPL-3.0-or-later",
   "homepage": "https://depdocs.com/opal",
   "description": "Backend listener for the Opal patient portal"
 }
