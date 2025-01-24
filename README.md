@@ -141,4 +141,4 @@ For the versions available, see the [tags on this repository](https://github.com
 
 ## License
 
-This project is licensed under the AGPL v3.0 License - see the [LICENSE.md](LICENSE.md) file for details
+This project is licensed under the AGPL v3.0 License - see the [LICENSE](LICENSE) file for details
