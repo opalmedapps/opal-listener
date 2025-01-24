@@ -5,7 +5,9 @@
 
 require('dotenv').config();
 
-const { ENVIRONMENT, FIREBASE_CONFIG, validateEnvironment } = require('./environment');
+const {
+    ENVIRONMENT, ENVIRONMENT_SOURCE_SYSTEM_CHECKIN, ENVIRONMENT_ORMS, FIREBASE_CONFIG, validateEnvironment,
+} = require('./environment');
 const { Firebase } = require('./firebase/firebase');
 const legacyServer = require('../listener/legacy-server');
 const legacyRegistrationServer = require('../legacy-registration/legacy-server');
@@ -16,6 +18,14 @@ const { Version } = require('./utility/version');
 
 // Raise AssertionError if environment variables are not set
 validateEnvironment(ENVIRONMENT);
+
+if (ENVIRONMENT.ORMS_ENABLED) {
+    validateEnvironment(ENVIRONMENT_ORMS);
+}
+
+if (ENVIRONMENT.SOURCE_SYSTEM_SUPPORTS_CHECKIN) {
+    validateEnvironment(ENVIRONMENT_SOURCE_SYSTEM_CHECKIN);
+}
 
 launch().then(() => {
     legacyLogger.log('info', 'LISTENER LAUNCHED SUCCESSFULLY');
