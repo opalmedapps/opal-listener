@@ -5,7 +5,7 @@
 const assert = require('assert');
 
 /**
- * @description The full list of .env variables for configuring the listener
+ * @description The full list of required .env variables for configuring the listener
  */
 const ENVIRONMENT = {
     FIREBASE_DATABASE_URL: process.env.FIREBASE_DATABASE_URL,
@@ -19,13 +19,28 @@ const ENVIRONMENT = {
     DATABASE_USE_SSL: process.env.DATABASE_USE_SSL,
     SSL_CA: process.env.SSL_CA,
     QUESTIONNAIRE_COMPLETED_URL: process.env.QUESTIONNAIRE_COMPLETED_URL,
-    OPAL_EMAIL: process.env.OPAL_EMAIL,
-    SMTP_SERVER_IP: process.env.SMTP_SERVER_IP,
-    SMTP_SERVER_PORT: process.env.SMTP_SERVER_PORT,
-    ORMS_ENABLED: process.env.ORMS_ENABLED,
-    SOURCE_SYSTEM_SUPPORTS_CHECKIN: process.env.SOURCE_SYSTEM_SUPPORTS_CHECKIN,
-    CHECKIN_ROOM: process.env.CHECKIN_ROOM,
+    FEEDBACK_EMAIL: process.env.FEEDBACK_EMAIL,
+    FEEDBACK_EMAIL_HOST: process.env.FEEDBACK_EMAIL_HOST,
+    FEEDBACK_EMAIL_PORT: process.env.FEEDBACK_EMAIL_PORT,
     OPAL_CHECKIN_URL: process.env.OPAL_CHECKIN_URL,
+    ORMS_ENABLED: process.env.ORMS_ENABLED === '1',
+    SOURCE_SYSTEM_SUPPORTS_CHECKIN: process.env.SOURCE_SYSTEM_SUPPORTS_CHECKIN === '1',
+};
+
+/**
+ * @description The list of .env variables for configuring the listener that are required when ORMS_ENABLED=1
+ */
+const ENVIRONMENT_ORMS = {
+    CHECKIN_ROOM: process.env.CHECKIN_ROOM,
+    ORMS_CHECKIN_URL: process.env.ORMS_CHECKIN_URL,
+};
+
+/**
+ * @description The list of .env variables for configuring the listener
+ * that are required when SOURCE_SYSTEM_SUPPORTS_CHECKIN=1
+ */
+const ENVIRONMENT_SOURCE_SYSTEM_CHECKIN = {
+    SOURCE_SYSTEM_CHECKIN_URL: process.env.SOURCE_SYSTEM_CHECKIN_URL,
 };
 
 /**
@@ -46,12 +61,14 @@ const FIREBASE_CONFIG = {
  */
 function validateEnvironment(processArr) {
     Object.keys(processArr).forEach(key => {
-        assert.ok(processArr[key], `${key} variable must be defined in .env`);
+        assert.ok(processArr[key] !== undefined && processArr[key] !== '', `${key} variable must be defined in .env`);
     });
 }
 
 module.exports = {
     ENVIRONMENT,
+    ENVIRONMENT_SOURCE_SYSTEM_CHECKIN,
+    ENVIRONMENT_ORMS,
     FIREBASE_CONFIG,
     validateEnvironment,
 };
