@@ -139,11 +139,6 @@ Please read [CONTRIBUTING.md](https://gist.github.com/PurpleBooth/b24679402957c6
 We use [SemVer](http://semver.org/) for versioning.
 For the versions available, see the [tags on this repository](https://github.com/your/project/tags).
 
-## Authors
-
-* **James Brace** - *Initial work*
-* **David Hererra** - *Initial work*
-
 ## License
 
-This project is licensed under the MIT License - see the [LICENSE.md](LICENSE.md) file for details
+This project is licensed under the AGPL v3.0 License - see the [LICENSE](LICENSE) file for details
