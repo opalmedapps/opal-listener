@@ -1,6 +1,10 @@
+// eslint-disable-next-line max-len
+// SPDX-FileCopyrightText: Copyright 2022 Opal Health Informatics Group at the Research Institute of the McGill University Health Centre <john.kildea@mcgill.ca>
+//
+// SPDX-License-Identifier: AGPL-3.0-or-later
+
 /**
  * @file Manages the connection to a Firebase realtime database.
- * @author Stacey Beard, David Herrera, Robert Maglieri
  */
 
 const admin = require('firebase-admin');

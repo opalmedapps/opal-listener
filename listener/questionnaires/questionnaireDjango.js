@@ -1,6 +1,9 @@
+// SPDX-FileCopyrightText: Copyright 2023 Opal Health Informatics Group at the Research Institute of the McGill University Health Centre <john.kildea@mcgill.ca>
+//
+// SPDX-License-Identifier: AGPL-3.0-or-later
+
 /**
  * @file Makes and interprets API calls to the Django backend, to get information used in the Questionnaire module.
- * @author Stacey Beard
  */
 
 const ApiRequest = require('../../src/core/api-request');

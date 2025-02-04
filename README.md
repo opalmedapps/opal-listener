@@ -1,3 +1,9 @@
+<!--
+SPDX-FileCopyrightText: Copyright 2017 Opal Health Informatics Group at the Research Institute of the McGill University Health Centre <john.kildea@mcgill.ca>
+
+SPDX-License-Identifier: AGPL-3.0-or-later
+-->
+
 # Listener
 
 [![pipeline status](https://gitlab.com/opalmedapps/opal-listener/badges/main/pipeline.svg)](https://gitlab.com/opalmedapps/opal-listener/-/commits/main) [![coverage report](https://gitlab.com/opalmedapps/opal-listener/badges/main/coverage.svg)](https://gitlab.com/opalmedapps/opal-listener/-/commits/main) [![Docs](https://img.shields.io/badge/docs-available-brightgreen.svg)](https://opalmedapps.gitlab.io/opal-listener)

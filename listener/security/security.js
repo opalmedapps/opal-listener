@@ -1,3 +1,7 @@
+// SPDX-FileCopyrightText: Copyright 2017 Opal Health Informatics Group at the Research Institute of the McGill University Health Centre <john.kildea@mcgill.ca>
+//
+// SPDX-License-Identifier: AGPL-3.0-or-later
+
 const logger = require('./../logs/logger');
 const firebase = require('firebase-admin');
 const keyDerivationCache = require('../../src/utility/key-derivation-cache');
@@ -221,7 +225,6 @@ async function getUserPatientSecurityInfo(requestKey, requestObject) {
          because during such a request, the app does not yet have access to the user's Firebase UID.
          This function looks up the UID value via firebase-admin's auth tool.
          Note: this function modifies the original requestObject.
- * @author Stacey Beard
  * @date 2023-05-04
  * @param requestObject The security request object to check.
  * @returns {Promise<void>} Resolves if the addition was successful or if a UserID was already provided.

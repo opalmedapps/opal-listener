@@ -1,6 +1,10 @@
+// eslint-disable-next-line max-len
+// SPDX-FileCopyrightText: Copyright 2022 Opal Health Informatics Group at the Research Institute of the McGill University Health Centre <john.kildea@mcgill.ca>
+//
+// SPDX-License-Identifier: AGPL-3.0-or-later
+
 /**
  * @file relay request uploaded to firebase by the app to the Django backend.
- * @author David Gagne
  */
 const axios = require('axios');
 const { convert } = require('html-to-text');

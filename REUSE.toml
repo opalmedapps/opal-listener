@@ -1,0 +1,57 @@
+version = 1
+
+
+[[annotations]]
+path = [
+    ".eslintrc.json",
+    ".vscode/extensions.json",
+    "docs/jsdoc.config.json",
+    "docs/source/config.json",
+    "firebase/demo/.firebaserc",
+    "firebase/demo/database.rules.json",
+    "firebase/demo/firebase.json",
+    "firebase/dev/.firebaserc",
+    "firebase/dev/database.rules.json",
+    "firebase/dev/firebase.json",
+    "firebase/devops/.firebaserc",
+    "firebase/devops/database.rules.json",
+    "firebase/devops/firebase.json",
+    "firebase/preprod/.firebaserc",
+    "firebase/preprod/database.rules.json",
+    "firebase/preprod/firebase.json",
+    "firebase/prod/.firebaserc",
+    "firebase/prod/database.rules.json",
+    "firebase/prod/firebase.json",
+    "firebase/qa/.firebaserc",
+    "firebase/qa/database.rules.json",
+    "firebase/qa/firebase.json",
+    "firebase/staging/.firebaserc",
+    "firebase/staging/database.rules.json",
+    "firebase/staging/firebase.json",
+    "listener/educational-material/eduMaterialConfig.json",
+    "listener/studies/studiesConfig.json",
+    "package.json",
+    "src/test/.eslintrc.json",
+]
+precedence = "override"
+SPDX-FileCopyrightText = "Copyright (C) 2022 Opal Health Informatics Group at the Research Institute of the McGill University Health Centre <john.kildea@mcgill.ca>"
+SPDX-License-Identifier = "AGPL-3.0-or-later"
+
+
+[[annotations]]
+path = [
+    "listener/questionnaires/questionnaireConfig.json",
+]
+precedence = "override"
+SPDX-FileCopyrightText = "Copyright (C) 2020 Opal Health Informatics Group at the Research Institute of the McGill University Health Centre <john.kildea@mcgill.ca>"
+SPDX-License-Identifier = "AGPL-3.0-or-later"
+
+
+[[annotations]]
+path = [
+    "VERSION",
+    "package-lock.json",
+]
+precedence = "override"
+SPDX-FileCopyrightText = "Copyright (C) 2018 Opal Health Informatics Group at the Research Institute of the McGill University Health Centre <john.kildea@mcgill.ca>"
+SPDX-License-Identifier = "AGPL-3.0-or-later"

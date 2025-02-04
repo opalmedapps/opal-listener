@@ -1,6 +1,10 @@
+// eslint-disable-next-line max-len
+// SPDX-FileCopyrightText: Copyright 2022 Opal Health Informatics Group at the Research Institute of the McGill University Health Centre <john.kildea@mcgill.ca>
+//
+// SPDX-License-Identifier: AGPL-3.0-or-later
+
 /**
  * @file Listen and handle request uploaded to firebase by the app
- * @author David Gagne
  */
 const ApiRequest = require('./api-request');
 const Encryption = require('../encryption/encryption');
