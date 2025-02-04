@@ -1,3 +1,8 @@
+// eslint-disable-next-line max-len
+// SPDX-FileCopyrightText: Copyright 2022 Opal Health Informatics Group at the Research Institute of the McGill University Health Centre <john.kildea@mcgill.ca>
+//
+// SPDX-License-Identifier: AGPL-3.0-or-later
+
 /**
  * @description Contains contants use to handle error from Django backend, legacy-listener, and new listerner structure.
  *              logMessage: is use by winston logger in the console and the log file.

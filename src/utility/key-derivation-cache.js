@@ -1,7 +1,11 @@
+// eslint-disable-next-line max-len
+// SPDX-FileCopyrightText: Copyright 2024 Opal Health Informatics Group at the Research Institute of the McGill University Health Centre <john.kildea@mcgill.ca>
+//
+// SPDX-License-Identifier: AGPL-3.0-or-later
+
 /**
  * @description Manages caching for the output of encryption key derivation functions (such as PBKDF2).
  *              This is done to limit the need to recompute the output, which is time-consuming.
- * @author Stacey Beard, 2024-03-20
  */
 const { Keyv } = require('keyv');
 const crypto = require('crypto');

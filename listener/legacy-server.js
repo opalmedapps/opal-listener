@@ -1,21 +1,10 @@
-/*
- * Filename     :   legacy-server.js
- * Description  :   This script listens for changes to config.FIREBASE_ROOT_BRANCH in firebase, reads those changes and
- *                  writes a response back to firebase.
- * Created by   :   David Herrera, Robert Maglieri
- * Date         :   07 Mar 2017
- * Copyright    :   Copyright 2016, HIG, All rights reserved.
- * Licence      :   This file is subject to the terms and conditions defined in
- *                  file 'LICENSE.txt', which is part of this source code package.
- *
- * *********************************************
- * Modified By    	: Yick Mo
- * Modified Date	: 2017-12-15
- * NOTES			: Added the Heart Beat Database
- *
- * Important		: Do not forget to change "/dev3" back to "/dev2" before merging. [Done]
- * *********************************************
- *
+// SPDX-FileCopyrightText: Copyright 2015 Opal Health Informatics Group at the Research Institute of the McGill University Health Centre <john.kildea@mcgill.ca>
+//
+// SPDX-License-Identifier: AGPL-3.0-or-later
+
+/**
+ * This script listens for changes to config.FIREBASE_ROOT_BRANCH in firebase, reads those changes and
+ * writes a response back to firebase.
  */
 
 const mainRequestApi    = require('./api/main.js');
@@ -251,7 +240,6 @@ function uploadToFirebase(context, response) {
 
 /**
  * validateKeysForFirebase
- * @author Stacey Beard
  * @date 2018-10-05
  * @desc Validates all keys in an object intended to be pushed to Firebase.
  *       Empty keys are replaced with 'MISSING_KEY' and illegal characters are replaced with '_'.
@@ -316,7 +304,6 @@ exports.validateKeysForFirebase = validateKeysForFirebase;
 
 /**
  * incrementStringParenthesisNumber
- * @author Stacey Beard
  * @date 2018-10-05
  * @desc Utility function that takes as input a string and increments its ending number (in parenthesis),
  *       like when saving a file of the same name as another in Windows.
