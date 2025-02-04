@@ -1,3 +1,7 @@
+# SPDX-FileCopyrightText: Copyright 2018 Opal Health Informatics Group at the Research Institute of the McGill University Health Centre <john.kildea@mcgill.ca>
+#
+# SPDX-License-Identifier: AGPL-3.0-or-later
+
 Version 1.11.1.0:
  - ci: add Firebase rule deployment for new envs
  - ci: add dependency scanning

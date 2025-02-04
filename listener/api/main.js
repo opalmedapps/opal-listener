@@ -1,3 +1,7 @@
+// SPDX-FileCopyrightText: Copyright 2015 Opal Health Informatics Group at the Research Institute of the McGill University Health Centre <john.kildea@mcgill.ca>
+//
+// SPDX-License-Identifier: AGPL-3.0-or-later
+
 const q                   = require('q');
 const processApiRequest   = require('./processApiRequest.js');
 const OpalResponseSuccess = require('./response/response-success');

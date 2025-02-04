@@ -1,9 +1,7 @@
-/**
- * Created by PhpStorm.
- * User: rob
- * Date: 2017-11-10
- * Time: 2:28 PM
- */
+// SPDX-FileCopyrightText: Copyright 2017 Opal Health Informatics Group at the Research Institute of the McGill University Health Centre <john.kildea@mcgill.ca>
+//
+// SPDX-License-Identifier: AGPL-3.0-or-later
+
 
 const logger            = require('../logs/logger.js');
 const config            = require('../config-adaptor');

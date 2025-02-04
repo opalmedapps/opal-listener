@@ -1,3 +1,7 @@
+// SPDX-FileCopyrightText: Copyright 2015 Opal Health Informatics Group at the Research Institute of the McGill University Health Centre <john.kildea@mcgill.ca>
+//
+// SPDX-License-Identifier: AGPL-3.0-or-later
+
 const axios             = require('axios');
 const filesystem        = require('fs');
 const Q                 = require('q');
@@ -298,7 +302,6 @@ exports.updateReadStatus = function(userId, parameters)
 
 /**
  * logPatientAction
- * @author Stacey Beard, based on work by Tongyou (Eason) Yang
  * @desc Logs a patient action in the table PatientActionLog.
  *
  * requestObject must include the following fields:
@@ -626,7 +629,6 @@ function getCheckedInAppointments(patientSerNum){
 
 /**
  * @description Retrieves a patient's MRNs (with their corresponding sites) based on their PatientSerNum.
- * @author Stacey Beard
  * @date 2021-02-26
  * @param patientSerNum
  * @returns {Promise<*>} Rows with the patient's MRN information (multiple MRNs).
@@ -640,7 +642,6 @@ async function getMRNs(patientSerNum) {
 
 /**
  * @description Set CheckinUsername for all checked-in appointments.
- * @author Shifeng Chen
  * @date 2023-01-04
  * @param requestObject
  * @param appointmentSerNumArray
@@ -849,7 +850,6 @@ exports.getEncryption=function(requestObject)
 
 /**
  * getPackageContents
- * @author Stacey Beard
  * @date 2018-11-15
  * @desc Gets and returns the contents of a specified package, at a single level of depth.
  *       For example, if the function is called to get the contents of Package 1, which includes a booklet and
