@@ -1,3 +1,7 @@
+// SPDX-FileCopyrightText: Copyright 2015 Opal Health Informatics Group at the Research Institute of the McGill University Health Centre <john.kildea@mcgill.ca>
+//
+// SPDX-License-Identifier: AGPL-3.0-or-later
+
 /**
  * @desc Query that returns patient table fields based on a PatientSerNum.
  * @deprecated Along with the Patient requestMapping in sqlInterface.
@@ -416,7 +420,6 @@ exports.logActivity=function()
 
 /**
  * logPatientAction
- * @author Stacey Beard
  * @desc Query that logs a patient action (CLICK, SCROLLTOBOTTOM, etc.) in the database table PatientActionLog.
  *       The database entry for the item that was acted upon (such as a piece of educational material) is specified
  *       by the fields RefTable and RefTableSerNum. ActionTime indicates the time of the action as reported by the app.
@@ -458,7 +461,6 @@ exports.updateDeviceIdentifiers = function()
 
 /**
  * getPackageContents
- * @author Stacey Beard
  * @date 2018-11-19
  * @desc Query that returns the contents of a specified education material package, at a single level of depth.
  * @returns {string}
@@ -542,7 +544,6 @@ exports.getPatientForPatientMembers = function() {
 
 /**
  * @description Retrieves all of a patient's MRNs from the Patient_Hospital_Identifier table
- * @author Stacey Beard
  * @date 2021-02-26
  * @returns {string}
  */
@@ -589,7 +590,6 @@ exports.getTodaysCheckedInAppointments = function() {
 
 /**
  * @description Set field CheckinUsername based on all the checked-in appointments on today's date
- * @author Shifeng Chen
  * @date 2023-01-04
  */
 exports.setCheckInUsername = function () {

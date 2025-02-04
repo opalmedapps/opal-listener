@@ -1,7 +1,11 @@
+// eslint-disable-next-line max-len
+// SPDX-FileCopyrightText: Copyright 2022 Opal Health Informatics Group at the Research Institute of the McGill University Health Centre <john.kildea@mcgill.ca>
+//
+// SPDX-License-Identifier: AGPL-3.0-or-later
+
 /* eslint-disable no-new */
 /**
  * @file Upload a mock request to firebase to simulate a request from the app.
- * @author David Gagne
  */
 require('dotenv').config();
 const path = require('path');

@@ -1,3 +1,9 @@
+<!--
+SPDX-FileCopyrightText: Copyright 2021 Opal Health Informatics Group at the Research Institute of the McGill University Health Centre <john.kildea@mcgill.ca>
+
+SPDX-License-Identifier: AGPL-3.0-or-later
+-->
+
 **By submitting this merge request, I confirm the following:**
 
 * [ ] The merge request title follows the conventional commits convention (see `Backend` project's `README.md`)

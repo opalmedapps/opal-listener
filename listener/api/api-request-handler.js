@@ -1,3 +1,7 @@
+// SPDX-FileCopyrightText: Copyright 2020 Opal Health Informatics Group at the Research Institute of the McGill University Health Centre <john.kildea@mcgill.ca>
+//
+// SPDX-License-Identifier: AGPL-3.0-or-later
+
 const { Patient } = require('./modules/patient/patient');
 const { validationResult } = require('express-validator');
 
@@ -15,7 +19,7 @@ class ApiRequestHandler {
     static validators = [];
 
     /**
-     * Validates the parameters using the list of validators for the requests. 
+     * Validates the parameters using the list of validators for the requests.
      * @param parameters
      * @returns {Promise<Result<{param: "_error"; msg: any; nestedErrors: ValidationError[];
      *  location?: undefined; value?: undefined} | {location: Location; param: string; value: any; msg: any; nestedErrors?: unknown[]}>>} returns errors from validator result from validator library

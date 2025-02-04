@@ -1,3 +1,9 @@
+<!--
+SPDX-FileCopyrightText: Copyright 2022 Opal Health Informatics Group at the Research Institute of the McGill University Health Centre <john.kildea@mcgill.ca>
+
+SPDX-License-Identifier: AGPL-3.0-or-later
+-->
+
 The listener is currently following the strangler fig design pattern to develop a new version while maintaining the old one.
 
 ## Legacy Part

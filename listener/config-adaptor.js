@@ -1,8 +1,11 @@
+// SPDX-FileCopyrightText: Copyright 2022 Opal Health Informatics Group at the Research Institute of the McGill University Health Centre <john.kildea@mcgill.ca>
+//
+// SPDX-License-Identifier: AGPL-3.0-or-later
+
 /**
  * @file Provides a bridge to selected configurations in the new config file, which replaces the old config.json file.
  *       This file provides a single point of interaction with all necessary configurations, preventing the need to edit
  *       many references in old code to access configs in the new config file.
- * @author Stacey Beard
  */
 
 // Add selected configs from the new file
