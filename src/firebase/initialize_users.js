@@ -89,7 +89,7 @@ async function deleteUsers() {
             console.log('Successfully deleted user:', user.email);
         }
         catch (error) {
-            console.log('Error deleting user:', error);
+            console.log('Error deleting user:', user.email, error);
         }
     }
 }
