@@ -50,7 +50,7 @@ const USER_RECORDS = [
         uid: 'mouj1pqpXrYCl994oSm5wtJT3In2',
     },
     {
-        email: 'bobbyjones@demo.opalmedapps.ca',
+        email: 'bobbyjones@opalmedapps.ca',
         password: '12345Opal!!',
         uid: 'hIMnEXkedPMxYnXeqNXzphklu4V2',
     },
