@@ -15,7 +15,7 @@ const opaldbCredentials = {
     port: config.MYSQL_DATABASE_PORT,
     user: config.MYSQL_USERNAME,
     password: config.MYSQL_PASSWORD,
-    database: config.MYSQL_OPAL_DATABASE,
+    database: config.MYSQL_DATABASE,
     dateStrings: true
 };
 
