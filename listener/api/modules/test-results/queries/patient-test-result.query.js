@@ -70,7 +70,7 @@ class PatientTestResultQuery {
 
 		return mysql.format(`
                     SELECT DISTINCT
-                        DATE_FORMAT(CONVERT_TZ(CollectedDateTime, 'America/Montreal', 'UTC'), '%Y-%m-%d %H:%i:%sZ') as collectedDateTime
+                        DATE_FORMAT(CONVERT_TZ(CollectedDateTime, 'America/Toronto', 'UTC'), '%Y-%m-%d %H:%i:%sZ') as collectedDateTime
                     FROM
                         PatientTestResult as ptr,
                         TestExpression as te,
