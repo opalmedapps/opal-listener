@@ -1,3 +1,4 @@
+const logger = require('../logs/logger.js');
 const questionnaireValidation = require('./questionnaire.validate');
 const questionnaireConfig = require('./questionnaireConfig.json');
 var utility = require('../utility/utility');
