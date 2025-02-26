@@ -13,13 +13,6 @@ default:
       - .npm/
   before_script:
     - uname -a
-    - node --version
-    - npm --version
-    # Install dependencies and cache within the project directory to cache
-    # See: https://javascript.plainenglish.io/improving-ci-performance-aka-how-to-save-your-money-31ff691360e4
-    - npm ci --include dev --cache .npm --prefer-offline
-    # Set up env files
-    - cp .env.sample .env
 
 stages:
   - Build
