@@ -3,28 +3,27 @@
  * @author David Gagne
  */
 
-const Axios = require('axios');
-const Configs = require('../config/config.json');
-const LegacyLogger = require('../../listener/logs/logger');
-const LegacyOpalResponseSuccess = require('../../listener/api/response/response-success');
+const axios = require('axios');
+const configs = require('../config/config.json');
+const legacyLogger = require('../../listener/logs/logger');
 
 class ApiRequest {
     /**
      * @description Take the validated request uploaded to Firebase and send the Parameters field
      * which represents the axios request to the Django backend. Use legacy server to format the request
      * uploaded to Firebase.
-     * @param {object} validatedRequest Request decrypted and validated by the listener.
+     * @param {object} decryptedRequest Request decrypted
      * @returns {object} Formatted request that merge the response from the Django API and
      * the legacy information needed by the app.
      */
-    static async makeRequest(validatedRequest) {
-        LegacyLogger.log('debug', 'Preparing to send request to Opal API');
-        const apiResponse = await ApiRequest.sendRequestToApi(validatedRequest.parameters);
-        const opalResponse = new LegacyOpalResponseSuccess({
-            Response: 'success',
-            Data: apiResponse.data.results,
-        });
-        return new LegacyOpalResponseSuccess(opalResponse, validatedRequest).toLegacy();
+    static async makeRequest(decryptedRequest) {
+        legacyLogger.log('debug', 'API: Preparing to send request to Opal API');
+        const apiResponse = await ApiRequest.sendRequestToApi(decryptedRequest.Parameters);
+        return {
+            status_code: apiResponse.status,
+            headers: apiResponse.headers,
+            data: apiResponse.data,
+        };
     }
 
     /**
@@ -33,11 +32,11 @@ class ApiRequest {
      * @returns {object} Response from the django api
      */
     static async sendRequestToApi(parameters) {
-        LegacyLogger.log('debug', 'Sending request to Opal API');
+        legacyLogger.log('debug', 'API: Sending request to Opal API');
         const requestParams = parameters;
-        requestParams.headers.Authorization = Configs.OPAL_BACKEND.AUTH_TOKEN;
-        requestParams.url = `${Configs.OPAL_BACKEND.HOST}${parameters.url}`;
-        return Axios(requestParams);
+        requestParams.headers.Authorization = configs.OPAL_BACKEND.AUTH_TOKEN;
+        requestParams.url = `${configs.OPAL_BACKEND.HOST}${parameters.url}`;
+        return axios(requestParams);
     }
 }
 
