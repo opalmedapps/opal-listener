@@ -408,6 +408,7 @@ exports.studyUpdateStatus = async function(requestObject) {
             [statusNumber, parameters.questionnaire_id, requestObject.UserID]
         );
 
+        // status 2 is used for 'opalConsented', all other statuses should not trigger the API
         if (statusNumber==2) {
             // Make database call to retrieve an active databank consent form id, if it exists
             let consent_questionnaire_id;
@@ -442,7 +443,8 @@ exports.studyUpdateStatus = async function(requestObject) {
                 try {
                     // TODO: Databank Phase2 replace this call with a put and implement PutAsCreate in Django endpoint to make this more error resistent
                     //       For example in case a DatabankConsent questionnaire is accidentally sent to the same patient twice, this would give a duplicate entry error in django.
-                    await requestUtility.request("post", config.DATABANK_CONSENT_URL.replace('<PATIENT_UUID>', parameters.uuid), options);
+                    api_url = `${config.OPAL_BACKEND_HOST}/api/patients/<PATIENT_UUID>/databank/consent/`;
+                    await requestUtility.request("post", api_url.replace('<PATIENT_UUID>', parameters.uuid), options);
                 }catch (error) {
                     return Promise.reject({Response: 'error', Reason: `Error creating DatabankConsent in backend: ${error}`});
                 }

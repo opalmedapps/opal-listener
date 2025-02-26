@@ -23,7 +23,6 @@ module.exports.DOCUMENTS_PATH = process.env.DOCUMENTS_PATH;
 module.exports.DOCTOR_PATH = process.env.DOCTOR_PATH;
 module.exports.CHECKIN_URL = process.env.CHECKIN_URL;
 module.exports.CHECKIN_ROOM = process.env.CHECKIN_ROOM;
-module.exports.DATABANK_CONSENT_URL = process.env.DATABANK_CONSENT_URL;
 module.exports.LAB_RESULT_HISTORY_URL = process.env.LAB_RESULT_HISTORY_URL;
 module.exports.QUESTIONNAIRE_COMPLETED_URL = process.env.QUESTIONNAIRE_COMPLETED_URL;
 module.exports.LATEST_STABLE_VERSION = process.env.LATEST_STABLE_VERSION;
