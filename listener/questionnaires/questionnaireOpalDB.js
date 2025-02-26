@@ -276,7 +276,6 @@ async function questionnaireUpdateStatus(requestObject) {
         response.data?.caregivers.forEach((caregiver) => usernames.push(`"${caregiver['username']}"`));
 
         let readBy = usernames.join(', ');
-        readBy = "[" + readBy + "]";
 
         await OpalSQLQueryRunner.run(
             opalQueries.implicitlyReadNotification(),
