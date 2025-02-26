@@ -140,8 +140,7 @@ pages:
 firebase rules dev:
   extends: .firebase rules
   rules:
-    # TODO testing, reset to == $CI_DEFAULT_BRANCH
-    - if: $CI_COMMIT_BRANCH == "QSCCD-1069.SB.firebase-rules-QA"
+    - if: $CI_COMMIT_BRANCH == $CI_DEFAULT_BRANCH
       changes:
         - firebase/dev/database.rules.json
   environment:
@@ -154,8 +153,7 @@ firebase rules dev:
 firebase rules qa:
   extends: .firebase rules
   rules:
-    # TODO testing, reset to == $CI_DEFAULT_BRANCH
-    - if: $CI_COMMIT_BRANCH == "QSCCD-1069.SB.firebase-rules-QA"
+    - if: $CI_COMMIT_BRANCH == $CI_DEFAULT_BRANCH
       changes:
         - firebase/qa/database.rules.json
       when: manual
@@ -171,8 +169,7 @@ firebase rules qa:
 firebase rules staging:
   extends: .firebase rules
   rules:
-    # TODO testing, reset to == $CI_DEFAULT_BRANCH
-    - if: $CI_COMMIT_BRANCH == "QSCCD-1069.SB.firebase-rules-QA"
+    - if: $CI_COMMIT_BRANCH == $CI_DEFAULT_BRANCH
       changes:
         - firebase/staging/database.rules.json
       when: manual
