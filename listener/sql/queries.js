@@ -597,8 +597,8 @@ exports.patientNotificationsTableFields=function()
             WHERE nc.NotificationControlSerNum = n.NotificationControlSerNum
                 AND n.PatientSerNum = ?
                 -- For now, only return unread notifications
-                AND n.ReadStatus = 0
                 AND (n.LastUpdated > ? OR nc.LastUpdated > ?)
+            HAVING ReadStatus = 0
             ;
     `;
 };
