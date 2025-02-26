@@ -15,10 +15,11 @@ class PatientTestResult {
 	/**
 	 * Method gets the test types for the patient
      * @param {Date} [lastUpdated] - Optional date/time; if provided, only items with 'LastUpdated' after this time are returned.
+     * @param {String} userId - Firebase userId making the request.
 	 * @returns {Promise<Object>} Returns the test types for the patient
 	 */
-	async getTestTypes(UserId, lastUpdated=0) {
-		const query = PatientTestResultQuery.getTestTypesQuery(UserId, this._patient.patientSerNum, lastUpdated);
+	async getTestTypes(userId, lastUpdated=0) {
+		const query = PatientTestResultQuery.getTestTypesQuery(userId, this._patient.patientSerNum, lastUpdated);
 		let results;
 		try {
 			results = await OpalSQLQueryRunner.run(query);

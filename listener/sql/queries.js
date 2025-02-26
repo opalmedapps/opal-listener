@@ -602,7 +602,7 @@ exports.getNewNotifications=function() {
     return `SELECT
                 Notification.NotificationSerNum,
                 Notification.DateAdded,
-                JSON_CONTAINS(Appt.ReadBy, ?) as ReadStatus,
+                JSON_CONTAINS(Notification.ReadBy, ?) as ReadStatus,
                 Notification.RefTableRowSerNum,
                 NotificationControl.NotificationType,
                 NotificationControl.Name_EN,
@@ -618,16 +618,11 @@ exports.getNewNotifications=function() {
                 Users
             WHERE
                 NotificationControl.NotificationControlSerNum = Notification.NotificationControlSerNum
-            AND
-                Notification.PatientSerNum=Patient.PatientSerNum
-            AND
-                Patient.PatientSerNum=Users.UserTypeSerNum
-            AND
-                Users.Username= ?
-            AND
-                Notification.ReadStatus = 0
-            AND
-                (Notification.DateAdded > ? OR NotificationControl.DateAdded > ?);
+            AND Notification.PatientSerNum=Patient.PatientSerNum
+            AND Patient.PatientSerNum=Users.UserTypeSerNum
+            AND Users.Username= ?
+            AND Notification.ReadStatus = 0
+            AND (Notification.DateAdded > ? OR NotificationControl.DateAdded > ?);
     `;
 };
 

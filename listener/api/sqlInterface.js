@@ -173,6 +173,7 @@ exports.runSqlQuery = OpalSQLQueryRunner.run;
 
 /**
  * @desc Fetches and returns data for the given patient in an array of categories from requestMappings.
+ * @param {string} userId Firebase userId making the request.
  * @param patientSerNum The PatientSerNum of the patient.
  * @param {string[]} arrayTables The list of categories of data to fetch. Should be keys in requestMappings.
  * @param [timestamp] Optional date/time; if provided, only items with 'LastUpdated' after this time are returned.
@@ -206,6 +207,7 @@ exports.getPatientTableFields = async function(
 /**
  * @desc Processes a request for data in one of the categories of requestMappings.
  *       If available, runs the category's 'processFunction' on the result before returning it.
+ * @param {string} userId Firebase userId making the request.
  * @param {string} category The requested data category. Must be a key in requestMappings.
  * @param patientSerNum The patient's PatientSerNum.
  * @param [timestamp] Optional date/time; if provided, only items with 'LastUpdated' after this time are returned.
@@ -1331,7 +1333,7 @@ async function refresh (fields, requestObject) {
     let timestamp = today.setHours(0,0,0,0);
     let patientSerNum = await getSelfPatientSerNum(requestObject.UserID);
 
-    let rows = await exports.getPatientTableFields(patientSerNum, fields, timestamp);
+    let rows = await exports.getPatientTableFields(requestObject.UserID, patientSerNum, fields, timestamp);
     rows.Data = utility.resolveEmptyResponse(rows.Data);
     return rows;
 }

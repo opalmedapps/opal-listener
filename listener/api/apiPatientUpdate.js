@@ -13,7 +13,7 @@ const questionnaires = require('./../questionnaires/questionnaireOpalDB.js');
  */
 exports.login = async function(requestObject) {
     let patientSerNum = await sqlInterface.getSelfPatientSerNum(requestObject.UserID);
-    return await sqlInterface.getPatientTableFields(patientSerNum, requestObject.Parameters.Fields, requestObject.Parameters.timestamp);
+    return await sqlInterface.getPatientTableFields(requestObject.UserID, patientSerNum, requestObject.Parameters.Fields, requestObject.Parameters.timestamp);
 };
 
 /**
