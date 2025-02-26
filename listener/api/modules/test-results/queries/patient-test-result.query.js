@@ -46,6 +46,7 @@ class PatientTestResultQuery {
 						AND ptr.PatientSerNum = ?
 						AND ptr.TestExpressionSerNum = te.TestExpressionSerNum
 						AND te.TestControlSerNum = tc.TestControlSerNum
+						AND tc.PublishFlag = 1
 					ORDER BY groupName, sequenceNum;`,
 				[moment(date).format("YYYY-MM-DD HH:mm:ss"), patientSerNum]);
 	}
@@ -67,6 +68,7 @@ class PatientTestResultQuery {
 						ptr.PatientSerNum = ?
 						AND ptr.TestExpressionSerNum = te.TestExpressionSerNum
 						AND te.TestControlSerNum = tc.TestControlSerNum
+						AND tc.PublishFlag = 1
 					ORDER BY collectedDateTime DESC;`, 
 				[patientSerNum]);
 	}
@@ -116,6 +118,7 @@ class PatientTestResultQuery {
 						AND ptr.TestExpressionSerNum = A.TestExpressionSerNum
 						AND ptr.TestExpressionSerNum = te.TestExpressionSerNum
 						AND te.TestControlSerNum = tc.TestControlSerNum
+						AND tc.PublishFlag = 1
 						ORDER BY name_EN;`,
 				[patientSerNum])
 	}
@@ -155,6 +158,7 @@ class PatientTestResultQuery {
 						AND ptr.TestExpressionSerNum = ?
 						AND ptr.TestExpressionSerNum = te.TestExpressionSerNum
 						AND te.TestControlSerNum = tc.TestControlSerNum
+						AND tc.PublishFlag = 1
 					ORDER BY latestCollectedDateTime DESC LIMIT 1;`,
 				[patientSerNum, testExpressionSerNum]);
 	}

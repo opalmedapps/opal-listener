@@ -8,6 +8,7 @@ const Mail              = require('./../mailer/mailer.js');
 const utility           = require('./../utility/utility');
 const logger            = require('./../logs/logger');
 const {OpalSQLQueryRunner} = require("../sql/opal-sql-query-runner");
+const ssl               = require('../security/ssl');
 
 var exports = module.exports = {};
 
@@ -377,48 +378,86 @@ exports.sendMessage=function(requestObject) {
 
 /**
  * checkIn
- * @desc checks into aria and then logs the check in status to db
+ * @description Checks the patient into their appointments for the day via the OIE.
  * @param requestObject
  * @return {Promise}
  */
-exports.checkIn=function(requestObject) {
-    const r = Q.defer();
-    const patientId = requestObject.Parameters.PatientId;
-    const patientSerNum = requestObject.Parameters.PatientSerNum;
+exports.checkIn = async function (requestObject) {
+    try {
+        const patientSerNum = requestObject.Parameters.PatientSerNum;
 
-    hasAlreadyAttemptedCheckin(patientSerNum)
-        .then(result => {
-            if(result === false){
-                //Check in to aria using Johns script
-                checkIntoAriaAndMedi(patientId).then(() => {
-                    //If successfully checked in, grab all the appointments that have been checked into in order to notify app
-                    getCheckedInAppointments(patientSerNum)
-                        .then(appts => r.resolve(appts))
-                        .catch(err => r.reject({Response:'error', Reason:'CheckIn error due to '+ err}));
-                }).catch(error => r.reject({Response:'error', Reason:error}));
-            } else r.resolve([]);
-        }).catch(err=> r.reject({Response:'error', Reason:'Error determining whether this patient has checked in or not due to : '+ error}));
-    return r.promise;
+        if (await hasAlreadyAttemptedCheckin(patientSerNum) === false) {
+            let success = false;
+            let lastError;
+
+            // Get the patient's MRNs (used in the check-in call to ORMS)
+            let mrnList = await getMRNs(patientSerNum);
+
+            // Attempt a check-in on each of the patient's MRNs on a loop until one of the calls is successful
+            for (let i = 0; i < mrnList.length; i++) {
+                let mrnObj = mrnList[i];
+                let mrn = mrnObj.MRN;
+                let mrnSite = mrnObj.Hospital_Identifier_Type_Code;
+
+                try {
+                    // Check into the patient's appointments via a call to ORMS
+                    await checkIntoAriaAndMedi(mrn, mrnSite);
+                    logger.log("verbose", `Success checking in PatientSerNum = ${patientSerNum} using MRN = ${mrn} (site = ${mrnSite})`);
+                    success = true;
+                    break;
+                }
+                catch (error) {
+                    logger.log("verbose", `Failed to check in PatientSerNum = ${patientSerNum} using MRN = ${mrn} (site = ${mrnSite}); error: ${error}`);
+                    lastError = error;
+                }
+            }
+            // Check whether the check-in call succeeded, or all attempts failed
+            // On a success, return all checked-in appointments to the app
+            if (success) return await getCheckedInAppointments(patientSerNum);
+            else throw lastError;
+        }
+        else return [];
+    }
+    catch (error) { throw {Response: 'error', Reason: error}; }
 };
 
-
 /**
- * Calls John's PHP script in order to check in patient on Aria and Medivisit
- * @param patientId
- * @returns {Promise}
+ * @description Calls the OIE in order to check in the patient on Aria and Medivisit.
+ * @param {string} mrn One of the patient's medical record numbers.
+ * @param {string} mrnSite The site to which the MRN belongs.
+ * @returns {Promise} Resolves if check-in succeeds, otherwise rejects with an error.
  */
-function checkIntoAriaAndMedi(patientId) {
-    let r = Q.defer();
-    let url = config.CHECKIN_PATH.replace('{ID}', patientId);
+function checkIntoAriaAndMedi(mrn, mrnSite) {
+    return new Promise((resolve, reject) => {
+        // Validate the existence of the check-in path
+        if (!config.CHECKIN_PATH || config.CHECKIN_PATH === "") reject("No value was provided for CHECKIN_PATH in the config file");
 
-    request(url,function(error, response, body) {
-        logger.log('debug', 'checked into aria and medi response: ' + JSON.stringify(response));
-        logger.log('debug', 'checked into aria and medi body: ' + JSON.stringify(body));
+        let options = {
+            url: config.CHECKIN_PATH,
+            json: true,
+            body: {
+                "mrn": mrn,
+                "site": mrnSite,
+                "room": config.CHECKIN_ROOM,
+            },
+        };
 
-        if(error) r.reject(error);
-        else r.resolve();
+        // Add an SSL certificate to the request's options if using https
+        try {
+            if (options.url.includes("https")) ssl.attachCertificate(options);
+        }
+        catch (error) { reject(error); return }
+
+        request.post(options, function(error, response, body) {
+            logger.log('verbose', 'Checked into aria and medi - response: ' + JSON.stringify(response));
+            logger.log('verbose', 'Checked into aria and medi - body: ' + JSON.stringify(body));
+
+            if (error) reject(error);
+            else if (!response) reject("No response received");
+            else if (response.statusCode !== 200) reject(`Request returned with a response status other than '200 OK': status = ${response.statusCode}, body = ${JSON.stringify(body)}`);
+            else resolve();
+        });
     });
-    return r.promise;
 }
 
 /**
@@ -457,11 +496,23 @@ function getCheckedInAppointments(patientSerNum){
     })
 }
 
-
 /**
  * ============================================================
  */
 
+/**
+ * @description Retrieves a patient's MRNs (with their corresponding sites) based on their PatientSerNum.
+ * @author Stacey Beard
+ * @date 2021-02-26
+ * @param patientSerNum
+ * @returns {Promise<*>} Rows with the patient's MRN information (multiple MRNs).
+ */
+async function getMRNs(patientSerNum) {
+    let rows = await exports.runSqlQuery(queries.getMRNs(), [patientSerNum]);
+
+    if (rows.length === 0) throw "No MRN found for PatientSerNum "+patientSerNum+" in Patient_Hospital_Identifier";
+    else return rows;
+}
 
 /**
  * getDocumentsContent
@@ -809,16 +860,6 @@ exports.setNewPassword=function(password,patientSerNum) {
 };
 
 /**
- * planningStepsAndEstimates
- * @desc Getting planning estimate from Marc's script
- * @param userId
- * @param timestamp
- */
-exports.planningStepsAndEstimates = function(userId, timestamp) {
-    return planningStepsAndEstimates(userId, timestamp);
-};
-
-/**
  * getPatientDeviceLastActivity
  * @desc gets the patient's last active timestamp
  * @param userid
@@ -1086,22 +1127,6 @@ var LoadAttachments = function (rows ) {
 
 };
 
-//Get the appointment aria ser num for a particular AppointmentSerNum, Username is passed as a security measure
-function getAppointmentAriaSer(username, appSerNum) {
-    return exports.runSqlQuery(queries.getAppointmentAriaSer(),[username, appSerNum]);
-}
-
-/**
- * @name getPatientId
- * @desc gets the patients Aria sernum from DB
- * @param username
- * @return {Promise}
- */
-function getPatientId(username) {
-    return exports.runSqlQuery(queries.getPatientId(),[username]);
-}
-
-
 /**
  * @module sqlInterface
  * @name combineResources
@@ -1152,34 +1177,6 @@ function combineResources(rows)
     r.resolve(rows);
     return r.promise;
 }
-
-/*function planningStepsAndEstimates (userId, timestamp)
-{
-    var r = Q.defer();
-    //Obtaing patient aria ser num
-    var que= connection.query(queries.getPatientAriaSerQuery(),[userId],function(error,rows,fields)
-    {
-        if(error) r.reject(error);
-        var command = 'python3 /var/www/devDocuments/marc/ML_Algorithm_MUHC/predictor.py '+rows[0].PatientAriaSer;
-        //Execute Marc's script
-        exec(command, function(error, stdout, stderr){
-            if (error) {
-                r.reject(error);
-            }
-            stdout = stdout.toString();
-            //Parse through the response
-            var firstParenthesis = stdout.indexOf('{');
-            var lastParenthesis = stdout.lastIndexOf('}');
-            var length = lastParenthesis - firstParenthesis+1;
-            //Convert into object
-            var data = JSON.parse(stdout.substring(firstParenthesis, length).replace(/'/g, "\""));
-            //Return data
-            r.resolve(data);
-        });
-    });
-    return r.promise;
-}*/
-
 
 exports.getSecurityQuestion = function (requestObject){
     var r = Q.defer();
