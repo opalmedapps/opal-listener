@@ -14,7 +14,7 @@ class RequestHandler {
 
     /**
      * @description Create an instance of the RequestHandler class and set connection to firebase
-     * @param {object} firebase - Firebase datbase reference
+     * @param {object} firebase - Firebase database reference
      */
     constructor(firebase) {
         this.#databaseRef = firebase.getDataBaseRef;
