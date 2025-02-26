@@ -6,7 +6,7 @@
     "docs": "run-script-os",
     "docs:nix": "./node_modules/.bin/jsdoc src README.md -c docs/jsdoc.config.json",
     "docs:windows": ".\\node_modules\\.bin\\jsdoc src README.md -c docs/jsdoc.config.json",
-    "test": "mocha \"./src/**/*.test.*\"",
+    "test": "mocha './src/**/*.test.*'",
     "start": "node src/server.js",
     "watch": "nodemon src/server.js"
   },
