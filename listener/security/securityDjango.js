@@ -13,6 +13,7 @@ class SecurityDjango {
      * @returns {Promise<any>} Resolves to a random security question and answer for the current user.
      */
     static async getRandomSecurityQuestionAnswer(userId) {
+        if (!userId) throw new Error('Cannot call API; no userId value provided');
         const requestParams = {
             Parameters: {
                 method: 'get',
