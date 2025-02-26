@@ -70,7 +70,7 @@ class PatientTestResultQuery {
 		params = utility.addSeveralToArray(params, lastUpdated, numLastUpdated);
 
 		return mysql.format(`
-					SELECT DISTINCT
+					SELECT
 						DATE_FORMAT(CONVERT_TZ(CollectedDateTime, 'America/Toronto', 'UTC'), '%Y-%m-%d %H:%i:%sZ') as collectedDateTime,
 						CASE
 							WHEN COUNT(*) = COUNT(CASE WHEN JSON_CONTAINS(ptr.ReadBy, ?) THEN 1 ELSE NULL END) THEN 1
