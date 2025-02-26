@@ -24,3 +24,9 @@ eslint:
   script:
     - eslint --version
     - npm run lint
+
+mocha:
+  stage: Test
+  script:
+    - npx mocha --version
+    - npm run test
