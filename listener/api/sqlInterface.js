@@ -68,7 +68,7 @@ const requestMappings =
         'Appointments': {
             sql: queries.patientAppointmentsAll(),
             sqlSingleItem: queries.patientAppointmentsOne(),
-            numberOfLastUpdated: 5,
+            numberOfLastUpdated: 4,
             processFunction: combineResources,
             table: 'Appointment',
             serNum: 'AppointmentSerNum',

@@ -94,8 +94,6 @@ function patientAppointmentTableFields(selectOne) {
                         Appt.SourceDatabaseSerNum,
                         Appt.AppointmentAriaSer,
                         JSON_CONTAINS(Appt.ReadBy, ?) as ReadStatus,
-                        R.ResourceName,
-                        R.ResourceType,
                         Appt.Status,
                         IfNull(Appt.RoomLocation_EN, '') AS RoomLocation_EN,
                         IfNull(Appt.RoomLocation_FR, '') AS RoomLocation_FR,
@@ -108,8 +106,6 @@ function patientAppointmentTableFields(selectOne) {
                         A.HospitalMapSerNum
                     FROM
                         Appointment Appt
-                        INNER JOIN ResourceAppointment RA ON RA.AppointmentSerNum = Appt.AppointmentSerNum
-                        INNER JOIN Resource R ON RA.ResourceSerNum = R.ResourceSerNum
                         INNER JOIN AliasExpression AE ON AE.AliasExpressionSerNum = Appt.AliasExpressionSerNum
                         INNER JOIN Alias A ON AE.AliasSerNum = A.AliasSerNum
                         LEFT JOIN HospitalMap HM ON HM.HospitalMapSerNum = A.HospitalMapSerNum
@@ -120,7 +116,7 @@ function patientAppointmentTableFields(selectOne) {
                         AND Appt.State = 'Active'
                         AND Appt.Status <> 'Deleted'
                         ${selectOne ? 'AND Appt.AppointmentSerNum = ?' : ''}
-                        ${!selectOne ? 'AND (Appt.LastUpdated > ? OR A.LastUpdated > ? OR AE.LastUpdated > ? OR R.LastUpdated > ? OR HM.LastUpdated > ?)' : ''}
+                        ${!selectOne ? 'AND (Appt.LastUpdated > ? OR A.LastUpdated > ? OR AE.LastUpdated > ? OR HM.LastUpdated > ?)' : ''}
                     ORDER BY Appt.AppointmentSerNum, ScheduledStartTime
                 ) as A2
             WHERE
