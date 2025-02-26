@@ -27,12 +27,12 @@ module.exports.LAB_RESULT_HISTORY = process.env.LAB_RESULT_HISTORY;
 module.exports.QUESTIONNAIRE_COMPLETED_PATH = process.env.QUESTIONNAIRE_COMPLETED_PATH;
 module.exports.LATEST_STABLE_VERSION = process.env.LATEST_STABLE_VERSION;
 // ORMS settings API
-module.exports.ORMS_API_URL = process.env.ORMS_API_URL;
-module.exports.ORMS_API_method_updatePatientStatus = process.env.ORMS_API_method_updatePatientStatus;
+module.exports.ORMS_HOST = process.env.ORMS_HOST;
+module.exports.ORMS_UPDATE_PATIENT_STATUS_URL = process.env.ORMS_UPDATE_PATIENT_STATUS_URL;
 // SMTP settings
-module.exports.SMTP_host = process.env.SMTP_host;
-module.exports.SMTP_port = process.env.SMTP_port;
-module.exports.SMTP_username = process.env.SMTP_username;
-module.exports.SMTP_password = process.env.SMTP_password;
-module.exports.SMTP_from = process.env.SMTP_from;
-module.exports.SMTP_tls_reject_unauthorized = process.env.SMTP_tls_reject_unauthorized;
+module.exports.SMTP_HOST = process.env.SMTP_HOST;
+module.exports.SMTP_PORT = process.env.SMTP_PORT;
+module.exports.SMTP_USERNAME = process.env.MYSQL_USERNAME;
+module.exports.SMTP_password = process.env.MYSQL_PASSWORD;
+module.exports.SMTP_FROM = process.env.SMTP_FROM;
+module.exports.SMTP_TLS_REJECTED_UNAUTHARIZED = process.env.SMTP_TLS_REJECTED_UNAUTHARIZED;
