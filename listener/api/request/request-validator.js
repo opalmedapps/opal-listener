@@ -81,14 +81,15 @@ class RequestValidator {
 	static validateRequestCredentials(request){
 		if(!request.meta || !request.type) return false;
 		//Must have all the properties of a request
-		let prop = ['DeviceId', 'Token', 'UserID','Timestamp','UserEmail', 'AppVersion'];
+		let prop = ['DeviceId', 'UserID','Timestamp','UserEmail', 'AppVersion'];
 		let errors = [];
 
 		let isValid = prop.reduce((valid, property)=>{
 			if(!valid) return false;
 			else {
-				if(!request.meta.hasOwnProperty(property)) errors.push(property);
-				return request.meta.hasOwnProperty(property);
+				let propValid = request.meta.hasOwnProperty(property) && typeof request.meta[property] !== 'undefined';
+				if(!propValid) errors.push(property);
+				return propValid;
 			}
 		},true);
 
@@ -101,6 +102,8 @@ class RequestValidator {
 	 *       targets patient data); otherwise, this function resolves and the request can proceed.
 	 *       If the request has a TargetPatientID, two checks are performed: first, a legacy check for 'self'
 	 *       in the OpalDB, and second (if no match was found in OpalDB), an API check via the Django backend.
+	 *       NOTE!!! Calling the 'UserPatient' endpoint is a special case, where TargetPatientID gets assigned
+	 *       in this function. This needed to check SELF relationship permissions during login.
 	 * @param {Object} request The request to validate.
 	 * @param {string} request.meta.UserID The ID of the user making the request.
 	 * @param {number} [request.meta.TargetPatientID] The ID of the patient whose data is being requested, if this is
@@ -109,7 +112,21 @@ class RequestValidator {
 	 *                          Otherwise (if permissions fail), rejects with an error.
 	 */
 	static async validateRequestPermissions(request) {
-		const logDetails = `caregiver with Username = '${request.meta.UserID}' requesting data from PatientSerNum = ${request.meta.TargetPatientID}`;
+        // Add TargetPatientID to the request if the calling endpoint (a.k.a., RequestType) is the 'UserPatient'
+        // This will enforce permissions check via the new backend (Django)
+        if (request.type === 'UserPatient') {
+            try {
+                let patientSerNum = await sqlInterface.getSelfPatientSerNum(request.meta.UserID);
+                request.meta.TargetPatientID = patientSerNum;
+            }
+            catch (error) {
+                throw new Error(
+                    `Error during permissions validation for caregiver with Username = '${request.meta.UserID}': ${error} calling 'UserPatient' endpoint.`
+                );
+            }
+        }
+
+        const logDetails = `caregiver with Username = '${request.meta.UserID}' requesting data from PatientSerNum = ${request.meta.TargetPatientID}`;
 
 		// Only perform validation on requests with a TargetPatientID
 		if (!request.meta.TargetPatientID) {
@@ -117,20 +134,12 @@ class RequestValidator {
 			return;
 		}
 
-		// First check for legacy permissions: whether OpalDB has a patient entry that matches the given user (self)
-		logger.log('info', `Checking legacy permissions by looking for a 'self' patient in OpalDB, for ${logDetails}`);
-		let legacySelfPermission = await RequestValidator.legacySelfPatientExists(request.meta.UserID, request.meta.TargetPatientID);
-		if (legacySelfPermission) {
-			logger.log('info', `Permission granted: legacy user-patient match found in OpalDB, for ${logDetails}`);
-			return;
-		} else logger.log('info', `No legacy user-patient match found in OpalDB, for ${logDetails}`);
-
-		// If the legacy check didn't return a match, check instead via the new permissions class in Django
+		// Check user's permissions by calling Django's API endpoint (e.g., /check-permissions/)
 		logger.log('info', `Checking permissions for ${logDetails}, via API request to the backend`);
 		let apiResponse;
 		try {
 			apiResponse = await ApiRequest.sendRequestToApi(request.meta.UserID, {
-				url: `/api/patients/legacy/${request.meta.TargetPatientID}/check_permissions`,
+				url: `/api/patients/legacy/${request.meta.TargetPatientID}/check-permissions/`,
 				headers: {},
 			});
 			logger.log('info', `Permissions response received with status = ${apiResponse.status} for ${logDetails}`, apiResponse.data);
@@ -142,22 +151,6 @@ class RequestValidator {
 			logger.log('error', 'Error details', axiosError.cause);
 			if (axiosError?.cause?.detail) throw new Error(`Permissions validation failed for ${logDetails}; reason: ${axiosError.cause.detail}`)
 			else throw new Error(`Error during permissions validation for ${logDetails}: ${axiosError}`);
-		}
-	}
-
-	/**
-	 * @desc Checks OpalDB to see whether the current user has a patient entry (self) that matches the provided PatientSerNum.
-	 * @param userId The username of the user to look up in the database.
-	 * @param patientSerNum The PatientSerNum to compare to the user.
-	 * @returns {Promise<boolean>} True if the user has a PatientSerNum equal to the provided value, or false otherwise.
-	 */
-	static async legacySelfPatientExists(userId, patientSerNum) {
-		try {
-			let result = await sqlInterface.getSelfPatientSerNum(userId);
-			return result === Number(patientSerNum);
-		}
-		catch (error) {
-			return false;
 		}
 	}
 

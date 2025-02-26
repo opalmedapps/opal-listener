@@ -406,11 +406,11 @@ exports.logCheckin = function()
 
 exports.accountChange=function()
 {
-    return `UPDATE Patient SET ??=?, SessionId=? WHERE PatientSerNum=?`;
+    return `UPDATE Patient SET ??=? WHERE PatientSerNum=?`;
 };
 exports.inputFeedback=function(UserSerNum, content)
 {
-    return "INSERT INTO Feedback (`FeedbackSerNum`,`PatientSerNum`,`FeedbackContent`,`AppRating`,`DateAdded`, `SessionId`, `LastUpdated`) VALUES (NULL,?,?,?,NOW(),?, CURRENT_TIMESTAMP )";
+    return "INSERT INTO Feedback (`FeedbackSerNum`,`PatientSerNum`,`FeedbackContent`,`AppRating`,`DateAdded`, `LastUpdated`) VALUES (NULL,?,?,?,NOW(),CURRENT_TIMESTAMP)";
 };
 
 exports.getPatientFromEmail=function()
@@ -421,8 +421,8 @@ exports.getPatientFromEmail=function()
 exports.logActivity=function()
 {
     return `INSERT INTO PatientActivityLog
-                (ActivitySerNum, Request, Parameters, TargetPatientId, Username, DeviceId, SessionId, DateTime, LastUpdated, AppVersion)
-            VALUES (NULL, ?, ?, ?, ?, ?, ?, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP, ?);
+                (ActivitySerNum, Request, Parameters, TargetPatientId, Username, DeviceId, DateTime, LastUpdated, AppVersion)
+            VALUES (NULL, ?, ?, ?, ?, ?, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP, ?);
     `;
 };
 
@@ -479,11 +479,10 @@ exports.updateDeviceIdentifiers = function()
                 RegistrationId,
                 DeviceType,
                 appVersion,
-                SessionId,
                 Trusted,
                 LastUpdated
-            ) VALUES (NULL,?,?,?,?,?,?,0,NULL)
-            ON DUPLICATE KEY UPDATE RegistrationId = ?, SessionId = ?;`
+            ) VALUES (NULL,?,?,?,?,?,0,NULL)
+            ON DUPLICATE KEY UPDATE RegistrationId = ?;`
 };
 
 /**
@@ -540,7 +539,7 @@ exports.updateConsentStatus = function()
 
 exports.insertEducationalMaterialRatingQuery=function()
 {
-    return "INSERT INTO `EducationalMaterialRating`(`EducationalMaterialRatingSerNum`, `EducationalMaterialControlSerNum`, `PatientSerNum`, `RatingValue`, `SessionId`, `LastUpdated`) VALUES (NULL,?,?,?,?,NULL)";
+    return "INSERT INTO `EducationalMaterialRating`(`EducationalMaterialRatingSerNum`, `EducationalMaterialControlSerNum`, `PatientSerNum`, `RatingValue`, `LastUpdated`) VALUES (NULL,?,?,?,NULL)";
 };
 
 exports.getPatientSerNumFromUserID = function()
