@@ -36,5 +36,10 @@ exports.InsertPatient = function () {
 
 exports.getSiteAndMrn = function() {
     return "SELECT PHI.MRN AS Mrn, PHI.Hospital_Identifier_Type_Code AS Site FROM Patient_Hospital_Identifier AS PHI INNER JOIN Patient AS P ON PHI.PatientSerNum = P.PatientSerNum AND P.SSN = ?;";
-}
+};
+
+exports.getPatient = function() {
+    return "SELECT patient.FirstName, patient.LastName, patient.TelNum, patient.BlockedStatus, `phi`.MRN, `hit`.Description_EN AS hospital_name_EN, `hit`.Description_FR AS hospital_name_FR FROM Patient patient JOIN Patient_Hospital_Identifier `phi` ON `phi`.PatientSerNum = patient.PatientSerNum JOIN Hospital_Identifier_Type `hit` ON `hit`.code = `phi`.Hospital_Identifier_Type_Code WHERE patient.SSN = ?;";
+};
+
 
