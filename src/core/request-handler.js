@@ -5,6 +5,7 @@
 const legacyLogger = require('../../listener/logs/logger');
 const { EncryptionUtilities } = require('../encryption/encryption');
 const ApiRequest = require('./api-request');
+const { Firebase } = require('../firebase/firebase');
 
 class RequestHandler {
     /**
@@ -35,6 +36,7 @@ class RequestHandler {
 
     /**
      * @description Handle requests with requestType 'api'. Then upload response ti Firebase
+     *              Need to add timestamp after encryption to give a valid value to Firebase.
      * @param {string} requestType Firebase request unique identifier
      * @param {object} snapshot Data snapshot from firebase
      */
@@ -48,6 +50,7 @@ class RequestHandler {
             const decryptedRequest = await EncryptionUtilities.decryptRequest(snapshot.val(), secret, salt);
             const apiResponse = await ApiRequest.makeRequest(decryptedRequest);
             const encryptedResponse = await EncryptionUtilities.encryptResponse(apiResponse, secret, salt);
+            encryptedResponse.timestamp = Firebase.getDatabaseTimeStamp;
             await this.sendResponse(encryptedResponse, snapshot.key, userId);
             this.clearRequest(requestType, snapshot.key);
         }
