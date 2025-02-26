@@ -52,7 +52,7 @@ class SQLQueryRunner {
 	 * @returns {Promise<any>} Returns a promise with the results from the query
 	 */
 	run(query, parameters = null, postProcessor = null) {
-	const allowedTypes = ['string', 'number', 'boolean', 'bigint', 'undefined'];
+		const allowedTypes = ['string', 'number', 'boolean', 'bigint', 'undefined'];
 
 		let dbName = this.#DB_CREDENTIALS.database;
 		let connectionErrorMsg = `Failed to connect to database ${dbName}`;
