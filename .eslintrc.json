@@ -33,7 +33,8 @@
     {
       "files": ["*.test.js"],
       "rules": {
-        "no-unused-expressions": "off"
+        "no-unused-expressions": "off",
+        "mocha/consistent-spacing-between-blocks": "off"
       }
     }
   ],
