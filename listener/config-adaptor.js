@@ -31,9 +31,9 @@ module.exports.OPAL_EMAIL=process.env.OPAL_EMAIL;
 module.exports.SMTP_SERVER_IP=process.env.SMTP_SERVER_IP;
 module.exports.SMTP_SERVER_PORT=process.env.SMTP_SERVER_PORT;
 // Checkins
-module.exports.ORMS_ENABLED = process.env.ORMS_ENABLED;
+module.exports.ORMS_ENABLED = process.env.ORMS_ENABLED === '1';
 module.exports.ORMS_CHECKIN_URL = process.env.ORMS_CHECKIN_URL;
 module.exports.CHECKIN_ROOM = process.env.CHECKIN_ROOM;
-module.exports.SOURCE_SYSTEM_SUPPORTS_CHECKIN = process.env.SOURCE_SYSTEM_SUPPORTS_CHECKIN === 'true';
+module.exports.SOURCE_SYSTEM_SUPPORTS_CHECKIN = process.env.SOURCE_SYSTEM_SUPPORTS_CHECKIN === '1';
 module.exports.SOURCE_SYSTEM_CHECKIN_URL = process.env.SOURCE_SYSTEM_CHECKIN_URL;
 module.exports.OPAL_CHECKIN_URL = process.env.OPAL_CHECKIN_URL;

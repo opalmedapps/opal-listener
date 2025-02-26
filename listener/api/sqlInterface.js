@@ -449,7 +449,6 @@ exports.studyUpdateStatus = async function(requestObject) {
  *      2) If the Opal Wait Room Management system is enabled in this environment, notify it
  *      3) Always notify the OpalAdmin backend system
  *
- *
  * @param requestObject
  * @return {Promise}
  */
@@ -460,7 +459,7 @@ exports.checkIn = async function (requestObject) {
         let mrnList = await getMRNs(patientSerNum);
         let lastError;
 
-        // Find sourceSystemName and sourceSystemID for each appointment for the patient
+        // Find sourceDatabaseSerNum and sourceSystemID for each appointment for the patient
         let appointmentDetails = await getAppointmentDetailsForPatient(patientSerNum);
 
         // Success booleans track individual success for each checkin system receiving an api call
@@ -477,17 +476,16 @@ exports.checkIn = async function (requestObject) {
                 let mrnObj = mrnList[i];
                 let mrn = mrnObj.MRN;
                 let mrnSite = mrnObj.Hospital_Identifier_Type_Code;
-                try {
-                    // Notify target system of the checkin
-                    await checkInToSystem(mrn, mrnSite, config.ORMS_CHECKIN_URL, "MEDIVISIT", "XXXXXXXXX", "ORMS");
-                    logger.log("verbose", `Success checking in to orms for PatientSerNum = ${patientSerNum} using MRN = ${mrn} (site = ${mrnSite})`);
-                    orms_success = true;
-                    break;
-                }
-                catch (error) {
-                    logger.log("verbose", `Failed to check in to orms for PatientSerNum = ${patientSerNum} using MRN = ${mrn} (site = ${mrnSite}); error: ${error}`);
-                    lastError = error;
-                }
+                await checkInToSystem(mrn, mrnSite, config.ORMS_CHECKIN_URL, null, null, "ORMS")
+                    .then(() => {
+                        logger.log("verbose", `Success checking in to orms for PatientSerNum = ${patientSerNum} using MRN = ${mrn} (site = ${mrnSite})`);
+                        orms_success = true;
+                        //break;
+                    })
+                    .catch((error) => {
+                        logger.log("verbose", `Failed to check in to orms for PatientSerNum = ${patientSerNum} using MRN = ${mrn} (site = ${mrnSite}); error: ${error}`);
+                        lastError = error;
+                    });
             }
         }
 
@@ -495,48 +493,47 @@ exports.checkIn = async function (requestObject) {
         // Note: all appointment checkins in this loop must be successful or success variable(s) will be false
         for (let appointment of appointmentDetails.Data) {
             let sourceSystemID = appointment.SourceSystemID;
-            let source = appointment.SourceDatabaseName;
-            logger.log("debug", `Check in for appointment ${sourceSystemID} ,  ${source}`);
+            let source = appointment.SourceDatabaseSerNum;
+
             // Attempt checkin to source system if enabled
             if (config.SOURCE_SYSTEM_SUPPORTS_CHECKIN && config.SOURCE_SYSTEM_CHECKIN_URL) {
                 // set source system success false until a successful code is returned
-                logger.log("debug", `source system enabled ${config.SOURCE_SYSTEM_SUPPORTS_CHECKIN} url ${config.SOURCE_SYSTEM_CHECKIN_URL}`);
                 source_system_success = false;
-                let mrnObj = mrnList[0];
-                try {
-                    // Notify target system of the checkin
-                    await checkInToSystem(mrnObj.MRN, mrnObj.Hospital_Identifier_Type_Code, config.SOURCE_SYSTEM_CHECKIN_URL, source, sourceSystemID, "SOURCE");
-                    logger.log("verbose", `Success checking in to source system for PatientSerNum = ${patientSerNum} using MRN = ${mrn} (site = ${mrnSite})`);
-                    source_system_success = true;
-                }
-                catch (error) {
-                    logger.log("verbose", `Failed to check in to source system for PatientSerNum = ${patientSerNum} using MRN = ${mrn} (site = ${mrnSite}); error: ${error}`);
-                    lastError = error;
-                }
-            }
-
-            // Attempt checkin to opal backend
-            try {
                 let mrnObj = mrnList[0];
                 let mrn = mrnObj.MRN;
                 let mrnSite = mrnObj.Hospital_Identifier_Type_Code;
-                // Notify target system of the checkin
-                logger.log("debug", "Attempt for opal");
-                await checkInToSystem(mrn, mrnSite, config.OPAL_CHECKIN_URL, source, sourceSystemID, "OPAL");
-                logger.log("verbose", `Success checking in to opal for PatientSerNum = ${patientSerNum} using MRN = ${mrn} (site = ${mrnSite})`);
-                opal_success = true;
+                await checkInToSystem(mrn, mrnSite, config.SOURCE_SYSTEM_CHECKIN_URL, null, sourceSystemID, "SOURCE")
+                    .then(() => {
+                        logger.log("verbose", `Success checking in to source system for PatientSerNum = ${patientSerNum} using ${mrn}-${mrnSite}`);
+                        source_system_success = true;
+                    })
+                    .catch((error) => {
+                        logger.log("verbose", `Failed to check in to source system for PatientSerNum = ${patientSerNum} using ${mrn}-${mrnSite}; error: ${error}`);
+                        lastError = error;
+                    }
+                );
             }
-            catch (error) {
-                logger.log("verbose", `Failed to check in to opal for PatientSerNum = ${patientSerNum} using MRN = ${mrn} (site = ${mrnSite}); error: ${error}`);
-                lastError = error;
-            }
+
+            // Attempt checkin to opal backend
+            let mrnObj = mrnList[0];
+            let mrn = mrnObj.MRN;
+            let mrnSite = mrnObj.Hospital_Identifier_Type_Code;
+            await checkInToSystem(mrn, mrnSite, config.OPAL_CHECKIN_URL, source, sourceSystemID, "OPAL")
+                .then(() => {
+                    logger.log("verbose", `Success checking in to opal for PatientSerNum = ${patientSerNum} using ${mrn}-${mrnSite}`);
+                    opal_success = true;
+                })
+                .catch((error) => {
+                    logger.log("verbose", `Failed to check in to opal for PatientSerNum = ${patientSerNum} using ${mrn}-${mrnSite}; error: ${error}`);
+                    lastError = error;
+                }
+            );
+
         }
-        logger.log("debug", `Successes: source ${source} orms ${orms_success} opal ${opal_success}`);
         // If all success, get checked in appointments
         if (source_system_success && orms_success && opal_success) {
             let appointments = await getCheckedInAppointments(patientSerNum);
             if (appointments.Data && appointments.Data.length === 0) throw 'Appointments were not marked as checked-in for this patient in OpalDB';
-
             logger.log("verbose", `Today's checked in appointments for PatientSerNum = ${patientSerNum}`, appointments);
             let appSerNums = [];
             appointments['Data'].forEach(function(serNum){
@@ -548,48 +545,57 @@ exports.checkIn = async function (requestObject) {
         }
         else throw lastError;
     }
-    catch (error) { throw {Response: 'error', Reason: error}; }
+    catch (error) {
+        logger.log("error", "Uncaught error while processing a checkin request: ", {
+            message: error.message || "No message",
+            stack: error.stack || "No stack trace",
+            response: error.response ? error.response.data : "No response data",
+        });
+        throw {Response: 'error', Reason: error};
+    }
 };
 
 /**
  * @description Calls the system to check the patient in
- *              Orms expects: mrn, site, room
+ *              Orms expects: mrn, site, room, checkin_type (APP/KIOSK/VWR/SMS)
  *              Source Systems typically expect: appointmentId, location
- *              Opal expects: appointment, source
- * Note: ORMs by default checkins all appointments for today for the patient. Opal backend does single appointment checkin only.
+ *              Opal expects: source_system_id, source_database
+ * Note: ORMs by default checkins all appointments for today for the patient. Opal backend & source system do single appointment checkin.
  * @param {string} mrn One of the patient's medical record numbers.
  * @param {string} mrnSite The site to which the MRN belongs.
  * @returns {Promise<void>} Resolves if check-in succeeds, otherwise rejects with an error.
  */
-async function checkInToSystem(mrn, mrnSite, url, sourceSystemName, sourceSystemID, targetSystem) {
-    let params = {};
+async function checkInToSystem(mrn, mrnSite, url, sourceSystemSerNum, sourceSystemID, targetSystem) {
+    let data = {};
+    let headers = {'Content-Type': 'application/json'};
     if (targetSystem === "ORMS") {
         // Currently, orms performs checkin for all of a patients appointments on that day
-        params = {
+        data = {
             "mrn": mrn,
             "site": mrnSite,
             "room": config.CHECKIN_ROOM,
+            "checkin_type": "APP",
         };
     } else if (targetSystem === "SOURCE") {
         // Source does single appointment checkin
-        params = {
+        data = {
             "appointmentId": sourceSystemID,
             "location": config.CHECKIN_ROOM,
         };
     } else {
         // Opal does single appointment checkin
-        params = {
-            "appointment": sourceSystemID,
-            "source": sourceSystemName.toUpperCase(),
+        data = {
+            "source_system_id": sourceSystemID,
+            "source_database": sourceSystemSerNum,
+            "checkin": 1,
         };
+        headers = {
+            'Authorization': `Token ${config.BACKEND_LISTENER_AUTH_TOKEN}`,
+            'Content-Type': 'application/json',
+        };
+
     }
-    logger.log("debug", `Requesting check-in for targetSystem=${targetSystem}, URL=${url}, params=${JSON.stringify(params)}`);
-    try {
-        const response = await axios.post(url, params);
-        console.log(`Check-in response: ${JSON.stringify(response.data)}`);
-    } catch (error) {
-        console.error(`Error during check-in: ${error.message}`, error.response ? error.response.data : null);
-    }
+    return await axios.post(url, data, {headers: headers});
 }
 
 /**

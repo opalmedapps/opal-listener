@@ -678,19 +678,17 @@ exports.implicitlyReadNotification = function() {
 };
 
 /**
- * Fetch the SourceSystemID and SourceDatabaseName for a patient for todays appointments.
+ * Fetch the SourceSystemID and SourceDatabaseSerNum for a patient for todays appointments.
  * @returns {array} List of ids and database names
  */
 exports.getAppointmentDetailsForPatient=function() {
     return `SELECT
                 app.SourceSystemID,
-                sd.SourceDatabaseName
+                app.SourceDatabaseSerNum
             FROM
-                Appointment app,
-                SourceDatabase sd
+                Appointment app
             WHERE
-                app.SourceDatabaseSerNum=sd.SourceDatabaseSerNum
-                AND app.PatientSerNum= ?
+                app.PatientSerNum= ?
                 AND DATE(app.ScheduledStartTime) = CURDATE()
             ;
     `;
