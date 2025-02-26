@@ -93,6 +93,73 @@ exports.getPatientInfo = async function(requestObject) {
     return { Data: result, Result: 'SUCCESS' };
 };
 
+// insert patient data
+exports.insertPatient = async function(requestObject) {
+    requestObject.Parameters.Fields = arraySanitization(requestObject.Parameters.Fields);
+    validateRequest(requestObject, [
+        'firstName',
+        'lastName',
+        'sex',
+        'dateOfBirth',
+        'telNum',
+        'SSN'
+    ]);
+
+    let result = undefined;
+    try {
+        result = await sqlInterface.insertPatient(requestObject);
+        result = typeof result[0] == 'object' ? result[0] : undefined;
+    } catch (error) {
+        logger.log('error', `An error occurred while inserting a patient data (for ${requestObject.Parameters.Fields.SSN}): ${JSON.stringify(error)}`);
+    }
+    return { Data: result, Result: 'SUCCESS' };
+};
+
+// insert patient hospital identifier data
+exports.insertPatientHospitalIdentifier = async function(requestObject) {
+    requestObject.Parameters.Fields = arraySanitization(requestObject.Parameters.Fields);
+    validateRequest(requestObject, ['patientSerNum', 'mrn', 'site']);
+
+    let result = undefined;
+    try {
+        result = await sqlInterface.insertPatientHospitalIdentifier(requestObject);
+        result = typeof result[0] == 'object' ? result[0] : undefined;
+    } catch (error) {
+        logger.log('error', `An error occurred while inserting patient hospital indentifier (for ${requestObject.Parameters.Fields.mrn}): ${JSON.stringify(error)}`);
+    }
+    return { Data: result, Result: 'SUCCESS' };
+};
+
+// validate patient data
+exports.validatePatient = async function(requestObject) {
+    requestObject.Parameters.Fields = arraySanitization(requestObject.Parameters.Fields);
+    validateRequest(requestObject, ['patientSerNum']);
+
+    let result = undefined;
+    try {
+        result = await sqlInterface.validatePatient(requestObject);
+        result = typeof result[0] == 'object' ? result[0] : undefined;
+    } catch (error) {
+        logger.log('error', `An error occurred while inserting a patient data (for ${requestObject.Parameters.Fields.patientSerNum}): ${JSON.stringify(error)}`);
+    }
+    return { Data: result, Result: 'SUCCESS' };
+};
+
+// get LabResult History
+exports.getLabResultHistory = async function(requestObject) {
+    requestObject.Parameters.Fields = arraySanitization(requestObject.Parameters.Fields);
+    validateRequest(requestObject, ['codeGenerateLoginLink', 'patientId', 'site']);
+
+    let result = undefined;
+    try {
+        result = await sqlInterface.getLabResultHistory(requestObject);
+        result = typeof result[0] == 'object' ? result[0] : undefined;
+    } catch (error) {
+        logger.log('error', `An error occurred while calling getLabResultHistory (for ${requestObject.Parameters.Fields.patientSerNum}): ${JSON.stringify(error)}`);
+    }
+    return { Data: result, Result: 'SUCCESS' };
+};
+
 
 // Register patient
 exports.registerPatient = async function(requestObject) {
@@ -280,4 +347,45 @@ function getEmailContent(language) {
     data.htmlStream = htmlStream
 
     return data;
+}
+
+
+/**
+ * @description Validates the request parameters with expected request fields.
+ * @param {Object} requestObject - The calling request's requestObject.
+ * @returns {void}
+ * @throws Throws an error if a required field is not present in the given request.
+ */
+function validateRequest(requestObject, requiredFields) {
+    if (!requestObject.Parameters || !requestObject.Parameters.Fields) {
+        throw 'requestObject is missing Parameters.Fields'
+    }
+    // Helper function
+    let fieldExists = (name) => { return requestObject.Parameters.Fields[name] && requestObject.Parameters.Fields[name] !== "" };
+
+    for (let field of requiredFields) {
+        if (!fieldExists(field)) {
+            throw `Required field '${field}' missing in request fields`
+        }
+    }
+}
+
+/*
+ * Recursive function that sanitize the data
+ * @params  array to sanitize
+ * @return  array sanitized
+ * */
+function arraySanitization(arrayForm) {
+    let sanitizedArray = [];
+    for (let key in arrayForm) {
+        key = key.replace('/[\x00-\x1F\x7F\xA0]/u', '');
+        let value = arrayForm[key];
+        if (Array.isArray(value)) {
+            value = arraySanitization(value);
+        } else {
+            value = value.replace('/[\x00-\x1F\x7F\xA0]/u', '');
+        }
+        sanitizedArray[key] = value;
+    }
+    return sanitizedArray;
 }

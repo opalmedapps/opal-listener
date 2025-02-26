@@ -5,6 +5,7 @@ const Q = require('q');
 const queries = require('../sql/queries.js');
 const logger = require('../../logs/logger.js');
 const config = require('../../config-adaptor');
+const axios = require('axios');
 
 /** OPAL DATABASE CONFIGURATIONS **/
 const opaldbCredentials = {
@@ -212,6 +213,71 @@ exports.getTermsandAgreementDocuments = function (requestObject) {
 
     return r.promise;
 }
+
+/**
+ insertPatient
+ @desc insert a patient record.
+ @param requestObject
+ @return {Promise}
+ **/
+exports.insertPatient = function (requestObject) {
+    let parameters = requestObject.Parameters.Fields;
+    return exports.runOpaldbSqlQuery(queries.insertPatient(), [
+        parameters.firstName,
+        parameters.lastName,
+        parameters.sex,
+        parameters.dateOfBirth,
+        parameters.telNum,
+        parameters.SSN,
+    ]);
+};
+
+/**
+ insertPatientHospitalIdentifier
+ @desc insert a patient hospital identifier record.
+ @param requestObject
+ @return {Promise}
+ **/
+exports.insertPatientHospitalIdentifier = function (requestObject) {
+    let parameters = requestObject.Parameters.Fields;
+    return exports.runOpaldbSqlQuery(queries.insertPatientHospitalIdentifier(), [
+        parameters.patientSerNum,
+        parameters.mrn,
+        parameters.site,
+    ]);
+};
+
+/**
+ validatePatient
+ @desc validate a patient data.
+ @param requestObject
+ @return {Promise}
+ **/
+exports.validatePatient = function (requestObject) {
+    let parameters = requestObject.Parameters.Fields;
+    return exports.runRegistrationSqlQuery(queries.validatePatient(), [
+        parameters.patientSerNum
+    ]);
+};
+
+// Get patient lab result history
+exports.getLabResultHistory = function (requestObject) {
+    let r = Q.defer();
+    let parameters = requestObject.Parameters.Fields
+    const url = parameters.codeGenerateLoginLink;
+    const data = {
+        PatientId: parameters.patientId,
+        Site: parameters.site
+    };
+    axios.post(url, data)
+        .then((response) => {
+            r.resolve(response);
+        }).catch((err) => {
+        logger.log('error', 'Problems calling getLabResultHistory due to ' + error);
+        r.reject(error);
+    });
+    return r.promise;
+};
 
 /**
      registerPatient
