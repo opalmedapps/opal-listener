@@ -1,210 +1,226 @@
-var sqlInterface=require('./../api/sqlInterface.js');
-var q = require('q');
-var utility=require('./../utility/utility.js');
+const logger = require('./../logs/logger');
+const firebase = require('firebase-admin');
+const sqlInterface = require('./../api/sqlInterface.js');
+const utility = require('./../utility/utility.js');
 const { Version } = require('../../src/utility/version');
-const logger            = require('./../logs/logger');
+const OpalResponse = require('../api/response/response');
+const OpalSecurityResponseError = require('../api/response/security-response-error');
+const OpalSecurityResponseSuccess = require('../api/response/security-response-success');
 
 const FIVE_MINUTES = 300000;
 
-exports.resetPasswordRequest=function(requestKey, requestObject)
-{
+// Available Opal response error codes
+const CODE = OpalResponse.CODE;
 
-    var r=q.defer();
-    var responseObject = {};
-    //Get the patient fields to verify the credentials
+// Commonly returned responses
+const answerVerified = { AnswerVerified: "true" };
+const answerNotVerified = { AnswerVerified: "false" };
+const passwordResetSuccess = { PasswordReset: "true" };
 
-    logger.log('debug', 'Running function to either VerifyAnswer or SetNewPassword');
+/**
+ * @desc Verifies a security answer provided by the user. Notably, if the request parameters fail to decrypt,
+ *       then this is one indication that the wrong answer may have been provided (and used to encrypt the request).
+ * @param {string} requestKey The key (branch) onto which this request was pushed on Firebase.
+ * @param {object} requestObject The security request made by the app.
+ * @returns {Promise<OpalSecurityResponseSuccess>} Resolves if the request successfully completes, whether the answer
+ *                                                 is correct or not. The returned object indicates via 'AnswerVerified'
+ *                                                 whether the user's provided answer was correct or incorrect.
+ */
+exports.verifySecurityAnswer = async (requestKey, requestObject) => {
+    // Special case used to set the request's UserID in the case of password reset requests
+    await ensureUserIdAvailable(requestObject);
 
-    sqlInterface.getPatientFieldsForPasswordReset(requestObject).then(function(patient){
-        //Check for injection attacks by the number of rows the result is returning
-        if(patient.length>1||patient.length === 0)
-        {
-            responseObject = { Headers:{RequestKey:requestKey,RequestObject:requestObject}, Code: 2, Data:{},Response:'error', Reason:'Injection attack, incorrect Email'};
-            r.resolve(responseObject);
-        }else{
-            //If the request is not erroneous simply direct the request to appropriate function based on the request mapping object
-            requestMappings[requestObject.Request](requestKey, requestObject, patient[0]).then(r.resolve).catch(r.reject);
-        }
-    }).catch(function(error){
-        //If there is an error with the queries reply with an error message
-        responseObject = { Headers:{RequestKey:requestKey,RequestObject:requestObject}, Code: 2, Data:{},Response:'error', Reason: error+""};
-        r.resolve(responseObject);
-    });
-    return r.promise;
+    logger.log('info', `Verifying security answer for username ${requestObject?.UserID}`);
 
-};
+    // Get security info needed to verify the answer, including the cached answer from PatientDeviceIdentifier.
+    let user = await getUserPatientSecurityInfo(requestKey, requestObject);
 
-exports.verifySecurityAnswer=function(requestKey,requestObject,patient)
-{
-    var r = q.defer();
-    var key = patient.AnswerText;
+    // Handle security answer attempts (resetting the attempts, or blocking the user after too many attempts)
+    await handleTooManyAttempts(requestKey, requestObject, user);
 
-
-    logger.log('debug', 'in verify security answer');
-    logger.log('debug', `patient: ${JSON.stringify(patient)}`);
-    //TO VERIFY, PASS SECURITY ANSWER THROUGH HASH THAT TAKES A WHILE TO COMPUTE, SIMILAR TO HOW THEY DO PASSWORD CHECKS
-    // utility.generatePBKDFHash(key,key);
-
-    if(patient.TimeoutTimestamp != null && requestObject.Timestamp - (new Date(patient.TimeoutTimestamp)).getTime() > FIVE_MINUTES) {
-        logger.log('debug', 'resetting security answer attempt');
-	    sqlInterface.resetSecurityAnswerAttempt(requestObject);
-    } else if(patient.Attempt == 5) {
-        //If 5 attempts have already been made, lock the user out for 5 minutes
-	    if(patient.TimeoutTimestamp == null) sqlInterface.setTimeoutSecurityAnswer(requestObject, requestObject.Timestamp);
-        r.resolve({Code: 4, RequestKey:requestKey, Data:"Attempted security answer more than 5 times, please try again in 5 minutes", Headers:{RequestKey:requestKey,RequestObject:requestObject}, Response:'error'});
-        return r.promise;
+    let unencrypted;
+    // An error caught during decryption indicates an incorrect security answer
+    try {
+        logger.log('debug', 'Attempting decryption to verify security answer');
+        unencrypted = await utility.decrypt(requestObject.Parameters, user.SecurityAnswer);
+    }
+    catch (error) {
+        logger.log('error', 'Wrong security answer (from decryption failure); increasing security answer attempts', error);
+        await sqlInterface.increaseSecurityAnswerAttempt(requestObject);
+        return new OpalSecurityResponseSuccess(answerNotVerified, requestKey, requestObject);
     }
 
-    //Wrap decrypt in try-catch because if error is caught that means decrypt was unsuccessful, hence incorrect security answer
+    // As an additional confirmation, validate that the provided answer (once decrypted) matches the expected value
+    let isVerified = confirmValidSecurityAnswer(unencrypted, requestObject, user);
+    if (!isVerified) {
+        logger.log('error', 'Wrong security answer (from verification); increasing security answer attempts');
+        return new OpalSecurityResponseSuccess(answerNotVerified, requestKey, requestObject);
+    }
 
-    let unencrypted = null;
-
-    logger.log('debug', 'decrypting');
-
-    utility.decrypt(requestObject.Parameters, key)
-        .then(params => {
-
-            logger.log('debug', `params: ${JSON.stringify(params)}`);
-
-            unencrypted = params;
-
-            //If its the right security answer, also make sure is a valid SSN;
-            var response = {};
-
-            var ssnValid = unencrypted.SSN && unencrypted.SSN.toUpperCase() === patient.SSN && unencrypted.Answer && unencrypted.Answer === patient.AnswerText;
-            var answerValid = unencrypted.Answer === patient.AnswerText;
-            var isVerified = false;
-
-            // Use of RAMQ (SSN) in password reset requests is no longer supported after 1.12.2 (QSCCD-476)
-            if (unencrypted.PasswordReset && Version.versionLessOrEqual(requestObject.AppVersion, Version.version_1_12_2)) {
-                isVerified = ssnValid;
-            } else {
-                isVerified = answerValid;
-            }
-
-            if (isVerified) {
-                response = { RequestKey:requestKey, Code:3,Data:{AnswerVerified:"true"}, Headers:{RequestKey:requestKey,RequestObject:requestObject},Response:'success'};
-                sqlInterface.setTrusted(requestObject)
-                    .then(function(){
-                        sqlInterface.resetSecurityAnswerAttempt(requestObject);
-                        r.resolve(response);
-                    })
-                    .catch(function(error){
-                        logger.log('error', 'Failed to set the device as trusted', error);
-                        r.reject({ Headers:{RequestKey:requestKey,RequestObject:requestObject}, Code: 2, Data:{},Response:'error', Reason:'Could not set trusted device'});
-                    })
-
-            } else {
-                response = { RequestKey:requestKey, Code:3,Data:{AnswerVerified:"false"}, Headers:{RequestKey:requestKey,RequestObject:requestObject},Response:'success'};
-                r.resolve(response);
-            }
-
-        })
-        .catch((err) => {
-            //Check if timestamp for lockout is old, if it is reset the security answer attempts
-            logger.log('error', 'increase security answer attempt due to error decrypting', err);
-            sqlInterface.increaseSecurityAnswerAttempt(requestObject);
-            r.resolve({ RequestKey:requestKey, Code:3,Data:{AnswerVerified:"false"}, Headers:{RequestKey:requestKey,RequestObject:requestObject},Response:'success'});
-        });
-
-    return r.promise;
+    await sqlInterface.setTrusted(requestObject);
+    await sqlInterface.resetSecurityAnswerAttempt(requestObject);
+    return new OpalSecurityResponseSuccess(answerVerified, requestKey, requestObject);
 };
 
-exports.setNewPassword=function(requestKey, requestObject, user)
-{
-    var r=q.defer();
-    // Use of RAMQ (SSN) to encrypt password reset requests is no longer supported after 1.12.2 (QSCCD-476)
-    let secret = Version.versionGreaterThan(requestObject.AppVersion, Version.version_1_12_2)
-        ? utility.hash(user.Email)
-        : utility.hash(user.SSN.toUpperCase());
-    var answer = user.AnswerText;
-    const errorResponse = {Headers: {RequestKey:requestKey, RequestObject:requestObject}, Code:2, Data:{}, Response:'error', Reason:'Could not set password'};
-
-    logger.log('debug', `Running function setNewPassword for user with UserTypeSerNum = ${user.UserTypeSerNum}`);
-
-    utility.decrypt(requestObject.Parameters, secret, answer)
-        .then((unencrypted)=> {
-            sqlInterface.setNewPassword(utility.hash(unencrypted.newPassword), user.UserTypeSerNum).then(function(){
-                logger.log('debug', 'successfully updated password');
-                var response = { RequestKey:requestKey, Code:3, Data:{PasswordReset:"true"}, Headers:{RequestKey:requestKey,RequestObject:requestObject},Response:'success'};
-                r.resolve(response);
-            }).catch(function(error){
-                logger.log('error', 'error updating password', error);
-                r.resolve(errorResponse);
-            });
-        }).catch(err => {
-            logger.log('error', 'Decryption error during setNewPassword', err);
-            r.reject(errorResponse);
-        });
-
-    return r.promise;
-};
-
-exports.securityQuestion=function(requestKey,requestObject) {
-    let r = q.defer();
-
-    let unencrypted = null;
-    return utility.decrypt(requestObject.Parameters, utility.hash("none"))
-        .then((params) => {
-            unencrypted = params;
-
-            logger.log('debug', `Unencrypted: ${JSON.stringify(unencrypted)}`);
-
-            let email = requestObject.UserEmail;
-            let password = unencrypted.Password;
-
-            //Then this means this is a login attempt
-            if (password) {
-                return getSecurityQuestion(requestKey, requestObject, unencrypted).then(function (response) {
-                    logger.log('debug', `Successfully got security question with response: ${JSON.stringify(response)}`);
-                    return response
-                });
-            } else {
-                //Otherwise we are dealing with a password reset
-                return getSecurityQuestion(requestKey, requestObject, unencrypted);
-            }
-
-        });
-};
-
-function getSecurityQuestion(requestKey, requestObject, unencrypted){
-
-    let r = q.defer();
-
-    requestObject.Parameters = unencrypted;
-
-    logger.log('debug', 'in get security question with: ' + requestObject);
-
-    sqlInterface.updateDeviceIdentifier(requestObject)
-        .then(function () {
-            logger.log('debug', 'finished updating device identifier');
-            return sqlInterface.getSecurityQuestion(requestObject)
-        })
-        .then(function (response) {
-            logger.log('debug', 'updated device id successfully');
-
-            r.resolve({
-                Code:3,
-                Data:response.Data,
-                Headers:{RequestKey:requestKey,RequestObject:requestObject},
-                Response:'success'
-            });
-        })
-        .catch(function (response){
-            logger.log('debug', 'error updating device id');
-            r.resolve({
-                Headers:{RequestKey:requestKey,RequestObject:requestObject},
-                Code: 2,
-                Data:{},
-                Response:'error',
-                Reason:response
-            });
-        });
-
-    return r.promise;
+/**
+ * @desc Helper function used by verifySecurityAnswer to handle behavior related to too many security answer attempts.
+ *       This function resets the too-many-attempts timeout when applicable, and instigates the timeout when the user
+ *       reaches 5 failed attempts.
+ * @param {string} requestKey The key (branch) onto which this request was pushed on Firebase.
+ * @param {object} requestObject The security request made by the app.
+ * @param {object} user The user/patient object returned by getUserPatientSecurityInfo.
+ * @returns {Promise<void>} Resolves if no issues occur, or rejects with an OpalSecurityResponseError.
+ */
+async function handleTooManyAttempts(requestKey, requestObject, user) {
+    // Reset the attempts if the timeout was reached
+    if (user.TimeoutTimestamp != null && requestObject.Timestamp - (new Date(user.TimeoutTimestamp)).getTime() > FIVE_MINUTES) {
+        logger.log('verbose', `Resetting number of security answer attempts for username ${requestObject?.UserID}`);
+        await sqlInterface.resetSecurityAnswerAttempt(requestObject);
+    }
+    // If 5 failed attempts have been made, lock the user out for 5 minutes
+    else if (user.Attempt === 5) {
+        logger.log('verbose', `Blocking user after reaching 5 security answer attempts for username ${requestObject?.UserID}`);
+        if (user.TimeoutTimestamp == null) await sqlInterface.setTimeoutSecurityAnswer(requestObject, requestObject.Timestamp);
+        throw new OpalSecurityResponseError(CODE.TOO_MANY_ATTEMPTS, "Attempted and failed security answer 5 times", requestKey, requestObject);
+    }
 }
 
-var requestMappings = {
-    'SetNewPassword':exports.setNewPassword,
-    'VerifyAnswer':exports.verifySecurityAnswer
+/**
+ * @desc Helper function used by verifySecurityAnswer to provide a second level of verification of a security answer.
+ *       While verifySecurityAnswer first checks for decryption success, this function then checks that the 'Answer' provided
+ *       in the request params matches the expected one.
+ *       Also contains a legacy check of the SSN value provided until version 1.12.2.
+ * @param {object} unencryptedParams The request params, after decryption.
+ * @param {object} requestObject The security request made by the app.
+ * @param {object} user The user/patient object returned by getUserPatientSecurityInfo.
+ * @returns {boolean} Returns true if the second validation passes; false otherwise.
+ */
+function confirmValidSecurityAnswer(unencryptedParams, requestObject, user) {
+    // Confirm the validity of the answer by checking its decrypted value in the request parameters.
+    let answerValid = unencryptedParams.Answer === user.SecurityAnswer;
+    let isVerified;
+
+    // Use of RAMQ (SSN) in password reset requests (which also verify a security answer) is no longer supported after 1.12.2 (QSCCD-476)
+    if (unencryptedParams.PasswordReset && Version.versionLessOrEqual(requestObject.AppVersion, Version.version_1_12_2)) {
+        let ssnValid = unencryptedParams.SSN && unencryptedParams.SSN.toUpperCase() === user.SSN;
+        isVerified = ssnValid && answerValid;
+    }
+    else isVerified = answerValid;
+    return isVerified;
+}
+
+/**
+ * @desc Function used during a password reset request (non-logged-in) to change the user's password.
+ * @param {string} requestKey The key (branch) onto which this request was pushed on Firebase.
+ * @param {object} requestObject The security request made by the app.
+ * @returns {Promise<OpalSecurityResponseSuccess>} Resolves if the password was successfully changed,
+ *                                                 or rejects with an OpalSecurityResponseError.
+ */
+exports.resetPassword = async function(requestKey, requestObject) {
+    // Special case used to set the request's UserID in the case of password reset requests
+    await ensureUserIdAvailable(requestObject);
+
+    logger.log('info', `Running function resetPassword for username = ${requestObject.UserID}`);
+
+    // Get security info needed to set a new password
+    let user = await getUserPatientSecurityInfo(requestKey, requestObject);
+
+    try {
+        // Use of RAMQ (SSN) to encrypt password reset requests is no longer supported after 1.12.2 (QSCCD-476)
+        let secret = Version.versionGreaterThan(requestObject.AppVersion, Version.version_1_12_2)
+            ? utility.hash(requestObject.UserEmail)
+            : utility.hash(user.SSN.toUpperCase());
+        let answer = user.SecurityAnswer;
+
+        let unencrypted = await utility.decrypt(requestObject.Parameters, secret, answer);
+        await sqlInterface.setNewPassword(utility.hash(unencrypted.newPassword), user.Username);
+
+        logger.log('verbose', `Successfully updated password for username = ${requestObject.UserID}`);
+        return new OpalSecurityResponseSuccess(passwordResetSuccess, requestKey, requestObject);
+    }
+    catch(err) {
+        let errMsg = "Error changing the user's password"
+        logger.log('error', errMsg, err);
+        throw new OpalSecurityResponseError(CODE.SERVER_ERROR, errMsg, requestKey, requestObject);
+    }
 };
+
+/**
+ * @desc Gets a security question from the backend to be shown to the user, and caches their answer for use in the listener.
+ *       The cached answer will be used to decrypt all responses during the user's current session.
+ *       This function is also called during the password reset process, where a security question is also presented.
+ * @param {string} requestKey The key (branch) onto which this request was pushed on Firebase.
+ * @param {object} requestObject The security request made by the app.
+ * @returns {Promise<OpalSecurityResponseSuccess>} Resolves to an object containing the security question,
+ *                                                 or rejects with an OpalSecurityResponseError.
+ */
+exports.getSecurityQuestion = async function(requestKey, requestObject) {
+    let unencrypted = await utility.decrypt(requestObject.Parameters, utility.hash("none"));
+    logger.log('debug', `Unencrypted: ${JSON.stringify(unencrypted)}`);
+
+    // Special case used to set the request's UserID in the case of password reset requests
+    await ensureUserIdAvailable(requestObject);
+
+    try {
+        logger.log('verbose', `Updating device identifiers for user ${requestObject.UserID}`);
+        requestObject.Parameters = unencrypted;
+        await sqlInterface.updateDeviceIdentifier(requestObject);
+
+        logger.log('verbose', `Getting security question for user ${requestObject.UserID}`);
+        let response = await sqlInterface.getSecurityQuestion(requestObject);
+        return new OpalSecurityResponseSuccess(response.Data, requestKey, requestObject);
+    }
+    catch(error) {
+        let errMsg = 'Error getting a security question for the user';
+        logger.log('error', errMsg, error);
+        throw new OpalSecurityResponseError(CODE.SERVER_ERROR, errMsg, requestKey, requestObject);
+    }
+};
+
+/**
+ * @desc Helper function used to get the user/patient information required for any security request in this file.
+ *       See the SQL query called for details on the returned values.
+ * @param {string} requestKey The key (branch) onto which the request was pushed on Firebase.
+ * @param {object} requestObject The security request made by the app.
+ * @returns {Promise<object>} Resolves to an object containing all required attributes for the user/patient,
+ *                            or rejects with a OpalSecurityResponseError if a single record cannot be found,
+ *                            or if any essential values are missing.
+ */
+async function getUserPatientSecurityInfo(requestKey, requestObject) {
+    let rows = await sqlInterface.getUserPatientSecurityInfo(requestObject);
+    if (rows.length !== 1) {
+        logger.log('error', `getUserPatientSecurityInfo returned ${rows.length} rows when it should have returned 1`);
+        let errMessage = rows.length === 0
+            ? 'Failed to find user/patient record'
+            : 'Possible injection attack; too many patient records returned';
+        throw new OpalSecurityResponseError(CODE.AUTHENTICATION_ERROR, errMessage, requestKey, requestObject);
+    }
+    let userPatient = rows[0];
+
+    // Validate that the returned security info has values for all required parameters
+    let requiredParams = ['SecurityAnswer', 'Attempt'];
+    requiredParams.forEach(param => {
+        if (userPatient[param] === null || userPatient[param] === '') {
+            throw new OpalSecurityResponseError(CODE.SERVER_ERROR, `Query for ${param} did not return a value`, requestKey, requestObject);
+        }
+    });
+    return userPatient;
+}
+
+/**
+ * @desc Ensures that a requestObject has a non-empty UserID parameter, and if not, initializes it.
+         This is required specifically when requesting a security answer for a password reset,
+         because during such a request, the app does not yet have access to the user's Firebase UID.
+         This function looks up the UID value via firebase-admin's auth tool.
+         Note: this function modifies the original requestObject.
+ * @author Stacey Beard
+ * @date 2023-05-04
+ * @param requestObject The security request object to check.
+ * @returns {Promise<void>} Resolves if the addition was successful or if a UserID was already provided.
+ */
+async function ensureUserIdAvailable(requestObject) {
+    if (requestObject.UserID) return;
+    let userRecord = await firebase.auth().getUserByEmail(requestObject.UserEmail);
+    requestObject.UserID = userRecord?.uid;
+    if (!requestObject.UserID) throw 'Failed to look up and set UserID value using the firebase admin tool; no value returned';
+}

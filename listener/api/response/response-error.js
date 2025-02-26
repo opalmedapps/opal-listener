@@ -6,18 +6,9 @@ const OpalResponse = require('./response');
 
 class OpalResponseError extends OpalResponse {
 
-	constructor(code, data, reqObj, errorDetail, errorBack){
+	constructor(code, data, reqObj, errorDetail){
 		super(code, data, reqObj);
-		this.errorBackend = errorBack;
 		this.errorDetail = errorDetail;
-	}
-	toJSON(){
-		return {
-			code: this.code,
-			errorBackend: this.errorBackend,
-			errorUser: this.data,
-			errorDetail: this.errorDetail,
-		};
 	}
 	toLegacy() {
 		return {

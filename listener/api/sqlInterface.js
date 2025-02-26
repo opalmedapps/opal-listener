@@ -12,6 +12,8 @@ const questionnaires    = require("./modules/questionnaires");
 const { Patient } = require('./modules/patient/patient');
 const eduMaterialConfig = require('./../educational-material/eduMaterialConfig.json');
 const studiesConfig     = require('./../studies/studiesConfig.json');
+const SecurityDjango = require('./../security/securityDjango');
+const { Version } = require('../../src/utility/version');
 
 /******************************
  * MAPPINGS
@@ -614,7 +616,7 @@ exports.updateAccountField=function(requestObject) {
             //Hash the password before storing
             let hashedPassword = utility.hash(newValue);
             //Update database
-            exports.runSqlQuery(queries.setNewPassword(), [hashedPassword, patient.PatientSerNum])
+            exports.runSqlQuery(queries.setNewPassword(), [hashedPassword, requestObject.UserID])
                 .then(()=>{
                     delete requestObject.Parameters.NewValue;
                     r.resolve({Response:'success'});
@@ -841,7 +843,7 @@ exports.getPackageContents = function(requestObject){
  * @param requestObject
  */
 exports.increaseSecurityAnswerAttempt = function(requestObject) {
-    return exports.runSqlQuery(queries.increaseSecurityAnswerAttempt(),[requestObject.DeviceId]);
+    return exports.runSqlQuery(queries.increaseSecurityAnswerAttempt(),[requestObject.UserID, requestObject.DeviceId]);
 };
 
 /**
@@ -850,7 +852,7 @@ exports.increaseSecurityAnswerAttempt = function(requestObject) {
  * @param requestObject
  */
 exports.resetSecurityAnswerAttempt = function(requestObject) {
-    return exports.runSqlQuery(queries.resetSecurityAnswerAttempt(),[requestObject.DeviceId]);
+    return exports.runSqlQuery(queries.resetSecurityAnswerAttempt(),[requestObject.UserID, requestObject.DeviceId]);
 };
 
 /**
@@ -860,17 +862,16 @@ exports.resetSecurityAnswerAttempt = function(requestObject) {
  * @param timestamp
  */
 exports.setTimeoutSecurityAnswer = function(requestObject, timestamp) {
-    return exports.runSqlQuery(queries.setTimeoutSecurityAnswer(),[new Date(timestamp), requestObject.DeviceId]);
+    return exports.runSqlQuery(queries.setTimeoutSecurityAnswer(),[new Date(timestamp), requestObject.UserID, requestObject.DeviceId]);
 };
 
 /**
- * getPatientFieldsForPasswordReset
- * @desc gets patient fields for password reset
- * @param requestObject
- * @return {Promise}
+ * @desc Gets and returns User and Patient fields used in security requests, such as password resets and verifying security answers.
+ * @param {object} requestObject A security request object.
+ * @return {Promise} Resolves to rows containing the user and patient's security information.
  */
-exports.getPatientFieldsForPasswordReset=function(requestObject) {
-    return exports.runSqlQuery(queries.getPatientFieldsForPasswordReset(),[requestObject.UserEmail, requestObject.DeviceId]);
+exports.getUserPatientSecurityInfo = requestObject => {
+    return exports.runSqlQuery(queries.getUserPatientSecurityInfo(),[requestObject.UserID, requestObject.DeviceId]);
 };
 
 /**
@@ -880,8 +881,8 @@ exports.getPatientFieldsForPasswordReset=function(requestObject) {
  * @param patientSerNum
  * @return {Promise}
  */
-exports.setNewPassword=function(password,patientSerNum) {
-    return exports.runSqlQuery(queries.setNewPassword(),[password,patientSerNum]);
+exports.setNewPassword = function(password, username) {
+    return exports.runSqlQuery(queries.setNewPassword(),[password, username]);
 };
 
 /**
@@ -1174,50 +1175,40 @@ function combineResources(rows)
     return r.promise;
 }
 
-exports.getSecurityQuestion = function (requestObject){
-    var r = Q.defer();
+exports.getSecurityQuestion = async function (requestObject) {
+    try {
+        let apiResponse = await SecurityDjango.getRandomSecurityQuestionAnswer(requestObject.UserID);
+        if (apiResponse.question === '' || apiResponse.answer === '') throw "API call returned a blank question or answer";
 
-    logger.log('debug', 'in get secyurity wquestuion in sql interface');
+        await exports.runSqlQuery(queries.cacheSecurityAnswerFromDjango(), [apiResponse.answer, requestObject.DeviceId, requestObject.UserID]);
 
-    var obj={};
-    var Data = {};
-    var userEmail = requestObject.UserEmail;
-
-    exports.runSqlQuery(queries.getSecQuestion(),[userEmail])
-        .then(function (queryRows) {
-
-            if (queryRows.length != 1 ) r.reject({Response:'error', Reason:'More or less than one question returned'});
-            Data.securityQuestion = {
-                securityQuestion_EN: queryRows[0].QuestionText_EN,
-                securityQuestion_FR: queryRows[0].QuestionText_FR
+        // Security question format read by the app has changed after 1.12.2
+        if (Version.versionLessOrEqual(requestObject.AppVersion, Version.version_1_12_2)) return {
+            // To maintain login for 1.12.2 and previous versions, return the one available question for either language
+            Data: {
+                securityQuestion: {
+                    securityQuestion_EN: apiResponse.question,
+                    securityQuestion_FR: apiResponse.question,
+                }
             }
-            obj.Data = Data;
-            return exports.runSqlQuery(queries.setDeviceSecurityAnswer(), [queryRows[0].SecurityAnswerSerNum, requestObject.DeviceId, requestObject.UserID])
-        })
-        .then(function () {
-            r.resolve(obj);
-        })
-        .catch(function (error) {
-            r.reject({Response:'error', Reason:'Error getting security question due to '+error});
-        });
-
-    return r.promise;
+        };
+        else return {
+            Data: {
+                securityQuestion: apiResponse.question,
+            }
+        }
+    }
+    catch (error) {
+        let errMsg = "Error getting a security question from Django and caching it locally";
+        logger.log('error', errMsg, error);
+        throw new Error(errMsg);
+    }
 };
 
 exports.setTrusted = function(requestObject)
 {
-
-    var r = Q.defer();
-    exports.runSqlQuery(queries.setTrusted(),[requestObject.DeviceId])
-        .then(function (queryRows) {
-            r.resolve({Response:'success'});
-        })
-        .catch(function (error) {
-            r.reject({Response:'error', Reason:'Error getting setting trusted device '+error});
-        });
-
-    return r.promise;
-
+    let trusted = requestObject?.Parameters?.Trusted === "true" ? 1 : 0;
+    return exports.runSqlQuery(queries.setTrusted(),[trusted, requestObject.UserID, requestObject.DeviceId]);
 };
 
 /**

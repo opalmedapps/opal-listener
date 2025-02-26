@@ -12,7 +12,7 @@ const requestDataApi = {
     AppVersion: '100.100.100',
     Request: 'api',
     DeviceId: '',
-    UserID: 'JUYxJadQuhhOkC1TfrAqD4crhi73',
+    UserID: process.env.TEST_ACCOUNT_FIREBASE_UID,
     Parameters: {
         method: 'get',
         url: '/api/app/home',
@@ -51,7 +51,7 @@ const requestRegistrationApi = {
  */
 const requestRegistration = {
     RequestType: 'REGISTRATION_LEGACY',
-    Request: 'SecurityQuestionsList',
+    Request: 'RegisterPatient',
     BranchName: CryptoJs.SHA512('code12345678').toString(),
     Parameters: {
         Fields: 'OTES12345678',
@@ -71,7 +71,7 @@ const requestData = {
     RequestType: 'LEGACY',
     Request: 'DeviceIdentifier',
     DeviceId: '',
-    UserID: 'JUYxJadQuhhOkC1TfrAqD4crhi73',
+    UserID: process.env.TEST_ACCOUNT_FIREBASE_UID,
     Parameters: {
         deviceType: 'browser',
         registrationId: '',
