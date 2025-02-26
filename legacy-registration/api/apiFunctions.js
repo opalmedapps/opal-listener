@@ -148,7 +148,7 @@ exports.registerPatient = async function(requestObject) {
         const patientData = await opalRequest.retrievePatientDataDetailed(backendApiRequest);
 
         // Insert patient
-        const patientResult = await insertPatient(requestObject, patientData?.patient, patientData?.hospital_patients[0]);
+        const patientResult = await insertPatient(requestObject, patientData?.patient);
         const legacy_id = patientResult[0].Result;
 
         // Insert patient hospital identifier
@@ -434,10 +434,9 @@ function getRegisterData(requestObject, legacy_id) {
  * @description insert patient with request parameters.
  * @param {Object} requestObject - The calling request's requestObject.
  * @param {Object} patient - patient object.
- * @param {Object} hospitalPatient - hospital patient object.
  * @returns {patientSerNum}
  */
-async function insertPatient(requestObject, patient, hospitalPatient) {
+async function insertPatient(requestObject, patient) {
     if (!patient) {
         const registrationCode = requestObject.Parameters.Fields.registrationCode;
         throw `Failed to insert Patient to legacyDB due to Patient not exists with registrationCode: ${registrationCode}`;
