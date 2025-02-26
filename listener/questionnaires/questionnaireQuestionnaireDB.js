@@ -48,6 +48,8 @@ function runQuery(query, parameters = null) {
 
 exports.getQuestionnaireList = getQuestionnaireList;
 exports.getQuestionnaire = getQuestionnaire;
+exports.getQuestionnairePurpose= getQuestionnairePurpose;
+exports.getQuestionnaireUnreadNumber = getQuestionnaireUnreadNumber;
 exports.saveAnswer = saveAnswer;
 exports.updateQuestionnaireStatusInQuestionnaireDB = updateQuestionnaireStatusInQuestionnaireDB;
 
@@ -59,12 +61,14 @@ FUNCTIONS TO GET QUESTIONNAIRES
  * getQuestionnaireList
  * @desc this function get a list of questionnaire belonging to an user.
  * @param {object} opalPatientSerNumAndLanguage object containing PatientSerNum and Language as property. These information comes from OpalDB
+ * @param {string} purpose string indicating the purpose of the questionnaire list requested. The purposes can be found in QUESTIONNAIRE_PURPOSE_ID_MAP of the questionnaireConfig.json file.
  * @param {Date} [lastUpdated] - If provided, only items with 'LastUpdated' after this time are returned.
  * @returns {promise}
  */
-async function getQuestionnaireList(opalPatientSerNumAndLanguage, lastUpdated=0) {
+async function getQuestionnaireList(opalPatientSerNumAndLanguage, purpose, lastUpdated=0) {
     const params = [
         opalPatientSerNumAndLanguage.PatientSerNum,
+        findPurposeId(purpose),
         opalPatientSerNumAndLanguage.Language,
     ]
     let queryResult = await runQuery(questionnaireQueries.getQuestionnaireListQuery(), params);
@@ -131,6 +135,62 @@ function getQuestionnaire(opalPatientSerNumAndLanguage, answerQuestionnaire_Id) 
 }
 
 /**
+ * getQuestionnairePurpose
+ * @desc this function gets the quetionnaire purpose of a given questionnaire.
+ * @param {number} answerQuestionnaireId  The unique Id of the answerQuestionnaire table.
+ * @returns {promise}
+ */
+function getQuestionnairePurpose(answerQuestionnaireId) {
+    let r = q.defer();
+
+    runQuery(questionnaireQueries.getQuestionnairePurposeQuery(), [answerQuestionnaireId])
+        .then(function (queryResult) {
+            if (!questionnaireValidation.validatePurpose(queryResult)) {
+                logger.log("error", "Error getting questionnaire purpose: query error");
+                r.reject(new Error('Error getting questionnaire purpose: query error'));
+            } else {
+                r.resolve(queryResult[0]);
+            }
+        })
+        .catch(function (err) {
+            logger.log("error", "Error getting questionnaire purpose, " + err);
+            r.reject(err);
+        })
+
+    return r.promise;
+}
+
+/**
+ * getQuestionnaireUnreadNumber
+ * @desc this function gets the number of unread (e.g. 'New') questionnaires in a given purpose belonging to an user.
+ * @param {object} opalPatientSerNum object containing PatientSerNum as a property.
+ *                 This information comes from OpalDB
+ * @param {string} purpose string indicating the purpose of the questionnaire list requested.
+ *                 The purposes can be found in QUESTIONNAIRE_PURPOSE_ID_MAP of the questionnaireConfig.json file.
+ * @returns {promise}
+ */
+function getQuestionnaireUnreadNumber(opalPatientSerNum, purpose) {
+    let r = q.defer();
+
+    // get number of unread questionnaires
+    runQuery(questionnaireQueries.getNumberUnreadQuery(), [findPurposeId(purpose), opalPatientSerNum.PatientSerNum])
+        .then(function (queryResult) {
+            if (!questionnaireValidation.validateUnreadNumber(queryResult)) {
+                logger.log("error", "Error getting number of unread questionnaires: query error");
+                r.reject(new Error('Error getting number of unread questionnaires: query error'));
+            } else {
+                r.resolve(queryResult[0]);
+            }
+        })
+        .catch(function (err) {
+            logger.log("error", "Error getting number of unread questionnaires, " + err);
+            r.reject(err);
+        })
+
+    return r.promise;
+}
+
+/**
  * getQuestionOptions
  * @desc This async function calls a procedure in the questionnaireDB to get all the question options according to the language passed.
  * @param {object} questionAndTypeMap this object should have type_id as key and question_id as value
@@ -160,6 +220,16 @@ function getQuestionOptions(questionAndTypeMap, languageId) {
         });
 
     return r.promise;
+}
+
+/**
+ * findPurposeId
+ * @desc helper function to map the purpose string sent from the front-end to its ID in the database
+ * @param {string} purposeString
+ * @returns {number} The purpose ID in the database
+ */
+function findPurposeId(purposeString) {
+    return questionnaireConfig.QUESTIONNAIRE_PURPOSE_ID_MAP[purposeString.toUpperCase()];
 }
 
 /*

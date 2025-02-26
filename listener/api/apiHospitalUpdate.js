@@ -61,3 +61,9 @@ exports.inputEducationalMaterialRating= function(requestObject)
 exports.getNewNotifications = function (requestObject) {
     return sqlInterface.getNewNotifications(requestObject);
 };
+
+// Update study consent status
+exports.studyUpdateStatus = function (requestObject)
+{
+  sqlInterface.studyUpdateStatus(requestObject);
+};
