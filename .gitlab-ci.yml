@@ -208,6 +208,8 @@ firebase rules preprod:
     - firebase deploy --only database
 
 include:
+  # use latest template versions to run security scanning jobs also in merge request pipelines:
+  # https://docs.gitlab.com/ee/user/application_security/index.html#use-security-scanning-tools-with-merge-request-pipelines
   # Secret Detection: https://docs.gitlab.com/ee/user/application_security/secret_detection/
-  # https://gitlab.com/gitlab-org/gitlab/-/blob/master/lib/gitlab/ci/templates/Jobs/Secret-Detection.gitlab-ci.yml
-  - template: Jobs/Secret-Detection.gitlab-ci.yml
+  # https://gitlab.com/gitlab-org/gitlab/-/blob/master/lib/gitlab/ci/templates/Jobs/Secret-Detection.latest.gitlab-ci.yml
+  - template: Jobs/Secret-Detection.latest.gitlab-ci.yml
