@@ -1,13 +1,8 @@
 /**  Library Imports **/
 
 var firebaseFunction = require('../api/firebase/firebaseFunctions.js');
-const config = require('../config-adaptor');
 const opalRequest = require('./request/request.js');
 const logger = require('../logs/logger.js');
-const path = require('path');
-const fs = require('fs');
-
-const { sendMail } = require('./utility/mail.js');
 
 /**
  * @description check the user is caregiver or not
