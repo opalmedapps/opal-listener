@@ -6,6 +6,7 @@ const { ENVIRONMENT } = require("../../src/environment");
 class SQLQueryRunner {
 	#SQL_QUERY_POOL;
 	#DB_CREDENTIALS;
+	// List of allowed data types of the SQL query parameters (e.g., Object is prohibited)
 	#ALLOWED_DATA_TYPES;
 
 	/**
@@ -58,8 +59,7 @@ class SQLQueryRunner {
 	/**
 	 * Performs sql query given parameters and a postProcessing function
 	 * @param query Query to perform
-	 * @param {Array<Object>} parameters Parameters for specified as array of objects, note mysql transforms
-	 *                        them to a string
+	 * @param {Array<any>} parameters an array of SQL query parameters
 	 * @param {Function} postProcessor Post processing function
 	 * @returns {Promise<any>} Returns a promise with the results from the query
 	 */
@@ -73,8 +73,8 @@ class SQLQueryRunner {
 				parameters.forEach((value) => {
 					let fieldType = typeof value;
 					// Check if the field's type is in the list of allowed types
-					if (!this.#ALLOWED_DATA_TYPES.includes(fieldType) || !this.isValidDate(value)) {
-						logger.log('error', `The query's parameter is prohibited ${fieldType} type.`);
+					if (!this.#ALLOWED_DATA_TYPES.includes(fieldType) && !this.isValidDate(value)) {
+						logger.log('error', `The query's parameter has a prohibited type: ${fieldType}.`);
 						reject('An error occurred while processing the request.');
 						return;
 					}
