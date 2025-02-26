@@ -41,7 +41,7 @@ const registrationRequest = {
         },
         data: {
             ipAddress: '192.168.32.1',
-            ramq: 'TESP62622718',
+            ramq: 'OTES12345678',
         },
     },
     Timestamp: '',

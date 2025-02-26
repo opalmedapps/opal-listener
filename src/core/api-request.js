@@ -18,7 +18,7 @@ class ApiRequest {
      */
     static async makeRequest(requestParams) {
         legacyLogger.log('debug', 'API: Preparing to send request to Opal API');
-        const userId = !requestParams.UserID ? 'registration' : requestParams.UserID;
+        const userId = requestParams.UserID || 'registration';
         const apiResponse = await ApiRequest.sendRequestToApi(userId, requestParams.Parameters);
         return {
             status_code: apiResponse.status,

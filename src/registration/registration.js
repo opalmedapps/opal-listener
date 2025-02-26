@@ -12,12 +12,10 @@ class Registration {
             },
         };
         const response = await ApiRequest.makeRequest(requestParams);
-        // TODO return Registration encrytion value from django backend
-        // https://o-hig.atlassian.net/browse/QSCCD-426
         // TODO handle decryption using MRNs
         // https://o-hig.atlassian.net/browse/QSCCD-427
         return {
-            salt: response.data.patient.ramq,
+            salt: response.data.patient.health_insurance_number,
             secret: response.data.code,
         };
     }

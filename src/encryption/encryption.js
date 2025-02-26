@@ -66,7 +66,7 @@ class EncryptionUtilities {
     }
 
     /**
-     * @description Get secret value which is either an hash of the username or registration token for registration.
+     * @description Get secret value which an hash of the userID.
      * @param {object} snapshot Firebase snapshot value
      * @returns {string} Value of the secret string use for encryption and decryption
      */
@@ -75,7 +75,7 @@ class EncryptionUtilities {
     }
 
     /**
-     * @description Get salt which is either security answer text for api calls or RAMQ for registration.
+     * @description Get salt which is the security answer related to the device making the request.
      * @param {object} snapshot Firebase snapshot value
      * @returns {string} salt value for decryption
      */
