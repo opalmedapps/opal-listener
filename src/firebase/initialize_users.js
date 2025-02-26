@@ -55,6 +55,11 @@ async function createUsers() {
             password: '12345Opal!!',
             uid: 'ZYHAjhNy6hhr4tOW8nFaVEeKngt1',
         },
+        {
+            email: 'hendren@cs.mcgill.ca',
+            password: '12345Opal!!',
+            uid: 'a51fba18-3810-4808-9238-4d0e487785c8',
+        },
     ];
 
     for (const user of userRecords) {
