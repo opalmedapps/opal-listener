@@ -224,3 +224,9 @@ include:
   # SAST Scanning: https://docs.gitlab.com/ee/user/application_security/sast/
   # https://gitlab.com/gitlab-org/gitlab/-/blob/master/lib/gitlab/ci/templates/Jobs/SAST.latest.gitlab-ci.yml
   - template: Jobs/SAST.latest.gitlab-ci.yml
+
+sast:
+  variables:
+    # exclude test files
+    # https://docs.gitlab.com/ee/user/application_security/sast/#vulnerability-filters
+    SAST_EXCLUDED_PATHS: "spec, test, tests, tmp, *.test.js"
