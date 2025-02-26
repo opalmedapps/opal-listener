@@ -1,6 +1,6 @@
 const nodemailer = require('nodemailer');
 
-function sendMail(config, recipient, subject, text) {
+function sendMail(config, recipient, subject, text, html) {
     let transporter = nodemailer.createTransport({
         host: config.host,
         port: config.port,
@@ -9,6 +9,11 @@ function sendMail(config, recipient, subject, text) {
             user: config.username,
             pass: config.password,
         },
+        // Allow configuration of unauthorized CAs (such as self-signed certificates)
+        // See: https://github.com/nodemailer/nodemailer/issues/406#issuecomment-83941225
+        tls: {
+            rejectUnauthorized: config.tls_reject_unauthorized,
+        },
     });
 
     let message = {
@@ -16,6 +21,7 @@ function sendMail(config, recipient, subject, text) {
         to: recipient,
         subject: subject,
         text: text,
+        html: html,
     };
 
     return transporter.sendMail(message);

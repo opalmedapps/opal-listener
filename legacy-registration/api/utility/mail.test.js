@@ -32,4 +32,20 @@ describe('sendmail()', function () {
     // verify that the response code is 250
     expect(result.response).to.be.a('string').and.satisfy(response => response.startsWith('250'));
   });
+
+  it('should send an email with HTML body successfully', async function () {
+    // create test account for etheral.email
+    let testAccount = await nodemailer.createTestAccount();
+
+    let result = await sendMail({
+      host: testAccount.smtp.host,
+      port: testAccount.smtp.port,
+      username: testAccount.user,
+      password: testAccount.pass,
+      from: 'Opal sendmail test <test@opalmedapps.ca>',
+    }, 'test@opalmedapps.ca', 'test', 'test email', '<b>html test</b>');
+
+    // verify that the response code is 250
+    expect(result.response).to.be.a('string').and.satisfy(response => response.startsWith('250'));
+  });
 });
