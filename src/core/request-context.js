@@ -38,7 +38,10 @@ class RequestContext {
         else {
             // For app requests, if some info is missing, cacheLabel stays undefined and the cache is later bypassed.
             // This is normal for some request types that are encrypted differently, such as security requests.
-            if (!this.userId || !this.deviceId) cacheLabel = undefined;
+            if (!this.userId || !this.deviceId) {
+                cacheLabel = undefined;
+                return cacheLabel;
+            }
             cacheLabel = `${this.userId}:${this.deviceId}`;
         }
         legacyLogger.log('debug', `Cache label assembled: ${cacheLabel}`);
