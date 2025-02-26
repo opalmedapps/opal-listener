@@ -3,7 +3,7 @@
  * @file Utility for Firebase to initialize users.
  * @author Matthias Schoettle
  */
-const { getAuth } = require('firebase-admin');
+const { getAuth } = require('firebase-admin/auth');
 
 const { FIREBASE_CONFIG } = require('../environment');
 const { Firebase } = require('./firebase');
