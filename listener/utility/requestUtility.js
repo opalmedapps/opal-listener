@@ -15,20 +15,26 @@ const utility           = require("../utility/utility");
  *              Attaches SSL certificates before making an https request.
  * @author Stacey Beard
  * @date 2021-11-15
- * @param {Object} options - The options required by 'request'.
+ * @param {string} method - The method used to make the request (e.g. "get", "post", etc.).
+ * @param {string} url - The url to which the request is made.
+ * @param {Object} [options] - Additional options to pass to the 'request' package.
  * @returns {Promise<Object>} Resolves on success of the request, with an object containing the response and
  *                            response body, or rejects with an error.
  */
-exports.request = function(options) {
+exports.request = function(method, url, options) {
     return new Promise((resolve, reject) => {
         // Helper function
-        let error = (errMsg) => { return `Error making request: ${errMsg}. Options provided: ${utility.stringifyShort(options)}` };
+        let error = (errMsg) => { return `Error making request: ${errMsg}. Method: [${method}], URL: [${url}], additional options: ${utility.stringifyShort(options)}` };
+
+        if (!options) options = {};
 
         // Validate input
-        if (!options) reject(error("cannot make a request without an options parameter"));
-        else if (!options.url || options.url === "") reject(error("the 'url' parameter is required to make a request"));
-        else if (!options.method || options.method === "") reject(error("the 'method' parameter is required to make a request via the request utility"));
+        if (!url || url === "") reject(error("the 'url' parameter is required to make a request"));
+        else if (!method || method === "") reject(error("the 'method' parameter is required to make a request"));
         else {
+            // Assemble all options together
+            options = { ...options, method: method, url: url };
+
             // Add an SSL certificate to the request's options if a certificate is provided for this listener
             try {
                 if (options.url.includes("https")) ssl.attachCertificate(options);

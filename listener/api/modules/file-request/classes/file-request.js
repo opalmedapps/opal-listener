@@ -19,13 +19,13 @@ class FileRequest {
      * @returns {Promise<Object>} Resolves to a data object containing the base64 content and content-type.
      */
     async getFileBase64() {
+        let url = encodeURI(this._url); // Required to work with non-standard characters (such as French characters)
+
         let options = {
-            method: "get",
-            url: encodeURI(this._url), // Required to work with non-standard characters (such as French characters)
             encoding: null, // Allows conversion to base64
         };
 
-        let { response, body } = await requestUtility.request(options);
+        let { response, body } = await requestUtility.request("get", url, options);
 
         return {
             contentType: response.headers["content-type"],

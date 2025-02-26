@@ -432,8 +432,6 @@ async function checkIntoOIE(mrn, mrnSite) {
     if (!config.CHECKIN_PATH || config.CHECKIN_PATH === "") throw "No value was provided for CHECKIN_PATH in the config file";
 
     let options = {
-        method: "post",
-        url: config.CHECKIN_PATH,
         json: true,
         body: {
             "mrn": mrn,
@@ -442,7 +440,7 @@ async function checkIntoOIE(mrn, mrnSite) {
         },
     };
 
-    await requestUtility.request(options);
+    await requestUtility.request("post", config.CHECKIN_PATH, options);
 }
 
 /**

@@ -205,12 +205,7 @@ async function questionnaireUpdateStatus(requestObject) {
             if (!config.QUESTIONNAIRE_COMPLETED_PATH || config.QUESTIONNAIRE_COMPLETED_PATH === "") {
                 throw "No value was provided for QUESTIONNAIRE_COMPLETED_PATH in the config file.";
             }
-            let options = {
-                method: "post",
-                url: config.QUESTIONNAIRE_COMPLETED_PATH,
-                json: true,
-            };
-            await requestUtility.request(options);
+            await requestUtility.request("post", config.QUESTIONNAIRE_COMPLETED_PATH, { json: true });
         }
         catch (error) {
             logger.log("error", `Failed to send notification of completed questionnaire to the OIE: ${JSON.stringify(error)}`);
