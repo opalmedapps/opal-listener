@@ -17,138 +17,32 @@ const SELF = 'SELF';
 const PARENT = 'PARENT';
 
 describe('QuestionnaireFormatting', function () {
-    describe('filterPatientQuestionnaires', function() {
-        it('should not modify the original array', function() {
-            let list = [
-                questionnaire(1, PATIENT),
-                questionnaire(2, CAREGIVER),
-            ];
-
-            format.filterPatientQuestionnaires(list, false);
-
-            expect(list).to.have.deep.members([
-                questionnaire(1, PATIENT),
-                questionnaire(2, CAREGIVER),
-            ]);
-        });
-        it("should filter out respondent=PATIENT questionnaires if the user isn't allowed to answer them", function() {
-            let list = [
-                questionnaire(1, PATIENT),
-                questionnaire(2, CAREGIVER),
-                questionnaire(3, CAREGIVER),
-                questionnaire(4, PATIENT),
-            ];
-
-            expect(format.filterPatientQuestionnaires(list, false)).to.have.deep.members([
-                questionnaire(2, CAREGIVER),
-                questionnaire(3, CAREGIVER),
-            ]);
-        });
-        it('should not filter out respondent=PATIENT questionnaires if the user is allowed to answer them', function() {
-            let list = [
-                questionnaire(1, PATIENT),
-                questionnaire(2, CAREGIVER),
-                questionnaire(3, PATIENT),
-            ];
-
-            expect(format.filterPatientQuestionnaires(list, true)).to.have.deep.members(list);
-        });
-    });
-    describe('filterCaregiverQuestionnaires', function() {
-        it('should not modify the original array', function() {
-            let list = [
-                questionnaire(1, PATIENT),
-                questionnaire(2, CAREGIVER),
-            ];
-
-            format.filterCaregiverQuestionnaires(list, true);
-
-            expect(list).to.have.deep.members([
-                questionnaire(1, PATIENT),
-                questionnaire(2, CAREGIVER),
-            ]);
-        });
-        it('should filter out respondent=CAREGIVER questionnaires if the user is "self"', function() {
-            let list = [
-                questionnaire(1, PATIENT),
-                questionnaire(2, CAREGIVER),
-                questionnaire(3, CAREGIVER),
-                questionnaire(4, PATIENT),
-            ];
-
-            expect(format.filterCaregiverQuestionnaires(list, true)).to.have.deep.members([
-                questionnaire(1, PATIENT),
-                questionnaire(4, PATIENT),
-            ]);
-        });
-        it('should not filter out respondent=CAREGIVER questionnaires if the user is not "self"', function() {
-            let list = [
-                questionnaire(1, PATIENT),
-                questionnaire(2, CAREGIVER),
-                questionnaire(3, PATIENT),
-            ];
-            expect(format.filterCaregiverQuestionnaires(list, false)).to.have.deep.members(list);
-        });
-    });
-    describe('filterByRespondent', function() {
+    describe('getAllowedRespondents', function() {
         afterEach(function() {
             clearStub();
         });
-        it('should filter out everything if the user is "self" and cannot answer patient questionnaires', async function() {
+        it('should allow no respondents if the user is "self" and cannot answer patient questionnaires', async function() {
             stubRelationship(false, SELF);
-            let list = [
-                questionnaire(1, PATIENT),
-                questionnaire(2, CAREGIVER),
-            ];
-            const filteredList = await format.filterByRespondent(list, "test", 51);
-            expect(filteredList).to.have.deep.members([]);
+            const respondents = await format.getAllowedRespondents("test", 51);
+            expect(respondents).to.have.deep.members([]);
         });
-        it('should filter out caregiver questionnaires if the user is "self" and can answer patient questionnaires', async function() {
+        it('should allow [patient] questionnaires if the user is "self" and can answer patient questionnaires', async function() {
             stubRelationship(true, SELF);
-            let list = [
-                questionnaire(1, PATIENT),
-                questionnaire(2, CAREGIVER),
-            ];
-            const filteredList = await format.filterByRespondent(list, "test", 51);
-            expect(filteredList).to.have.deep.members([
-                questionnaire(1, PATIENT),
-            ]);
+            const respondents = await format.getAllowedRespondents("test", 51);
+            expect(respondents).to.have.deep.members([PATIENT]);
         });
-        it('should filter out patient questionnaires if the user is not "self" and cannot answer patient questionnaires', async function() {
+        it('should allow [caregiver] questionnaires if the user is not "self" and cannot answer patient questionnaires', async function() {
             stubRelationship(false, PARENT);
-            let list = [
-                questionnaire(1, PATIENT),
-                questionnaire(2, CAREGIVER),
-            ];
-            const filteredList = await format.filterByRespondent(list, "test", 51);
-            expect(filteredList).to.have.deep.members([
-                questionnaire(2, CAREGIVER),
-            ]);
+            const respondents = await format.getAllowedRespondents("test", 51);
+            expect(respondents).to.have.deep.members([CAREGIVER]);
         });
-        it('should filter out nothing if the user is not "self" and can answer patient questionnaires', async function() {
+        it('should allow [patient, caregiver] questionnaires if the user is not "self" and can answer patient questionnaires', async function() {
             stubRelationship(true, PARENT);
-            let list = [
-                questionnaire(1, PATIENT),
-                questionnaire(2, CAREGIVER),
-            ];
-            const filteredList = await format.filterByRespondent(list, "test", 51);
-            expect(filteredList).to.have.deep.members([
-                questionnaire(1, PATIENT),
-                questionnaire(2, CAREGIVER),
-            ]);
+            const respondents = await format.getAllowedRespondents("test", 51);
+            expect(respondents).to.have.deep.members([PATIENT, CAREGIVER]);
         });
     });
 });
-
-/**
- * @desc Test utility function that quickly builds a minimal questionnaire object.
- * @param {number} qp_ser_num Value of the questionnaire's qp_ser_num.
- * @param {number} respondent_id Value of the questionnaire's respondent_id.
- * @returns {object} An object made up of the provided configurations.
- */
-function questionnaire(qp_ser_num, respondent_id) {
-    return {qp_ser_num, respondent_id};
-}
 
 /**
  * @desc Test utility function that stubs the API call to get the list of relationships between a caregiver and patient.

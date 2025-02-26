@@ -68,11 +68,17 @@ FUNCTIONS TO GET QUESTIONNAIRES
  */
 async function getQuestionnaireList(opalPatientSerNumAndLanguage, userId, purpose, lastUpdated=0) {
     const patientSerNum = opalPatientSerNumAndLanguage.PatientSerNum;
+
+    // Filter the list based on respondents. Questionnaires with certain respondent types can only be viewed and answered under specific conditions.
+    let possibleRespondentIds = await format.getAllowedRespondents(userId, patientSerNum);
+
     const params = [
         patientSerNum,
         findPurposeId(purpose),
         opalPatientSerNumAndLanguage.Language,
+        possibleRespondentIds.join('|'),  // Possible respondent ids must be passed as a string
     ]
+
     let queryResult = await runQuery(questionnaireQueries.getQuestionnaireListQuery(), params);
 
     if (!questionnaireValidation.hasValidProcedureStatus(queryResult)) {
@@ -81,9 +87,6 @@ async function getQuestionnaireList(opalPatientSerNumAndLanguage, userId, purpos
 
     // Filter the list if the user is refreshing to get only new questionnaires
     let list = lastUpdated ? queryResult[0].filter(row => new Date(row.last_updated) > lastUpdated) : queryResult[0];
-
-    // Filter the list based on respondents. Questionnaires with certain respondent types can only be viewed and answered under specific conditions.
-    list = format.filterByRespondent(list, userId, patientSerNum);
 
     return list;
 }
