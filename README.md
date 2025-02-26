@@ -7,7 +7,6 @@ This is Opal's backend listener that facilitates communication between the user 
 ## Getting Started
 
 These instructions will get you a copy of the project up and running on your local machine for development and testing purposes.
-Refer to the Deployment section below for notes on how to deploy the project on a live system.
 
 ### Prerequisites
 
@@ -34,7 +33,7 @@ Communication with the backend needs to be authenticated with a REST API token.
 It is assumed that at this point you already have the backend set up with initial data which generated these.
 
 * The `FIREBASE_DATABASE_URL` can be found in the exported app configuration from Firebase
-* The `FIREBASE_ADMIN_KEY_PATH` defaults to `/app/src/config/firebase-admin-key.json` (i.e., `src/config/firebase-admin-key.json` in your project)
+* The `FIREBASE_ADMIN_KEY_PATH` defaults to `/app/src/config/firebase-admin-key.json` inside the container (i.e., `src/config/firebase-admin-key.json` in your project)
 * Notice that the host names are `host.docker.internal` and NOT `localhost`. This is required for a container to call a localhost service on the host system.
 * `DATA_CACHE_TIME_TO_LIVE_MINUTES` represents the length of time in minutes the listener will store a given user's salt and secret keys when requesting encryption values
 
@@ -104,8 +103,10 @@ For help on creating new documentation pages, refer to {@tutorial creating-docum
 
 ### Unit tests
 
-Unit tests for this repository are run using the Mocha test framework. Test files should be in the `src` directory
-(or any of its subdirectories), and should have a name in the format `*.test.*`.
+Unit tests for this repository are run using the Mocha test framework.
+Tests are required for any new code written in the `src` directory (or any of its subdirectories), and test files should have a name in the format `*.test.*`.
+In other (legacy) parts of the project, tests are not necessarily required.
+However, they can still be created to improve coverage or to test new code when the legacy part of the system is modified.
 
 To run the tests:
 

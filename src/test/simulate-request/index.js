@@ -94,7 +94,7 @@ class SimulateRequest {
      * @returns {object} File path for the firebase admin key.
      */
     static async getFirebaseAdminKey() {
-        const pathName = path.join(__dirname, '../../config/firebase');
+        const pathName = path.join(__dirname, '../../config');
         const files = await fs.promises.readdir(pathName);
         return `${pathName}/${files[0]}`;
     }
