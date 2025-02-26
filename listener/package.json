@@ -6,7 +6,7 @@
     "@stablelib/utf8": "^1.0.0",
     "crypto-js": "^3.1.6",
     "express-validator": "^6.4.0",
-    "firebase-admin": "^8.10.0",
+    "firebase-admin": "10.0.2",
     "moment": "^2.24.0",
     "mysql": "^2.10.2",
     "nodemailer": "^4.0.1",
