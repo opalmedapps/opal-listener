@@ -68,7 +68,9 @@ class EncryptionUtilities {
      */
     static async decryptRequestMultipleSalts(request, secret, saltArray) {
         if (!Array.isArray(saltArray)) {
-            throw new Error("decryptRequestMultipleSalts can only be called with an Array as the 'saltArray' param");
+            throw new Error('DECRYPTION', {
+                cause: "decryptRequestMultipleSalts can only be called with an Array as the 'saltArray' param",
+            });
         }
 
         const promises = saltArray.map(salt => this.decryptRequest(request, secret, salt));
