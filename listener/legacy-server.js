@@ -100,12 +100,12 @@ function handleRequest(requestType, snapshot){
     processRequest(headers).then(function(response){
 
         // Print the response contents (shortened if too long)
-        // try {
-        //     console.log("response", JSON.parse(utility.stringifyShort(response)));
-        // }
-        // catch (error) {
-        //     console.error("Failed to print the response due to a formatting issue:", error);
-        // }
+        try {
+            console.log("response", JSON.parse(utility.stringifyShort(response)));
+        }
+        catch (error) {
+            console.error("Failed to print the response due to a formatting issue:", error);
+        }
 
         // Log before uploading to Firebase. Check that it was not a simple log
         // if (response.Headers.RequestObject.Request !== 'Log') logResponse(response);
