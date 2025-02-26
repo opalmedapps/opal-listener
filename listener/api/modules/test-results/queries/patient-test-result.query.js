@@ -110,7 +110,7 @@ class PatientTestResultQuery {
 					`SELECT
 						ptr.PatientTestResultSerNum as latestPatientTestResultSerNum,
 						te.TestExpressionSerNum as testExpressionSerNum,
-						JSON_CONTAINS(ptr.ReadBy, ?) as readStatus,
+						A.readStatus AS readStatus,
 						tc.Name_EN as name_EN,
 						tc.Name_FR as name_FR,
 						IfNull((SELECT emc.URL_EN FROM EducationalMaterialControl emc
@@ -131,7 +131,14 @@ class PatientTestResultQuery {
 						TestExpression as te,
 						TestControl as tc,
 						(
-							SELECT ptr2.PatientSerNum, ptr2.TestExpressionSerNum, MAX(ptr2.CollectedDateTime) CollectedDateTime
+							SELECT
+								ptr2.PatientSerNum,
+								ptr2.TestExpressionSerNum,
+								MAX(ptr2.CollectedDateTime) CollectedDateTime,
+								CASE
+									WHEN COUNT(*) = COUNT(CASE WHEN JSON_CONTAINS(ptr2.ReadBy, ?) THEN 1 ELSE NULL END) THEN 1
+									ELSE 0
+								END AS readStatus
 							FROM PatientTestResult ptr2
 							WHERE
 							ptr2.PatientSerNum = ?
