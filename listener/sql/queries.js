@@ -686,7 +686,7 @@ exports.getAppointmentDetailsForPatient=function() {
             FROM
                 Appointment app
             WHERE
-                app.PatientSerNum= ?
+                app.PatientSerNum = ?
                 AND DATE(app.ScheduledStartTime) = CURDATE()
             ;
     `;
