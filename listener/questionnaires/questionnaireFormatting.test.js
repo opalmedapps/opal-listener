@@ -16,9 +16,6 @@ const CAREGIVER = questionnaireConfig.QUESTIONNAIRE_RESPONDENT_ID.CAREGIVER;
 const SELF = 'SELF';
 const PARENT = 'PARENT';
 
-// Keeps track of the stubbed API call to get caregiver relationships
-let relationshipStub;
-
 describe('QuestionnaireFormatting', function () {
     describe('filterPatientQuestionnaires', function() {
         it('should not modify the original array', function() {
@@ -159,7 +156,7 @@ function questionnaire(qp_ser_num, respondent_id) {
  * @param {string} role_type The role_type of the returned relationship.
  */
 function stubRelationship(can_answer_questionnaire, role_type) {
-    relationshipStub = sinon.stub(QuestionnaireDjango, 'getRelationshipsWithPatient').callsFake(() => {
+    sinon.stub(QuestionnaireDjango, 'getRelationshipsWithPatient').callsFake(() => {
         return [
             {
                 patient_id: 1,
