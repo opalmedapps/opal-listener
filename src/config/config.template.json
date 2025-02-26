@@ -3,6 +3,6 @@
     "DATABASE_URL": "<Url of the Firebase database to use>",
     "ADMIN_KEY_PATH": "<Absolute path to DATABASE_URL's downloaded admin key>",
     "ROOT_BRANCH": "<Branch to use as the root of the Firebase database>",
-    "ENABLE_LOGGING": "<Boolean indicating whether to enable Firebase logging (recommended for debugging only)>"
+    "ENABLE_LOGGING": "<Boolean indicating whether to enable Firebase logging (value 'true' recommended for debugging only)>"
   }
 }
