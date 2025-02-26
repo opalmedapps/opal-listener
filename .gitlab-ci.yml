@@ -126,6 +126,8 @@ coverage:
 reuse:
   stage: test
   image: ghcr.io/astral-sh/uv:0.5.24-python3.13-alpine
+  # prevent artifacts from other jobs from polluting the working directory
+  needs: []
   script:
     - uv pip install --system reuse
     - reuse lint
