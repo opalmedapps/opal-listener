@@ -340,23 +340,6 @@ exports.logPatientAction = function(requestObject){
 };
 
 /**
- * @desc Gets the patient fields related to the current user.
- *       TODO this request should be removed once we no longer assume that every user is a patient.
- * @param requestObject The request object.
- * @returns {Promise<{Data: *}>}
- */
-exports.getUserPatient = async function(requestObject) {
-    let rows = await exports.runSqlQuery(
-        queries.patientTableFields(),
-        [requestObject.TargetPatientID],
-        loadProfileImagePatient,
-    );
-    return {
-        Data: rows[0],
-    }
-};
-
-/**
  * @name getStudies
  * @desc Gets patient studies based on UserID
  * @param {object} requestObject
@@ -976,6 +959,7 @@ function loadImageDoctor(rows){
 /**
  * loadProfileImagePatient
  * @desc formats patient image to base64
+ * @deprecated Along with the Patient requestMapping in sqlInterface.
  * @param rows
  * @return {Promise}
  */
