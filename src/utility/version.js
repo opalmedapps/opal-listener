@@ -2,6 +2,7 @@
  * @file Utility functions used to manage or compare semver version numbers.
  * @author Stacey Beard
  */
+const fs = require('fs');
 
 class Version {
     // Constants
@@ -43,6 +44,19 @@ class Version {
             if (part.a < part.b) return -1;
         }
         return 0;
+    }
+
+    /**
+     * @description Reads and returns the listener's version from the VERSION file.
+     * @returns {string} The version read from the VERSION file, or undefined if not found or if an error occurs.
+     */
+    static getListenerVersion() {
+        try {
+            return fs.readFileSync('./VERSION').toString().trim();
+        }
+        catch (error) {
+            return undefined;
+        }
     }
 }
 
