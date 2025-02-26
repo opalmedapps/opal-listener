@@ -22,6 +22,7 @@ class ErrorHandler {
                 errorMessage: opalError.clientMessage,
                 errorData: error || null,
             },
+            encrypt: opalError.encrypt,
         };
     }
 
