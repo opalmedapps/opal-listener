@@ -78,16 +78,15 @@ spawnCronJobs();
  * @desc Listen for firebase changes and send responses for requests
  */
 function listenForRequest(requestType){
-    logger.log('info','Starting '+ requestType+' listener.');
+    logger.log('info',`Starting ${requestType} listener.`);
 
     //disconnect any existing listeners..
     ref.child(requestType).off();
 
     ref.child(requestType).on('child_added',
         function(snapshot){
-            logger.log('debug', 'Received request from Firebase: ', JSON.stringify(snapshot.val()));
-            logger.log('info', 'Received request from Firebase: ', snapshot.val().Request);
-
+            logger.log('debug', 'Received request from Firebase: ', {data: JSON.stringify(snapshot.val())});
+            logger.log('info', 'Received request from Firebase: ', {data: snapshot.val().Request});
             if(snapshot.val().Request === 'HeartBeat'){
                 logger.log('debug', 'Handling heartbeat request');
                 handleHeartBeat(snapshot.val())
@@ -141,7 +140,7 @@ function logResponse(response){
 			(response.Headers.RequestObject.Request === 'Refresh' ? ": " + response.Headers.RequestObject.Parameters.Fields.join(' ') : ""),
 			requestKey: response.Headers.RequestKey
 		});
-        logger.log('info', "Completed response", response.Headers.RequestObject.Request);
+        logger.log('info', "Completed response", {header: response.Headers.RequestObject.Request});
 	}
 }
 
@@ -171,7 +170,6 @@ function logError(err, requestObject, requestKey)
  */
 function processRequest(headers){
 
-    // logger.log('debug', 'Processing request: ' + JSON.stringify(headers));
     logger.log('info', 'Processing request');
 
     const r = q.defer();
@@ -200,7 +198,7 @@ function processRequest(headers){
         mainRequestApi.apiRequestFormatter(requestKey, requestObject)
             .then(function(results){
 
-                logger.log('debug', 'results: ' + utility.stringifyShort(results));
+                logger.log('debug', `results: ${utility.stringifyShort(results)}`);
                 r.resolve(results);
             })
     }
@@ -393,7 +391,7 @@ function incrementStringParenthesisNumber(stringToIncrement) {
  */
 function completeRequest(headers, key)
 {
-    logger.log('debug', 'Removing request from Firebase after uploading response: ' + key);
+    logger.log('debug', `Removing request from Firebase after uploading response: ${key}`);
 	return ref.child(key).child(headers.RequestKey).set(null)
 		.catch(function (error) {
 			logger.error('Error writing to firebase', {error:error});
@@ -419,13 +417,13 @@ function handleHeartBeat(data){
 	fs.appendFile(filename, JSON.stringify(HeartBeat)  + "\n", function (err) {
 	  if (err) {
 			// Log any errors
-			logger.log('error', err);
+			logger.log('error', {error: err});
 	  }
 	});
 
     heartbeatRef.set(HeartBeat)
         .catch(err => {
-            logger.log('error', 'Error reporting heartbeat', err)
+            logger.log('error', 'Error reporting heartbeat', {error: err})
         })
 
 }
@@ -463,11 +461,11 @@ function spawnClearRequest(){
 
     // Handles clearRequest cron events
     clearRequests.on('message', (m) => {
-        logger.log('info', 'PARENT got message:', m);
+        logger.log('info', 'PARENT got message:', {message:m});
     });
 
     clearRequests.on('error', (m) => {
-        logger.log('error','clearRequest cron error:', m);
+        logger.log('error','clearRequest cron error:', {error: m});
         clearRequests.kill();
         if(clearRequests.killed){
             clearRequests = cp.fork(`${__dirname}/cron/clearRequests.js`);
@@ -493,11 +491,11 @@ function spawnClearDBRequest(){
 
     // Handles clearRequest cron events
     clearDBRequests.on('message', (m) => {
-        logger.log('info', 'PARENT got message:', m);
+        logger.log('info', 'PARENT got message:', {message: m});
     });
 
     clearDBRequests.on('error', (m) => {
-        logger.log('error','clearRequest cron error:', m);
+        logger.log('error','clearRequest cron error:', {error: m});
         clearDBRequests.kill();
         if(clearDBRequests.killed){
             clearDBRequests = cp.fork(`${__dirname}/cron/clearDBRequests.js`);
@@ -519,11 +517,11 @@ function spawnClearResponses(){
 
     // Handles clearResponses cron events
     clearResponses.on('message', (m) => {
-        logger.log('info','PARENT got message:', m);
+        logger.log('info','PARENT got message:', {message: m});
     });
 
     clearResponses.on('error', (m) => {
-        logger.log('error','clearResponse cron error:', m);
+        logger.log('error','clearResponse cron error:', {error: m});
 
         clearResponses.kill();
         if(clearResponses.killed){
@@ -542,11 +540,11 @@ function spawnHeartBeat(){
 
     // Handles heartBeat cron events
     heartBeat.on('message', (m) => {
-        logger.log('info','PARENT got message:', m);
+        logger.log('info','PARENT got message:', {message: m});
     });
 
     heartBeat.on('error', (m) => {
-        logger.log('error','heartBeat cron error:', m);
+        logger.log('error','heartBeat cron error:', {error: m});
 
         heartBeat.kill();
         if(heartBeat.killed){

@@ -71,6 +71,6 @@ function startHeartBeat(){
             logger.log('info', 'Successfully pushed heartbeat');
         })
         .catch(err => {
-            logger.log('error', 'Error sending heartbeat request', err);
+            logger.log('error', 'Error sending heartbeat request', {error: err});
         });
 }

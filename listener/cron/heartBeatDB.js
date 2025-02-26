@@ -132,7 +132,7 @@ function submitSimpleQuery(){
 
 		if (err) {
 			// Log any errors
-			logger.log('error', err);
+			logger.log('error', {error:err});
 			r.reject(err);
 		} else {
 			// if no error, push MySQL stats to Firebase
@@ -144,7 +144,7 @@ function submitSimpleQuery(){
 			fs.appendFile(filename, JSON.stringify(rows[0])  + "\n", function (err) {
 			  if (err) {
 					// Log any errors
-					logger.log('error', err);
+					logger.log('error', {error: err});
 			  }
 			});
 			
@@ -178,7 +178,7 @@ function startHeartBeatDB(){
 				.catch(()=>logger.log('error', 'Error while performing query'));
         })
         .catch(err => {
-            logger.log('error', 'Error sending heartbeat db request', err);
+            logger.log('error', 'Error sending heartbeat db request', {error: err});
         });
 
 }

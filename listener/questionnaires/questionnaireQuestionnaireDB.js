@@ -78,7 +78,7 @@ function getQuestionnaireList(opalPatientSerNumAndLanguage) {
             }
         })
         .catch(function (err) {
-            logger.log("error", "Error getting questionnaire list, " + err);
+            logger.log("error", `Error getting questionnaire list, ${err}`);
             r.reject(err);
         })
 
@@ -130,7 +130,7 @@ function getQuestionnaire(opalPatientSerNumAndLanguage, answerQuestionnaire_Id) 
             r.resolve(dataFormatted);
         })
         .catch(function (err) {
-            logger.log("error", "Error getting questionnaire, " + err);
+            logger.log("error", `Error getting questionnaire, ${err}`);
             r.reject(err);
         })
 
@@ -162,7 +162,7 @@ function getQuestionOptions(questionAndTypeMap, languageId) {
             r.resolve(questionOptionsAndTypeMap);
         })
         .catch(function (err) {
-            logger.log("error", "Error getting question options, " + err);
+            logger.log("error", `Error getting question options, ${err}`);
             r.reject(err);
         });
 
@@ -228,7 +228,7 @@ function saveAnswer(opalPatientSerNumAndLanguage, param, appVersion) {
             r.resolve('AnswerId: ' + answerId + '. Insert answer by type: ' + insertAnswerResult);
         })
         .catch(function (err) {
-            logger.log("error", "Error saving questionnaire answers, " + err);
+            logger.log("error", `Error saving questionnaire answers, ${err}`);
             r.reject(err);
         });
 
@@ -371,7 +371,7 @@ function insertAnswerByType(answerId, answerArray, question_typeId) {
             }
             break;
         default:
-            logger.log("error", "Error saving answer: do not have an answer table matching the question type. The answerId in answer table is: " + answerId);
+            logger.log("error", `Error saving answer: do not have an answer table matching the question type. The answerId in answer table is: ${answerId}`);
             r.reject(new Error('Error saving answer: do not have an answer table matching the question type. The answerId in answer table is: ' + answerId));
     }
 
@@ -419,7 +419,7 @@ function updateQuestionnaireStatusInQuestionnaireDB(answerQuestionnaireId, newSt
             }
 
         }).catch(function (err) {
-            logger.log("error", "Error updating the questionnaire status: ", + err);
+            logger.log("error", `Error updating the questionnaire status: ${err}`);
             r.reject(err);
         });
 

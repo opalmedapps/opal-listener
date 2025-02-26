@@ -22,7 +22,7 @@ class PatientTestTypeResultsHandler extends ApiRequestHandler {
 	static async handleRequest(requestObject) {
 		const errors = await PatientTestTypeResultsHandler.validate(requestObject.parameters);
 		if (!errors.isEmpty()) {
-			logger.log("error", "Validation Error", errors);
+			logger.log("error", "Validation Error", {error: errors});
 			throw new ValidationError(errors.array());
 		}
 		const testTypeSerNum = requestObject.parameters.testTypeSerNum;

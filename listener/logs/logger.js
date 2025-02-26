@@ -8,39 +8,42 @@
  *                  file 'LICENSE.txt', which is part of this source code package.
  */
 
-const winston = require('winston');
+const {createLogger, format, transports} = require('winston');
 
-winston.level = (process.env.NODE_ENV === 'production') ? 'info' : 'debug';
+// Choose log level according to environement.
+const LoggerLevel = process.env.NODE_ENV === 'production' ? 'info' : 'debug';
 
-console.log("Initialize Winston with level: " + winston.level);
-
-const levels = {
-    error: 0,
-    warn: 1,
-    info: 2,
-    verbose: 3,
-    debug: 4,
-};
-
-winston.configure({
+// Initialize winston logger
+const WinstonLogger = createLogger({
+    // Set level log level
+    level: LoggerLevel,
+    // Set log format output in the log file
+    format: format.combine(
+        format.timestamp(),
+        format.json()
+    ),
     transports: [
-        // Output all debug events and higher to console
-        new (winston.transports.Console)({
-            level: 'debug',
-            json: false,
-            timestamp: true
-        }),
-        // Store all info events and higher to the opal.log file
-        new (winston.transports.File)({
-            filename: './logs/opal-info.log',
-            level: 'info',
-            json: true,
-            timestamp: true
-        })
+        // Log level info and above in the log file.
+        new transports.File({ filename:'./logs/opal-info.log', level: 'info'})
+    ],
+    exceptionHandlers: [
+        // Log uncaught exceptions to a different file.
+        new transports.File({ filename: './logs/opal-uncaughtExceptions.log'})
     ]
 });
 
-// Log all uncaught exceptions to a separate file
-if(process.env.NODE_ENV === 'production') winston.handleExceptions(new winston.transports.File({ filename: './logs/opal-uncaughtExceptions.log' }));
+// Init debug transport that output to the console only if we are not in production.
+if (process.env.NODE_ENV !== 'production') {
+    WinstonLogger.add(new transports.Console({
+        level: 'debug',
+        format: format.combine(
+            format.colorize(),
+            format.simple(),
+            format.timestamp()
+        ),
+    }));
+}
 
-module.exports = winston;
+WinstonLogger.log('info', `Initialized Winston with level: ${LoggerLevel}`);
+
+module.exports = WinstonLogger;

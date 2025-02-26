@@ -42,7 +42,7 @@ exports.verifySecurityAnswer=function(requestKey,requestObject,patient)
 
 
     logger.log('debug', 'in verify security answer');
-    logger.log('debug', 'patient: ' + JSON.stringify(patient));
+    logger.log(`debug', 'patient: ${JSON.stringify(patient)}`);
     //TO VERIFY, PASS SECURITY ANSWER THROUGH HASH THAT TAKES A WHILE TO COMPUTE, SIMILAR TO HOW THEY DO PASSWORD CHECKS
     // utility.generatePBKDFHash(key,key);
 
@@ -65,7 +65,7 @@ exports.verifySecurityAnswer=function(requestKey,requestObject,patient)
     utility.decrypt(requestObject.Parameters, key)
         .then(params => {
 
-            logger.log('debug', 'params: ' + JSON.stringify(params));
+            logger.log('debug', `params: ${JSON.stringify(params)}`);
 
             unencrypted = params;
 
@@ -101,7 +101,7 @@ exports.verifySecurityAnswer=function(requestKey,requestObject,patient)
         })
         .catch((err) => {
             //Check if timestamp for lockout is old, if it is reset the security answer attempts
-            logger.log('error', 'increase security answer attempt due to error decrypting', err);
+            logger.log('error', 'increase security answer attempt due to error decrypting', {error: err});
             sqlInterface.increaseSecurityAnswerAttempt(requestObject);
             r.resolve({ RequestKey:requestKey, Code:3,Data:{AnswerVerified:"false"}, Headers:{RequestKey:requestKey,RequestObject:requestObject},Response:'success'});
         });
@@ -122,7 +122,7 @@ exports.setNewPassword=function(requestKey, requestObject, user)
                 var response = { RequestKey:requestKey, Code:3, Data:{PasswordReset:"true"}, Headers:{RequestKey:requestKey,RequestObject:requestObject},Response:'success'};
                 r.resolve(response);
             }).catch(function(error){
-                logger.log('error', 'error updating password', error);
+                logger.log('error', 'error updating password', {error: error});
 
                 var response = { Headers:{RequestKey:requestKey,RequestObject:requestObject}, Code: 2, Data:{},Response:'error', Reason:'Could not set password'};
                 r.resolve(response);
@@ -140,7 +140,7 @@ exports.securityQuestion=function(requestKey,requestObject) {
         .then((params) => {
             unencrypted = params;
 
-            logger.log('debug', 'Unencrypted: ' + JSON.stringify(unencrypted));
+            logger.log('debug', `Unencrypted: ${JSON.stringify(unencrypted)}`);
 
             let email = requestObject.UserEmail;
             let password = unencrypted.Password;
@@ -148,7 +148,7 @@ exports.securityQuestion=function(requestKey,requestObject) {
             //Then this means this is a login attempt
             if (password) {
                 return getSecurityQuestion(requestKey, requestObject, unencrypted).then(function (response) {
-                    logger.log('debug', 'Successfully got security question with response: ' + JSON.stringify(response));
+                    logger.log('debug', `Successfully got security question with response: ${JSON.stringify(response)}`);
                     return response
                 });
             } else {

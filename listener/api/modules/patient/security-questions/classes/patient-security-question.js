@@ -23,7 +23,7 @@ class PatientSecurityQuestion {
         try {
             securityQuestionList = await OpalSQLQueryRunner.run(query);
         } catch (err) {
-            logger.log("error", "SQL: could not obtain active security question list", err);
+            logger.log("error", "SQL: could not obtain active security question list", {error: err});
             throw err;
         }
 
@@ -42,7 +42,7 @@ class PatientSecurityQuestion {
         try {
             securityQuestionWithAnsList = await OpalSQLQueryRunner.run(securityQuestionWithAnsQuery);
         } catch (err) {
-            logger.log("error", `SQL: could not obtain security answer list for patient ${this._patient}`, err);
+            logger.log("error", `SQL: could not obtain security answer list for patient ${this._patient}`, {error: err});
             throw err;
         }
 
@@ -84,7 +84,7 @@ class PatientSecurityQuestion {
             result = await Promise.all(promiseArr);
 
         } catch (err) {
-            logger.log("error", `SQL: could not update security question and/or answer for patient ${this._patient}`, err);
+            logger.log("error", `SQL: could not update security question and/or answer for patient ${this._patient}`, {error: err});
 
             await this.rollbackSecurityAnswerChange(originalSecurityAnswerTable);
 
@@ -114,7 +114,7 @@ class PatientSecurityQuestion {
             }
 
         } catch (err) {
-            logger.log("error", `SQL: could not get security answer for patient ${this._patient}`, err);
+            logger.log("error", `SQL: could not get security answer for patient ${this._patient}`, {error: err});
             throw err;
         }
 
@@ -142,7 +142,7 @@ class PatientSecurityQuestion {
             logger.log("debug", `SQL: successful rollback of security question or answer change for patient ${this._patient}`);
 
         } catch (err) {
-            logger.log("error", `SQL: could not rollback security question or answer change for patient ${this._patient}`, err);
+            logger.log("error", `SQL: could not rollback security question or answer change for patient ${this._patient}`, {error: err});
             throw err;
         }
 

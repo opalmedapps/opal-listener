@@ -187,8 +187,8 @@ exports.getPatientTableFields = function(userId,timestamp,arrayTables) {
         }
         r.resolve({Data:objectToFirebase,Response:'success'});
     },function(error){
-        logger.log('error', 'Problems querying the database due to ' + error);
-        r.reject({Response:'error',Reason:'Problems querying the database due to ' + error});
+        logger.log('error', `Problems querying the database due to ${error}`);
+        r.reject({Response:'error',Reason:`Problems querying the database due to ${error}`});
     });
     return r.promise;
 };
@@ -620,7 +620,7 @@ exports.updateDeviceIdentifier = function(requestObject, parameters) {
 
     let r = Q.defer();
 
-    logger.log('debug', 'in update device id with : ' + JSON.stringify(requestObject));
+    logger.log('debug', `in update device id with : ${JSON.stringify(requestObject)}`);
 
     let identifiers = parameters || requestObject.Parameters;
     let deviceType = null;
@@ -1301,7 +1301,7 @@ function mapRefreshedDataToNotifications(results, notifications) {
         resultsArray = resultsArray.concat(results[key]);
     });
 
-    logger.log('debug', 'results array: ' + JSON.stringify(resultsArray));
+    logger.log('debug', `results array: ${JSON.stringify(resultsArray)}`);
 
     // For each notification, find it's associated item in the results array and create a tuple
     return notifications.map(notif => {

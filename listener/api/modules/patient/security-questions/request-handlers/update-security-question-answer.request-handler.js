@@ -34,7 +34,7 @@ class UpdateSecurityQuestionAnswerRequestHandler extends ApiRequestHandler {
 
         const errors = await UpdateSecurityQuestionAnswerRequestHandler.validate(requestObject.parameters);
         if (!errors.isEmpty()) {
-            logger.log("error", "Validation Error", errors);
+            logger.log("error", "Validation Error", {error: errors});
             throw new ValidationError(errors.errors());
         }
 

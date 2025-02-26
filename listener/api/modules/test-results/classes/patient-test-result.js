@@ -22,7 +22,7 @@ class PatientTestResult {
 		try {
 			results = await OpalSQLQueryRunner.run(query);
 		} catch (err) {
-			logger.log("error", `SQL: could not obtain test types for patient ${this._patient}`, err);
+			logger.log("error", `SQL: could not obtain test types for patient ${this._patient}`, {error: err});
 			throw err;
 		}
 		return results;
@@ -38,7 +38,7 @@ class PatientTestResult {
 		try {
 			results = await OpalSQLQueryRunner.run(query);
 		} catch (err) {
-			logger.log("error", `SQL: could not obtain tests for patient ${this._patient}`, err);
+			logger.log("error", `SQL: could not obtain tests for patient ${this._patient}`, {error: err});
 			throw err;
 		}
 		return results;
@@ -55,8 +55,7 @@ class PatientTestResult {
 		try {
 			results = await OpalSQLQueryRunner.run(query);
 		} catch (err) {
-			logger.log("error", `SQL: could not obtain tests for date ${date.toString()}` +
-				`for patient ${this._patient}`, err);
+			logger.log("error", `SQL: could not obtain tests for date ${date.toString()} for patient ${this._patient}`, {error: err});
 			throw err;
 		}
 		return results;
@@ -73,8 +72,7 @@ class PatientTestResult {
 		try {
 			results = await OpalSQLQueryRunner.run(query);
 		} catch (err) {
-			logger.log("error", `SQL: could not obtain result latest information for test ExpressionSerNum ` +
-				`${typeSerNum} for patient ${this._patient}`, err);
+			logger.log("error", `SQL: could not obtain result latest information for test ExpressionSerNum ${typeSerNum} for patient ${this._patient}`, {error: err});
 			throw err;
 		}
 		return results;
@@ -92,8 +90,7 @@ class PatientTestResult {
 		try {
 			results = await OpalSQLQueryRunner.run(query);
 		} catch (err) {
-			logger.log("error", `SQL: could not obtain results fort test ExpressionSerNum ${testTypeSerNum}` +
-				` for patient ${this._patient}`, err);
+			logger.log("error", `SQL: could not obtain results fort test ExpressionSerNum ${testTypeSerNum} for patient ${this._patient}`, {error: err});
 			throw err;
 		}
 		if (results.length === 0) return null;
