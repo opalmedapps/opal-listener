@@ -11,7 +11,7 @@ describe('ApiRequest', function () {
     });
 
     describe('sendRequestToApi', function () {
-        it('Should return home page data', async function () {
+        it('Should throw an error when failing to connect to the backend api', async function () {
             const userId = 'aksdjhaksd';
             const parameters = {
                 method: 'get',
