@@ -13,7 +13,7 @@ const questionnaires = require('./../questionnaires/questionnaireOpalDB.js');
  */
 exports.login = async function(requestObject) {
     let patientSerNum = await sqlInterface.getSelfPatientSerNum(requestObject.UserID);
-    return await sqlInterface.getPatientTableFields(patientSerNum, requestObject.Parameters.Fields, requestObject.Parameters.timestamp);
+    return await sqlInterface.getPatientTableFields(requestObject.UserID, patientSerNum, requestObject.Parameters.Fields, requestObject.Parameters.timestamp);
 };
 
 /**
@@ -37,7 +37,7 @@ exports.refresh = async function(requestObject) {
     if (!fields) throw {Response:'error', Reason:"Undefined 'Fields' in Refresh request"};
     if (!Array.isArray(fields)) fields = [fields];
 
-    let rows = await sqlInterface.getPatientTableFields(patientSerNum, fields, parameters.Timestamp, parameters?.purpose);
+    let rows = await sqlInterface.getPatientTableFields(UserId, patientSerNum, fields, parameters.Timestamp, parameters?.purpose);
     rows.Data = utility.resolveEmptyResponse(rows.Data);
 
     return rows;
