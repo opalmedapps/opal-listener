@@ -19,7 +19,6 @@ const LEGACYAPI = {
     'DeviceIdentifier': apiHospitalUpdate.updateDeviceIdentifier,
     'Log': apiPatientUpdate.logActivity,
     'LogPatientAction': apiPatientUpdate.logPatientAction,
-    // Deprecated API entry: 'Login'
     'Login': apiPatientUpdate.login,
     'Logout': apiPatientUpdate.logout,
     'Refresh': apiPatientUpdate.refresh,
