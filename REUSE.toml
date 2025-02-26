@@ -36,7 +36,7 @@ path = [
 ]
 precedence = "override"
 SPDX-FileCopyrightText = "Copyright (C) 2022 Opal Health Informatics Group at the Research Institute of the McGill University Health Centre <john.kildea@mcgill.ca>"
-SPDX-License-Identifier = "GPL-3.0-or-later"
+SPDX-License-Identifier = "AGPL-3.0-or-later"
 
 
 [[annotations]]
@@ -45,7 +45,7 @@ path = [
 ]
 precedence = "override"
 SPDX-FileCopyrightText = "Copyright (C) 2020 Opal Health Informatics Group at the Research Institute of the McGill University Health Centre <john.kildea@mcgill.ca>"
-SPDX-License-Identifier = "GPL-3.0-or-later"
+SPDX-License-Identifier = "AGPL-3.0-or-later"
 
 
 [[annotations]]
@@ -56,4 +56,4 @@ path = [
 ]
 precedence = "override"
 SPDX-FileCopyrightText = "Copyright (C) 2018 Opal Health Informatics Group at the Research Institute of the McGill University Health Centre <john.kildea@mcgill.ca>"
-SPDX-License-Identifier = "GPL-3.0-or-later"
+SPDX-License-Identifier = "AGPL-3.0-or-later"
