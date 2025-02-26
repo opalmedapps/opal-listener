@@ -203,7 +203,7 @@ function saveAnswer(opalPatientSerNumAndLanguage, param, appVersion, respondentU
 
                 logger.log("error", "Error saving answer: query unsuccessful", queryResult);
                 let cause = getProcedureCode(queryResult);
-                r.reject(new Error('Error saving answer: query unsuccessful', {cause: cause}));
+                r.reject(new Error('Error saving answer: query unsuccessful', {cause}));
             } else {
                 answerId = queryResult[queryResult.length - 2][0].inserted_answer_id;
 
@@ -410,7 +410,7 @@ function updateQuestionnaireStatusInQuestionnaireDB(answerQuestionnaireId, newSt
             if (!questionnaireValidation.hasValidProcedureStatus(queryResult)) {
                 logger.log("error", "Error updating the questionnaire status: query unsuccessful", queryResult);
                 let cause = getProcedureCode(queryResult);
-                r.reject(new Error('Error updating the questionnaire status: query unsuccessful', {cause: cause}));
+                r.reject(new Error('Error updating the questionnaire status: query unsuccessful', {cause}));
             } else {
                 r.resolve(isCompleted);
             }
