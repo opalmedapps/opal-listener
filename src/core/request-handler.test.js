@@ -1,6 +1,6 @@
 /* eslint-disable no-new */
 /* eslint-disable consistent-return */
-require('../test/test-setup');
+require('../test/chai-setup');
 const { expect } = require('chai');
 const { RequestHandler } = require('./request-handler');
 

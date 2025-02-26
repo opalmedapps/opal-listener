@@ -1,4 +1,4 @@
-require('../test/test-setup');
+require('../test/chai-setup');
 const { expect } = require('chai');
 const Keyv = require('keyv');
 const sinon = require('sinon');
