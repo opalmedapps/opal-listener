@@ -6,6 +6,7 @@
 const axios = require('axios');
 const configs = require('../config/config.json');
 const legacyLogger = require('../../listener/logs/logger');
+const { Firebase } = require('../firebase/firebase');
 
 class ApiRequest {
     /**
@@ -23,6 +24,7 @@ class ApiRequest {
             status_code: apiResponse.status,
             headers: apiResponse.headers,
             data: apiResponse.data,
+            timestamp: Firebase.getDatabaseTimeStamp,
         };
     }
 
