@@ -6,7 +6,13 @@ exports.patientTableFields=function()
      *       This was added to make the Account tab display nothing instead of the Patient's MRN
      *       The PatientId attribute can be removed after qplus PR #829 is merged
      * -SB */
-    return "SELECT Patient.PatientSerNum, Patient.TestUser, Patient.FirstName, Patient.LastName, Patient.TelNum, \"\" AS PatientId, Patient.Email, Patient.Alias, Patient.Language, Patient.EnableSMS,Patient.ProfileImage, Patient.SSN, Patient.AccessLevel FROM Patient, Users WHERE Users.Username LIKE ? AND Users.UserTypeSerNum=Patient.PatientSerNum AND Patient.LastUpdated > ?"
+    return `SELECT p.PatientSerNum, p.TestUser, p.FirstName, p.LastName, p.TelNum, "" AS PatientId, p.Email, p.Alias,
+                   p.Language, p.EnableSMS, p.ProfileImage, p.SSN, p.AccessLevel
+            FROM Patient p, Users u
+            WHERE u.Username = ?
+              AND u.UserTypeSerNum = p.PatientSerNum
+              AND p.LastUpdated > ?
+            ;`
 };
 
 exports.patientDoctorTableFields=function()
