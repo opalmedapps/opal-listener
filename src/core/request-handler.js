@@ -91,7 +91,7 @@ class RequestHandler {
         return errorResponse.encrypt // An error should be encrypted only if indicated in the error object
             && encryptionInfo?.secret
             && encryptionInfo?.salt
-            && !Array.isArray(encryptionInfo?.salt); // Can't encrypt if an array of possible salts failed to resolve
+            && !Array.isArray(encryptionInfo.salt); // Can't encrypt if an array of possible salts failed to resolve
     }
 
     /**
