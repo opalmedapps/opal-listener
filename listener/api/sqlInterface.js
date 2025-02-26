@@ -83,7 +83,8 @@ const requestMappings =
             serNum: 'TxTeamMessageSerNum'
         },
         'EducationalMaterial': {
-            sql: queries.patientEducationalMaterialTableFields(),
+            sql: queries.patientEducationalMaterialAll(),
+            sqlSingleItem: queries.patientEducationalMaterialOne(),
             processFunction: getEducationTableOfContents,
             numberOfLastUpdated: 3,
             table: 'EducationalMaterial',

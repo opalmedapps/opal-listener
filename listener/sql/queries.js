@@ -226,8 +226,12 @@ function patientAnnouncementTableFields(selectOne=false) {
     `;
 }
 
-exports.patientEducationalMaterialTableFields=function()
-{
+/**
+ * @desc Query that returns the patient's educational material.
+ * @param {boolean} [selectOne] If provided, only one educational material with a specific SerNum is returned.
+ * @returns {string} The query.
+ */
+function patientEducationalMaterialTableFields(selectOne=false) {
     return `SELECT A.EducationalMaterialSerNum, A.ShareURL_EN, A.ShareURL_FR, A.EducationalMaterialControlSerNum, A.DateAdded,
                 A.ReadStatus, A.EducationalMaterialType_EN, A.EducationalMaterialType_FR, A.Name_EN, A.Name_FR, A.URL_EN, A.URL_FR
             FROM Patient P, Users U, (
@@ -252,11 +256,11 @@ exports.patientEducationalMaterialTableFields=function()
             WHERE P.PatientSerNum = A.PatientSerNum
                 AND P.PatientSerNum = U.UserTypeSerNum
                 AND U.Username = ?
-                AND (A.EM_LastUpdated > ?
-                    OR A.EC_LastUpdated > ?
-                    OR A.TOC_LastUpdated > ?)
-            ;`;
-};
+                ${selectOne ? 'AND A.EducationalMaterialSerNum = ?' : ''}
+                ${!selectOne ? 'AND (A.EM_LastUpdated > ? OR A.EC_LastUpdated > ? OR A.TOC_LastUpdated > ?)' : ''}
+            ;
+    `;
+}
 
 exports.patientEducationalMaterialContents=function()
 {
@@ -599,6 +603,9 @@ exports.patientAppointmentsOne = () => patientAppointmentTableFields(true);
 
 exports.patientDocumentsAll = () => patientDocumentTableFields(false);
 exports.patientDocumentsOne = () => patientDocumentTableFields(true);
+
+exports.patientEducationalMaterialAll = () => patientEducationalMaterialTableFields(false);
+exports.patientEducationalMaterialOne = () => patientEducationalMaterialTableFields(true);
 
 exports.patientTxTeamMessagesAll = () => patientTxTeamMessageTableFields(false);
 exports.patientTxTeamMessagesOne = () => patientTxTeamMessageTableFields(true);
