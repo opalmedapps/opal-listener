@@ -1,6 +1,5 @@
 var sqlInterface=require('./../api/sqlInterface.js');
 var q = require('q');
-var CryptoJS = require('crypto-js');
 var utility=require('./../utility/utility.js');
 const logger            = require('./../logs/logger');
 

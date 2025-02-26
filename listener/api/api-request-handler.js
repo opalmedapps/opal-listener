@@ -1,4 +1,4 @@
-const { param, validationResult } = require('express-validator');
+const { validationResult } = require('express-validator');
 
 /**
  * This class serves as an interface for any api request handler (for any request in the front-end)
