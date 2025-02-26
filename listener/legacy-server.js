@@ -208,6 +208,8 @@ function encryptResponse(response)
 		return Promise.resolve(response);
 	}
 }
+// Export for legacy-registration
+exports.encryptResponse = encryptResponse;
 
 /**
  * uploadToFirebase
@@ -319,6 +321,8 @@ function validateKeysForFirebase(objectToValidate) {
     } // Validate the next sub-object in the stack until there are none left
     return objectToValidate;
 }
+// Export for legacy-registration
+exports.validateKeysForFirebase = validateKeysForFirebase;
 
 /**
  * incrementStringParenthesisNumber
