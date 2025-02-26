@@ -46,22 +46,25 @@ exports.registerPatient = async function(requestObject) {
         // Request validation
         const registrationData = await prepareAndValidateRegistrationRequest(requestObject);
 
+        // Variables
+        const isNewPatient = registrationData.patient.legacy_id === null;
+
         // Registration steps
-        const patientLegacyId = await initializeBasicPatientRow(requestObject, registrationData);
-        await initializePatientMRNs(requestObject, registrationData, patientLegacyId);
-        const uid = await getOrCreateFirebaseAccount(fields.accountExists, fields.email, fields.password);
+        const patientLegacyId = await initializeOrGetBasicPatientRow(requestObject, registrationData);
+        if (isNewPatient) await initializePatientMRNs(requestObject, registrationData, patientLegacyId);
+        const uid = await initializeOrGetFirebaseAccount(fields.accountExists, fields.email, fields.password);
         hashPassword(requestObject);
-        let selfPatientSerNum = await initializeSelfPatient(requestObject, registrationData, patientLegacyId);
-        let userSerNum = await initializeUser(registrationData, uid, fields.password, selfPatientSerNum);
+        let selfPatientSerNum = await initializeOrGetSelfPatient(requestObject, registrationData, patientLegacyId);
+        let userSerNum = await initializeOrGetUser(registrationData, uid, fields.password, selfPatientSerNum);
         await updateSelfPatient(requestObject, selfPatientSerNum);
-        await initializePatientControl(patientLegacyId);
+        if (isNewPatient) await initializePatientControl(patientLegacyId);
         await registerInBackend(requestObject, patientLegacyId, userSerNum, uid);
 
         // Registration is considered successful at this point.
         // I.e., don't fail the whole registration if an error occurs now and only log an error.
         await sendConfirmationEmailNoFailure(fields.language, fields.email);
-        await requestLabHistoryNoFailure(registrationData, patientLegacyId);
-        await updatePatientStatusInORMSNoFailure(registrationData);
+        if (isNewPatient) await requestLabHistoryNoFailure(registrationData, patientLegacyId);
+        if (isNewPatient) await updatePatientStatusInORMSNoFailure(registrationData);
 
         // Exact response string expected by the frontend
         return { Data: [{ Result: 'Successfully Update' }]};
@@ -162,7 +165,7 @@ function validateRegistrationDataDetailed(registrationData) {
  * @param {object} registrationData The detailed registration data sent from the backend.
  * @returns {Promise<*>} Resolves to the legacy ID (PatientSerNum) of the new row, or of the old row if it already existed.
  */
-async function initializeBasicPatientRow(requestObject, registrationData) {
+async function initializeOrGetBasicPatientRow(requestObject, registrationData) {
     const isNewPatient = registrationData.patient.legacy_id === null;
     let patientLegacyId;
     if (isNewPatient) {
@@ -177,19 +180,16 @@ async function initializeBasicPatientRow(requestObject, registrationData) {
 }
 
 /**
- * @description Inserts the patient's MRNs in the database if it's a new patient.
+ * @description Inserts the patient's MRNs in the database.
  * @param {object} requestObject The request object.
  * @param {object} registrationData The detailed registration data sent from the backend.
  * @param {number} patientLegacyId The patient's legacy ID (PatientSerNum).
  * @returns {Promise<void>}
  */
 async function initializePatientMRNs(requestObject, registrationData, patientLegacyId) {
-    const isNewPatient = registrationData.patient.legacy_id === null;
-    if (isNewPatient) {
-        logger.log('info', 'New patient detected; inserting into OpalDB.Patient_Hospital_Identifier');
-        for (const hospital_patient of registrationData?.hospital_patients) {
-            await insertPatientHospitalIdentifier(requestObject, hospital_patient, patientLegacyId);
-        }
+    logger.log('info', 'New patient; inserting into OpalDB.Patient_Hospital_Identifier');
+    for (const hospital_patient of registrationData?.hospital_patients) {
+        await insertPatientHospitalIdentifier(requestObject, hospital_patient, patientLegacyId);
     }
 }
 
@@ -200,7 +200,7 @@ async function initializePatientMRNs(requestObject, registrationData, patientLeg
  * @param password The user's password, used when creating a new account.
  * @returns {Promise<*>} Resolves to the user's Firebase UID.
  */
-async function getOrCreateFirebaseAccount(accountExists, email, password) {
+async function initializeOrGetFirebaseAccount(accountExists, email, password) {
     let uid;
     if (accountExists === '0') {
         // The user's decrypted password is required to create a new Firebase account
@@ -246,19 +246,26 @@ function hashPassword(requestObject) {
  * @param patientLegacyId
  * @returns {Promise<*>} Resolves to the legacy ID (PatientSerNum) of the user in the Patient table.
  */
-async function initializeSelfPatient(requestObject, registrationData, patientLegacyId) {
+async function initializeOrGetSelfPatient(requestObject, registrationData, patientLegacyId) {
     const isNewCaregiver = registrationData.caregiver.legacy_id === null;
-    const isSelfRegistration = registrationData.relationship_type.role_type === "SELF"
+    const isSelfRegistration = registrationData.relationship_type.role_type === "SELF";
+
     let selfPatientSerNum;
-    if (!isNewCaregiver) selfPatientSerNum = await sqlInterface.getPatientSerNumFromUserSerNum(registrationData.caregiver.legacy_id);
+    if (!isNewCaregiver) {
+        selfPatientSerNum = await sqlInterface.getPatientSerNumFromUserSerNum(registrationData.caregiver.legacy_id);
+    }
     // Special case: when it's a new caregiver who isn't registering for self, we need to create a dummy self patient row
-    else if (!isSelfRegistration) selfPatientSerNum = await sqlInterface.insertDummyPatient(
-        registrationData.caregiver.first_name,
-        registrationData.caregiver.last_name,
-        requestObject.Parameters.Fields.email,
-        requestObject.Parameters.Fields.language,
-    );
-    else selfPatientSerNum = patientLegacyId;
+    else if (!isSelfRegistration) {
+        selfPatientSerNum = await sqlInterface.insertDummyPatient(
+            registrationData.caregiver.first_name,
+            registrationData.caregiver.last_name,
+            requestObject.Parameters.Fields.email,
+            requestObject.Parameters.Fields.language,
+        );
+    }
+    else {
+        selfPatientSerNum = patientLegacyId;
+    }
     return selfPatientSerNum;
 }
 
@@ -272,7 +279,7 @@ async function initializeSelfPatient(requestObject, registrationData, patientLeg
  * @param {number} selfPatientSerNum The PatientSerNum that represents the user's "self" row in the Patient table.
  * @returns {Promise<*>} Resolves to the legacy ID (UserSerNum) of the user in the Users table.
  */
-async function initializeUser(registrationData, uid, password, selfPatientSerNum) {
+async function initializeOrGetUser(registrationData, uid, password, selfPatientSerNum) {
     const isNewCaregiver = registrationData.caregiver.legacy_id === null;
     let userSerNum;
     if (isNewCaregiver) userSerNum = await sqlInterface.insertUser(uid, password, selfPatientSerNum);
@@ -308,10 +315,6 @@ async function sendConfirmationEmailNoFailure(language, emailAddress) {
  */
 async function requestLabHistoryNoFailure(registrationData, patientLegacyId) {
     try {
-        // If the patient already exists in the system, do not pull labs again
-        const isNewPatient = registrationData.patient.legacy_id === null;
-        if (!isNewPatient) return;
-
         for (const hospital_patient of registrationData?.hospital_patients) {
             const requestData = {
                 PatientId: hospital_patient.mrn,
@@ -333,10 +336,6 @@ async function requestLabHistoryNoFailure(registrationData, patientLegacyId) {
  */
 async function updatePatientStatusInORMSNoFailure(registrationData) {
     try {
-        // If the patient already exists in the system, do not update their status in ORMS again
-        const isNewPatient = registrationData.patient.legacy_id === null;
-        if (!isNewPatient) return;
-
         await updatePatientStatusInORMS(registrationData);
     }
     catch (error) {
