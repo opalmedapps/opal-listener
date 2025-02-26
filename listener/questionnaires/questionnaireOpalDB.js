@@ -6,7 +6,6 @@ const logger = require('./../logs/logger');
 const {OpalSQLQueryRunner} = require("../sql/opal-sql-query-runner");
 const config = require("../config-adaptor");
 const requestUtility = require("../utility/request-utility");
-const utility = require('../utility/utility');
 
 exports.getQuestionnaireInOpalDB = getQuestionnaireInOpalDB;
 exports.getQuestionnaireList = getQuestionnaireList;
@@ -110,9 +109,9 @@ FUNCTIONS TO SAVE ANSWERS (QUESTIONNAIRE V2)
  */
 /**
  * @name questionnaireSaveAnswer
- * @desc save the answer of one question
- * @param {object} requestObject
- * @returns {Promise}
+ * @desc Saves the answer to one question in the database.
+ * @param {object} requestObject The request object.
+ * @returns {Promise} Resolves to an object containing a 'success' response or rejects with an error.
  */
 async function questionnaireSaveAnswer(requestObject) {
     // check argument
