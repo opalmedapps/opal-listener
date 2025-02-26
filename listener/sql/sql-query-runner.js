@@ -6,6 +6,8 @@ const { ENVIRONMENT } = require("../../src/environment");
 class SQLQueryRunner {
 	#SQL_QUERY_POOL;
 	#DB_CREDENTIALS;
+	// List of allowed data types of the SQL query parameters (e.g., Object is prohibited)
+	#ALLOWED_DATA_TYPES;
 
 	/**
 	 * @desc Instantiates a database connection pool. Uses SSL if enabled.
@@ -25,6 +27,7 @@ class SQLQueryRunner {
 			stringifyObjects: true,
 		};
 		this.#SQL_QUERY_POOL = mysql.createPool(this.#DB_CREDENTIALS);
+		this.#ALLOWED_DATA_TYPES = ['string', 'number', 'boolean', 'bigint', 'undefined'];
 	}
 
 	/**
@@ -44,10 +47,19 @@ class SQLQueryRunner {
 	}
 
 	/**
+	 * @desc Check if the object is a date type.
+	 * @returns {boolean} Boolean value indicating if the value's type is a date.
+	 */
+	isValidDate(value) {
+		// See: https://builtin.com/software-engineering-perspectives/javascript-array-typeof
+		// See: https://stackoverflow.com/questions/643782/how-to-check-whether-an-object-is-a-date
+		return value instanceof Date && !Number.isNaN(value.valueOf());
+	}
+
+	/**
 	 * Performs sql query given parameters and a postProcessing function
 	 * @param query Query to perform
-	 * @param {Array<Object>} parameters Parameters for specified as array of objects, note mysql transforms
-	 *                        them to a string
+	 * @param {Array<any>} parameters an array of SQL query parameters
 	 * @param {Function} postProcessor Post processing function
 	 * @returns {Promise<any>} Returns a promise with the results from the query
 	 */
@@ -56,6 +68,18 @@ class SQLQueryRunner {
 		let connectionErrorMsg = `Failed to connect to database ${dbName}`;
 
 		return new Promise((resolve, reject) => {
+			// Reject value types that are different than those defined as allowed types
+			if (parameters) {
+				parameters.forEach((value) => {
+					let fieldType = typeof value;
+					// Check if the field's type is in the list of allowed types
+					if (!this.#ALLOWED_DATA_TYPES.includes(fieldType) && !this.isValidDate(value)) {
+						logger.log('error', `The query's parameter has a prohibited type: ${fieldType}.`);
+						reject('An error occurred while processing the request.');
+						return;
+					}
+				});
+			}
 			this.#SQL_QUERY_POOL.getConnection(function (err, connection) {
 				logger.log('debug', `Grabbed SQL connection to ${dbName}: ${connection}, `
 					+ `with SSL ${ENVIRONMENT.DATABASE_USE_SSL === '1' ? 'enabled': 'disabled'}`);
