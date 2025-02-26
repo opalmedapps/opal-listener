@@ -72,8 +72,14 @@ class SQLQueryRunner {
 			if (parameters) {
 				for (const value of parameters) {
 					let fieldType = typeof value;
-					// Check if the field's type is in the list of allowed types
-					if (!this.#ALLOWED_DATA_TYPES.includes(fieldType) && !this.isValidDate(value)) {
+					if (
+                        !this.#ALLOWED_DATA_TYPES.includes(fieldType)
+                        // typeof for a datetime is object
+                        && !this.isValidDate(value)
+                        // typeof for an array is object
+                        // allow arrows to support queries with the IN clause
+                        && !Array.isArray(value)
+                    ) {
 						logger.log('error', `The query's parameter has a prohibited type: ${fieldType}.`);
 						reject('An error occurred while processing the request.');
 						return;
