@@ -18,7 +18,7 @@ class Patient {
 		this.firstName = firstName;
 		this.lastName = lastName;
 		this.email = email;
-        this.language = language;
+		this.language = language;
 	}
 
 	static async getPatientByUsername(username = "") {

@@ -70,8 +70,7 @@ async function getQuestionnaireList(opalPatientSerNumAndLanguage, lastUpdated=0)
     let queryResult = await runQuery(questionnaireQueries.getQuestionnaireListQuery(), params);
 
     if (!questionnaireValidation.hasValidProcedureStatus(queryResult)) {
-        logger.log("error", "Error getting questionnaire list: query error");
-        throw new Error('Error getting questionnaire list: query error');
+        throw new Error('Error getting questionnaire list: query error - result does not have a successful procedure status');
     }
 
     // To limit unnecessary processing, skip the filter if no lastUpdated was provided
