@@ -250,7 +250,7 @@ exports.logCheckin = function()
 
 exports.accountChange=function()
 {
-    return `UPDATE Patient SET ??=?, SessionId=? WHERE PatientSerNum=?`;
+    return "UPDATE Patient SET `Language` = ?, `SessionId` = ? WHERE PatientSerNum = ?";
 };
 exports.inputFeedback=function(UserSerNum, content)
 {

@@ -595,7 +595,7 @@ exports.updateAccountField=function(requestObject) {
                 });
             //If not a password field update
         }else if(validFields.includes(field)){
-            exports.runSqlQuery(queries.accountChange(), [field, newValue, requestObject.Token, patient.PatientSerNum])
+            exports.runSqlQuery(queries.accountChange(), [newValue, requestObject.Token, patient.PatientSerNum])
                 .then(()=>{
                     r.resolve({Response:'success'});
                 }).catch((err)=>{
