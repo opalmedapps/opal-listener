@@ -22,7 +22,7 @@
     "API": {
       "URL": "https://127.0.0.1:8084",
       "method": {
-        "updatePatientStatus": "/patient/updateOpalStatus"
+        "updatePatientStatus": "/php/api/public/v2/patient/updateOpalStatus.php"
       }
     }
   },

@@ -175,6 +175,9 @@ exports.registerPatient = async function(requestObject) {
         requestObject.Parameters.Fields.uniqueId = uid;
         requestObject.Parameters.Fields.password = CryptoJS.SHA512(requestObject.Parameters.Fields.password).toString();
 
+        // Add patient's UUID to the request to allow ORMS patients to participate in studies with wearables
+        requestObject.Parameters.Fields.uuid = patientData?.patient?.uuid;
+
         // Register the patient in the database
         logger.log('info', `Registering the patient with these parameters: ${JSON.stringify(requestObject)}`);
         let result = await sqlInterface.registerPatient(requestObject);
@@ -290,8 +293,8 @@ async function updatePatientStatusInORMS(requestObject) {
         body: {
             "mrn": response[0].Mrn,
             "site": response[0].Site,
-            "opalStatus": 1,
-            "opalUUID": "",
+            "opalStatus": 1,  // 1 => registered/active patient; 0 => unregistered/inactive patient
+            "opalUUID": requestObject.Parameters.Fields.uuid,
         },
     };
 
