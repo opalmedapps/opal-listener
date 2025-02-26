@@ -3,7 +3,7 @@ default:
     # use node image instead of our own
     # our image runs with user node
     # see: https://gitlab.com/gitlab-org/gitlab-runner/-/issues/2750
-    name: node:20.11.1-alpine3.18
+    name: node:20.11.1-alpine3.19
   # Cache modules in between jobs
   cache:
     key:
@@ -24,7 +24,7 @@ default:
 stages:
   - Build
   - Static Analysis
-  - Test
+  - test
   - Documentation
   - Deploy
 
@@ -81,7 +81,7 @@ eslint:
       codequality: gl-codequality.json
 
 mocha:
-  stage: Test
+  stage: test
   script:
     - npm install mocha-junit-reporter --no-save
     - npx mocha --version
@@ -93,7 +93,7 @@ mocha:
         - junit.xml
 
 coverage:
-  stage: Test
+  stage: test
   needs:
     - job: mocha
   script:
@@ -197,3 +197,17 @@ firebase rules preprod:
     - cd firebase/preprod
     - export GOOGLE_APPLICATION_CREDENTIALS=$PREPROD_GOOGLE_APPLICATION_CREDENTIALS
     - firebase deploy --only database
+
+include:
+  # Secret Detection: https://docs.gitlab.com/ee/user/application_security/secret_detection/
+  # https://gitlab.com/gitlab-org/gitlab/-/blob/master/lib/gitlab/ci/templates/Jobs/Secret-Detection.gitlab-ci.yml
+  - template: Jobs/Secret-Detection.gitlab-ci.yml
+
+# Job Customizations
+#
+
+# Secret Detection:
+# https://docs.gitlab.com/ee/user/application_security/secret_detection/#customizing-settings
+secret_detection:
+  variables:
+    SECRET_DETECTION_HISTORIC_SCAN: "true"
