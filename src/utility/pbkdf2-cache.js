@@ -39,7 +39,8 @@ class Pbkdf2Cache {
      *                              If no value is provided, the cache is bypassed and a new PBKDF2 value is used.
      * @param {boolean} useLegacySettings [Temporary, compatibility] If true, the old settings for PBKDF2 are used.
      *                                    Used for compatibility with app version 1.12.2.
-     * @param {Function} keyUsageFunction Function which is called after getting the key value.
+     * @param {Function} keyUsageFunction Callback function which is called after getting the key value (with the
+     *                                    key as a parameter).
      *                                    IMPORTANT: this function is used as a test of the cache success.
      *                                    If a cached value is used and this function fails, then the cached value
      *                                    is discarded, the key is re-derived, and the function is called again.
