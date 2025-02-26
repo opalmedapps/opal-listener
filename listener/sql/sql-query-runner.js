@@ -34,7 +34,7 @@ class SQLQueryRunner {
 					// Check if the field's type is in the list of allowed types
 					let fieldType = typeof parameter;
 					// Check if the field's type is in the list of allowed types
-					if (!this.#ALLOWED_DATA_TYPES.includes(fieldType) && !this.isValidDate(parameter)) {
+					if (!this.#ALLOWED_DATA_TYPES.includes(fieldType) && !this.isValidDate(parameter) && !Array.isArray(parameter)) {
 						logger.log('error', `${parameter} field has ${fieldType} type which is not allowed.`);
 						return reject('An error occurred while processing the request.');
 					}
