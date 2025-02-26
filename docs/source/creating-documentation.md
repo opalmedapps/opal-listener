@@ -1,5 +1,6 @@
-To add new pages to this documentation site, follow the instructions at the link below. Documentation pages used
-by JSDoc are called "Tutorials", and can be created in a variety of formats, including `.md`.
-These pages can be ordered and given a hierarchy using the file `docs/source/config.json` in this repository.
+Documentation pages made for JSDoc are called "Tutorials", and can be created in a variety of formats, including `.md`.
+To add a new page to this documentation site, create a `.md` file in the `docs/source` folder.
+Then, add an entry to `docs/source/config.json` with the file name as the key, and an object specifying its title
+as the value.
 
-[JSDoc Tutorial Pages](https://jsdoc.app/about-tutorials.html)
+Reference: [JSDoc Tutorial Pages](https://jsdoc.app/about-tutorials.html)
