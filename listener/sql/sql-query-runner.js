@@ -30,15 +30,15 @@ class SQLQueryRunner {
 		return new Promise((resolve, reject) => {
 			// Reject value types that are different than those defined as allowed types
 			if (parameters) {
-				parameters.forEach(parameter => {
+				for (const parameter of parameters) {
+					// Check if the field's type is in the list of allowed types
 					let fieldType = typeof parameter;
 					// Check if the field's type is in the list of allowed types
 					if (!this.#ALLOWED_DATA_TYPES.includes(fieldType) && !this.isValidDate(parameter)) {
 						logger.log('error', `${parameter} field has ${fieldType} type which is not allowed.`);
-						reject('An error occurred while processing the request.');
-						return;
+						return reject('An error occurred while processing the request.');
 					}
-				})
+				}
 			}
 
 			this.#SQL_QUERY_POOL.getConnection(function (err, connection) {
