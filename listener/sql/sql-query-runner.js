@@ -58,7 +58,7 @@ class SQLQueryRunner {
 		let connectionErrorMsg = `Failed to connect to database ${dbName}`;
 
 		return new Promise((resolve, reject) => {
-            // Reject value types that are different than string, number, boolean, bigint, or undefined
+            // Reject value types that are different than those defined as allowed types
             if (parameters) {
                 for (const [key, value] of Object.entries(parameters)) {
                     let fieldType = typeof value;
