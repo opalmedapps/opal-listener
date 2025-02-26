@@ -450,8 +450,7 @@ exports.updateDeviceIdentifiers = function()
             ON DUPLICATE KEY UPDATE
                 RegistrationId = VALUES(RegistrationId),
                 DeviceType = VALUES(DeviceType),
-                appVersion = VALUES(appVersion),
-                LastUpdated = NOW();`
+                appVersion = VALUES(appVersion);`
 };
 
 /**
