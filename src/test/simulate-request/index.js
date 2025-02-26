@@ -12,7 +12,7 @@ const DefaultRequestData = require('./mock-request');
 const legacyLogger = require('../../../listener/logs/logger');
 const legacyOpalSqlRunner = require('../../../listener/sql/opal-sql-query-runner');
 const legacyUtility = require('../../../listener/utility/utility');
-const { EncryptionUtilities } = require('../../encryption/encryption');
+const EncryptionUtilities = require('../../encryption/encryption');
 
 class SimulateRequest {
     /**

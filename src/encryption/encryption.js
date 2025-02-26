@@ -66,11 +66,29 @@ class EncryptionUtilities {
     }
 
     /**
-     * @description SQL query to get security question hash used for encryption
+     * @description Get secret value which is either an hash of the username or registration token for registration.
+     * @param {object} snapshot Firebase snapshot value
+     * @returns {string} Value of the secret string use for encryption and decryption
+     */
+    static async getSecret(snapshot) {
+        return EncryptionUtilities.hash(snapshot.UserID);
+    }
+
+    /**
+     * @description Get salt which is either security answer text for api calls or RAMQ for registration.
+     * @param {object} snapshot Firebase snapshot value
+     * @returns {string} salt value for decryption
+     */
+    static async getSalt(snapshot) {
+        return EncryptionUtilities.getAnswerText(snapshot.UserID);
+    }
+
+    /**
+     * @description SQL query to get security question hash used for encryption and decryption
      * @param {string} userId ID used to retrive salt.
      * @returns {string} Security question hash.
      */
-    static async getSalt(userId) {
+    static async getAnswerText(userId) {
         const query = mysql.format(`
             SELECT
                 SA.AnswerText
@@ -98,4 +116,4 @@ class EncryptionUtilities {
     }
 }
 
-exports.EncryptionUtilities = EncryptionUtilities;
+module.exports = EncryptionUtilities;

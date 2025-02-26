@@ -35,6 +35,10 @@ const registrationRequest = {
     Parameters: {
         method: 'get',
         url: '/api/registration',
+        headers: {
+            'Content-Type': 'application/json',
+            'Accept-Language': 'fr',
+        },
         data: {
             ipAddress: '192.168.32.1',
             ramq: 'TESP62622718',

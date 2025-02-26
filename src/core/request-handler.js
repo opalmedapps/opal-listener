@@ -3,9 +3,10 @@
  * @author David Gagne
  */
 const legacyLogger = require('../../listener/logs/logger');
-const { EncryptionUtilities } = require('../encryption/encryption');
+const EncryptionUtilities = require('../encryption/encryption');
+const Registration = require('../registration/registration');
 const ApiRequest = require('./api-request');
-const { ErrorHandler } = require('../error/handler');
+const ErrorHandler = require('../error/handler');
 
 class RequestHandler {
     /**
@@ -40,13 +41,11 @@ class RequestHandler {
      * @param {object} snapshot Data snapshot from firebase or and formated error to be handle by the app.
      */
     async processRequest(requestType, snapshot) {
-        legacyLogger.log('debug', 'API: Processing API request');
-        const encryptionInfo = {};
+        legacyLogger.log('debug', `API: Processing API request of type ${requestType}`);
+        let encryptionInfo;
         try {
             if (!RequestHandler.validateSnapshot(snapshot)) throw new Error('SNAPSHOT_VALIDATION');
-            encryptionInfo.userId = snapshot.val().UserID;
-            encryptionInfo.salt = await EncryptionUtilities.getSalt(encryptionInfo.userId);
-            encryptionInfo.secret = EncryptionUtilities.hash(encryptionInfo.userId);
+            encryptionInfo = await RequestHandler.getEncryptionInfo(snapshot, requestType);
             const decryptedRequest = await EncryptionUtilities.decryptRequest(
                 snapshot.val(),
                 encryptionInfo.secret,
@@ -67,10 +66,28 @@ class RequestHandler {
                 encryptionInfo.secret,
                 encryptionInfo.salt,
             ) : errorResponse;
-            await this.sendResponse(response, snapshot.key, encryptionInfo.userId);
+            await this.sendResponse(response, snapshot.key, encryptionInfo.userId, requestType);
         }
 
         this.clearRequest(requestType, snapshot.key);
+    }
+
+    /**
+     * @description Get encrytion values according to type fo request
+     * @param {object} snapshot Firebase data snapshot.
+     * @param {string} requestType Type of request between "api" or "registration".
+     * @returns {object} Encryption required values
+     */
+    static async getEncryptionInfo(snapshot, requestType) {
+        if (requestType === 'registration-api') {
+            return Registration.getEncryptionValue(snapshot.val());
+        }
+
+        return {
+            userId: snapshot.val().UserID,
+            salt: await EncryptionUtilities.getSalt(snapshot.val(), requestType),
+            secret: await EncryptionUtilities.getSecret(snapshot.val(), requestType),
+        };
     }
 
     /**
@@ -100,10 +117,13 @@ class RequestHandler {
      * @param {object} encryptedResponse Processed and encrypted response.
      * @param {string} firebaseRequestKey Firebase request unique identifier
      * @param {string} userId User id making the request.
+     * @param {string} requestType Type of request between 'api or 'registration'.
      */
-    async sendResponse(encryptedResponse, firebaseRequestKey, userId) {
+    async sendResponse(encryptedResponse, firebaseRequestKey, userId, requestType) {
         legacyLogger.log('debug', 'API: Sending response to Firebase');
-        const path = `users/${userId}/${firebaseRequestKey}`;
+        const path = (requestType === 'registration-api')
+            ? `users/${firebaseRequestKey}`
+            : `users/${userId}/${firebaseRequestKey}`;
         await this.#databaseRef.child(path).set(encryptedResponse);
     }
 }
