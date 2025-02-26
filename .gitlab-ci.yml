@@ -254,16 +254,19 @@ include:
   # https://gitlab.com/gitlab-org/gitlab/-/blob/master/lib/gitlab/ci/templates/Jobs/SAST.latest.gitlab-ci.yml
   - template: Jobs/SAST.latest.gitlab-ci.yml
 
+# Customizations
+#
+
+# Container Scanning
+# https://docs.gitlab.com/ee/user/application_security/container_scanning/#customizing-the-container-scanning-settings
+container_scanning:
+  variables:
+    CS_IMAGE: $CI_REGISTRY_IMAGE:$CI_COMMIT_REF_SLUG
+
+# SAST
+# https://docs.gitlab.com/ee/user/application_security/sast/#available-cicd-variables
 sast:
   variables:
     # exclude test files
     # https://docs.gitlab.com/ee/user/application_security/sast/#vulnerability-filters
     SAST_EXCLUDED_PATHS: "spec, test, tests, tmp, *.test.js"
-
-# Customizations
-#
-
-# Container Scanning
-container_scanning:
-  variables:
-    CS_IMAGE: $CI_REGISTRY_IMAGE:$CI_COMMIT_REF_SLUG
