@@ -103,3 +103,7 @@ exports.insertAnswerCheckbox = function () {
 exports.updateAnswerQuestionnaireStatus = function () {
     return "call updateAnswerQuestionnaireStatus(?,?,?,?,?);";
 }
+
+exports.getAnswerQuestionnaireRespondent = function () {
+    return "SELECT respondentUsername FROM answerQuestionnaire WHERE ID = ?;";
+}
