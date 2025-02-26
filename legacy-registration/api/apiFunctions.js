@@ -1,12 +1,9 @@
 /**  Library Imports **/
 
-var sqlInterface = require('../api/sql/sqlInterface.js');
 var firebaseFunction = require('../api/firebase/firebaseFunctions.js');
-var CryptoJS = require("crypto-js");
 const config = require('../config-adaptor');
 const opalRequest = require('./request/request.js');
 const logger = require('../logs/logger.js');
-const request = require('request');
 const path = require('path');
 const fs = require('fs');
 
@@ -273,8 +270,7 @@ function getEmailContent(language) {
  * @description Formats the data expected by the backend API for completing registration.
  * @param {Object} requestObject - The calling request's requestObject.
  * @param {string} firebaseUsername - The caregiver's Firebase username.
- * @param {int} patientLegacyId - The legacy ID of the patient (PatientSerNum).
- * @param {int} userLegacyId - The legacy ID of the user (UserSerNum).
+ * @param {string} email - The email of the user.
  * @param {boolean} isExistingUser Indicate if the user already exists in the backend
  * @returns {Object} registerData {
         patient: {
