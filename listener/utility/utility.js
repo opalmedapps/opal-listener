@@ -7,7 +7,7 @@ const Q                 = require('q');
 // parameters for pbkdf2 function
 const keySizeBits = 256; // Key size in bits for SHA-256
 const iterations = 600000;
-const keySizeBytes =  32;
+const bitsPerWord =  32; // Used to convert keySizeBits, since crypto-js expects key sizes in 32-bit words
 
 
 //crypto.DEFAULT_ENCODING = 'hex';
@@ -77,7 +77,7 @@ exports.unixToMYSQLTimestamp=function(time) {
 exports.generatePBKDFHash = function(secret, salt) {
 
     const derivedKey = CryptoJS.PBKDF2(secret, salt, {
-        keySize: keySizeBits / keySizeBytes,
+        keySize: keySizeBits / bitsPerWord,
         iterations: iterations,
         hasher: CryptoJS.algo.SHA256,
     }).toString(CryptoJS.enc.Hex);
@@ -98,7 +98,7 @@ exports.encrypt = function(object, secret, salt) {
     let r = Q.defer();
     const nonce = nacl.randomBytes(nacl.secretbox.nonceLength);
     if (salt) {
-        crypto.pbkdf2(secret, salt, iterations, keySizeBytes, 'sha256', (err, derivedKey) => {
+        crypto.pbkdf2(secret, salt, iterations, bitsPerWord, 'sha256', (err, derivedKey) => {
             if (err) {
                 r.reject(err);
             } else {
@@ -128,7 +128,7 @@ exports.decrypt = function(object, secret, salt) {
 
     if (salt) {
 
-        crypto.pbkdf2(secret, salt, iterations, keySizeBytes, 'sha256', (err, derivedKey) => {
+        crypto.pbkdf2(secret, salt, iterations, bitsPerWord, 'sha256', (err, derivedKey) => {
             if (err) {
                 r.reject(err);
             } else {
