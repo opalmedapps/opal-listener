@@ -74,7 +74,8 @@ exports.verifySecurityAnswer=function(requestKey,requestObject,patient)
             var answerValid = unencrypted.Answer === patient.AnswerText;
             var isVerified = false;
 
-            if(unencrypted.PasswordReset){
+            // Use of RAMQ (SSN) in password reset requests is no longer supported after 1.12.2 (QSCCD-476)
+            if (unencrypted.PasswordReset && utility.versionLessOrEqual(requestObject.AppVersion, "1.12.2")) {
                 isVerified = ssnValid;
             } else {
                 isVerified = answerValid;
@@ -111,7 +112,7 @@ exports.setNewPassword=function(requestKey, requestObject, user)
 {
     var r=q.defer();
     // Use of RAMQ (SSN) to encrypt password reset requests is no longer supported after 1.12.2 (QSCCD-476)
-    let secret = utility.versionGreaterThan(requestObject.meta.AppVersion, "1.12.2")
+    let secret = utility.versionGreaterThan(requestObject.AppVersion, "1.12.2")
         ? utility.hash(user.Email)
         : utility.hash(user.SSN.toUpperCase());
     var answer = user.AnswerText;
