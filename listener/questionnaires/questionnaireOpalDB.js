@@ -128,10 +128,10 @@ async function getQuestionnaire(requestObject) {
         throw new Error('Error getting questionnaire: the requestObject does not have the required parameter qp_ser_num');
     }
     const patientSerNum = Number(requestObject.TargetPatientID);
-    //check the caregiver permissions for the user
-    if (requestObject.Parameters.status !== questionnaireConfig.COMPLETED_QUESTIONNAIRE_STATUS) await checkCaregiverPermissions(requestObject.UserID, patientSerNum);
-    //check the questionnaire locking status
-    if (requestObject.Parameters.status == questionnaireConfig.IN_PROGRESS_QUESTIONNAIRE_STATUS) {
+    if (requestObject.Parameters.status !== questionnaireConfig.COMPLETED_QUESTIONNAIRE_STATUS) {
+        //check the caregiver permissions for the user
+        await checkCaregiverPermissions(requestObject.UserID, patientSerNum);
+        //check the questionnaire locking status
         let respondent = await questionnaires.getRespondentUsername();
         if (respondent && respondent[0]['respondentUsername'] != requestObject.UserID){
             const errMsg = `ERROR: another user has already locked this questionnaire.`;
