@@ -3,9 +3,10 @@ const config            =       require('./config.json');
 
 
 // Initialize firebase connection
+const serviceAccount = require(config.FIREBASE_ADMIN_KEY);
 admin.initializeApp({
-    credential: admin.credential.cert("/Users/rob/Downloads/opal-prod.json"),
-    databaseURL: "https://opal-prod.firebaseio.com"
+    credential: admin.credential.cert(serviceAccount),
+    databaseURL: config.DATABASE_URL,
 });
 
 var db = admin.database();
