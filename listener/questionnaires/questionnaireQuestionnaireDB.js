@@ -1,7 +1,7 @@
 var exports = module.exports = {};
 var mysql = require('mysql');
 var q = require('q');
-var credentials = require('./../config.json');
+var credentials = require('./../config-adaptor');
 const logger = require('./../logs/logger');
 const questionnaireConfig = require('./questionnaireConfig.json');
 const questionnaireQueries = require('./questionnaireQueries.js');

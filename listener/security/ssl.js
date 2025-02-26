@@ -5,11 +5,11 @@
  * Date         :   2021-09-15
  */
 var exports             = module.exports = {};
-const config            = require("../config.json");
+const config            = require("../config-adaptor");
 const fs                = require('fs');
 
 /*
- * To aid in debugging, the following line can be added to server.js to disable certificate validation:
+ * To aid in debugging, the following line can be added to legacy-server.js to disable certificate validation:
  *     process.env.NODE_TLS_REJECT_UNAUTHORIZED = "0";
  * This environment variable makes HTTPS insecure, which is why its use is strongly discouraged. To use for debugging only.
  * -SB */

@@ -6,7 +6,7 @@ const opalQueries = require('../sql/queries');
 const questionnaireValidation = require('./questionnaire.validate');
 const logger = require('./../logs/logger');
 const {OpalSQLQueryRunner} = require("../sql/opal-sql-query-runner");
-const config = require("../config.json");
+const config = require("../config-adaptor");
 const requestUtility = require("../utility/request-utility");
 
 exports.getQuestionnaireInOpalDB = getQuestionnaireInOpalDB;

@@ -1,5 +1,5 @@
-const admin            	=   	require("firebase-admin");
-const config            =       require('./config.json');
+const admin             =       require("firebase-admin");
+const config            =       require('./config-adaptor');
 
 
 // Initialize firebase connection
@@ -58,6 +58,6 @@ function writeRequests(arr, requestNumber){
             });
 
         });
-        
+
     }
 }
