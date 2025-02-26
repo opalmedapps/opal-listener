@@ -258,6 +258,7 @@ async function questionnaireUpdateStatus(requestObject) {
                     'Content-Type': 'application/json',
                 },
             },
+            UserID: requestObject.UserID,
         };
 
         logger.log('info', "API: Calling backend to get the user's list of caregivers.");
@@ -273,7 +274,8 @@ async function questionnaireUpdateStatus(requestObject) {
 
         let readBy = usernames.join(', ');
         readBy = "[" + readBy + "]";
-        const notification = await OpalSQLQueryRunner.run(
+
+        await OpalSQLQueryRunner.run(
             opalQueries.implicitlyReadQuestionnaireNotification(),
             [readBy, questionnaire[0]['QuestionnaireSerNum'], questionnaire[0]['PatientSerNum']],
         );
