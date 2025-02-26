@@ -1,6 +1,6 @@
 require('../test/chai-setup');
 const { expect } = require('chai');
-const Keyv = require('keyv');
+const { Keyv } = require('keyv');
 const sinon = require('sinon');
 const crypto = require('crypto');
 const cache = require('./key-derivation-cache');

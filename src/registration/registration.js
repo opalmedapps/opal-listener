@@ -1,4 +1,4 @@
-const Keyv = require('keyv');
+const { Keyv } = require('keyv');
 const ApiRequest = require('../core/api-request');
 const EncryptionUtilities = require('../encryption/encryption');
 const legacyLogger = require('../../listener/logs/logger');
