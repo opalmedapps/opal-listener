@@ -101,6 +101,8 @@ class RequestValidator {
 	 *       targets patient data); otherwise, this function resolves and the request can proceed.
 	 *       If the request has a TargetPatientID, two checks are performed: first, a legacy check for 'self'
 	 *       in the OpalDB, and second (if no match was found in OpalDB), an API check via the Django backend.
+	 *       NOTE!!! Calling the 'UserPatient' endpoint is a special case, where TargetPatientID gets assigned
+	 *       in this function. This needed to check SELF relationship permissions during login.
 	 * @param {Object} request The request to validate.
 	 * @param {string} request.meta.UserID The ID of the user making the request.
 	 * @param {number} [request.meta.TargetPatientID] The ID of the patient whose data is being requested, if this is
