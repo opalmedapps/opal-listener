@@ -157,7 +157,6 @@ exports.registerPatient = async function(requestObject) {
         }
         // Register patient info to new backend
         const registerData = getRegisterData(requestObject, legacy_id);
-        const test = JSON.stringify(registerData);
         await opalRequest.registrationRegister(backendApiRequest, registerData);
 
         // Before registering the patient, create their firebase user account with decrypted email and password
@@ -171,7 +170,7 @@ exports.registerPatient = async function(requestObject) {
             uid = await firebaseFunction.getFirebaseAccountByEmail(email);
             logger.log('info', `Got firebase user account: ${uid}`);
         }
-        
+
         // Assign the unique ID and encrypted password to the request object
         requestObject.Parameters.Fields.uniqueId = uid;
         requestObject.Parameters.Fields.password = CryptoJS.SHA512(requestObject.Parameters.Fields.password).toString();
