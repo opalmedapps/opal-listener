@@ -27,6 +27,24 @@ exports.createFirebaseAccount = function (userEmail, userPassword) {
     return r.promise;
 };
 
+// Function to create firebase account
+exports.getFirebaseAccountByEmail = function (userEmail) {
+    let r = Q.defer();
+
+    admin.auth().getUserByEmail(userEmail)
+        .then(function (userRecord) {
+            // Firebase account has been created and it returns the firebase unique ID
+            logger.log('debug','Successfully getting firebase user account and this is the unique Id: ' + userRecord.uid);
+            r.resolve(userRecord.uid);
+        })
+        .catch(function (error) {
+            logger.log('error', 'Error while getting a user account in firebase: ' + error.code);
+            r.reject(error.errorInfo);
+        });
+
+    return r.promise;
+};
+
 exports.deleteFirebaseAccount = function (uid) {
     let r = Q.defer();
 

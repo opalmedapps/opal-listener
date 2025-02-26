@@ -16,6 +16,8 @@ const API = {
     'TermsandAggreementDocuments': apiFunctionRequest.getTermsandAgreementDocuments,
     'RegisterPatient': apiFunctionRequest.registerPatient,
     'GetPatientInfo': apiFunctionRequest.getPatientInfo,
+    'GetFirebaseUser': apiFunctionRequest.getFirebaseUser,
+    'AddFirebaseUser': apiFunctionRequest.addFirebaseUser,
 };
 
 /**
