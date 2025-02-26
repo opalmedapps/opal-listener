@@ -115,7 +115,7 @@ async function verifyExistingUser(requestObject) {
             );
             const result = await opalRequest.isCaregiverAlreadyRegistered(decodedToken.uid);
             return {
-                isExistingUser: result === 200,
+                isExistingUser: result.status === 200,
                 decodedToken: decodedToken,
             };
         }
