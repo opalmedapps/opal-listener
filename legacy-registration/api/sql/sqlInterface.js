@@ -18,17 +18,6 @@ const opaldbCredentials = {
     dateStrings: true
 };
 
-/**  REGISTRATION DATABASE CONFIGURATIONS **/
-const registerdbCredentials = {
-    connectionLimit: 10,
-    host: config.MYSQL_DATABASE_HOST,
-    port: config.MYSQL_DATABASE_PORT,
-    user: config.MYSQL_USERNAME,
-    password: config.MYSQL_PASSWORD,
-    database: config.MYSQL_DATABASE_REGISTRATION,
-    dateStrings: true
-};
-
 
 /**
      SQL POOL CONFIGURATION for opal database
@@ -39,9 +28,13 @@ const opalPool = mysql.createPool(opaldbCredentials);
 
 /**
      SQL POOL CONFIGURATION for registration database
+
+     Deprecated since it is unused.
+
      @type {Pool}
+     @deprecated
  **/
-const registerPool = mysql.createPool(registerdbCredentials);
+const registerPool = mysql.createPool(opaldbCredentials);
 
 /**
      insertIPLog
