@@ -7,8 +7,9 @@ const { convert } = require('html-to-text');
 const legacyLogger = require('../../listener/logs/logger');
 
 const configs = {
-    OPAL_BACKEND_HOST: process.env.OPAL_BACKEND_HOST,
-    OPAL_BACKEND_AUTH_TOKEN: process.env.OPAL_BACKEND_AUTH_TOKEN,
+    BACKEND_HOST: process.env.BACKEND_HOST,
+    BACKEND_LISTENER_AUTH_TOKEN: process.env.BACKEND_LISTENER_AUTH_TOKEN,
+    BACKEND_REGISTRATION_AUTH_TOKEN: process.env.BACKEND_REGISTRATION_AUTH_TOKEN,
 };
 class ApiRequest {
     /**
@@ -40,9 +41,12 @@ class ApiRequest {
         legacyLogger.log('debug', 'API: Sending request to Opal API');
         const requestParams = parameters;
 
-        requestParams.headers.Authorization = `Token ${configs.OPAL_BACKEND_AUTH_TOKEN}`;
+        const token = userId === 'registration'
+            ? configs.BACKEND_REGISTRATION_AUTH_TOKEN
+            : configs.BACKEND_LISTENER_AUTH_TOKEN;
+        requestParams.headers.Authorization = `Token ${token}`;
         requestParams.headers.Appuserid = userId;
-        requestParams.url = `${configs.OPAL_BACKEND_HOST}${parameters.url}`;
+        requestParams.url = `${configs.BACKEND_HOST}${parameters.url}`;
 
         if (parameters.data !== undefined) requestParams.data = parameters.data;
 
