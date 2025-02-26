@@ -20,8 +20,6 @@ class ApiRequest {
         legacyLogger.log('debug', 'API: Preparing to send request to Opal API');
         const apiResponse = await ApiRequest.sendRequestToApi(decryptedRequest.UserID, decryptedRequest.Parameters);
 
-        console.log('apiResponse ==>', apiResponse);
-
         return {
             status_code: apiResponse.status,
             headers: apiResponse.headers,
