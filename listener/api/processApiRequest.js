@@ -68,8 +68,9 @@ const API = {
  */
 exports.processRequest=function(requestObject) {
     const type = requestObject.type;
+    const target = requestObject.meta.TargetPatientID;
     // Old requests
-    logger.log('info', `Processing request of type: '${type}', with params = ${JSON.stringify(requestObject.params)}, TargetPatientID = ${requestObject.meta.TargetPatientID}`);
+    logger.log('info', `Processing request of type: '${type}', with params = ${JSON.stringify(requestObject.params)}${target ? ', TargetPatientID = '+target : ''}`);
     if (LEGACYAPI.hasOwnProperty(type)) {
         return LEGACYAPI[type](requestObject.toLegacy());
     // New request format

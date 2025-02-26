@@ -284,8 +284,9 @@ exports.patientTasksTableFields=function()
         "emc.URL_EN, " +
         "emc.URL_FR " +
         "" +
-        "FROM Task " +
+        "FROM Patient " +
         "" +
+        "INNER JOIN Task ON Task.PatientSerNum = Patient.PatientSerNum " +
         "INNER JOIN AliasExpression ON AliasExpression.AliasExpressionSerNum = Task.AliasExpressionSerNum " +
         "INNER JOIN Alias ON Alias.AliasSerNum = AliasExpression.AliasSerNum " +
         "LEFT JOIN EducationalMaterialControl emc ON emc.EducationalMaterialControlSerNum = Alias.EducationalMaterialControlSerNum " +

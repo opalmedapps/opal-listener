@@ -1,4 +1,3 @@
-const mysql             = require('mysql');
 const filesystem        = require('fs');
 const Q                 = require('q');
 const queries           = require('./../sql/queries.js');
@@ -157,7 +156,7 @@ exports.getPatientTableFields = async function(patientSerNum, arrayTables, times
 
     // Validate the arrayTables
     let invalidCategory = arrayTables.find(e => !requestMappings.hasOwnProperty(e));
-    if (invalidCategory) throw {Response:'error', Reason:`Incorrect refresh parameter: ${invalidCategory}`};
+    if (invalidCategory) throw {Response: 'error', Reason: `Incorrect refresh parameter: ${invalidCategory}`};
 
     logger.log('verbose', `Processing select requests in the following categories: ${JSON.stringify(arrayTables)}`);
     let response = await Promise.all(arrayTables.map(category => processSelectRequest(category, patientSerNum, timestamp)));
