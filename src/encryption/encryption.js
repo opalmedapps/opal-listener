@@ -3,7 +3,6 @@ const mysql = require('mysql');
 const legacyOpalSqlRunner = require('../../listener/sql/opal-sql-query-runner');
 const legacyLogger = require('../../listener/logs/logger');
 const legacyUtility = require('../../listener/utility/utility');
-const { ErrorHandler } = require('../error/error-handler');
 
 class EncryptionUtilities {
     /**
@@ -23,7 +22,7 @@ class EncryptionUtilities {
             );
         }
         catch (error) {
-            throw new ErrorHandler(500, 'Ecryption error', error, null, false);
+            throw new Error('ENCRYPTION', { cause: error });
         }
     }
 
@@ -53,7 +52,7 @@ class EncryptionUtilities {
             };
         }
         catch (error) {
-            throw new ErrorHandler(500, 'Error getting secret value', error, null, false);
+            throw new Error('DECRYPTION', { cause: error });
         }
     }
 
@@ -94,7 +93,7 @@ class EncryptionUtilities {
             return response[0].AnswerText;
         }
         catch (error) {
-            throw new ErrorHandler(500, 'Error getting salt value', error, null, false);
+            throw new Error('ENCRYPTION_SALT', { cause: error });
         }
     }
 }

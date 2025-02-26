@@ -6,7 +6,6 @@
 const axios = require('axios');
 const configs = require('../config/config.json');
 const legacyLogger = require('../../listener/logs/logger');
-const { ErrorHandler } = require('../error/error-handler');
 
 class ApiRequest {
     /**
@@ -57,22 +56,21 @@ class ApiRequest {
      * @param {object} error Error details from Axios failure.
      */
     static handleApiError(error) {
-        const logMessage = `BACKEND REQUEST: ${error.response.statusText}`;
         const errorData = ApiRequest.filterOutHTML(error.response.data);
-        let clientMessage;
+        let opalError;
         switch (error.response.status) {
         case 404:
-            clientMessage = 'API_ERROR_NOT_FOUND';
+            opalError = 'API_NOT_FOUND';
             break;
         case 403:
-            clientMessage = 'API_ERROR_UNALLOWED';
+            opalError = 'API_UNALLOWED';
             break;
         default:
-            clientMessage = 'API_ERROR_INTERNAL';
+            opalError = 'API_INTERNAL';
             break;
         }
 
-        throw new ErrorHandler(error.response.status, logMessage, errorData, clientMessage);
+        throw new Error(opalError, { cause: errorData });
     }
 
     /**
