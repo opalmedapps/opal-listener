@@ -1,5 +1,5 @@
 default:
-  image: node:16.20.0-alpine3.17
+  image: $CI_REGISTRY_IMAGE:$CI_COMMIT_REF_SLUG
   # Cache modules in between jobs
   cache:
     key: $CI_COMMIT_REF_SLUG
@@ -11,7 +11,7 @@ default:
     - npm --version
     # Install dependencies and cache within the project directory to cache
     # See: https://javascript.plainenglish.io/improving-ci-performance-aka-how-to-save-your-money-31ff691360e4
-    - npm ci --cache .npm --prefer-offline
+    - npm ci --include dev --cache .npm --prefer-offline
     # Set up config files (currently no actual values are needed)
     - cp listener/config_template.json listener/config.json
     # TODO: If required, setup .env file in pipeline using gitlab project settings vars or by setting variables directly here.
