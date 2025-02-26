@@ -2,7 +2,6 @@
  *
  * 
  */
-const q = require('q');
 const ApiRequest = require('../../../src/core/api-request');
 
 class opalRequest {
