@@ -43,8 +43,10 @@ exports.refresh = async function(requestObject) {
     return rows;
 };
 
-//Check checkin API call
-// TODO (QSCCD-106) - Make use of requestObject.TargetPatientID to check in on behalf of others or as self
+/**
+ * @desc Check checkin API call
+ * @deprecated
+ */
 exports.checkCheckin = function(requestObject)
 {
     var r = Q.defer();
