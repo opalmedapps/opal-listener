@@ -25,6 +25,7 @@
     "linebreak-style": 0,
     "max-len": ["error", { "code": 120 }],
     "mocha/prefer-arrow-callback": 2,
+    "mocha/no-setup-in-describe": 0,
     "no-restricted-syntax": ["error", "ForInStatement", "LabeledStatement", "WithStatement"],
     "no-use-before-define": ["error", { "functions": false }],
     "prefer-arrow-callback": 0

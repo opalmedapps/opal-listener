@@ -1,6 +1,4 @@
-const chai = require('chai');
-const chaiAsPromised = require('chai-as-promised');
-chai.use(chaiAsPromised);
+require('../../src/test/test-setup');
 const { expect } = require('chai');
 
 const utility = require('../utility/utility.js');
