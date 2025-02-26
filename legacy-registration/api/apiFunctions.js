@@ -2,7 +2,6 @@
 
 var sqlInterface = require('../api/sql/sqlInterface.js');
 var firebaseFunction = require('../api/firebase/firebaseFunctions.js');
-const admin = require("firebase-admin");
 var CryptoJS = require("crypto-js");
 const config = require('../config-adaptor');
 const opalRequest = require('./request/request.js');
@@ -13,120 +12,6 @@ const path = require('path');
 const fs = require('fs');
 
 const { sendMail } = require('./utility/mail.js');
-
-/**
- * @description Insert user IP address.
- * @param {Object} requestObject - The calling request's requestObject.
- * @returns {Promise<void>} Resolves if the call completes successfully, or rejects with an error.
- */
-exports.insertIPLog = function (requestObject) {
-    return new Promise((resolve, reject) => {
-
-        sqlInterface.insertIPLog(requestObject).then((members) => {
-            resolve({ Data: members });
-        }).catch((err) => reject({ Response: error, Reason: err }));
-
-    });
-};
-
-/**
- * @description Validate user IP address.
- * @param {Object} requestObject - The calling request's requestObject.
- * @returns {Promise<void>} Resolves if the call completes successfully, or rejects with an error.
- */
-exports.validateIP = function (requestObject) {
-    return new Promise((resolve, reject) => {
-        sqlInterface.validateIP(requestObject).then((members) => {
-            resolve({ Data: members });
-        }).catch((err) => reject({ Response: error, Reason: err }));
-    });
-};
-
-/**
- * @description Validate user input and search the user.
- * @param {Object} requestObject - The calling request's requestObject.
- * @returns {Promise<void>} Resolves if the call completes successfully, or rejects with an error.
- */
-exports.validateInputs = function (requestObject) {
-    return new Promise((resolve, reject) => {
-        sqlInterface.validateInputs(requestObject).then((members) => {
-            resolve({ Data: members });
-        }).catch((err) => reject({ Response: error, Reason: err }));
-    });
-};
-
-/**
- * @description Get all security questions.
- * @param {Object} requestObject - The calling request's requestObject.
- * @returns {Promise<void>} Resolves if the call completes successfully, or rejects with an error.
- */
-exports.getSecurityQuestionsList = function (requestObject) {
-    return new Promise((resolve, reject) => {
-        sqlInterface.getSecurityQuestionsList(requestObject).then((members) => {
-            resolve({ Data: members });
-        }).catch((err) => reject({ Response: error, Reason: err }));
-    });
-};
-
-/**
- * @description Fetch the Opal level of accesss list.
- * @param {Object} requestObject - The calling request's requestObject.
- * @returns {Promise<void>} Resolves if the call completes successfully, or rejects with an error.
- */
-exports.getAccessLevelList = function (requestObject) {
-    return new Promise((resolve, reject) => {
-        sqlInterface.getAccessLevelList(requestObject).then((members) => {
-            resolve({ Data: members });
-        }).catch((err) => reject({ Response: 'error', Reason: err }));
-    });
-};
-
-/**
- * @description Get the Opal app language list.
- * @param {Object} requestObject - The calling request's requestObject.
- * @returns {Promise<void>} Resolves if the call completes successfully, or rejects with an error.
- */
-exports.getLanguageList = function (requestObject) {
-    return new Promise((resolve, reject) => {
-        sqlInterface.getLanguageList(requestObject).then((members) => {
-            resolve({ Data: members });
-        }).catch((err) => reject({ Response: error, Reason: err }));
-    });
-};
-
-/**
- * @description Get the terms and agreement docuemnts.
- * @param {Object} requestObject - The calling request's requestObject.
- * @returns {Promise<void>} Resolves if the call completes successfully, or rejects with an error.
- */
-exports.getTermsandAgreementDocuments = function (requestObject) {
-    return new Promise((resolve, reject) => {
-        sqlInterface.getTermsandAgreementDocuments(requestObject).then((members) => {
-            resolve({ Data: members });
-        }).catch((err) => reject({ Response: error, Reason: err }));
-    });
-};
-
-/**
- * @description Get a patient data info.
- * @param {Object} requestObject - The calling request's requestObject.
- * @returns { Data: response, Result: result }
- * @throws Throws an error if a required field is not present in the given request.
- */
-exports.getPatientInfo = async function(requestObject) {
-    let response = undefined;
-    let result = 'FAILURE';
-    try {
-        response = await sqlInterface.getPatient(requestObject);
-        if (typeof response[0] == 'object') {
-            response = response[0];
-            result = 'SUCCESS';
-        }
-    } catch (error) {
-        logger.log('error', `An error occurred while getting patient info (for ${requestObject.Parameters.Fields.ramq}): ${JSON.stringify(error)}`);
-    }
-    return { Data: response, Result: result };
-};
 
 /**
  * @description Register a patient
@@ -180,9 +65,6 @@ exports.registerPatient = async function(requestObject) {
         logger.log('info', `Registering the patient with these parameters: ${JSON.stringify(requestObject)}`);
         let result = await sqlInterface.registerPatient(requestObject);
         logger.log('debug', `Register patient response: ${JSON.stringify(result)}`);
-
-        // Delete the unique firebase branch
-        deleteFirebaseBranch(requestObject.BranchName);
 
         // Registration is considered successful at this point.
         // I.e., don't fail the whole registration if an error occurs now and only log an error.
@@ -322,20 +204,6 @@ function postPromise(options) {
         });
     });
 }
-
-// Function to delete the firebase branch
-function deleteFirebaseBranch(parameter) {
-
-    const db = admin.database();
-    const ref = db.ref(config.FIREBASE_ROOT_BRANCH + '/branch/' + parameter);
-
-    return ref.once("value", function (snapshot) {
-        if (snapshot.exists()) {
-            logger.log('debug', 'Firebase branch exist with these value in snapshot: ' + snapshot.val());
-            ref.remove();
-        }
-    });
-};
 
 /**
  * @description Returns the subject, body and HTML stream of the registration email in the given language.
