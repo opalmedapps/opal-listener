@@ -1,0 +1,26 @@
+default:
+  image: node:16.14.0-alpine3.15
+
+# Cache modules in between jobs
+cache:
+  key: $CI_COMMIT_REF_SLUG
+  paths:
+    - .npm/
+
+before_script:
+  - uname -a
+  - node --version
+  - npm --version
+  # Install dependencies and cache within the project directory to cache
+  # See: https://javascript.plainenglish.io/improving-ci-performance-aka-how-to-save-your-money-31ff691360e4
+  - npm ci --cache .npm --prefer-offline
+
+stages:
+  - Static Analysis
+  - Test
+
+eslint:
+  stage: Static Analysis
+  script:
+    - eslint --version
+    - npm run lint
