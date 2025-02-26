@@ -83,7 +83,7 @@ function getQuestionnaireList(requestObject) {
             return obj;
         })
         .catch(function (error) {
-            logger.log("error", "Error getting questionnaire list", {error: error});
+            logger.log("error", "Error getting questionnaire list", error);
             throw new Error(error);
         });
 }

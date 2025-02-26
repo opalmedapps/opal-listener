@@ -178,7 +178,7 @@ function startHeartBeatDB(){
 				.catch(()=>logger.log('error', 'Error while performing query'));
         })
         .catch(err => {
-            logger.log('error', 'Error sending heartbeat db request', {error: err});
+            logger.log('error', 'Error sending heartbeat db request', err);
         });
 
 }
