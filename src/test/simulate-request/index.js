@@ -6,7 +6,6 @@
 const path = require('path');
 const mysql = require('mysql');
 const fs = require('fs');
-// const config = require('../../config/config.json');
 const { Firebase } = require('../../firebase/firebase');
 const DefaultRequestData = require('./mock-request');
 const legacyLogger = require('../../../listener/logs/logger');
