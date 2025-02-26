@@ -127,7 +127,6 @@ class EncryptionUtilities {
      * @param {string} deviceId ID of the device use to make the request.
      * @returns {string} Security question hash.
      */
-    // TODO check calls of this
     static async getAnswerText(userId, deviceId) {
         const query = mysql.format(`
             SELECT
