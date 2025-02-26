@@ -61,7 +61,7 @@ const FIREBASE_CONFIG = {
  */
 function validateEnvironment(processArr) {
     Object.keys(processArr).forEach(key => {
-        assert.ok(processArr[key] !== undefined, `${key} variable must be defined in .env`);
+        assert.ok(processArr[key] !== undefined && processArr[key] !== '', `${key} variable must be defined in .env`);
     });
 }
 
