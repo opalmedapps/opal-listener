@@ -122,13 +122,6 @@ exports.logout = function(requestObject) {
 };
 
 /**
- * @desc Gets patient info for the current user.
- * @param requestObject
- * @returns {Promise}
- */
-exports.getUserPatient = requestObject => sqlInterface.getUserPatient(requestObject);
-
-/**
  * For questionnaire V2 (2019 version of qplus questionnaire front-end). Getting the list of questionnaires belonging to a patient
  * @deprecated Since QSCCD-230
  * @param {object} requestObject
