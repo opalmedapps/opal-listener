@@ -2,7 +2,11 @@ var exports=module.exports={};
 //Get Patient table information for a particular patient
 exports.patientTableFields=function()
 {
-    return "SELECT Patient.PatientSerNum, Patient.TestUser, Patient.FirstName, Patient.LastName, Patient.TelNum, Patient.PatientSerNum AS PatientId, Patient.Email, Patient.Alias, Patient.Language, Patient.EnableSMS,Patient.ProfileImage, Patient.SSN, Patient.AccessLevel FROM Patient, Users WHERE Users.Username LIKE ? AND Users.UserTypeSerNum=Patient.PatientSerNum AND Patient.LastUpdated > ?"
+    /* Note: "" AS PatientId
+     *       This was added to make the Account tab display nothing instead of the Patient's MRN
+     *       The PatientId attribute can be removed after qplus PR #829 is merged
+     * -SB */
+    return "SELECT Patient.PatientSerNum, Patient.TestUser, Patient.FirstName, Patient.LastName, Patient.TelNum, \"\" AS PatientId, Patient.Email, Patient.Alias, Patient.Language, Patient.EnableSMS,Patient.ProfileImage, Patient.SSN, Patient.AccessLevel FROM Patient, Users WHERE Users.Username LIKE ? AND Users.UserTypeSerNum=Patient.PatientSerNum AND Patient.LastUpdated > ?"
 };
 
 exports.patientDoctorTableFields=function()
