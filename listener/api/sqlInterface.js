@@ -8,6 +8,7 @@ const Mail              = require('./../mailer/mailer.js');
 const utility           = require('./../utility/utility');
 const logger            = require('./../logs/logger');
 const {OpalSQLQueryRunner} = require("../sql/opal-sql-query-runner");
+const ssl               = require('../security/ssl');
 
 var exports = module.exports = {};
 
@@ -406,7 +407,7 @@ exports.checkIn = async function (requestObject) {
                     break;
                 }
                 catch (error) {
-                    logger.log("verbose", `Failed to check in PatientSerNum = ${patientSerNum} using MRN = ${mrn} (site = ${mrnSite}); error: ${JSON.stringify(error)}`);
+                    logger.log("verbose", `Failed to check in PatientSerNum = ${patientSerNum} using MRN = ${mrn} (site = ${mrnSite}); error: ${error}`);
                     lastError = error;
                 }
             }
@@ -421,29 +422,42 @@ exports.checkIn = async function (requestObject) {
 };
 
 /**
- * @description Calls ORMS in order to check in the patient on Aria and Medivisit.
+ * @description Calls the OIE in order to check in the patient on Aria and Medivisit.
  * @param {string} mrn One of the patient's medical record numbers.
  * @param {string} mrnSite The site to which the MRN belongs.
  * @returns {Promise} Resolves if check-in succeeds, otherwise rejects with an error.
  */
 function checkIntoAriaAndMedi(mrn, mrnSite) {
-    let r = Q.defer();
-    request.post(config.CHECKIN_PATH, {
-        json: true,
-        body: {
-            "mrn": mrn,
-            "site": mrnSite,
-            "room": config.CHECKIN_ROOM,
-        },
-    }, function(error, response, body) {
-        logger.log('verbose', 'Checked into aria and medi - response: ' + JSON.stringify(response));
-        logger.log('verbose', 'Checked into aria and medi - body: ' + JSON.stringify(body));
+    return new Promise((resolve, reject) => {
+        // Validate the existence of the check-in path
+        if (!config.CHECKIN_PATH || config.CHECKIN_PATH === "") reject("No value was provided for CHECKIN_PATH in the config file");
 
-        if (error) r.reject(error);
-        else if (response.statusCode !== 200) r.reject(`Request returned with a response status other than '200 OK': status = ${response.statusCode}, body = ${JSON.stringify(body)}`);
-        else r.resolve();
+        let options = {
+            url: config.CHECKIN_PATH,
+            json: true,
+            body: {
+                "mrn": mrn,
+                "site": mrnSite,
+                "room": config.CHECKIN_ROOM,
+            },
+        };
+
+        // Add an SSL certificate to the request's options if using https
+        try {
+            if (options.url.includes("https")) ssl.attachCertificate(options);
+        }
+        catch (error) { reject(error); return }
+
+        request.post(options, function(error, response, body) {
+            logger.log('verbose', 'Checked into aria and medi - response: ' + JSON.stringify(response));
+            logger.log('verbose', 'Checked into aria and medi - body: ' + JSON.stringify(body));
+
+            if (error) reject(error);
+            else if (!response) reject("No response received");
+            else if (response.statusCode !== 200) reject(`Request returned with a response status other than '200 OK': status = ${response.statusCode}, body = ${JSON.stringify(body)}`);
+            else resolve();
+        });
     });
-    return r.promise;
 }
 
 /**
