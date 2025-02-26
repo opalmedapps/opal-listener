@@ -8,8 +8,8 @@ class PatientTestCollectedDatesHandler extends ApiRequestHandler {
 	 * @param {OpalRequest} requestObject OpalRequest object
 	 */
 	static async handleRequest(requestObject) {
-        const lastUpdated = requestObject.params.Date ? new Date(Number(requestObject.params.Date)) : 0;
-		const patient = await Patient.getPatientByUsername(requestObject.meta.UserID);
+		const lastUpdated = requestObject.params.Date ? new Date(Number(requestObject.params.Date)) : 0;
+		const patient = await PatientTestCollectedDatesHandler.getTargetPatient(requestObject);
 		const patientTest = new PatientTestResult(patient);
 		const testDates = (await patientTest.getTestDates(lastUpdated)).map(queryRes=>queryRes.collectedDateTime);
 		return {
