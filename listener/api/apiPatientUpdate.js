@@ -14,7 +14,7 @@ const { Version } = require('../../src/utility/version');
  *             After 1.12.2: Doesn't do anything anymore, but was kept to record 'Login' in PatientActivityLog.
  */
 exports.login = async function(requestObject) {
-    if (Version.versionLessOrEqual(requestObject.meta.AppVersion, Version.version_1_12_2)) {
+    if (Version.versionLessOrEqual(requestObject.AppVersion, Version.version_1_12_2)) {
         let patientSerNum = await sqlInterface.getSelfPatientSerNum(requestObject.UserID);
         return await sqlInterface.getPatientTableFields(requestObject.UserID, patientSerNum, requestObject.Parameters.Fields, requestObject.Parameters.timestamp);
     }
