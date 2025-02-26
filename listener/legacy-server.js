@@ -71,7 +71,7 @@ function listenForRequest(requestType){
             }
         },
         function(error){
-	        logError(error);
+            logger.log('error', `Failed to read 'child_added' snapshot while listening to '${requestType}'`, error);
         });
 }
 exports.listenForRequest = listenForRequest;
@@ -123,25 +123,6 @@ function logResponse(response){
 }
 
 /**
- * logError
- * @param err
- * @param requestObject
- * @param requestKey
- * @desc logs every error the listener encounters
- */
-function logError(err, requestObject, requestKey)
-{
-    err = JSON.stringify(err);
-    logger.error("Error processing request!", {
-        error: err,
-        deviceID:requestObject.DeviceId,
-        userID:requestObject.UserID,
-        request:requestObject.Request,
-        requestKey: requestKey
-    });
-}
-
-/**
  * processRequest
  * @param headers
  * @desc takes in the request read from Firebase and routes it to the correct API handler
@@ -163,11 +144,10 @@ function processRequest(headers){
         logger.log('debug', 'Processing security request');
         processApi.securityAPI[requestObject.Request](requestKey, requestObject)
             .then(function (response) {
-
                 r.resolve(response);
             })
             .catch(function (error) {
-                logError(error, requestObject, requestKey);
+                logger.log('error', 'Processing security request failed', error);
                 r.resolve(error);
             });
     } else {

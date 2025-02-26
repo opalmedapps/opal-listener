@@ -1,6 +1,7 @@
 var sqlInterface=require('./../api/sqlInterface.js');
 var q = require('q');
 var utility=require('./../utility/utility.js');
+const { Version } = require('../../src/utility/version');
 const logger            = require('./../logs/logger');
 
 const FIVE_MINUTES = 300000;
@@ -12,6 +13,8 @@ exports.resetPasswordRequest=function(requestKey, requestObject)
     var responseObject = {};
     //Get the patient fields to verify the credentials
 
+    logger.log('debug', 'Running function to either VerifyAnswer or SetNewPassword');
+
     sqlInterface.getPatientFieldsForPasswordReset(requestObject).then(function(patient){
         //Check for injection attacks by the number of rows the result is returning
         if(patient.length>1||patient.length === 0)
@@ -20,9 +23,7 @@ exports.resetPasswordRequest=function(requestKey, requestObject)
             r.resolve(responseObject);
         }else{
             //If the request is not erroneous simply direct the request to appropriate function based on the request mapping object
-            requestMappings[requestObject.Request](requestKey, requestObject,patient[0]).then(function(response){
-                r.resolve(response);
-            });
+            requestMappings[requestObject.Request](requestKey, requestObject, patient[0]).then(r.resolve).catch(r.reject);
         }
     }).catch(function(error){
         //If there is an error with the queries reply with an error message
@@ -74,7 +75,8 @@ exports.verifySecurityAnswer=function(requestKey,requestObject,patient)
             var answerValid = unencrypted.Answer === patient.AnswerText;
             var isVerified = false;
 
-            if(unencrypted.PasswordReset){
+            // Use of RAMQ (SSN) in password reset requests is no longer supported after 1.12.2 (QSCCD-476)
+            if (unencrypted.PasswordReset && Version.versionLessOrEqual(requestObject.AppVersion, Version.version_1_12_2)) {
                 isVerified = ssnValid;
             } else {
                 isVerified = answerValid;
@@ -88,6 +90,7 @@ exports.verifySecurityAnswer=function(requestKey,requestObject,patient)
                         r.resolve(response);
                     })
                     .catch(function(error){
+                        logger.log('error', 'Failed to set the device as trusted', error);
                         r.reject({ Headers:{RequestKey:requestKey,RequestObject:requestObject}, Code: 2, Data:{},Response:'error', Reason:'Could not set trusted device'});
                     })
 
@@ -110,10 +113,16 @@ exports.verifySecurityAnswer=function(requestKey,requestObject,patient)
 exports.setNewPassword=function(requestKey, requestObject, user)
 {
     var r=q.defer();
-    var ssn = user.SSN.toUpperCase();
+    // Use of RAMQ (SSN) to encrypt password reset requests is no longer supported after 1.12.2 (QSCCD-476)
+    let secret = Version.versionGreaterThan(requestObject.AppVersion, Version.version_1_12_2)
+        ? utility.hash(user.Email)
+        : utility.hash(user.SSN.toUpperCase());
     var answer = user.AnswerText;
+    const errorResponse = {Headers: {RequestKey:requestKey, RequestObject:requestObject}, Code:2, Data:{}, Response:'error', Reason:'Could not set password'};
 
-    utility.decrypt(requestObject.Parameters, utility.hash(ssn), answer)
+    logger.log('debug', `Running function setNewPassword for user with UserTypeSerNum = ${user.UserTypeSerNum}`);
+
+    utility.decrypt(requestObject.Parameters, secret, answer)
         .then((unencrypted)=> {
             sqlInterface.setNewPassword(utility.hash(unencrypted.newPassword), user.UserTypeSerNum).then(function(){
                 logger.log('debug', 'successfully updated password');
@@ -121,11 +130,12 @@ exports.setNewPassword=function(requestKey, requestObject, user)
                 r.resolve(response);
             }).catch(function(error){
                 logger.log('error', 'error updating password', error);
-
-                var response = { Headers:{RequestKey:requestKey,RequestObject:requestObject}, Code: 2, Data:{},Response:'error', Reason:'Could not set password'};
-                r.resolve(response);
+                r.resolve(errorResponse);
             });
-        }).catch(err => r.reject(err));
+        }).catch(err => {
+            logger.log('error', 'Decryption error during setNewPassword', err);
+            r.reject(errorResponse);
+        });
 
     return r.promise;
 };
