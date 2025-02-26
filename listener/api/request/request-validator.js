@@ -6,7 +6,7 @@ const {OpalResponseError} = require('../response/response-error');
 const sqlInterface = require('../sqlInterface');
 const utility = require('../../utility/utility');
 const logger = require('../../logs/logger');
-const config = require('../../config/config.json');
+const config = require('../../config.json');
 
 /**
 * Library imports

@@ -13,7 +13,7 @@
  * HEARTBEAT DB DEPENDENCIES
  */
 const admin		= require("firebase-admin");
-const config   	= require('./../config/config.json');
+const config   	= require('./../config.json');
 const logger	= require('./../logs/logger');
 const mysql		= require('mysql');
 const q			= require("q");
@@ -72,7 +72,7 @@ const dbQuery = "call mysql.my_memory();";
 /******************************
  * DATABASE connection to MySQL
  * The configuration is from 
- * "const config = require('./../config/config.json');" at the top
+ * "const config = require('./../config.json');" at the top
  ******************************/
 var conn = mysql.createConnection({
 	host: config.HOST,

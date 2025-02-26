@@ -11,16 +11,19 @@ These are the requirements to run a local listener app. The second requirement i
 
 1) Install [Node.js](https://nodejs.org/en/download/)
 2) (**Only required if wanting to access live data**) Have access to clinical computer in the MedPhys department
-3) Configure a test DB. It is suggested to use Docker to run your local database. [Instruction here](https://gitlab.com/opalmedapps/db-docker). You can, alternatively, setup a local mysql server using XAMP/MAMP by following [these instructions](https://gitlab.com/opal-teaching/opal-backend-wiki/-/blob/master/backend-installation.md#database)
-4) Setup firebase app. You can follow [these instruction](https://gitlab.com/opal-teaching/opal-backend-wiki/-/blob/master/backend-installation.md#firebase) to complete the setup.
+3) Install [Docker](https://docs.docker.com/get-docker/) (Should you choose the docker installation)
+4) Configure a test DB. It is suggested to use Docker to run your local database. [Instruction here](https://gitlab.com/opalmedapps/db-docker). You can, alternatively, setup a local mysql server using XAMP/MAMP by following [these instructions](https://gitlab.com/opal-teaching/opal-backend-wiki/-/blob/master/backend-installation.md#database)
+5) Setup firebase app. You can follow [these instruction](https://gitlab.com/opal-teaching/opal-backend-wiki/-/blob/master/backend-installation.md#firebase) to complete the setup.
 
 ### Installing with Docker
-The project contains a `Dockerfile` and a `docker.compose.yml` to build and run the app within a Docker container.
+The project contains a `Dockerfile` and  `docker.compose.yml` files to build and run the app within a Docker container. Either for production like setup or development using a local volume.
 
 ##### Step 1 | Add Firebase configuration
-Move your firebase admin key file in the `env/local` directory located at the root. 
+Copy your firebase admin key file in the `listener/firebase` directory located at the root of the project.
+> The content of this directory is ignore by versioning
+
 ##### Step 2 | App configuration
-Move `config_template.json` to `env/local` then rename it `config.json`. Then edit the require fields. You should at least need to change these fields:
+Copy and rename `config_template.json` to `config.json`. Then edit the require fields. You should at least need to change these fields:
 ```
 MYSQL_USERNAME: "The database user name",
 MYSQL_PASSWORD: "The database password",
@@ -29,7 +32,7 @@ MYSQL_DATABASE_QUESTIONNAIRE: "The name of the QuestionnaireDB",
 MYSQL_DATABASE_PORT: "3306",
 MYSQL_DATABASE_HOST: "host.docker.internal",
 HOST: "host.docker.internal",
-FIREBASE_ADMIN_KEY: "Absolute path to the json firebase admin key file that you copied in step 1,
+FIREBASE_ADMIN_KEY: "/app/firebase/THE_NAME_OF_YOU_FIRE.json,
 DATABASE_URL: "This value can be found in the web_config.txt file in your firebase folder",
 LATEST_STABLE_VERSION: "0.0.1",
 FIREBASE_ROOT_BRANCH: "dev3/A0",
@@ -37,28 +40,34 @@ FIREBASE_ROOT_BRANCH: "dev3/A0",
 
 > Leave all other variables blank by setting them to empty double quotes: ""
 
-> When running the app using Docker, the `./listener/config/config.json` file is overwritten in the container with the one in the `env/local` folder. Your firebase admin key file is also copied in the container for it to be accessible.
+> Notice that the host names are `host.docker.internal` and NOT `localhost`. This is required for a container to call a localhost service on the host system.
 
-##### Step 3 | Build the Docker image
-To build the Docker image, run the command that accepts an environment as an argument.
+> When running the app using Docker, your firebase admin key file is copied in the container for it to be accessible.
 
+##### Step 3 | Install the NPM pakages
+Run the following command in the `listener` folder to install NPM dependencies and dev dependencies:
 ```
-docker compose build --build-arg ENV_CONFIG=local
+npm install
 ```
 
-The `ENV_CONFIG` build argument specifies which environment we build our app with. It reflects the name of the directory in the `env` folder found at the root of the code base. EX: local, prod, preprod
+
+##### Step 4 | Build the Docker image
+To build the Docker image and run the container, running the following command at the root of the project
+```
+docker compose up 
+```
+
+The project also contains a `docker-compose.prod.ylm` This file is used to build an image and a container with an attached volume and a different start command. You can use this file should you want a none developpement set up. To use this file run the command:
+```
+docker compose -f docker-compose.prod.yml up --build
+```
 
 > More informations about Docker compose can be found [here](https://docs.docker.com/compose/)
 
-##### Step 4 | Run the application
-Start you app with the following command:
-```
-docker compose up
-```
 
 ### Installing with NodeJs
 
-Make sure all the references in /listener/config/config.json are correct. Currently they are pointing to locations on the Opal server.
+Make sure all the references in /listener/config.json are correct. Currently they are pointing to locations on the Opal server.
 
 Once the configurations are set up properly, you need to install all the dependencies:
 

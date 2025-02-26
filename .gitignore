@@ -1,6 +1,6 @@
 # config files
-env/local/
-listener/config/config.json
+listener/config.json
+listener/firebase/*
 
 # Logs
 logs
