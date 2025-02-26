@@ -3,7 +3,7 @@
   "MYSQL_PASSWORD": "",
   "MYSQL_DATABASE": "OpalDB",
   "MYSQL_DATABASE_QUESTIONNAIRE": "",
-  "MYSQL_REGISTRATION_DATABASE": "registerdb",
+  "MYSQL_DATABASE_REGISTRATION": "registerdb",
   "MYSQL_DATABASE_HOST": "host.docker.internal",
   "MYSQL_DATABASE_PORT": 3306,
   "SSL": {

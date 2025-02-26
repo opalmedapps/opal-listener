@@ -24,9 +24,11 @@ Copy your firebase admin key file into the `src/config/firebase` directory.
 > The content of this directory is ignore by versioning
 
 ##### Step 2 | App configuration
+
 Copy and rename `listener/config_template.json` to `listener/config.json`.
 Also copy and rename `src/config/config.template.json` to `src/config/config.json`.
 Then edit the required fields. Across both files, you should at least need to change these fields:
+
 ```
 listener/config.json
 
@@ -34,11 +36,12 @@ MYSQL_USERNAME: "The database user name",
 MYSQL_PASSWORD: "The database password",
 MYSQL_DATABASE: "The name of the OpalDB",
 MYSQL_DATABASE_QUESTIONNAIRE: "The name of the QuestionnaireDB",
-MYSQL_DATABASE_PORT: "3306",
+MYSQL_DATABASE_REGISTRATION: "The name of the registerdb",
+MYSQL_DATABASE_PORT: 3306,
 MYSQL_DATABASE_HOST: "host.docker.internal",
-HOST: "host.docker.internal",
 LATEST_STABLE_VERSION: "0.0.1"
 ```
+
 ```
 src/config/config.json
 
