@@ -127,7 +127,7 @@ class RequestHandler {
     async sendResponse(encryptedResponse, firebaseRequestKey, userId, requestType) {
         legacyLogger.log('debug', 'API: Sending response to Firebase');
         const path = (requestType === REQUEST_TYPE.REGISTRATION)
-            ? `registration-api/response/${firebaseRequestKey}`
+            ? `registration-api/responses/${firebaseRequestKey}`
             : `users/${userId}/${firebaseRequestKey}`;
         await this.#databaseRef.child(path).set(encryptedResponse);
     }
