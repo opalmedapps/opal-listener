@@ -1,6 +1,8 @@
 const {ApiRequestHandler} = require("../../../../api-request-handler");
 const {Patient} = require("../../patient");
 const SecurityDjango = require("../../../../../security/securityDjango");
+const {Version} = require('../../../../../../src/utility/version');
+const logger = require("../../../../../logs/logger");
 
 class GetSecurityQuestionAnswerListRequestHandler extends ApiRequestHandler{
     /**
@@ -14,6 +16,9 @@ class GetSecurityQuestionAnswerListRequestHandler extends ApiRequestHandler{
         let activeSecurityQuestions;
         let securityQuestionList;
         let apiResponse;
+        let activeQuestionForLowerVersion = [];
+        let securityQuestionForLowerVersion = [];
+        let questionIdObj = {}
 
         apiResponse = await SecurityDjango.getSecurityQuestionList(requestObject.meta.UserID);
         if (apiResponse.length === 0) throw "API call returned a empty list of questions for the current user";
@@ -22,13 +27,52 @@ class GetSecurityQuestionAnswerListRequestHandler extends ApiRequestHandler{
         apiResponse = await SecurityDjango.getActiveSecurityQuestions();
         if (apiResponse.length === 0) throw "API call returned a empty list of all the active questions";
         activeSecurityQuestions = apiResponse.results;
-        return {
-            "data": {
-                "patientSerNum": patient.patientSerNum,
-                "securityQuestionList": securityQuestionList,
-                "activeSecurityQuestions": activeSecurityQuestions,
-            }
-        };
+
+        // Getting security question list format read by the app has changed after 1.12.2
+        if (Version.versionLessOrEqual(requestObject.meta.AppVersion, Version.version_1_12_2)) {
+            activeSecurityQuestions.forEach(questionObj => {
+                activeQuestionForLowerVersion.push(
+                    {
+                        "SecurityQuestionSerNum": questionObj.id,
+                        "QuestionText_EN": questionObj.title_en,
+                        "QuestionText_FR": questionObj.title_fr,
+                        "Active": 1
+                    }
+                );
+                questionIdObj[questionObj.title_en] = questionObj.id;
+                questionIdObj[questionObj.title_fr] = questionObj.id;
+            });
+
+            securityQuestionList.forEach(securityQuestionObj => {
+                let questionId = -1;
+                if (questionIdObj[securityQuestionObj.question] !== "undefined") questionId = questionIdObj[securityQuestionObj.question];
+                securityQuestionForLowerVersion.push(
+                    {
+                        "SecurityAnswerSerNum": securityQuestionObj.id,
+                        "QuestionText_EN": securityQuestionObj.question,
+                        "QuestionText_FR": securityQuestionObj.question,
+                        "Active": 1,
+                        "SecurityQuestionSerNum": questionId
+                    }
+                );
+            });
+            return {
+                "data": {
+                    "patientSerNum": patient.patientSerNum,
+                    "securityQuestionWithAnswerList": securityQuestionForLowerVersion,
+                    "activeSecurityQuestionList": activeQuestionForLowerVersion,
+                }
+            };
+        }
+        else{
+            return {
+                "data": {
+                    "patientSerNum": patient.patientSerNum,
+                    "securityQuestionList": securityQuestionList,
+                    "activeSecurityQuestions": activeSecurityQuestions,
+                }
+            };
+        }
     }
 }
 

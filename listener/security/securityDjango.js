@@ -56,6 +56,31 @@ class SecurityDjango {
     }
 
     /**
+     * @desc Calls the backend to get a specific active security question from SecurityQuestion model.
+     * @param {int} questionId The security question id.
+     * @returns {Promise<any>} Resolves to a specific active security questions.
+     */
+    static async getSpecificActiveSecurityQuestion(questionId) {
+        if (!questionId) throw new Error('Cannot call API; no questionId value provided');
+        const requestParams = {
+            Parameters: {
+                method: 'get',
+                url: `/api/security-questions/${questionId}/`,
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+            },
+        };
+        logger.log('info', "API: Calling backend to get a specific active security question");
+        const response = await ApiRequest.makeRequest(requestParams);
+        if (response?.data) return response.data;
+        else {
+            logger.log('error', 'Error from API call', response);
+            throw new Error('Failed to get a specific active security question from the backend');
+        }
+    }
+
+    /**
      * @desc Calls the backend to get a list of security questions for the current user.
      * @param {string} userId The Firebase username of the user making the request.
      * @returns {Promise<any>} Resolves to a list of security questions for the current user.
@@ -77,6 +102,33 @@ class SecurityDjango {
         else {
             logger.log('error', 'Error from API call', response);
             throw new Error('Failed to get a list of security questions from the backend');
+        }
+    }
+
+    /**
+     * @desc Calls the backend to get a specific security question from SecurityAnswer model for the current user.
+     * @param {string} userId The Firebase username of the user making the request.
+     * @param {int} questionId The security question id.
+     * @returns {Promise<any>} Resolves to a specific security questions for the current user.
+     */
+    static async getSpecificSecurityQuestion(userId, questionId) {
+        if (!userId) throw new Error('Cannot call API; no userId value provided');
+        if (!questionId) throw new Error('Cannot call API; no questionId value provided');
+        const requestParams = {
+            Parameters: {
+                method: 'get',
+                url: `/api/caregivers/${userId}/security-questions/${questionId}/`,
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+            },
+        };
+        logger.log('info', "API: Calling backend to get a specific security question for the user");
+        const response = await ApiRequest.makeRequest(requestParams);
+        if (response?.data) return response.data;
+        else {
+            logger.log('error', 'Error from API call', response);
+            throw new Error('Failed to get a specific security question from the backend');
         }
     }
 
