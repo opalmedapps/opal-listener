@@ -69,6 +69,47 @@ class opalRequest {
 		};
 		return await ApiRequest.makeRequest(requestParams);
 	}
+
+	/**
+	 registrationRegister
+	 @desc call the new backend api 'registration/<std:code>/register/.
+	 @param request, registerData
+	 request = {
+	 	ramq: str,
+	 	language: str,
+	 }
+	 registerData = {
+	 	patient: {
+	 		legacy_id: int
+	 	},
+	 	caregiver: {
+	 		language: str,
+	 		phone_number: str,
+	 	},
+	 	security_answers: [
+	 		{
+				question: str,
+				answer: str,
+			},
+	 	],
+	 }
+	 @return {Promise}
+	 **/
+	static async registrationRegister(request, registerData) {
+		const language = request?.language ? request.language : 'en';
+		const requestParams = {
+			Parameters: {
+				method: 'post',
+				url: `/api/registration/${request?.ramq}/register/`,
+				headers: {
+					'Content-Type': 'application/json',
+					'Accept-Language': language,
+				},
+				data: registerData,
+			},
+		};
+		return await ApiRequest.makeRequest(requestParams);
+	}
 }
 
 module.exports = opalRequest;
