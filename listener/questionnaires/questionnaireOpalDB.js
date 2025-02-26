@@ -292,7 +292,7 @@ async function questionnaireUpdateStatus(requestObject) {
         await OpalSQLQueryRunner.run(questionnaireQueries.updateQuestionnaireStatus(), [isCompleted, requestObject.Parameters.answerQuestionnaire_id]);
         // TODO: do we rollback if this fails + insert log into DB
 
-        // 3. If the questionnaire is completed, notify the OIE. If an error occurs, don't cause the whole function to fail.
+        // 3. If the questionnaire is completed, notify the ORMS directly. If an error occurs, don't cause the whole function to fail.
         try {
             logger.log("info", "Notifying the OIE that a questionnaire was completed.");
             if (!config.QUESTIONNAIRE_COMPLETED_URL) {
