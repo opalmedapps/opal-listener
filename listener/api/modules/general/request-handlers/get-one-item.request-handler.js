@@ -1,6 +1,5 @@
 const { ApiRequestHandler } = require('../../../api-request-handler');
 const logger = require('../../../../logs/logger');
-const mysql = require('mysql');
 const { OpalSQLQueryRunner } = require('../../../../sql/opal-sql-query-runner');
 const { param } = require('express-validator');
 const sqlInterface = require('../../../sqlInterface');
@@ -10,7 +9,7 @@ const { ValidationError } = require('../../../errors/validation-error');
 class GetOneItemHandler extends ApiRequestHandler {
 
     static validators = [
-        param("category", "Must provide a valid category").exists().custom(value => {
+        param("category", "Must provide a valid category from requestMappings").exists().custom(value => {
             const requestMappings = sqlInterface.getSqlApiMappings();
             return requestMappings.hasOwnProperty(value);
         }),
@@ -18,17 +17,18 @@ class GetOneItemHandler extends ApiRequestHandler {
     ];
 
     /**
-     * @description Returns a single item (document, appointment, etc.) based on its SerNum.
+     * @description Returns a single item (document, appointment, etc.) based on its SerNum. This is done by calling
+     *              'sqlSingleItem' queries provided in sqlInterface's requestMappings.
      * @param {OpalRequest} requestObject The request object.
      * @returns {Promise<{Data: *}>} An object with Data containing the category as the key and an array with the item
-     *                               as its value (same return format as the 'Refresh' request).
+     *                               as its value (same return format as the 'Refresh' request for compatibility).
      */
     static async handleRequest(requestObject) {
         // Validate request parameters
         const errors = await GetOneItemHandler.validate(requestObject.parameters);
         if (!errors.isEmpty()) {
             logger.log("error", "Validation Error", errors);
-            throw new ValidationError(errors.errors());
+            throw new ValidationError(errors.errors);
         }
         let { category, serNum } = requestObject.parameters;
         let serNumInt = parseInt(serNum);
