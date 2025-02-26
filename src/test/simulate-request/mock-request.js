@@ -16,7 +16,7 @@ const requestDataApi = {
     UserID: 'JUYxJadQuhhOkC1TfrAqD4crhi73',
     Parameters: {
         method: 'get',
-        url: '/api/sites',
+        url: '/api/app/home',
         headers: {
             'Content-Type': 'application/json',
             'Accept-Language': 'fr',
@@ -24,6 +24,27 @@ const requestDataApi = {
     },
     Timestamp: '',
     UserEmail: 'muhc.app.mobile@gmail.com',
+};
+
+/**
+ * Registration sample request
+ */
+const registrationRequest = {
+    Request: 'registration-api',
+    BranchName: 'code12345678',
+    Parameters: {
+        method: 'get',
+        url: '/api/registration/by-hash/',
+        headers: {
+            'Content-Type': 'application/json',
+            'Accept-Language': 'fr',
+        },
+        data: {
+            ipAddress: '192.168.32.1',
+            ramq: 'OTES12345678',
+        },
+    },
+    Timestamp: '',
 };
 
 /**
@@ -43,4 +64,8 @@ const requestData = {
     UserEmail: 'muhc.app.mobile@gmail.com',
 };
 
-module.exports = requestDataApi;
+module.exports = {
+    registrationRequest,
+    requestData,
+    requestDataApi,
+};

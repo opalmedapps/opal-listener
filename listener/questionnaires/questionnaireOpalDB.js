@@ -13,8 +13,6 @@ exports.getQuestionnaire = getQuestionnaire;
 exports.questionnaireSaveAnswer = questionnaireSaveAnswer;
 exports.questionnaireUpdateStatus = questionnaireUpdateStatus;
 
-const lastUpdatedDateForGettingPatient = '0000-00-00';
-
 /*
 FUNCTIONS TO GET QUESTIONNAIRES (QUESTIONNAIRE V2)
  */
@@ -59,12 +57,13 @@ function getQuestionnaireInOpalDB(requestObject) {
 /**
  * getQuestionnaireList
  * @desc Returns a promise containing the questionnaire list for a particular user. Used for the new questionnaire 2019
+ * @deprecated Since QSCCD-230
  * @param {object} requestObject
  * @return {Promise} Returns a promise that contains a list of questionnaire data
  */
 function getQuestionnaireList(requestObject) {
 
-    return OpalSQLQueryRunner.run(opalQueries.patientTableFields(), [requestObject.UserID, lastUpdatedDateForGettingPatient])
+    return OpalSQLQueryRunner.run(opalQueries.patientTableFieldsForUser(), [requestObject.UserID])
         .then(function (patientSerNumAndLanguageRow) {
 
             if (questionnaireValidation.validatePatientSerNumAndLanguage(patientSerNumAndLanguageRow)) {
@@ -92,6 +91,7 @@ function getQuestionnaireList(requestObject) {
  * @param {object} requestObject the request
  * @returns {Promise} Returns a promise that contains the questionnaire data
  */
+// TODO (QSCCD-84) - Make use of requestObject.TargetPatientID to get the another patient's questionnaire, but in the current user's language
 function getQuestionnaire(requestObject) {
 
     return new Promise(function (resolve, reject) {
@@ -101,7 +101,7 @@ function getQuestionnaire(requestObject) {
 
         } else {
             // get language in the database
-            OpalSQLQueryRunner.run(opalQueries.patientTableFields(), [requestObject.UserID, lastUpdatedDateForGettingPatient])
+            OpalSQLQueryRunner.run(opalQueries.patientTableFieldsForUser(), [requestObject.UserID])
                 .then(function (patientSerNumAndLanguageRow) {
 
                     if (questionnaireValidation.validatePatientSerNumAndLanguage(patientSerNumAndLanguageRow)) {
@@ -143,7 +143,7 @@ function questionnaireSaveAnswer(requestObject) {
 
         } else {
             // get language in the opal database
-            OpalSQLQueryRunner.run(opalQueries.patientTableFields(), [requestObject.UserID, lastUpdatedDateForGettingPatient])
+            OpalSQLQueryRunner.run(opalQueries.patientTableFieldsForUser(), [requestObject.UserID])
                 .then(function (patientSerNumAndLanguageRow) {
 
                     if (questionnaireValidation.validatePatientSerNumAndLanguage(patientSerNumAndLanguageRow)) {
@@ -183,7 +183,7 @@ async function questionnaireUpdateStatus(requestObject) {
 
     // 1. update the status in the answerQuestionnaire table in questionnaire DB
     // First, get the patientSerNum in the opal database
-    let patientSerNumAndLanguageRow = await OpalSQLQueryRunner.run(opalQueries.patientTableFields(), [requestObject.UserID, lastUpdatedDateForGettingPatient]);
+    let patientSerNumAndLanguageRow = await OpalSQLQueryRunner.run(opalQueries.patientTableFieldsForUser(), [requestObject.UserID]);
 
     if (!questionnaireValidation.validatePatientSerNumAndLanguage(patientSerNumAndLanguageRow)) {
         throw new Error('Error updating status: No matching PatientSerNum found in opalDB');

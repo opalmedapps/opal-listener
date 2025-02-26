@@ -26,7 +26,7 @@ class PatientTestTypeResultsHandler extends ApiRequestHandler {
 			throw new ValidationError(errors.array());
 		}
 		const testTypeSerNum = requestObject.parameters.testTypeSerNum;
-		const patient = await Patient.getPatientByUsername(requestObject.meta.UserID);
+		const patient = await PatientTestTypeResultsHandler.getTargetPatient(requestObject);
 		const patientTests = new PatientTestResult(patient);
 		const latestPatientTestResultByType = await patientTests.getLatestTestResultByTestType(testTypeSerNum);
 		if(!latestPatientTestResultByType) return {"data": null};

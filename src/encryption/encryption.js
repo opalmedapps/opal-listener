@@ -14,11 +14,16 @@ class EncryptionUtilities {
      */
     static async encryptResponse(response, secret, salt) {
         legacyLogger.log('debug', 'API: Encrypting response');
-        return legacyUtility.encrypt(
-            response,
-            secret,
-            salt,
-        );
+        try {
+            return legacyUtility.encrypt(
+                response,
+                secret,
+                salt,
+            );
+        }
+        catch (error) {
+            throw new Error('ENCRYPTION', { cause: error });
+        }
     }
 
     /**
@@ -30,20 +35,25 @@ class EncryptionUtilities {
      */
     static async decryptRequest(request, secret, salt) {
         legacyLogger.log('debug', 'API: Decrypting request');
-        const decryptedRequest = await legacyUtility.decrypt(
-            {
-                req: request.Request,
-                params: request.Parameters,
-            },
-            secret,
-            salt,
-        );
+        try {
+            const decryptedRequest = await legacyUtility.decrypt(
+                {
+                    req: request.Request,
+                    params: request.Parameters,
+                },
+                secret,
+                salt,
+            );
 
-        return {
-            ...request,
-            Request: decryptedRequest.req,
-            Parameters: decryptedRequest.params,
-        };
+            return {
+                ...request,
+                Request: decryptedRequest.req,
+                Parameters: decryptedRequest.params,
+            };
+        }
+        catch (error) {
+            throw new Error('DECRYPTION', { cause: error });
+        }
     }
 
     /**
@@ -56,11 +66,29 @@ class EncryptionUtilities {
     }
 
     /**
-     * @description SQL query to get security question hash used for encryption
+     * @description Get secret value which an hash of the userID.
+     * @param {object} snapshot Firebase snapshot value
+     * @returns {string} Value of the secret string use for encryption and decryption
+     */
+    static async getSecret(snapshot) {
+        return EncryptionUtilities.hash(snapshot.UserID);
+    }
+
+    /**
+     * @description Get salt which is the security answer related to the device making the request.
+     * @param {object} snapshot Firebase snapshot value
+     * @returns {string} salt value for decryption
+     */
+    static async getSalt(snapshot) {
+        return EncryptionUtilities.getAnswerText(snapshot.UserID);
+    }
+
+    /**
+     * @description SQL query to get security question hash used for encryption and decryption
      * @param {string} userId ID used to retrive salt.
      * @returns {string} Security question hash.
      */
-    static async getSalt(userId) {
+    static async getAnswerText(userId) {
         const query = mysql.format(`
             SELECT
                 SA.AnswerText
@@ -78,9 +106,14 @@ class EncryptionUtilities {
             LIMIT 1
         `, [userId]);
 
-        const response = await legacyOpalSqlRunner.OpalSQLQueryRunner.run(query);
-        return response[0].AnswerText;
+        try {
+            const response = await legacyOpalSqlRunner.OpalSQLQueryRunner.run(query);
+            return response[0].AnswerText;
+        }
+        catch (error) {
+            throw new Error('ENCRYPTION_SALT', { cause: error });
+        }
     }
 }
 
-exports.EncryptionUtilities = EncryptionUtilities;
+module.exports = EncryptionUtilities;

@@ -1,4 +1,3 @@
-const mysql             = require('mysql');
 const filesystem        = require('fs');
 const Q                 = require('q');
 const queries           = require('./../sql/queries.js');
@@ -9,6 +8,8 @@ const utility           = require('./../utility/utility');
 const logger            = require('./../logs/logger');
 const {OpalSQLQueryRunner} = require("../sql/opal-sql-query-runner");
 const testResults       = require("./modules/test-results");
+const questionnaires    = require("./modules/questionnaires");
+const { Patient } = require('./modules/patient/patient');
 
 /******************************
  * MAPPINGS
@@ -28,20 +29,23 @@ const testResults       = require("./modules/test-results");
  */
 const requestMappings =
     {
+        /**
+         * Deprecated: 'Patient'
+         */
         'Patient': {
             sql: queries.patientTableFields(),
             processFunction: loadProfileImagePatient,
-            numberOfLastUpdated: 1
+            numberOfLastUpdated: 0
         },
         'Documents': {
-            sql: queries.patientDocumentTableFields(),
+            sql: queries.patientDocumentsAll(),
+            sqlSingleItem: queries.patientDocumentsOne(),
             numberOfLastUpdated: 2,
-            //processFunction:LoadDocuments,
             table: 'Document',
             serNum: 'DocumentSerNum'
         },
         /**
-         * Deprecated
+         * Deprecated: 'Doctors'
          */
         'Doctors': {
             sql: queries.patientDoctorTableFields(),
@@ -49,11 +53,15 @@ const requestMappings =
             numberOfLastUpdated: 2
         },
         'Diagnosis': {
-            sql: queries.patientDiagnosisTableFields(),
-            numberOfLastUpdated: 1
+            sql: queries.patientDiagnosesAll(),
+            sqlSingleItem: queries.patientDiagnosesOne(),
+            numberOfLastUpdated: 1,
+            table: 'Diagnosis',
+            serNum: 'DiagnosisSerNum',
         },
         'Appointments': {
-            sql: queries.patientAppointmentsTableFields(),
+            sql: queries.patientAppointmentsAll(),
+            sqlSingleItem: queries.patientAppointmentsOne(),
             numberOfLastUpdated: 5,
             processFunction: combineResources,
             table: 'Appointment',
@@ -61,33 +69,36 @@ const requestMappings =
         },
         'Notifications': {
             sql: queries.patientNotificationsTableFields(),
-            numberOfLastUpdated: 0,
+            numberOfLastUpdated: 2,
             table: 'Notification',
             serNum: 'NotificationSerNum'
         },
         /**
-         * Deprecated
+         * Deprecated: 'Tasks'
          */
         'Tasks': {
             sql: queries.patientTasksTableFields(),
             numberOfLastUpdated: 2
         },
         'TxTeamMessages': {
-            sql: queries.patientTeamMessagesTableFields(),
+            sql: queries.patientTxTeamMessagesAll(),
+            sqlSingleItem: queries.patientTxTeamMessagesOne(),
             processFunction: decodePostMessages,
             numberOfLastUpdated: 2,
             table: 'TxTeamMessage',
             serNum: 'TxTeamMessageSerNum'
         },
         'EducationalMaterial': {
-            sql: queries.patientEducationalMaterialTableFields(),
+            sql: queries.patientEducationalMaterialAll(),
+            sqlSingleItem: queries.patientEducationalMaterialOne(),
             processFunction: getEducationTableOfContents,
             numberOfLastUpdated: 3,
             table: 'EducationalMaterial',
             serNum: 'EducationalMaterialSerNum'
         },
         'Announcements': {
-            sql: queries.patientAnnouncementsTableFields(),
+            sql: queries.patientAnnouncementsAll(),
+            sqlSingleItem: queries.patientAnnouncementsOne(),
             processFunction: decodePostMessages,
             numberOfLastUpdated: 2,
             table: 'Announcement',
@@ -100,7 +111,11 @@ const requestMappings =
         'PatientTestTypes': {
             module: testResults,
             processFunction: result => result.data.testTypes
-        }
+        },
+        'QuestionnaireList': {
+            module: questionnaires,
+            processFunction: result => result.data.questionnaireList
+        },
     };
 
 
@@ -112,12 +127,11 @@ const requestMappings =
 
 /**
  * getSqlApiMapping
- * @return {{Patient: {sql, processFunction: loadProfileImagePatient, numberOfLastUpdated: number}, Documents: {sql, numberOfLastUpdated: number, table: string, serNum: string}, Doctors: {sql, processFunction: loadImageDoctor, numberOfLastUpdated: number}, Diagnosis: {sql, numberOfLastUpdated: number}, Appointments: {sql, numberOfLastUpdated: number, processFunction: combineResources, table: string, serNum: string}, Notifications: {sql, numberOfLastUpdated: number, table: string, serNum: string}, Tasks: {sql, numberOfLastUpdated: number}, TxTeamMessages: {sql, numberOfLastUpdated: number, table: string, serNum: string}, EducationalMaterial: {sql, processFunction: getEducationTableOfContents, numberOfLastUpdated: number, table: string, serNum: string}, Announcements: {sql, numberOfLastUpdated: number, table: string, serNum: string}}}
+ * @return {Object}
  */
 exports.getSqlApiMappings = function() {
     return requestMappings;
 };
-
 
 /**
  * runSqlQuery function runs query, its kept due to the many references
@@ -130,112 +144,60 @@ exports.getSqlApiMappings = function() {
 exports.runSqlQuery = OpalSQLQueryRunner.run;
 
 /**
- * getPatientTableFields
- * @desc Gets Patient tables based on userID,  if timestamp defined sends requests that are only updated after timestamp, third parameter is an array of table names, if not present all tables are gathered
- * @param userId
- * @param timestamp
- * @param arrayTables
+ * @desc Fetches and returns data for the given patient in an array of categories from requestMappings.
+ * @param patientSerNum The PatientSerNum of the patient.
+ * @param {string[]} arrayTables The list of categories of data to fetch. Should be keys in requestMappings.
+ * @param [timestamp] Optional date/time; if provided, only items with 'LastUpdated' after this time are returned.
+ *                    If not provided, all data is returned (a default value of 0 is used to query the database).
  * @return {Promise}
  */
-exports.getPatientTableFields = function(userId,timestamp,arrayTables) {
-    const r = Q.defer();
-    var timestp = (timestamp)?timestamp:0;
-    const objectToFirebase = {};
-    let index = 0;
+exports.getPatientTableFields = async function(patientSerNum, arrayTables, timestamp) {
+    timestamp = timestamp || 0;
 
     // Validate the arrayTables
     let invalidCategory = arrayTables.find(e => !requestMappings.hasOwnProperty(e));
-    if (invalidCategory) {
-        r.reject({Response:'error', Reason:`Incorrect refresh parameter: ${invalidCategory}`});
-        return r.promise;
-    }
+    if (invalidCategory) throw {Response: 'error', Reason: `Incorrect refresh parameter: ${invalidCategory}`};
 
-    Q.all(preparePromiseArrayFields(userId,timestp,arrayTables)).then(function(response){
-        if(arrayTables) {
-            for (let i = 0; i < arrayTables.length; i++) {
-                objectToFirebase[arrayTables[i]]=response[index];
-                index++;
-            }
-        }else{
-            for (const key in requestMappings) {
-                objectToFirebase[key]=response[index];
-                index++;
-            }
-        }
-        r.resolve({Data:objectToFirebase,Response:'success'});
-    },function(error){
-        logger.log('error', `Problems querying the database due to ${error}`);
-        r.reject({Response:'error',Reason:`Problems querying the database due to ${error}`});
-    });
-    return r.promise;
+    logger.log('verbose', `Processing select requests in the following categories: ${JSON.stringify(arrayTables)}`);
+    let response = await Promise.all(arrayTables.map(category => processSelectRequest(category, patientSerNum, timestamp)));
+    // Arrange the return object with categories as keys and each corresponding response as a value
+    let responseMapping = Object.fromEntries(arrayTables.map((category, i) => [category, response[i]]));
+    return {
+        Data: responseMapping,
+        Response: 'success',
+    };
 };
 
 /**
- * processSelectRequest
- * @desc Gets the correct request mapping object and runs the query against the sql function
- * @param table
- * @param userId
- * @param timestamp
- * @return {Promise}
+ * @desc Processes a request for data in one of the categories of requestMappings.
+ *       If available, runs the category's 'processFunction' on the result before returning it.
+ * @param {string} category The requested data category. Must be a key in requestMappings.
+ * @param patientSerNum The patient's PatientSerNum.
+ * @param [timestamp] Optional date/time; if provided, only items with 'LastUpdated' after this time are returned.
+ * @returns {Promise<*>}
  */
-function processSelectRequest(table, userId, timestamp) {
-    const requestMappingObject = requestMappings[table];
-
-    let date = new Date(0);
-    if(timestamp) {
-        date=new Date(Number(timestamp));
-    }
-
-    let paramArray = [userId];
-    paramArray = utility.addSeveralToArray(paramArray, date, requestMappingObject.numberOfLastUpdated);
+async function processSelectRequest(category, patientSerNum, timestamp) {
+    const mapping = requestMappings[category];
+    let date = timestamp ? new Date(Number(timestamp)) : new Date(0);
 
     // Request mappings with a 'module' attribute use request handlers in the `listener/api/modules` folder
-    if (requestMappingObject.hasOwnProperty('module')) {
-        return new Promise((resolve, reject) => {
-            requestMappingObject.module[table].handleRequest({
-                meta: {
-                    UserID: userId
-                },
-                params: {
-                    Date: timestamp,
-                },
-            }).then(result => {
-                if (requestMappingObject.processFunction) resolve(requestMappingObject.processFunction(result));
-                else resolve(result);
-            }).catch(reject);
-        })
+    if (mapping.hasOwnProperty('module')) {
+        let result = await mapping.module[category].handleRequest({
+            meta: {
+                TargetPatientID: patientSerNum,
+            },
+            params: {
+                Date: timestamp,
+            },
+        });
+        return mapping.processFunction ? mapping.processFunction(result) : result;
     }
-    else if (requestMappingObject.hasOwnProperty('sql')) {
-        return exports.runSqlQuery(requestMappingObject.sql,paramArray, requestMappingObject.processFunction);
+    else if (mapping.hasOwnProperty('sql')) {
+        let paramArray = [patientSerNum];
+        paramArray = utility.addSeveralToArray(paramArray, date, mapping.numberOfLastUpdated);
+        return await exports.runSqlQuery(mapping.sql, paramArray, mapping.processFunction);
     }
-    else {
-        return requestMappingObject.processFunction(userId,timestamp);
-    }
-}
-
-/**
- * preparePromiseArrayFields
- * @desc Preparing a promise array for later retrieval
- * @param userId
- * @param timestamp
- * @param arrayTables
- * @return {Array}
- */
-function preparePromiseArrayFields(userId,timestamp,arrayTables) {
-    const array = [];
-
-    if(typeof arrayTables!=='undefined')
-    {
-        for (let i = 0; i < arrayTables.length; i++) {
-            array.push(processSelectRequest(arrayTables[i],userId,timestamp));
-        }
-    }else{
-        for (const key in requestMappings) {
-
-            array.push(processSelectRequest(key,userId,timestamp));
-        }
-    }
-    return array;
+    else throw new Error(`requestMapping for '${category}' does not have the necessary properties to complete the request`);
 }
 
 /**
@@ -336,15 +298,18 @@ exports.logPatientAction = function(requestObject){
 };
 
 /**
- * sendMessage
- * @desc inserts a message into messages table
- * @param requestObject
- * @return {Promise}
+ * @desc Gets the patient fields related to the current user.
+ *       TODO this request should be removed once we no longer assume that every user is a patient.
+ * @param requestObject The request object.
+ * @returns {Promise<{Data: *}>}
  */
-exports.sendMessage=function(requestObject) {
-    return exports.runSqlQuery(queries.sendMessage(requestObject));
+exports.getUserPatient = async function(requestObject) {
+    let patientSerNum = await getSelfPatientSerNum(requestObject.UserID);
+    let rows = await exports.runSqlQuery(queries.patientTableFields(), [patientSerNum], loadProfileImagePatient);
+    return {
+        Data: rows[0],
+    }
 };
-
 
 /**
  * CHECKIN FUNCTIONALITY
@@ -478,30 +443,19 @@ async function getMRNs(patientSerNum) {
  * @param requestObject
  * @return {Promise}
  */
-exports.getDocumentsContent = function(requestObject) {
+exports.getDocumentsContent = async function(requestObject) {
+    let documentList = requestObject.Parameters;
+    let patientSerNum = requestObject.TargetPatientID ? requestObject.TargetPatientID : await getSelfPatientSerNum(requestObject.UserID);
+    logger.log('verbose', `Fetching document contents for DocumentSerNums ${JSON.stringify(documentList)}`);
 
-    let r = Q.defer();
-    let documents = requestObject.Parameters;
-    let userID = requestObject.UserID;
-    if(!(typeof documents.constructor !=='undefined'&&documents.constructor=== Array)){
-        r.reject({Response:'error',Reason:'Not an array'});
-    }else{
-        exports.runSqlQuery(queries.getDocumentsContentQuery(), [[documents],userID]).then((rows)=>{
-            if(rows.length === 0) {
-                r.resolve({Response:'success',Data:'DocumentNotFound'});
-            } else {
-                LoadDocuments(rows).then(function(documents) {
-                    if(documents.length === 1) r.resolve({Response:'success',Data:documents[0]});
-                    else r.resolve({Response:'success',Data:documents});
-                }).catch(function (err) {
-                    r.reject({Response:'error', Reason:err});
-                });
-            }
-        }).catch((err)=>{
-            r.reject({Response:'error',Reason:err});
-        });
-    }
-    return r.promise;
+    if (!Array.isArray(documentList)) throw 'Request parameter is not an array';
+    let rows = await exports.runSqlQuery(queries.getDocumentsContentQuery(), [[documentList], patientSerNum]);
+    if (rows.length === 0) throw "Document not found";
+    let documents = await LoadDocuments(rows);
+    return {
+        Response: 'success',
+        Data: documents.length === 1 ? documents[0] : documents,
+    };
 };
 
 /**
@@ -567,6 +521,7 @@ exports.inputFeedback = function(requestObject) {
 	            let email;
                 let subject;
 	            // Determine if the feedback is for the app or patients committee
+                //deprecated (Patients for Patients will be removed)
 	            if (type === 'pfp'){
 		            email = "patients4patients.contact@gmail.com";
 		            subject = "New Suggestion - Opal";
@@ -693,28 +648,6 @@ exports.getFirstEncryption=function(requestObject) {
 exports.getEncryption=function(requestObject)
 {
     return exports.runSqlQuery(queries.userEncryption(),[requestObject.UserID, requestObject.DeviceId]);
-};
-
-/**
- * @name getMapLocation
- * @description Obtains map location via QR code
- * @deprecated
- * @param requestObject
- */
-exports.getMapLocation=function(requestObject) {
-    let r = Q.defer();
-
-    if(!requestObject.Parameters || !requestObject.Parameters.QRCode) {
-        r.reject({Response:'error', Reason:'Incorrect parameter'});
-    }
-
-    exports.runSqlQuery(queries.getMapLocation(),[requestObject.Parameters.QRCode]).then((rows)=>{
-        r.resolve({Response:'success', Data:{MapLocation:rows[0]}});
-    }).catch((err)=>{
-        r.reject({Response:'error', Reason:err});
-    });
-
-    return r.promise;
 };
 
 /**
@@ -1188,10 +1121,10 @@ exports.setTrusted = function(requestObject)
 
 /**
  * Returns a promise containing all new notifications
+ * @deprecated Since QSCCD-125. This function provides duplicate functionality to 'Notifications' in requestMappings.
  * @param {object} requestObject the request
  * @returns {Promise} Returns a promise that contains the notification data
  */
-
 exports.getNewNotifications = function(requestObject){
     let r = Q.defer();
 
@@ -1215,6 +1148,7 @@ exports.getNewNotifications = function(requestObject){
 /**
  * Takes in a list of notifications and the original requestObject and returns a list of tuples that contains the notifications
  * and their associated content
+ * @deprecated Since QSCCD-125
  * @param notifications
  * @param requestObject
  * @returns {Promise<any>}
@@ -1263,6 +1197,9 @@ function assocNotificationsWithItems(notifications, requestObject){
     })
 }
 
+/**
+ * @deprecated Since QSCCD-125
+ */
 function mapRefreshedDataToNotifications(results, notifications) {
 
     logger.log('debug', 'notifications: ' + JSON.stringify(notifications));
@@ -1297,16 +1234,25 @@ function mapRefreshedDataToNotifications(results, notifications) {
     });
 }
 
-function refresh (fields, requestObject) {
-    let r = Q.defer();
-    let UserId=requestObject.UserID;
+/**
+ * @deprecated Since QSCCD-125
+ */
+async function refresh (fields, requestObject) {
     let today = new Date();
     let timestamp = today.setHours(0,0,0,0);
+    let patientSerNum = await getSelfPatientSerNum(requestObject.UserID);
 
-    exports.getPatientTableFields(UserId, timestamp, fields).then(rows => {
-        rows.Data= utility.resolveEmptyResponse(rows.Data);
-        r.resolve(rows);
-    }).catch(err => r.reject(err));
-
-    return r.promise;
+    let rows = await exports.getPatientTableFields(patientSerNum, fields, timestamp);
+    rows.Data = utility.resolveEmptyResponse(rows.Data);
+    return rows;
 }
+
+/**
+ * @desc Gets the PatientSerNum associated with the given user (by Firebase userId).
+ * @param userId The Firebase userId of the user.
+ * @returns {Promise<*>} Resolves with the PatientSerNum of the user, or rejects with an error if not found.
+ */
+async function getSelfPatientSerNum(userId) {
+    return (await Patient.getPatientByUsername(userId)).patientSerNum;
+}
+exports.getSelfPatientSerNum = getSelfPatientSerNum;

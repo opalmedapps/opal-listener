@@ -12,6 +12,8 @@ const DefaultRequestData = require('./mock-request');
 const legacyLogger = require('../../../listener/logs/logger');
 const legacyOpalSqlRunner = require('../../../listener/sql/opal-sql-query-runner');
 const legacyUtility = require('../../../listener/utility/utility');
+const EncryptionUtilities = require('../../encryption/encryption');
+const { REQUEST_TYPE } = require('../../const');
 
 class SimulateRequest {
     /**
@@ -35,9 +37,10 @@ class SimulateRequest {
     #firebase;
 
     /**
-     * Type of request to send request to either legacy using 'request value or new structure using 'api' default value.
+     * Type of request to send to either legacy using 'request',
+     * registration using 'registration-api' or new structure using 'api' which is the default value.
      */
-    #requestType = 'api';
+    #requestType = REQUEST_TYPE.API;
 
     /**
      * @param {object} requestData  Mock request to be encrypt and upload to firebase. Simulate a app request
@@ -53,6 +56,7 @@ class SimulateRequest {
         this.#config = config;
         this.#requestData = requestData;
         this.#requestData.Timestamp = Firebase.getDatabaseTimeStamp;
+        if (this.#requestData.Request === REQUEST_TYPE.REGISTRATION) this.#requestType = REQUEST_TYPE.REGISTRATION;
         this.makeRequest();
     }
 
@@ -66,7 +70,12 @@ class SimulateRequest {
     async makeRequest() {
         this.#config.FIREBASE.ADMIN_KEY_PATH = await SimulateRequest.getFirebaseAdminKey();
         await this.initFirebase();
-        await this.encryptRequest();
+        if (this.#requestData.Request === REQUEST_TYPE.REGISTRATION) {
+            await this.encryptRegistrationRequest();
+        }
+        else {
+            await this.encryptApiRequest();
+        }
         this.uploadToFirebase();
     }
 
@@ -89,13 +98,35 @@ class SimulateRequest {
     }
 
     /**
+     * @description Encrypt mock request for registration.
+     */
+    async encryptRegistrationRequest() {
+        const encryptedBranchName = EncryptionUtilities.hash(this.#requestData.BranchName);
+        const encryptedData = await legacyUtility.encrypt(
+            {
+                request: this.#requestData.Request,
+                params: this.#requestData.Parameters,
+            },
+            this.#requestData.BranchName,
+            this.#requestData.Parameters.data.ramq,
+        );
+
+        this.#requestData = {
+            ...this.#requestData,
+            Request: encryptedData.request,
+            BranchName: encryptedBranchName,
+            Parameters: encryptedData.params,
+        };
+    }
+
+    /**
      * @description Encrypt mock request using listener encryption utilities.
      */
-    async encryptRequest() {
+    async encryptApiRequest() {
         const sqlResponse = await legacyOpalSqlRunner.OpalSQLQueryRunner.run(
             SimulateRequest.getQuery(this.#testUserSerNum),
         );
-        const hash = legacyUtility.hash(this.#requestData.UserID);
+        const hash = EncryptionUtilities.hash(this.#requestData.UserID);
         const secret = sqlResponse[0].AnswerText;
         const encryptedData = await legacyUtility.encrypt(
             {
@@ -149,6 +180,6 @@ class SimulateRequest {
 }
 
 // Create a new instance with a default mock request to be able to run the script via a npm command
-new SimulateRequest(DefaultRequestData);
+new SimulateRequest(DefaultRequestData.registrationRequest);
 
 exports.SimulateRequest = SimulateRequest;

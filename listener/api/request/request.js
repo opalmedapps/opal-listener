@@ -29,10 +29,11 @@ class OpalRequest {
 module.exports = OpalRequest;
 
 class RequestMeta {
-	constructor({DeviceId, Token, UserID, Timestamp, UserEmail, AppVersion}) {
+	constructor({DeviceId, Token, UserID, TargetPatientID, Timestamp, UserEmail, AppVersion}) {
 		this.DeviceId = DeviceId;
 		this.Token = Token;
 		this.UserID = UserID;
+		this.TargetPatientID = TargetPatientID;
 		this.Timestamp = Timestamp;
 		this.UserEmail = UserEmail;
 		this.AppVersion = AppVersion;
