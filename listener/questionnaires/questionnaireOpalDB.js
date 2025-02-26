@@ -244,6 +244,7 @@ async function questionnaireUpdateStatus(requestObject) {
     // Note that the notification will be marked as read for the self-user and all caregivers.
     const newStatusInt = parseInt(requestObject.Parameters.new_status);
     if (newStatusInt === questionnaireConfig.IN_PROGRESS_QUESTIONNAIRE_STATUS) {
+        logger.log('info', "Implicitly marking the questionnaire's notification as read.");
         const questionnaire = await OpalSQLQueryRunner.run(
             opalQueries.getOpalDBQuestionnaire(),
             [requestObject.Parameters.answerQuestionnaire_id],
@@ -265,7 +266,10 @@ async function questionnaireUpdateStatus(requestObject) {
         // Silently exit if lister cannot fetch the user's list of caregivers
         if (!response?.data) {
             logger.log('error', "An error occurred while fetching the patient's list of caregivers.");
-            return {Response: 'success'};
+            return {
+                Response: 'success',
+                QuestionnaireSerNum: questionnaire[0]['QuestionnaireSerNum'],
+            };
         }
 
         let usernames = [];

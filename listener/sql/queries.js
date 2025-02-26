@@ -681,12 +681,16 @@ exports.getNewNotifications=function() {
 
 exports.implicitlyReadQuestionnaireNotification = function() {
     return `
-    UPDATE Notification
-    SET ReadBy = ?, ReadStatus = 1
-    WHERE RefTableRowSerNum = ?
-    AND PatientSerNum = ?
-    AND NotificationControlSerNum = 13;
-`;
+        UPDATE Notification
+        SET ReadBy = ?, ReadStatus = 1
+        WHERE RefTableRowSerNum = ?
+        AND PatientSerNum = ?
+        AND NotificationControlSerNum = (SELECT
+                                            NotificationControlSerNum
+                                        FROM NotificationControl
+                                        WHERE NotificationType = "LegacyQuestionnaire"
+                                    );
+    `;
 }
 
 /*
