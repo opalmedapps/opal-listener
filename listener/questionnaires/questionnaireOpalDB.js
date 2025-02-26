@@ -132,8 +132,8 @@ async function getQuestionnaire(requestObject) {
         //check the caregiver permissions for the user
         await checkCaregiverPermissions(requestObject.UserID, patientSerNum);
         //check the questionnaire locking status
-        let respondent = await questionnaires.getRespondentUsername();
-        if (respondent && respondent[0]['respondentUsername'] != requestObject.UserID){
+        let respondent = await questionnaires.getRespondentUsername(requestObject.Parameters.qp_ser_num);
+        if (respondent[0]['respondentUsername'] && respondent[0]['respondentUsername'] != requestObject.UserID){
             const errMsg = `ERROR: another user has already locked this questionnaire.`;
             throw new Error(errMsg, {cause: '-8'});
         }

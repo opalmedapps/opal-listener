@@ -469,7 +469,7 @@ function getProcedureCode(queryResult) {
  */
 async function getRespondentUsername(qp_ser_num) {
     try {
-        return await runQuery(questionnaireQueries.getAnswerQuestionnaireRespondent(), [184]);
+        return await runQuery(questionnaireQueries.getAnswerQuestionnaireRespondent(), [qp_ser_num]);
     } catch (error) {
         logger.log("error", `Error getting the questionnaire respondent`, error);
         throw error;
