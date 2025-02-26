@@ -1,6 +1,6 @@
 /**
- * @description Manages caching for the output of PBKDF2.
- *              This is done to avoid having to recompute the result of PBKDF2 multiple times, which is time-consuming.
+ * @description Manages caching for the output of encryption key derivation functions (such as PBKDF2).
+ *              This is done to limit the need to recompute the output, which is time-consuming.
  * @author Stacey Beard, 2024-03-20
  */
 const Keyv = require('keyv');
@@ -17,29 +17,29 @@ const legacyIterations = 1000;
 const legacyKeySizeBytes = 16;
 const legacyDigest = 'sha1';
 
-class Pbkdf2Cache {
+class KeyDerivationCache {
     constructor() {
-        this.cache = new Keyv({ namespace: 'pbkdf2' });
-        this.cache.on('error', err => legacyLogger.log('error', 'Keyv PBKDF2 data cache error', err));
+        this.cache = new Keyv({ namespace: 'keyDerivation' });
+        this.cache.on('error', err => legacyLogger.log('error', 'Keyv cache error (key derivation cache)', err));
     }
 
     /**
-     * @description Gets a key generated from PBKDF2, either cached or newly generated.
-     *              A cache is used because PBKDF2 is a time-consuming algorithm to run.
+     * @description Gets a derived key (generated from PBKDF2), either cached or newly generated.
+     *              A cache is used because key derivation is time-consuming.
      *              Workflow:
-     *                1. On a cache miss, the PBKDF2 value is generated, cached, and used.
-     *                2. On a cache hit, the PBKDF2 value is tested for validity.
-     *                  a. If the value is valid, it's used and kept in the cache.
-     *                  b. If the value is invalid, it's removed from the cache. Then, a new value is generated,
+     *                1. On a cache miss, a new key is derived, cached, and used.
+     *                2. On a cache hit, the derived key is tested for validity.
+     *                  a. If the key is valid, it's used and kept in the cache.
+     *                  b. If the key is invalid, it's removed from the cache. Then, a new key is generated,
      *                    cached, and used.
-     *              The validity test and regeneration are done to prevent issues if a cached value becomes stale.
-     * @param {string} secret Secret passed to PBKDF2.
-     * @param {string} salt Salt passed to PBKDF2.
-     * @param {string} [cacheLabel] The label (dictionary key) under which to get or store PBKDF2 output.
-     *                              If no value is provided, the cache is bypassed and a new PBKDF2 value is used.
+     *              The validity test and regeneration are done to prevent issues if a cached key becomes stale.
+     * @param {string} secret Secret passed to the key derivation function.
+     * @param {string} salt Salt passed to the key derivation function.
+     * @param {string} [cacheLabel] The label (dictionary key) under which to get or store the derived key.
+     *                              If not provided, then the cache is bypassed and a new key is derived.
      * @param {boolean} useLegacySettings [Temporary, compatibility] If true, the old settings for PBKDF2 are used.
      *                                    Used for compatibility with app version 1.12.2.
-     * @param {Function} keyUsageFunction Callback function which is called after getting the key value (with the
+     * @param {Function} keyUsageFunction Callback function which is called after getting the key (with the
      *                                    key as a parameter).
      *                                    IMPORTANT: this function is used as a test of the cache success.
      *                                    If a cached value is used and this function fails, then the cached value
@@ -50,7 +50,7 @@ class Pbkdf2Cache {
     async getKey(secret, salt, cacheLabel, useLegacySettings, keyUsageFunction) {
         // If no label is provided, bypass the cache
         if (!cacheLabel) {
-            legacyLogger.log('debug', 'PBKDF2 cache not used for this request');
+            legacyLogger.log('debug', 'KeyDerivationCache cache not used for this request');
             const newValue = await this.#regenerateKey(undefined, secret, salt, useLegacySettings);
             keyUsageFunction(newValue);
             return;
@@ -61,7 +61,7 @@ class Pbkdf2Cache {
 
         // Cache miss: generate the value and use it
         if (!cachedValue) {
-            legacyLogger.log('debug', `PBKDF2 cache miss for ${cacheLabel}`);
+            legacyLogger.log('debug', `KeyDerivationCache cache miss for ${cacheLabel}`);
             const newValue = await this.#regenerateKey(cacheLabel, secret, salt, useLegacySettings);
             keyUsageFunction(newValue);
             return;
@@ -70,12 +70,12 @@ class Pbkdf2Cache {
         // Cache hit: test the cached value for validity
         try {
             // If the keyUsageFunction succeeds using the cached value, there's nothing more to do
-            legacyLogger.log('debug', `PBKDF2 cache hit for ${cacheLabel}`);
+            legacyLogger.log('debug', `KeyDerivationCache cache hit for ${cacheLabel}`);
             keyUsageFunction(cachedValue);
         }
         catch (error) {
             // If the keyUsageFunction fails, the cached value is bad: invalidate it and try again
-            legacyLogger.log('debug', `PBKDF2 cached value was bad; invalidating cache for ${cacheLabel}`);
+            legacyLogger.log('debug', `KeyDerivationCache cached value was bad; invalidating cache for ${cacheLabel}`);
             await this.#invalidate(cacheLabel);
             await this.getKey(secret, salt, cacheLabel, useLegacySettings, keyUsageFunction);
         }
@@ -91,11 +91,11 @@ class Pbkdf2Cache {
     }
 
     /**
-     * @description Regenerates the output of PBKDF2 and saves it to the cache.
+     * @description Re-derives a key and saves it to the cache.
      * @param {string} [cacheLabel] The label under which the value is stored.
      *                              If no label is provided, then a new value is generated, but not stored in the cache.
-     * @param {string} secret Secret passed to PBKDF2.
-     * @param {string} salt Salt passed to PBKDF2.
+     * @param {string} secret Secret passed to the key derivation function.
+     * @param {string} salt Salt passed to the key derivation function.
      * @param {boolean} useLegacySettings [Temporary, compatibility] If true, the old settings for PBKDF2 are used.
      *                                    Used for compatibility with app version 1.12.2.
      * @returns {Promise<string>} Resolves to the newly generated PBKDF2 key.
@@ -109,7 +109,7 @@ class Pbkdf2Cache {
         const keySizeBytesCompatibility = useLegacySettings ? legacyKeySizeBytes : keySizeBytes;
         const digestCompatibility = useLegacySettings ? legacyDigest : digest;
 
-        // Generate the pbkdf2 key
+        // Generate the PBKDF2 key
         const outputBuffer = crypto.pbkdf2Sync(
             secret,
             salt,
@@ -118,7 +118,7 @@ class Pbkdf2Cache {
             digestCompatibility,
         );
         const output = outputBuffer.toString('hex');
-        legacyLogger.log('debug', 'PBKDF2 generated a new key');
+        legacyLogger.log('debug', 'KeyDerivationCache generated a new key');
 
         // Store the output in the cache
         if (cacheLabel) await this.cache.set(cacheLabel, output);
@@ -126,4 +126,4 @@ class Pbkdf2Cache {
     }
 }
 
-exports.Pbkdf2Cache = Pbkdf2Cache;
+exports.KeyDerivationCache = KeyDerivationCache;

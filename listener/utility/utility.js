@@ -2,10 +2,10 @@ const CryptoJS          = require('crypto-js');
 const stablelibutf8     = require('@stablelib/utf8');
 const nacl              = require('tweetnacl');
 const stablelibbase64   = require('@stablelib/base64');
-const { Pbkdf2Cache }   = require('../../src/utility/pbkdf2-cache');
+const { KeyDerivationCache }   = require('../../src/utility/key-derivation-cache');
 
-// Manages caching of PBKDF2 derived keys, to avoid the need to recompute a key every time a request is made by the same user
-const pbkdf2Cache = new Pbkdf2Cache();
+// Manages caching of derived keys, to avoid the need to recompute a key every time a request is made by the same user
+const keyDerivationCache = new KeyDerivationCache();
 
 /**
  * resolveEmptyResponse
@@ -65,18 +65,18 @@ exports.unixToMYSQLTimestamp=function(time) {
  * @description Encrypts a response object.
  * @param {RequestContext} context The request context.
  * @param {Object} object The object to encrypt.
- * @param {string} secret If a salt is provided, this value is used as a "password" passed to PBKDF2 to derive a key.
- *                        If no salt is provided, this value is used directly as the encryption key.
- * @param {string} [salt] Optional salt; if provided, it's used with the secret for PBKDF2 to derive an encryption key.
+ * @param {string} secret If a salt is provided, the secret is used as a "password" with the salt to derive a key.
+ *                        If no salt is provided, the secret is used directly as the encryption key.
+ * @param {string} [salt] Optional salt; if provided, it's used with the secret to derive an encryption key.
  * @returns {Promise<Object>} Resolves to the encrypted object.
  */
 exports.encrypt = function(context, object, secret, salt) {
     return new Promise(async (resolve, reject) => {
         try {
-            if (salt) await pbkdf2Cache.getKey(secret, salt, context.cacheLabel, context.useLegacyPBKDF2Settings, continueWithKey);
+            if (salt) await keyDerivationCache.getKey(secret, salt, context.cacheLabel, context.useLegacyPBKDF2Settings, continueWithKey);
             else continueWithKey(secret);
 
-            // The second half of this function is itself wrapped in a function to work with the PBKDF2 cache above
+            // The second half of this function is itself wrapped in a function to work with the key derivation cache above
             function continueWithKey(key) {
                 const truncatedKey = stablelibutf8.encode(key.substring(0, nacl.secretbox.keyLength));
                 const nonce = nacl.randomBytes(nacl.secretbox.nonceLength);
@@ -93,18 +93,18 @@ exports.encrypt = function(context, object, secret, salt) {
  * @description Decrypts a request object.
  * @param {RequestContext} context The request context.
  * @param {Object} object The object to decrypt.
- * @param {string} secret If a salt is provided, this value is used as a "password" passed to PBKDF2 to derive a key.
- *                        If no salt is provided, this value is used directly as the decryption key.
- * @param {string} [salt] Optional salt; if provided, it's used with the secret for PBKDF2 to derive a decryption key.
+ * @param {string} secret If a salt is provided, the secret is used as a "password" with the salt to derive a key.
+ *                        If no salt is provided, the secret is used directly as the encryption key.
+ * @param {string} [salt] Optional salt; if provided, it's used with the secret to derive an encryption key.
  * @returns {Promise<Object>} Resolves to the decrypted object.
  */
 exports.decrypt = function(context, object, secret, salt) {
     return new Promise(async (resolve, reject) => {
         try {
-            if (salt) await pbkdf2Cache.getKey(secret, salt, context.cacheLabel, context.useLegacyPBKDF2Settings, continueWithKey);
+            if (salt) await keyDerivationCache.getKey(secret, salt, context.cacheLabel, context.useLegacyPBKDF2Settings, continueWithKey);
             else continueWithKey(secret);
 
-            // The second half of this function is itself wrapped in a function to work with the PBKDF2 cache above
+            // The second half of this function is itself wrapped in a function to work with the key derivation cache above
             function continueWithKey(key) {
                 const truncatedKey = stablelibutf8.encode(key.substring(0, nacl.secretbox.keyLength));
                 resolve(exports.decryptObject(object, truncatedKey));
