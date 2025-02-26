@@ -1,5 +1,5 @@
 default:
-  image: node:16.14.2-alpine3.15
+  image: node:18.0.0-alpine3.15
 
 # Cache modules in between jobs
 cache:
