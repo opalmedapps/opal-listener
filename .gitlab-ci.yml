@@ -14,6 +14,7 @@ default:
   before_script:
     - uname -a
 
+
 stages:
   - Build
   - Static Analysis
@@ -25,6 +26,16 @@ stages:
 .default_needs:
   needs:
     - job: build image
+
+.default_before:
+  before_script:
+    - node --version
+    - npm --version
+    # Install dependencies and cache within the project directory to cache
+    # See: https://javascript.plainenglish.io/improving-ci-performance-aka-how-to-save-your-money-31ff691360e4
+    - npm ci --include dev --cache .npm --prefer-offline
+    # Set up env files
+    - cp .env.sample .env
 
 build image:
   stage: Build
@@ -64,6 +75,7 @@ build image:
 
 eslint:
   stage: Static Analysis
+  extends: .default_before
   script:
     - npm install eslint-formatter-gitlab --no-save
     - npx eslint --version
@@ -75,6 +87,7 @@ eslint:
 
 mocha:
   stage: test
+  extends: .default_before
   script:
     - npm install mocha-junit-reporter --no-save
     - npx mocha --version
@@ -87,6 +100,7 @@ mocha:
 
 coverage:
   stage: test
+  extends: .default_before
   needs:
     - job: mocha
   script:
@@ -106,12 +120,14 @@ coverage:
 
 build docs:
   stage: Documentation
+  extends: .default_before
   script:
     - npx jsdoc --version
     - npm run docs
 
 pages:
   stage: Deploy
+  extends: .default_before
   script:
     - npx jsdoc --version
     - npm run docs
