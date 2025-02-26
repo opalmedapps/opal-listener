@@ -53,7 +53,7 @@ async function deleteExpiredBranches() {
 
 /**
  * @desc Deletes all firebase branches in the provided array.
- * @param branches string[] The names of the branches to delete
+ * @param {string[]} branches The names of the branches to delete
  * @returns {Promise<string[]>} The list of branches that were successfully deleted.
  * @author Jinal Vyas, refactored by Stacey Beard
  */
@@ -72,7 +72,7 @@ async function deleteFirebaseBranches(branches) {
 
 /**
  * @desc Deletes a branch reference from Firebase.
- * @param firebaseBranch The name of the branch to delete.
+ * @param {string} firebaseBranch The name of the branch to delete.
  * @returns {Promise<any>} The Promise from the remove() operation.
  * @author Jinal Vyas, refactored by Stacey Beard
  */
