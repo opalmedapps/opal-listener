@@ -687,8 +687,8 @@ exports.updateAccountField = async requestObject => {
     const newValue = requestObject.Parameters?.NewValue;
     if (!email) throw `Missing value of 'UserEmail' parameter: ${email}`;
     if (!uid) throw `Missing value of 'UserID' parameter: ${uid}`;
-    if (!field || typeof field !== 'string') throw `Invalid type or missing value of 'FieldToChange' parameter: ${field}`;
-    if (!newValue || typeof newValue !== 'string') throw `Invalid type or missing value of 'NewValue' parameter: ${newValue}`;
+    if (typeof field !== 'string' || !field) throw `Invalid type or missing value of 'FieldToChange' parameter: ${field}`;
+    if (typeof newValue !== 'string' || !newValue) throw `Invalid type or missing value of 'NewValue' parameter: ${newValue}`;
 
     let patient = await getPatientFromEmail(email);
 
