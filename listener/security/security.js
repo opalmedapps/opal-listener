@@ -27,10 +27,10 @@ const passwordResetSuccess = { PasswordReset: "true" };
  *                                                 whether the user's provided answer was correct or incorrect.
  */
 exports.verifySecurityAnswer = async (requestKey, requestObject) => {
-    logger.log('info', `Verifying security answer for username ${requestObject?.UserID}`);
-
     // Special case used to set the request's UserID in the case of password reset requests
     await ensureUserIdAvailable(requestObject);
+
+    logger.log('info', `Verifying security answer for username ${requestObject?.UserID}`);
 
     // Get security info needed to verify the answer, including the cached answer from PatientDeviceIdentifier.
     let user = await getUserPatientSecurityInfo(requestKey, requestObject);
@@ -117,10 +117,10 @@ function confirmValidSecurityAnswer(unencryptedParams, requestObject, user) {
  *                                                 or rejects with an OpalSecurityResponseError.
  */
 exports.resetPassword = async function(requestKey, requestObject) {
-    logger.log('info', `Running function resetPassword for username = ${requestObject.UserID}`);
-
     // Special case used to set the request's UserID in the case of password reset requests
     await ensureUserIdAvailable(requestObject);
+
+    logger.log('info', `Running function resetPassword for username = ${requestObject.UserID}`);
 
     // Get security info needed to set a new password
     let user = await getUserPatientSecurityInfo(requestKey, requestObject);
@@ -128,7 +128,7 @@ exports.resetPassword = async function(requestKey, requestObject) {
     try {
         // Use of RAMQ (SSN) to encrypt password reset requests is no longer supported after 1.12.2 (QSCCD-476)
         let secret = Version.versionGreaterThan(requestObject.AppVersion, Version.version_1_12_2)
-            ? utility.hash(user.Email)
+            ? utility.hash(requestObject.UserEmail)
             : utility.hash(user.SSN.toUpperCase());
         let answer = user.SecurityAnswer;
 
@@ -198,7 +198,7 @@ async function getUserPatientSecurityInfo(requestKey, requestObject) {
     let userPatient = rows[0];
 
     // Validate that the returned security info has values for all required parameters
-    let requiredParams = ['Email', 'SecurityAnswer', 'Attempt'];
+    let requiredParams = ['SecurityAnswer', 'Attempt'];
     requiredParams.forEach(param => {
         if (userPatient[param] === null || userPatient[param] === '') {
             throw new OpalSecurityResponseError(CODE.SERVER_ERROR, `Query for ${param} did not return a value`, requestKey, requestObject);

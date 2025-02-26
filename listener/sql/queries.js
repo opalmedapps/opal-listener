@@ -340,7 +340,6 @@ exports.getPatientPasswordForVerification = function()
 exports.getUserPatientSecurityInfo = function() {
     return `SELECT DISTINCT
                 pat.SSN,
-                pat.Email,
                 pdi.SecurityAnswer,
                 pdi.Attempt,
                 pdi.TimeoutTimestamp
