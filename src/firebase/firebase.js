@@ -53,6 +53,7 @@ class Firebase {
         await Validator.validate(this.#config, Firebase.#configValidators);
 
         // Load the Firebase service account configurations from the admin key file
+        // eslint-disable-next-line import/no-dynamic-require, global-require
         const serviceAccount = require(this.#config.ADMIN_KEY_PATH);
 
         const firebaseDBObject = admin.initializeApp({
