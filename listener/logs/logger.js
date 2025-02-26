@@ -22,20 +22,10 @@ const opalLogFormat = format.printf((info) => {
 
 // Format error data according to data type passed to the logger wraper
 const formatErrorData = (data) => {
-    let formattedData;
-    switch (typeof data) {
-        case 'undefined':
-            formattedData = '';
-            break;
-        case 'object':
-            formattedData = JSON.stringify(data);
-            break
-        default:
-            formattedData = data;   
-            break;
-    }
+    if (typeof data === 'undefined') return '';
+    if (typeof data === 'object' && !data instanceof Error) return JSON.stringify(data);
 
-    return formattedData;
+    return data;
 }
 
 // Initialize winston logger
