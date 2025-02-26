@@ -140,28 +140,28 @@ exports.patientAnnouncementsTableFields=function()
 
 exports.patientEducationalMaterialTableFields=function()
 {
-    return `SELECT A.EducationalMaterialSerNum, A.ShareURL_EN, A.ShareURL_FR, A.EducationalMaterialControlSerNum,
-                A.DateAdded, A.ReadStatus, A.EducationalMaterialType_EN, A.EducationalMaterialType_FR, A.Name_EN, 
-                A.Name_FR,  A.URL_EN, A.URL_FR, A.PhaseName_EN, A.PhaseName_FR
+    return `SELECT A.EducationalMaterialSerNum, A.ShareURL_EN, A.ShareURL_FR, A.EducationalMaterialControlSerNum, A.DateAdded, 
+                A.ReadStatus, A.EducationalMaterialType_EN, A.EducationalMaterialType_FR, A.Name_EN, A.Name_FR, A.URL_EN,
+                A.URL_FR, A.PhaseName_EN, A.PhaseName_FR
             FROM Patient P, Users U, (
                 SELECT EduMat.PatientSerNum, EduMat.EducationalMaterialSerNum, EduControl.ShareURL_EN, EduControl.ShareURL_FR, 
-                    EduControl.EducationalMaterialControlSerNum,  EduMat.DateAdded, EduMat.ReadStatus, 
+                    EduControl.EducationalMaterialControlSerNum, EduMat.DateAdded, EduMat.ReadStatus, 
                     EduControl.EducationalMaterialType_EN, EduControl.EducationalMaterialType_FR, EduControl.Name_EN, 
                     EduControl.Name_FR,  EduControl.URL_EN, EduControl.URL_FR, Phase.Name_EN as PhaseName_EN, 
-                    Phase.Name_FR as PhaseName_FR
-                FROM EducationalMaterialControl as EduControl, 
-                    EducationalMaterial as EduMat, PhaseInTreatment as Phase
+                    Phase.Name_FR as PhaseName_FR, EduMat.LastUpdated EM_LastUpdated, EduControl.LastUpdated EC_LastUpdated, 
+                    Phase.LastUpdated P_LastUpdated, '0000-00-00 00:00:00' TOC_LastUpdated
+                FROM EducationalMaterialControl as EduControl, EducationalMaterial as EduMat, PhaseInTreatment as Phase
                 WHERE EduMat.EducationalMaterialControlSerNum = EduControl.EducationalMaterialControlSerNum 
                     AND Phase.PhaseInTreatmentSerNum = EduControl.PhaseInTreatmentSerNum
                 UNION
                 SELECT EduMat.PatientSerNum, EduMat.EducationalMaterialSerNum, EduControl.ShareURL_EN, EduControl.ShareURL_FR, 
-                    EduControl.EducationalMaterialControlSerNum,  EduMat.DateAdded, EduMat.ReadStatus, 
+                    EduControl.EducationalMaterialControlSerNum, EduMat.DateAdded, EduMat.ReadStatus, 
                     EduControl.EducationalMaterialType_EN, EduControl.EducationalMaterialType_FR, EduControl.Name_EN, 
                     EduControl.Name_FR,  EduControl.URL_EN, EduControl.URL_FR, Phase.Name_EN as PhaseName_EN, 
-                    Phase.Name_FR as PhaseName_FR
-                FROM EducationalMaterialControl as EduControl, 
-                    EducationalMaterial as EduMat, PhaseInTreatment as Phase, 
-                    EducationalMaterialTOC as TOC  
+                    Phase.Name_FR as PhaseName_FR, EduMat.LastUpdated EM_LastUpdated, EduControl.LastUpdated EC_LastUpdated, 
+                    Phase.LastUpdated P_LastUpdated, TOC.LastUpdated TOC_LastUpdated
+                FROM EducationalMaterialControl as EduControl, EducationalMaterial as EduMat, PhaseInTreatment as Phase, 
+                    EducationalMaterialTOC as TOC
                 WHERE TOC.ParentSerNum = EduMat.EducationalMaterialControlSerNum 
                     AND TOC.EducationalMaterialControlSerNum = EduControl.EducationalMaterialControlSerNum
                     AND Phase.PhaseInTreatmentSerNum = EduControl.PhaseInTreatmentSerNum 
@@ -169,6 +169,10 @@ exports.patientEducationalMaterialTableFields=function()
             WHERE P.PatientSerNum = A.PatientSerNum
                 AND P.PatientSerNum = U.UserTypeSerNum  
                 AND U.Username = ?
+                AND (A.EM_LastUpdated > ?
+                    OR A.EC_LastUpdated > ?
+                    OR A.P_LastUpdated > ?
+                    OR A.TOC_LastUpdated > ?)
             ;`;
 };
 
