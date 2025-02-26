@@ -6,7 +6,7 @@ const crypto            = require('crypto');
 const Q                 = require('q');
 
 // Parameters for PBKDF2
-const iterations = 600000;
+const iterations = 25000;
 const keySizeBytes = 32;
 const digest = 'sha256';
 
