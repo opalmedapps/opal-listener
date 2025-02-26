@@ -1,9 +1,9 @@
 /**
- * @file Listen and handle request from firebase
+ * @file Listen and handle request uploaded to firebase by the app
  * @author David Gagne
  */
 const legacyLogger = require('../../listener/logs/logger');
-const { EncryptionUtilities } = require('../utility/encryption');
+const { EncryptionUtilities } = require('../encryption/encryption');
 const ApiRequest = require('./api-request');
 
 class RequestHandler {
@@ -11,11 +11,6 @@ class RequestHandler {
      * @description Reference to the firebase database connection
      */
     #databaseRef;
-
-    /**
-     * Encryption utility classes used throughout the request handling process.
-     */
-    #encryptionUtils;
 
     /**
      * @description Create an instance of the RequestHandler class and set connection to firebase
@@ -32,16 +27,46 @@ class RequestHandler {
     listenToRequests(requestType) {
         legacyLogger.log('debug', 'API: Starting request listener');
         this.#databaseRef.child(requestType).off();
-        this.#databaseRef.child(requestType).on('child_added', async snapshot => {
-            try {
-                const response = await this.#processRequest(snapshot);
-                await this.sendResponse(response, snapshot.key, snapshot.val().UserID);
-                await this.clearRequest(requestType, snapshot.key);
-            }
-            catch (error) {
-                legacyLogger.log('error', 'API: CANNOT PROCESS REQUEST', error);
-            }
-        });
+        this.#databaseRef.child(requestType).on('child_added', async snapshot => this.processRequest(
+            requestType,
+            snapshot,
+        ));
+    }
+
+    /**
+     * @description Handle requests with requestType 'api'. Then upload response ti Firebase
+     * @param {string} requestType Firebase request unique identifier
+     * @param {object} snapshot Data snapshot from firebase
+     */
+    async processRequest(requestType, snapshot) {
+        legacyLogger.log('debug', 'API: Processing API request');
+        try {
+            if (!RequestHandler.validateSnapshot(snapshot)) throw new Error('API: Firebase snapshot invalid');
+            const userId = snapshot.val().UserID;
+            const salt = await EncryptionUtilities.getSalt(userId);
+            const secret = EncryptionUtilities.getSecret(userId);
+            const decryptedRequest = await EncryptionUtilities.decryptRequest(snapshot.val(), secret, salt);
+            const apiResponse = await ApiRequest.makeRequest(decryptedRequest);
+            const encryptedResponse = await EncryptionUtilities.encryptResponse(apiResponse, secret, salt);
+            await this.sendResponse(encryptedResponse, snapshot.key, userId);
+            this.clearRequest(requestType, snapshot.key);
+        }
+        catch (error) {
+            legacyLogger.log('error', 'API: CANNOT PROCESS REQUEST', error);
+            this.clearRequest(requestType, snapshot.key);
+        }
+    }
+
+    /**
+     * @description High level validation of Firebase snapshot.
+     * @param {object} snapshot Data snapshot uploaded from Firebase
+     * @returns {boolean} Return true if the snapshot is valid.
+     */
+    static validateSnapshot(snapshot) {
+        return (snapshot !== undefined
+            && Object.keys(snapshot).length !== 0
+            && Object.getPrototypeOf(snapshot) !== Object.prototype)
+            && snapshot.key !== undefined;
     }
 
     /**
@@ -56,27 +81,14 @@ class RequestHandler {
 
     /**
      * @description Send response to Firebase after being processed.
-     * @param {object} response Process unencrypted response.
+     * @param {object} encryptedResponse Processed and encrypted response.
      * @param {string} firebaseRequestKey Firebase request unique identifier
      * @param {string} userId User id making the request.
      */
-    async sendResponse(response, firebaseRequestKey, userId) {
+    async sendResponse(encryptedResponse, firebaseRequestKey, userId) {
         legacyLogger.log('debug', 'API: Sending response to Firebase');
-        const encryptedResponse = await this.#encryptionUtils.encryptResponse(response);
         const path = `users/${userId}/${firebaseRequestKey}`;
         await this.#databaseRef.child(path).set(encryptedResponse);
-    }
-
-    /**
-     * @description Handle regular requests. If requestType is 'api', send to new pipeline else send to legacy listener
-     * @param {object} snapshot - Response data snapshot from firebase
-     * @returns {object} Data from the request API
-     */
-    async #processRequest(snapshot) {
-        legacyLogger.log('debug', 'API: Processing API request');
-        this.#encryptionUtils = new EncryptionUtilities(snapshot.val());
-        const decryptedRequest = await this.#encryptionUtils.decryptRequest();
-        return ApiRequest.makeRequest(decryptedRequest);
     }
 }
 

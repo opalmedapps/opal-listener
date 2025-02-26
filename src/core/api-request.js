@@ -34,7 +34,7 @@ class ApiRequest {
     static async sendRequestToApi(parameters) {
         legacyLogger.log('debug', 'API: Sending request to Opal API');
         const requestParams = parameters;
-        requestParams.headers.Authorization = configs.OPAL_BACKEND.AUTH_TOKEN;
+        requestParams.headers.Authorization = `Token ${configs.OPAL_BACKEND.AUTH_TOKEN}`;
         requestParams.url = `${configs.OPAL_BACKEND.HOST}${parameters.url}`;
         return axios(requestParams);
     }
