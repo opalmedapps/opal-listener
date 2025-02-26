@@ -143,12 +143,12 @@ exports.registerPatient = async function(requestObject) {
         // Get patient data from new backend
         const patientData = await opalRequest.retrievePatientDataDetailed(requestObject);
 
-        // insert patient
+        // Insert patient
         let legacy_id = await insertPatient(requestObject, patientData?.patient);
 
-        // insert patient hospital identifier
-        for (let index in patientData?.hospital_patients) {
-            await insertPatientHospitalIdentifier(requestObject, patientData.hospital_patients[index], legacy_id);
+        // Insert patient hospital identifier
+        for (const hospital_patient of patientData?.hospital_patients) {
+            await insertPatientHospitalIdentifier(requestObject, hospital_patient, legacy_id);
         }
 
         // Before registering the patient, create their firebase user account with decrypted email and password
@@ -369,7 +369,8 @@ function validateRequest(requestObject, requiredFields) {
  */
 async function insertPatient(requestObject, patient) {
     if (!patient) {
-        return null;
+        const registrationCode = requestObject.Parameters.Fields.registrationCode;
+        throw `Failed to insert Patient to legacyDB due to Patient not exists with registrationCode: ${registrationCode}`;
     }
     requestObject.Parameters.Fields.firstName = patient.first_name;
     requestObject.Parameters.Fields.lastName = patient.last_name;
@@ -384,8 +385,12 @@ async function insertPatient(requestObject, patient) {
  * @returns {void}
  */
 async function insertPatientHospitalIdentifier(requestObject, hospitalPatient, patientSerNum) {
+    if (!hospitalPatient) {
+        const registrationCode = requestObject.Parameters.Fields.registrationCode;
+        throw  `Failed to insert Patient to legacyDB due to hospitalPatient not exists with registrationCode: ${registrationCode}`;
+    }
     requestObject.Parameters.Fields.patientSerNum = patientSerNum;
-    requestObject.Parameters.Fields.mrn = hospitalPatient?.mrn;
-    requestObject.Parameters.Fields.site = hospitalPatient?.site_code;
+    requestObject.Parameters.Fields.mrn = hospitalPatient.mrn;
+    requestObject.Parameters.Fields.site = hospitalPatient.site_code;
     return await sqlInterface.insertPatientHospitalIdentifier(requestObject);
 }
