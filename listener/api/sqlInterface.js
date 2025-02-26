@@ -1063,7 +1063,7 @@ async function supportLegacyAppointmentResource(rows) {
         return {
             ...row,
             Resource: {
-                LegacyCompatibility: true,
+                LegacyCompatibility: 'Added for temporary compatibility with app version 1.12.2.',
             },
         }
     });
