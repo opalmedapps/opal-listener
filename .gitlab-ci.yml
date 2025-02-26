@@ -123,11 +123,6 @@ coverage:
         coverage_format: cobertura
         path: coverage/cobertura-coverage.xml
 
-# reuse job
-include:
-  - project: 'opalmedapps/engineering/ci-templates'
-    file: '/templates/jobs/Reuse.gitlab-ci.yml'
-
 build docs:
   stage: Documentation
   extends: .default_before
@@ -266,6 +261,9 @@ include:
   # SAST Scanning: https://docs.gitlab.com/ee/user/application_security/sast/
   # https://gitlab.com/gitlab-org/gitlab/-/blob/master/lib/gitlab/ci/templates/Jobs/SAST.latest.gitlab-ci.yml
   - template: Jobs/SAST.latest.gitlab-ci.yml
+  # reuse job
+  - project: 'opalmedapps/engineering/ci-templates'
+    file: '/templates/jobs/Reuse.gitlab-ci.yml'
 
 # Customizations
 #
