@@ -8,6 +8,6 @@ services:
     ports:
       - 8080:80
     volumes:
-      - ./legacy-listener:/app/legacy-listener
+      - ./listener:/app/listener
       - ./src:/app/src
     command: npm run watch:docker

@@ -23,7 +23,7 @@ Copy your firebase admin key file into the `src/config/firebase` directory.
 > The content of this directory is ignore by versioning
 
 ##### Step 2 | App configuration
-Copy and rename `legacy-listener/config_template.json` to `legacy-listener/config.json`.
+Copy and rename `listener/config_template.json` to `listener/config.json`.
 Also copy and rename `src/config/config.template.json` to `src/config/config.json`.
 Then edit the required fields. Across both files, you should at least need to change these fields:
 ```
@@ -52,7 +52,7 @@ HOST: "host.docker.internal",
 > When running the app using Docker, your firebase admin key file is copied in the container for it to be accessible.
 
 ##### Step 3 | Install the NPM pakages
-Run the following command in the `legacy-listener` folder to install NPM dependencies and dev dependencies:
+Run the following command in the `listener` folder to install NPM dependencies and dev dependencies:
 ```
 npm install
 ```
@@ -74,18 +74,18 @@ docker compose -f docker-compose.prod.yml up --build
 
 ### Installing with NodeJs
 
-Make sure all the references in /legacy-listener/config.json are correct. Currently they are pointing to locations on the Opal server.
+Make sure all the references in /listener/config.json are correct. Currently they are pointing to locations on the Opal server.
 
 Once the configurations are set up properly, you need to install all the dependencies:
 
-* Navigate to legacy-listener directory
+* Navigate to listener directory
 * Run the following command:
 
 ```
 npm install
 ```
 
-Once that is done, you can start the app by running the following command in the legacy-listener directory:
+Once that is done, you can start the app by running the following command in the listener directory:
 
 ```
 npm run start
@@ -96,7 +96,7 @@ npm run start
 #### ESLint
 
 This project uses ESLint to statically analyze its source code. It has been configured to only analyze new files in the 
-context of strangler fig (i.e. to ignore files in the `legacy-listener` folder).
+context of strangler fig (i.e. to ignore files in the `listener` folder).
 Follow the steps below to enable ESLint in your IDE.
 
 ##### VSCode

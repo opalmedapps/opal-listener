@@ -5,8 +5,8 @@
 
 const config = require('./config/config.json');
 const { Firebase } = require('./firebase/firebase');
-const legacyServer = require('../legacy-listener/legacy-server');
-const logger = require('../legacy-listener/logs/logger');
+const legacyServer = require('../listener/legacy-server');
+const logger = require('../listener/logs/logger');
 
 launch().then(() => {
     logger.log('info', 'LISTENER LAUNCHED SUCCESSFULLY');

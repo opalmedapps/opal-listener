@@ -2,7 +2,7 @@ The listener is currently following the strangler fig design pattern to develop 
 
 ## Legacy Part
 
-Legacy code is stored in the `legacy-listener` folder.
+Legacy code is stored in the `listener` folder.
   - Note: the sub-folder `api/modules` represents an improvement over the legacy structure,
     but is still part of the old version. It may make its way into the new version in some form.
 

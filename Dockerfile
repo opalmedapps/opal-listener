@@ -5,5 +5,5 @@ COPY ./package*.json ./
 RUN npm install --only=prod
 
 # Copy both code sources (legacy listener and new folder)
-COPY legacy-listener ./legacy-listener
+COPY ./listener ./listener
 COPY ./src ./src
