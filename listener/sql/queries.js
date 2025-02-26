@@ -466,7 +466,6 @@ exports.updateDeviceIdentifiers = function()
 {
     return `INSERT INTO PatientDeviceIdentifier(
                 PatientDeviceIdentifierSerNum,
-                PatientSerNum,
                 Username,
                 DeviceId,
                 RegistrationId,
@@ -474,7 +473,7 @@ exports.updateDeviceIdentifiers = function()
                 appVersion,
                 SessionId,
                 Trusted,LastUpdated
-            ) VALUES (NULL,?,?,?,?,?,?,?,0,NULL)
+            ) VALUES (NULL,?,?,?,?,?,?,0,NULL)
             ON DUPLICATE KEY UPDATE RegistrationId = ?, SessionId = ?;`
 };
 
@@ -540,28 +539,15 @@ exports.getPatientSerNumFromUserID = function()
     return "SELECT Patient.PatientSerNum FROM Patient, Users WHERE Patient.PatientSerNum = Users.UserTypeSerNum && Users.Username = ?";
 };
 
-exports.getTrustedDevice = function () {
-    return `SELECT
-                pdi.Trusted
-            FROM
-                PatientDeviceIdentifier pdi,
-                Users u
-            WHERE
-                pdi.Username = u.Username
-            AND
-                u.Username = ? AND DeviceId = ?`;
-};
-
 exports.setDeviceSecurityAnswer = function () {
     return `UPDATE
                 PatientDeviceIdentifier
             SET
-                SecurityAnswerSerNum = ?,
-                SecurityAnswer = (SELECT AnswerText FROM SecurityAnswer WHERE SecurityAnswerSerNum = ?)
+                SecurityAnswerSerNum = ?
             WHERE
                 DeviceId = ?
             AND
-                PatientSerNum = ?`;
+                Username = ?`;
 };
 
 exports.setTrusted = function () {
