@@ -13,7 +13,9 @@
   "DOCUMENTS_PATH": "",
   "DOCTOR_PATH": "",
   "CHECKIN_PATH": "",
+  "_CHECKIN_PATH_HINT": "https://OIE_SERVER.muhcad.muhcfrd.ca/Patient/CheckIn",
   "CHECKIN_ROOM": "",
+  "_CHECKIN_ROOM_HINT": "OPAL_DEV_CHECKIN_ROOM",
   "QUESTIONNAIRE_COMPLETED_PATH": "Path notified when a questionnaire is completed",
   "LATEST_STABLE_VERSION": "",
   "OIE": {
