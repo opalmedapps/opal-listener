@@ -36,7 +36,7 @@ const waitingRoomPool = mysql.createPool(waitingRoomDbCredentials);
 /**
  * Table mappings and process data functions for results obtained from the database. Exporting function for testing purposes.
  * @type {{Patient: {sql, processFunction: loadProfileImagePatient, numberOfLastUpdated: number}, Documents: {sql, numberOfLastUpdated: number, table: string, serNum: string}, Doctors: {sql, processFunction: loadImageDoctor, numberOfLastUpdated: number}, Diagnosis: {sql, numberOfLastUpdated: number}, Appointments: {sql, numberOfLastUpdated: number, processFunction: combineResources, table: string, serNum: string}, Notifications: {sql, numberOfLastUpdated: number, table: string, serNum: string}, Tasks: {sql, numberOfLastUpdated: number}, TxTeamMessages: {sql, numberOfLastUpdated: number, table: string, serNum: string}, EducationalMaterial: {sql, processFunction: getEducationTableOfContents, numberOfLastUpdated: number, table: string, serNum: string}, Announcements: {sql, numberOfLastUpdated: number, table: string, serNum: string}}}
- * Deprecated: {Doctors: {sql, processFunction: loadImageDoctor, numberOfLastUpdated: number}}
+ * Deprecated: {Doctors: {sql, processFunction: loadImageDoctor, numberOfLastUpdated: number}, Tasks: {sql, numberOfLastUpdated: number}}
  */
 const requestMappings =
     {
