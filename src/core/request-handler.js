@@ -3,11 +3,12 @@
  * @author David Gagne
  */
 const JC = require('just-clone');
-const legacyLogger = require('../listener/logs/logger');
-const legacyServer = require('../listener/legacy-server');
-const legacyProcessApi = require('../listener/api/processApiRequest');
-const legacyMainRequestApi = require('../listener/api/main');
-const legacyRequestValidator = require('../listener/api/request/request-validator');
+const legacyLogger = require('../../listener/logs/logger');
+const legacyServer = require('../../listener/legacy-server');
+const legacyProcessApi = require('../../listener/api/processApiRequest');
+const legacyMainRequestApi = require('../../listener/api/main');
+const legacyRequestValidator = require('../../listener/api/request/request-validator');
+const ApiRequest = require('./api-request');
 
 class RequestHandler {
     /**
@@ -61,6 +62,7 @@ class RequestHandler {
      * @returns {object} Data from the security API
      */
     static async processSecurityRequests(snapshot) {
+        legacyLogger.log('debug', 'Processing security request');
         const requestKey = snapshot.key;
         const requestObject = snapshot.val();
         try {
@@ -78,12 +80,13 @@ class RequestHandler {
      * @returns {object} Data from the request API
      */
     static async processRequests(snapshot) {
+        legacyLogger.log('debug', 'Processing regular request');
         const requestKey = snapshot.key;
         const requestObject = snapshot.val();
         const requestType = await legacyRequestValidator.validate(requestKey, JC(requestObject));
         try {
             const response = (requestType.type === 'api')
-                ? console.log('send to new pipeline') // TO DO setup new pipeline
+                ? ApiRequest.makeRequest()
                 : await legacyMainRequestApi.apiRequestFormatter(requestKey, requestObject);
             return response;
         }
