@@ -38,5 +38,10 @@
       "groupName": "eslint",
       "matchPackageNames": ["/eslint/"],
     },
+    // Rate-limit firebase-tools updates: first day of each month
+    {
+      "matchPackageNames": ["firebase-tools"],
+      "schedule": ["* * 1 * *"],
+    },
   ],
 }
