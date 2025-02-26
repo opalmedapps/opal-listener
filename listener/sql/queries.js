@@ -1,4 +1,7 @@
-//Get Patient table information for a particular patient
+/**
+ * @desc Query that returns patient table fields based on a PatientSerNum.
+ * @returns {string} The query.
+ */
 exports.patientTableFields=function()
 {
     /* Note: "" AS PatientId
@@ -7,19 +10,35 @@ exports.patientTableFields=function()
      * -SB */
     return `SELECT p.PatientSerNum, p.TestUser, p.FirstName, p.LastName, p.TelNum, "" AS PatientId, p.Email, p.Alias,
                    p.Language, p.EnableSMS, p.ProfileImage, p.SSN, p.AccessLevel
-            FROM Patient p, Users u
-            WHERE u.Username = ?
-              AND u.UserTypeSerNum = p.PatientSerNum
-              AND p.LastUpdated > ?
+            FROM Patient p
+            WHERE p.PatientSerNum = ?
             ;`
 };
+
+/**
+ * @desc Query that returns patient table fields based on a user's Username.
+ * @deprecated Uses of this query should be updated with better methods (e.g. using the Patient module).
+ * @returns {string} The query.
+ */
+exports.patientTableFieldsForUser = function() {
+    return `SELECT p.PatientSerNum, p.TestUser, p.FirstName, p.LastName, p.TelNum, p.Email, p.Alias,
+                   p.Language, p.EnableSMS, p.ProfileImage, p.SSN, p.AccessLevel
+            FROM
+                Patient p,
+                Users u
+            WHERE u.Username = ?
+                AND u.UserTypeSerNum = p.PatientSerNum
+                AND u.UserType = 'Patient'
+            ;`
+};
+
 /**
  * @deprecated;
  * @returns {string}
  */
 exports.patientDoctorTableFields=function()
 {
-	return "SELECT ifnull(D.FirstName, '') FirstName, ifnull(D.LastName, '') LastName, D.DoctorSerNum, PD.PrimaryFlag, PD.OncologistFlag, ifnull(D.Email, '') Email, ifnull(D.Phone, '') Phone, ifnull(D.ProfileImage, '') ProfileImage, ifnull(D.Address, '') Address,	ifnull(D.BIO_EN, '') Bio_EN, ifnull(D.BIO_FR, '') Bio_FR FROM Doctor D, PatientDoctor PD, Patient P, Users U WHERE U.Username Like ? AND P.PatientSerNum=U.UserTypeSerNum AND PD.PatientSerNum = P.PatientSerNum AND D.DoctorSerNum = PD.DoctorSerNum AND (D.LastUpdated > ? OR PD.LastUpdated > ?);";
+	return "SELECT ifnull(D.FirstName, '') FirstName, ifnull(D.LastName, '') LastName, D.DoctorSerNum, PD.PrimaryFlag, PD.OncologistFlag, ifnull(D.Email, '') Email, ifnull(D.Phone, '') Phone, ifnull(D.ProfileImage, '') ProfileImage, ifnull(D.Address, '') Address,	ifnull(D.BIO_EN, '') Bio_EN, ifnull(D.BIO_FR, '') Bio_FR FROM Doctor D, PatientDoctor PD WHERE PD.PatientSerNum = ? AND D.DoctorSerNum = PD.DoctorSerNum AND (D.LastUpdated > ? OR PD.LastUpdated > ?);";
 };
 
 /**
@@ -34,23 +53,14 @@ function patientDiagnosisTableFields(selectOne) {
                 getDiagnosisDescription(D.DiagnosisCode,'EN') Description_EN,
                 getDiagnosisDescription(D.DiagnosisCode,'FR') Description_FR
             FROM
-                Diagnosis D,
-                Patient P,
-                Users U
+                Diagnosis D
             WHERE
-                U.UserTypeSerNum = P.PatientSerNum
-                AND D.PatientSerNum = P.PatientSerNum
-                AND U.Username = ?
+                D.PatientSerNum = ?
                 ${selectOne ? 'AND D.DiagnosisSerNum = ?' : ''}
                 ${!selectOne ? 'AND D.LastUpdated > ?' : ''}
             ;
     `;
 }
-
-exports.patientMessageTableFields=function()
-{
-    return "SELECT Messages.MessageSerNum, Messages.LastUpdated, Messages.SenderRole, Messages.ReceiverRole, Messages.SenderSerNum, Messages.ReceiverSerNum, Messages.MessageContent, Messages.ReadStatus, Messages.MessageDate FROM Messages, Patient, Users WHERE Patient.PatientSerNum=Users.UserTypeSerNum AND ((Messages.ReceiverRole='Patient' AND Patient.PatientSerNum = Messages.ReceiverSerNum) OR (Messages.SenderRole='Patient' AND Patient.PatientSerNum = Messages.SenderSerNum)) AND Users.Username Like ? AND Messages.LastUpdated > ? ORDER BY Messages.MessageDate ASC;";
-};
 
 /**
  * @desc Query that returns the patient's appointments.
@@ -106,7 +116,7 @@ function patientAppointmentTableFields(selectOne) {
                         INNER JOIN AppointmentCheckin AC ON AE.AliasSerNum = AC.AliasSerNum
                         LEFT JOIN EducationalMaterialControl emc ON emc.EducationalMaterialControlSerNum = A.EducationalMaterialControlSerNum
                     WHERE
-                        Appt.PatientSerNum = (SELECT P.PatientSerNum FROM Patient P, Users U WHERE U.Username = ? AND U.UserTypeSerNum = P.PatientSerNum)
+                        Appt.PatientSerNum = ?
                         AND Appt.State = 'Active'
                         AND Appt.Status <> 'Deleted'
                         ${selectOne ? 'AND Appt.AppointmentSerNum = ?' : ''}
@@ -145,15 +155,12 @@ function patientDocumentTableFields(selectOne=false) {
                 emc.URL_FR
             FROM
                 Document
-                INNER JOIN Patient ON Patient.PatientSerNum = Document.PatientSerNum
                 INNER JOIN AliasExpression ON AliasExpression.AliasExpressionSerNum = Document.AliasExpressionSerNum
                 INNER JOIN Alias ON Alias.AliasSerNum = AliasExpression.AliasSerNum
-                INNER JOIN Users ON Users.UserTypeSerNum = Patient.PatientSerNum
                 INNER JOIN Staff ON Staff.StaffSerNum = Document.ApprovedBySerNum
                 LEFT JOIN EducationalMaterialControl emc ON emc.EducationalMaterialControlSerNum = Alias.EducationalMaterialControlSerNum
             WHERE
-                Patient.AccessLevel = 3
-                AND Users.Username = ?
+                Document.PatientSerNum = ?
                 ${selectOne ? 'AND Document.DocumentSerNum = ?' : ''}
                 ${!selectOne ? 'AND (Document.LastUpdated > ? OR Alias.LastUpdated > ?)' : ''}
             ;
@@ -167,7 +174,7 @@ exports.getDocumentsContentQuery = function()
         "   when instr(Document.FinalFileName, '/') = 0 then Document.FinalFileName " +
         "   when instr(Document.FinalFileName, '/') > 0 then substring(Document.FinalFileName, instr(Document.FinalFileName, '/') + 1, length(Document.FinalFileName)) " +
         "end FinalFileName " +
-        "FROM Document, Patient, Users WHERE Document.DocumentSerNum IN ? AND Document.PatientSerNum = Patient.PatientSerNum AND Patient.PatientSerNum = Users.UserTypeSerNum AND Users.Username = ?";
+        "FROM Document WHERE Document.DocumentSerNum IN ? AND Document.PatientSerNum = ?;";
 };
 
 /**
@@ -187,14 +194,10 @@ function patientTxTeamMessageTableFields(selectOne=false) {
                 Post.PostName_FR
             FROM
                 PostControl as Post,
-                TxTeamMessage as TxRecords,
-                Patient,
-                Users
+                TxTeamMessage as TxRecords
             WHERE
                 Post.PostControlSerNum = TxRecords.PostControlSerNum
-                AND TxRecords.PatientSerNum = Patient.PatientSerNum
-                AND Patient.PatientSerNum = Users.UserTypeSerNum
-                AND Users.Username = ?
+                AND TxRecords.PatientSerNum = ?
                 ${selectOne ? 'AND TxRecords.TxTeamMessageSerNum = ?' : ''}
                 ${!selectOne ? 'AND (TxRecords.LastUpdated > ? OR Post.LastUpdated > ?)' : ''}
             ;
@@ -218,14 +221,10 @@ function patientAnnouncementTableFields(selectOne=false) {
                 PostControl.PostName_FR
             FROM
                 PostControl,
-                Announcement,
-                Users,
-                Patient
+                Announcement
             WHERE
                 PostControl.PostControlSerNum = Announcement.PostControlSerNum
-                AND Announcement.PatientSerNum = Patient.PatientSerNum
-                AND Patient.PatientSerNum = Users.UserTypeSerNum
-                AND Users.Username = ?
+                AND Announcement.PatientSerNum = ?
                 ${selectOne ? 'AND Announcement.AnnouncementSerNum = ?' : ''}
                 ${!selectOne ? 'AND (Announcement.LastUpdated > ? OR PostControl.LastUpdated > ?)' : ''}
             ;
@@ -240,7 +239,7 @@ function patientAnnouncementTableFields(selectOne=false) {
 function patientEducationalMaterialTableFields(selectOne=false) {
     return `SELECT A.EducationalMaterialSerNum, A.ShareURL_EN, A.ShareURL_FR, A.EducationalMaterialControlSerNum, A.DateAdded,
                 A.ReadStatus, A.EducationalMaterialType_EN, A.EducationalMaterialType_FR, A.Name_EN, A.Name_FR, A.URL_EN, A.URL_FR
-            FROM Patient P, Users U, (
+            FROM (
                 SELECT EduMat.PatientSerNum, EduMat.EducationalMaterialSerNum, EduControl.ShareURL_EN, EduControl.ShareURL_FR,
                     EduControl.EducationalMaterialControlSerNum, EduMat.DateAdded, EduMat.ReadStatus,
                     EduControl.EducationalMaterialType_EN, EduControl.EducationalMaterialType_FR, EduControl.Name_EN,
@@ -259,9 +258,7 @@ function patientEducationalMaterialTableFields(selectOne=false) {
                 WHERE TOC.ParentSerNum = EduMat.EducationalMaterialControlSerNum
                     AND TOC.EducationalMaterialControlSerNum = EduControl.EducationalMaterialControlSerNum
                 ) AS A
-            WHERE P.PatientSerNum = A.PatientSerNum
-                AND P.PatientSerNum = U.UserTypeSerNum
-                AND U.Username = ?
+            WHERE A.PatientSerNum = ?
                 ${selectOne ? 'AND A.EducationalMaterialSerNum = ?' : ''}
                 ${!selectOne ? 'AND (A.EM_LastUpdated > ? OR A.EC_LastUpdated > ? OR A.TOC_LastUpdated > ?)' : ''}
             ;
@@ -287,16 +284,14 @@ exports.patientTasksTableFields=function()
         "emc.URL_EN, " +
         "emc.URL_FR " +
         "" +
-        "FROM Patient " +
+        "FROM Task " +
         "" +
-        "INNER JOIN Users ON Users.UserTypeSerNum = Patient.PatientSerNum " +
-        "INNER JOIN Task ON Task.PatientSerNum = Patient.PatientSerNum " +
         "INNER JOIN AliasExpression ON AliasExpression.AliasExpressionSerNum = Task.AliasExpressionSerNum " +
         "INNER JOIN Alias ON Alias.AliasSerNum = AliasExpression.AliasSerNum " +
         "LEFT JOIN EducationalMaterialControl emc ON emc.EducationalMaterialControlSerNum = Alias.EducationalMaterialControlSerNum " +
         "" +
         "WHERE " +
-        "Users.Username LIKE ? " +
+        "Task.PatientSerNum = ? " +
         "AND (Task.LastUpdated > ? OR Alias.LastUpdated > ?) " +
         "ORDER BY Task.DueDateTime ASC;";
 };
@@ -351,19 +346,7 @@ exports.inputFeedback=function(UserSerNum, content)
 {
     return "INSERT INTO Feedback (`FeedbackSerNum`,`PatientSerNum`,`FeedbackContent`,`AppRating`,`DateAdded`, `SessionId`, `LastUpdated`) VALUES (NULL,?,?,?,NOW(),?, CURRENT_TIMESTAMP )";
 };
-//As the name implies, sends the message, this message function needs to be improved to account for injection attacks
-exports.sendMessage=function(objectRequest)
-{
-    var token=objectRequest.Token;
-    objectRequest=objectRequest.Parameters;
-    var senderRole=objectRequest.SenderRole;
-    var receiverRole=objectRequest.ReceiverRole;
-    var senderSerNum=objectRequest.SenderSerNum;
-    var receiverSerNum=objectRequest.ReceiverSerNum;
-    var messageContent=objectRequest.MessageContent;
-    var messageDate=objectRequest.MessageDate;
-    return "INSERT INTO Messages (`MessageSerNum`, `SenderRole`,`ReceiverRole`, `SenderSerNum`, `ReceiverSerNum`,`MessageContent`,`ReadStatus`,`MessageDate`,`SessionId`,`LastUpdated`) VALUES (NULL,'"+senderRole+"','"+ receiverRole + "', '"+senderSerNum+"','"+ receiverSerNum +"','" +messageContent+"',0,'"+messageDate+"','"+token+"' ,CURRENT_TIMESTAMP )";
-};
+
 exports.getPatientFromEmail=function()
 {
     return "SELECT PatientSerNum FROM Patient WHERE Email = ?";
@@ -421,10 +404,6 @@ exports.updateLogout=function()
 exports.updateDeviceIdentifiers = function()
 {
     return "INSERT INTO `PatientDeviceIdentifier`(`PatientDeviceIdentifierSerNum`, `PatientSerNum`, `DeviceId`, `RegistrationId`, `DeviceType`, `appVersion`,`SessionId`, `Trusted`,`LastUpdated`) VALUES (NULL, ?,?,?,?,?,?, 0, NULL) ON DUPLICATE KEY UPDATE RegistrationId = ?, SessionId = ?;"
-};
-exports.getMapLocation=function()
-{
-    return "SELECT * FROM HospitalMap WHERE QRMapAlias = ?;";
 };
 
 /**
@@ -553,15 +532,11 @@ exports.patientNotificationsTableFields=function()
                 n.RefTableRowTitle_FR
             FROM
                 Notification n,
-                NotificationControl nc,
-                Patient p,
-                Users u
+                NotificationControl nc
             WHERE nc.NotificationControlSerNum = n.NotificationControlSerNum
-                AND n.PatientSerNum = p.PatientSerNum
-                AND p.PatientSerNum = u.UserTypeSerNum
+                AND n.PatientSerNum = ?
                 -- For now, only return unread notifications
                 AND n.ReadStatus = 0
-                AND u.Username = ?
                 AND (n.LastUpdated > ? OR nc.LastUpdated > ?)
             ;
     `;

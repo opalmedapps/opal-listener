@@ -32,12 +32,13 @@ class GetOneItemHandler extends ApiRequestHandler {
         }
         let { category, serNum } = requestObject.parameters;
         let serNumInt = parseInt(serNum);
+        const patient = await GetOneItemHandler.getTargetPatient(requestObject);
 
         // Query the DB to get the requested item
         const requestMappings = sqlInterface.getSqlApiMappings();
         const itemQuery = requestMappings[category].sqlSingleItem;
         if (!itemQuery) throw new Error(`GetOneItem request failed: sqlSingleItem not implemented for category '${category}'`);
-        const params = [requestObject.meta.UserID, serNumInt];
+        const params = [patient.patientSerNum, serNumInt];
         const rows = await OpalSQLQueryRunner.run(itemQuery, params, requestMappings[category].processFunction);
 
         // The response format is the same as the 'Refresh' request to be able to use these responses interchangeably
