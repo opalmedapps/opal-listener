@@ -49,15 +49,23 @@ function validatePatientSerNumAndLanguage(queryResponse) {
  * @returns {boolean} true if the requestObject contain the requested properties with the correct format, false otherwise
  */
 function validateParamSaveAnswer(requestObject) {
-    return (
-        requestObject.UserID && requestObject.hasOwnProperty('Parameters') &&
-        requestObject.Parameters.hasOwnProperty('answerQuestionnaire_id') &&
-        requestObject.Parameters.hasOwnProperty('is_skipped') && requestObject.Parameters.hasOwnProperty('questionSection_id') &&
-        requestObject.Parameters.hasOwnProperty('question_id') && requestObject.Parameters.hasOwnProperty('section_id') &&
-        requestObject.Parameters.hasOwnProperty('question_type_id') && !isNaN(requestObject.Parameters.answerQuestionnaire_id) &&
-        !isNaN(requestObject.Parameters.questionSection_id) && !isNaN(requestObject.Parameters.question_id) &&
-        !isNaN(requestObject.Parameters.section_id) && !isNaN(requestObject.Parameters.question_type_id) &&
-        !isNaN(requestObject.Parameters.is_skipped));
+    let requirements = [
+        requestObject.UserID,
+        requestObject.hasOwnProperty('Parameters'),
+        requestObject.Parameters.hasOwnProperty('answerQuestionnaire_id'),
+        requestObject.Parameters.hasOwnProperty('is_skipped'),
+        requestObject.Parameters.hasOwnProperty('questionSection_id'),
+        requestObject.Parameters.hasOwnProperty('question_id'),
+        requestObject.Parameters.hasOwnProperty('section_id'),
+        requestObject.Parameters.hasOwnProperty('question_type_id'),
+        !isNaN(requestObject.Parameters.answerQuestionnaire_id),
+        !isNaN(requestObject.Parameters.questionSection_id),
+        !isNaN(requestObject.Parameters.question_id),
+        !isNaN(requestObject.Parameters.section_id),
+        !isNaN(requestObject.Parameters.question_type_id),
+        !isNaN(requestObject.Parameters.is_skipped),
+    ];
+    return requirements.every(requirement => requirement);
 }
 
 /**
@@ -67,12 +75,15 @@ function validateParamSaveAnswer(requestObject) {
  * @returns {boolean} true if the requestObject contain the requested properties with the correct format, false otherwise
  */
 function validateParamUpdateStatus(requestObject) {
-    return (
-        requestObject.UserID && requestObject.hasOwnProperty('Parameters') &&
-        requestObject.Parameters.hasOwnProperty('answerQuestionnaire_id') &&
-        requestObject.Parameters.hasOwnProperty('new_status') && !isNaN(parseInt(requestObject.Parameters.new_status)) &&
-        !isNaN(parseInt(requestObject.Parameters.answerQuestionnaire_id))
-    );
+    let requirements = [
+        requestObject.UserID,
+        requestObject.hasOwnProperty('Parameters'),
+        requestObject.Parameters.hasOwnProperty('answerQuestionnaire_id'),
+        requestObject.Parameters.hasOwnProperty('new_status'),
+        !isNaN(parseInt(requestObject.Parameters.new_status)),
+        !isNaN(parseInt(requestObject.Parameters.answerQuestionnaire_id)),
+    ];
+    return requirements.every(requirement => requirement);
 }
 
 /**
