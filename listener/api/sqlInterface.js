@@ -480,6 +480,7 @@ exports.checkIn = async function (requestObject) {
                     await checkInToSystem(mrn, mrnSite, config.ORMS_CHECKIN_URL, null, null, "ORMS");
                     logger.log("verbose", `Success checking in to orms for PatientSerNum = ${patientSerNum} using MRN = ${mrn} (site = ${mrnSite})`);
                     orms_success = true;
+                    break;
                 } catch(error){
                     logger.log("verbose", `Failed to check in to orms for PatientSerNum = ${patientSerNum} using MRN = ${mrn} (site = ${mrnSite}); error: ${error}`);
                     lastError = error;
