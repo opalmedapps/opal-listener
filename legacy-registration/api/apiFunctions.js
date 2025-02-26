@@ -381,7 +381,7 @@ function validateRequest(requestObject, requiredFields) {
         throw 'requestObject is missing Parameters.Fields'
     }
     // Helper function
-    let fieldExists = (name) => { return requestObject.Parameters.Fields[name] && requestObject.Parameters.Fields[name] !== "" };
+    let fieldExists = name => requestObject.Parameters.Fields[name] && requestObject.Parameters.Fields[name] !== "";
 
     for (let field of requiredFields) {
         if (!fieldExists(field)) {
