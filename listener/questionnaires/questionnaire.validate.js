@@ -8,26 +8,42 @@ const logger = require('./../logs/logger');
  */
 
 const questionnaireOpalDBValidation = {
-    'validatingPatientQuestionnaireSerNum': validatingPatientQuestionnaireSerNum,
+    'validatePatientQuestionnaireSerNum': validatePatientQuestionnaireSerNum,
+    'validatePatientSerNum': validatePatientSerNum,
     'validatePatientSerNumAndLanguage': validatePatientSerNumAndLanguage,
     'validateParamSaveAnswer': validateParamSaveAnswer,
     'validateParamUpdateStatus': validateParamUpdateStatus,
+    'validateQuestionnairePurpose': validateQuestionnairePurpose,
     'validateQuestionnaireSerNum': validateQuestionnaireSerNum,
 };
 
 /**
- * @name validatingPatientQuestionnaireSerNum
+ * @name validatePatientQuestionnaireSerNum
  * @desc validating the parameter qp_ser_num sent from the front-end
  * @param {object} requestObject object sent from the front-end
  * @returns {boolean} true if the qp_ser_num parameter exists and is in correct format, false otherwise
  */
-function validatingPatientQuestionnaireSerNum(requestObject) {
+function validatePatientQuestionnaireSerNum(requestObject) {
     return (requestObject.hasOwnProperty('Parameters') && requestObject.Parameters.hasOwnProperty('qp_ser_num')
         && requestObject.Parameters.qp_ser_num !== null && !isNaN(requestObject.Parameters.qp_ser_num));
 }
 
 /**
+ * @name validatePatientSerNum
+ * @desc validate the whether there is a patientSerNum returned from the OpalDB
+ * @param {array} queryResponse The response directly from the OpalDB
+ * @returns {boolean} true if the response is valid, false otherwise
+ */
+function validatePatientSerNum(queryResponse) {
+    return (queryResponse.length === 1
+        && queryResponse[0].hasOwnProperty('PatientSerNum')
+        && queryResponse[0].PatientSerNum !== undefined
+        && queryResponse[0].PatientSerNum !== null);
+}
+
+/**
  * @name validatePatientSerNumAndLanguage
+ * @deprecated Since QSCCD-91
  * @desc validate the whether there is a patientSerNum and language returned from the OpalDB
  * @param {array} queryResponse The response directly from the OpalDB
  * @returns {boolean} true if the response is valid, false otherwise
@@ -87,6 +103,19 @@ function validateParamUpdateStatus(requestObject) {
 }
 
 /**
+ * @name validateQuestionnairePurpose
+ * @desc validation function for the questionnaire purpose
+ * @param {object} requestObject
+ * @returns {boolean} true if the requestObject contain the purpose with the correct format, false otherwise
+ */
+function validateQuestionnairePurpose(requestObject) {
+    return (
+        requestObject?.Parameters?.purpose &&
+        questionnaireConfig.QUESTIONNAIRE_PURPOSE_ID_MAP.hasOwnProperty(requestObject.Parameters.purpose.toUpperCase())
+    );
+}
+
+/**
  * @name validateQuestionnaireSerNum
  * @desc validating the parameter questionnaireSerNum sent from the front-end
  * @param {object} requestObject object sent from the front-end
@@ -118,6 +147,8 @@ const questionnaireQuestionnaireDBValidation = {
     'validateSliderAnswer': validateSliderAnswer,
     'validateRadioButtonAnswer': validateRadioButtonAnswer,
     'validateCheckboxAnswer': validateCheckboxAnswer,
+    'validatePurpose': validatePurpose,
+    'validateUnreadNumber': validateUnreadNumber,
 }
 
 /**
@@ -207,7 +238,9 @@ function validateQuestionnaireProperties(questionnaire) {
         !questionnaire.nickname ||
         !questionnaire.hasOwnProperty('description') ||
         !questionnaire.hasOwnProperty('logo') ||
-        !questionnaire.hasOwnProperty('instruction')) {
+        !questionnaire.hasOwnProperty('instruction') ||
+        !questionnaire.hasOwnProperty('purpose_id') ||
+        isNaN(parseInt(questionnaire.purpose_id))) {
 
         logger.log("error", "Error: this questionnaire does not have the required properties");
 
@@ -311,6 +344,26 @@ function validateSliderAnswer(answerArray) {
  */
 function validateRadioButtonAnswer(answerArray) {
     return validateAnswerArrayLen1(answerArray) && !isNaN(parseInt(answerArray[0].answer_value));
+}
+
+/**
+ * validatePurpose
+ * @desc verify that the query result has the correct property (purpose)
+ * @param {object} queryResult
+ * @returns {boolean} true if the result has required property, false otherwise
+ */
+ function validatePurpose(queryResult) {
+    return queryResult[0].hasOwnProperty('purpose') && queryResult[0].purpose;
+}
+
+/**
+ * validateUnreadNumber
+ * @desc verify that the query result has the correct property (numberUnread) and type
+ * @param {object} queryResult
+ * @returns {boolean} true if the result has required property and correct type, false otherwise
+ */
+function validateUnreadNumber(queryResult) {
+    return queryResult[0].hasOwnProperty('numberUnread') && !isNaN(parseInt(queryResult[0].numberUnread));
 }
 
 /**

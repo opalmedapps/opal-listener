@@ -48,6 +48,8 @@ function runQuery(query, parameters = null) {
 
 exports.getQuestionnaireList = getQuestionnaireList;
 exports.getQuestionnaire = getQuestionnaire;
+exports.getQuestionnairePurpose= getQuestionnairePurpose;
+exports.getQuestionnaireUnreadNumber = getQuestionnaireUnreadNumber;
 exports.saveAnswer = saveAnswer;
 exports.updateQuestionnaireStatusInQuestionnaireDB = updateQuestionnaireStatusInQuestionnaireDB;
 
@@ -59,12 +61,14 @@ FUNCTIONS TO GET QUESTIONNAIRES
  * getQuestionnaireList
  * @desc this function get a list of questionnaire belonging to an user.
  * @param {object} opalPatientSerNumAndLanguage object containing PatientSerNum and Language as property. These information comes from OpalDB
+ * @param {string} purpose string indicating the purpose of the questionnaire list requested. The purposes can be found in QUESTIONNAIRE_PURPOSE_ID_MAP of the questionnaireConfig.json file.
  * @param {Date} [lastUpdated] - If provided, only items with 'LastUpdated' after this time are returned.
  * @returns {promise}
  */
-async function getQuestionnaireList(opalPatientSerNumAndLanguage, lastUpdated=0) {
+async function getQuestionnaireList(opalPatientSerNumAndLanguage, purpose, lastUpdated=0) {
     const params = [
         opalPatientSerNumAndLanguage.PatientSerNum,
+        findPurposeId(purpose),
         opalPatientSerNumAndLanguage.Language,
     ]
     let queryResult = await runQuery(questionnaireQueries.getQuestionnaireListQuery(), params);
@@ -81,11 +85,11 @@ async function getQuestionnaireList(opalPatientSerNumAndLanguage, lastUpdated=0)
 /**
  * getQuestionnaire
  * @desc this function gets data related to that questionnaire, including answers
- * @param {object} opalPatientSerNumAndLanguage object containing PatientSerNum and Language as property. These information comes from OpalDB
+ * @param {string} language The language in which to return the questionnaire.
  * @param {number} answerQuestionnaire_Id This is the ID of the answerQuestionnaire (questionnaire belonging to that user and which the user would like to view). Should be passed from qplus.
  * @returns {Promise}
  */
-function getQuestionnaire(opalPatientSerNumAndLanguage, answerQuestionnaire_Id) {
+function getQuestionnaire(language, answerQuestionnaire_Id) {
     let r = q.defer();
 
     let questionAndTypeMap = {};
@@ -96,7 +100,7 @@ function getQuestionnaire(opalPatientSerNumAndLanguage, answerQuestionnaire_Id) 
     let answerDataArray; // note that this might not contain any useful data if the questionnaire is new
     let answerObject;
 
-    runQuery(questionnaireQueries.getQuestionnaireQuery(), [answerQuestionnaire_Id, opalPatientSerNumAndLanguage.Language])
+    runQuery(questionnaireQueries.getQuestionnaireQuery(), [answerQuestionnaire_Id, language])
         .then(function (queryResult) {
             if (!questionnaireValidation.hasValidProcedureStatusAndLang(queryResult)) {
 
@@ -124,6 +128,62 @@ function getQuestionnaire(opalPatientSerNumAndLanguage, answerQuestionnaire_Id) 
         })
         .catch(function (err) {
             logger.log("error", `Error getting questionnaire, ${err}`);
+            r.reject(err);
+        })
+
+    return r.promise;
+}
+
+/**
+ * getQuestionnairePurpose
+ * @desc this function gets the quetionnaire purpose of a given questionnaire.
+ * @param {number} answerQuestionnaireId  The unique Id of the answerQuestionnaire table.
+ * @returns {promise}
+ */
+function getQuestionnairePurpose(answerQuestionnaireId) {
+    let r = q.defer();
+
+    runQuery(questionnaireQueries.getQuestionnairePurposeQuery(), [answerQuestionnaireId])
+        .then(function (queryResult) {
+            if (!questionnaireValidation.validatePurpose(queryResult)) {
+                logger.log("error", "Error getting questionnaire purpose: query error");
+                r.reject(new Error('Error getting questionnaire purpose: query error'));
+            } else {
+                r.resolve(queryResult[0]);
+            }
+        })
+        .catch(function (err) {
+            logger.log("error", "Error getting questionnaire purpose, " + err);
+            r.reject(err);
+        })
+
+    return r.promise;
+}
+
+/**
+ * getQuestionnaireUnreadNumber
+ * @desc this function gets the number of unread (e.g. 'New') questionnaires in a given purpose belonging to an user.
+ * @param {object} opalPatientSerNum object containing PatientSerNum as a property.
+ *                 This information comes from OpalDB
+ * @param {string} purpose string indicating the purpose of the questionnaire list requested.
+ *                 The purposes can be found in QUESTIONNAIRE_PURPOSE_ID_MAP of the questionnaireConfig.json file.
+ * @returns {promise}
+ */
+function getQuestionnaireUnreadNumber(opalPatientSerNum, purpose) {
+    let r = q.defer();
+
+    // get number of unread questionnaires
+    runQuery(questionnaireQueries.getNumberUnreadQuery(), [findPurposeId(purpose), opalPatientSerNum.PatientSerNum])
+        .then(function (queryResult) {
+            if (!questionnaireValidation.validateUnreadNumber(queryResult)) {
+                logger.log("error", "Error getting number of unread questionnaires: query error");
+                r.reject(new Error('Error getting number of unread questionnaires: query error'));
+            } else {
+                r.resolve(queryResult[0]);
+            }
+        })
+        .catch(function (err) {
+            logger.log("error", "Error getting number of unread questionnaires, " + err);
             r.reject(err);
         })
 
@@ -162,6 +222,16 @@ function getQuestionOptions(questionAndTypeMap, languageId) {
     return r.promise;
 }
 
+/**
+ * findPurposeId
+ * @desc helper function to map the purpose string sent from the front-end to its ID in the database
+ * @param {string} purposeString
+ * @returns {number} The purpose ID in the database
+ */
+function findPurposeId(purposeString) {
+    return questionnaireConfig.QUESTIONNAIRE_PURPOSE_ID_MAP[purposeString.toUpperCase()];
+}
+
 /*
 FUNCTIONS TO SAVE QUESTIONNAIRE
  */
@@ -169,16 +239,15 @@ FUNCTIONS TO SAVE QUESTIONNAIRE
 /**
  * saveAnswer
  * @desc this saves the answer of one question only
- * @param {object} opalPatientSerNumAndLanguage must contain PatientSerNum and Language as properties. This should be gotten directly from the OpalDB
+ * @param {string} isoLang The language in which the questionnaire was answered.
  * @param {object} param the parameters passed from the front-end. The calling function must verify its properties.
  * @param {string} appVersion a string denoting the version of the app.
  * @param {string} respondentUsername the username of the user answering the questionnaire.
  * @returns {Promise}
  */
-function saveAnswer(opalPatientSerNumAndLanguage, param, appVersion, respondentUsername) {
+function saveAnswer(isoLang, param, appVersion, respondentUsername) {
 
     let r = q.defer();
-    let isoLang = opalPatientSerNumAndLanguage.Language;
     let answerId;
 
     /*
@@ -202,7 +271,8 @@ function saveAnswer(opalPatientSerNumAndLanguage, param, appVersion, respondentU
             if (!questionnaireValidation.hasValidProcedureStatusAndInsertId(queryResult)) {
 
                 logger.log("error", "Error saving answer: query unsuccessful", queryResult);
-                r.reject(new Error('Error saving answer: query unsuccessful'));
+                let cause = getProcedureCode(queryResult);
+                r.reject(new Error('Error saving answer: query unsuccessful', {cause}));
             } else {
                 answerId = queryResult[queryResult.length - 2][0].inserted_answer_id;
 
@@ -388,11 +458,10 @@ function insertAnswerByType(answerId, answerArray, question_typeId) {
  * @param {string} newStatus denote the status to be updated to. It should match the database convention of being either 0,1,2
  * @param {string} respondentUsername the username of the user answering the questionnaire.
  * @param {string} appVersion a string denoting the version of the app. This is used for noting the author of update
+ * @param {string} userDisplayName Questionnaire's respondent first and last name used for display purpose.
  * @returns {Promise} resolve with a boolean denoting whether the questionnaire's new status is completed or not
  */
-function updateQuestionnaireStatusInQuestionnaireDB(answerQuestionnaireId, newStatus, respondentUsername, appVersion) {
-    let r = q.defer();
-
+async function updateQuestionnaireStatusInQuestionnaireDB(answerQuestionnaireId, newStatus, respondentUsername, appVersion, userDisplayName) {
     let isCompleted = 0;
     let newStatusInt = parseInt(newStatus);
 
@@ -403,20 +472,31 @@ function updateQuestionnaireStatusInQuestionnaireDB(answerQuestionnaireId, newSt
         throw new Error("Error updating the questionnaire status: the new status is not in progress, completed, or new");
     }
 
-    runQuery(questionnaireQueries.updateAnswerQuestionnaireStatus(), [answerQuestionnaireId, newStatus, respondentUsername, appVersion])
-        .then(function (queryResult) {
+    try {
+        const queryResult = await runQuery(questionnaireQueries.updateAnswerQuestionnaireStatus(), [answerQuestionnaireId, newStatus, respondentUsername, appVersion, userDisplayName]);
+        if (!questionnaireValidation.hasValidProcedureStatus(queryResult)) {
+            logger.log("error", "Error updating the questionnaire status: query unsuccessful", queryResult);
+            let cause = getProcedureCode(queryResult);
+            throw new Error('Error updating the questionnaire status: query unsuccessful', {cause});
+        } else {
+            return isCompleted;
+        }
+    } catch (error) {
+        logger.log("error", `Error updating the questionnaire status`, error);
+        throw error;
+    }
+}
 
-            if (!questionnaireValidation.hasValidProcedureStatus(queryResult)) {
-                logger.log("error", "Error updating the questionnaire status: query unsuccessful", queryResult);
-                r.reject(new Error('Error updating the questionnaire status: query unsuccessful'));
-            } else {
-                r.resolve(isCompleted);
-            }
-
-        }).catch(function (err) {
-            logger.log("error", `Error updating the questionnaire status`, err);
-            r.reject(err);
-        });
-
-    return r.promise;
+/**
+ * @desc Reads the procedure_status returned in a query result, if it exists.
+ * @param queryResult The result returned from running a questionnaires procedure in the database.
+ * @returns {number|undefined} The procedure_status from the query result, or undefined if it's not found.
+ */
+function getProcedureCode(queryResult) {
+    try {
+        return queryResult[0][0].procedure_status;
+    }
+    catch(error) {
+        return undefined;
+    }
 }

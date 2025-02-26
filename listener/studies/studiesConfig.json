@@ -1,0 +1,9 @@
+{
+    "___COMMENT":"This config file stores the convention used for studies consent status. It matches the comment next to 'consentStatus' in the patientStudy table.",
+    "STUDY_CONSENT_STATUS_MAP":{
+        "1":"invited",
+        "2":"opalConsented",
+        "3":"otherConsented",
+        "4":"declined"
+    }
+}

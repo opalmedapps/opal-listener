@@ -10,6 +10,8 @@ const {OpalSQLQueryRunner} = require("../sql/opal-sql-query-runner");
 const testResults       = require("./modules/test-results");
 const questionnaires    = require("./modules/questionnaires");
 const { Patient } = require('./modules/patient/patient');
+const eduMaterialConfig = require('./../educational-material/eduMaterialConfig.json');
+const studiesConfig     = require('./../studies/studiesConfig.json');
 
 /******************************
  * MAPPINGS
@@ -116,6 +118,10 @@ const requestMappings =
             module: questionnaires,
             processFunction: result => result.data.questionnaireList
         },
+        'patientStudy': {
+            table: 'patientStudy',
+            serNum: 'ID'
+        }
     };
 
 /**
@@ -165,9 +171,15 @@ exports.runSqlQuery = OpalSQLQueryRunner.run;
  * @param {string[]} arrayTables The list of categories of data to fetch. Should be keys in requestMappings.
  * @param [timestamp] Optional date/time; if provided, only items with 'LastUpdated' after this time are returned.
  *                    If not provided, all data is returned (a default value of 0 is used to query the database).
+ * @param {string} purpose Optional parameter that is used to filter questionnaires and educational materials by purpose. By default is set to "clinical" to support the old versions of the app.
  * @return {Promise}
  */
-exports.getPatientTableFields = async function(patientSerNum, arrayTables, timestamp) {
+exports.getPatientTableFields = async function(
+    patientSerNum,
+    arrayTables,
+    timestamp,
+    purpose = 'clinical'
+) {
     timestamp = timestamp || 0;
 
     // Validate the arrayTables
@@ -175,7 +187,7 @@ exports.getPatientTableFields = async function(patientSerNum, arrayTables, times
     if (invalidCategory) throw {Response: 'error', Reason: `Incorrect refresh parameter: ${invalidCategory}`};
 
     logger.log('verbose', `Processing select requests in the following categories: ${JSON.stringify(arrayTables)}`);
-    let response = await Promise.all(arrayTables.map(category => processSelectRequest(category, patientSerNum, timestamp)));
+    let response = await Promise.all(arrayTables.map(category => processSelectRequest(category, patientSerNum, timestamp, purpose)));
     // Arrange the return object with categories as keys and each corresponding response as a value
     let responseMapping = Object.fromEntries(arrayTables.map((category, i) => [category, response[i]]));
     return {
@@ -190,9 +202,10 @@ exports.getPatientTableFields = async function(patientSerNum, arrayTables, times
  * @param {string} category The requested data category. Must be a key in requestMappings.
  * @param patientSerNum The patient's PatientSerNum.
  * @param [timestamp] Optional date/time; if provided, only items with 'LastUpdated' after this time are returned.
+ * @param {string} purpose Optional parameter that is used to filter questionnaires and educational materials by purpose. By default is set to "clinical" to support the old versions of the app.
  * @returns {Promise<*>}
  */
-async function processSelectRequest(category, patientSerNum, timestamp) {
+async function processSelectRequest(category, patientSerNum, timestamp, purpose = 'clinical') {
     const mapping = requestMappings[category];
     let date = timestamp ? new Date(Number(timestamp)) : new Date(0);
 
@@ -204,6 +217,7 @@ async function processSelectRequest(category, patientSerNum, timestamp) {
             },
             params: {
                 Date: timestamp,
+                purpose: purpose
             },
         });
         return mapping.processFunction ? mapping.processFunction(result) : result;
@@ -228,6 +242,7 @@ exports.updateReadStatus=function(userId, parameters)
     let r = Q.defer();
 
     let table, serNum;
+
     if(parameters && parameters.Field && parameters.Id && requestMappings.hasOwnProperty(parameters.Field) ) {
         ({table, serNum} = requestMappings[parameters.Field]);
 
@@ -325,6 +340,76 @@ exports.getUserPatient = async function(requestObject) {
     return {
         Data: rows[0],
     }
+};
+
+/**
+ * @name getStudies
+ * @desc Gets patient studies based on UserID
+ * @param {object} requestObject
+ * @returns {promise}
+ */
+exports.getStudies = async function(requestObject) {
+    try {
+        let rows = await exports.runSqlQuery(queries.patientStudyTableFields(), [requestObject.UserID]);
+
+        rows.forEach(
+            (row, id, arr) => arr[id].consentStatus = studiesConfig.STUDY_CONSENT_STATUS_MAP[arr[id].consentStatus]
+        );
+
+        let data = {studies: rows};
+
+        return {Response: 'success', Data: data};
+    }
+    catch (error) { throw {Response: 'error', Reason: error}; }
+};
+
+/**
+ * @name getStudyQuestionnaires
+ * @desc Gets study questionnaires based on studyID
+ * @param {object} requestObject
+ * @returns {promise}
+ */
+exports.getStudyQuestionnaires = async function(requestObject) {
+    try {
+        let rows = await exports.runSqlQuery(
+            queries.getStudyQuestionnairesQuery(),
+            [requestObject.Parameters.studyID]
+        );
+
+        return {Response: 'success', Data: rows};
+    }
+    catch (error) { throw {Response: 'error', Reason: error}; }
+};
+
+/**
+ * @name studyUpdateStatus
+ * @desc Update consent status for a study.
+ * @param {object} requestObject
+ * @return {Promise}
+ */
+exports.studyUpdateStatus = async function(requestObject) {
+    try {
+        let parameters = requestObject.Parameters;
+
+        if (parameters && parameters.questionnaire_id && parameters.status) {
+            // get number corresponding to consent status string
+            let statusNumber = Object.keys(
+                studiesConfig.STUDY_CONSENT_STATUS_MAP
+            ).find(
+                key => studiesConfig.STUDY_CONSENT_STATUS_MAP[key] === parameters.status
+            );
+
+            await exports.runSqlQuery(
+                queries.updateConsentStatus(),
+                [statusNumber, parameters.questionnaire_id, requestObject.UserID]
+            );
+
+            return {Response: 'success'};
+        } else {
+            throw {Response: 'error', Reason: 'Invalid parameters'};
+        }
+    }
+    catch (error) { throw {Response: 'error', Reason: error}; }
 };
 
 /**
@@ -690,7 +775,6 @@ exports.getEncryption=function(requestObject)
  */
 exports.getPackageContents = function(requestObject){
     let r = Q.defer();
-
     // Check that the correct parameters are given.
     let {EducationalMaterialControlSerNum} = requestObject.Parameters;
     if(!EducationalMaterialControlSerNum) {
@@ -956,6 +1040,7 @@ function decodePostMessages(rows){
 }
 
 //Obtains the educational material table of contents and adds it to the pertinent materials
+// Also adds educational material category string based on category ID
 function getEducationTableOfContents(rows)
 {
     var r = Q.defer();
@@ -989,6 +1074,9 @@ function getEducationTableOfContents(rows)
                 if(results[i].length !== 0)
                 {
                     for (var j = 0; j < rows.length; j++) {
+                        // Add edu material category name based on its ID
+                        rows[j].Category = eduMaterialConfig.EDUMATERIAL_CATEGORY_ID_MAP[rows[j].EduCategoryId].toLowerCase();
+
                         if(rows[j].EducationalMaterialControlSerNum ==results[i][0].ParentSerNum)
                         {
                             rows[j].TableContents = results[i];
