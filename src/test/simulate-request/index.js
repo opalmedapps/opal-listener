@@ -28,7 +28,7 @@ class SimulateRequest {
     }
 
     /**
-     * @description Get the firebase admin keep from it's folder and trigger forebase initialization.
+     * @description Get the firebase admin key from it's folder and trigger Firebase initialization.
      */
     makeRequest() {
         const pathName = path.join(__dirname, '../../config/firebase');
