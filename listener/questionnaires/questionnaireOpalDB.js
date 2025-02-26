@@ -208,6 +208,7 @@ async function questionnaireUpdateStatus(requestObject) {
             let options = {
                 method: "post",
                 url: config.QUESTIONNAIRE_COMPLETED_PATH,
+                json: true,
             };
             await requestUtility.request(options);
         }
