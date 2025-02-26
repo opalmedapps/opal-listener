@@ -31,7 +31,7 @@ async function deleteAllUsers() {
 async function createUsers() {
     const userRecords = [
         {
-            email: 'muhc.app.mobile@gmail.com',
+            email: 'marge@opalmedapps.ca',
             password: '12345Opal!!',
             uid: 'QXmz5ANVN3Qp9ktMlqm2tJ2YYBz2',
         },
@@ -44,6 +44,11 @@ async function createUsers() {
             email: 'bart@opalmedapps.ca',
             password: '12345Opal!!',
             uid: 'SipDLZCcOyTYj7O3C8HnWLalb4G3',
+        },
+        {
+            email: 'mona@opalmedapps.ca',
+            password: '12345Opal!!',
+            uid: '61DXBRwLCmPxlaUoX6M1MP9DiEl1',
         },
     ];
 
