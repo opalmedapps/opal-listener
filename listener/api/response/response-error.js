@@ -23,7 +23,7 @@ class OpalResponseError extends OpalResponse {
 		return {
 			Code: this.code,
 			Reason: this.data,
-			...( this.errorDetail ? {Details: this.errorDetail} : undefined),
+			...(this.errorDetail ? {Details: this.errorDetail} : undefined),
 			Headers: {
 				RequestKey: this.reqObj.key,
 				RequestObject: this.reqObj.toLegacy(),
