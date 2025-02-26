@@ -319,3 +319,30 @@ exports.addSeveralToArray = (array, item, numTimes) => {
     for (let i = 0; i < numTimes; i++) arrCopy.push(item);
     return arrCopy;
 };
+
+/**
+ * @desc Compares two version numbers in semver format and returns a number (0, 1, -1) representing the result.
+ * @param {string} v1 The first version string to compare.
+ * @param {string} v2 The second version string to compare.
+ * @returns {number} -1 if v1 < v2; 0 if v1 = v2; 1 if v1 > v2.
+ */
+exports.compareVersions = (v1, v2) => {
+    const format = /^[\d.]+$/;
+    if (!format.test(v1) || !format.test(v2)) throw `Version strings must contain only digits and dots; tried to use: '${v1}' and '${v2}'`;
+
+    const a = v1.split('.');
+    const b = v2.split('.');
+    if (a.length !== b.length) throw `Cannot compare two version strings with a different number of parts (dots): '${v1}' and '${v2}'`;
+    const parts = a.map((aPart, i) => ({a: Number(aPart), b: Number(b[i])}));
+
+    for (const part of parts) {
+        if (part.a > part.b) return 1;
+        else if (part.a < part.b) return -1;
+    }
+    return 0;
+}
+
+exports.versionGreaterThan = (v1, v2) => exports.compareVersions(v1, v2) === 1
+exports.versionLessThan = (v1, v2) => exports.compareVersions(v1, v2) === -1
+exports.versionGreaterOrEqual = (v1, v2) => exports.compareVersions(v1, v2) >= 0
+exports.versionLessOrEqual = (v1, v2) => exports.compareVersions(v1, v2) <= 0

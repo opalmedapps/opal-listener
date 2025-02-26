@@ -110,12 +110,16 @@ exports.verifySecurityAnswer=function(requestKey,requestObject,patient)
 exports.setNewPassword=function(requestKey, requestObject, user)
 {
     var r=q.defer();
+    // Use of RAMQ (SSN) to encrypt password reset requests is no longer supported after 1.12.2 (QSCCD-476)
+    let secret = utility.versionGreaterThan(requestObject.meta.AppVersion, "1.12.2")
+        ? utility.hash(user.Email)
+        : utility.hash(user.SSN.toUpperCase());
     var answer = user.AnswerText;
     const errorResponse = {Headers: {RequestKey:requestKey, RequestObject:requestObject}, Code:2, Data:{}, Response:'error', Reason:'Could not set password'};
 
     logger.log('debug', `Running function setNewPassword for user with UserTypeSerNum = ${user.UserTypeSerNum}`);
 
-    utility.decrypt(requestObject.Parameters, utility.hash(user.Email), answer)
+    utility.decrypt(requestObject.Parameters, secret, answer)
         .then((unencrypted)=> {
             sqlInterface.setNewPassword(utility.hash(unencrypted.newPassword), user.UserTypeSerNum).then(function(){
                 logger.log('debug', 'successfully updated password');
