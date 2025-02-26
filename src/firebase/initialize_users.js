@@ -3,6 +3,7 @@
  * @file Utility for Firebase to initialize users.
  * @author Matthias Schoettle
  */
+/* eslint-disable import/no-unresolved */
 const { getAuth } = require('firebase-admin/auth');
 
 const { FIREBASE_CONFIG } = require('../environment');
@@ -30,7 +31,7 @@ async function deleteAllUsers() {
 async function createUsers() {
     const userRecords = [
         {
-            email: 'marge@opalmedapps.ca',
+            email: 'muhc.app.mobile@gmail.com',
             password: '12345Opal!!',
             uid: 'QXmz5ANVN3Qp9ktMlqm2tJ2YYBz2',
         },
