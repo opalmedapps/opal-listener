@@ -146,10 +146,10 @@ exports.registerPatient = async function(requestObject) {
         let uid = '';
         if (requestObject.Parameters.Fields.accountExists == '0') {
             uid = await firebaseFunction.createFirebaseAccount(email, requestObject.Parameters.Fields.password);
-            logger.log('info', 'Created firebase user account: ' + uid);
+            logger.log('info', 'Created firebase user account: {uid}');
         } else {
             uid = await firebaseFunction.getFirebaseAccountByEmail(email);
-            logger.log('info', 'Got firebase user account: ' + uid);
+            logger.log('info', 'Got firebase user account: {uid}');
         }
 
 
