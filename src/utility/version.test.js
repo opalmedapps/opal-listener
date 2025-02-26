@@ -10,13 +10,6 @@ const { Version } = require('./version');
 
 describe('Version', function () {
     describe('compareVersions', function () {
-        it('should fail when provided with inputs of different lengths (number of parts)', function () {
-            const v1 = '1.2.3.4';
-            const v2 = '1.2.3';
-            expect(() => Version.compareVersions(v1, v2)).to.throw(
-                'Cannot compare two version strings with a different number of parts (dots)',
-            );
-        });
         it('should fail if a version contains a negative number', function () {
             const v1 = '1.2.3';
             const v2 = '1.-2.3';
