@@ -323,7 +323,7 @@ async function requestLabHistoryNoFailure(registrationData, patientLegacyId) {
                 PatientId: hospital_patient.mrn,
                 Site: hospital_patient.site_code,
             }
-            await opalRequest.getLabResultHistory(config.LAB_RESULT_HISTORY, requestData);
+            await opalRequest.getLabResultHistory(config.LAB_RESULT_HISTORY_URL, requestData);
         }
     } catch (error) {
         logger.log('error', `An error occurred while getting lab result history (for patient ${patientLegacyId}): ${JSON.stringify(error)}`);
@@ -362,7 +362,7 @@ async function updatePatientStatusInORMS(registrationData) {
         let logMsg = message => `${message} for mrn = ${mrn}, site = ${site}`;
         try {
             let options = {
-                url: config.ORMS.API.URL + config.ORMS.API.method.updatePatientStatus,
+                url: config.ORMS_HOST + config.ORMS_UPDATE_PATIENT_STATUS_URL,
                 json: true,
                 body: {
                     "mrn": mrn,

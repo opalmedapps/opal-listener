@@ -233,10 +233,10 @@ async function questionnaireUpdateStatus(requestObject) {
         // 3. If the questionnaire is completed, notify the OIE. If an error occurs, don't cause the whole function to fail.
         try {
             logger.log("info", "Notifying the OIE that a questionnaire was completed.");
-            if (!config.QUESTIONNAIRE_COMPLETED_PATH || config.QUESTIONNAIRE_COMPLETED_PATH === "") {
-                throw "No value was provided for QUESTIONNAIRE_COMPLETED_PATH in the config file.";
+            if (!config.QUESTIONNAIRE_COMPLETED_URL || config.QUESTIONNAIRE_COMPLETED_URL === "") {
+                throw "No value was provided for QUESTIONNAIRE_COMPLETED_URL in the config file.";
             }
-            await requestUtility.request("post", config.QUESTIONNAIRE_COMPLETED_PATH, { json: true });
+            await requestUtility.request("post", config.QUESTIONNAIRE_COMPLETED_URL, { json: true });
         }
         catch (error) {
             logger.log("error", `Failed to send notification of completed questionnaire to the OIE`, error);
