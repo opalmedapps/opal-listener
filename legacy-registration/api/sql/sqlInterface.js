@@ -16,7 +16,6 @@ let formatParameterSex = sex => {
  insertPatient
  @desc insert a patient record.
  @param requestObject
- @param {boolean} isSelfRelationship Whether the user is registering for a "self" relationship.
  @return {Promise}
  **/
 exports.insertPatient = async function (requestObject) {
