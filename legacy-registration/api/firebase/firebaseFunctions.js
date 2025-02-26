@@ -5,8 +5,6 @@ const logger = require('../../logs/logger.js');
 const Q = require('q');
 const config = require('../../config-adaptor');
 
-var exports = module.exports = {};
-
 
 // Function to create firebase account
 exports.createFirebaseAccount = function (userEmail, userPassword) {

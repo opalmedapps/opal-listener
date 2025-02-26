@@ -1,5 +1,3 @@
-var exports = module.exports = {};
-
 exports.getRequestEncryption = function () {
     return "CALL reg_BranchSearch(?);";
 };

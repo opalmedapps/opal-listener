@@ -6,8 +6,6 @@ const queries = require('../sql/queries.js');
 const logger = require('../../logs/logger.js');
 const config = require('../../config-adaptor');
 
-var exports = module.exports = {};
-
 /** OPAL DATABASE CONFIGURATIONS **/
 const opaldbCredentials = {
     connectionLimit: 10,

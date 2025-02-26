@@ -1,5 +1,3 @@
-var exports = module.exports = {};
-
 /*
 This file stores all queries related to the questionnaire system
  */

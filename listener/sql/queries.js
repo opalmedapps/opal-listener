@@ -1,4 +1,3 @@
-var exports=module.exports={};
 //Get Patient table information for a particular patient
 exports.patientTableFields=function()
 {
