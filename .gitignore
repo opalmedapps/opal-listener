@@ -1,6 +1,6 @@
 # config files
-listener/config.json
-listener/firebase/*
+legacy-listener/config.json
+legacy-listener/firebase/*
 src/config/config.json
 src/config/firebase/
 

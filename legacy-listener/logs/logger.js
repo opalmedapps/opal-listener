@@ -40,12 +40,12 @@ const WinstonLogger = createLogger({
     ),
     transports: [
         // Log level info and above in the log file.
-        new transports.File({ filename:'./listener/logs/opal-info.log', level: 'info'}),
+        new transports.File({ filename:'./legacy-listener/logs/opal-info.log', level: 'info'}),
         new transports.Console({level: 'debug'})
     ],
     exceptionHandlers: [
         // Log uncaught exceptions to a different file and console.
-        new transports.File({ filename: './listener/logs/opal-uncaughtExceptions.log'}),
+        new transports.File({ filename: './legacy-listener/logs/opal-uncaughtExceptions.log'}),
         new transports.Console({level: 'debug'})
     ]
 });
