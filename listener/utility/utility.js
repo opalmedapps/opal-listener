@@ -9,8 +9,6 @@ const Q                 = require('q');
 //crypto.DEFAULT_ENCODING = 'hex';
 
 
-var exports=module.exports={};
-
 /**
  * resolveEmptyResponse
  * @desc Returns empty response, function used by refresh, resume, login
