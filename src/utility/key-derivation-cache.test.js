@@ -3,19 +3,18 @@ const { expect } = require('chai');
 const Keyv = require('keyv');
 const sinon = require('sinon');
 const crypto = require('crypto');
-const { KeyDerivationCache } = require('./key-derivation-cache');
+const cache = require('./key-derivation-cache');
 
 const noop = () => {};
 
 describe('KeyDerivationCache', function () {
-    let cache;
-    let cacheSet;
-    let pbkdf2;
     const label = 'test-label';
     const legacySettings = [false, true];
+    let cacheSet;
+    let pbkdf2;
 
     beforeEach(function () {
-        cache = new KeyDerivationCache();
+        cache.clear();
         cacheSet = sinon.spy(cache.cache, 'set');
         pbkdf2 = sinon.spy(crypto, 'pbkdf2Sync');
     });

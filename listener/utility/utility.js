@@ -2,10 +2,7 @@ const CryptoJS          = require('crypto-js');
 const stablelibutf8     = require('@stablelib/utf8');
 const nacl              = require('tweetnacl');
 const stablelibbase64   = require('@stablelib/base64');
-const { KeyDerivationCache }   = require('../../src/utility/key-derivation-cache');
-
-// Manages caching of derived keys, to avoid the need to recompute a key every time a request is made by the same user
-const keyDerivationCache = new KeyDerivationCache();
+const keyDerivationCache = require('../../src/utility/key-derivation-cache');
 
 /**
  * resolveEmptyResponse

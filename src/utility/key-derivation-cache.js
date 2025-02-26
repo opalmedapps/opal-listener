@@ -91,6 +91,14 @@ class KeyDerivationCache {
     }
 
     /**
+     * @description Clears out all content from the current cache.
+     * @returns {Promise<void>} Resolves when the content has been cleared.
+     */
+    clear() {
+        return this.cache.clear();
+    }
+
+    /**
      * @description Re-derives a key and saves it to the cache.
      * @param {string} [cacheLabel] The label under which the value is stored.
      *                              If no label is provided, then a new value is generated, but not stored in the cache.
@@ -126,4 +134,5 @@ class KeyDerivationCache {
     }
 }
 
-exports.KeyDerivationCache = KeyDerivationCache;
+// Singleton
+module.exports = new KeyDerivationCache();
