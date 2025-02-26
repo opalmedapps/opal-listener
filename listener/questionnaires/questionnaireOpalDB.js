@@ -263,7 +263,10 @@ async function questionnaireUpdateStatus(requestObject) {
         logger.log('info', "API: Calling backend to get the user's list of caregivers.");
         const response = await ApiRequest.makeRequest(requestParams);
         // Silently exit if lister cannot fetch the user's list of caregivers
-        if (!response?.data) return {Response: 'success'};
+        if (!response?.data) {
+            logger.log('error', "An error occurred while fetching the user's list of caregivers.");
+            return {Response: 'success'};
+        }
 
         let usernames = [];
         response.data?.caregivers.forEach((caregiver) => usernames.push(`"${caregiver['username']}"`));
