@@ -612,6 +612,8 @@ exports.patientNotificationsTableFields=function()
                 n.NotificationSerNum,
                 n.DateAdded,
                 JSON_CONTAINS(n.ReadBy, ?) as ReadStatus,
+                p.FirstName as PatientFirstName,
+                p.LastName as PatientLastName,
                 n.RefTableRowSerNum,
                 nc.NotificationType,
                 nc.Name_EN,
@@ -622,8 +624,10 @@ exports.patientNotificationsTableFields=function()
                 n.RefTableRowTitle_FR
             FROM
                 Notification n,
-                NotificationControl nc
+                NotificationControl nc,
+                Patient p
             WHERE nc.NotificationControlSerNum = n.NotificationControlSerNum
+                AND n.PatientSerNum = p.PatientSerNum
                 AND n.PatientSerNum = ?
                 -- For now, only return unread notifications
                 AND (n.LastUpdated > ? OR nc.LastUpdated > ?)
