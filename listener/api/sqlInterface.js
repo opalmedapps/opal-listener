@@ -485,7 +485,7 @@ function getCheckedInAppointments(patientSerNum){
  *              Until the check-in race condition is properly fixed, this patch will help restore check-in service in prod.
  *              Race condition: "await checkIntoOIE" resolves as a success BEFORE the check-in status is actually updated in OpalDB,
  *              i.e. before the check-in is fully completed. This causes getCheckedInAppointments to return [],
- *              even upon a successful checkin via the OIE, causing an error in the listener.
+ *              even upon a successful checkin via the OIE, causing an error in the app.
  *
  *              This function checks the database once per second, until it detects that check-in was completed,
  *              up to a maximum attempt limit. This should alleviate the race condition by forcing the listener
