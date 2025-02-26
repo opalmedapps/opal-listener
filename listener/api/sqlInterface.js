@@ -171,10 +171,15 @@ exports.runSqlQuery = OpalSQLQueryRunner.run;
  * @param {string[]} arrayTables The list of categories of data to fetch. Should be keys in requestMappings.
  * @param [timestamp] Optional date/time; if provided, only items with 'LastUpdated' after this time are returned.
  *                    If not provided, all data is returned (a default value of 0 is used to query the database).
- * @param {string} purpose Optional parameter that is used to filter questionnaires and educational materials by purpose.
+ * @param {string} purpose Optional parameter that is used to filter questionnaires and educational materials by purpose. By default is set to "clinical" to support the old versions of the app.
  * @return {Promise}
  */
-exports.getPatientTableFields = async function(patientSerNum, arrayTables, timestamp, purpose = null) {
+exports.getPatientTableFields = async function(
+    patientSerNum,
+    arrayTables,
+    timestamp,
+    purpose = 'clinical'
+) {
     timestamp = timestamp || 0;
 
     // Validate the arrayTables
@@ -197,10 +202,10 @@ exports.getPatientTableFields = async function(patientSerNum, arrayTables, times
  * @param {string} category The requested data category. Must be a key in requestMappings.
  * @param patientSerNum The patient's PatientSerNum.
  * @param [timestamp] Optional date/time; if provided, only items with 'LastUpdated' after this time are returned.
- * @param {string} purpose Optional parameter that is used to filter questionnaires and educational materials by purpose.
+ * @param {string} purpose Optional parameter that is used to filter questionnaires and educational materials by purpose. By default is set to "clinical" to support the old versions of the app.
  * @returns {Promise<*>}
  */
-async function processSelectRequest(category, patientSerNum, timestamp, purpose = null) {
+async function processSelectRequest(category, patientSerNum, timestamp, purpose = 'clinical') {
     const mapping = requestMappings[category];
     let date = timestamp ? new Date(Number(timestamp)) : new Date(0);
 

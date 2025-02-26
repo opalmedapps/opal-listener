@@ -95,7 +95,7 @@ function validateParamUpdateStatus(requestObject) {
  */
 function validateQuestionnairePurpose(requestObject) {
     return (
-        requestObject.hasOwnProperty('Parameters') && requestObject.Parameters.hasOwnProperty('purpose') &&
+        requestObject?.Parameters?.purpose &&
         questionnaireConfig.QUESTIONNAIRE_PURPOSE_ID_MAP.hasOwnProperty(requestObject.Parameters.purpose.toUpperCase())
     );
 }
