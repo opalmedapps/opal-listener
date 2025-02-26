@@ -42,7 +42,7 @@ exports.verifySecurityAnswer=function(requestKey,requestObject,patient)
 
 
     logger.log('debug', 'in verify security answer');
-    logger.log(`debug', 'patient: ${JSON.stringify(patient)}`);
+    logger.log('debug', `patient: ${JSON.stringify(patient)}`);
     //TO VERIFY, PASS SECURITY ANSWER THROUGH HASH THAT TAKES A WHILE TO COMPUTE, SIMILAR TO HOW THEY DO PASSWORD CHECKS
     // utility.generatePBKDFHash(key,key);
 
