@@ -10,7 +10,8 @@ class FileRequestHandler extends ApiRequestHandler {
         param("url", "Must provide valid url")
             .exists()
             .isString()
-            .notEmpty(),
+            .notEmpty()
+            .isURL(),
     ];
 
     static async handleRequest(requestObject) {
