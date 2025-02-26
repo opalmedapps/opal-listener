@@ -1,28 +1,11 @@
 /**  Library Imports **/
-
-const mysql = require('mysql');
 const Q = require('q');
 const queries = require('../sql/queries.js');
 const logger = require('../../logs/logger.js');
-const config = require('../../config-adaptor');
-
-/** OPAL DATABASE CONFIGURATIONS **/
-const opaldbCredentials = {
-    connectionLimit: 10,
-    host: config.MYSQL_DATABASE_HOST,
-    port: config.MYSQL_DATABASE_PORT,
-    user: config.MYSQL_USERNAME,
-    password: config.MYSQL_PASSWORD,
-    database: config.MYSQL_DATABASE,
-    dateStrings: true
-};
+const { OpalSQLQueryRunner } = require('../../../listener/sql/opal-sql-query-runner');
 
 
-/**
-     SQL POOL CONFIGURATION for opal database
-     @type {Pool}
- **/
-const opalPool = mysql.createPool(opaldbCredentials);
+exports.runOpaldbSqlQuery = (...args) => OpalSQLQueryRunner.run(...args);
 
 /**
  insertPatient
@@ -100,48 +83,5 @@ exports.getSiteAndMrn = function (requestObject) {
             r.reject(error);
         });
 
-    return r.promise;
-};
-
-/**
-    runOpaldbSqlQuery
-     @desc Set database connection pool with the Opal database
-     @param query
-     @param parameters
-     @param processRawFunction
-     @return {Promise}
- **/
-
-exports.runOpaldbSqlQuery = function (query, parameters, processRawFunction) {
-    let r = Q.defer();
-
-    opalPool.getConnection(function (err, connection) {
-        if (err) logger.log('error', 'Error while grabbing connection from pool due to: ' + err);
-        else {
-            logger.log('debug', 'Grabbed Opal database connection: ' + connection);
-            logger.log('info', 'Successfully grabbed Opal connection from pool and about to perform following query: ' + { query: query });
-
-            const que = connection.query(query, parameters, function (err, rows, fields) {
-                connection.release();
-
-                logger.log('info', 'Successfully performed query', { query: que.sql, response: JSON.stringify(rows) });
-                if (err) {
-                    logger.log('error', 'Error while performing query due to: ' + err);
-                    r.reject(err);
-                }
-                if (typeof rows !== 'undefined') {
-                    if (processRawFunction && typeof processRawFunction !== 'undefined') {
-                        processRawFunction(rows).then(function (result) {
-                            r.resolve(result);
-                        });
-                    } else {
-                        r.resolve(rows);
-                    }
-                } else {
-                    r.resolve([]);
-                }
-            });
-        };
-    });
     return r.promise;
 };

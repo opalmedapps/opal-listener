@@ -326,13 +326,6 @@ exports.getStudyQuestionnairesQuery = function(){
     return "SELECT QS.questionnaireID, Q.DateAdded, QC.QuestionnaireName_EN, QC.QuestionnaireName_FR FROM questionnaireStudy QS, Questionnaire Q, QuestionnaireControl QC, study S WHERE S.ID = QS.studyID AND QC.QuestionnaireControlSerNum = Q.QuestionnaireControlSerNum AND Q.QuestionnaireSerNum = QS.questionnaireId AND S.ID = ?";
 }
 
-exports.getPatientPasswordForVerification = function()
-{
-    return `SELECT DISTINCT u.Password
-            FROM Users u, Patient pat
-            WHERE pat.Email= ? AND pat.PatientSerNum = u.UserTypeSerNum`;
-};
-
 /**
  * @desc Query that returns User and Patient information used in security requests.
  * @returns {string} The query.
@@ -396,16 +389,6 @@ exports.setNewPassword=function()
             ;`;
 };
 
-exports.checkin=function()
-{
-    return "UPDATE Appointment, Patient, Users SET Appointment.Checkin=1, Appointment.SessionId=? WHERE Appointment.AppointmentSerNum=? AND Appointment.PatientSerNum = Patient.PatientSerNum AND Patient.PatientSerNum = Users.UserTypeSerNum AND Users.Username = ? ";
-};
-
-exports.logCheckin = function()
-{
-    return "INSERT INTO `CheckinLog`(`CheckinLogSerNum`, `AppointmentSerNum`, `DeviceId`, `Latitude`, `Longitude`, `Accuracy`, `DateAdded`, `LastUpdated`) VALUES (NULL,?,?,?,?,?,?,NULL)";
-};
-
 exports.accountChange=function()
 {
     return `UPDATE Patient SET ??=? WHERE PatientSerNum=?`;
@@ -441,10 +424,6 @@ exports.logPatientAction = function(){
                (PatientSerNum, Action, RefTable, RefTableSerNum, ActionTime)
                VALUES (?, ?, ?, ?, ?)
             ;`
-};
-
-exports.securityQuestionEncryption=function(){
-    return "SELECT Password FROM Users WHERE Username = ?";
 };
 
 exports.userEncryption=function()

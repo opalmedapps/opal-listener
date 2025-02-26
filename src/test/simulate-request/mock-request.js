@@ -54,12 +54,28 @@ const requestRegistration = {
     Request: 'RegisterPatient',
     BranchName: CryptoJs.SHA512('code12345678').toString(),
     Parameters: {
-        Fields: 'OTES12345678',
+        Fields: {
+            email: 'test@opalmedapps.ca',
+            password: 'test',
+            accessLevel: 3,
+            accessLevelSign: 1,
+            answer1: 'test',
+            answer2: 'test',
+            answer3: 'test',
+            language: 'EN',
+            securityQuestion1: 1,
+            securityQuestion2: 2,
+            securityQuestion3: 3,
+            termsandAggreementSign: 1,
+            registrationCode: 'code12345678',
+            phone: 1,
+            ramq: 'SIMM86600199',
+        },
     },
     Timestamp: '',
     SimulatedEncryption: {
         secret: 'code12345678',
-        salt: 'OTES12345678',
+        salt: '9999996',
     },
 };
 
