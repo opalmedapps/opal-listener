@@ -261,7 +261,7 @@ include:
   # SAST Scanning: https://docs.gitlab.com/ee/user/application_security/sast/
   # https://gitlab.com/gitlab-org/gitlab/-/blob/master/lib/gitlab/ci/templates/Jobs/SAST.latest.gitlab-ci.yml
   - template: Jobs/SAST.latest.gitlab-ci.yml
-  # Add reuse job
+  # Add Reuse job: https://reuse.software/
   - project: 'opalmedapps/engineering/ci-templates'
     file: '/templates/jobs/Reuse.gitlab-ci.yml'
 

@@ -1,5 +1,4 @@
 // eslint-disable-next-line max-len
-// Copyright    :   Copyright 2016, HIG, All rights reserved.
 // SPDX-FileCopyrightText: Copyright 2015 Opal Health Informatics Group at the Research Institute of the McGill University Health Centre <john.kildea@mcgill.ca>
 //
 // SPDX-License-Identifier: AGPL-3.0-or-later
@@ -7,8 +6,6 @@
 /**
  * This script listens for changes to config.FIREBASE_ROOT_BRANCH in firebase, reads those changes and
  * writes a response back to firebase.
- *
- * Important: Do not forget to change "/dev3" back to "/dev2" before merging. [Done]
  */
 
 const mainRequestApi    = require('./api/main.js');
