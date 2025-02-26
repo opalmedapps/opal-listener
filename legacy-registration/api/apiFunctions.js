@@ -147,7 +147,9 @@ exports.registerPatient = async function(requestObject) {
         let legacy_id = await insertPatient(requestObject, patientData.patient);
 
         // insert patient hospital identifier
-        await insertPatientHospitalIdentifier(requestObject, patientData.hospital_patients[0], legacy_id)
+        for (let index in atientData.hospital_patients) {
+            await insertPatientHospitalIdentifier(requestObject, atientData.hospital_patients[index], legacy_id);
+        }
 
         // Before registering the patient, create their firebase user account with decrypted email and password
         // This is required to store their firebase UID as well
