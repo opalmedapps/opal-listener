@@ -388,7 +388,7 @@ exports.setNewPassword=function()
 };
 
 /**
- * @description Query that looks up a PatientSerNum based on an email.
+ * @description Query that updates a patient's language based on their PatientSerNum.
  * @returns {string} The query.
  */
 exports.languageChange = function()
