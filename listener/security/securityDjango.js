@@ -35,9 +35,10 @@ class SecurityDjango {
 
     /**
      * @desc Calls the backend to get all the active security questions.
+     * @param {string} userId The Firebase username of the user making the request.
      * @returns {Promise<any>} Resolves to get all the active security questions.
      */
-    static async getActiveSecurityQuestions() {
+    static async getActiveSecurityQuestions(userId) {
         const requestParams = {
             UserID: userId,
             Parameters: {
@@ -59,10 +60,11 @@ class SecurityDjango {
 
     /**
      * @desc Calls the backend to get a specific active security question from SecurityQuestion model.
+     * @param {string} userId The Firebase username of the user making the request.
      * @param {int} questionId The security question id.
      * @returns {Promise<any>} Resolves to a specific active security questions.
      */
-    static async getSpecificActiveSecurityQuestion(questionId) {
+    static async getSpecificActiveSecurityQuestion(userId, questionId) {
         if (!questionId) throw new Error('Cannot call API; no questionId value provided');
         const requestParams = {
             UserID: userId,
