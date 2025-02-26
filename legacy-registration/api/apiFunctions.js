@@ -63,7 +63,7 @@ exports.registerPatient = async function(requestObject) {
         // Verify User existence
         let {isExistingUser, decodedToken} = await verifyExistingUser(requestObject);
         // Request validation
-        prepareAndValidateRegistrationRequest(requestObject, isExistingUser);
+        validateRegistrationRequest(requestObject, isExistingUser);
 
         let uid;
         let email = undefined;
@@ -100,9 +100,10 @@ exports.registerPatient = async function(requestObject) {
  * and the decoded Firebase token.
  */
 async function verifyExistingUser(requestObject) {
+    let decodedToken = null;
     if (requestObject?.Parameters?.Fields?.accessToken !== undefined){
         try {
-            const decodedToken = await firebaseFunction.getFirebaseAccountByIdToken(
+            decodedToken = await firebaseFunction.getFirebaseAccountByIdToken(
                 requestObject.Parameters.Fields.accessToken,
             );
             const result = await opalRequest.isCaregiverAlreadyRegistered(decodedToken.uid);
@@ -117,7 +118,7 @@ async function verifyExistingUser(requestObject) {
     }
     return {
         isExistingUser: false,
-        decodedToken: null,
+        decodedToken: decodedToken,
     };
 }
 
@@ -128,7 +129,7 @@ async function verifyExistingUser(requestObject) {
  * @param {boolean} isExistingUser Indicate if the user already exists in the backend
  * @returns {void}
  */
-function prepareAndValidateRegistrationRequest(requestObject, isExistingUser) {
+function validateRegistrationRequest(requestObject, isExistingUser) {
     logger.log('info', `Validating registration request parameters for ${requestObject?.Parameters?.Fields?.email}`);
     validateRegisterPatientRequest(requestObject);
 
@@ -154,14 +155,10 @@ function validateRegisterPatientRequest(requestObject) {
 
     let requiredFields = [
         'accessLevel',
-        'accessLevelSign',
-        'accountExists',
         'email',
         'language',
         'password',
         'registrationCode',
-        // typo in the frontend
-        'termsandAggreementSign',
     ]
 
     for (let field of requiredFields) {
