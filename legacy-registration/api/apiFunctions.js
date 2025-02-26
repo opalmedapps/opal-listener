@@ -19,11 +19,6 @@ const { sendMail } = require('./utility/mail.js');
  * @throws Throws an error if a required field is not present in the given request.
  */
 exports.registerPatient = async function(requestObject) {
-    console.log("REQUEST", requestObject);
-    // TODO check if all fields are being saved
-    // TODO save terms and agreement signed and dated?
-    // TODO check if inserted letter format is ok or if whole string is needed
-
     try {
         logger.log('info', `Validating registration request parameters for ${requestObject?.Parameters?.Fields?.email}`);
         validateRegisterPatientRequest(requestObject);
@@ -33,7 +28,6 @@ exports.registerPatient = async function(requestObject) {
         // Get patient data from new backend
         logger.log('info', 'Calling backend API to get registration details');
         const patientData = await opalRequest.retrievePatientDataDetailed(registrationCode, language);
-        console.log(patientData); // TODO Temp
         const isNewPatient = patientData !== undefined && patientData.legacy_id !== null;
 
         // Insert patient in OpalDB
