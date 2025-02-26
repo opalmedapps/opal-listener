@@ -82,9 +82,11 @@ eslint:
 
 mocha:
   stage: Test
-  script:
+  before_script:
     - npm install mocha-junit-reporter --no-save
     - npx mocha --version
+    - export DISABLED_LOGGING=true
+  script:
     - npx mocha --reporter mocha-junit-reporter --reporter-options mochaFile=junit.xml './src/**/*.test.*' './listener/**/*.test.*' './legacy-registration/**/*.test.*'
   artifacts:
     when: always
