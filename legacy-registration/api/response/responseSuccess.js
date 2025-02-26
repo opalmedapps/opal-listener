@@ -1,6 +1,6 @@
 /**  Library Imports **/
 
-const opalResponse = require('./response.js');
+const opalResponse = require('../../../listener/api/response/response');
 /**
  * @class opalResponseSuccess
  *
