@@ -25,7 +25,7 @@ class Version {
      * @returns {number} -1 if v1 < v2; 0 if v1 = v2; 1 if v1 > v2.
      */
     static compareVersions(v1, v2) {
-        const format = /^\d{1,3}.\d{1,3}.\d{1,3}$/;
+        const format = /^\d{1,3}\.\d{1,3}\.\d{1,3}$/;
         if (!format.test(v1) || !format.test(v2)) {
             throw new Error(`Version strings must contain only digits and dots; tried to use: '${v1}' and '${v2}'`);
         }
