@@ -12,7 +12,7 @@ const utility           = require("../utility/utility");
 
 /**
  * @description Promisified version of the 'request' function, which also takes care of some basic error handling.
- *              Attaches SSL certificates before making a request.
+ *              Attaches SSL certificates before making an https request.
  * @author Stacey Beard
  * @date 2021-11-15
  * @param {Object} options - The options required by 'request'.
@@ -33,7 +33,7 @@ exports.request = function(options) {
             try {
                 if (options.url.includes("https")) ssl.attachCertificate(options);
             }
-            catch (error) { logger.log('warn', `Making http request without a certificate: ${error}`) }
+            catch (error) { logger.log('warn', `Making https request without a certificate: ${error}`) }
 
             request(options, function(err, response, body) {
                 logger.log('verbose', 'Request response: ' + utility.stringifyShort(response));
