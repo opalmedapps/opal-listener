@@ -153,7 +153,7 @@ class RequestValidator {
 	static async legacySelfPatientExists(userId, patientSerNum) {
 		try {
 			let result = await sqlInterface.getSelfPatientSerNum(userId);
-			return result === patientSerNum;
+			return result === Number(patientSerNum);
 		}
 		catch (error) {
 			return false;
