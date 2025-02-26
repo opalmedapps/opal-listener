@@ -440,16 +440,18 @@ exports.userEncryption=function()
 exports.updateDeviceIdentifiers = function()
 {
     return `INSERT INTO PatientDeviceIdentifier(
-                PatientDeviceIdentifierSerNum,
                 Username,
                 DeviceId,
                 RegistrationId,
                 DeviceType,
                 appVersion,
-                Trusted,
-                LastUpdated
-            ) VALUES (NULL,?,?,?,?,?,0,NULL)
-            ON DUPLICATE KEY UPDATE RegistrationId = ?;`
+                Trusted
+            ) VALUES (?,?,?,?,?,0)
+            ON DUPLICATE KEY UPDATE
+                RegistrationId = VALUES(RegistrationId),
+                DeviceType = VALUES(DeviceType),
+                appVersion = VALUES(appVersion),
+                LastUpdated = NOW();`
 };
 
 /**
