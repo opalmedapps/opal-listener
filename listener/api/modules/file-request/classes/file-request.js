@@ -18,7 +18,7 @@ class FileRequest {
      * @date 2021-08-20
      * @description Fetches a file from the internet (at this._url) and returns the content in base64 encoding.
      *              Source: https://stackoverflow.com/questions/17124053/node-js-get-image-from-web-and-encode-with-base64
-     * @returns {Promise<unknown>} Resolves to a data object containing the base64 content and content-type.
+     * @returns {Promise<object>} Resolves to a data object containing the base64 content and content-type.
      */
     getFileBase64() {
         return new Promise((resolve, reject) => {
