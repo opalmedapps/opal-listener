@@ -18,7 +18,7 @@ COPY package-lock.json ./
 # see: https://docs.npmjs.com/cli/v9/commands/npm-ci#omit
 RUN npm ci
 
-FROM node:20.11.1-alpine3.19
+FROM node:20.10.0-alpine3.19
 
 USER node
 WORKDIR /app
