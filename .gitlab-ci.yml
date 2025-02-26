@@ -20,6 +20,7 @@ default:
     # Install dependencies and cache within the project directory to cache
     # See: https://javascript.plainenglish.io/improving-ci-performance-aka-how-to-save-your-money-31ff691360e4
     - npm ci --include dev --cache .npm --prefer-offline
+    - ls -la node_modules
     # Set up config files (currently no actual values are needed)
     - cp listener/config_template.json listener/config.json
     # TODO: If required, setup .env file in pipeline using gitlab project settings vars or by setting variables directly here.
