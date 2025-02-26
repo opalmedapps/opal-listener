@@ -49,8 +49,9 @@ function validatePatientSerNumAndLanguage(queryResponse) {
  * @returns {boolean} true if the requestObject contain the requested properties with the correct format, false otherwise
  */
 function validateParamSaveAnswer(requestObject) {
-    return (requestObject.hasOwnProperty('UserID') && requestObject.UserID !== '' &&
-        requestObject.hasOwnProperty('Parameters') && requestObject.Parameters.hasOwnProperty('answerQuestionnaire_id') &&
+    return (
+        requestObject.UserID && requestObject.hasOwnProperty('Parameters') &&
+        requestObject.Parameters.hasOwnProperty('answerQuestionnaire_id') &&
         requestObject.Parameters.hasOwnProperty('is_skipped') && requestObject.Parameters.hasOwnProperty('questionSection_id') &&
         requestObject.Parameters.hasOwnProperty('question_id') && requestObject.Parameters.hasOwnProperty('section_id') &&
         requestObject.Parameters.hasOwnProperty('question_type_id') && !isNaN(requestObject.Parameters.answerQuestionnaire_id) &&
@@ -67,7 +68,8 @@ function validateParamSaveAnswer(requestObject) {
  */
 function validateParamUpdateStatus(requestObject) {
     return (
-        requestObject.hasOwnProperty('Parameters') && requestObject.Parameters.hasOwnProperty('answerQuestionnaire_id') &&
+        requestObject.UserID && requestObject.hasOwnProperty('Parameters') &&
+        requestObject.Parameters.hasOwnProperty('answerQuestionnaire_id') &&
         requestObject.Parameters.hasOwnProperty('new_status') && !isNaN(parseInt(requestObject.Parameters.new_status)) &&
         !isNaN(parseInt(requestObject.Parameters.answerQuestionnaire_id))
     );

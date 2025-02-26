@@ -385,11 +385,12 @@ function insertAnswerByType(answerId, answerArray, question_typeId) {
  * updateQuestionnaireStatusInQuestionnaireDB
  * @desc This function is exported and is used to update the questionnaire status in the questionnaireDB
  * @param {number} answerQuestionnaireId The unique Id of the answerQuestionnaire table
- * @param {String} newStatus denote the status to be updated to. It should match the database convention of being either 0,1,2
- * @param {String} appVersion a string denoting the version of the app. This is used for noting the author of update
+ * @param {string} newStatus denote the status to be updated to. It should match the database convention of being either 0,1,2
+ * @param {string} respondentUsername the username of the user answering the questionnaire.
+ * @param {string} appVersion a string denoting the version of the app. This is used for noting the author of update
  * @returns {Promise} resolve with a boolean denoting whether the questionnaire's new status is completed or not
  */
-function updateQuestionnaireStatusInQuestionnaireDB(answerQuestionnaireId, newStatus, appVersion) {
+function updateQuestionnaireStatusInQuestionnaireDB(answerQuestionnaireId, newStatus, respondentUsername, appVersion) {
     let r = q.defer();
 
     let isCompleted = 0;
@@ -402,18 +403,18 @@ function updateQuestionnaireStatusInQuestionnaireDB(answerQuestionnaireId, newSt
         throw new Error("Error updating the questionnaire status: the new status is not in progress, completed, or new");
     }
 
-    runQuery(questionnaireQueries.updateAnswerQuestionnaireStatus(), [answerQuestionnaireId, newStatus, appVersion])
+    runQuery(questionnaireQueries.updateAnswerQuestionnaireStatus(), [answerQuestionnaireId, newStatus, respondentUsername, appVersion])
         .then(function (queryResult) {
 
             if (!questionnaireValidation.hasValidProcedureStatus(queryResult)) {
-                logger.log("error", "Error updating the questionnaire status: query unsuccessful");
+                logger.log("error", "Error updating the questionnaire status: query unsuccessful", queryResult);
                 r.reject(new Error('Error updating the questionnaire status: query unsuccessful'));
             } else {
                 r.resolve(isCompleted);
             }
 
         }).catch(function (err) {
-            logger.log("error", `Error updating the questionnaire status: ${err}`);
+            logger.log("error", `Error updating the questionnaire status`, err);
             r.reject(err);
         });
 

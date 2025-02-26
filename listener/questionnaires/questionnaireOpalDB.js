@@ -189,7 +189,12 @@ async function questionnaireUpdateStatus(requestObject) {
         throw new Error('Error updating status: No matching PatientSerNum found in opalDB');
     }
 
-    const isCompleted = await questionnaires.updateQuestionnaireStatusInQuestionnaireDB(requestObject.Parameters.answerQuestionnaire_id, requestObject.Parameters.new_status, requestObject.AppVersion);
+    const isCompleted = await questionnaires.updateQuestionnaireStatusInQuestionnaireDB(
+        requestObject.Parameters.answerQuestionnaire_id,
+        requestObject.Parameters.new_status,
+        requestObject.UserID,
+        requestObject.AppVersion,
+    );
 
     if (isCompleted === 1) {
 
