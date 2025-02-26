@@ -96,7 +96,7 @@ class opalRequest {
 	 @return {Promise}
 	 **/
 	static async registrationRegister(request, registerData) {
-		const language = request?.language ? request.language : 'en';
+		const language = request?.language ? request.language : 'fr';
 		const requestParams = {
 			Parameters: {
 				method: 'post',
