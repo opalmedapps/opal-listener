@@ -7,6 +7,7 @@ const EncryptionUtilities = require('../encryption/encryption');
 const Registration = require('../registration/registration');
 const ApiRequest = require('./api-request');
 const ErrorHandler = require('../error/handler');
+const { Firebase } = require('../firebase/firebase');
 
 class RequestHandler {
     /**
@@ -36,7 +37,8 @@ class RequestHandler {
     }
 
     /**
-     * @description Handle requests with requestType 'api'. Then upload response to Firebase
+     * @description Handle requests with requestType 'api'. Then upload response ti Firebase
+     *              Need to add timestamp after encryption to give a valid value to Firebase.
      * @param {string} requestType Firebase request unique identifier
      * @param {object} snapshot Data snapshot from firebase or and formated error to be handle by the app.
      */
@@ -58,6 +60,8 @@ class RequestHandler {
                 encryptionInfo.salt,
             );
             await this.sendResponse(encryptedResponse, snapshot.key, encryptionInfo.userId);
+            encryptedResponse.timestamp = Firebase.getDatabaseTimeStamp;
+            this.clearRequest(requestType, snapshot.key);
         }
         catch (error) {
             const errorResponse = ErrorHandler.getErrorResponse(error);

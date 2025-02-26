@@ -5,12 +5,13 @@ const logger                = require('./../logs/logger');
 
 // New API handlers
 const fileRequest = require("./modules/file-request");
+const general = require('./modules/general');
 const securityQuestions = require("./modules/patient/security-questions");
 const testResults = require("./modules/test-results");
 
 /**
  * API HANDLERS FOR GENERAL REQUESTS
- * @type {{DeviceIdentifier: *, Log: *, Login: *, Logout: *, Resume: *, Refresh: *, AccountChange: *, CheckCheckin: *, Checkin: *, CheckinUpdate: *, DocumentContent: *, Feedback: *, MapLocation: *, Message: *, NotificationsAll: *, Questionnaires: *, QuestionnaireRating: *, QuestionnaireAnswers: *, Read: *, PFPMembers: *, AppointmentDelays: *}}
+ * @type {Object}
  */
 const LEGACYAPI = {
     'DeviceIdentifier': apiHospitalUpdate.updateDeviceIdentifier,
@@ -18,26 +19,25 @@ const LEGACYAPI = {
     'LogPatientAction': apiPatientUpdate.logPatientAction,
     'Login': apiPatientUpdate.login,
     'Logout': apiPatientUpdate.logout,
-    'Resume': apiPatientUpdate.resume,
+    'UserPatient': apiPatientUpdate.getUserPatient,
     'Refresh': apiPatientUpdate.refresh,
     'AccountChange': apiHospitalUpdate.accountChange,
     'CheckCheckin': apiPatientUpdate.checkCheckin,
     'Checkin': apiHospitalUpdate.checkIn,
-    'CheckinUpdate': apiPatientUpdate.checkinUpdate,
     'DocumentContent': apiPatientUpdate.getDocumentsContent,
     'Feedback': apiHospitalUpdate.inputFeedback,
-    'MapLocation': apiPatientUpdate.getMapLocation,
-    'Message': apiHospitalUpdate.sendMessage,
+    // Deprecated API entry: 'NotificationsNew', since QSCCD-125
     'NotificationsNew': apiHospitalUpdate.getNewNotifications,
     'EducationalPackageContents': apiPatientUpdate.getPackageContents,
     'QuestionnaireInOpalDBFromSerNum': apiPatientUpdate.getQuestionnaireInOpalDB,
-    // Deprecated API entry: 'QuestionnaireList' is now accessed via sqlInterface's requestMappings
+    // Deprecated API entry: 'QuestionnaireList' is now accessed via sqlInterface's requestMappings (since QSCCD-230)
     'QuestionnaireList': apiPatientUpdate.getQuestionnaireList,
     'Questionnaire': apiPatientUpdate.getQuestionnaire,
     'EducationalMaterialRating': apiHospitalUpdate.inputEducationalMaterialRating,
     'QuestionnaireSaveAnswer': apiHospitalUpdate.questionnaireSaveAnswer,
     'QuestionnaireUpdateStatus': apiHospitalUpdate.questionnaireUpdateStatus,
     'Read': apiHospitalUpdate.updateReadStatus,
+    //Deprecate API entry: 'PFPMembers', since QSCCD-417
     'PFPMembers': apiPatientUpdate.getPatientsForPatientsMembers
 };
 
@@ -56,6 +56,7 @@ exports.securityAPI = {
  */
 const API = {
     ...fileRequest,
+    ...general,
     ...securityQuestions,
     ...testResults,
 };
@@ -68,8 +69,9 @@ const API = {
  */
 exports.processRequest=function(requestObject) {
     const type = requestObject.type;
+    const target = requestObject.meta.TargetPatientID;
     // Old requests
-    logger.log('debug', `Processing request of type: ${type}`);
+    logger.log('info', `Processing request of type: '${type}', with params = ${JSON.stringify(requestObject.params)}${target ? ', TargetPatientID = '+target : ''}`);
     if (LEGACYAPI.hasOwnProperty(type)) {
         return LEGACYAPI[type](requestObject.toLegacy());
     // New request format

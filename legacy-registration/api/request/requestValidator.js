@@ -20,7 +20,6 @@ class RequestValidator {
 	* @param requestObject
 	*/
     static validate(requestKey, requestObject) {
-        console.log('==>', requestObject);
         const r = q.defer();
         let request = new opalRequest(requestObject, requestKey);
         let validation = this.validateRequestCredentials(request);

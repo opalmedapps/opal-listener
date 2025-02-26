@@ -1,3 +1,4 @@
+const { Patient } = require('./modules/patient/patient');
 const { validationResult } = require('express-validator');
 
 /**
@@ -31,6 +32,20 @@ class ApiRequestHandler {
      */
     static async handleRequest(requestObject){
         throw new Error("Must be implemented by child class");
-    }    
+    }
+
+    /**
+     * @desc Returns the Patient who is the target of a request. Uses a TargetPatientID if it's provided,
+     *       otherwise returns the 'self' patient based on UserID.
+     * @param requestObject The request object.
+     * @param [requestObject.meta.TargetPatientID] If provided, this value is used as the PatientSerNum of the patient.
+     * @param requestObject.meta.UserID Fallback value used to look up the self PatientSerNum if TargetPatientID isn't provided.
+     * @returns {Promise<Patient>} Resolves with the target patient for the request.
+     */
+    static async getTargetPatient(requestObject) {
+        return requestObject.meta.TargetPatientID ?
+            await Patient.getPatientBySerNum(requestObject.meta.TargetPatientID) :
+            await Patient.getPatientByUsername(requestObject.meta.UserID);
+    }
 }
 module.exports = {ApiRequestHandler};
