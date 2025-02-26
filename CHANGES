@@ -1,3 +1,7 @@
+Version 1.5.0.0:
+ - Modify path in docker.compose.yml to work on windows system
+ - Added docker support
+
 Version 1.4.4.0:
  - OPAL-1162: Notify the OIE when a questionnaire is completed (!45)
  - OPAL-1168 - Optimizing the Educational Material Query
