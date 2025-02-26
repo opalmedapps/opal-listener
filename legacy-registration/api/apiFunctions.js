@@ -409,7 +409,7 @@ function getRegisterData(requestObject, legacy_id) {
         },
         'caregiver': {
             'language': requestObject.Parameters.Fields.language,
-            'phone_number': '+1' + requestObject.Parameters.Fields.phone,
+            'phone_number': `+1${requestObject.Parameters.Fields.phone}`,
         },
         'security_answers': [
             {
