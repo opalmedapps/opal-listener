@@ -4,7 +4,6 @@ const request = require('request').defaults({ encoding: null });  // 'encoding: 
  * @description Class representing a request to a file from the internet.
  */
 class FileRequest {
-
     /**
      * @param url The url of the file to request.
      */
@@ -24,14 +23,15 @@ class FileRequest {
             // The url must be encoded to work with non-standard characters (such as French characters)
             request.get(encodeURI(this._url), function (error, response, body) {
                 if (error) reject(error);
-                else if (response.statusCode === 200) {
+                else if (!response) reject("No response received");
+                else if (response.statusCode !== 200) reject(`Request returned with a response status other than '200 OK': status = ${response.statusCode}, body = ${JSON.stringify(body)}`);
+                else {
                     let data = {
                         contentType: response.headers["content-type"],
                         base64Data: Buffer.from(body).toString('base64'),
                     };
                     resolve(data);
                 }
-                else reject(`Request returned with a response status other than '200 OK': status = ${response.statusCode}`);
             });
         });
     }

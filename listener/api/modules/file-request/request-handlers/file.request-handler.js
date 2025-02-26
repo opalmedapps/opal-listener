@@ -14,7 +14,6 @@ class FileRequestHandler extends ApiRequestHandler {
     ];
 
     static async handleRequest(requestObject) {
-
         // Validate the request
         const errors = await FileRequestHandler.validate(requestObject.parameters);
         if (!errors.isEmpty()) {
