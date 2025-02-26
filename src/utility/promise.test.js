@@ -6,13 +6,13 @@ describe('PromiseUtility', function () {
     describe('promiseAnyWithIndex', function () {
         it('should resolve to the result of a single promise', async function () {
             const success = Promise.resolve('success');
-            const { value, index } = await PromiseUtility.promiseAnyWithIndex([success]);
+            const { value, index } = await PromiseUtility.promiseAnyWithIndex(success);
             expect(index).to.equal(0);
             return expect(value).to.equal('success');
         });
         it('should reject an AggregateError for a single rejecting promise', async function () {
             const failure = Promise.reject(new Error('error'));
-            return expect(PromiseUtility.promiseAnyWithIndex([failure])).to.be.rejectedWith(AggregateError);
+            return expect(PromiseUtility.promiseAnyWithIndex(failure)).to.be.rejectedWith(AggregateError);
         });
         it('should resolve to the only resolving promise in an array', async function () {
             const promises = [
