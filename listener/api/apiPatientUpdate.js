@@ -37,7 +37,7 @@ exports.refresh = async function(requestObject) {
     if (!fields) throw {Response:'error', Reason:"Undefined 'Fields' in Refresh request"};
     if (!Array.isArray(fields)) fields = [fields];
 
-    let rows = await sqlInterface.getPatientTableFields(patientSerNum, fields, parameters.Timestamp);
+    let rows = await sqlInterface.getPatientTableFields(patientSerNum, fields, parameters.Timestamp, parameters?.purpose);
     rows.Data = utility.resolveEmptyResponse(rows.Data);
 
     return rows;

@@ -171,9 +171,10 @@ exports.runSqlQuery = OpalSQLQueryRunner.run;
  * @param {string[]} arrayTables The list of categories of data to fetch. Should be keys in requestMappings.
  * @param [timestamp] Optional date/time; if provided, only items with 'LastUpdated' after this time are returned.
  *                    If not provided, all data is returned (a default value of 0 is used to query the database).
+ * @param {string} purpose Optional parameter that is used to filter questionnaires and educational materials by purpose.
  * @return {Promise}
  */
-exports.getPatientTableFields = async function(patientSerNum, arrayTables, timestamp) {
+exports.getPatientTableFields = async function(patientSerNum, arrayTables, timestamp, purpose = null) {
     timestamp = timestamp || 0;
 
     // Validate the arrayTables
@@ -181,7 +182,7 @@ exports.getPatientTableFields = async function(patientSerNum, arrayTables, times
     if (invalidCategory) throw {Response: 'error', Reason: `Incorrect refresh parameter: ${invalidCategory}`};
 
     logger.log('verbose', `Processing select requests in the following categories: ${JSON.stringify(arrayTables)}`);
-    let response = await Promise.all(arrayTables.map(category => processSelectRequest(category, patientSerNum, timestamp)));
+    let response = await Promise.all(arrayTables.map(category => processSelectRequest(category, patientSerNum, timestamp, purpose)));
     // Arrange the return object with categories as keys and each corresponding response as a value
     let responseMapping = Object.fromEntries(arrayTables.map((category, i) => [category, response[i]]));
     return {
@@ -196,9 +197,10 @@ exports.getPatientTableFields = async function(patientSerNum, arrayTables, times
  * @param {string} category The requested data category. Must be a key in requestMappings.
  * @param patientSerNum The patient's PatientSerNum.
  * @param [timestamp] Optional date/time; if provided, only items with 'LastUpdated' after this time are returned.
+ * @param {string} purpose Optional parameter that is used to filter questionnaires and educational materials by purpose.
  * @returns {Promise<*>}
  */
-async function processSelectRequest(category, patientSerNum, timestamp) {
+async function processSelectRequest(category, patientSerNum, timestamp, purpose = null) {
     const mapping = requestMappings[category];
     let date = timestamp ? new Date(Number(timestamp)) : new Date(0);
 
@@ -210,6 +212,7 @@ async function processSelectRequest(category, patientSerNum, timestamp) {
             },
             params: {
                 Date: timestamp,
+                purpose: purpose
             },
         });
         return mapping.processFunction ? mapping.processFunction(result) : result;
