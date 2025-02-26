@@ -35,6 +35,7 @@ eslint:
 mocha:
   stage: Test
   script:
+    - cp src/config/config.template.json src/config/config.json
     - npm install mocha-junit-reporter --no-save
     - npx mocha --version
     - npx mocha --reporter mocha-junit-reporter --reporter-options mochaFile=junit.xml './src/**/*.test.*'
