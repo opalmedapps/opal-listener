@@ -148,7 +148,7 @@ exports.patientEducationalMaterialTableFields=function()
                     EduControl.EducationalMaterialType_EN, EduControl.EducationalMaterialType_FR, EduControl.Name_EN, 
                     EduControl.Name_FR,  EduControl.URL_EN, EduControl.URL_FR, EduMat.LastUpdated EM_LastUpdated, 
                     EduControl.LastUpdated EC_LastUpdated, '0000-00-00 00:00:00' TOC_LastUpdated
-                FROM EducationalMaterialControl as EduControl, EducationalMaterial as EduMat, PhaseInTreatment as Phase
+                FROM EducationalMaterialControl as EduControl, EducationalMaterial as EduMat
                 WHERE EduMat.EducationalMaterialControlSerNum = EduControl.EducationalMaterialControlSerNum 
                 UNION
                 SELECT EduMat.PatientSerNum, EduMat.EducationalMaterialSerNum, EduControl.ShareURL_EN, EduControl.ShareURL_FR, 
@@ -156,7 +156,7 @@ exports.patientEducationalMaterialTableFields=function()
                     EduControl.EducationalMaterialType_EN, EduControl.EducationalMaterialType_FR, EduControl.Name_EN, 
                     EduControl.Name_FR,  EduControl.URL_EN, EduControl.URL_FR, EduMat.LastUpdated EM_LastUpdated, 
                     EduControl.LastUpdated EC_LastUpdated, TOC.LastUpdated TOC_LastUpdated
-                FROM EducationalMaterialControl as EduControl, EducationalMaterial as EduMat, PhaseInTreatment as Phase, 
+                FROM EducationalMaterialControl as EduControl, EducationalMaterial as EduMat, 
                     EducationalMaterialTOC as TOC
                 WHERE TOC.ParentSerNum = EduMat.EducationalMaterialControlSerNum 
                     AND TOC.EducationalMaterialControlSerNum = EduControl.EducationalMaterialControlSerNum
