@@ -571,7 +571,7 @@ async function checkInToSystem(mrn, mrnSite, url, sourceSystemSerNum, sourceSyst
         data = {
             "mrn": mrn,
             "site": mrnSite,
-            "room": config.FEEDBACK_EMAIL_PORT,
+            "room": config.CHECKIN_ROOM,
             "checkinType": "APP",
         };
     } else if (targetSystem === "SOURCE") {
