@@ -70,8 +70,17 @@ exports.unixToMYSQLTimestamp=function(time) {
  * @param salt
  * @return {string}
  */
-exports.generatePBKDFHash = function(secret,salt) {
-    return CryptoJS.PBKDF2(secret, salt, {keySize: 512/32, iterations: 1000}).toString(CryptoJS.enc.Hex);
+exports.generatePBKDFHash = function(secret, salt) {
+  const keySizeBits = 256; // Key size in bits for SHA-256
+  const iterations = 600000;
+
+  const derivedKey = CryptoJS.PBKDF2(secret, salt, {
+    keySize: keySizeBits / 32,
+    iterations: iterations,
+    hasher: CryptoJS.algo.SHA256,
+  }).toString(CryptoJS.enc.Hex);
+
+  return derivedKey;
 };
 
 /**
@@ -83,25 +92,30 @@ exports.generatePBKDFHash = function(secret,salt) {
  * @returns {Promise}
  * @notes link for NACL encryption documentation: https://tweetnacl.js.org/#/
  */
-exports.encrypt = function(object,secret,salt) {
-    let r = Q.defer();
+exports.encrypt = function(object, secret, salt) {
+  let r = Q.defer();
 
-    const nonce = nacl.randomBytes(nacl.secretbox.nonceLength);
-    // secret = (salt)?CryptoJS.PBKDF2(secret, salt, {keySize: 512/32, iterations: 1000}).toString(CryptoJS.enc.Hex):secret;
+  const nonce = nacl.randomBytes(nacl.secretbox.nonceLength);
 
-    if(salt){
-        crypto.pbkdf2(secret, salt, 1000, 64, 'sha1', (err, derivedKey) => {
-            if (err) r.reject(err);
-	        derivedKey = derivedKey.toString('hex');
-            derivedKey = stablelibutf8.encode(derivedKey.substring(0,nacl.secretbox.keyLength));
-            r.resolve(exports.encryptObject(object,derivedKey,nonce));
-        });
-    } else {
-        secret = stablelibutf8.encode(secret.substring(0,nacl.secretbox.keyLength));
-        r.resolve(exports.encryptObject(object,secret,nonce));
-    }
+  if (salt) {
+    const iterations = 600000;
+    const keySizeBytes = 32; // Key size in bytes for SHA-256
 
-    return r.promise;
+    crypto.pbkdf2(secret, salt, iterations, keySizeBytes, 'sha256', (err, derivedKey) => {
+      if (err) {
+        r.reject(err);
+      } else {
+        const hexKey = derivedKey.toString('hex');
+        const truncatedKey = stablelibutf8.encode(hexKey.substring(0, nacl.secretbox.keyLength));
+        r.resolve(exports.encryptObject(object, truncatedKey, nonce));
+      }
+    });
+  } else {
+    secret = stablelibutf8.encode(secret.substring(0, nacl.secretbox.keyLength));
+    r.resolve(exports.encryptObject(object, secret, nonce));
+  }
+
+  return r.promise;
 };
 
 /**
@@ -113,29 +127,36 @@ exports.encrypt = function(object,secret,salt) {
  * @returns {Promise}
  * @notes link for NACL encryption documentation: https://tweetnacl.js.org/#/
  */
-exports.decrypt= function(object,secret,salt) {
-
+exports.decrypt = function(object, secret, salt) {
   let r = Q.defer();
-  if(salt){
-      crypto.pbkdf2(secret, salt, 1000, 64, 'sha1', (err, derivedKey) => {
-          if (err) r.reject(err);
-	      derivedKey = derivedKey.toString('hex');
-          derivedKey = stablelibutf8.encode(derivedKey.substring(0,nacl.secretbox.keyLength));
-          let decrypted;
-          try{
-	          decrypted = exports.decryptObject(object, derivedKey);
-	          r.resolve(decrypted);
-          }catch(err){
-              r.reject(err);
-          }
-      });
-  } else {
-      try {
-          var decrypted = exports.decryptObject(object, stablelibutf8.encode(secret.substring(0, nacl.secretbox.keyLength)));
+
+  if (salt) {
+    const iterations = 600000;
+    const keySizeBytes = 32; // Key size in bytes for SHA-256
+
+    crypto.pbkdf2(secret, salt, iterations, keySizeBytes, 'sha256', (err, derivedKey) => {
+      if (err) {
+        r.reject(err);
+      } else {
+        const hexKey = derivedKey.toString('hex');
+        const truncatedKey = stablelibutf8.encode(hexKey.substring(0, nacl.secretbox.keyLength));
+
+        let decrypted;
+        try {
+          decrypted = exports.decryptObject(object, truncatedKey);
           r.resolve(decrypted);
-      }catch(err){
+        } catch (err) {
           r.reject(err);
+        }
       }
+    });
+  } else {
+    try {
+      var decrypted = exports.decryptObject(object, stablelibutf8.encode(secret.substring(0, nacl.secretbox.keyLength)));
+      r.resolve(decrypted);
+    } catch (err) {
+      r.reject(err);
+    }
   }
 
   return r.promise;
