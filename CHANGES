@@ -3,6 +3,7 @@ Version 1.9.0.0:
  - refactor: remove API pagination
  - fix: add patient name to be displayed on announcements
  - feat: trigger django databank api during study consent update
+ - chore(deps): update nodejs server to v20.8.0
 
 Version 1.8.3.0:
  - fix: fix crash due to encryption of errors and improve logging
