@@ -6,7 +6,7 @@ class GetSecurityQuestionAnswerListRequestHandler extends ApiRequestHandler{
     /**
      * Handler for the SecurityQuestionAnswerList request, returns 2 list for security questions related to the current user
      * @param {OpalRequest} requestObject
-     * @returns {Promise<{data: {patientSerNum: number, securityQuestionList: []}}>}
+     * @returns {Promise<{data: {patientSerNum: number, securityQuestionList: [], activeSecurityQuestions: []}}>}
      */
     static async handleRequest(requestObject){
         const patient = await Patient.getPatientByUsername(requestObject.meta.UserID);
