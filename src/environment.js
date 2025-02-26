@@ -7,7 +7,7 @@ const assert = require('assert');
 /**
  * @description The full list of .env variables for configuring the listener
  */
-const environment = {
+const ENVIRONMENT = {
     FIREBASE_DATABASE_URL: process.env.FIREBASE_DATABASE_URL,
     FIREBASE_ADMIN_KEY_PATH: process.env.FIREBASE_ADMIN_KEY_PATH,
     FIREBASE_ROOT_BRANCH: process.env.FIREBASE_ROOT_BRANCH,
@@ -19,7 +19,7 @@ const environment = {
 /**
  * @description The firebase-specific environment object
  */
-const firebaseConfig = {
+const FIREBASE_CONFIG = {
     DATABASE_URL: process.env.FIREBASE_DATABASE_URL,
     ADMIN_KEY_PATH: process.env.FIREBASE_ADMIN_KEY_PATH,
     ROOT_BRANCH: process.env.FIREBASE_ROOT_BRANCH,
@@ -39,7 +39,7 @@ function validateEnvironment(processArr) {
 }
 
 module.exports = {
-    environment,
-    firebaseConfig,
+    ENVIRONMENT,
+    FIREBASE_CONFIG,
     validateEnvironment,
 };

@@ -5,7 +5,7 @@
 
 require('dotenv').config();
 
-const { environment, firebaseConfig, validateEnvironment } = require('./environment');
+const { ENVIRONMENT, FIREBASE_CONFIG, validateEnvironment } = require('./environment');
 const { Firebase } = require('./firebase/firebase');
 const legacyServer = require('../listener/legacy-server');
 const legacyRegistrationServer = require('../legacy-registration/legacy-server');
@@ -14,7 +14,7 @@ const { RequestHandler } = require('./core/request-handler');
 const { REQUEST_TYPE } = require('./const');
 
 // Raise AssertionError if environment variables are not set
-validateEnvironment(environment);
+validateEnvironment(ENVIRONMENT);
 
 launch().then(() => {
     legacyLogger.log('info', 'LISTENER LAUNCHED SUCCESSFULLY');
@@ -29,10 +29,10 @@ launch().then(() => {
  * @returns {Promise<void>}
  */
 async function launch() {
-    const firebase = new Firebase(firebaseConfig);
+    const firebase = new Firebase(FIREBASE_CONFIG);
 
     await firebase.init();
-    Firebase.enableLogging(firebaseConfig.FIREBASE_ENABLE_LOGGING);
+    Firebase.enableLogging(FIREBASE_CONFIG.FIREBASE_ENABLE_LOGGING);
 
     legacyLogger.log('debug', 'Setting Firebase request listeners');
 
