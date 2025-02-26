@@ -344,8 +344,11 @@ exports.logPatientAction = function(requestObject){
  * @returns {Promise<{Data: *}>}
  */
 exports.getUserPatient = async function(requestObject) {
-    let patientSerNum = await getSelfPatientSerNum(requestObject.UserID);
-    let rows = await exports.runSqlQuery(queries.patientTableFields(), [patientSerNum], loadProfileImagePatient);
+    let rows = await exports.runSqlQuery(
+        queries.patientTableFields(),
+        [requestObject.TargetPatientID],
+        loadProfileImagePatient,
+    );
     return {
         Data: rows[0],
     }
