@@ -71,7 +71,7 @@ exports.insertUser = async function (username, password, patientSerNum) {
  * @param selfPatientSerNum The SerNum representing the user's "self" row in the Patient table.
  * @returns {Promise<*>}
  */
-exports.updateSelfPatient = async function (requestObject, selfPatientSerNum) {
+exports.updateSelfPatient = function (requestObject, selfPatientSerNum) {
     let fields = requestObject.Parameters.Fields;
     return exports.runOpaldbSqlQuery(queries.updateSelfPatientInfo(), [
         fields.email,
@@ -83,7 +83,7 @@ exports.updateSelfPatient = async function (requestObject, selfPatientSerNum) {
     ]);
 }
 
-exports.initializePatientControl = async function (patientSerNum) {
+exports.initializePatientControl = function (patientSerNum) {
     return exports.runOpaldbSqlQuery(queries.insertPatientControl(), [patientSerNum]);
 }
 
@@ -100,4 +100,14 @@ exports.insertPatientHospitalIdentifier = function (requestObject) {
         parameters.mrn,
         parameters.site,
     ]);
+};
+
+/**
+ * Finds the Patient row associated with a Users row, and returns its PatientSerNum.
+ * @param userSerNum The UserSerNum to look up in Users.
+ * @returns {*}
+ */
+exports.getPatientSerNumFromUserSerNum = async function(userSerNum) {
+    let rows = await exports.runOpaldbSqlQuery(queries.getPatientSerNumFromUserSerNum(), [userSerNum]);
+    return rows[0].PatientSerNum;
 };

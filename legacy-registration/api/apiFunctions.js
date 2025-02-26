@@ -181,6 +181,7 @@ async function initializeBasicPatientRow(requestObject, registrationData) {
  * @param {object} requestObject The request object.
  * @param {object} registrationData The detailed registration data sent from the backend.
  * @param {number} patientLegacyId The patient's legacy ID (PatientSerNum).
+ * @returns {Promise<void>}
  */
 async function initializePatientMRNs(requestObject, registrationData, patientLegacyId) {
     const isNewPatient = registrationData.patient.legacy_id === null;
@@ -249,7 +250,9 @@ async function initializeSelfPatient(requestObject, registrationData, patientLeg
     const isNewCaregiver = registrationData.caregiver.legacy_id === null;
     const isSelfRegistration = registrationData.relationship_type.role_type === "SELF"
     let selfPatientSerNum;
-    if (isNewCaregiver && !isSelfRegistration) selfPatientSerNum = await sqlInterface.insertDummyPatient(
+    if (!isNewCaregiver) selfPatientSerNum = await sqlInterface.getPatientSerNumFromUserSerNum(registrationData.caregiver.legacy_id);
+    // Special case: when it's a new caregiver who isn't registering for self, we need to create a dummy self patient row
+    else if (!isSelfRegistration) selfPatientSerNum = await sqlInterface.insertDummyPatient(
         registrationData.caregiver.first_name,
         registrationData.caregiver.last_name,
         requestObject.Parameters.Fields.email,
