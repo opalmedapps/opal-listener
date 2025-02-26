@@ -33,6 +33,29 @@ class SecurityDjango {
     }
 
     /**
+     * @desc Calls the backend to get all the active security questions.
+     * @returns {Promise<any>} Resolves to get all the active security questions.
+     */
+    static async getActiveSecurityQuestions() {
+        const requestParams = {
+            Parameters: {
+                method: 'get',
+                url: `/api/security-questions/`,
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+            },
+        };
+        logger.log('info', "API: Calling backend to get all the active security questions");
+        const response = await ApiRequest.makeRequest(requestParams);
+        if (response?.data) return response.data;
+        else {
+            logger.log('error', 'Error from API call', response);
+            throw new Error('Failed to get all the active security questions from the backend');
+        }
+    }
+
+    /**
      * @desc Calls the backend to get a list of security questions for the current user.
      * @param {string} userId The Firebase username of the user making the request.
      * @returns {Promise<any>} Resolves to a list of security questions for the current user.
