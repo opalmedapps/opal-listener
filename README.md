@@ -29,23 +29,10 @@ Copy your firebase admin key file into the `src/config/firebase` directory.
 
 ##### Step 2 | App configuration
 
-Copy and rename `listener/config_template.json` to `listener/config.json`.
-Also copy and rename `.env.sample` to `.env`.
+Copy and rename `.env.sample` to `.env`.
 Then edit the required fields. Across both files, you should at least need to change these fields:
 
 Communication with the django backend needs to be authenticated with an REST API token. You can generate a token following [this procedure](https://opalmedapps.gitlab.io/backend/authentication/). Then add the token to your `.env` as shown in the example.
-
-```text
-listener/config.json
-
-MYSQL_USERNAME: "The database user name",
-MYSQL_PASSWORD: "The database password",
-MYSQL_DATABASE: "The name of the OpalDB",
-MYSQL_DATABASE_QUESTIONNAIRE: "The name of the QuestionnaireDB",
-MYSQL_DATABASE_PORT: 3306,
-MYSQL_DATABASE_HOST: "host.docker.internal",
-LATEST_STABLE_VERSION: "0.0.1"
-```
 
 ```text
 .env (fill out missing fields according to the instructions)
@@ -63,12 +50,21 @@ OPAL_BACKEND_AUTH_TOKEN=
 # Data Cache TTL (in minutes)
 DATA_CACHE_TIME_TO_LIVE_MINUTES=
 
+# Database details
+MYSQL_USERNAME: "The database user name",
+MYSQL_PASSWORD: "The database password",
+MYSQL_DATABASE: "The name of the OpalDB",
+MYSQL_DATABASE_QUESTIONNAIRE: "The name of the QuestionnaireDB",
+MYSQL_DATABASE_PORT: 3306,
+MYSQL_DATABASE_HOST: "host.docker.internal",
+LATEST_STABLE_VERSION: "0.0.1"
+
 ```
 
 > FIREBASE_ADMIN_KEY_PATH: If you intend to run the listener in Docker, use "/app/src/config/firebase/NAME_OF_YOUR_ADMIN_KEY_FILE.json".
 > If you intend to run the listener using Node.js, use the absolute path to the Firebase admin key file on your computer (using forward slashes, not backslashes).
 
-> Leave all other variables blank by setting them to empty double quotes (for config.json only, all settings in .env must be non-blank): ""
+> Unless instructed in the env.sample file, all settings in .env must be non-blank.
 
 > Notice that the host names are `host.docker.internal` and NOT `localhost`. This is required for a container to call a localhost service on the host system.
 
