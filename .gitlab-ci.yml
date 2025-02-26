@@ -4,13 +4,14 @@ default:
     # images are run as root by default
     # force switch to node user
     # see: https://gitlab.com/gitlab-org/gitlab-runner/-/issues/2750
-    entrypoint: ['sh', '-c', 'exec su node -c sh']
+    # entrypoint: ['sh', '-c', 'exec su node -c sh']
   # Cache modules in between jobs
   cache:
     key: $CI_COMMIT_REF_SLUG
     paths:
       - .npm/
   before_script:
+    - whoami
     - uname -a
     - node --version
     - npm --version
