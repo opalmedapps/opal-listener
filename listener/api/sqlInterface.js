@@ -466,7 +466,7 @@ exports.checkIn = async function (requestObject) {
             if (success) {
                 let rows = await getCheckedInAppointments(patientSerNum);
                 // Set CheckinUsername for all checked-in appointments
-                await setCheckInUserName(requestObject, rows);
+                await setCheckInUsername(requestObject, rows);
                 return rows;
             }
             else throw lastError;
@@ -557,10 +557,10 @@ async function getMRNs(patientSerNum) {
  * @author Shifeng Chen
  * @date 2023-01-04
  * @param requestObject
- * @param AppointmentSerNumArray
+ * @param appointmentSerNumArray
  */
-async function setCheckInUserName(requestObject, AppointmentSerNumArray) {
-    await exports.runSqlQuery(queries.setCheckInUserName(), [requestObject.UserID, AppointmentSerNumArray]);
+async function setCheckInUsername(requestObject, appointmentSerNumArray) {
+    await exports.runSqlQuery(queries.setCheckInUsername(), [requestObject.UserID, appointmentSerNumArray]);
 }
 
 /**

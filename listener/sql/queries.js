@@ -567,7 +567,7 @@ exports.getTodaysCheckedInAppointments = function() {
  * @author Shifeng Chen
  * @date 2023-01-04
  */
-exports.setCheckInUserName = function () {
+exports.setCheckInUsername = function () {
     return "UPDATE Appointment SET CheckinUsername = ? WHERE AppointmentSerNum IN ?";
 };
 
