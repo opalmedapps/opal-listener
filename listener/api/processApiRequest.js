@@ -31,6 +31,7 @@ const LEGACYAPI = {
     'NotificationsNew': apiHospitalUpdate.getNewNotifications,
     'EducationalPackageContents': apiPatientUpdate.getPackageContents,
     'QuestionnaireInOpalDBFromSerNum': apiPatientUpdate.getQuestionnaireInOpalDB,
+    // Deprecated API entry: 'QuestionnaireList' is now accessed via sqlInterface's requestMappings
     'QuestionnaireList': apiPatientUpdate.getQuestionnaireList,
     'Questionnaire': apiPatientUpdate.getQuestionnaire,
     'EducationalMaterialRating': apiHospitalUpdate.inputEducationalMaterialRating,

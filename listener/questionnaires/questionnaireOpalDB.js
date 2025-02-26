@@ -59,6 +59,7 @@ function getQuestionnaireInOpalDB(requestObject) {
 /**
  * getQuestionnaireList
  * @desc Returns a promise containing the questionnaire list for a particular user. Used for the new questionnaire 2019
+ * @deprecated Since QSCCD-230
  * @param {object} requestObject
  * @return {Promise} Returns a promise that contains a list of questionnaire data
  */
