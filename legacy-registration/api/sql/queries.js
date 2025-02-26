@@ -16,6 +16,10 @@ exports.insertUser = () => {
     `;
 };
 
+/**
+ * @description Query to update the fields relevant to the "self" user in the Patient table.
+ * @returns {string} The query.
+ */
 exports.updateSelfPatientInfo = () => {
     return `UPDATE Patient
             SET
