@@ -682,7 +682,7 @@ exports.getDocumentsContent = async function(requestObject) {
 exports.updateAccountField = async requestObject => {
     // Validate input
     const email = requestObject.UserEmail;
-    const uid = requestObject.UserEmail;
+    const uid = requestObject.UserID;
     const field = requestObject.Parameters?.FieldToChange;
     const newValue = requestObject.Parameters?.NewValue;
     if (!email) throw `Missing value of 'UserEmail' parameter: ${email}`;
