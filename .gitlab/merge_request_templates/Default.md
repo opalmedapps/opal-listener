@@ -1,11 +1,6 @@
 **By submitting this merge request, I confirm the following:**
 
 * [ ] The merge request title follows the conventional commits convention (see `Backend` project's `README.md`)
-    - `feat`: minor app version will be incremented.
-    - `fix`, `deps`, `perf`: patch app version will be incremented.
-    - `chore`, `ci`, etc.: app version will not be incremented.
-    - See [semantic-release/commit-analyzer](https://github.com/semantic-release/commit-analyzer/blob/master/lib/default-release-rules.js)
-      for complete set of rules.
 
 ### Changes
 <!-- Summary of the changes in this MR. -->
