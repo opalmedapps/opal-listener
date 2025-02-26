@@ -55,7 +55,7 @@
     "health",
     "oncology"
   ],
-  "author": "David Herrera",
+  "author": "Opal Health Informatics Group",
   "license": "ISC",
   "homepage": "https://depdocs.com/opal",
   "description": "Backend listener for the Opal patient portal"

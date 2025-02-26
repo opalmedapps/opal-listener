@@ -1,7 +1,10 @@
+// SPDX-FileCopyrightText: Copyright 2022 Opal Health Informatics Group <info@opalmedapps.tld>
+//
+// SPDX-License-Identifier: Apache-2.0
+
 /* eslint-disable no-unused-vars */
 /**
  * @file unencrypted mock request
- * @author David Gagne
  */
 const CryptoJs = require('crypto-js');
 

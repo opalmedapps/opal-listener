@@ -1,3 +1,7 @@
+// SPDX-FileCopyrightText: Copyright 2020 Opal Health Informatics Group <info@opalmedapps.tld>
+//
+// SPDX-License-Identifier: Apache-2.0
+
 const axios = require('axios');
 const questionnaireQueries = require('./questionnaireQueries.js');
 const questionnaires = require('./questionnaireQuestionnaireDB.js');

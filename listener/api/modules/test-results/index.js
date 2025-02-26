@@ -1,3 +1,7 @@
+// SPDX-FileCopyrightText: Copyright 2020 Opal Health Informatics Group <info@opalmedapps.tld>
+//
+// SPDX-License-Identifier: Apache-2.0
+
 // Index for the module
 module.exports = {
     'PatientTestTypes':  require("./request-handlers/patient-test-types.request-handler"),

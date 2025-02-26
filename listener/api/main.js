@@ -1,3 +1,7 @@
+// SPDX-FileCopyrightText: Copyright 2015 Opal Health Informatics Group <info@opalmedapps.tld>
+//
+// SPDX-License-Identifier: Apache-2.0
+
 const q                   = require('q');
 const processApiRequest   = require('./processApiRequest.js');
 const OpalResponseSuccess = require('./response/response-success');

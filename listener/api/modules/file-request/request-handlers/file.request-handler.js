@@ -1,3 +1,7 @@
+// SPDX-FileCopyrightText: Copyright 2021 Opal Health Informatics Group <info@opalmedapps.tld>
+//
+// SPDX-License-Identifier: Apache-2.0
+
 const {ApiRequestHandler} = require("../../../api-request-handler");
 const {FileRequest} = require("../classes/file-request");
 const logger = require("../../../../logs/logger");

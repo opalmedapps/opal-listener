@@ -1,6 +1,9 @@
+// SPDX-FileCopyrightText: Copyright 2022 Opal Health Informatics Group <info@opalmedapps.tld>
+//
+// SPDX-License-Identifier: Apache-2.0
+
 /**
  * @file Provides functions used to validate input or object parameters.
- * @author David Herrera, Stacey Beard
  */
 
 const { param, validationResult, ValidationChain } = require('express-validator');

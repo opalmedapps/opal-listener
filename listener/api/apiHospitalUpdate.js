@@ -1,3 +1,7 @@
+// SPDX-FileCopyrightText: Copyright 2016 Opal Health Informatics Group <info@opalmedapps.tld>
+//
+// SPDX-License-Identifier: Apache-2.0
+
 const sqlInterface = require('./sqlInterface.js');
 const logger = require('./../logs/logger.js');
 const questionnaires = require('./../questionnaires/questionnaireOpalDB.js');

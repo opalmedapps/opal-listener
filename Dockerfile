@@ -1,3 +1,7 @@
+# SPDX-FileCopyrightText: Copyright 2022 Opal Health Informatics Group <info@opalmedapps.tld>
+#
+# SPDX-License-Identifier: Apache-2.0
+
 # install dependencies in separate stage to keep node_modules out of app directory
 # npm ci does not seem to be customizable on where to install node_modules/
 # see: https://nickjanetakis.com/blog/best-practices-around-production-ready-web-apps-with-docker-compose#customizing-where-package-dependencies-get-installed

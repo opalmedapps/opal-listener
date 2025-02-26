@@ -1,12 +1,6 @@
-/*
- * Filename     :   mailer.js
- * Description  :   Module that send emails using node mailer
- * Created by   :   David Herrera, Robert Maglieri
- * Date         :   30 Mar 2017
- * Copyright    :   Copyright 2016, HIG, All rights reserved.
- * Licence      :   This file is subject to the terms and conditions defined in
- *                  file 'LICENSE.txt', which is part of this source code package.
- */
+// SPDX-FileCopyrightText: Copyright 2016 Opal Health Informatics Group <info@opalmedapps.tld>
+//
+// SPDX-License-Identifier: Apache-2.0
 
 'use strict';
 const nodemailer = require('nodemailer');

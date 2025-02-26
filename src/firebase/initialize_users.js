@@ -1,7 +1,10 @@
+// SPDX-FileCopyrightText: Copyright 2023 Opal Health Informatics Group <info@opalmedapps.tld>
+//
+// SPDX-License-Identifier: Apache-2.0
+
 /* eslint-disable no-console */
 /**
  * @file Utility for Firebase to initialize users.
- * @author Matthias Schoettle
  */
 /* eslint-disable import/no-unresolved */
 const { getAuth } = require('firebase-admin/auth');

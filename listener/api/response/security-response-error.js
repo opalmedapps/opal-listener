@@ -1,3 +1,7 @@
+// SPDX-FileCopyrightText: Copyright 2023 Opal Health Informatics Group <info@opalmedapps.tld>
+//
+// SPDX-License-Identifier: Apache-2.0
+
 class OpalSecurityResponseError {
     constructor(code, reason, requestKey, requestObject) {
         this.code = code;

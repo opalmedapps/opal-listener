@@ -1,3 +1,7 @@
+// SPDX-FileCopyrightText: Copyright 2020 Opal Health Informatics Group <info@opalmedapps.tld>
+//
+// SPDX-License-Identifier: Apache-2.0
+
 const questionnaireConfig = require('./questionnaireConfig.json');
 const logger = require('./../logs/logger');
 const { Version } = require('../../src/utility/version');

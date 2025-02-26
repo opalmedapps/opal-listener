@@ -1,9 +1,7 @@
-/**
- * Created by PhpStorm.
- * User: rob
- * Date: 2017-11-10
- * Time: 2:28 PM
- */
+// SPDX-FileCopyrightText: Copyright 2017 Opal Health Informatics Group <info@opalmedapps.tld>
+//
+// SPDX-License-Identifier: Apache-2.0
+
 
 const logger            = require('../logs/logger.js');
 const config            = require('../config-adaptor');

@@ -1,6 +1,9 @@
+// SPDX-FileCopyrightText: Copyright 2022 Opal Health Informatics Group <info@opalmedapps.tld>
+//
+// SPDX-License-Identifier: Apache-2.0
+
 /**
  * @file Gracefully handle error either coming from an api call or inside the listener.
- * @author David Gagne
  */
 const legacyLogger = require('../../listener/logs/logger');
 const { ERRORS } = require('./const');

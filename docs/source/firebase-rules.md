@@ -1,3 +1,9 @@
+<!--
+SPDX-FileCopyrightText: Copyright 2022 Opal Health Informatics Group <info@opalmedapps.tld>
+
+SPDX-License-Identifier: Apache-2.0
+-->
+
 The Firebase rules for the Realtime Database used by the app and listener are version-controlled in this project.
 Rules for each environment can be found in the `firebase` directory.
 

@@ -1,6 +1,9 @@
+// SPDX-FileCopyrightText: Copyright 2022 Opal Health Informatics Group <info@opalmedapps.tld>
+//
+// SPDX-License-Identifier: Apache-2.0
+
 /**
  * @file Error class used by param-validator; wrapper for errors returned by express-validator.
- * @author Stacey Beard
  */
 
 const { Result } = require('express-validator');

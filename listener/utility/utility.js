@@ -1,3 +1,7 @@
+// SPDX-FileCopyrightText: Copyright 2015 Opal Health Informatics Group <info@opalmedapps.tld>
+//
+// SPDX-License-Identifier: Apache-2.0
+
 const CryptoJS          = require('crypto-js');
 const stablelibutf8     = require('@stablelib/utf8');
 const nacl              = require('tweetnacl');

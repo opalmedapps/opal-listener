@@ -1,8 +1,11 @@
+// SPDX-FileCopyrightText: Copyright 2022 Opal Health Informatics Group <info@opalmedapps.tld>
+//
+// SPDX-License-Identifier: Apache-2.0
+
 /**
  * @file Provides a bridge to selected configurations in the new config file, which replaces the old config.json file.
  *       This file provides a single point of interaction with all necessary configurations, preventing the need to edit
  *       many references in old code to access configs in the new config file.
- * @author Stacey Beard
  */
 
 // Add selected configs from the new file

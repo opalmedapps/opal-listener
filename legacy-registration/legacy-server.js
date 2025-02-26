@@ -1,11 +1,8 @@
-/**
-     Filename     :   legacy-server.js
-     Description  :   This script listens for changes on registration/ in firebase, reads those changes and writes a response back to firebase.
-     Date         :   07 May 2019
-     Copyright    :   Copyright 2016, HIG, All rights reserved.
-     Licence      :   This file is subject to the terms and conditions defined in
-                      file 'LICENSE.txt', which is part of this source code package.
- **/
+// SPDX-FileCopyrightText: Copyright 2016 Opal Health Informatics Group <info@opalmedapps.tld>
+//
+// SPDX-License-Identifier: Apache-2.0
+
+// This script listens for changes on registration/ in firebase, reads those changes and writes a response back to firebase.
 
 /**  Library Imports **/
 

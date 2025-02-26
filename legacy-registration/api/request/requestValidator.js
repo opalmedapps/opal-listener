@@ -1,3 +1,7 @@
+// SPDX-FileCopyrightText: Copyright 2020 Opal Health Informatics Group <info@opalmedapps.tld>
+//
+// SPDX-License-Identifier: Apache-2.0
+
 const legacyUtility = require('../../../listener/utility/utility.js');
 const logger = require('../../logs/logger.js');
 const opalRequest = require('./request.js');

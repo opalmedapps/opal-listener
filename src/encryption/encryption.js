@@ -1,3 +1,7 @@
+// SPDX-FileCopyrightText: Copyright 2022 Opal Health Informatics Group <info@opalmedapps.tld>
+//
+// SPDX-License-Identifier: Apache-2.0
+
 const cryptoJs = require('crypto-js');
 const mysql = require('mysql');
 const legacyOpalSqlRunner = require('../../listener/sql/opal-sql-query-runner');

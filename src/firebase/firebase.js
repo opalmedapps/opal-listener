@@ -1,6 +1,9 @@
+// SPDX-FileCopyrightText: Copyright 2022 Opal Health Informatics Group <info@opalmedapps.tld>
+//
+// SPDX-License-Identifier: Apache-2.0
+
 /**
  * @file Manages the connection to a Firebase realtime database.
- * @author Stacey Beard, David Herrera, Robert Maglieri
  */
 
 const admin = require('firebase-admin');

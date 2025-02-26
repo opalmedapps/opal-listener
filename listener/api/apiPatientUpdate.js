@@ -1,3 +1,7 @@
+// SPDX-FileCopyrightText: Copyright 2016 Opal Health Informatics Group <info@opalmedapps.tld>
+//
+// SPDX-License-Identifier: Apache-2.0
+
 var Q = require('q');
 var sqlInterface = require('./sqlInterface.js');
 var utility = require('./../utility/utility.js');

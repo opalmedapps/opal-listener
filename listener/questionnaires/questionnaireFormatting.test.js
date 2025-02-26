@@ -1,3 +1,7 @@
+// SPDX-FileCopyrightText: Copyright 2023 Opal Health Informatics Group <info@opalmedapps.tld>
+//
+// SPDX-License-Identifier: Apache-2.0
+
 require('../../src/test/chai-setup');
 const { expect } = require('chai');
 const sinon = require('sinon');

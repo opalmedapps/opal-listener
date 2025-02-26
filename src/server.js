@@ -1,6 +1,9 @@
+// SPDX-FileCopyrightText: Copyright 2022 Opal Health Informatics Group <info@opalmedapps.tld>
+//
+// SPDX-License-Identifier: Apache-2.0
+
 /**
  * @file Entry point used to launch the listener.
- * @author David Herrera, Robert Maglieri, Stacey Beard
  */
 
 require('dotenv').config();

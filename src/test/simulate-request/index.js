@@ -1,7 +1,10 @@
+// SPDX-FileCopyrightText: Copyright 2022 Opal Health Informatics Group <info@opalmedapps.tld>
+//
+// SPDX-License-Identifier: Apache-2.0
+
 /* eslint-disable no-new */
 /**
  * @file Upload a mock request to firebase to simulate a request from the app.
- * @author David Gagne
  */
 require('dotenv').config();
 const path = require('path');

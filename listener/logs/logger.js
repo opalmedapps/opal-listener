@@ -1,12 +1,6 @@
-/*
- * Filename     :   logger.js
- * Description  :   This file intiliazes the logger for Opal.
- * Created by   :   David Herrera, Robert Maglieri
- * Date         :   22 Mar 2017
- * Copyright    :   Copyright 2016, HIG, All rights reserved.
- * Licence      :   This file is subject to the terms and conditions defined in
- *                  file 'LICENSE.txt', which is part of this source code package.
- */
+// SPDX-FileCopyrightText: Copyright 2016 Opal Health Informatics Group <info@opalmedapps.tld>
+//
+// SPDX-License-Identifier: Apache-2.0
 
 const {createLogger, format, transports} = require('winston');
 

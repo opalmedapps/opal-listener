@@ -1,3 +1,7 @@
+// SPDX-FileCopyrightText: Copyright 2016 Opal Health Informatics Group <info@opalmedapps.tld>
+//
+// SPDX-License-Identifier: Apache-2.0
+
 const apiPatientUpdate      = require('./apiPatientUpdate.js');
 const apiHospitalUpdate     = require('./apiHospitalUpdate.js');
 const security              = require('./../security/security');

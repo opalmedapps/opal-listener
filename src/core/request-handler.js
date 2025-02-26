@@ -1,6 +1,9 @@
+// SPDX-FileCopyrightText: Copyright 2022 Opal Health Informatics Group <info@opalmedapps.tld>
+//
+// SPDX-License-Identifier: Apache-2.0
+
 /**
  * @file Listen and handle request uploaded to firebase by the app
- * @author David Gagne
  */
 const ApiRequest = require('./api-request');
 const Encryption = require('../encryption/encryption');

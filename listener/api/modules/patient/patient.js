@@ -1,3 +1,7 @@
+// SPDX-FileCopyrightText: Copyright 2020 Opal Health Informatics Group <info@opalmedapps.tld>
+//
+// SPDX-License-Identifier: Apache-2.0
+
 const {ValidationError} = require("../../errors/validation-error");
 const patientQueries = require("./patient.queries");
 const {OpalSQLQueryRunner} = require("../../../sql/opal-sql-query-runner");

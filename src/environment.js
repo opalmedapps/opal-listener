@@ -1,6 +1,9 @@
+// SPDX-FileCopyrightText: Copyright 2022 Opal Health Informatics Group <info@opalmedapps.tld>
+//
+// SPDX-License-Identifier: Apache-2.0
+
 /**
  * @file Provides environment validation and exposes environment configuration objects.
- * @author Kelly Agnew
  */
 const assert = require('assert');
 

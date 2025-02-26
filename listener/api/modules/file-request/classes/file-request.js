@@ -1,3 +1,7 @@
+// SPDX-FileCopyrightText: Copyright 2021 Opal Health Informatics Group <info@opalmedapps.tld>
+//
+// SPDX-License-Identifier: Apache-2.0
+
 const axios = require('axios');
 
 /**
@@ -12,7 +16,6 @@ class FileRequest {
     }
 
     /**
-     * @author Stacey Beard
      * @date 2021-08-20
      * @description Fetches a file from the internet (at this._url) and returns the content in base64 encoding.
      *              Source: https://stackoverflow.com/questions/17124053/node-js-get-image-from-web-and-encode-with-base64

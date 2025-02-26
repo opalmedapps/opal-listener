@@ -1,3 +1,7 @@
+// SPDX-FileCopyrightText: Copyright 2017 Opal Health Informatics Group <info@opalmedapps.tld>
+//
+// SPDX-License-Identifier: Apache-2.0
+
 module.exports = {
     apps : [
         {

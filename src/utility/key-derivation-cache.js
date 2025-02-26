@@ -1,7 +1,10 @@
+// SPDX-FileCopyrightText: Copyright 2024 Opal Health Informatics Group <info@opalmedapps.tld>
+//
+// SPDX-License-Identifier: Apache-2.0
+
 /**
  * @description Manages caching for the output of encryption key derivation functions (such as PBKDF2).
  *              This is done to limit the need to recompute the output, which is time-consuming.
- * @author Stacey Beard, 2024-03-20
  */
 const { Keyv } = require('keyv');
 const crypto = require('crypto');

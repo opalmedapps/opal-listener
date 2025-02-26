@@ -1,3 +1,9 @@
+<!--
+SPDX-FileCopyrightText: Copyright 2021 Opal Health Informatics Group <info@opalmedapps.tld>
+
+SPDX-License-Identifier: Apache-2.0
+-->
+
 **By submitting this merge request, I confirm the following:**
 
 * [ ] The merge request title follows the conventional commits convention (see `Backend` project's `README.md`)

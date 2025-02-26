@@ -1,6 +1,9 @@
+// SPDX-FileCopyrightText: Copyright 2023 Opal Health Informatics Group <info@opalmedapps.tld>
+//
+// SPDX-License-Identifier: Apache-2.0
+
 /**
  * @file Makes and interprets API calls to the Django backend, to get information used in security-sensitive requests.
- * @author Stacey Beard
  */
 
 const ApiRequest = require('../../src/core/api-request');

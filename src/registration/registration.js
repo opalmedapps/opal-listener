@@ -1,3 +1,7 @@
+// SPDX-FileCopyrightText: Copyright 2022 Opal Health Informatics Group <info@opalmedapps.tld>
+//
+// SPDX-License-Identifier: Apache-2.0
+
 const { Keyv } = require('keyv');
 const ApiRequest = require('../core/api-request');
 const EncryptionUtilities = require('../encryption/encryption');

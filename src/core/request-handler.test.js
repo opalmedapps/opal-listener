@@ -1,3 +1,7 @@
+// SPDX-FileCopyrightText: Copyright 2022 Opal Health Informatics Group <info@opalmedapps.tld>
+//
+// SPDX-License-Identifier: Apache-2.0
+
 /* eslint-disable no-new */
 /* eslint-disable consistent-return */
 require('../test/chai-setup');
