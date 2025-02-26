@@ -1,0 +1,29 @@
+{
+  "MYSQL_USERNAME":"",
+  "MYSQL_PASSWORD":"",
+  "MYSQL_OPAL_DATABASE": "OpalDB",
+  "MYSQL_REGISTRATION_DATABASE": "registerdb",
+  "HOST": "host.docker.internal",
+  "PORT": 3306,
+  "firebaseBranch": {
+    "parentBranch": "dev3/A0/registration",
+    "firebaseChildBranch": "branch",
+    "requestChildBranch": "requests",
+    "responseChildBranch": "users"
+  },
+  "OIE": {
+    "api": {
+      "url": "http://localhost:8088",
+      "method": {
+        "updatePatientStatus": "/Patient/UpdateOpalStatus"
+      }
+    }
+  },
+  "SMTP": {
+    "host": "",
+    "port": 465,
+    "username": "registration@opalmedapps.ca",
+    "password": "",
+    "from": "Opal Registration <registration@opalmedapps.ca>"
+  }
+}
