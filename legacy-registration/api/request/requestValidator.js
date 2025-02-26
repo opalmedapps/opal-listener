@@ -35,7 +35,8 @@ class RequestValidator {
                     r.reject(new opalResponseError(2, 'Unable to decrypt request', request, err));
                 });
             }).catch((err) => {
-                r.reject(new opalResponseError(2, 'Unable get user encryption', request, err));
+                logger.log('error', 'Unable to get valid user encryption info from the API', err);
+                r.reject(new opalResponseError(2, 'Unable to get valid user encryption info from the API', request, err));
             });
         } else {
             logger.log('error', 'Invalid legacy registration request', validation.errors);
