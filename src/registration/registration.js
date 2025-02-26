@@ -6,7 +6,11 @@ const legacyLogger = require('../../listener/logs/logger');
 const config = require('../config/config.json');
 
 const regCache = new Keyv({ namespace: 'registration' });
-regCache.on('error', err => legacyLogger.log('error', err)); // default keyv error handling
+regCache.on('error', err => legacyLogger.log(
+    'error',
+    'KeyV registration data cache error',
+    err,
+));
 class Registration {
     static async getEncryptionValues(snapshot) {
         // We bind the snapshot branch name to dedicated salt and secret keys for this regCache instance
@@ -14,7 +18,6 @@ class Registration {
         const instanceSalt = `salt-${snapshot.BranchName}`;
         const instanceSecret = `secret-${snapshot.BranchName}`;
 
-        // Declare keyv instance linked to the specific patient branch
         const requestParams = {
             Parameters: {
                 method: 'get',
@@ -25,7 +28,7 @@ class Registration {
             },
         };
         // Retrieve encryption values from memory if TTL has not been reached
-        if (!await regCache.get(instanceSalt) && !await regCache.get(instanceSecret)) {
+        if (!await regCache.get(instanceSalt) || !await regCache.get(instanceSecret)) {
             legacyLogger.log('info', 'Registration encryption datacache TTL expired; fetching new data');
             const response = await ApiRequest.makeRequest(requestParams);
             await regCache.set(
