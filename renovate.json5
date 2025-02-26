@@ -1,6 +1,21 @@
 {
   "$schema": "https://docs.renovatebot.com/renovate-schema.json",
   "extends": [
-    "config:base"
+    "config:base",
+    ":rebaseStalePrs"
+  ],
+  "assignees": ["staceybeard"],
+  "labels": ["dependencies"],
+  "packageRules": [
+    // Change commit type to build for Docker-related updates
+    {
+      "matchDatasources": ["docker"],
+      "semanticCommitType": "build"
+    },
+    // Group eslint-related updates
+    {
+      "matchPackagePatterns": ["eslint"],
+      "groupName": "eslint"
+    }
   ]
 }
