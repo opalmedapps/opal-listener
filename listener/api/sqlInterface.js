@@ -69,7 +69,6 @@ const requestMappings =
             sql: queries.patientAppointmentsAll(),
             sqlSingleItem: queries.patientAppointmentsOne(),
             numberOfLastUpdated: 4,
-            processFunction: combineResources,
             table: 'Appointment',
             serNum: 'AppointmentSerNum',
             needUserId: true,
@@ -1146,57 +1145,6 @@ var LoadAttachments = function (rows ) {
     return r.promise;
 
 };
-
-/**
- * @module sqlInterface
- * @name combineResources
- * @method combineResources
- * @parameters {void}
- * @description Modifies all the appointments for the user to only obtain
- */
-function combineResources(rows)
-{
-    var r = Q.defer();
-    var resource = {};
-    var index = 0;
-    if(rows.length>0)
-    {
-        // ResourceType is set to 'Unknown' if it is empty to prevent a Firebase error due to an empty key. -SB
-        const resourceType1 = !rows[rows.length-1].ResourceType || rows[rows.length-1].ResourceType === ""
-                            ? "Unknown"
-                            : rows[rows.length-1].ResourceType;
-        resource[resourceType1] = rows[rows.length-1].ResourceName;
-
-        for (var i=rows.length-2;i>=0;i--) {
-
-            // ResourceType is set to 'Unknown' if it is empty to prevent a Firebase error due to an empty key. -SB
-            const resourceType2 = !rows[i].ResourceType || rows[i].ResourceType === ""
-                                ? "Unknown"
-                                : rows[i].ResourceType;
-            if(rows[i].AppointmentSerNum == rows[i+1].AppointmentSerNum)
-            {
-                resource[resourceType2] = rows[i].ResourceName;
-                rows.splice(i+1,1);
-            }else{
-                var resourceObject={};
-                for (var key in resource) {
-                    resourceObject[key] = resource[key];
-                }
-                rows[i+1].Resource = resourceObject;
-                resource = {};
-                resource[resourceType2] = rows[i].ResourceName;
-                delete rows[i+1].ResourceName;
-                delete rows[i+1].ResourceType;
-            }
-        }
-        delete rows[0].ResourceName;
-        delete rows[0].ResourceType;
-        rows[0].Resource = resource;
-
-    }
-    r.resolve(rows);
-    return r.promise;
-}
 
 exports.getSecurityQuestion = async function (requestObject) {
     try {
