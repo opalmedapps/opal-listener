@@ -157,6 +157,10 @@ exports.getQuestionnaireInOpalDB = questionnaires.getQuestionnaireInOpalDB;
  */
 exports.getQuestionnaire = questionnaires.getQuestionnaire;
 
+/**
+ * @deprecated
+ * @returns
+ */
 exports.getPatientsForPatientsMembers = function ()
 {
   return new Promise((resolve, reject)=>{

@@ -14,7 +14,6 @@
   "DOCTOR_PATH": "",
   "CHECKIN_PATH": "",
   "CHECKIN_ROOM": "",
-  "PFP_PATH": "",
   "QUESTIONNAIRE_COMPLETED_PATH": "Path notified when a questionnaire is completed",
   "LATEST_STABLE_VERSION": "",
   "OIE": {
