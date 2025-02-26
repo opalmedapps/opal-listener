@@ -4,40 +4,57 @@ This is the Opal app's backend listener that sits between Firebase and OpalDB.
 ## Getting Started
 
 These instructions will get you a copy of the project up and running on your local machine for development and testing purposes. See deployment for notes on how to deploy the project on a live system.
-- **NOTE:** These instructions are incomplete, and only
- concerned themselves with running the backend quickly,
-  and assuming that all the dependencies and config files
-  are already ready and configured.
-  There is a more complete
-tutorial on how to get Opal-backend development environment at
-[Opal Backend Tutorial](https://github.com/Opal-teaching/opal-backend-wiki.git)
 
 ### Prerequisites
 
-There are only three requirements needed to run the backend, and the second requirement is only needed to run in a live setting with actual clinical data.
+These are the requirements to run a local listener app. The second requirement is only needed to run in a live setting with actual clinical data.
 
 1) Install [Node.js](https://nodejs.org/en/download/)
 2) (**Only required if wanting to access live data**) Have access to clinical computer in the MedPhys department
-
-If running in a testing environment, you will first need to configure a test DB. This will need to be done with an Opal developer who access to OpalDB and can give you a test file to create a testing DB.
-
-**Note:** If you are wanting to test the backend without real clinical data then you will need to configure your own mySQL DB with test data. That is out of the scope of this README and will require aid from a existing Opal developer.
+3) Configure a test DB. It is suggested to use Docker to run your local database. [Instruction here](https://gitlab.com/opalmedapps/db-docker). You can, alternatively, setup a local mysql server using XAMP/MAMP by following [these instructions](https://gitlab.com/opal-teaching/opal-backend-wiki/-/blob/master/backend-installation.md#database)
+4) Setup firebase app. You can follow [these instruction](https://gitlab.com/opal-teaching/opal-backend-wiki/-/blob/master/backend-installation.md#firebase) to complete the setup.
 
 ### Installing with Docker
 The project contains a `Dockerfile` and a `docker.compose.yml` to build and run the app within a Docker container.
 
-You first need to build an image using the `Dockerfile` and the `docker build` command as follow: 
+##### Step 1 | Add Firebase configuration
+Move your firebase admin key file in the `env/local` directory located at the root. 
+##### Step 2 | App configuration
+Move `config_template.json` to `env/local` then rename it `config.json`. Then edit the require fields. You should at least need to change these fields:
+```
+MYSQL_USERNAME: "The database user name",
+MYSQL_PASSWORD: "The database password",
+MYSQL_DATABASE: "The name of the OpalDB",
+MYSQL_DATABASE_QUESTIONNAIRE: "The name of the QuestionnaireDB",
+MYSQL_DATABASE_PORT: "3306",
+MYSQL_DATABASE_HOST: "host.docker.internal",
+HOST: "host.docker.internal",
+FIREBASE_ADMIN_KEY: "Absolute path to the json firebase admin key file that you copied in step 1,
+DATABASE_URL: "This value can be found in the web_config.txt file in your firebase folder",
+LATEST_STABLE_VERSION: "0.0.1",
+FIREBASE_ROOT_BRANCH: "dev3/A0",
+```
 
-`docker build --build-arg ENV_CONFIG=local -t opalmedapps/listener:latest .`
+> Leave all other variables blank by setting them to empty double quotes: ""
 
-The `ENV_CONFIG` build argument specifies which configuration the app will be run with. The configuration are found at:
+> When running the app using Docker, the `./listener/config/config.json` file is overwritten in the container with the one in the `env/local` folder. Your firebase admin key file is also copied in the container for it to be accessible.
 
-`/config/<ENV_CONFIG>/`
+##### Step 3 | Build the Docker image
+To build the Docker image, run the command that accepts an environment as an argument.
 
-These configuration overwrite the one find at `/listener/config/config.json` and add the firebase json file to the container at `/config/<ENV_CONFIG>/firebase`
+```
+docker compose build --build-arg ENV_CONFIG=local
+```
 
-Once you successfully build the docker image, you can run the command `docker compose up` to build and start the container. 
+The `ENV_CONFIG` build argument specifies which environment we build our app with. It reflects the name of the directory in the `env` folder found at the root of the code base. EX: local, prod, preprod
 
+> More informations about Docker compose can be found [here](https://docs.docker.com/compose/)
+
+##### Step 4 | Run the application
+Start you app with the following command:
+```
+docker compose up
+```
 
 ### Installing with NodeJs
 
@@ -137,8 +154,6 @@ We use [SemVer](http://semver.org/) for versioning. For the versions available, 
 
 * **James Brace** - *Initial work*
 * **David Hererra** - *Initial work*
-
-See also the list of [contributors](https://github.com/your/project/contributors) who participated in this project.
 
 ## License
 

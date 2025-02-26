@@ -1,9 +1,5 @@
 # config files
-config.json
-config.original.json
-
-#local configurations
-config/local/
+env/local/
 listener/config/config.json
 
 # Logs
