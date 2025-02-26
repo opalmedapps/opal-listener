@@ -681,10 +681,10 @@ exports.getDocumentsContent = async function(requestObject) {
  */
 exports.updateAccountField = async requestObject => {
     // Validate input
-    let email = requestObject.UserEmail;
-    let uid = requestObject.UserEmail;
-    let field = requestObject.Parameters?.FieldToChange;
-    let newValue = requestObject.Parameters?.NewValue;
+    const email = requestObject.UserEmail;
+    const uid = requestObject.UserEmail;
+    const field = requestObject.Parameters?.FieldToChange;
+    const newValue = requestObject.Parameters?.NewValue;
     if (!email) throw `Missing value of 'UserEmail' parameter: ${email}`;
     if (!uid) throw `Missing value of 'UserID' parameter: ${uid}`;
     if (!field || typeof field !== 'string') throw `Invalid type or missing value of 'FieldToChange' parameter: ${field}`;
@@ -694,7 +694,7 @@ exports.updateAccountField = async requestObject => {
 
     if (field === 'Password') {
         // Hash the password before storing it
-        let hashedPassword = utility.hash(newValue);
+        const hashedPassword = utility.hash(newValue);
 
         await exports.runSqlQuery(queries.setNewPassword(), [hashedPassword, uid]);
         delete requestObject.Parameters.NewValue;
