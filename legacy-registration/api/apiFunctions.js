@@ -85,9 +85,9 @@ exports.getPatientInfo = async function(requestObject) {
     try {
             result = await sqlInterface.getPatient(requestObject);
             result = typeof result[0] == 'object' ? result[0] : undefined;
-        } catch (error) {
-            logger.log('error', `An error occurred while getting patient info (for ${requestObject.Parameters.Fields.ramq}): ${JSON.stringify(error)}`);
-        }
+    } catch (error) {
+        logger.log('error', `An error occurred while getting patient info (for ${requestObject.Parameters.Fields.ramq}): ${JSON.stringify(error)}`);
+    }
     return { Data: result, Result: 'SUCCESS' };
 };
 

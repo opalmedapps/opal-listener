@@ -266,19 +266,8 @@ exports.getSiteAndMrn = function (requestObject) {
  @return {Promise}
  **/
 exports.getPatient = function (requestObject) {
-    let r = Q.defer();
-    let Parameters = requestObject.Parameters.Fields;
-
-    exports.runOpaldbSqlQuery(queries.getPatient(), [Parameters.ramq])
-        .then((rows) => {
-            r.resolve(rows);
-        })
-        .catch((error) => {
-            logger.log('error', 'Problems querying getPatient due to ' + error);
-            r.reject(error);
-        });
-
-    return r.promise;
+    let parameters = requestObject.Parameters.Fields;
+    return exports.runOpaldbSqlQuery(queries.getPatient(), [parameters.ramq]);
 };
 
 /**
