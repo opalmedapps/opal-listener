@@ -44,7 +44,7 @@
     "eslint-plugin-import": "2.29.0",
     "eslint-plugin-jsdoc": "46.8.2",
     "eslint-plugin-mocha": "10.2.0",
-    "firebase-tools": "12.6.1",
+    "firebase-tools": "12.8.1",
     "jsdoc": "4.0.2",
     "mocha": "10.2.0",
     "nyc": "15.1.0",
