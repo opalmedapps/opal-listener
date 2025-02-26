@@ -3,7 +3,7 @@ const logger = require('./../logs/logger');
 class SQLQueryRunner {
 	#SQL_QUERY_POOL;
 	constructor(databaseCredentials={}) {
-		config = {
+		const config = {
 			...databaseCredentials,
 			stringifyObjects: true,
 		};
