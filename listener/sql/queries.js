@@ -36,7 +36,7 @@ exports.patientDiagnosisTableFields=function()
             FROM Diagnosis D, Patient P, Users U
             WHERE U.UserTypeSerNum = P.PatientSerNum
               AND D.PatientSerNum = P.PatientSerNum
-              AND U.Username LIKE ?
+              AND U.Username = ?
               AND D.LastUpdated > ?
             ;`
 };
