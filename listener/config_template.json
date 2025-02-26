@@ -16,6 +16,7 @@
   "DOCUMENTS_PATH": "",
   "DOCTOR_PATH": "",
   "CHECKIN_PATH": "",
+  "CHECKIN_ROOM": "",
   "PFP_PATH": "",
   "FIREBASE_ADMIN_KEY": "",
   "DATABASE_URL": "",

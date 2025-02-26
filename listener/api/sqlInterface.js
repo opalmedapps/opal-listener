@@ -381,14 +381,11 @@ exports.sendMessage=function(requestObject) {
  * @param requestObject
  * @return {Promise}
  */
-exports.checkIn = async function (requestObject)
-{
-    try
-    {
+exports.checkIn = async function (requestObject) {
+    try {
         const patientSerNum = requestObject.Parameters.PatientSerNum;
 
-        if (await hasAlreadyAttemptedCheckin(patientSerNum) === false)
-        {
+        if (await hasAlreadyAttemptedCheckin(patientSerNum) === false) {
             let success = false;
             let lastError;
 
@@ -396,24 +393,20 @@ exports.checkIn = async function (requestObject)
             let mrnList = await getMRNs(patientSerNum);
 
             // Attempt a check-in on each of the patient's MRNs on a loop until one of the calls is successful
-            for (let i = 0; i < mrnList.length; i++)
-            {
+            for (let i = 0; i < mrnList.length; i++) {
                 let mrnObj = mrnList[i];
                 let mrn = mrnObj.MRN;
                 let mrnSite = mrnObj.Hospital_Identifier_Type_Code;
-                try
-                {
+
+                try {
                     // Check into the patient's appointments via a call to ORMS
                     await checkIntoAriaAndMedi(mrn, mrnSite);
-                    logger.log("debug", "Success checking in PatientSerNum = "+patientSerNum+
-                        " using MRN = "+mrn+" (site = "+mrnSite+")");
+                    logger.log("verbose", `Success checking in PatientSerNum = ${patientSerNum} using MRN = ${mrn} (site = ${mrnSite})`);
                     success = true;
                     break;
                 }
-                catch (error)
-                {
-                    logger.log("error", "Failed to check in PatientSerNum = "+patientSerNum+
-                        " using MRN = "+mrn+" (site = "+mrnSite+"); error: "+error);
+                catch (error) {
+                    logger.log("verbose", `Failed to check in PatientSerNum = ${patientSerNum} using MRN = ${mrn} (site = ${mrnSite}); error: ${JSON.stringify(error)}`);
                     lastError = error;
                 }
             }
@@ -424,24 +417,30 @@ exports.checkIn = async function (requestObject)
         }
         else return [];
     }
-    catch (error) { throw {Response: 'error', Reason: 'Check-in error: ' + error}; }
+    catch (error) { throw {Response: 'error', Reason: error}; }
 };
 
 /**
- * Calls John's PHP script in order to check in patient on Aria and Medivisit
+ * @description Calls ORMS in order to check in the patient on Aria and Medivisit.
  * @param {string} mrn One of the patient's medical record numbers.
  * @param {string} mrnSite The site to which the MRN belongs.
- * @returns {Promise}
+ * @returns {Promise} Resolves if check-in succeeds, otherwise rejects with an error.
  */
 function checkIntoAriaAndMedi(mrn, mrnSite) {
     let r = Q.defer();
-    let url = config.CHECKIN_PATH.replace('{MRN}', mrn).replace('{SITE}', mrnSite);
+    request.post(config.CHECKIN_PATH, {
+        json: true,
+        body: {
+            "mrn": mrn,
+            "site": mrnSite,
+            "room": config.CHECKIN_ROOM,
+        },
+    }, function(error, response, body) {
+        logger.log('verbose', 'Checked into aria and medi - response: ' + JSON.stringify(response));
+        logger.log('verbose', 'Checked into aria and medi - body: ' + JSON.stringify(body));
 
-    request(url,function(error, response, body) {
-        logger.log('debug', 'checked into aria and medi response: ' + JSON.stringify(response));
-        logger.log('debug', 'checked into aria and medi body: ' + JSON.stringify(body));
-
-        if(error) r.reject(error);
+        if (error) r.reject(error);
+        else if (response.statusCode !== 200) r.reject(`Request returned with a response status other than '200 OK': status = ${response.statusCode}, body = ${JSON.stringify(body)}`);
         else r.resolve();
     });
     return r.promise;
