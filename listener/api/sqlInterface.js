@@ -480,7 +480,6 @@ exports.checkIn = async function (requestObject) {
                     .then(() => {
                         logger.log("verbose", `Success checking in to orms for PatientSerNum = ${patientSerNum} using MRN = ${mrn} (site = ${mrnSite})`);
                         orms_success = true;
-                        //break;
                     })
                     .catch((error) => {
                         logger.log("verbose", `Failed to check in to orms for PatientSerNum = ${patientSerNum} using MRN = ${mrn} (site = ${mrnSite}); error: ${error}`);
@@ -543,7 +542,7 @@ exports.checkIn = async function (requestObject) {
             await setCheckInUsername(requestObject, appSerNums);
             return appointments;
         }
-        else throw lastError;
+        else return [];
     }
     catch (error) {
         logger.log("error", "Uncaught error while processing a checkin request: ", {
