@@ -33,8 +33,8 @@ const ERRORS = {
     },
     DEFAULT_ERROR: {
         statusCode: 500,
-        logMessage: 'Unknowed listener error',
-        clientMessage: 'UNKNOWED_ERROR',
+        logMessage: 'Unknown listener error',
+        clientMessage: 'UNKNOWN_ERROR',
         encrypt: false,
     },
     API_NOT_FOUND: {
@@ -44,7 +44,7 @@ const ERRORS = {
         encrypt: true,
     },
     API_UNALLOWED: {
-        statusCode: 402,
+        statusCode: 403,
         logMessage: 'Unallowed request to backend',
         clientMessage: 'API_ERROR_UNALLOWED',
         encrypt: true,
