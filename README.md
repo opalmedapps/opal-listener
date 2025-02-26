@@ -1,4 +1,4 @@
-# opal-listener
+# Opal-listener
 This is the Opal app's backend listener that sits between Firebase and OpalDB.
 
 ## Getting Started
@@ -19,13 +19,29 @@ There are only three requirements needed to run the backend, and the second requ
 1) Install [Node.js](https://nodejs.org/en/download/)
 2) (**Only required if wanting to access live data**) Have access to clinical computer in the MedPhys department
 
-**Note:** If you are wanting to test the backend without real clinical data then you will need to configure your own mySQL DB with test data. That is out of the scope of this README and will require aid from a existing Opal developer.
-
-### Installing
-
 If running in a testing environment, you will first need to configure a test DB. This will need to be done with an Opal developer who access to OpalDB and can give you a test file to create a testing DB.
 
-Second thing that needs to be done is make sure all the references in /listener/config.json are correct. Currently they are pointing to locations on the Opal server.
+**Note:** If you are wanting to test the backend without real clinical data then you will need to configure your own mySQL DB with test data. That is out of the scope of this README and will require aid from a existing Opal developer.
+
+### Installing with Docker
+The project contains a `Dockerfile` and a `docker.compose.yml` to build and run the app within a Docker container.
+
+You first need to build an image using the `Dockerfile` and the `docker build` command as follow: 
+
+`docker build --build-arg ENV_CONFIG=local -t opalmedapps/listener:latest .`
+
+The `ENV_CONFIG` build argument specifies which configuration the app will be run with. The configuration are found at:
+
+`/config/<ENV_CONFIG>/`
+
+These configuration overwrite the one find at `/listener/config/config.json` and add the firebase json file to the container at `/config/<ENV_CONFIG>/firebase`
+
+Once you successfully build the docker image, you can run the command `docker compose up` to build and start the container. 
+
+
+### Installing with NodeJs
+
+Make sure all the references in /listener/config/config.json are correct. Currently they are pointing to locations on the Opal server.
 
 Once the configurations are set up properly, you need to install all the dependencies:
 
@@ -127,5 +143,3 @@ See also the list of [contributors](https://github.com/your/project/contributors
 ## License
 
 This project is licensed under the MIT License - see the [LICENSE.md](LICENSE.md) file for details
-
-

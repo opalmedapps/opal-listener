@@ -23,7 +23,7 @@ const processApi        = require('./api/processApiRequest');
 const admin             = require("firebase-admin");
 const utility           = require('./utility/utility.js');
 const q                 = require("q");
-const config            = require('./config.json');
+const config            = require('./config/config.json');
 const logger            = require('./logs/logger.js');
 const cp                = require('child_process');
 

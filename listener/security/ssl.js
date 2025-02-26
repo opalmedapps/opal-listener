@@ -5,7 +5,7 @@
  * Date         :   2021-09-15
  */
 var exports             = module.exports = {};
-const config            = require("../config");
+const config            = require("../config/config.json");
 const fs                = require('fs');
 
 /*
