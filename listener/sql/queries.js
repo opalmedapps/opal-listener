@@ -509,14 +509,6 @@ exports.insertEducationalMaterialRatingQuery=function()
     return "INSERT INTO `EducationalMaterialRating`(`EducationalMaterialRatingSerNum`, `EducationalMaterialControlSerNum`, `PatientSerNum`, `Username`, `RatingValue`, `LastUpdated`) VALUES (NULL,?,?,?,?,NULL)";
 };
 
-/**
- * @deprecated
- */
-exports.getPatientSerNumFromUserID = function()
-{
-    return "SELECT Patient.PatientSerNum FROM Patient, Users WHERE Patient.PatientSerNum = Users.UserTypeSerNum && Users.Username = ?";
-};
-
 exports.cacheSecurityAnswerFromDjango = () => {
     return `UPDATE
                 PatientDeviceIdentifier
