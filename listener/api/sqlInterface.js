@@ -1317,7 +1317,7 @@ async function refresh (fields, requestObject) {
     let timestamp = today.setHours(0,0,0,0);
     let patientSerNum = await getSelfPatientSerNum(requestObject.UserID);
 
-    let rows = await exports.getPatientTableFields(requestObject.UserID, patientSerNum, fields, {timestamp});
+    let rows = await exports.getPatientTableFields(requestObject.UserID, patientSerNum, fields, {Timestamp: timestamp});
     rows.Data = utility.resolveEmptyResponse(rows.Data);
     return rows;
 }
