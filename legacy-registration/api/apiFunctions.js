@@ -368,10 +368,13 @@ function validateRequest(requestObject, requiredFields) {
  * @returns {patientSerNum}
  */
 async function insertPatient(requestObject, patient) {
-    requestObject.Parameters.Fields.firstName = patient?.first_name;
-    requestObject.Parameters.Fields.lastName = patient?.last_name;
-    requestObject.Parameters.Fields.sex = patient?.sex;
-    requestObject.Parameters.Fields.dateOfBirth = patient?.date_of_birth;
+    if (!patient) {
+        return null;
+    }
+    requestObject.Parameters.Fields.firstName = patient.first_name;
+    requestObject.Parameters.Fields.lastName = patient.last_name;
+    requestObject.Parameters.Fields.sex = patient.sex;
+    requestObject.Parameters.Fields.dateOfBirth = patient.date_of_birth;
     return await sqlInterface.insertPatient(requestObject);
 }
 
