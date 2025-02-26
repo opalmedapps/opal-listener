@@ -2,6 +2,8 @@
 //
 // SPDX-License-Identifier: Apache-2.0
 
+// Module that send emails using node mailer
+
 'use strict';
 const nodemailer = require('nodemailer');
 const config = require('./../config-adaptor');

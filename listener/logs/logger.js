@@ -2,6 +2,8 @@
 //
 // SPDX-License-Identifier: Apache-2.0
 
+// This file initializes the logger for Opal.
+
 const {createLogger, format, transports} = require('winston');
 
 // Choose log level according to environement.

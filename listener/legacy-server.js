@@ -3,6 +3,13 @@
 //
 // SPDX-License-Identifier: Apache-2.0
 
+/**
+ * This script listens for changes to config.FIREBASE_ROOT_BRANCH in firebase, reads those changes and
+ * writes a response back to firebase.
+ *
+ * Important: Do not forget to change "/dev3" back to "/dev2" before merging. [Done]
+ */
+
 const mainRequestApi    = require('./api/main.js');
 const processApi        = require('./api/processApiRequest');
 const admin             = require("firebase-admin");
