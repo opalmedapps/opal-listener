@@ -1,12 +1,9 @@
 default:
   image:
     # use node image instead of our own
-    # our image runs as node
-    name: node:16.20.0-alpine3.17
-    # images are run as root by default
-    # force switch to node user
+    # our image runs with user node
     # see: https://gitlab.com/gitlab-org/gitlab-runner/-/issues/2750
-    # entrypoint: ['sh', '-c', 'exec su node -c sh']
+    name: node:16.20.0-alpine3.17
   # Cache modules in between jobs
   cache:
     key:
@@ -15,16 +12,12 @@ default:
     paths:
       - .npm/
   before_script:
-    - whoami
     - uname -a
     - node --version
     - npm --version
-    - ls -la .
-    - ls -la .npm || true
     # Install dependencies and cache within the project directory to cache
     # See: https://javascript.plainenglish.io/improving-ci-performance-aka-how-to-save-your-money-31ff691360e4
     - npm ci --include dev --cache .npm --prefer-offline
-    - ls -la node_modules
     # Set up config files (currently no actual values are needed)
     - cp listener/config_template.json listener/config.json
     # TODO: If required, setup .env file in pipeline using gitlab project settings vars or by setting variables directly here.
