@@ -264,7 +264,7 @@ async function questionnaireUpdateStatus(requestObject) {
         const response = await ApiRequest.makeRequest(requestParams);
         // Silently exit if lister cannot fetch the user's list of caregivers
         if (!response?.data) {
-            logger.log('error', "An error occurred while fetching the user's list of caregivers.");
+            logger.log('error', "An error occurred while fetching the patient's list of caregivers.");
             return {Response: 'success'};
         }
 
