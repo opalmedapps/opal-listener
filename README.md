@@ -115,6 +115,8 @@ To generate and view the project documentation, follow the steps below.
 1. Generate the documentation using `npm run docs`.
 2. Using your IDE, right-click on the file `docs/generated/index.html` and select the option to open it in a browser.
 
+For help on creating new documentation pages, refer to {@tutorial creating-documentation}.
+
 ## Running the tests
 
 Unit tests for this repository are run using the Mocha test framework. Test files should be in the `src` directory
