@@ -27,7 +27,7 @@
     "mysql": "2.18.1",
     "node-cron": "3.0.2",
     "nodemailer": "6.7.2",
-    "nodemon": "2.0.20",
+    "nodemon": "2.0.21",
     "q": "1.5.1",
     "request": "2.88.2",
     "tweetnacl": "1.0.3",
