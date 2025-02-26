@@ -84,7 +84,7 @@ pages:
   rules:
     - if: $CI_COMMIT_REF_NAME == $CI_DEFAULT_BRANCH
 
-# Deployment implicitly uses a service account assigned to $GOOGLE_APPLICATION_CREDENTIALS below
+# Deployment implicitly uses a service account assigned to $GOOGLE_APPLICATION_CREDENTIALS below (from values defined in the GitLab project settings)
 # These service accounts provide permissions for editing Firebase rules
 .firebase rules:
   stage: Deploy
