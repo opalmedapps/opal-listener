@@ -11,10 +11,12 @@ class QuestionnaireListHandler extends ApiRequestHandler {
     static async handleRequest(requestObject) {
         const lastUpdated = requestObject.params.Date ? new Date(Number(requestObject.params.Date)) : 0;
         const patient = await QuestionnaireListHandler.getTargetPatient(requestObject);
+        // Ideally, use the language provided by the user in the request. If not found, use the language of the patient.
+        const userLanguage = requestObject.params.Language || patient.language;
 
         const patientInfoSubset = {
             PatientSerNum: patient.patientSerNum,
-            Language: patient.language,
+            Language: userLanguage,
         };
         return {
             data: {

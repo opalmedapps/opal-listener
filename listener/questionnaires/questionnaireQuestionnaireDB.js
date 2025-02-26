@@ -81,11 +81,11 @@ async function getQuestionnaireList(opalPatientSerNumAndLanguage, lastUpdated=0)
 /**
  * getQuestionnaire
  * @desc this function gets data related to that questionnaire, including answers
- * @param {object} opalPatientSerNumAndLanguage object containing PatientSerNum and Language as property. These information comes from OpalDB
+ * @param {string} language The language in which to return the questionnaire.
  * @param {number} answerQuestionnaire_Id This is the ID of the answerQuestionnaire (questionnaire belonging to that user and which the user would like to view). Should be passed from qplus.
  * @returns {Promise}
  */
-function getQuestionnaire(opalPatientSerNumAndLanguage, answerQuestionnaire_Id) {
+function getQuestionnaire(language, answerQuestionnaire_Id) {
     let r = q.defer();
 
     let questionAndTypeMap = {};
@@ -96,7 +96,7 @@ function getQuestionnaire(opalPatientSerNumAndLanguage, answerQuestionnaire_Id) 
     let answerDataArray; // note that this might not contain any useful data if the questionnaire is new
     let answerObject;
 
-    runQuery(questionnaireQueries.getQuestionnaireQuery(), [answerQuestionnaire_Id, opalPatientSerNumAndLanguage.Language])
+    runQuery(questionnaireQueries.getQuestionnaireQuery(), [answerQuestionnaire_Id, language])
         .then(function (queryResult) {
             if (!questionnaireValidation.hasValidProcedureStatusAndLang(queryResult)) {
 
@@ -169,16 +169,15 @@ FUNCTIONS TO SAVE QUESTIONNAIRE
 /**
  * saveAnswer
  * @desc this saves the answer of one question only
- * @param {object} opalPatientSerNumAndLanguage must contain PatientSerNum and Language as properties. This should be gotten directly from the OpalDB
+ * @param {string} isoLang The language in which the questionnaire was answered.
  * @param {object} param the parameters passed from the front-end. The calling function must verify its properties.
  * @param {string} appVersion a string denoting the version of the app.
  * @param {string} respondentUsername the username of the user answering the questionnaire.
  * @returns {Promise}
  */
-function saveAnswer(opalPatientSerNumAndLanguage, param, appVersion, respondentUsername) {
+function saveAnswer(isoLang, param, appVersion, respondentUsername) {
 
     let r = q.defer();
-    let isoLang = opalPatientSerNumAndLanguage.Language;
     let answerId;
 
     /*

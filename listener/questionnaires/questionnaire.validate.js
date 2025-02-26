@@ -28,6 +28,7 @@ function validatingPatientQuestionnaireSerNum(requestObject) {
 
 /**
  * @name validatePatientSerNumAndLanguage
+ * @deprecated Since QSCCD-91
  * @desc validate the whether there is a patientSerNum and language returned from the OpalDB
  * @param {array} queryResponse The response directly from the OpalDB
  * @returns {boolean} true if the response is valid, false otherwise

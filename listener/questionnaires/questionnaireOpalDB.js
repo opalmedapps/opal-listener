@@ -6,6 +6,7 @@ const logger = require('./../logs/logger');
 const {OpalSQLQueryRunner} = require("../sql/opal-sql-query-runner");
 const config = require("../config-adaptor");
 const requestUtility = require("../utility/request-utility");
+const utility = require('../utility/utility');
 
 exports.getQuestionnaireInOpalDB = getQuestionnaireInOpalDB;
 exports.getQuestionnaireList = getQuestionnaireList;
@@ -91,38 +92,17 @@ function getQuestionnaireList(requestObject) {
  * @param {object} requestObject the request
  * @returns {Promise} Returns a promise that contains the questionnaire data
  */
-// TODO (QSCCD-84) - Make use of requestObject.TargetPatientID to get the another patient's questionnaire, but in the current user's language
-function getQuestionnaire(requestObject) {
+async function getQuestionnaire(requestObject) {
+    // check argument
+    if (!questionnaireValidation.validatingPatientQuestionnaireSerNum(requestObject)) {
+        throw new Error('Error getting questionnaire: the requestObject does not have the required parameter qp_ser_num');
+    }
+    let language = await getQuestionnaireLanguage(requestObject);
 
-    return new Promise(function (resolve, reject) {
-        // check argument
-        if (!questionnaireValidation.validatingPatientQuestionnaireSerNum(requestObject)) {
-            reject(new Error('Error getting questionnaire: the requestObject does not have the required parameter qp_ser_num'));
-
-        } else {
-            // get language in the database
-            OpalSQLQueryRunner.run(opalQueries.patientTableFieldsForUser(), [requestObject.UserID])
-                .then(function (patientSerNumAndLanguageRow) {
-
-                    if (questionnaireValidation.validatePatientSerNumAndLanguage(patientSerNumAndLanguageRow)) {
-                        // get questionnaire belonging to that qp_ser_num
-                        return questionnaires.getQuestionnaire(patientSerNumAndLanguageRow[0], requestObject.Parameters.qp_ser_num);
-                    } else {
-                        logger.log("error", "Error getting questionnaire: No matching PatientSerNum or/and Language found in opalDB");
-                        reject(new Error('Error getting questionnaire: No matching PatientSerNum or/and Language found in opalDB'));
-                    }
-                })
-                .then(function (result) {
-                    let obj = {};
-                    obj.Data = result;
-                    resolve(obj);
-                })
-                .catch(function (error) {
-                    logger.log("error", "Error getting questionnaire", error);
-                    reject(error);
-                });
-        }
-    });
+    // get questionnaire belonging to that qp_ser_num
+    return {
+        Data: await questionnaires.getQuestionnaire(language, requestObject.Parameters.qp_ser_num),
+    };
 }
 
 /*
@@ -134,38 +114,15 @@ FUNCTIONS TO SAVE ANSWERS (QUESTIONNAIRE V2)
  * @param {object} requestObject
  * @returns {Promise}
  */
-function questionnaireSaveAnswer(requestObject) {
-    return new Promise(function (resolve, reject) {
-        // check argument
-        if (!questionnaireValidation.validateParamSaveAnswer(requestObject)) {
-            logger.log("error", "Error saving answer: the requestObject does not have the required parameters");
-            reject(new Error('Error saving answer: the requestObject does not have the required parameters'));
+async function questionnaireSaveAnswer(requestObject) {
+    // check argument
+    if (!questionnaireValidation.validateParamSaveAnswer(requestObject)) {
+        throw new Error('Error saving answer: the requestObject does not have the required parameters');
+    }
+    let language = await getQuestionnaireLanguage(requestObject);
 
-        } else {
-            // get language in the opal database
-            OpalSQLQueryRunner.run(opalQueries.patientTableFieldsForUser(), [requestObject.UserID])
-                .then(function (patientSerNumAndLanguageRow) {
-
-                    if (questionnaireValidation.validatePatientSerNumAndLanguage(patientSerNumAndLanguageRow)) {
-                        // save answer in questionnaire DB
-                        return questionnaires.saveAnswer(patientSerNumAndLanguageRow[0], requestObject.Parameters, requestObject.AppVersion, requestObject.UserID);
-                    } else {
-                        logger.log("error", "Error saving answer: No matching PatientSerNum or/and Language found in opalDB");
-                        reject(new Error('Error saving answer: No matching PatientSerNum or/and Language found in opalDB'));
-                    }
-
-                })
-                .then(function () {
-                    // no need to update opalDB questionnaire status since it is not completed.
-                    resolve({Response: 'success'});
-
-                })
-                .catch(function (error) {
-                    logger.log("error", "Error saving answer", error);
-                    reject(error);
-                });
-        }
-    });
+    await questionnaires.saveAnswer(language, requestObject.Parameters, requestObject.AppVersion, requestObject.UserID);
+    return {Response: 'success'};
 }
 
 /**
@@ -182,13 +139,6 @@ async function questionnaireUpdateStatus(requestObject) {
     }
 
     // 1. update the status in the answerQuestionnaire table in questionnaire DB
-    // First, get the patientSerNum in the opal database
-    let patientSerNumAndLanguageRow = await OpalSQLQueryRunner.run(opalQueries.patientTableFieldsForUser(), [requestObject.UserID]);
-
-    if (!questionnaireValidation.validatePatientSerNumAndLanguage(patientSerNumAndLanguageRow)) {
-        throw new Error('Error updating status: No matching PatientSerNum found in opalDB');
-    }
-
     const isCompleted = await questionnaires.updateQuestionnaireStatusInQuestionnaireDB(
         requestObject.Parameters.answerQuestionnaire_id,
         requestObject.Parameters.new_status,
@@ -212,9 +162,26 @@ async function questionnaireUpdateStatus(requestObject) {
             await requestUtility.request("post", config.QUESTIONNAIRE_COMPLETED_PATH, { json: true });
         }
         catch (error) {
-            logger.log("error", `Failed to send notification of completed questionnaire to the OIE: ${JSON.stringify(error)}`);
+            logger.log("error", `Failed to send notification of completed questionnaire to the OIE`, error);
         }
     }
 
     return {Response: 'success'};
+}
+
+/**
+ * @desc Gets the questionnaire language from the request object, or if not found, from OpalDB (legacy way).
+ * @param requestObject The request object to check for a language parameter.
+ * @returns {Promise<string>} Resolves to the questionnaire language or throws an error if not found.
+ */
+async function getQuestionnaireLanguage(requestObject) {
+    try {
+        // The second method using a query is deprecated and will eventually be removed
+        return requestObject.Parameters?.language
+            || (await OpalSQLQueryRunner.run(opalQueries.patientTableFieldsForUser(), [requestObject.UserID]))[0].Language;
+    }
+    catch (error) {
+        logger.log('error', 'Error getting questionnaire language', error);
+        throw new Error('No language was provided in the request or found in OpalDB');
+    }
 }
