@@ -22,8 +22,8 @@ describe('sendmail()', function () {
     let testAccount = await nodemailer.createTestAccount();
 
     let result = await sendMail({
-      SMTP_HOST: testAccount.host,
-      SMTP_PORT: testAccount.port,
+      SMTP_HOST: testAccount.smtp.host,
+      SMTP_PORT: testAccount.smtp.port,
       SMTP_USERNAME: testAccount.user,
       SMTP_PASSWORD: testAccount.pass,
       SMTP_FROM: 'Opal sendmail test <test@opalmedapps.ca>',
