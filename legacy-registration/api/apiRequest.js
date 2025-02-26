@@ -16,7 +16,6 @@ const API = {
     'TermsandAggreementDocuments': apiFunctionRequest.getTermsandAgreementDocuments,
     'RegisterPatient': apiFunctionRequest.registerPatient,
     'GetPatientInfo': apiFunctionRequest.getPatientInfo,
-    'GetLabResultHistory': apiFunctionRequest.getLabResultHistory,
 };
 
 /**
