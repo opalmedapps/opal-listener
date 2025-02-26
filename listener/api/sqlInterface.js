@@ -571,14 +571,14 @@ async function checkInToSystem(mrn, mrnSite, url, sourceSystemSerNum, sourceSyst
         data = {
             "mrn": mrn,
             "site": mrnSite,
-            "room": config.CHECKIN_ROOM,
+            "room": config.FEEDBACK_EMAIL_PORT,
             "checkinType": "APP",
         };
     } else if (targetSystem === "SOURCE") {
         // Source does single appointment checkin
         data = {
             "appointmentId": sourceSystemID,
-            "location": config.CHECKIN_ROOM,
+            "location": config.FEEDBACK_EMAIL_PORT,
         };
     } else {
         // Opal does single appointment checkin
@@ -735,10 +735,10 @@ exports.inputFeedback = function(requestObject) {
                     subject = "New Suggestion - Opal";
                     replyTo = email;
                 } else if (type === 'research') {
-                    email = config.OPAL_EMAIL;
+                    email = config.FEEDBACK_EMAIL;
                     subject = "New Research Feedback - Opal - From PatientSerNum: " + patientSerNum;
                 } else {
-                    email = config.OPAL_EMAIL;
+                    email = config.FEEDBACK_EMAIL;
                     subject = "New Feedback - Opal - From PatientSerNum: " + patientSerNum;
                 }
 

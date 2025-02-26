@@ -16,15 +16,15 @@ function Mail(){
 
     // create reusable transporter object using the default SMTP transport
     let transporter = nodemailer.createTransport({
-        host: config.SMTP_SERVER_IP,
-        port: config.SMTP_SERVER_PORT
+        host: config.FEEDBACK_EMAIL_HOST,
+        port: config.FEEDBACK_EMAIL_PORT
     });
 
     // setup email data with unicode symbols
 
     this.sendMail = function (recipient, subject, text, replyEmail) {
         let mailOptions = {
-            from: `Opal <${config.OPAL_EMAIL}>`, // sender address
+            from: `Opal <${config.FEEDBACK_EMAIL}>`, // sender address
             to: recipient, // list of receivers
             subject: subject, // Subject line
             text: text, // plain text body
