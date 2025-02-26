@@ -49,10 +49,10 @@ class RequestValidator {
 					r.reject(new OpalResponseError(1, 'Potential Injection Attack', request, 'Invalid credentials'));
 				} else {
 
-					let {AnswerText} = rows[0];
-					utility.decrypt({req: request.type, params: request.parameters}, hashedUID, AnswerText)
+					let {SecurityAnswer} = rows[0];
+					utility.decrypt({req: request.type, params: request.parameters}, hashedUID, SecurityAnswer)
 					.then((dec)=>{
-						request.setAuthenticatedInfo(AnswerText, hashedUID, dec.req, dec.params);
+						request.setAuthenticatedInfo(SecurityAnswer, hashedUID, dec.req, dec.params);
 						return RequestValidator.validateRequestPermissions(request);
 					}).then(() => {
 						r.resolve(request);
