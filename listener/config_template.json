@@ -18,11 +18,11 @@
   "_CHECKIN_ROOM_HINT": "OPAL PHONE APP",
   "QUESTIONNAIRE_COMPLETED_PATH": "Path notified when a questionnaire is completed",
   "LATEST_STABLE_VERSION": "",
-  "OIE": {
-    "api": {
-      "url": "http://localhost:8088",
+  "ORMS": {
+    "API": {
+      "URL": "https://127.0.0.1:8084",
       "method": {
-        "updatePatientStatus": "/Patient/UpdateOpalStatus"
+        "updatePatientStatus": "/patient/updateOpalStatus"
       }
     }
   },
