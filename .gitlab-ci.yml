@@ -80,13 +80,17 @@ eslint:
     reports:
       codequality: gl-codequality.json
 
+.mocha setup:
+  before_script:
+    - export DISABLED_LOGGING=true
+    - export EXIT_ON_ERROR=false
+
 mocha:
   stage: Test
-  before_script:
+  extends: .mocha setup
+  script:
     - npm install mocha-junit-reporter --no-save
     - npx mocha --version
-    - export DISABLED_LOGGING=true
-  script:
     - npx mocha --reporter mocha-junit-reporter --reporter-options mochaFile=junit.xml './src/**/*.test.*' './listener/**/*.test.*' './legacy-registration/**/*.test.*'
   artifacts:
     when: always
@@ -96,6 +100,7 @@ mocha:
 
 coverage:
   stage: Test
+  extends: .mocha setup
   needs:
     - job: mocha
   script:

@@ -31,8 +31,10 @@ const formatErrorData = (data) => {
 
 // Initialize winston logger
 const WinstonLogger = createLogger({
-    // Silent logger when runing unit tests.
+    // Silent logger when running unit tests
     silent: process.env.DISABLED_LOGGING === 'true',
+    // By default, we want to exit on error (true), except when explicitly setting false for pipeline tests
+    exitOnError: process.env.EXIT_ON_ERROR !== 'false',
     // Set level log level
     level: LoggerLevel,
     // Set log format output in the log file
