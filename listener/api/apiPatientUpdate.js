@@ -4,6 +4,7 @@ var utility = require('./../utility/utility.js');
 var queries = require('./../sql/queries.js');
 var logger = require('./../logs/logger.js');
 const questionnaires = require('./../questionnaires/questionnaireOpalDB.js');
+const RequestValidator  = require('./request/request-validator');
 
 /**
  *@name login
@@ -130,7 +131,17 @@ exports.logout = function(requestObject) {
  * @param requestObject
  * @returns {Promise}
  */
-exports.getUserPatient = requestObject => sqlInterface.getUserPatient(requestObject);
+exports.getUserPatient = async function(requestObject) {
+    let patientSerNum = await getSelfPatientSerNum(requestObject.UserID);
+    requestObject.TargetPatientID = patientSerNum;
+    try {
+        await RequestValidator.validate(requestObject?.Request, requestObject);
+    }
+    catch (error) {
+        return {};
+    }
+    return sqlInterface.getUserPatient(requestObject);
+}
 
 /**
  * For questionnaire V2 (2019 version of qplus questionnaire front-end). Getting the list of questionnaires belonging to a patient

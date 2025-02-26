@@ -117,20 +117,12 @@ class RequestValidator {
 			return;
 		}
 
-		// First check for legacy permissions: whether OpalDB has a patient entry that matches the given user (self)
-		logger.log('info', `Checking legacy permissions by looking for a 'self' patient in OpalDB, for ${logDetails}`);
-		let legacySelfPermission = await RequestValidator.legacySelfPatientExists(request.meta.UserID, request.meta.TargetPatientID);
-		if (legacySelfPermission) {
-			logger.log('info', `Permission granted: legacy user-patient match found in OpalDB, for ${logDetails}`);
-			return;
-		} else logger.log('info', `No legacy user-patient match found in OpalDB, for ${logDetails}`);
-
-		// If the legacy check didn't return a match, check instead via the new permissions class in Django
+		// Check user's permissions by calling Django's API endpoint (e.g., /check-permissions/)
 		logger.log('info', `Checking permissions for ${logDetails}, via API request to the backend`);
 		let apiResponse;
 		try {
 			apiResponse = await ApiRequest.sendRequestToApi(request.meta.UserID, {
-				url: `/api/patients/legacy/${request.meta.TargetPatientID}/check-permissions`,
+				url: `/api/patients/legacy/${request.meta.TargetPatientID}/check-permissions/`,
 				headers: {},
 			});
 			logger.log('info', `Permissions response received with status = ${apiResponse.status} for ${logDetails}`, apiResponse.data);
@@ -142,22 +134,6 @@ class RequestValidator {
 			logger.log('error', 'Error details', axiosError.cause);
 			if (axiosError?.cause?.detail) throw new Error(`Permissions validation failed for ${logDetails}; reason: ${axiosError.cause.detail}`)
 			else throw new Error(`Error during permissions validation for ${logDetails}: ${axiosError}`);
-		}
-	}
-
-	/**
-	 * @desc Checks OpalDB to see whether the current user has a patient entry (self) that matches the provided PatientSerNum.
-	 * @param userId The username of the user to look up in the database.
-	 * @param patientSerNum The PatientSerNum to compare to the user.
-	 * @returns {Promise<boolean>} True if the user has a PatientSerNum equal to the provided value, or false otherwise.
-	 */
-	static async legacySelfPatientExists(userId, patientSerNum) {
-		try {
-			let result = await sqlInterface.getSelfPatientSerNum(userId);
-			return result === Number(patientSerNum);
-		}
-		catch (error) {
-			return false;
 		}
 	}
 
