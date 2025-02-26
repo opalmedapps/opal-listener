@@ -93,7 +93,6 @@ async function prepareAndValidateRegistrationRequest(requestObject) {
     logger.log('info', 'Calling backend API to get registration details');
     const registrationData = await opalRequest.retrieveRegistrationDataDetailed(
         requestObject.Parameters.Fields.registrationCode,
-        requestObject.Parameters.Fields.language
     );
     validateRegistrationDataDetailed(registrationData);
 
