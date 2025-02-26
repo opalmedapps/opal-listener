@@ -91,7 +91,7 @@ class KeyDerivationCache {
     }
 
     /**
-     * @description Re-derives a key and saves it to the cache.
+     * @description Derives a key and saves it to the cache.
      * @param {string} [cacheLabel] The label under which the value is stored.
      *                              If no label is provided, then a new value is generated, but not stored in the cache.
      * @param {string} secret Secret passed to the key derivation function.
