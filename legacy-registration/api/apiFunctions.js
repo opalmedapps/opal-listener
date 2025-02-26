@@ -442,8 +442,6 @@ async function insertPatient(requestObject, patient, hospitalPatient) {
         const registrationCode = requestObject.Parameters.Fields.registrationCode;
         throw `Failed to insert Patient to legacyDB due to Patient not exists with registrationCode: ${registrationCode}`;
     }
-    requestObject.Parameters.Fields.mrn = hospitalPatient.mrn;
-    requestObject.Parameters.Fields.site = hospitalPatient.site_code;
     requestObject.Parameters.Fields.firstName = patient.first_name;
     requestObject.Parameters.Fields.lastName = patient.last_name;
     requestObject.Parameters.Fields.sex = patient.sex;

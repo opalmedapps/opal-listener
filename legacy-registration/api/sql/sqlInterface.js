@@ -208,14 +208,12 @@ exports.getTermsandAgreementDocuments = function (requestObject) {
 exports.insertPatient = function (requestObject) {
     let parameters = requestObject.Parameters.Fields;
     return exports.runOpaldbSqlQuery(queries.insertPatient(), [
-        parameters.mrn,
         parameters.firstName,
         parameters.lastName,
         parameters.sex,
         parameters.dateOfBirth,
         parameters.phone,
         parameters.ramq,
-        parameters.site,
     ]);
 };
 

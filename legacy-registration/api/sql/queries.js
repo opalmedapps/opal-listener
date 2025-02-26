@@ -31,7 +31,7 @@ exports.updatePatient = function () {
 };
 
 exports.insertPatient = function () {
-    return "SELECT insertPatient(?,?,?,?,?,?,?,?) AS Result;";
+    return "SELECT insertPatient(?,?,?,?,?,?) AS Result;";
 };
 
 exports.insertPatientHospitalIdentifier = function () {
