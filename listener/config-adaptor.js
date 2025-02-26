@@ -26,7 +26,6 @@ module.exports.LAB_RESULT_HISTORY_URL = process.env.LAB_RESULT_HISTORY_URL;
 module.exports.QUESTIONNAIRE_COMPLETED_URL = process.env.QUESTIONNAIRE_COMPLETED_URL;
 module.exports.LATEST_STABLE_VERSION = process.env.LATEST_STABLE_VERSION;
 // ORMS settings API
-module.exports.ORMS_HOST = process.env.ORMS_HOST;
 module.exports.ORMS_UPDATE_PATIENT_STATUS_URL = process.env.ORMS_UPDATE_PATIENT_STATUS_URL;
 // SMTP settings
 module.exports.SMTP_HOST = process.env.SMTP_HOST;
