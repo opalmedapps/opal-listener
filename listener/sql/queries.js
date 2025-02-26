@@ -385,13 +385,16 @@ exports.setTimeoutSecurityAnswer = function()
     return `UPDATE PatientDeviceIdentifier
             SET TimeoutTimestamp = ?
             WHERE Username = ?
-              AND DeviceId = ?
+                AND DeviceId = ?
             ;`;
 };
 
 exports.setNewPassword=function()
 {
-    return "UPDATE Users SET Password = ? WHERE Username = ?";
+    return `UPDATE Users
+            SET Password = ?
+            WHERE Username = ?
+            ;`;
 };
 
 exports.checkin=function()
@@ -573,9 +576,8 @@ exports.cacheSecurityAnswerFromDjango = () => {
 exports.setTrusted = function () {
     return `UPDATE PatientDeviceIdentifier
             SET Trusted = ?
-            WHERE
-              Username = ?
-              AND DeviceId = ?
+            WHERE Username = ?
+                AND DeviceId = ?
             ;`;
 };
 
