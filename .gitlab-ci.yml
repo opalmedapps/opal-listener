@@ -146,6 +146,19 @@ pages:
   before_script:
     - npm install -g firebase-tools
 
+firebase rules demo:
+  extends: .firebase rules
+  rules:
+    - if: $CI_COMMIT_BRANCH == $CI_DEFAULT_BRANCH
+      changes:
+        - firebase/demo/database.rules.json
+  environment:
+    name: demo
+  script:
+    - cd firebase/demo
+    - export GOOGLE_APPLICATION_CREDENTIALS=$DEMO_GOOGLE_APPLICATION_CREDENTIALS
+    - firebase deploy --only database
+
 firebase rules dev:
   extends: .firebase rules
   rules:
@@ -157,6 +170,35 @@ firebase rules dev:
   script:
     - cd firebase/dev
     - export GOOGLE_APPLICATION_CREDENTIALS=$DEV_GOOGLE_APPLICATION_CREDENTIALS
+    - firebase deploy --only database
+
+firebase rules devops:
+  extends: .firebase rules
+  rules:
+    - if: $CI_COMMIT_BRANCH == $CI_DEFAULT_BRANCH
+      changes:
+        - firebase/devops/database.rules.json
+  environment:
+    name: devops
+  script:
+    - cd firebase/devops
+    - export GOOGLE_APPLICATION_CREDENTIALS=$DEVOPS_GOOGLE_APPLICATION_CREDENTIALS
+    - firebase deploy --only database
+
+firebase rules preprod:
+  extends: .firebase rules
+  rules:
+    - if: $CI_COMMIT_BRANCH == $CI_DEFAULT_BRANCH
+      changes:
+        - firebase/preprod/database.rules.json
+      when: manual
+      # Allow pipeline to continue without running this job
+      allow_failure: true
+  environment:
+    name: preprod
+  script:
+    - cd firebase/preprod
+    - export GOOGLE_APPLICATION_CREDENTIALS=$PREPROD_GOOGLE_APPLICATION_CREDENTIALS
     - firebase deploy --only database
 
 firebase rules qa:
@@ -191,22 +233,6 @@ firebase rules staging:
     - export GOOGLE_APPLICATION_CREDENTIALS=$STAGING_GOOGLE_APPLICATION_CREDENTIALS
     - firebase deploy --only database
 
-firebase rules preprod:
-  extends: .firebase rules
-  rules:
-    - if: $CI_COMMIT_BRANCH == $CI_DEFAULT_BRANCH
-      changes:
-        - firebase/preprod/database.rules.json
-      when: manual
-      # Allow pipeline to continue without running this job
-      allow_failure: true
-  environment:
-    name: preprod
-  script:
-    - cd firebase/preprod
-    - export GOOGLE_APPLICATION_CREDENTIALS=$PREPROD_GOOGLE_APPLICATION_CREDENTIALS
-    - firebase deploy --only database
-
 include:
   # run pipelines for default branch, tags, and all types of merge request pipelines
   # to support merge trains
@@ -221,6 +247,9 @@ include:
   # Dependency Scanning: https://docs.gitlab.com/ee/user/application_security/dependency_scanning/
   # https://gitlab.com/gitlab-org/gitlab/-/blob/master/lib/gitlab/ci/templates/Jobs/Dependency-Scanning.latest.gitlab-ci.yml
   - template: Jobs/Dependency-Scanning.latest.gitlab-ci.yml
+  # Container Scanning: https://docs.gitlab.com/ee/user/application_security/container_scanning/
+  # https://gitlab.com/gitlab-org/gitlab/-/blob/master/lib/gitlab/ci/templates/Jobs/Container-Scanning.latest.gitlab-ci.yml
+  - template: Jobs/Container-Scanning.latest.gitlab-ci.yml
   # SAST Scanning: https://docs.gitlab.com/ee/user/application_security/sast/
   # https://gitlab.com/gitlab-org/gitlab/-/blob/master/lib/gitlab/ci/templates/Jobs/SAST.latest.gitlab-ci.yml
   - template: Jobs/SAST.latest.gitlab-ci.yml
@@ -230,3 +259,11 @@ sast:
     # exclude test files
     # https://docs.gitlab.com/ee/user/application_security/sast/#vulnerability-filters
     SAST_EXCLUDED_PATHS: "spec, test, tests, tmp, *.test.js"
+
+# Customizations
+#
+
+# Container Scanning
+container_scanning:
+  variables:
+    CS_IMAGE: $CI_REGISTRY_IMAGE:$CI_COMMIT_REF_SLUG
