@@ -33,6 +33,6 @@ module.exports.ORMS_UPDATE_PATIENT_STATUS_URL = process.env.ORMS_UPDATE_PATIENT_
 module.exports.SMTP_HOST = process.env.SMTP_HOST;
 module.exports.SMTP_PORT = process.env.SMTP_PORT;
 module.exports.SMTP_USERNAME = process.env.MYSQL_USERNAME;
-module.exports.SMTP_password = process.env.MYSQL_PASSWORD;
+module.exports.SMTP_PASSWORD = process.env.MYSQL_PASSWORD;
 module.exports.SMTP_FROM = process.env.SMTP_FROM;
 module.exports.SMTP_TLS_REJECTED_UNAUTHARIZED = process.env.SMTP_TLS_REJECTED_UNAUTHARIZED;
