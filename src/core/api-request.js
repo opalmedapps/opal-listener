@@ -1,21 +1,42 @@
 /**
- * @file TO DO Make request to specified Django API routes
+ * @file relay request uploaded to firebase by the app to the Django backend.
  * @author David Gagne
  */
 
+const axios = require('axios');
+const configs = require('../config/config.json');
 const legacyLogger = require('../../listener/logs/logger');
 
 class ApiRequest {
-    // eslint-disable-next-line no-useless-constructor
-    constructor() {
-        // TO DO
-        // Setup api connection using .env file
+    /**
+     * @description Take the validated request uploaded to Firebase and send the Parameters field
+     * which represents the axios request to the Django backend. Use legacy server to format the request
+     * uploaded to Firebase.
+     * @param {object} decryptedRequest Request decrypted
+     * @returns {object} Formatted request that merge the response from the Django API and
+     * the legacy information needed by the app.
+     */
+    static async makeRequest(decryptedRequest) {
+        legacyLogger.log('debug', 'API: Preparing to send request to Opal API');
+        const apiResponse = await ApiRequest.sendRequestToApi(decryptedRequest.Parameters);
+        return {
+            status_code: apiResponse.status,
+            headers: apiResponse.headers,
+            data: apiResponse.data,
+        };
     }
 
-    static makeRequest() {
-        // TO DO
-        // Make request to django API
-        legacyLogger.log('debug', 'Sendig request to Opal API');
+    /**
+     * @description Add host and auth token to request params then send it to Django backend.
+     * @param {object} parameters - Parameters from the app request.
+     * @returns {object} Response from the django api
+     */
+    static async sendRequestToApi(parameters) {
+        legacyLogger.log('debug', 'API: Sending request to Opal API');
+        const requestParams = parameters;
+        requestParams.headers.Authorization = `Token ${configs.OPAL_BACKEND.AUTH_TOKEN}`;
+        requestParams.url = `${configs.OPAL_BACKEND.HOST}${parameters.url}`;
+        return axios(requestParams);
     }
 }
 
