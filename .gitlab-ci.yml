@@ -123,6 +123,11 @@ coverage:
         coverage_format: cobertura
         path: coverage/cobertura-coverage.xml
 
+# reuse job
+include:
+  - project: 'opalmedapps/engineering/ci-templates'
+    file: '/templates/jobs/Reuse.gitlab-ci.yml'
+
 build docs:
   stage: Documentation
   extends: .default_before
