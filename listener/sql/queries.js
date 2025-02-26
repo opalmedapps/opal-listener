@@ -108,8 +108,6 @@ function patientAppointmentTableFields(selectOne) {
                 LEFT JOIN EducationalMaterialControl emc ON emc.EducationalMaterialControlSerNum = A.EducationalMaterialControlSerNum
             WHERE
                 Appt.PatientSerNum = ?
-                AND Appt.State = 'Active'
-                AND Appt.Status <> 'Deleted'
                 ${selectOne ? 'AND Appt.AppointmentSerNum = ?' : ''}
                 ${!selectOne ? 'AND (Appt.LastUpdated > ? OR A.LastUpdated > ? OR AE.LastUpdated > ? OR HM.LastUpdated > ?)' : ''}
             ORDER BY Appt.AppointmentSerNum, ScheduledStartTime;
