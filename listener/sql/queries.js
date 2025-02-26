@@ -336,10 +336,23 @@ exports.getPatientPasswordForVerification = function()
 
  exports.getPatientFieldsForPasswordReset = function()
  {
-    return `SELECT DISTINCT pat.SSN, pat.Email, u.Password, u.UserTypeSerNum, sa.AnswerText, pdi.Attempt, pdi.TimeoutTimestamp
-            FROM Users u, Patient pat, SecurityAnswer sa, PatientDeviceIdentifier pdi
-            WHERE pat.Email= ? AND pat.PatientSerNum = u.UserTypeSerNum AND pdi.DeviceId = ?
-            AND sa.SecurityAnswerSerNum = pdi.SecurityAnswerSerNum AND sa.PatientSerNum = pat.PatientSerNum`;
+    return `SELECT DISTINCT
+                pat.SSN,
+                pat.Email,
+                u.Password,
+                u.UserTypeSerNum,
+                sa.AnswerText,
+                pdi.Attempt,
+                pdi.TimeoutTimestamp
+            FROM
+                Users u,
+                Patient pat,
+                SecurityAnswer sa,
+                PatientDeviceIdentifier pdi
+            WHERE
+                pat.Email = ? AND pat.PatientSerNum = u.UserTypeSerNum AND pdi.DeviceId = ?
+            AND
+                sa.SecurityAnswerSerNum = pdi.SecurityAnswerSerNum AND sa.PatientSerNum = pat.PatientSerNum`;
  };
 exports.increaseSecurityAnswerAttempt = function()
 {
@@ -411,7 +424,13 @@ exports.securityQuestionEncryption=function(){
 
 exports.userEncryption=function()
 {
-    return "SELECT sa.AnswerText FROM Users u, SecurityAnswer sa, PatientDeviceIdentifier pdi WHERE u.Username = ? AND pdi.PatientSerNum = u.UserTypeSerNum AND sa.SecurityAnswerSerNum = pdi.SecurityAnswerSerNum AND pdi.DeviceId = ?";
+    return `SELECT sa.AnswerText
+            FROM Users u, SecurityAnswer sa, PatientDeviceIdentifier pdi
+            WHERE u.Username = ?
+            AND pdi.Username = u.Username
+            AND sa.SecurityAnswerSerNum = pdi.SecurityAnswerSerNum
+            AND pdi.DeviceId = ?
+        `;
 };
     /**
      * @deprecated;
@@ -425,12 +444,38 @@ exports.userEncryption=function()
 
 exports.getSecQuestion=function()
 {
-    return "SELECT sq.QuestionText_EN, sq.QuestionText_FR, sa.SecurityAnswerSerNum, sa.PatientSerNum FROM SecurityQuestion sq, SecurityAnswer sa, Patient pat WHERE pat.Email = ? AND sa.PatientSerNum= pat.PatientSerNum AND sq.SecurityQuestionSerNum = sa.SecurityQuestionSerNum ORDER BY RAND() LIMIT 1";
+    return `SELECT
+                sq.QuestionText_EN,
+                sq.QuestionText_FR,
+                sa.SecurityAnswerSerNum,
+                sa.PatientSerNum
+            FROM
+                SecurityQuestion sq,
+                SecurityAnswer sa,
+                Patient pat
+            WHERE
+                pat.Email = ?
+            AND
+                sa.PatientSerNum = pat.PatientSerNum
+            AND
+                sq.SecurityQuestionSerNum = sa.SecurityQuestionSerNum
+            ORDER BY RAND() LIMIT 1`;
 };
 
 exports.updateDeviceIdentifiers = function()
 {
-    return "INSERT INTO `PatientDeviceIdentifier`(`PatientDeviceIdentifierSerNum`, `PatientSerNum`, `DeviceId`, `RegistrationId`, `DeviceType`, `appVersion`,`SessionId`, `Trusted`,`LastUpdated`) VALUES (NULL, ?,?,?,?,?,?, 0, NULL) ON DUPLICATE KEY UPDATE RegistrationId = ?, SessionId = ?;"
+    return `INSERT INTO PatientDeviceIdentifier(
+                PatientDeviceIdentifierSerNum,
+                PatientSerNum,
+                Username,
+                DeviceId,
+                RegistrationId,
+                DeviceType,
+                appVersion,
+                SessionId,
+                Trusted,LastUpdated
+            ) VALUES (NULL,?,?,?,?,?,?,?,0,NULL)
+            ON DUPLICATE KEY UPDATE RegistrationId = ?, SessionId = ?;`
 };
 
 /**
@@ -496,11 +541,27 @@ exports.getPatientSerNumFromUserID = function()
 };
 
 exports.getTrustedDevice = function () {
-    return "SELECT pdi.Trusted FROM PatientDeviceIdentifier pdi, Users u WHERE pdi.PatientSerNum = u.UserTypeSerNum AND u.Username = ? AND DeviceId = ?"
+    return `SELECT
+                pdi.Trusted
+            FROM
+                PatientDeviceIdentifier pdi,
+                Users u
+            WHERE
+                pdi.Username = u.Username
+            AND
+                u.Username = ? AND DeviceId = ?`;
 };
 
 exports.setDeviceSecurityAnswer = function () {
-    return "UPDATE PatientDeviceIdentifier SET SecurityAnswerSerNum = ? WHERE DeviceId = ? AND PatientSerNum = ?";
+    return `UPDATE
+                PatientDeviceIdentifier
+            SET
+                SecurityAnswerSerNum = ?,
+                SecurityAnswer = (SELECT AnswerText FROM SecurityAnswer WHERE SecurityAnswerSerNum = ?)
+            WHERE
+                DeviceId = ?
+            AND
+                PatientSerNum = ?`;
 };
 
 exports.setTrusted = function () {

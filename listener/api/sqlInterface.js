@@ -701,10 +701,9 @@ exports.updateDeviceIdentifier = function(requestObject, parameters) {
     }
 
     let email = requestObject.UserEmail;
-
     getPatientFromEmail(email).then(function(user){
 
-        exports.runSqlQuery(queries.updateDeviceIdentifiers(),[user.PatientSerNum, requestObject.DeviceId, identifiers.registrationId, deviceType, appVersion, requestObject.Token, identifiers.registrationId, requestObject.Token])
+        exports.runSqlQuery(queries.updateDeviceIdentifiers(),[user.PatientSerNum, requestObject.UserID, requestObject.DeviceId, identifiers.registrationId, deviceType, appVersion, requestObject.Token, identifiers.registrationId, requestObject.Token])
             .then(()=>{
                 logger.log('debug', 'successfully updated device identifiers');
                 r.resolve({Response:'success'});
@@ -1192,7 +1191,7 @@ exports.getSecurityQuestion = function (requestObject){
                 securityQuestion_FR: queryRows[0].QuestionText_FR
             }
             obj.Data = Data;
-            return exports.runSqlQuery(queries.setDeviceSecurityAnswer(), [queryRows[0].SecurityAnswerSerNum, requestObject.DeviceId, queryRows[0].PatientSerNum])
+            return exports.runSqlQuery(queries.setDeviceSecurityAnswer(), [queryRows[0].SecurityAnswerSerNum, queryRows[0].SecurityAnswerSerNum, requestObject.DeviceId, queryRows[0].PatientSerNum])
         })
         .then(function () {
             r.resolve(obj);
