@@ -279,8 +279,13 @@ async function questionnaireUpdateStatus(requestObject) {
         readBy = "[" + readBy + "]";
 
         await OpalSQLQueryRunner.run(
-            opalQueries.implicitlyReadQuestionnaireNotification(),
-            [readBy, questionnaire[0]['QuestionnaireSerNum'], questionnaire[0]['PatientSerNum']],
+            opalQueries.implicitlyReadNotification(),
+            [
+                readBy,
+                questionnaire[0]['QuestionnaireSerNum'],
+                questionnaire[0]['PatientSerNum'],
+                "LegacyQuestionnaire",
+            ],
         );
 
         return {

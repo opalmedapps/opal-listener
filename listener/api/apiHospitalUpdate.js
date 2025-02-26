@@ -32,7 +32,8 @@ exports.accountChange = function (requestObject) {
 //Update Read Status
 exports.updateReadStatus=function(requestObject)
 {
-  return sqlInterface.updateReadStatus(requestObject.UserID,requestObject.Parameters);
+  requestObject.Parameters["TargetPatientID"] = requestObject.TargetPatientID;
+  return sqlInterface.updateReadStatus(requestObject.UserID, requestObject.Parameters);
 };
 
 //Update checkin
