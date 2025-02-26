@@ -7,8 +7,8 @@ const axios = require('axios');
 const logger = require('../../../listener/logs/logger');
 
 const env = {
-	OPAL_BACKEND_HOST: process.env.OPAL_BACKEND_HOST,
-	OPAL_BACKEND_AUTH_TOKEN: process.env.OPAL_BACKEND_AUTH_TOKEN,
+	BACKEND_HOST: process.env.BACKEND_HOST,
+	BACKEND_REGISTRATION_AUTH_TOKEN: process.env.BACKEND_REGISTRATION_AUTH_TOKEN,
 };
 
 class opalRequest {
@@ -39,7 +39,7 @@ class opalRequest {
 
     //==========================Rest Apis=======================================
 	static backendApiHeaders = {
-		'Authorization': `Token ${env.OPAL_BACKEND_AUTH_TOKEN}`,
+		'Authorization': `Token ${env.BACKEND_REGISTRATION_AUTH_TOKEN}`,
 		'Content-Type': 'application/json',
 		'Appuserid': 'registration',
 	}
@@ -98,7 +98,7 @@ class opalRequest {
 	static async retrieveRegistrationDataDetailed(registrationCode, language) {
 		let headers = this.backendApiHeaders;
 		headers['Accept-Language'] = language;
-		const url = `${env.OPAL_BACKEND_HOST}/api/registration/${registrationCode}/?detailed`;
+		const url = `${env.BACKEND_HOST}/api/registration/${registrationCode}/?detailed`;
 		const requestParams = {
 			method: 'get',
 			url: url,
@@ -144,7 +144,7 @@ class opalRequest {
 	static async registrationRegister(registrationCode, language, registerData) {
 		let headers = this.backendApiHeaders;
 		headers['Accept-Language'] = language;
-		const url = `${env.OPAL_BACKEND_HOST}/api/registration/${registrationCode}/register/`;
+		const url = `${env.BACKEND_HOST}/api/registration/${registrationCode}/register/`;
 		const requestParams = {
 			method: 'post',
 			url: url,

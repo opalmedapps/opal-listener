@@ -7,15 +7,18 @@ const { convert } = require('html-to-text');
 const legacyLogger = require('../../listener/logs/logger');
 
 const configs = {
-    OPAL_BACKEND_HOST: process.env.OPAL_BACKEND_HOST,
-    OPAL_BACKEND_AUTH_TOKEN: process.env.OPAL_BACKEND_AUTH_TOKEN,
+    BACKEND_HOST: process.env.BACKEND_HOST,
+    BACKEND_LISTENER_AUTH_TOKEN: process.env.BACKEND_LISTENER_AUTH_TOKEN,
+    BACKEND_REGISTRATION_AUTH_TOKEN: process.env.BACKEND_REGISTRATION_AUTH_TOKEN,
 };
 class ApiRequest {
     /**
      * @description Take the validated request uploaded to Firebase and send the Parameters field
      * which represents the axios request to the Django backend. Use legacy server to format the request
      * uploaded to Firebase.
-     * @param {object} requestParams Request decrypted
+     * @param {object} requestParams decrypted request containing a Parameters field with the request parameters
+     *                 and an optional UserID field.
+     *                 For requests coming from the app, the UserID of the authenticated user needs to be provided.
      * @returns {object} Formatted request that merge the response from the Django API and
      * the legacy information needed by the app.
      */
@@ -40,9 +43,12 @@ class ApiRequest {
         legacyLogger.log('debug', 'API: Sending request to Opal API');
         const requestParams = parameters;
 
-        requestParams.headers.Authorization = `Token ${configs.OPAL_BACKEND_AUTH_TOKEN}`;
+        const token = userId === 'registration'
+            ? configs.BACKEND_REGISTRATION_AUTH_TOKEN
+            : configs.BACKEND_LISTENER_AUTH_TOKEN;
+        requestParams.headers.Authorization = `Token ${token}`;
         requestParams.headers.Appuserid = userId;
-        requestParams.url = `${configs.OPAL_BACKEND_HOST}${parameters.url}`;
+        requestParams.url = `${configs.BACKEND_HOST}${parameters.url}`;
 
         if (parameters.data !== undefined) requestParams.data = parameters.data;
 

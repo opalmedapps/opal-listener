@@ -8,6 +8,7 @@ const config = require("../config-adaptor");
 const requestUtility = require("../utility/request-utility");
 
 exports.getQuestionnaireInOpalDB = getQuestionnaireInOpalDB;
+exports.getAnswerQuestionnaireIdFromSerNum = getAnswerQuestionnaireIdFromSerNum;
 exports.getQuestionnaireList = getQuestionnaireList;
 exports.getQuestionnaire = getQuestionnaire;
 exports.getQuestionnairePurpose = getQuestionnairePurpose;
@@ -22,6 +23,7 @@ FUNCTIONS TO GET QUESTIONNAIRES (QUESTIONNAIRE V2)
 /**
  * getQuestionnaireInOpalDB
  * @desc Returns a promise containing the questionnaire's general information stored in OpalDB. Used for the new questionnaire 2019
+ * @deprecated Since QSCCD-1559, in released versions after 1.12.2.
  * @param {object} requestObject
  * @returns {Promise} object containing the questionnaire's general information stored in OpalDB
  */
@@ -54,6 +56,18 @@ function getQuestionnaireInOpalDB(requestObject) {
                 });
         }
     });
+}
+
+/**
+ * @description Looks up the answerQuestionnaireId corresponding to a given QuestionnaireSerNum.
+ * @param questionnaireSerNum The SerNum of the questionnaire to find.
+ * @throws {string} Throws an error message if the questionnaire is not found.
+ * @returns {Promise<*>} Resolves to the questionnaire's answerQuestionnaireId.
+ */
+async function getAnswerQuestionnaireIdFromSerNum(questionnaireSerNum) {
+    let rows = await OpalSQLQueryRunner.run(questionnaireQueries.getAnswerQuestionnaireIdFromSerNum(), [questionnaireSerNum]);
+    if (!rows || rows.length === 0) throw `Questionnaire with QuestionnaireSerNum = ${questionnaireSerNum} not found`;
+    return rows[0].answerQuestionnaireId;
 }
 
 /**
