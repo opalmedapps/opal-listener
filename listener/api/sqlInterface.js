@@ -351,7 +351,9 @@ exports.getStudies = async function(requestObject) {
             (row, id, arr) => arr[id].consentStatus = studiesConfig.STUDY_CONSENT_STATUS_MAP[arr[id].consentStatus]
         );
 
-        return {Response: 'success', Data: rows};
+        let data = {studies: rows};
+
+        return {Response: 'success', Data: data};
     }
     catch (error) { throw {Response: 'error', Reason: error}; }
 };
@@ -768,7 +770,6 @@ exports.getEncryption=function(requestObject)
  */
 exports.getPackageContents = function(requestObject){
     let r = Q.defer();
-
     // Check that the correct parameters are given.
     let {EducationalMaterialControlSerNum} = requestObject.Parameters;
     if(!EducationalMaterialControlSerNum) {
@@ -1069,7 +1070,7 @@ function getEducationTableOfContents(rows)
                 {
                     for (var j = 0; j < rows.length; j++) {
                         // Add edu material category name based on its ID
-                        rows[j].Category = eduMaterialConfig.EDUMATERIAL_CATEGORY_ID_MAP[rows[j].EducationalMaterialCategoryId].toLowerCase();
+                        rows[j].Category = eduMaterialConfig.EDUMATERIAL_CATEGORY_ID_MAP[rows[j].EduCategoryId].toLowerCase();
 
                         if(rows[j].EducationalMaterialControlSerNum ==results[i][0].ParentSerNum)
                         {
