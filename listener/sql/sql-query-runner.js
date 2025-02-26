@@ -1,6 +1,7 @@
 const fs = require('fs');
 const logger = require('../logs/logger');
 const mysql = require("mysql");
+const { ENVIRONMENT } = require("../../src/environment");
 
 class SQLQueryRunner {
 	#SQL_QUERY_POOL;
@@ -14,7 +15,7 @@ class SQLQueryRunner {
 		// Add SSL parameters if SSL is enabled
 		this.#DB_CREDENTIALS = {
 			...databaseCredentials,
-			...(process.env.DATABASE_USE_SSL === '1' ? {
+			...(ENVIRONMENT.DATABASE_USE_SSL === '1' ? {
 					ssl: {
 						ca: this.readSSLCAFile(),
 						rejectUnauthorized: true,
@@ -26,17 +27,17 @@ class SQLQueryRunner {
 	}
 
 	/**
-	 * @desc Reads the SSL CA file provided as a path in the .env file, under NODE_EXTRA_CA_CERTS.
+	 * @desc Reads the SSL CA file provided as a path in the .env file, under SSL_CA.
 	 * @returns {Buffer} The read file contents.
 	 */
 	readSSLCAFile() {
 		try {
-			let filePath = process.env.NODE_EXTRA_CA_CERTS;
+			let filePath = ENVIRONMENT.SSL_CA;
 			return fs.readFileSync(filePath);
 		}
 		catch (error) {
 			logger.log('error', 'Failed to read SSL CA file. SSL is enabled via the DATABASE_USE_SSL environment variable. ' +
-				'Check the path defined in .env as NODE_EXTRA_CA_CERTS.', error);
+				'Check the path defined in .env as SSL_CA.', error);
 			process.exit(1);
 		}
 	}
@@ -56,7 +57,7 @@ class SQLQueryRunner {
 		return new Promise((resolve, reject) => {
 			this.#SQL_QUERY_POOL.getConnection(function (err, connection) {
 				logger.log('debug', `Grabbed SQL connection to ${dbName}: ${connection}, `
-					+ `with SSL ${process.env.DATABASE_USE_SSL === '1' ? 'enabled': 'disabled'}`);
+					+ `with SSL ${ENVIRONMENT.DATABASE_USE_SSL === '1' ? 'enabled': 'disabled'}`);
 				if (err) {
 					logger.log('error', `Failed to establish database connection`, err);
 					reject(connectionErrorMsg);
