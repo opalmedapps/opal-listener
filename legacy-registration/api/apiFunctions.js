@@ -148,15 +148,16 @@ exports.registerPatient = async function(requestObject) {
         const patientData = await opalRequest.retrievePatientDataDetailed(backendApiRequest);
 
         // Insert patient
-        const legacy_id = await insertPatient(requestObject, patientData?.patient);
+        const patientResult = await insertPatient(requestObject, patientData?.patient, patientData?.hospital_patients[0]);
+        const legacy_id = patientResult[0].Result;
 
         // Insert patient hospital identifier
         for (const hospital_patient of patientData?.hospital_patients) {
             await insertPatientHospitalIdentifier(requestObject, hospital_patient, legacy_id);
         }
-
         // Register patient info to new backend
         const registerData = getRegisterData(requestObject, legacy_id);
+        const test = JSON.stringify(registerData);
         await opalRequest.registrationRegister(backendApiRequest, registerData);
 
         // Before registering the patient, create their firebase user account with decrypted email and password
@@ -170,8 +171,7 @@ exports.registerPatient = async function(requestObject) {
             uid = await firebaseFunction.getFirebaseAccountByEmail(email);
             logger.log('info', `Got firebase user account: ${uid}`);
         }
-
-
+        
         // Assign the unique ID and encrypted password to the request object
         requestObject.Parameters.Fields.uniqueId = uid;
         requestObject.Parameters.Fields.password = CryptoJS.SHA512(requestObject.Parameters.Fields.password).toString();
@@ -410,7 +410,7 @@ function getRegisterData(requestObject, legacy_id) {
         },
         'caregiver': {
             'language': requestObject.Parameters.Fields.language,
-            'phone_number': requestObject.Parameters.Fields.phoneNumber,
+            'phone_number': '+1' + requestObject.Parameters.Fields.phone,
         },
         'security_answers': [
             {
@@ -435,14 +435,32 @@ function getRegisterData(requestObject, legacy_id) {
  * @param {Object} requestObject - The calling request's requestObject.
  * @returns {patientSerNum}
  */
-async function insertPatient(requestObject, patient) {
+async function insertPatient(requestObject, patient, hospital_patient) {
     if (!patient) {
         const registrationCode = requestObject.Parameters.Fields.registrationCode;
         throw `Failed to insert Patient to legacyDB due to Patient not exists with registrationCode: ${registrationCode}`;
     }
+    requestObject.Parameters.Fields.mrn = hospital_patient.mrn;
+    requestObject.Parameters.Fields.site = hospital_patient.site_code;
     requestObject.Parameters.Fields.firstName = patient.first_name;
     requestObject.Parameters.Fields.lastName = patient.last_name;
     requestObject.Parameters.Fields.sex = patient.sex;
     requestObject.Parameters.Fields.dateOfBirth = patient.date_of_birth;
     return await sqlInterface.insertPatient(requestObject);
+}
+
+/**
+ * @description insert patient hospital indetifier with request parameters.
+ * @param {Object} requestObject - The calling request's requestObject.
+ * @returns {void}
+ */
+async function insertPatientHospitalIdentifier(requestObject, hospitalPatient, patientSerNum) {
+    if (!hospitalPatient) {
+        const registrationCode = requestObject.Parameters.Fields.registrationCode;
+        throw  `Failed to insert Patient to legacyDB due to hospitalPatient not exists with registrationCode: ${registrationCode}`;
+    }
+    requestObject.Parameters.Fields.patientSerNum = patientSerNum;
+    requestObject.Parameters.Fields.mrn = hospitalPatient.mrn;
+    requestObject.Parameters.Fields.site = hospitalPatient.site_code;
+    return await sqlInterface.insertPatientHospitalIdentifier(requestObject);
 }
