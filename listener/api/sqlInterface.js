@@ -500,33 +500,28 @@ exports.checkIn = async function (requestObject) {
                 let mrnObj = mrnList[0];
                 let mrn = mrnObj.MRN;
                 let mrnSite = mrnObj.Hospital_Identifier_Type_Code;
-                await checkInToSystem(mrn, mrnSite, config.SOURCE_SYSTEM_CHECKIN_URL, null, sourceSystemID, "SOURCE")
-                    .then(() => {
-                        logger.log("verbose", `Success checking in to source system for PatientSerNum = ${patientSerNum} using ${mrn}-${mrnSite}`);
-                        source_system_success = true;
-                    })
-                    .catch((error) => {
-                        logger.log("verbose", `Failed to check in to source system for PatientSerNum = ${patientSerNum} using ${mrn}-${mrnSite}; error: ${error}`);
-                        lastError = error;
-                    }
-                );
+                try {
+                    await checkInToSystem(mrn, mrnSite, config.SOURCE_SYSTEM_CHECKIN_URL, null, sourceSystemID, "SOURCE");
+                    logger.log("verbose", `Success checking in to source system for PatientSerNum = ${patientSerNum} using ${mrn}-${mrnSite}`);
+                    source_system_success = true;
+                }catch(error){
+                    logger.log("verbose", `Failed to check in to source system for PatientSerNum = ${patientSerNum} using ${mrn}-${mrnSite}; error: ${error}`);
+                    lastError = error;
+                }
             }
 
             // Attempt checkin to opal backend
             let mrnObj = mrnList[0];
             let mrn = mrnObj.MRN;
             let mrnSite = mrnObj.Hospital_Identifier_Type_Code;
-            await checkInToSystem(mrn, mrnSite, config.OPAL_CHECKIN_URL, source, sourceSystemID, "OPAL")
-                .then(() => {
-                    logger.log("verbose", `Success checking in to opal for PatientSerNum = ${patientSerNum} using ${mrn}-${mrnSite}`);
-                    opal_success = true;
-                })
-                .catch((error) => {
-                    logger.log("verbose", `Failed to check in to opal for PatientSerNum = ${patientSerNum} using ${mrn}-${mrnSite}; error: ${error}`);
-                    lastError = error;
-                }
-            );
-
+            try {
+                await checkInToSystem(mrn, mrnSite, config.OPAL_CHECKIN_URL, source, sourceSystemID, "OPAL");
+                logger.log("verbose", `Success checking in to opal for PatientSerNum = ${patientSerNum} using ${mrn}-${mrnSite}`);
+                opal_success = true;
+            }catch(error){
+                logger.log("verbose", `Failed to check in to opal for PatientSerNum = ${patientSerNum} using ${mrn}-${mrnSite}; error: ${error}`);
+                lastError = error;
+            }
         }
         // If all success, get checked in appointments
         if (source_system_success && orms_success && opal_success) {
@@ -541,7 +536,7 @@ exports.checkIn = async function (requestObject) {
             await setCheckInUsername(requestObject, appSerNums);
             return appointments;
         }
-        else return [];
+        else throw lastError;
     }
     catch (error) {
         logger.log("error", "Uncaught error while processing a checkin request: ", {
