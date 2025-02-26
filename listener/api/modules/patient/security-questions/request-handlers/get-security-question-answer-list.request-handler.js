@@ -15,7 +15,6 @@ class GetSecurityQuestionAnswerListRequestHandler extends ApiRequestHandler{
 
         let activeSecurityQuestions;
         let securityQuestionList;
-        let apiResponse;
         let activeQuestionForLowerVersion = [];
         let securityQuestionForLowerVersion = [];
         let questionIdObj = {}
