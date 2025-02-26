@@ -1,6 +1,8 @@
 /**  Library Imports **/
 
 const admin = require("firebase-admin");
+const logger = require('../../logs/logger.js');
+
 
 // Function to create firebase account
 exports.createFirebaseAccount = async function (userEmail, userPassword) {
@@ -8,15 +10,22 @@ exports.createFirebaseAccount = async function (userEmail, userPassword) {
         email: userEmail,
         password: userPassword
     });
+    if (response?.uid) {
+        logger.log('debug',`Successfully created new firebase user account and this is the unique Id: ${response.uid}`);
+    }
     return response?.uid;
 };
 
 // Function to create firebase account
 exports.getFirebaseAccountByEmail = async function (userEmail) {
-    const response = await admin.auth().getUserByEmail(userEmail)
+    const response = await admin.auth().getUserByEmail(userEmail);
+    if (response?.uid) {
+        logger.log('debug', `Successfully got firebase user account and this is the unique Id: ${response.uid}`);
+    }
     return response?.uid;
 };
 
 exports.deleteFirebaseAccount = async function (uid) {
     await admin.auth().deleteUser(uid)
+    logger.log('debug', `Successfully delete the firebase account using passed uniqueID: ${uid}`);
 };
