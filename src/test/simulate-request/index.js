@@ -14,12 +14,11 @@ const legacyUtility = require('../../../listener/utility/utility');
 const EncryptionUtilities = require('../../encryption/encryption');
 const { REQUEST_TYPE } = require('../../const');
 
-const loggingBoolean = (process.env.FIREBASE_ENABLE_LOGGING === 'true');
 const firebaseConfig = {
     DATABASE_URL: process.env.FIREBASE_DATABASE_URL,
     ADMIN_KEY_PATH: process.env.FIREBASE_ADMIN_KEY_PATH,
     ROOT_BRANCH: process.env.FIREBASE_ROOT_BRANCH,
-    ENABLE_LOGGING: loggingBoolean,
+    ENABLE_LOGGING: process.env.FIREBASE_ENABLE_LOGGING === 'true',
 };
 
 class SimulateRequest {

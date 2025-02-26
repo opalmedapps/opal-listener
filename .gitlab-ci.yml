@@ -16,6 +16,7 @@ before_script:
   - npm ci --cache .npm --prefer-offline
   # Set up config files (currently no actual values are needed)
   - cp listener/config_template.json listener/config.json
+  # TODO: set up .env file from .env.sample?
 
 stages:
   - Static Analysis

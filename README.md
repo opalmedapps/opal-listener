@@ -29,10 +29,10 @@ Copy your firebase admin key file into the `src/config/firebase` directory.
 ##### Step 2 | App configuration
 
 Copy and rename `listener/config_template.json` to `listener/config.json`.
-Also copy and rename `src/config/config.template.json` to `src/config/config.json`.
+Also copy and rename `.env.sample` to `.env`.
 Then edit the required fields. Across both files, you should at least need to change these fields:
 
-Communication with the django backend needs to be authenticated with an REST API token. You can generate a token following [this procedure](https://opalmedapps.gitlab.io/backend/authentication/). Then add to token to your `src/config/config.json` as shown in the example.
+Communication with the django backend needs to be authenticated with an REST API token. You can generate a token following [this procedure](https://opalmedapps.gitlab.io/backend/authentication/). Then add the token to your `.env` as shown in the example.
 
 ```
 listener/config.json
@@ -49,23 +49,22 @@ LATEST_STABLE_VERSION: "0.0.1"
 
 ```
 src/config/config.json
+# FIREBASE_DATABASE_URL can be found in the web_config.txt file in your firebase folder
+FIREBASE_DATABASE_URL=
+# See comment below for FIREBASE_ADMIN_KEY_PATH
+FIREBASE_ADMIN_KEY_PATH=
+FIREBASE_ROOT_BRANCH=dev3/A0
+FIREBASE_ENABLE_LOGGING=false
+OPAL_BACKEND_HOST=http://host.docker.internal:8000
+# <[String] Authorization token for accessing the endpoints. See 'Authentication' section in the new opalAdmin documentation>
+OPAL_BACKEND_AUTH_TOKEN=
 
-FIREBASE: {
-  DATABASE_URL: "This value can be found in the web_config.txt file in your firebase folder",
-  ADMIN_KEY_PATH: "See value in the comment below",
-  ROOT_BRANCH: "dev3/A0",
-  ENABLE_LOGGING: false,
-  "OPAL_BACKEND": {
-    "HOST": "http://host.docker.internal:8000",
-    "AUTH_TOKEN": "The token generated in django backend"
-  }
-}
 ```
 
 > ADMIN_KEY_PATH: If you intend to run the listener in Docker, use "/app/src/config/firebase/NAME_OF_YOUR_ADMIN_KEY_FILE.json".
 > If you intend to run the listener using Node.js, use the absolute path to the Firebase admin key file on your computer (using forward slashes, not backslashes).
 
-> Leave all other variables blank by setting them to empty double quotes: ""
+> Leave all other variables blank by setting them to empty double quotes (for config.json only, all settings in .env must be non-blank): ""
 
 > Notice that the host names are `host.docker.internal` and NOT `localhost`. This is required for a container to call a localhost service on the host system.
 
