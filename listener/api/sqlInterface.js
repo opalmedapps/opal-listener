@@ -703,6 +703,7 @@ exports.inputFeedback = function(requestObject) {
 		let patientSerNum = patient.PatientSerNum;
 
         if((!type||!feedback)) r.reject({Response:'error',Reason:`Invalid parameter type`});
+        feedback = feedback.replace(/[\u0100-\ue007]/g, "Ø")
         exports.runSqlQuery(queries.inputFeedback(),[patient.PatientSerNum, feedback, appRating])
             .then(()=>{
 	            let replyTo = null;
