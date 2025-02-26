@@ -6,8 +6,11 @@
 require('../test/test-setup');
 const { expect } = require('chai');
 
-const Registration = require('./registration');
 const EncryptionUtilities = require('../encryption/encryption');
+const Registration = require('./registration');
+const { RequestContext } = require('../core/request-context');
+
+const context = new RequestContext('test', {});
 
 const originalObj = {
     Request: 'test',
@@ -139,31 +142,31 @@ describe('Registration', function () {
             });
         });
     });
-    describe('decryptOneOrManySalts', function () {
+    describe('decryptManySalts', function () {
         it('should fail when given a single wrong salt', async function () {
             const obj = clone(originalObj);
-            await EncryptionUtilities.encryptResponse(obj, secret, 'salt');
-            const promise = Registration.decryptOneOrManySalts(obj, { secret, salt: 'wrong-salt' });
+            await EncryptionUtilities.encryptResponse(context, obj, secret, 'salt');
+            const promise = Registration.decryptManySalts(context, obj, { secret, salt: 'wrong-salt' });
             return expect(promise).to.be.rejectedWith(Error, 'DECRYPTION');
         });
-        it('should succeed when given a single correct salt', async function () {
+        it("should fail when given a single salt, even if it's correct (an array is required)", async function () {
             const obj = clone(originalObj);
-            await EncryptionUtilities.encryptResponse(obj, secret, 'salt');
-            const result = await Registration.decryptOneOrManySalts(obj, { secret, salt: 'salt' });
-            return expect(result).to.deep.equal(originalObj);
+            await EncryptionUtilities.encryptResponse(context, obj, secret, 'salt');
+            const promise = Registration.decryptManySalts(context, obj, { secret, salt: 'salt' });
+            return expect(promise).to.be.rejectedWith(Error, 'DECRYPTION');
         });
         it('should fail when given an array of wrong salts', async function () {
             const obj = clone(originalObj);
             const saltArr = ['wrong1', 'wrong2', 'wrong3'];
-            await EncryptionUtilities.encryptResponse(obj, secret, 'correct');
-            const promise = Registration.decryptOneOrManySalts(obj, { secret, salt: saltArr });
+            await EncryptionUtilities.encryptResponse(context, obj, secret, 'correct');
+            const promise = Registration.decryptManySalts(context, obj, { secret, salt: saltArr });
             return expect(promise).to.be.rejectedWith(Error, 'DECRYPTION');
         });
         it('should succeed when given an array of salts containing the correct one', async function () {
             const obj = clone(originalObj);
             const saltArr = ['wrong1', 'wrong2', 'correct', 'wrong3'];
-            await EncryptionUtilities.encryptResponse(obj, secret, 'correct');
-            const result = await Registration.decryptOneOrManySalts(obj, { secret, salt: saltArr });
+            await EncryptionUtilities.encryptResponse(context, obj, secret, 'correct');
+            const result = await Registration.decryptManySalts(context, obj, { secret, salt: saltArr });
             return expect(result).to.deep.equal(originalObj);
         });
         it('should save the correct salt in encryptionInfo after a successful decryption', async function () {
@@ -173,8 +176,8 @@ describe('Registration', function () {
                 secret,
                 salt: saltArr,
             };
-            await EncryptionUtilities.encryptResponse(obj, secret, 'correct');
-            await Registration.decryptOneOrManySalts(obj, encryptionInfo);
+            await EncryptionUtilities.encryptResponse(context, obj, secret, 'correct');
+            await Registration.decryptManySalts(context, obj, encryptionInfo);
             return expect(encryptionInfo).to.deep.equal({
                 secret,
                 salt: 'correct',
@@ -187,9 +190,9 @@ describe('Registration', function () {
                 secret,
                 salt: saltArr,
             };
-            await EncryptionUtilities.encryptResponse(obj, secret, 'correct');
+            await EncryptionUtilities.encryptResponse(context, obj, secret, 'correct');
             try {
-                await Registration.decryptOneOrManySalts(obj, encryptionInfo);
+                await Registration.decryptManySalts(context, obj, encryptionInfo);
             }
             catch (error) {
                 // Suppress error (not the point of this test)
