@@ -42,10 +42,6 @@ exports.insertPatientHospitalIdentifier = function () {
     return "SELECT reg_insertPatientHospitalIdentifier(?,?,?) AS Result;";
 };
 
-exports.validatePatient = function () {
-    return "SELECT validatePatient(?) AS Result;";
-};
-
 exports.getSiteAndMrn = function() {
     return "SELECT PHI.MRN AS Mrn, PHI.Hospital_Identifier_Type_Code AS Site FROM Patient_Hospital_Identifier AS PHI INNER JOIN Patient AS P ON PHI.PatientSerNum = P.PatientSerNum AND P.SSN = ?;";
 };
