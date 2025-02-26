@@ -249,7 +249,6 @@ async function questionnaireUpdateStatus(requestObject) {
             [requestObject.Parameters.answerQuestionnaire_id],
         );
 
-        // TODO: make endpoint available for the listener (e.g, change listener permissions in backend)
         const requestParams = {
             Parameters: {
                 method: 'get',
