@@ -15,6 +15,7 @@ class SecurityDjango {
     static async getRandomSecurityQuestionAnswer(userId) {
         if (!userId) throw new Error('Cannot call API; no userId value provided');
         const requestParams = {
+            UserID: userId,
             Parameters: {
                 method: 'get',
                 url: `/api/caregivers/${userId}/security-questions/random/`,
@@ -38,6 +39,7 @@ class SecurityDjango {
      */
     static async getActiveSecurityQuestions() {
         const requestParams = {
+            UserID: userId,
             Parameters: {
                 method: 'get',
                 url: `/api/security-questions/`,
@@ -63,6 +65,7 @@ class SecurityDjango {
     static async getSpecificActiveSecurityQuestion(questionId) {
         if (!questionId) throw new Error('Cannot call API; no questionId value provided');
         const requestParams = {
+            UserID: userId,
             Parameters: {
                 method: 'get',
                 url: `/api/security-questions/${questionId}/`,
@@ -88,6 +91,7 @@ class SecurityDjango {
     static async getSecurityQuestionList(userId) {
         if (!userId) throw new Error('Cannot call API; no userId value provided');
         const requestParams = {
+            UserID: userId,
             Parameters: {
                 method: 'get',
                 url: `/api/caregivers/${userId}/security-questions/`,
@@ -115,6 +119,7 @@ class SecurityDjango {
         if (!userId) throw new Error('Cannot call API; no userId value provided');
         if (!questionId) throw new Error('Cannot call API; no questionId value provided');
         const requestParams = {
+            UserID: userId,
             Parameters: {
                 method: 'get',
                 url: `/api/caregivers/${userId}/security-questions/${questionId}/`,
@@ -141,6 +146,7 @@ class SecurityDjango {
         if (!userId) throw new Error('Cannot call API; no userId value provided');
         questionAnswerArr.forEach(function(questionAnswerObj) {
             const requestParams = {
+                UserID: userId,
                 Parameters: {
                     method: 'put',
                     url: `/api/caregivers/${userId}/security-questions/${questionAnswerObj.questionId}/`,
@@ -150,7 +156,7 @@ class SecurityDjango {
                     data: {
                         'question': questionAnswerObj.question,
                         'answer': questionAnswerObj.answer,
-                    }
+                    },
                 },
             };
             ApiRequest.makeRequest(requestParams);
