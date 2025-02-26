@@ -14,14 +14,14 @@ describe('Version', function () {
             const v1 = '1.2.3';
             const v2 = '1.-2.3';
             expect(() => Version.compareVersions(v1, v2)).to.throw(
-                'Version strings must contain only digits and dots',
+                'Version strings must be of format "major.minor.patch"',
             );
         });
         it('should fail if a version contains illegal characters', function () {
             const v1 = '1.2.a';
             const v2 = '0.0.0';
             expect(() => Version.compareVersions(v1, v2)).to.throw(
-                'Version strings must contain only digits and dots',
+                'Version strings must be of format "major.minor.patch"',
             );
         });
         it('should return -1 when v1 < v2 (small difference)', function () {
