@@ -385,6 +385,7 @@ function validateRequest(requestObject, requiredFields) {
 /**
  * @description getRegisterData.
  * @param {Object} requestObject - The calling request's requestObject.
+ * @param {int} legacy_id - legacy patient id.
  * @returns {Object} registerData {
         patient: {
 	 		legacy_id: int
@@ -432,15 +433,17 @@ function getRegisterData(requestObject, legacy_id) {
 /**
  * @description insert patient with request parameters.
  * @param {Object} requestObject - The calling request's requestObject.
+ * @param {Object} patient - patient object.
+ * @param {Object} hospitalPatient - hospital patient object.
  * @returns {patientSerNum}
  */
-async function insertPatient(requestObject, patient, hospital_patient) {
+async function insertPatient(requestObject, patient, hospitalPatient) {
     if (!patient) {
         const registrationCode = requestObject.Parameters.Fields.registrationCode;
         throw `Failed to insert Patient to legacyDB due to Patient not exists with registrationCode: ${registrationCode}`;
     }
-    requestObject.Parameters.Fields.mrn = hospital_patient.mrn;
-    requestObject.Parameters.Fields.site = hospital_patient.site_code;
+    requestObject.Parameters.Fields.mrn = hospitalPatient.mrn;
+    requestObject.Parameters.Fields.site = hospitalPatient.site_code;
     requestObject.Parameters.Fields.firstName = patient.first_name;
     requestObject.Parameters.Fields.lastName = patient.last_name;
     requestObject.Parameters.Fields.sex = patient.sex;
@@ -451,6 +454,8 @@ async function insertPatient(requestObject, patient, hospital_patient) {
 /**
  * @description insert patient hospital indetifier with request parameters.
  * @param {Object} requestObject - The calling request's requestObject.
+ * @param {Object} hospitalPatient - hospitalPatient object.
+ * @param {int} patientSerNum - legacy patient id.
  * @returns {void}
  */
 async function insertPatientHospitalIdentifier(requestObject, hospitalPatient, patientSerNum) {
