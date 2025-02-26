@@ -789,7 +789,6 @@ exports.addToActivityLog=function(requestObject)
     let r = Q.defer();
 
     let {Request, UserID, DeviceId, AppVersion, TargetPatientID, Parameters} = requestObject;
-
     if (typeof Request === "undefined") Request = requestObject.type;
     if (typeof UserID === "undefined") UserID = requestObject.meta.UserID;
     if (typeof DeviceId === "undefined") DeviceId = requestObject.meta.DeviceId;
@@ -798,7 +797,7 @@ exports.addToActivityLog=function(requestObject)
     if (typeof Parameters === "undefined") Parameters = requestObject.params || requestObject.parameters;
 
     if (omitParametersFromLogs.hasOwnProperty(Request) && omitParametersFromLogs[Request](Parameters)) Parameters = 'OMITTED';
-    else Parameters = Parameters === 'undefined' ? null : JSON.stringify(Parameters);
+    else Parameters = Parameters === 'undefined' ? undefined : JSON.stringify(Parameters);
 
     // Ignore LogPatientAction to avoid double-logging --> Refer to table PatientActionLog
     if (Request !== "LogPatientAction") {
