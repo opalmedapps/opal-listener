@@ -365,8 +365,7 @@ exports.getPatientForPatientMembers = function() {
  * @date 2021-02-26
  * @returns {string}
  */
-exports.getMRNs = function()
-{
+exports.getMRNs = function() {
     return `
         SELECT PHI.MRN, PHI.Hospital_Identifier_Type_Code FROM Patient_Hospital_Identifier PHI
         WHERE PHI.PatientSerNum = ?

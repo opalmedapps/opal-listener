@@ -491,10 +491,9 @@ function getCheckedInAppointments(patientSerNum){
  * @author Stacey Beard
  * @date 2021-02-26
  * @param patientSerNum
- * @returns {Promise<*>} Rows with the patient's MRN information (multiple MRNs)
+ * @returns {Promise<*>} Rows with the patient's MRN information (multiple MRNs).
  */
-async function getMRNs(patientSerNum)
-{
+async function getMRNs(patientSerNum) {
     let rows = await exports.runSqlQuery(queries.getMRNs(), [patientSerNum]);
 
     if (rows.length === 0) throw "No MRN found for PatientSerNum "+patientSerNum+" in Patient_Hospital_Identifier";
