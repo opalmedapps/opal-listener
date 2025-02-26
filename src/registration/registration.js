@@ -7,9 +7,14 @@ const config = require('../config/config.json');
 
 const regCache = new Keyv({ namespace: 'registration' });
 regCache.on('error', err => legacyLogger.log('error', err)); // default keyv error handling
-
 class Registration {
     static async getEncryptionValues(snapshot) {
+        // We bind the snapshot branch name to dedicated salt and secret keys for this regCache instance
+        // This allows to keep a dedicated datacache for each unique registration code hash
+        const instanceSalt = `salt-${snapshot.BranchName}`;
+        const instanceSecret = `secret-${snapshot.BranchName}`;
+
+        // Declare keyv instance linked to the specific patient branch
         const requestParams = {
             Parameters: {
                 method: 'get',
@@ -20,23 +25,38 @@ class Registration {
             },
         };
         // Retrieve encryption values from memory if TTL has not been reached
-        if (!await regCache.get('salt') && !await regCache.get('secret')) {
+        if (!await regCache.get(instanceSalt) && !await regCache.get(instanceSecret)) {
             legacyLogger.log('info', 'Registration encryption datacache TTL expired; fetching new data');
             const response = await ApiRequest.makeRequest(requestParams);
-            await regCache.set('salt', response.data.patient.ramq, config.DATA_CACHE_TIME_TO_LIVE_MINUTES * 60 * 1000);
-            await regCache.set('secret', response.data.code, config.DATA_CACHE_TIME_TO_LIVE_MINUTES * 60 * 1000);
+            await regCache.set(
+                instanceSalt,
+                response.data.patient.ramq,
+                config.DATA_CACHE_TIME_TO_LIVE_MINUTES * 60 * 1000,
+            );
+            await regCache.set(
+                instanceSecret,
+                response.data.code,
+                config.DATA_CACHE_TIME_TO_LIVE_MINUTES * 60 * 1000,
+            );
         }
         else {
             legacyLogger.log('info', 'Loading registration encryption data from cache and resetting ttl');
-            await regCache.set('salt', await regCache.get('salt'), config.DATA_CACHE_TIME_TO_LIVE_MINUTES * 60 * 1000);
-            // eslint-disable-next-line max-len
-            await regCache.set('secret', await regCache.get('secret'), config.DATA_CACHE_TIME_TO_LIVE_MINUTES * 60 * 1000);
+            await regCache.set(
+                instanceSalt,
+                await regCache.get(instanceSalt),
+                config.DATA_CACHE_TIME_TO_LIVE_MINUTES * 60 * 1000,
+            );
+            await regCache.set(
+                instanceSecret,
+                await regCache.get(instanceSecret),
+                config.DATA_CACHE_TIME_TO_LIVE_MINUTES * 60 * 1000,
+            );
         }
         // TODO handle decryption using MRNs
         // https://o-hig.atlassian.net/browse/QSCCD-427
         return {
-            salt: await regCache.get('salt'), // .health_insurance_number
-            secret: await regCache.get('secret'),
+            salt: await regCache.get(instanceSalt),
+            secret: await regCache.get(instanceSecret),
         };
     }
 }
