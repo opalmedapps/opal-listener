@@ -8,6 +8,7 @@ const Registration = require('../registration/registration');
 const ApiRequest = require('./api-request');
 const ErrorHandler = require('../error/handler');
 const { Firebase } = require('../firebase/firebase');
+const { REQUEST_TYPE } = require('../const');
 
 class RequestHandler {
     /**
@@ -77,14 +78,14 @@ class RequestHandler {
     }
 
     /**
-     * @description Get encrytion values according to type fo request
+     * @description Get encryption values according to type of request
      * @param {object} snapshot Firebase data snapshot.
      * @param {string} requestType Type of request between "api" or "registration".
      * @returns {object} Encryption required values
      */
     static async getEncryptionInfo(snapshot, requestType) {
-        if (requestType === 'registration-api') {
-            return Registration.getEncryptionValue(snapshot.val());
+        if (requestType === REQUEST_TYPE.REGISTRATION) {
+            return Registration.getEncryptionValues(snapshot.val());
         }
 
         return {
@@ -125,7 +126,7 @@ class RequestHandler {
      */
     async sendResponse(encryptedResponse, firebaseRequestKey, userId, requestType) {
         legacyLogger.log('debug', 'API: Sending response to Firebase');
-        const path = (requestType === 'registration-api')
+        const path = (requestType === REQUEST_TYPE.REGISTRATION)
             ? `users/${firebaseRequestKey}`
             : `users/${userId}/${firebaseRequestKey}`;
         await this.#databaseRef.child(path).set(encryptedResponse);

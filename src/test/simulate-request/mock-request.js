@@ -31,10 +31,10 @@ const requestDataApi = {
  */
 const registrationRequest = {
     Request: 'registration-api',
-    BranchName: 'A0pt84n5hBzS',
+    BranchName: 'code12345678',
     Parameters: {
         method: 'get',
-        url: '/api/registration',
+        url: '/api/registration/by-hash/',
         headers: {
             'Content-Type': 'application/json',
             'Accept-Language': 'fr',

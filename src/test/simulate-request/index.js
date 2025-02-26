@@ -13,6 +13,7 @@ const legacyLogger = require('../../../listener/logs/logger');
 const legacyOpalSqlRunner = require('../../../listener/sql/opal-sql-query-runner');
 const legacyUtility = require('../../../listener/utility/utility');
 const EncryptionUtilities = require('../../encryption/encryption');
+const { REQUEST_TYPE } = require('../../const');
 
 class SimulateRequest {
     /**
@@ -39,7 +40,7 @@ class SimulateRequest {
      * Type of request to send to either legacy using 'request',
      * registration using 'registration-api' or new structure using 'api' which is the default value.
      */
-    #requestType = 'api';
+    #requestType = REQUEST_TYPE.API;
 
     /**
      * @param {object} requestData  Mock request to be encrypt and upload to firebase. Simulate a app request
@@ -55,7 +56,7 @@ class SimulateRequest {
         this.#config = config;
         this.#requestData = requestData;
         this.#requestData.Timestamp = Firebase.getDatabaseTimeStamp;
-        if (this.#requestData.Request === 'registration-api') this.#requestType = 'registration-api';
+        if (this.#requestData.Request === REQUEST_TYPE.REGISTRATION) this.#requestType = REQUEST_TYPE.REGISTRATION;
         this.makeRequest();
     }
 
@@ -69,7 +70,7 @@ class SimulateRequest {
     async makeRequest() {
         this.#config.FIREBASE.ADMIN_KEY_PATH = await SimulateRequest.getFirebaseAdminKey();
         await this.initFirebase();
-        if (this.#requestData.Request === 'registration-api') {
+        if (this.#requestData.Request === REQUEST_TYPE.REGISTRATION) {
             await this.encryptRegistrationRequest();
         }
         else {
@@ -179,6 +180,6 @@ class SimulateRequest {
 }
 
 // Create a new instance with a default mock request to be able to run the script via a npm command
-new SimulateRequest(DefaultRequestData.requestDataApi);
+new SimulateRequest(DefaultRequestData.registrationRequest);
 
 exports.SimulateRequest = SimulateRequest;
