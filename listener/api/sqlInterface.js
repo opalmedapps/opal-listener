@@ -463,7 +463,12 @@ exports.checkIn = async function (requestObject) {
             }
             // Check whether the check-in call succeeded, or all attempts failed
             // On a success, return all checked-in appointments to the app
-            if (success) return await getCheckedInAppointments(patientSerNum);
+            if (success) {
+                let rows = await getCheckedInAppointments(patientSerNum);
+                // Set CheckinUsername for all checked-in appointments
+                await setCheckInUserName(requestObject, rows);
+                return rows;
+            }
             else throw lastError;
         }
         else return [];
@@ -545,6 +550,17 @@ async function getMRNs(patientSerNum) {
 
     if (rows.length === 0) throw "No MRN found for PatientSerNum "+patientSerNum+" in Patient_Hospital_Identifier";
     else return rows;
+}
+
+/**
+ * @description Set CheckinUsername for all checked-in appointments.
+ * @author Shifeng Chen
+ * @date 2023-01-04
+ * @param requestObject
+ * @param AppointmentSerNumArray
+ */
+async function setCheckInUserName(requestObject, AppointmentSerNumArray) {
+    await exports.runSqlQuery(queries.setCheckInUserName(), [requestObject.UserID, AppointmentSerNumArray]);
 }
 
 /**
