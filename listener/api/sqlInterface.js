@@ -68,6 +68,7 @@ const requestMappings =
         'Appointments': {
             sql: queries.patientAppointmentsAll(),
             sqlSingleItem: queries.patientAppointmentsOne(),
+            processFunction: supportLegacyAppointmentResource,
             numberOfLastUpdated: 4,
             table: 'Appointment',
             serNum: 'AppointmentSerNum',
@@ -286,7 +287,7 @@ exports.updateReadStatus = function(userId, parameters)
                 logger.log('info', `Implicitly marking ${notificationType} notification as read.`);
                 await exports.runSqlQuery(
                     queries.implicitlyReadNotification(),
-                    [userId, userId, parameters.Id, parameters.TargetPatientID, notificationType],
+                    [userId, `"${userId}"`, parameters.Id, parameters.TargetPatientID, notificationType],
                 );
             }
             r.resolve({Response:'success'});
@@ -1048,6 +1049,24 @@ function loadProfileImagePatient(rows){
     }
 
     return deferred.promise;
+}
+
+/**
+ * @description [Temporary compatibility with 1.12.2] The old app expects appointments to have a Resource attribute.
+ *              Adds a mock Resource object to each appointment to prevent crashes at login using app version 1.12.2.
+ * @deprecated
+ * @param rows Appointment rows queried using requestMappings above.
+ * @returns {*} A copy of the rows, each with an added Resource object attribute.
+ */
+async function supportLegacyAppointmentResource(rows) {
+    return rows.map(row => {
+        return {
+            ...row,
+            Resource: {
+                LegacyCompatibility: 'Added for temporary compatibility with app version 1.12.2.',
+            },
+        }
+    });
 }
 
 //Obtains educational material table of contents

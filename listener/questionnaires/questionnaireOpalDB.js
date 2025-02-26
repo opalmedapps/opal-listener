@@ -283,21 +283,26 @@ async function questionnaireUpdateStatus(requestObject) {
             };
         }
 
-        let usernames = [];
-        response.data?.caregivers.forEach((caregiver) => usernames.push(`${caregiver['username']}`));
+        // Update Notification table ReadBy and ReadStatus for each caregiver and the patient
+        // Business rule: Notification gets cleared for all users when one of them starts the questionnaire.
+        response.data?.caregivers.forEach(async (caregiver) => {
+            const username = caregiver['username'];
+            try {
+                await OpalSQLQueryRunner.run(
+                    opalQueries.implicitlyReadNotification(),
+                    [
+                        username,
+                        `"${username}"`, // Double quotes needed only for the JSON_CONTAINS function
+                        questionnaire[0]['QuestionnaireSerNum'],
+                        patientSerNum,
+                        "LegacyQuestionnaire",
+                    ],
+                );
+            } catch (error) {
+                console.error("Failed to append username:", username, "Error:", error);
+            }
+        });
 
-        let readBy = usernames.join(', ');
-
-        await OpalSQLQueryRunner.run(
-            opalQueries.implicitlyReadNotification(),
-            [
-                readBy,
-                readBy,
-                questionnaire[0]['QuestionnaireSerNum'],
-                patientSerNum,
-                "LegacyQuestionnaire",
-            ],
-        );
 
         return {
             Response: 'success',

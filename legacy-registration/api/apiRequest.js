@@ -7,6 +7,7 @@ const logger = require('../logs/logger.js');
 const API = {
     'RegisterPatient': apiFunctionRequest.registerPatient,
     'CheckEmailExistsInFirebase': apiFunctionRequest.checkEmailExistsInFirebase,
+    'IsCaregiverAlreadyRegistered': apiFunctionRequest.isCaregiverAlreadyRegistered,
 };
 
 /**
