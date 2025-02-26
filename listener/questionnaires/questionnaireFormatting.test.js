@@ -94,6 +94,9 @@ describe('QuestionnaireFormatting', function () {
         });
     });
     describe('filterByRespondent', function() {
+        afterEach(function() {
+            clearStub();
+        });
         it('should filter out everything if the user is "self" and cannot answer patient questionnaires', async function() {
             stubRelationship(false, SELF);
             let list = [
@@ -101,7 +104,6 @@ describe('QuestionnaireFormatting', function () {
                 questionnaire(2, CAREGIVER),
             ];
             const filteredList = await format.filterByRespondent(list, "test", 51);
-            clearStub();
             expect(filteredList).to.have.deep.members([]);
         });
         it('should filter out caregiver questionnaires if the user is "self" and can answer patient questionnaires', async function() {
@@ -111,7 +113,6 @@ describe('QuestionnaireFormatting', function () {
                 questionnaire(2, CAREGIVER),
             ];
             const filteredList = await format.filterByRespondent(list, "test", 51);
-            clearStub();
             expect(filteredList).to.have.deep.members([
                 questionnaire(1, PATIENT),
             ]);
@@ -123,7 +124,6 @@ describe('QuestionnaireFormatting', function () {
                 questionnaire(2, CAREGIVER),
             ];
             const filteredList = await format.filterByRespondent(list, "test", 51);
-            clearStub();
             expect(filteredList).to.have.deep.members([
                 questionnaire(2, CAREGIVER),
             ]);
@@ -135,7 +135,6 @@ describe('QuestionnaireFormatting', function () {
                 questionnaire(2, CAREGIVER),
             ];
             const filteredList = await format.filterByRespondent(list, "test", 51);
-            clearStub();
             expect(filteredList).to.have.deep.members([
                 questionnaire(1, PATIENT),
                 questionnaire(2, CAREGIVER),
