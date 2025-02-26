@@ -124,7 +124,7 @@ class EncryptionUtilities {
     /**
      * @description SQL query to get security question hash used for encryption and decryption
      * @param {string} userId ID used to retrive salt.
-     * @param {string} deviceId Device of the ID use to make the request.
+     * @param {string} deviceId ID of the device use to make the request.
      * @returns {string} Security question hash.
      */
     static async getAnswerText(userId, deviceId) {
