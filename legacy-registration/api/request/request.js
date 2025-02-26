@@ -151,7 +151,6 @@ class opalRequest {
 		};
 		logger.log('info', 'Calling API to register patient in the backend', url)
 		const response = await this.axiosApi(requestParams);
-        console.log(response);
 		return response.data;
 	}
 
