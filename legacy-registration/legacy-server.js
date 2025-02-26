@@ -1,6 +1,6 @@
 // SPDX-FileCopyrightText: Copyright 2016 Opal Health Informatics Group <info@opalmedapps.tld>
 //
-// SPDX-License-Identifier: Apache-2.0
+// SPDX-License-Identifier: AGPL-3.0-or-later
 
 // This script listens for changes on registration/ in firebase, reads those changes and writes a response back to firebase.
 

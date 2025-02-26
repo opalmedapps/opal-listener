@@ -1,6 +1,6 @@
 // SPDX-FileCopyrightText: Copyright 2023 Opal Health Informatics Group <info@opalmedapps.tld>
 //
-// SPDX-License-Identifier: Apache-2.0
+// SPDX-License-Identifier: AGPL-3.0-or-later
 
 /**
  * @file Makes and interprets API calls to the Django backend, to get information used in the Questionnaire module.

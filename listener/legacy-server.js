@@ -1,7 +1,7 @@
 // Copyright    :   Copyright 2016, HIG, All rights reserved.
 // SPDX-FileCopyrightText: Copyright 2015 Opal Health Informatics Group <info@opalmedapps.tld>
 //
-// SPDX-License-Identifier: Apache-2.0
+// SPDX-License-Identifier: AGPL-3.0-or-later
 
 /**
  * This script listens for changes to config.FIREBASE_ROOT_BRANCH in firebase, reads those changes and

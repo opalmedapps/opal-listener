@@ -1,6 +1,6 @@
 // SPDX-FileCopyrightText: Copyright 2022 Opal Health Informatics Group <info@opalmedapps.tld>
 //
-// SPDX-License-Identifier: Apache-2.0
+// SPDX-License-Identifier: AGPL-3.0-or-later
 
 /**
  * @description Contains contants use to handle error from Django backend, legacy-listener, and new listerner structure.

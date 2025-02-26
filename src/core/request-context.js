@@ -1,6 +1,6 @@
 // SPDX-FileCopyrightText: Copyright 2024 Opal Health Informatics Group <info@opalmedapps.tld>
 //
-// SPDX-License-Identifier: Apache-2.0
+// SPDX-License-Identifier: AGPL-3.0-or-later
 
 const legacyLogger = require('../../listener/logs/logger');
 const { REQUEST_TYPE } = require('../const');

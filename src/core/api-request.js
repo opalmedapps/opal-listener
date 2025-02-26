@@ -1,6 +1,6 @@
 // SPDX-FileCopyrightText: Copyright 2022 Opal Health Informatics Group <info@opalmedapps.tld>
 //
-// SPDX-License-Identifier: Apache-2.0
+// SPDX-License-Identifier: AGPL-3.0-or-later
 
 /**
  * @file relay request uploaded to firebase by the app to the Django backend.

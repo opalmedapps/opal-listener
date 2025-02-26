@@ -1,6 +1,6 @@
 // SPDX-FileCopyrightText: Copyright 2024 Opal Health Informatics Group <info@opalmedapps.tld>
 //
-// SPDX-License-Identifier: Apache-2.0
+// SPDX-License-Identifier: AGPL-3.0-or-later
 
 /**
  * @description Manages caching for the output of encryption key derivation functions (such as PBKDF2).

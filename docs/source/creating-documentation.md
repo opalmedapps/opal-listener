@@ -1,7 +1,7 @@
 <!--
 SPDX-FileCopyrightText: Copyright 2022 Opal Health Informatics Group <info@opalmedapps.tld>
 
-SPDX-License-Identifier: Apache-2.0
+SPDX-License-Identifier: AGPL-3.0-or-later
 -->
 
 Documentation pages made for JSDoc are called "Tutorials", and can be created in a variety of formats, including `.md`.
