@@ -340,22 +340,17 @@ exports.getUserPatient = async function(requestObject) {
  * @param {object} requestObject
  * @returns {promise}
  */
-exports.getStudies = function(requestObject) {
-    let r = Q.defer();
+exports.getStudies = async function(requestObject) {
+    try {
+        let rows = await exports.runSqlQuery(queries.patientStudyTableFields(), [requestObject.UserID]);
 
-    exports.runSqlQuery(queries.patientStudyTableFields(), [requestObject.UserID])
-        .then((rows) => {
-            for (var j = 0; j < rows.length; j++) {
-                rows[j].consentStatus = studiesConfig.STUDY_CONSENT_STATUS_MAP[rows[j].consentStatus];
-            }
+        rows.forEach(
+            (row, id, arr) => arr[id].consentStatus = studiesConfig.STUDY_CONSENT_STATUS_MAP[arr[id].consentStatus]
+        );
 
-            r.resolve({Response: 'success', Data: rows});
-        })
-        .catch((err) => {
-            r.reject({Response: 'error', Reason: err});
-        });
-
-    return r.promise;
+        return {Response: 'success', Data: rows};
+    }
+    catch (error) { throw {Response: 'error', Reason: error}; }
 };
 
 /**
@@ -364,18 +359,16 @@ exports.getStudies = function(requestObject) {
  * @param {object} requestObject
  * @returns {promise}
  */
-exports.getStudyQuestionnaires = function(requestObject) {
-    let r = Q.defer();
+exports.getStudyQuestionnaires = async function(requestObject) {
+    try {
+        let rows = await exports.runSqlQuery(
+            queries.getStudyQuestionnairesQuery(),
+            [requestObject.Parameters.studyID]
+        );
 
-    exports.runSqlQuery(queries.getStudyQuestionnairesQuery(), [requestObject.Parameters.studyID])
-        .then((rows) => {
-            r.resolve({Response: 'success', Data: rows});
-        })
-        .catch((err) => {
-            r.reject({Response: 'error', Reason: err});
-        });
-
-    return r.promise;
+        return {Response: 'success', Data: rows};
+    }
+    catch (error) { throw {Response: 'error', Reason: error}; }
 };
 
 /**
@@ -384,35 +377,29 @@ exports.getStudyQuestionnaires = function(requestObject) {
  * @param {object} requestObject
  * @return {Promise}
  */
-exports.studyUpdateStatus = function(requestObject)
-{
-    let r = Q.defer();
+exports.studyUpdateStatus = async function(requestObject) {
+    try {
+        let parameters = requestObject.Parameters;
 
-    let parameters = requestObject.Parameters;
+        if (parameters && parameters.questionnaire_id && parameters.status) {
+            // get number corresponding to consent status string
+            let statusNumber = Object.keys(
+                studiesConfig.STUDY_CONSENT_STATUS_MAP
+            ).find(
+                key => studiesConfig.STUDY_CONSENT_STATUS_MAP[key] === parameters.status
+            );
 
-    if (parameters && parameters.questionnaire_id && parameters.status) {
-        // get number corresponding to consent status string
-        let statusNumber = Object.keys(
-            studiesConfig.STUDY_CONSENT_STATUS_MAP
-        ).find(
-            key => studiesConfig.STUDY_CONSENT_STATUS_MAP[key] === parameters.status
-        );
+            await exports.runSqlQuery(
+                queries.updateConsentStatus(),
+                [statusNumber, parameters.questionnaire_id, requestObject.UserID]
+            );
 
-        exports.runSqlQuery(
-            queries.updateConsentStatus(),
-            [statusNumber, parameters.questionnaire_id, requestObject.UserID]
-        ).then(() => {
-            r.resolve({Response: 'success'});
-        })
-        .catch((err)=>{
-            r.reject({Response: 'error', Reason: err});
-        });
-
-    } else {
-        r.reject({Response: 'error', Reason: 'Invalid parameters'});
+            return {Response: 'success'};
+        } else {
+            throw {Response: 'error', Reason: 'Invalid parameters'};
+        }
     }
-
-    return r.promise;
+    catch (error) { throw {Response: 'error', Reason: error}; }
 };
 
 /**
