@@ -454,10 +454,8 @@ exports.userEncryption=function()
     return `SELECT
                 pdi.SecurityAnswer as AnswerText
             FROM
-                Users u,
                 PatientDeviceIdentifier pdi
-            WHERE u.Username = ?
-                AND pdi.Username = u.Username
+            WHERE pdi.Username = ?
                 AND pdi.DeviceId = ?
             ;`;
 };
