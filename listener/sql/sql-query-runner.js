@@ -52,10 +52,24 @@ class SQLQueryRunner {
 	 * @returns {Promise<any>} Returns a promise with the results from the query
 	 */
 	run(query, parameters = null, postProcessor = null) {
+        let allowedTypes = ['string', 'number', 'boolean', 'bigint', 'undefined'];
+
 		let dbName = this.#DB_CREDENTIALS.database;
 		let connectionErrorMsg = `Failed to connect to database ${dbName}`;
 
 		return new Promise((resolve, reject) => {
+            // Reject value types that are different than string, number, boolean, bigint, or undefined
+            if (parameters) {
+                for (const [key, value] of Object.entries(parameters)) {
+                    let fieldType = typeof value;
+                    // Check if the field's type is in the list of allowed types
+                    if (!allowedTypes.includes(fieldType)) {
+                        logger.log('error', `${key} field has ${fieldType} type which is not allowed.`);
+                        reject('An error occurred while processing the request.');
+                        return;
+                    }
+                }
+            }
 			this.#SQL_QUERY_POOL.getConnection(function (err, connection) {
 				logger.log('debug', `Grabbed SQL connection to ${dbName}: ${connection}, `
 					+ `with SSL ${ENVIRONMENT.DATABASE_USE_SSL === '1' ? 'enabled': 'disabled'}`);
