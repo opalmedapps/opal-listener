@@ -232,7 +232,7 @@ function postPromise(options) {
 function deleteFirebaseBranch(parameter) {
 
     const db = admin.database();
-    const ref = db.ref(config.firebaseBranch.parentBranch + '/' + config.firebaseBranch.firebaseChildBranch + '/' + parameter);
+    const ref = db.ref(config.FIREBASE_ROOT_BRANCH + '/branch/' + parameter);
 
     return ref.once("value", function (snapshot) {
         if (snapshot.exists()) {

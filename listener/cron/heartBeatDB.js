@@ -4,7 +4,7 @@
  *
  * NOTE: This is copy from the original heartbeat.js on 2017-11-29
  * Important : Do not forget to change "/dev3" back to "/dev2" before merging. [Done]
- * 
+ *
  */
 
 "use strict";
@@ -75,7 +75,7 @@ const dbQuery = "call mysql.my_memory();";
  * "const config = require('./../config-adaptor');" at the top
  ******************************/
 var conn = mysql.createConnection({
-	host: config.HOST,
+	host: config.MYSQL_DATABASE_HOST,
 	user: config.MYSQL_USERNAME,
 	password: config.MYSQL_PASSWORD,
 	database: config.MYSQL_DATABASE
@@ -101,7 +101,7 @@ init();
 /**
  * @name init
  * @desc initialize the heartbeat DB
- * 
+ *
  * The intervals are in ms, so 30000 is 30 seconds
  */
 function init(){
@@ -138,7 +138,7 @@ function submitSimpleQuery(){
 			// if no error, push MySQL stats to Firebase
 			ref.push({Timestamp: n, response: rows[0]}); //  The [0] will exclude the result set (fieldcount, affectedRows, insertId, etc...)
 			logger.log('info', 'Results : ', {Timestamp: n, response: rows[0]}); // Log the result in the regular log
-			
+
 			// Log the results to the heart beat DB logs
 			// NOTE: The logs are manage by using the  logrotate to control the settings of the log
 			fs.appendFile(filename, JSON.stringify(rows[0])  + "\n", function (err) {
@@ -147,7 +147,7 @@ function submitSimpleQuery(){
 					logger.log('error', err);
 			  }
 			});
-			
+
 			r.resolve(rows);
 			// ref.remove(); // Remove reference from firebase
 		}
@@ -171,7 +171,7 @@ function startHeartBeatDB(){
     ref.push(request)
         .then(()=>{
 			// ref.remove(); // Remove reference from firebase
-			
+
 			// call a function to retrieve basic stats from MySQL
 			submitSimpleQuery()
 				.then(()=> logger.log('info',  'Finished simple query'))

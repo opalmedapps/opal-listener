@@ -49,7 +49,7 @@ exports.setFirebaseConnection = setFirebaseConnection;
 
 function listenForRequest(requestType) {
     logger.log('info', 'Starting registration/' + requestType + ' listener.');
-    console.log(ref.child(requestType).toString())
+
     ref.child(requestType).on('child_added',
         function (snapshot) {
             logger.log('debug', 'Received request from Firebase: ', JSON.stringify(snapshot.val()));
@@ -171,9 +171,7 @@ function uploadToFirebase(response, key) {
                 const userId = headers.RequestObject.UserID;
                 const responseBranchId = headers.RequestObject.BranchName;
 
-                console.log(config);
-
-                responsePath = config.firebaseBranch.responseChildBranch + '/' + requestKey;
+                responsePath = 'users/' + requestKey;
 
                 logger.log('debug', 'Firebase response branch: ' + responsePath);
             }

@@ -11,8 +11,8 @@ var exports = module.exports = {};
 /** OPAL DATABASE CONFIGURATIONS **/
 const opaldbCredentials = {
     connectionLimit: 10,
-    host: config.HOST,
-    port: config.PORT,
+    host: config.MYSQL_DATABASE_HOST,
+    port: config.MYSQL_DATABASE_PORT,
     user: config.MYSQL_USERNAME,
     password: config.MYSQL_PASSWORD,
     database: config.MYSQL_OPAL_DATABASE,
@@ -22,8 +22,8 @@ const opaldbCredentials = {
 /**  REGISTRATION DATABASE CONFIGURATIONS **/
 const registerdbCredentials = {
     connectionLimit: 10,
-    host: config.HOST,
-    port: config.PORT,
+    host: config.MYSQL_DATABASE_HOST,
+    port: config.MYSQL_DATABASE_PORT,
     user: config.MYSQL_USERNAME,
     password: config.MYSQL_PASSWORD,
     database: config.MYSQL_REGISTRATION_DATABASE,
