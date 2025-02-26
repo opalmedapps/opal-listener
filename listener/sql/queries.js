@@ -29,7 +29,6 @@ exports.patientTableFieldsForUser = function() {
                 Users u
             WHERE u.Username = ?
                 AND u.UserTypeSerNum = p.PatientSerNum
-                AND u.UserType = 'Patient'
             ;`
 };
 
@@ -346,7 +345,6 @@ exports.getUserPatientSecurityInfo = function() {
                 AND pdi.DeviceId = ?
                 AND pdi.Username = u.Username
                 AND u.UserTypeSerNum = pat.PatientSerNum
-                AND u.UserType = 'Patient'
             ;`;
 };
 

@@ -57,9 +57,10 @@ exports.insertDummyPatient = async function (firstName, lastName, email, languag
  * @param {string} username The user's Firebase username.
  * @param {string} password The user's password, hashed.
  * @param {number} patientSerNum The user's "self" PatientSerNum in the database.
+ * @param {string} userType The user's type (Patient or Caregiver).
  */
-exports.insertUser = async function (username, password, patientSerNum) {
-    let result = await exports.runOpaldbSqlQuery(queries.insertUser(), [patientSerNum, username, password]);
+exports.insertUser = async function (username, password, patientSerNum, userType) {
+    let result = await exports.runOpaldbSqlQuery(queries.insertUser(), [userType, patientSerNum, username, password]);
     if (!result?.insertId) throw "Failed to insert user record; no insertId was returned";
     return result.insertId;
 }

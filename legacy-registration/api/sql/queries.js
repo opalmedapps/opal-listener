@@ -12,7 +12,7 @@ exports.insertDummyPatient = () => {
 
 exports.insertUser = () => {
     return `INSERT INTO Users (UserType, UserTypeSerNum, Username, Password, SessionId)
-            VALUES ('Patient', ?, ?, ?, '');
+            VALUES (?, ?, ?, ?, '');
     `;
 };
 

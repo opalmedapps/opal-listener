@@ -281,8 +281,11 @@ async function initializeOrGetSelfPatient(requestObject, registrationData, patie
  */
 async function initializeOrGetUser(registrationData, uid, password, selfPatientSerNum) {
     const isNewCaregiver = registrationData.caregiver.legacy_id === null;
+    const isSelfRegistration = registrationData.relationship_type.role_type === "SELF";
+    const userType = isSelfRegistration ? 'Patient' : 'Caregiver';
+
     let userSerNum;
-    if (isNewCaregiver) userSerNum = await sqlInterface.insertUser(uid, password, selfPatientSerNum);
+    if (isNewCaregiver) userSerNum = await sqlInterface.insertUser(uid, password, selfPatientSerNum, userType);
     else userSerNum = registrationData.caregiver.legacy_id;
     return userSerNum;
 }
