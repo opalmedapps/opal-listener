@@ -149,11 +149,9 @@ pages:
 firebase rules demo:
   extends: .firebase rules
   rules:
-    # TODO testing
-    - when: always
-#    - if: $CI_COMMIT_BRANCH == $CI_DEFAULT_BRANCH
-#      changes:
-#        - firebase/demo/database.rules.json
+    - if: $CI_COMMIT_BRANCH == $CI_DEFAULT_BRANCH
+      changes:
+        - firebase/demo/database.rules.json
   environment:
     name: demo
   script:
@@ -177,11 +175,9 @@ firebase rules dev:
 firebase rules devops:
   extends: .firebase rules
   rules:
-    # TODO testing
-    - when: always
-  #    - if: $CI_COMMIT_BRANCH == $CI_DEFAULT_BRANCH
-  #      changes:
-  #        - firebase/demo/database.rules.json
+    - if: $CI_COMMIT_BRANCH == $CI_DEFAULT_BRANCH
+      changes:
+        - firebase/devops/database.rules.json
   environment:
     name: devops
   script:
