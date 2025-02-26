@@ -140,6 +140,15 @@ exports.registerPatient = async function(requestObject) {
     try {
         validateRegisterPatientRequest(requestObject);
 
+        // Get patient data from new backend
+        const patientData = await opalRequest.retrievePatientDataDetailed(requestObject);
+
+        // insert patient
+        let legacy_id = await insertPatient(requestObject, patientData.patient);
+
+        // insert patient hospital identifier ============================================
+        await insertPatientHospitalIdentifier(requestObject, patientData.hospital_patients[0], legacy_id)
+
         // Before registering the patient, create their firebase user account with decrypted email and password
         // This is required to store their firebase UID as well
         let email = requestObject.Parameters.Fields.email;
@@ -349,4 +358,29 @@ function validateRequest(requestObject, requiredFields) {
             throw `Required field '${field}' missing in request fields`
         }
     }
+}
+
+/**
+ * @description insert patient with request parameters.
+ * @param {Object} requestObject - The calling request's requestObject.
+ * @returns {patientSerNum}
+ */
+async function insertPatient(requestObject, patientData) {
+    requestObject.Parameters.Fields.firstName = patientData.patient.first_name;
+    requestObject.Parameters.Fields.lastName = patientData.patient.last_name;
+    requestObject.Parameters.Fields.sex = patientData.patient.sex;
+    requestObject.Parameters.Fields.dateOfBirth = patientData.patient.date_of_birth;
+    return await sqlInterface.insertPatient(requestObject);
+}
+
+/**
+ * @description insert patient hospital indetifier with request parameters.
+ * @param {Object} requestObject - The calling request's requestObject.
+ * @returns {void}
+ */
+async function insertPatientHospitalIdentifier(requestObject, hospitalPatient, patientSerNum) {
+    requestObject.Parameters.Fields.patientSerNum = patientSerNum;
+    requestObject.Parameters.Fields.mrn = hospitalPatient.mrn;
+    requestObject.Parameters.Fields.site = hospitalPatient.site_code;
+    return await sqlInterface.insertPatientHospitalIdentifier(requestObject);
 }
