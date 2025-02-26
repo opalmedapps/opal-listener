@@ -2,7 +2,7 @@
 
 [![pipeline status](https://gitlab.com/opalmedapps/opal-listener/badges/main/pipeline.svg)](https://gitlab.com/opalmedapps/opal-listener/-/commits/main) [![coverage report](https://gitlab.com/opalmedapps/opal-listener/badges/main/coverage.svg)](https://gitlab.com/opalmedapps/opal-listener/-/commits/main) [![Docs](https://img.shields.io/badge/docs-available-brightgreen.svg)](https://opalmedapps.gitlab.io/opal-listener)
 
-This is the Opal app's backend listener that facilitates communication between the user applications and the Opal PIE (typically running within a hospital network that cannot be accessed from the outside) via Firebase.
+This is Opal's backend listener that facilitates communication between the user applications and the Opal PIE (typically running within a hospital network that cannot be accessed from the outside) via Firebase.
 
 ## Getting Started
 
@@ -11,23 +11,24 @@ Refer to the Deployment section below for notes on how to deploy the project on 
 
 ### Prerequisites
 
-These are the requirements to run a local listener app.
+These are the requirements to run the listener locally.
 
 1. [Docker](https://docs.docker.com/get-docker/)
 2. Have the [backend](https://gitlab.com/opalmedapps/backend) and [legacy databases](https://gitlab.com/opalmedapps/db-docker) running.
-3. Have your own [Firebase project set up](https://opalmedapps.gitlab.io/development/setup/) and the Firebase admin key file saved
+3. Have your own [Firebase project set up](https://opalmedapps.gitlab.io/development/setup/) and the Firebase admin key file saved.
 
 ### Installation
 
 #### Step 1: Add Firebase configuration
 
-Copy your firebase admin key file into the `src/config/firebase` directory.
+Copy your Firebase admin key file into the `src/config/` directory.
 The content of this directory is ignored from version control.
 
 #### Step 2: Configuration
 
 Copy and rename `.env.sample` to `.env`.
-Then fill out the required fields (at least the Firebase database URL and the two auth tokens).
+Then, fill out the fields according to your local installation (most importantly, the Firebase database URL copied from your Firebase project's settings, and the two backend auth tokens).
+Note that the backend auth tokens will have been generated for you when initializing your test data in the backend project.
 
 Communication with the backend needs to be authenticated with a REST API token.
 It is assumed that at this point you already have the backend set up with initial data which generated these.
@@ -66,7 +67,7 @@ On a server, certificate files may be stored in different locations.
 To ensure that your setup was successful, make sure the listener launches successfully, and that the database queries
 print `Grabbed SQL connection ... with SSL enabled` to the logger, and complete successfully.
 
-If external HTTP requests are intercepted by a proxy (e.g., via deep packet inspection) HTTPS requests might fail because if a custom/internal certificate authority is used.
+If external HTTP requests are intercepted by a proxy (e.g., via deep packet inspection) HTTPS requests might fail if a custom/internal certificate authority is used.
 In this case, provide a certificate bundle that includes this certificate, make it available inside the container, and set the `NODE_EXTRA_CA_CERTS` environment variable.
 
 ### Project Configurations
