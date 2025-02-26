@@ -1,3 +1,4 @@
+// eslint-disable-next-line max-len
 // Copyright    :   Copyright 2016, HIG, All rights reserved.
 // SPDX-FileCopyrightText: Copyright 2015 Opal Health Informatics Group at the Research Institute of the McGill University Health Centre <john.kildea@mcgill.ca>
 //

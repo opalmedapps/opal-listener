@@ -55,8 +55,8 @@
     "health",
     "oncology"
   ],
-  "author": "Opal Health Informatics Group at the Research Institute of the McGill University Health Centre <john.kildea@mcgill.ca>",
-  "license": "ISC",
+  "author": "Opal Health Informatics Group",
+  "license": "AGPL-3.0-or-later",
   "homepage": "https://depdocs.com/opal",
   "description": "Backend listener for the Opal patient portal"
 }
