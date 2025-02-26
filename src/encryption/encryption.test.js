@@ -3,9 +3,9 @@ const { expect } = require('chai');
 const { EncryptionUtilities } = require('./encryption');
 
 describe('EncryptionUtilities', function () {
-    describe('getSecret()', function () {
-        it('Should return encrypted string', function () {
-            return expect(EncryptionUtilities.getSecret('username')).to.be.string;
+    describe('hash()', function () {
+        it('Should return hased input string', function () {
+            return expect(EncryptionUtilities.hash('username')).to.be.string;
         });
     });
 

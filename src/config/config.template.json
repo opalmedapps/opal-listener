@@ -7,6 +7,6 @@
   },
   "OPAL_BACKEND": {
     "HOST": "http://host.docker.internal:8000",
-    "AUTH_TOKEN": "TOKEN_"
+    "AUTH_TOKEN": "<[String] Authorization token for accessing the endpoints. See 'Authentication' section in the new opalAdmin documentation>"
   }
 }

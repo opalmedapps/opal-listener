@@ -47,11 +47,11 @@ class EncryptionUtilities {
     }
 
     /**
-     * @description Encrypt user id to use for request encryption.
+     * @description Hash input string to use for request encryption.
      * @param {string} input to be encrypt.
      * @returns {string} Encrypted string.
      */
-    static getSecret(input) {
+    static hash(input) {
         return cryptoJs.SHA512(input).toString();
     }
 

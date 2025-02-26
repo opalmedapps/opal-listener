@@ -44,7 +44,7 @@ class RequestHandler {
             if (!RequestHandler.validateSnapshot(snapshot)) throw new Error('API: Firebase snapshot invalid');
             const userId = snapshot.val().UserID;
             const salt = await EncryptionUtilities.getSalt(userId);
-            const secret = EncryptionUtilities.getSecret(userId);
+            const secret = EncryptionUtilities.hash(userId);
             const decryptedRequest = await EncryptionUtilities.decryptRequest(snapshot.val(), secret, salt);
             const apiResponse = await ApiRequest.makeRequest(decryptedRequest);
             const encryptedResponse = await EncryptionUtilities.encryptResponse(apiResponse, secret, salt);
