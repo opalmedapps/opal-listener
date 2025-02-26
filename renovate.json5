@@ -2,7 +2,8 @@
   "$schema": "https://docs.renovatebot.com/renovate-schema.json",
   "extends": [
     "config:base",
-    ":rebaseStalePrs"
+    ":rebaseStalePrs",
+    "gitlab>opalmedapps/renovate-bot//presets/docker-alpine.json5",
   ],
   "assignees": ["staceybeard"],
   "labels": ["dependencies"],
