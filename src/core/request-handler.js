@@ -6,9 +6,10 @@ const ApiRequest = require('./api-request');
 const Encryption = require('../encryption/encryption');
 const ErrorHandler = require('../error/handler');
 const { Firebase } = require('../firebase/firebase');
+const keyDerivationCache = require('../utility/key-derivation-cache');
 const legacyLogger = require('../../listener/logs/logger');
 const Registration = require('../registration/registration');
-const { REQUEST_TYPE } = require('../const');
+const { REQUEST_TYPE, REGISTER_SEARCH_REQUEST_REGEX } = require('../const');
 const { RequestContext } = require('./request-context');
 
 class RequestHandler {
@@ -47,16 +48,23 @@ class RequestHandler {
         let context;
 
         try {
-            // Validate and decrypt request
+            // Validate request
             RequestHandler.validateSnapshot(snapshot);
             const requestObject = snapshot.val();
             context = new RequestContext(requestType, requestObject);
+
+            // Decrypt request
             encryptionInfo = requestType === REQUEST_TYPE.REGISTRATION
                 ? await Registration.getEncryptionValues(context)
                 : await Encryption.getEncryptionInfo(context);
             const decryptedRequest = Array.isArray(encryptionInfo.salt)
                 ? await Registration.decryptManySalts(context, requestObject, encryptionInfo)
                 : await Encryption.decryptRequest(context, requestObject, encryptionInfo.secret, encryptionInfo.salt);
+
+            // Special case: on a first registration request, invalidate cached encryption info
+            if (REGISTER_SEARCH_REQUEST_REGEX.test(requestObject.Parameters?.url)) {
+                await keyDerivationCache.invalidate(context.cacheLabel);
+            }
 
             // Process the request
             const apiResponse = await ApiRequest.makeRequest(decryptedRequest);

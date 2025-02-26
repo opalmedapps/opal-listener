@@ -70,6 +70,10 @@ class EncryptionUtilities {
             });
         }
 
+        // While testing multiple salts, bypass the key derivation cache (to avoid caching incorrect keys)
+        const { cacheLabel } = context;
+        context.cacheLabel = undefined;
+
         const promises = saltArray.map(salt => this.decryptRequest(context, request, secret, salt));
         try {
             // Return the first of the promises to succeed
@@ -88,6 +92,10 @@ class EncryptionUtilities {
                     individualErrors: aggregateErr.errors.map(e => `${e.message} ${e.cause} ${e.stack}`).join(' | '),
                 },
             });
+        }
+        finally {
+            // Restore the cacheLabel
+            context.cacheLabel = cacheLabel;
         }
     }
 

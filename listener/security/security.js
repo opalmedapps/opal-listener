@@ -1,5 +1,6 @@
 const logger = require('./../logs/logger');
 const firebase = require('firebase-admin');
+const keyDerivationCache = require('../../src/utility/key-derivation-cache');
 const sqlInterface = require('./../api/sqlInterface.js');
 const utility = require('./../utility/utility.js');
 const { Version } = require('../../src/utility/version');
@@ -166,6 +167,9 @@ exports.getSecurityQuestion = async function(context, requestKey, requestObject)
     await ensureUserIdAvailable(requestObject);
 
     try {
+        // Invalidate the key derivation cache, since the new security answer will be used as salt to derive a new key
+        await keyDerivationCache.invalidate(context.cacheLabel);
+
         logger.log('verbose', `Updating device identifiers for user ${requestObject.UserID}`);
         requestObject.Parameters = unencrypted;
         await sqlInterface.updateDeviceIdentifier(requestObject);

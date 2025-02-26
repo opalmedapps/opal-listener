@@ -67,23 +67,13 @@ exports.unixToMYSQLTimestamp=function(time) {
  * @param {string} [salt] Optional salt; if provided, it's used with the secret to derive an encryption key.
  * @returns {Promise<Object>} Resolves to the encrypted object.
  */
-exports.encrypt = function(context, object, secret, salt) {
-    return new Promise(async (resolve, reject) => {
-        try {
-            if (salt) await keyDerivationCache.getKey(secret, salt, context.cacheLabel, context.useLegacyPBKDF2Settings, continueWithKey);
-            else continueWithKey(secret);
-
-            // The second half of this function is itself wrapped in a function to work with the key derivation cache above
-            function continueWithKey(key) {
-                const truncatedKey = stablelibutf8.encode(key.substring(0, nacl.secretbox.keyLength));
-                const nonce = nacl.randomBytes(nacl.secretbox.nonceLength);
-                resolve(exports.encryptObject(object, truncatedKey, nonce));
-            }
-        }
-        catch (error) {
-            reject(error);
-        }
-    });
+exports.encrypt = async function(context, object, secret, salt) {
+    const key = salt
+        ? await keyDerivationCache.getKey(secret, salt, context.cacheLabel, context.useLegacyPBKDF2Settings)
+        : secret;
+    const truncatedKey = stablelibutf8.encode(key.substring(0, nacl.secretbox.keyLength));
+    const nonce = nacl.randomBytes(nacl.secretbox.nonceLength);
+    return exports.encryptObject(object, truncatedKey, nonce);
 };
 
 /**
@@ -95,22 +85,12 @@ exports.encrypt = function(context, object, secret, salt) {
  * @param {string} [salt] Optional salt; if provided, it's used with the secret to derive an encryption key.
  * @returns {Promise<Object>} Resolves to the decrypted object.
  */
-exports.decrypt = function(context, object, secret, salt) {
-    return new Promise(async (resolve, reject) => {
-        try {
-            if (salt) await keyDerivationCache.getKey(secret, salt, context.cacheLabel, context.useLegacyPBKDF2Settings, continueWithKey);
-            else continueWithKey(secret);
-
-            // The second half of this function is itself wrapped in a function to work with the key derivation cache above
-            function continueWithKey(key) {
-                const truncatedKey = stablelibutf8.encode(key.substring(0, nacl.secretbox.keyLength));
-                resolve(exports.decryptObject(object, truncatedKey));
-            }
-        }
-        catch (error) {
-            reject(error);
-        }
-    });
+exports.decrypt = async function(context, object, secret, salt) {
+    const key = salt
+        ? await keyDerivationCache.getKey(secret, salt, context.cacheLabel, context.useLegacyPBKDF2Settings)
+        : secret;
+    const truncatedKey = stablelibutf8.encode(key.substring(0, nacl.secretbox.keyLength));
+    return exports.decryptObject(object, truncatedKey);
 };
 
 //Encrypts an object, array, number, date or string
