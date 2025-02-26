@@ -142,7 +142,7 @@ exports.patientEducationalMaterialTableFields=function()
 {
     return `SELECT A.EducationalMaterialSerNum, A.ShareURL_EN, A.ShareURL_FR, A.EducationalMaterialControlSerNum,
                 A.DateAdded, A.ReadStatus, A.EducationalMaterialType_EN, A.EducationalMaterialType_FR, A.Name_EN, 
-                A.Name_FR,  A.URL_EN, A.URL_FR, A.Name_EN as PhaseName_EN, A.Name_FR as PhaseName_FR
+                A.Name_FR,  A.URL_EN, A.URL_FR, A.PhaseName_EN, A.PhaseName_FR
             FROM Patient P, Users U, (
                 SELECT EduMat.PatientSerNum, EduMat.EducationalMaterialSerNum, EduControl.ShareURL_EN, EduControl.ShareURL_FR, 
                     EduControl.EducationalMaterialControlSerNum,  EduMat.DateAdded, EduMat.ReadStatus, 
@@ -150,7 +150,7 @@ exports.patientEducationalMaterialTableFields=function()
                     EduControl.Name_FR,  EduControl.URL_EN, EduControl.URL_FR, Phase.Name_EN as PhaseName_EN, 
                     Phase.Name_FR as PhaseName_FR
                 FROM EducationalMaterialControl as EduControl, 
-                    EducationalMaterial as EduMat, PhaseInTreatment as PHASE
+                    EducationalMaterial as EduMat, PhaseInTreatment as Phase
                 WHERE EduMat.EducationalMaterialControlSerNum = EduControl.EducationalMaterialControlSerNum 
                     AND Phase.PhaseInTreatmentSerNum = EduControl.PhaseInTreatmentSerNum
                 UNION
