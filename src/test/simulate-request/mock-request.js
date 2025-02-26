@@ -23,7 +23,7 @@ const requestDataApi = {
         },
     },
     Timestamp: '',
-    UserEmail: 'muhc.app.mobile@gmail.com',
+    UserEmail: 'marge@opalmedapps.ca',
 };
 
 /**
@@ -32,7 +32,7 @@ const requestDataApi = {
 const requestRegistrationApi = {
     Request: 'registration-api',
     RequestType: 'REGISTRATION',
-    BranchName: CryptoJs.SHA512('code12345678').toString(),
+    BranchName: CryptoJs.SHA512('A0code123456').toString(),
     UserID: process.env.TEST_ACCOUNT_FIREBASE_UID,
     Parameters: {
         method: 'get',
@@ -44,8 +44,8 @@ const requestRegistrationApi = {
     },
     Timestamp: '',
     SimulatedEncryption: {
-        secret: 'code12345678',
-        salt: 'OTES12345678',
+        secret: 'A0code123456',
+        salt: 'SIMM86600199',
     },
 };
 
@@ -68,7 +68,7 @@ const requestRegistration = {
             email: 'test@opalmedapps.ca',
             language: 'en',
             mrn: '9999996',
-            password: 'test',
+            password: 'test-password',
             phone: '+11234567890',
             ramq: '',
             registrationCode: 'A0code123456',
@@ -102,7 +102,7 @@ const requestData = {
         registrationId: '',
     },
     Timestamp: '',
-    UserEmail: 'muhc.app.mobile@gmail.com',
+    UserEmail: 'marge@opalmedapps.ca',
 };
 
 module.exports = {
