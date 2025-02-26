@@ -3,7 +3,7 @@ default:
     # use node image instead of our own
     # our image runs with user node
     # see: https://gitlab.com/gitlab-org/gitlab-runner/-/issues/2750
-    name: node:16.20.0-alpine3.17
+    name: node:16.20.2-alpine3.17
   # Cache modules in between jobs
   cache:
     key:
