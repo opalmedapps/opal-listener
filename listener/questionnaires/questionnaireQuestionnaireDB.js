@@ -388,6 +388,7 @@ function insertAnswerByType(answerId, answerArray, question_typeId) {
  * @param {string} newStatus denote the status to be updated to. It should match the database convention of being either 0,1,2
  * @param {string} respondentUsername the username of the user answering the questionnaire.
  * @param {string} appVersion a string denoting the version of the app. This is used for noting the author of update
+ * @param {string} userDisplayName Questionnaire's respondent first and last name used for display purpose.
  * @returns {Promise} resolve with a boolean denoting whether the questionnaire's new status is completed or not
  */
 async function updateQuestionnaireStatusInQuestionnaireDB(answerQuestionnaireId, newStatus, respondentUsername, appVersion, userDisplayName) {

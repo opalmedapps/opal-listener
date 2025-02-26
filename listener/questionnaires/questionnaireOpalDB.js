@@ -194,7 +194,7 @@ async function questionnaireUpdateStatus(requestObject) {
         requestObject.Parameters.new_status,
         requestObject.UserID,
         requestObject.AppVersion,
-        requestObject.Parameters.userDisplayName || 'unowned',
+        requestObject.Parameters.userDisplayName || '',
     );
 
     if (isCompleted === 1) {
