@@ -191,8 +191,9 @@ exports.registerPatient = async function(requestObject) {
         }
 
         try {
+            let labResultHistories = [];
             for (const hospital_patient of patientData?.hospital_patients) {
-                await getLabResultHistory(requestObject, hospital_patient, legacy_id);
+                labResultHistories.push(await getLabResultHistory(requestObject, hospital_patient, legacy_id));
             }
         } catch (error) {
             logger.log('error', `An error occurred while getting lab result history (for patient ${legacy_id}): ${JSON.stringify(error)}`);
