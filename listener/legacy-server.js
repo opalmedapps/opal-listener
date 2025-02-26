@@ -42,16 +42,20 @@ let heartbeatRef;
  *              Called by src/server.js to pass a Firebase database object to this file.
  * @param {Firebase} firebase The Firebase database object to use.
  */
-function setFirebaseConnection(firebase) {
-    db = firebase.database;
-    ref = db.ref(firebase.root);
-    heartbeatRef = ref.child('/users/heartbeat');
+function setFirebaseConnection(firebase, provided = false) {
+    if (provided !== false) {
+        ref = provided;
+    } else {
+        db = firebase.database;
+        ref = db.ref(firebase.root);
+        heartbeatRef = ref.child('/users/heartbeat');
 
-    // Ensure there is no leftover data on the firebase root branch
-    ref.set(null)
-    .catch(function (error) {
-        logger.log('error', 'Cannot reset firebase', error);
-    });
+        // Ensure there is no leftover data on the firebase root branch
+        ref.set(null)
+        .catch(function (error) {
+            logger.log('error', 'Cannot reset firebase', error);
+        });
+    }
 }
 exports.setFirebaseConnection = setFirebaseConnection;
 
@@ -96,18 +100,19 @@ function handleRequest(requestType, snapshot){
     processRequest(headers).then(function(response){
 
         // Print the response contents (shortened if too long)
-        try {
-            console.log("response", JSON.parse(utility.stringifyShort(response)));
-        }
-        catch (error) {
-            console.error("Failed to print the response due to a formatting issue:", error);
-        }
+        // try {
+        //     console.log("response", JSON.parse(utility.stringifyShort(response)));
+        // }
+        // catch (error) {
+        //     console.error("Failed to print the response due to a formatting issue:", error);
+        // }
 
         // Log before uploading to Firebase. Check that it was not a simple log
         // if (response.Headers.RequestObject.Request !== 'Log') logResponse(response);
         uploadToFirebase(response, requestType);
     });
 }
+exports.handleRequest = handleRequest;
 
 /**
  * logResponse
@@ -256,7 +261,7 @@ function uploadToFirebase(response, key) {
 		});
 	});
 }
-
+exports.uploadToFirebase = uploadToFirebase;
 /**
  * validateKeysForFirebase
  * @author Stacey Beard

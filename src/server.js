@@ -7,6 +7,7 @@ const config = require('./config/config.json');
 const { Firebase } = require('./firebase/firebase');
 const legacyServer = require('../listener/legacy-server');
 const logger = require('../listener/logs/logger');
+const { RequestHandler } = require('./request-handler');
 
 launch().then(() => {
     logger.log('info', 'LISTENER LAUNCHED SUCCESSFULLY');
@@ -27,8 +28,11 @@ async function launch() {
 
     logger.log('debug', 'Setting Firebase request listeners');
 
-    legacyServer.setFirebaseConnection(firebase);
-    legacyServer.listenForRequest('requests');
-    legacyServer.listenForRequest('passwordResetRequests');
+    const requestHandler = new RequestHandler(firebase);
+    // Still need pass the database reference to make the legacy-server work for the moment
+    legacyServer.setFirebaseConnection(firebase, requestHandler.databaseRef);
+    requestHandler.listenToRequest('requests');
+    requestHandler.listenToRequest('passwordResetRequests');
+
     legacyServer.spawnCronJobs();
 }
