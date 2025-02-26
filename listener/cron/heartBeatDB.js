@@ -132,7 +132,7 @@ function submitSimpleQuery(){
 
 		if (err) {
 			// Log any errors
-			logger.log('error', {error:err});
+			logger.log('error', err);
 			r.reject(err);
 		} else {
 			// if no error, push MySQL stats to Firebase
@@ -144,7 +144,7 @@ function submitSimpleQuery(){
 			fs.appendFile(filename, JSON.stringify(rows[0])  + "\n", function (err) {
 			  if (err) {
 					// Log any errors
-					logger.log('error', {error: err});
+					logger.log('error', err);
 			  }
 			});
 			

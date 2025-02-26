@@ -56,9 +56,7 @@ logger.log('debug', 'INITIALIZED APP IN DEBUG MODE');
 // Ensure there is no leftover data on the firebase root branch
 ref.set(null)
 	.catch(function (error) {
-		logger.log('error', 'Cannot reset firebase', {
-			error:error
-		})
+		logger.log('error', 'Cannot reset firebase', error);
 	});
 
 
@@ -85,8 +83,8 @@ function listenForRequest(requestType){
 
     ref.child(requestType).on('child_added',
         function(snapshot){
-            logger.log('debug', 'Received request from Firebase: ', {data: JSON.stringify(snapshot.val())});
-            logger.log('info', 'Received request from Firebase: ', {data: snapshot.val().Request});
+            logger.log('debug', 'Received request from Firebase: ', snapshot.val());
+            logger.log('info', 'Received request from Firebase: ', snapshot.val().Request);
             if(snapshot.val().Request === 'HeartBeat'){
                 logger.log('debug', 'Handling heartbeat request');
                 handleHeartBeat(snapshot.val())
@@ -140,7 +138,7 @@ function logResponse(response){
 			(response.Headers.RequestObject.Request === 'Refresh' ? ": " + response.Headers.RequestObject.Parameters.Fields.join(' ') : ""),
 			requestKey: response.Headers.RequestKey
 		});
-        logger.log('info', "Completed response", {header: response.Headers.RequestObject.Request});
+        logger.log('info', "Completed response", response.Headers.RequestObject.Request);
 	}
 }
 
@@ -417,13 +415,13 @@ function handleHeartBeat(data){
 	fs.appendFile(filename, JSON.stringify(HeartBeat)  + "\n", function (err) {
 	  if (err) {
 			// Log any errors
-			logger.log('error', {error: err});
+			logger.log('error', 'Error reporting heartbeat', err);
 	  }
 	});
 
     heartbeatRef.set(HeartBeat)
         .catch(err => {
-            logger.log('error', 'Error reporting heartbeat', {error: err})
+            logger.log('error', 'Error reporting heartbeat', err)
         })
 
 }
@@ -461,11 +459,11 @@ function spawnClearRequest(){
 
     // Handles clearRequest cron events
     clearRequests.on('message', (m) => {
-        logger.log('info', 'PARENT got message:', {message:m});
+        logger.log('info', 'PARENT got message:', m);
     });
 
     clearRequests.on('error', (m) => {
-        logger.log('error','clearRequest cron error:', {error: m});
+        logger.log('error','clearRequest cron error:', m);
         clearRequests.kill();
         if(clearRequests.killed){
             clearRequests = cp.fork(`${__dirname}/cron/clearRequests.js`);
@@ -491,11 +489,11 @@ function spawnClearDBRequest(){
 
     // Handles clearRequest cron events
     clearDBRequests.on('message', (m) => {
-        logger.log('info', 'PARENT got message:', {message: m});
+        logger.log('info', 'PARENT got message:', m);
     });
 
     clearDBRequests.on('error', (m) => {
-        logger.log('error','clearRequest cron error:', {error: m});
+        logger.log('error','clearRequest cron error:', m);
         clearDBRequests.kill();
         if(clearDBRequests.killed){
             clearDBRequests = cp.fork(`${__dirname}/cron/clearDBRequests.js`);
@@ -517,11 +515,11 @@ function spawnClearResponses(){
 
     // Handles clearResponses cron events
     clearResponses.on('message', (m) => {
-        logger.log('info','PARENT got message:', {message: m});
+        logger.log('info','PARENT got message:', m);
     });
 
     clearResponses.on('error', (m) => {
-        logger.log('error','clearResponse cron error:', {error: m});
+        logger.log('error','clearResponse cron error:', m);
 
         clearResponses.kill();
         if(clearResponses.killed){
@@ -540,11 +538,11 @@ function spawnHeartBeat(){
 
     // Handles heartBeat cron events
     heartBeat.on('message', (m) => {
-        logger.log('info','PARENT got message:', {message: m});
+        logger.log('info','PARENT got message:', m);
     });
 
     heartBeat.on('error', (m) => {
-        logger.log('error','heartBeat cron error:', {error: m});
+        logger.log('error','heartBeat cron error:', m);
 
         heartBeat.kill();
         if(heartBeat.killed){

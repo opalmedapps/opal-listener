@@ -34,11 +34,11 @@ function requestFormatter({key,request}) {
 
 			return processApiRequest.processRequest(opalReq).then((data)=>
 			{
-				logger.log('debug', 'Successfully processed request: ', {data: data});
+				logger.log('debug', 'Successfully processed request: ', data);
                 logger.log('info', 'Successfully processed request');
 				return (new OpalResponseSuccess(data, opalReq)).toLegacy();
 			}).catch((err)=>{
-				logger.log('error', 'Error processing request', {error: err});
+				logger.log('error', 'Error processing request', err);
 				if(err instanceof ValidationError){
 					return (new OpalResponseError( 400, err.error, opalReq)).toLegacy();
 				}else{
@@ -47,7 +47,7 @@ function requestFormatter({key,request}) {
 				}
 			});
 		}).catch( err => {
-            logger.log('error', 'Error validating request', {error: err});
+            logger.log('error', 'Error validating request', err);
             return err.toLegacy();
 		});
 }

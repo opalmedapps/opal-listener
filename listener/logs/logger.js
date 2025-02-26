@@ -16,8 +16,27 @@ const LoggerLevel = process.env.NODE_ENV === 'production' ? 'info' : 'debug';
 // Set custom format for login.
 const opalLogFormat = format.printf((info) => {
     const { level, message, timestamp, data } = info;
-    return `${timestamp} - ${level.toUpperCase()}: ${message} ${(data) ? `- DATA: ${data}` : ``}`;
+    let formattedData = formatErrorData(data);
+    return `${timestamp} - ${level.toUpperCase()}: ${message}${formattedData ? `: ${formattedData}` : ''}`;
 });
+
+// Format error data according to data type passed to the logger wraper
+const formatErrorData = (data) => {
+    let formattedData;
+    switch (typeof data) {
+        case 'undefined':
+            formattedData = '';
+            break;
+        case 'object':
+            formattedData = JSON.stringify(data);
+            break
+        default:
+            formattedData = data;   
+            break;
+    }
+
+    return formattedData;
+}
 
 // Initialize winston logger
 const WinstonLogger = createLogger({
@@ -41,6 +60,14 @@ const WinstonLogger = createLogger({
     ]
 });
 
+// Wrappe logger to allow 3rd arguments to be of any type.
+const logWrapper = (level, message, data) => {
+    WinstonLogger.log(level, message, {data: data});
+}
+
 WinstonLogger.log('info', `Initialized Winston with level: ${LoggerLevel}`);
 
-module.exports = WinstonLogger;
+module.exports = {
+    ...WinstonLogger,
+    log: logWrapper,
+};

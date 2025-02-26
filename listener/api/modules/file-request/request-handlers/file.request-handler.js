@@ -18,7 +18,7 @@ class FileRequestHandler extends ApiRequestHandler {
         // Validate the request
         const errors = await FileRequestHandler.validate(requestObject.parameters);
         if (!errors.isEmpty()) {
-            logger.log("error", "Validation Error", {error: errors});
+            logger.log("error", "Validation Error", errors);
             throw new ValidationError(errors);
         }
 

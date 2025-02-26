@@ -51,7 +51,7 @@ function getQuestionnaireInOpalDB(requestObject) {
                     }
                 })
                 .catch(function (error) {
-                    logger.log("error", "Error getting questionnaire data stored in OpalDB", {error: error});
+                    logger.log("error", "Error getting questionnaire data stored in OpalDB", error);
                     reject(error);
                 });
         }
@@ -120,7 +120,7 @@ function getQuestionnaire(requestObject) {
                     resolve(obj);
                 })
                 .catch(function (error) {
-                    logger.log("error", "Error getting questionnaire", {error: error});
+                    logger.log("error", "Error getting questionnaire", error);
                     reject(error);
                 });
         }
@@ -163,7 +163,7 @@ function questionnaireSaveAnswer(requestObject) {
 
                 })
                 .catch(function (error) {
-                    logger.log("error", "Error saving answer", {error: error});
+                    logger.log("error", "Error saving answer", error);
                     reject(error);
                 });
         }

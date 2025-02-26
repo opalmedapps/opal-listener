@@ -101,7 +101,7 @@ exports.verifySecurityAnswer=function(requestKey,requestObject,patient)
         })
         .catch((err) => {
             //Check if timestamp for lockout is old, if it is reset the security answer attempts
-            logger.log('error', 'increase security answer attempt due to error decrypting', {error: err});
+            logger.log('error', 'increase security answer attempt due to error decrypting', err);
             sqlInterface.increaseSecurityAnswerAttempt(requestObject);
             r.resolve({ RequestKey:requestKey, Code:3,Data:{AnswerVerified:"false"}, Headers:{RequestKey:requestKey,RequestObject:requestObject},Response:'success'});
         });
@@ -122,7 +122,7 @@ exports.setNewPassword=function(requestKey, requestObject, user)
                 var response = { RequestKey:requestKey, Code:3, Data:{PasswordReset:"true"}, Headers:{RequestKey:requestKey,RequestObject:requestObject},Response:'success'};
                 r.resolve(response);
             }).catch(function(error){
-                logger.log('error', 'error updating password', {error: error});
+                logger.log('error', 'error updating password', error);
 
                 var response = { Headers:{RequestKey:requestKey,RequestObject:requestObject}, Code: 2, Data:{},Response:'error', Reason:'Could not set password'};
                 r.resolve(response);

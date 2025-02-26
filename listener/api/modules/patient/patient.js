@@ -25,11 +25,11 @@ class Patient {
 		try {
 			results = await OpalSQLQueryRunner.run(query);
 		} catch (err) {
-			logger.log("error", `Error fetching patient with Username ${username}`, {error: err});
+			logger.log("error", `Error fetching patient with Username ${username}`, err);
 			throw err;
 		}
 		if (results.length === 0) {
-			logger.log("error", `Patient with username ${username} not found`, {error: results});
+			logger.log("error", `Patient with username ${username} not found`, results);
 			throw new ValidationError(`Patient with username ${username} not found`);
 		}
 		let patientRows = results[0];
