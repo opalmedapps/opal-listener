@@ -17,6 +17,7 @@ class SQLQueryRunner {
 			...(process.env.USE_SSL === '1' ? {
 					ssl: {
 						ca: this.readSSLCAFile(),
+						rejectUnauthorized: true,
 					}
 				} : undefined
 			),
