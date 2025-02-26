@@ -23,7 +23,7 @@ const opalLogFormat = format.printf((info) => {
 // Format error data according to data type passed to the logger wraper
 const formatErrorData = (data) => {
     if (typeof data === 'undefined') return '';
-    if (typeof data === 'object' && !data instanceof Error) return JSON.stringify(data);
+    if (typeof data === 'object' && data instanceof Error === false) return JSON.stringify(data);
 
     return data;
 }
