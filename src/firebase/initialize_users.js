@@ -1,8 +1,9 @@
+/* eslint-disable no-console */
 /**
  * @file Utility for Firebase to initialize users.
  * @author Matthias Schoettle
  */
-const { getAuth } = require('firebase-admin/auth');
+const { getAuth } = require('firebase-admin');
 
 const { FIREBASE_CONFIG } = require('../environment');
 const { Firebase } = require('./firebase');
@@ -15,11 +16,11 @@ async function deleteAllUsers() {
     // avoid recursion with async/await here and get the max possible number of users
     // to support any number of users the following can be adapted using async/await
     // https://dev.to/pratik14/deleting-all-firebase-users-l4d
-    let userRecords = await getAuth().listUsers(1000)
-    let uids = userRecords.users.map((userRecord) => userRecord.uid)
+    const userRecords = await getAuth().listUsers(1000);
+    const uids = userRecords.users.map(userRecord => userRecord.uid);
 
-    await getAuth().deleteUsers(uids)
-    console.log('Deleted all users')
+    await getAuth().deleteUsers(uids);
+    console.log('Deleted all users');
 }
 
 /**
@@ -27,7 +28,7 @@ async function deleteAllUsers() {
  * @returns {Promise<void>}
  */
 async function createUsers() {
-    let userRecords = [
+    const userRecords = [
         {
             email: 'marge@opalmedapps.ca',
             password: '12345Opal!!',
@@ -42,16 +43,17 @@ async function createUsers() {
             email: 'bart@opalmedapps.ca',
             password: '12345Opal!!',
             uid: 'SipDLZCcOyTYj7O3C8HnWLalb4G3',
-        }
-    ]
+        },
+    ];
 
     for (const user of userRecords) {
         try {
-            let userRecord = await getAuth().createUser(user)
-            console.log('Successfully created new user:', userRecord.email)
+            // eslint-disable-next-line no-await-in-loop
+            const userRecord = await getAuth().createUser(user);
+            console.log('Successfully created new user:', userRecord.email);
         }
         catch (error) {
-            console.log('Error creating new user:', error)
+            console.log('Error creating new user:', error);
         }
     }
 }
@@ -62,11 +64,11 @@ async function createUsers() {
  */
 async function run() {
     const firebase = new Firebase(FIREBASE_CONFIG);
-    await firebase.init()
+    await firebase.init();
 
-    await deleteAllUsers()
-    await createUsers()
-    process.exit(0)
+    await deleteAllUsers();
+    await createUsers();
+    process.exit(0);
 }
 
-run()
+run();
