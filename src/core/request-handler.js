@@ -2,7 +2,7 @@
  * @file Listen and handle request from firebase
  * @author David Gagne
  */
-const JC = require('just-clone');
+const JustClone = require('just-clone');
 const legacyLogger = require('../../listener/logs/logger');
 const legacyServer = require('../../listener/legacy-server');
 const legacyProcessApi = require('../../listener/api/processApiRequest');
@@ -83,7 +83,7 @@ class RequestHandler {
         legacyLogger.log('debug', 'Processing regular request');
         const requestKey = snapshot.key;
         const requestObject = snapshot.val();
-        const requestType = await legacyRequestValidator.validate(requestKey, JC(requestObject));
+        const requestType = await legacyRequestValidator.validate(requestKey, JustClone(requestObject));
         try {
             const response = (requestType.type === 'api')
                 ? ApiRequest.makeRequest()
