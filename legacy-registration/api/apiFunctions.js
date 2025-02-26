@@ -20,16 +20,17 @@ const { sendMail } = require('./utility/mail.js');
  */
 exports.checkEmailExistsInFirebase = async function(requestObject) {
     try {
-        logger.log('info', `Validating registration request parameters for ${requestObject?.Parameters?.Fields?.email}`);
-      
-        const result = 'test';
-        return { Data: result };
+        logger.log('info', `Checking user account for email: ${requestObject?.Parameters?.Fields?.email}`);
+
+        const email = requestObject?.Parameters?.Fields?.email;
+        const uid = await firebaseFunction.getFirebaseAccountByEmail(email);
+
+        return { Data: {uid: uid} };
     }
     catch (error) {
         logger.log('error', `An error occurred while attempting to check email (${requestObject.Parameters.Fields.email}) exists or not`, error);
 
-        // Avoid showing error details to frontend
-        throw 'Error during checking email. See internal logs for details.';
+        return { Data: error };
     }
 };
 
