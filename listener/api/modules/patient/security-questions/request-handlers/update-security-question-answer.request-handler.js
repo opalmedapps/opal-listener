@@ -1,9 +1,9 @@
 const {ApiRequestHandler} = require("../../../../api-request-handler");
 const {Patient} = require("../../patient");
-const {PatientSecurityQuestion} = require("../classes/patient-security-question");
 const {ValidationError} = require("../../../../errors/validation-error");
 const logger = require("../../../../../logs/logger");
 const {param} = require("express-validator");
+const SecurityDjango = require("../../../../../security/securityDjango");
 
 class UpdateSecurityQuestionAnswerRequestHandler extends ApiRequestHandler {
     /**
@@ -13,14 +13,14 @@ class UpdateSecurityQuestionAnswerRequestHandler extends ApiRequestHandler {
         param("questionAnswerArr", "Must provide valid questionAnswerArr parameter")
             .exists()
             .isArray(),
-        param("questionAnswerArr.*.questionSerNum", "Must provide valid questionSerNum property")
+        param("questionAnswerArr.*.question", "Must provide valid question property")
             .exists()
-            .isNumeric(),
+            .isString(),
         param("questionAnswerArr.*.answer", "Must provide valid answer property")
             .exists()
             .isString()
             .notEmpty(),
-        param("questionAnswerArr.*.securityAnswerSerNum", "Must provide valid securityAnswerSerNum property")
+        param("questionAnswerArr.*.questionId", "Must provide valid questionId property")
             .exists()
             .isNumeric(),
     ];
@@ -39,10 +39,7 @@ class UpdateSecurityQuestionAnswerRequestHandler extends ApiRequestHandler {
         }
 
         const patient = await Patient.getPatientByUsername(requestObject.meta.UserID);
-        const patientSecurityQuestion = new PatientSecurityQuestion(patient);
-
-        await patientSecurityQuestion.updateSecurityQuestionAndAnswer(requestObject.parameters.questionAnswerArr);
-
+        await SecurityDjango.updateSecurityQuestionAndAnswerList(requestObject.meta.UserID, requestObject.parameters.questionAnswerArr);
         return {
             "data": {
                 "patientSerNum": patient.patientSerNum,
