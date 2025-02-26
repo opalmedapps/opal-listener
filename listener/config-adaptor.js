@@ -23,6 +23,7 @@ module.exports.DOCUMENTS_PATH = process.env.DOCUMENTS_PATH
 module.exports.DOCTOR_PATH = process.env.DOCTOR_PATH
 module.exports.CHECKIN_PATH = process.env.CHECKIN_PATH
 module.exports.CHECKIN_ROOM = process.env.CHECKIN_ROOM
+module.exports.LAB_RESULT_HISTORY = process.env.LAB_RESULT_HISTORY
 module.exports.QUESTIONNAIRE_COMPLETED_PATH = process.env.QUESTIONNAIRE_COMPLETED_PATH
 module.exports.LATEST_STABLE_VERSION = process.env.LATEST_STABLE_VERSION
 // ORMS settings API
