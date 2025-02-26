@@ -13,6 +13,28 @@ const fs = require('fs');
 const { sendMail } = require('./utility/mail.js');
 
 /**
+ * @description check email exists in firebase or not
+ * @param {Object} requestObject - The calling request's requestObject.
+ * @returns { Data: result}
+ * @throws Throws an error if a required field is not present in the given request.
+ */
+exports.checkEmailExistsInFirebase = async function(requestObject) {
+    try {
+        logger.log('info', `Checking user account for email: ${requestObject?.Parameters?.Fields?.email}`);
+
+        const email = requestObject?.Parameters?.Fields?.email;
+        const uid = await firebaseFunction.getFirebaseAccountByEmail(email);
+
+        return { Data: {uid: uid} };
+    }
+    catch (error) {
+        logger.log('error', `An error occurred while attempting to check email (${requestObject.Parameters.Fields.email}) exists or not`, error);
+
+        return { Data: error };
+    }
+};
+
+/**
  * @description Register a patient
  * @param {Object} requestObject - The calling request's requestObject.
  * @returns { Data: result}
@@ -20,38 +42,47 @@ const { sendMail } = require('./utility/mail.js');
  */
 exports.registerPatient = async function(requestObject) {
     try {
+        logger.log('info', `Validating registration request parameters for ${requestObject?.Parameters?.Fields?.email}`);
         validateRegisterPatientRequest(requestObject);
+        const registrationCode = requestObject.Parameters.Fields.registrationCode;
+        const language = requestObject.Parameters.Fields.language;
 
-        const backendApiRequest = {
-            registrationCode: requestObject.Parameters.Fields.registrationCode,
-            language: requestObject.Parameters.Fields.language,
-        };
         // Get patient data from new backend
-        const patientData = await opalRequest.retrievePatientDataDetailed(backendApiRequest);
+        logger.log('info', 'Calling backend API to get registration details');
+        const patientData = await opalRequest.retrievePatientDataDetailed(registrationCode, language);
+        const isNewPatient = patientData !== undefined && patientData.legacy_id !== null;
 
-        // Insert patient
-        const patientResult = await insertPatient(requestObject, patientData?.patient);
-        const legacy_id = patientResult[0].Result;
+        // Insert patient in OpalDB
+        let legacy_id;
+        if (isNewPatient) {
+            logger.log('info', 'New patient detected; inserting into OpalDB.Patient');
+            legacy_id = await insertPatient(requestObject, patientData?.patient);
 
-        // Insert patient hospital identifier
-        for (const hospital_patient of patientData?.hospital_patients) {
-            await insertPatientHospitalIdentifier(requestObject, hospital_patient, legacy_id);
+            logger.log('info', 'New patient detected; inserting into OpalDB.Patient_Hospital_Identifier');
+            for (const hospital_patient of patientData?.hospital_patients) {
+                await insertPatientHospitalIdentifier(requestObject, hospital_patient, legacy_id);
+            }
         }
-        // Register patient info to new backend
-        const registerData = getRegisterData(requestObject, legacy_id);
-        await opalRequest.registrationRegister(backendApiRequest, registerData);
+        else {
+            legacy_id = patientData.legacy_id;
+            logger.log('info', `Existing patient detected (legacy_id = ${legacy_id}); skipping inserts into OpalDB');`);
+        }
 
         // Before registering the patient, create their firebase user account with decrypted email and password
         // This is required to store their firebase UID as well
         let email = requestObject.Parameters.Fields.email;
         let uid = '';
-        if (requestObject.Parameters.Fields.accountExists == '0') {
+        if (requestObject.Parameters.Fields.accountExists === '0') {
             uid = await firebaseFunction.createFirebaseAccount(email, requestObject.Parameters.Fields.password);
             logger.log('info', `Created firebase user account: ${uid}`);
         } else {
             uid = await firebaseFunction.getFirebaseAccountByEmail(email);
             logger.log('info', `Got firebase user account: ${uid}`);
         }
+
+        // Register patient info to new backend
+        const registerData = formatRegisterData(requestObject, legacy_id, uid);
+        await opalRequest.registrationRegister(registrationCode, language, registerData);
 
         // Assign the unique ID and encrypted password to the request object
         requestObject.Parameters.Fields.uniqueId = uid;
@@ -97,12 +128,12 @@ exports.registerPatient = async function(requestObject) {
         return { Data: result };
     }
     catch (error) {
-        logger.log('error', `An error occurred while attempting to register patient (${requestObject.Parameters.Fields.email}): ${JSON.stringify(error)}`);
+        logger.log('error', `An error occurred while attempting to register patient (${requestObject.Parameters.Fields.email})`, error);
 
         // TODO: Make registration transactional; undo lasting changes after a registration failure (e.g. remove the patient from the DB and Firebase).
 
         // Avoid showing error details to frontend
-        throw {Response: 'error', Reason: 'Error during registering patient: See internal logs for details.'};
+        throw 'Error during patient registration. See internal logs for details.';
     }
 };
 
@@ -121,20 +152,24 @@ function validateRegisterPatientRequest(requestObject) {
     let fieldExists = (name) => { return requestObject.Parameters.Fields[name] && requestObject.Parameters.Fields[name] !== "" };
 
     let requiredFields = [
-        'email',
-        'password',
         'accessLevel',
         'accessLevelSign',
+        'accountExists',
         'answer1',
         'answer2',
         'answer3',
+        'email',
         'language',
+        'password',
+        'registrationCode',
         'securityQuestion1',
         'securityQuestion2',
         'securityQuestion3',
+        'securityQuestionText1',
+        'securityQuestionText2',
+        'securityQuestionText3',
         // typo in the frontend
         'termsandAggreementSign',
-        'registrationCode'
     ]
 
     for (let field of requiredFields) {
@@ -210,17 +245,18 @@ function postPromise(options) {
 function getEmailContent(language) {
     let data;
     let htmlStream;
+    const languageChoice = language.toUpperCase();
 
-    if (language == 'EN') {
+    if (languageChoice === 'EN') {
         data = require('../email/confirmation_en.json');
         htmlStream = fs.createReadStream(path.resolve(__dirname, '../email/confirmation_en.html'));
     }
-    else if (language == 'FR') {
+    else if (languageChoice === 'FR') {
         data = require('../email/confirmation_fr.json');
         htmlStream = fs.createReadStream(path.resolve(__dirname, '../email/confirmation_fr.html'));
     }
     else {
-        throw `No email content for language '${language}' available`;
+        throw `No email content for language '${languageChoice}' available`;
     }
 
     data.htmlStream = htmlStream
@@ -250,9 +286,10 @@ function validateRequest(requestObject, requiredFields) {
 }
 
 /**
- * @description getRegisterData.
+ * @description Formats the data expected by the backend API for completing registration.
  * @param {Object} requestObject - The calling request's requestObject.
  * @param {int} legacy_id - legacy patient id.
+ * @param {string} firebaseUsername - The caregiver's Firebase username.
  * @returns {Object} registerData {
         patient: {
 	 		legacy_id: int
@@ -270,7 +307,7 @@ function validateRequest(requestObject, requiredFields) {
  * }
  */
 
-function getRegisterData(requestObject, legacy_id) {
+function formatRegisterData(requestObject, legacy_id, firebaseUsername) {
     const registerData = {
         'patient': {
             'legacy_id': legacy_id,
@@ -278,18 +315,19 @@ function getRegisterData(requestObject, legacy_id) {
         'caregiver': {
             'language': requestObject.Parameters.Fields.language,
             'phone_number': requestObject.Parameters.Fields.phone,
+            'username': firebaseUsername,
         },
         'security_answers': [
             {
-                'question': requestObject.Parameters.Fields.securityQuestion1,
+                'question': requestObject.Parameters.Fields.securityQuestionText1,
                 'answer': requestObject.Parameters.Fields.answer1,
             },
             {
-                'question': requestObject.Parameters.Fields.securityQuestion2,
+                'question': requestObject.Parameters.Fields.securityQuestionText2,
                 'answer': requestObject.Parameters.Fields.answer2,
             },
             {
-                'question': requestObject.Parameters.Fields.securityQuestion3,
+                'question': requestObject.Parameters.Fields.securityQuestionText3,
                 'answer': requestObject.Parameters.Fields.answer3,
             },
         ],
@@ -305,13 +343,14 @@ function getRegisterData(requestObject, legacy_id) {
  */
 async function insertPatient(requestObject, patient) {
     if (!patient) {
-        const registrationCode = requestObject.Parameters.Fields.registrationCode;
+        const registrationCode = requestObject?.Parameters?.Fields?.registrationCode;
         throw `Failed to insert Patient to legacyDB due to Patient not exists with registrationCode: ${registrationCode}`;
     }
     requestObject.Parameters.Fields.firstName = patient.first_name;
     requestObject.Parameters.Fields.lastName = patient.last_name;
     requestObject.Parameters.Fields.sex = patient.sex;
     requestObject.Parameters.Fields.dateOfBirth = patient.date_of_birth;
+    requestObject.Parameters.Fields.ramq = patient.ramq;
     return await sqlInterface.insertPatient(requestObject);
 }
 

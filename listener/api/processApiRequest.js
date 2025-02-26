@@ -20,7 +20,6 @@ const LEGACYAPI = {
     // Deprecated API entry: 'Login'
     'Login': apiPatientUpdate.login,
     'Logout': apiPatientUpdate.logout,
-    'UserPatient': apiPatientUpdate.getUserPatient,
     'Refresh': apiPatientUpdate.refresh,
     'AccountChange': apiHospitalUpdate.accountChange,
     // Deprecated API entry: 'CheckCheckin'

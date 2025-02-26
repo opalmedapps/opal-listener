@@ -102,8 +102,6 @@ class RequestValidator {
 	 *       targets patient data); otherwise, this function resolves and the request can proceed.
 	 *       If the request has a TargetPatientID, two checks are performed: first, a legacy check for 'self'
 	 *       in the OpalDB, and second (if no match was found in OpalDB), an API check via the Django backend.
-	 *       NOTE!!! Calling the 'UserPatient' endpoint is a special case, where TargetPatientID gets assigned
-	 *       in this function. This needed to check SELF relationship permissions during login.
 	 * @param {Object} request The request to validate.
 	 * @param {string} request.meta.UserID The ID of the user making the request.
 	 * @param {number} [request.meta.TargetPatientID] The ID of the patient whose data is being requested, if this is
@@ -112,20 +110,6 @@ class RequestValidator {
 	 *                          Otherwise (if permissions fail), rejects with an error.
 	 */
 	static async validateRequestPermissions(request) {
-        // Add TargetPatientID to the request if the calling endpoint (a.k.a., RequestType) is the 'UserPatient'
-        // This will enforce permissions check via the new backend (Django)
-        if (request.type === 'UserPatient') {
-            try {
-                let patientSerNum = await sqlInterface.getSelfPatientSerNum(request.meta.UserID);
-                request.meta.TargetPatientID = patientSerNum;
-            }
-            catch (error) {
-                throw new Error(
-                    `Error during permissions validation for caregiver with Username = '${request.meta.UserID}': ${error} calling 'UserPatient' endpoint.`
-                );
-            }
-        }
-
         const logDetails = `caregiver with Username = '${request.meta.UserID}' requesting data from PatientSerNum = ${request.meta.TargetPatientID}`;
 
 		// Only perform validation on requests with a TargetPatientID

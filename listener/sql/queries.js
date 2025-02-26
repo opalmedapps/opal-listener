@@ -1,5 +1,6 @@
 /**
  * @desc Query that returns patient table fields based on a PatientSerNum.
+ * @deprecated Along with the Patient requestMapping in sqlInterface.
  * @returns {string} The query.
  */
 exports.patientTableFields=function()
