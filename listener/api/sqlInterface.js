@@ -1069,14 +1069,13 @@ function decodePostMessages(rows){
 // Also adds educational material category string based on category ID
 function getEducationTableOfContents(rows)
 {
-    var r = Q.defer();
-    var indexes = [];
-    var promises =[];
-    for (var i = rows.length-1; i >= 0; i--) {
+    let r = Q.defer();
+    let indexes = [];
+    let promises =[];
+    for (let i = rows.length-1; i >= 0; i--) {
         if(!rows[i].URL_EN || typeof rows[i].URL_EN == 'undefined'|| rows[i].URL_EN.length === 0)
         {
-            var array=[];
-            for (var j = rows.length-1; j >= 0; j--) {
+            for (let j = rows.length-1; j >= 0; j--) {
                 if(rows[j].EducationalMaterialSerNum == rows[i].EducationalMaterialSerNum && rows[j].EducationalMaterialControlSerNum !== rows[i].EducationalMaterialControlSerNum)
                 {
                     indexes.push(j);
@@ -1085,31 +1084,25 @@ function getEducationTableOfContents(rows)
         }
     }
     //Delete
-    for (var k = rows.length-1; k >= 0; k--) {
+    for (let k = rows.length-1; k >= 0; k--) {
         if(indexes.indexOf(k) !== -1)
         {
             rows.splice(k,1);
         }
     }
-    for (var l = 0; l < rows.length; l++) {
+    for (let l = 0; l < rows.length; l++) {
         promises.push(exports.runSqlQuery(queries.patientEducationalMaterialContents(),[rows[l].EducationalMaterialControlSerNum] ));
     }
-    Q.all(promises).then(
-        function(results){
-            for (var i = 0; i < results.length; i++) {
-                if(results[i].length !== 0)
-                {
-                    for (var j = 0; j < rows.length; j++) {
-                        // Add edu material category name based on its ID
-                        rows[j].Category = eduMaterialConfig.EDUMATERIAL_CATEGORY_ID_MAP[rows[j].EduCategoryId].toLowerCase();
+    Q.all(promises).then(function(results) {
+            rows.forEach(row => {
+                row.Category = eduMaterialConfig.EDUMATERIAL_CATEGORY_ID_MAP[row.EduCategoryId].toLowerCase();
 
-                        if(rows[j].EducationalMaterialControlSerNum ==results[i][0].ParentSerNum)
-                        {
-                            rows[j].TableContents = results[i];
-                        }
+                results.forEach(toc => {
+                    if (toc.length > 0 && toc[0].ParentSerNum == row.EducationalMaterialControlSerNum) {
+                        row.TableContents = toc;
                     }
-                }
-            }
+                })
+            });
             r.resolve(rows);
         }
     ).catch(function(error){r.reject(error);});
