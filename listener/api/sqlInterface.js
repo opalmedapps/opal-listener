@@ -52,6 +52,9 @@ const requestMappings =
             table: 'Document',
             serNum: 'DocumentSerNum'
         },
+        /**
+         * Deprecated
+         */
         'Doctors': {
             sql: queries.patientDoctorTableFields(),
             processFunction: loadImageDoctor,
@@ -74,6 +77,9 @@ const requestMappings =
             table: 'Notification',
             serNum: 'NotificationSerNum'
         },
+        /**
+         * Deprecated
+         */
         'Tasks': {
             sql: queries.patientTasksTableFields(),
             numberOfLastUpdated: 2
