@@ -14,7 +14,7 @@
  */
 
 const logger            = require('../logs/logger.js');
-const config            = require('../config.json');
+const config            = require('../config-adaptor');
 const admin             = require("firebase-admin");
 
 // Initialize firebase connection

@@ -1,8 +1,9 @@
-# TODO modify to support new folder structure (./src, ./src/config/config.json)
 FROM node:16.10.0-alpine3.14
 WORKDIR /app
-COPY ./listener/package*.json ./
+COPY ./package*.json ./
 # `--only=prod` Only install production dependencies
 RUN npm install --only=prod
-COPY ./listener .
 
+# Copy both code sources (legacy listener and new folder)
+COPY ./listener ./listener
+COPY ./src ./src

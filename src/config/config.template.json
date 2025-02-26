@@ -1,8 +1,8 @@
 {
   "FIREBASE": {
-    "DATABASE_URL": "<Url of the Firebase database to use>",
-    "ADMIN_KEY_PATH": "<Absolute path to DATABASE_URL's downloaded admin key>",
-    "ROOT_BRANCH": "<Branch to use as the root of the Firebase database>",
-    "ENABLE_LOGGING": "<Boolean indicating whether to enable Firebase logging (value 'true' recommended for debugging only)>"
+    "DATABASE_URL": "<[String] Url of the Firebase database to use>",
+    "ADMIN_KEY_PATH": "<[String] Absolute path (or docker app path) to DATABASE_URL's downloaded admin key>",
+    "ROOT_BRANCH": "<[String] Branch to use as the root of the Firebase database>",
+    "ENABLE_LOGGING": "<[Boolean, no quotes] Whether to enable Firebase logging (value 'true' recommended for debugging only)>"
   }
 }

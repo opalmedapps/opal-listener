@@ -19,11 +19,13 @@ These are the requirements to run a local listener app. The second requirement i
 The project contains a `Dockerfile` and  `docker.compose.yml` files to build and run the app within a Docker container. Either for production like setup or development using a local volume.
 
 ##### Step 1 | Add Firebase configuration
-Copy your firebase admin key file in the `listener/firebase` directory located at the root of the project.
+Copy your firebase admin key file into the `src/config/firebase` directory.
 > The content of this directory is ignore by versioning
 
 ##### Step 2 | App configuration
-Copy and rename `config_template.json` to `config.json`. Then edit the required fields. You should at least need to change these fields:
+Copy and rename `listener/config_template.json` to `listener/config.json`.
+Also copy and rename `src/config/config.template.json` to `src/config/config.json`.
+Then edit the required fields. Across both files, you should at least need to change these fields:
 ```
 MYSQL_USERNAME: "The database user name",
 MYSQL_PASSWORD: "The database password",
@@ -32,10 +34,15 @@ MYSQL_DATABASE_QUESTIONNAIRE: "The name of the QuestionnaireDB",
 MYSQL_DATABASE_PORT: "3306",
 MYSQL_DATABASE_HOST: "host.docker.internal",
 HOST: "host.docker.internal",
-FIREBASE_ADMIN_KEY: "/app/firebase/THE_NAME_OF_YOU_FIRE.json,
-DATABASE_URL: "This value can be found in the web_config.txt file in your firebase folder",
-LATEST_STABLE_VERSION: "0.0.1",
-FIREBASE_ROOT_BRANCH: "dev3/A0",
+"LATEST_STABLE_VERSION": "0.0.1"
+```
+```
+"FIREBASE": {
+  DATABASE_URL: "This value can be found in the web_config.txt file in your firebase folder",
+  ADMIN_KEY_PATH: "/app/src/config/firebase/NAME_OF_YOUR_ADMIN_KEY_FILE.json,
+  ROOT_BRANCH: "dev3/A0",
+  ENABLE_LOGGING: false
+}
 ```
 
 > Leave all other variables blank by setting them to empty double quotes: ""

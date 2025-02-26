@@ -2,6 +2,7 @@
 listener/config.json
 listener/firebase/*
 src/config/config.json
+src/config/firebase/
 
 # Generated documentation
 docs/generated
