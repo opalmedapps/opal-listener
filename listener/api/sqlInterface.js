@@ -239,12 +239,8 @@ function processSelectRequest(table, userId, timestamp) {
         date=new Date(Number(timestamp));
     }
 
-    const paramArray = [userId];
-    if(requestMappingObject.numberOfLastUpdated>0){
-        for (let i = 0; i < requestMappingObject.numberOfLastUpdated; i++) {
-            paramArray.push(date);
-        }
-    }
+    let paramArray = [userId];
+    paramArray = utility.addSeveralToArray(paramArray, date, requestMappingObject.numberOfLastUpdated);
 
     // Request mappings with a 'module' attribute use request handlers in the `listener/api/modules` folder
     if (requestMappingObject.hasOwnProperty('module')) {
