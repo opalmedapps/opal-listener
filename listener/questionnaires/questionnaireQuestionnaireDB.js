@@ -271,7 +271,8 @@ function saveAnswer(isoLang, param, appVersion, respondentUsername) {
             if (!questionnaireValidation.hasValidProcedureStatusAndInsertId(queryResult)) {
 
                 logger.log("error", "Error saving answer: query unsuccessful", queryResult);
-                r.reject(new Error('Error saving answer: query unsuccessful'));
+                let cause = getProcedureCode(queryResult);
+                r.reject(new Error('Error saving answer: query unsuccessful', {cause}));
             } else {
                 answerId = queryResult[queryResult.length - 2][0].inserted_answer_id;
 
@@ -475,12 +476,27 @@ async function updateQuestionnaireStatusInQuestionnaireDB(answerQuestionnaireId,
         const queryResult = await runQuery(questionnaireQueries.updateAnswerQuestionnaireStatus(), [answerQuestionnaireId, newStatus, respondentUsername, appVersion, userDisplayName]);
         if (!questionnaireValidation.hasValidProcedureStatus(queryResult)) {
             logger.log("error", "Error updating the questionnaire status: query unsuccessful", queryResult);
-            throw new Error('Error updating the questionnaire status: query unsuccessful');
+            let cause = getProcedureCode(queryResult);
+            throw new Error('Error updating the questionnaire status: query unsuccessful', {cause});
         } else {
             return isCompleted;
         }
     } catch (error) {
         logger.log("error", `Error updating the questionnaire status`, error);
-        return error;
+        throw error;
+    }
+}
+
+/**
+ * @desc Reads the procedure_status returned in a query result, if it exists.
+ * @param queryResult The result returned from running a questionnaires procedure in the database.
+ * @returns {number|undefined} The procedure_status from the query result, or undefined if it's not found.
+ */
+function getProcedureCode(queryResult) {
+    try {
+        return queryResult[0][0].procedure_status;
+    }
+    catch(error) {
+        return undefined;
     }
 }
