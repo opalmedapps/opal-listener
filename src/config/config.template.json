@@ -4,5 +4,9 @@
     "ADMIN_KEY_PATH": "<[String] Absolute path (or docker app path) to DATABASE_URL's downloaded admin key>",
     "ROOT_BRANCH": "<[String] Branch to use as the root of the Firebase database>",
     "ENABLE_LOGGING": "<[Boolean, no quotes] Whether to enable Firebase logging (value 'true' recommended for debugging only)>"
+  },
+  "OPAL_BACKEND": {
+    "HOST": "http://host.docker.internal:8000",
+    "AUTH_TOKEN": "Token TOKEN_"
   }
 }

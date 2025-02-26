@@ -6,7 +6,7 @@
 const CryptoJs = require('crypto-js');
 
 /**
- * Request fir the new Django API
+ * Request for the new Django API
  */
 const requestDataApi = {
     AppVersion: '100.100.100',
@@ -16,9 +16,8 @@ const requestDataApi = {
     UserID: 'JUYxJadQuhhOkC1TfrAqD4crhi73',
     Parameters: {
         method: 'get',
-        url: 'http://host.docker.internal:8000/api/sites',
+        url: '/api/sites',
         headers: {
-            Authorization: 'Token 7485eb68cc578e4b8a171af2849b63a7112e3b00',
             'Content-Type': 'application/json',
             'Accept-Language': 'fr',
         },
