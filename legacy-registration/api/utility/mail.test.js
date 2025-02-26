@@ -22,11 +22,11 @@ describe('sendmail()', function () {
     let testAccount = await nodemailer.createTestAccount();
 
     let result = await sendMail({
-      host: testAccount.smtp.host,
-      port: testAccount.smtp.port,
-      username: testAccount.user,
-      password: testAccount.pass,
-      from: 'Opal sendmail test <test@opalmedapps.ca>',
+      SMTP_HOST: testAccount.host,
+      SMTP_PORT: testAccount.port,
+      SMTP_USERNAME: testAccount.user,
+      SMTP_PASSWORD: testAccount.pass,
+      SMTP_FROM: 'Opal sendmail test <test@opalmedapps.ca>',
     }, 'test@opalmedapps.ca', 'test', 'test email');
 
     // verify that the response code is 250
