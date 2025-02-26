@@ -80,7 +80,7 @@ function patientAppointmentTableFields(selectOne) {
                 Appt.ScheduledEndTime,
                 Appt.Checkin,
                 Appt.SourceDatabaseSerNum,
-                Appt.AppointmentAriaSer,
+                Appt.SourceSystemID,
                 JSON_CONTAINS(Appt.ReadBy, ?) as ReadStatus,
                 Appt.Status,
                 IfNull(Appt.RoomLocation_EN, '') AS RoomLocation_EN,
