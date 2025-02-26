@@ -34,9 +34,9 @@ class SimulateRequest {
     #requestData;
 
     /**
-     * @description User sernum use for testing purpose only.
+     * @description User's Firebase UID used for testing purposes only.
      */
-    #testUserSerNum = 51;
+    #testUsername = process.env.TEST_ACCOUNT_FIREBASE_UID;
 
     /**
      * @description Firebase manager instance use for uploading and set timestamp.
@@ -60,6 +60,7 @@ class SimulateRequest {
      *              Mock request data is located in `./mock-request.js`
      */
     constructor(requestData) {
+        if (!this.#testUsername) throw new Error('TEST_ACCOUNT_FIREBASE_UID must be set in the .env file');
         this.#firebaseConfig = firebaseConfig;
         this.#requestData = requestData;
         this.#requestData.Timestamp = Firebase.getDatabaseTimeStamp;
@@ -131,10 +132,10 @@ class SimulateRequest {
      */
     async encryptApiRequest() {
         const sqlResponse = await legacyOpalSqlRunner.OpalSQLQueryRunner.run(
-            SimulateRequest.getQuery(this.#testUserSerNum),
+            SimulateRequest.getDeviceIdAndAnswer(this.#testUsername),
         );
         const hash = EncryptionUtilities.hash(this.#requestData.UserID);
-        const secret = sqlResponse[0].AnswerText;
+        const secret = sqlResponse[0].SecurityAnswer;
         const encryptedData = await legacyUtility.encrypt(
             {
                 request: this.#requestData.Request,
@@ -165,29 +166,26 @@ class SimulateRequest {
     }
 
     /**
-     * @param {number} userSerNum - Test user sernum.
+     * @description Query that returns the most recent device ID and associated security answer for a given user.
+     * @param {string} username The Firebase UID of the user.
      * @returns {object} The latest deviceID used to login and the related security question answer for encryption.
      */
-    // TODO fix this
-    static getQuery(userSerNum) {
+    static getDeviceIdAndAnswer(username) {
         return mysql.format(`
             SELECT
                 PDI.DeviceId,
-                SA.AnswerText
+                PDI.SecurityAnswer
             FROM
-                PatientDeviceIdentifier PDI,
-                SecurityAnswer SA
+                PatientDeviceIdentifier PDI
             WHERE
-                PDI.PatientSerNum = ?
-            AND
-                PDI.SecurityAnswerSerNum = SA.SecurityAnswerSerNum
+                PDI.Username = ?
             ORDER BY PDI.LastUpdated DESC
             LIMIT 1
-        `, [userSerNum]);
+        `, [username]);
     }
 }
 
 // Create a new instance with a default mock request to be able to run the script via a npm command
-new SimulateRequest(DefaultRequestData.requestRegistrationApi);
+new SimulateRequest(DefaultRequestData.requestDataApi);
 
 exports.SimulateRequest = SimulateRequest;

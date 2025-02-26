@@ -12,7 +12,7 @@ const requestDataApi = {
     AppVersion: '100.100.100',
     Request: 'api',
     DeviceId: '',
-    UserID: 'JUYxJadQuhhOkC1TfrAqD4crhi73',
+    UserID: process.env.TEST_ACCOUNT_FIREBASE_UID,
     Parameters: {
         method: 'get',
         url: '/api/app/home',
@@ -71,7 +71,7 @@ const requestData = {
     RequestType: 'LEGACY',
     Request: 'DeviceIdentifier',
     DeviceId: '',
-    UserID: 'JUYxJadQuhhOkC1TfrAqD4crhi73',
+    UserID: process.env.TEST_ACCOUNT_FIREBASE_UID,
     Parameters: {
         deviceType: 'browser',
         registrationId: '',
