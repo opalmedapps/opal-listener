@@ -20,13 +20,11 @@ class GetSecurityQuestionAnswerListRequestHandler extends ApiRequestHandler{
         let securityQuestionForLowerVersion = [];
         let questionIdObj = {}
 
-        apiResponse = await SecurityDjango.getSecurityQuestionList(requestObject.meta.UserID);
-        if (apiResponse.length === 0) throw "API call returned a empty list of questions for the current user";
-        securityQuestionList = apiResponse.results;
+        securityQuestionList = await SecurityDjango.getSecurityQuestionList(requestObject.meta.UserID);
+        if (securityQuestionList.length === 0) throw "API call returned a empty list of questions for the current user";
 
-        apiResponse = await SecurityDjango.getActiveSecurityQuestions();
-        if (apiResponse.length === 0) throw "API call returned a empty list of all the active questions";
-        activeSecurityQuestions = apiResponse.results;
+        activeSecurityQuestions = await SecurityDjango.getActiveSecurityQuestions();
+        if (activeSecurityQuestions.length === 0) throw "API call returned a empty list of all the active questions";
 
         // Getting security question list format read by the app has changed after 1.12.2
         if (Version.versionLessOrEqual(requestObject.meta.AppVersion, Version.version_1_12_2)) {
