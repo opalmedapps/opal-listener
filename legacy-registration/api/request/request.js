@@ -114,6 +114,7 @@ class opalRequest {
 	 @desc call the new backend api 'registration/<std:code>/register/.
 	 @param {string} registrationCode The user's registration code.
 	 @param {string} language The user's selected language.
+	 @param {object} registerData The registration data formatted for the API.
 	 @param request, registerData
 	 request = {
 	 	registrationCode: str,
