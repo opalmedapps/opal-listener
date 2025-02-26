@@ -566,7 +566,7 @@ async function getMRNs(patientSerNum) {
  * @param appointmentSerNumArray
  */
 async function setCheckInUsername(requestObject, appointmentSerNumArray) {
-    await exports.runSqlQuery(queries.setCheckInUsername(), [requestObject.UserID, appointmentSerNumArray]);
+    await exports.runSqlQuery(queries.setCheckInUsername(), [requestObject.UserID, [appointmentSerNumArray]]);
 }
 
 /**
