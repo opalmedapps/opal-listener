@@ -119,11 +119,6 @@ const requestMappings =
     };
 
 /**
- * @desc Used in omitParametersFromLogs below.
- */
-const always = () => true;
-
-/**
  * @desc List of request types for which to omit parameters in PatientActivityLog.
  *       This is done to avoid logging sensitive information, such as passwords or security answers.
  *       Each key is the name of a request type. The value represents a test. If the test returns true,
@@ -132,11 +127,11 @@ const always = () => true;
  */
 const omitParametersFromLogs = {
     AccountChange: params => params.FieldToChange === 'Password',
-    Feedback: always,
-    QuestionnaireSaveAnswer: always,
-    SecurityQuestion: always,
-    UpdateSecurityQuestionAnswer: always,
-    VerifyAnswer: always,
+    Feedback: () => true,
+    QuestionnaireSaveAnswer: () => true,
+    SecurityQuestion: () => true,
+    UpdateSecurityQuestionAnswer: () => true,
+    VerifyAnswer: () => true,
 }
 
 
