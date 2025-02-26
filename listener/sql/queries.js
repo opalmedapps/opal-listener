@@ -22,9 +22,23 @@ exports.patientDoctorTableFields=function()
 	return "SELECT ifnull(D.FirstName, '') FirstName, ifnull(D.LastName, '') LastName, D.DoctorSerNum, PD.PrimaryFlag, PD.OncologistFlag, ifnull(D.Email, '') Email, ifnull(D.Phone, '') Phone, ifnull(D.ProfileImage, '') ProfileImage, ifnull(D.Address, '') Address,	ifnull(D.BIO_EN, '') Bio_EN, ifnull(D.BIO_FR, '') Bio_FR FROM Doctor D, PatientDoctor PD, Patient P, Users U WHERE U.Username Like ? AND P.PatientSerNum=U.UserTypeSerNum AND PD.PatientSerNum = P.PatientSerNum AND D.DoctorSerNum = PD.DoctorSerNum AND (D.LastUpdated > ? OR PD.LastUpdated > ?);";
 };
 
+/**
+ * @description Returns a query to get the patient's diagnoses.
+ * @returns {string} The requested query.
+ */
 exports.patientDiagnosisTableFields=function()
 {
-   return "SELECT D.CreationDate, getDiagnosisDescription(D.DiagnosisCode,'EN') Description_EN, getDiagnosisDescription(D.DiagnosisCode,'FR') Description_FR FROM Diagnosis D, Patient P, Users U WHERE U.UserTypeSerNum=P.PatientSerNum AND D.PatientSerNum = P.PatientSerNum AND U.Username Like ? AND D.LastUpdated > ?;";
+    return `SELECT
+                D.DiagnosisSerNum,
+                D.CreationDate,
+                getDiagnosisDescription(D.DiagnosisCode,'EN') Description_EN,
+                getDiagnosisDescription(D.DiagnosisCode,'FR') Description_FR
+            FROM Diagnosis D, Patient P, Users U
+            WHERE U.UserTypeSerNum = P.PatientSerNum
+              AND D.PatientSerNum = P.PatientSerNum
+              AND U.Username LIKE ?
+              AND D.LastUpdated > ?
+            ;`
 };
 
 exports.patientMessageTableFields=function()
