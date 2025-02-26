@@ -343,23 +343,3 @@ function validateRequest(requestObject, requiredFields) {
         }
     }
 }
-
-/*
- * Recursive function that sanitize the data
- * @params  array to sanitize
- * @return  array sanitized
- * */
-function arraySanitization(arrayForm) {
-    let sanitizedArray = [];
-    for (let key in arrayForm) {
-        key = key.replace('/[\x00-\x1F\x7F\xA0]/u', '');
-        let value = arrayForm[key];
-        if (Array.isArray(value)) {
-            value = arraySanitization(value);
-        } else {
-            value = value.replace('/[\x00-\x1F\x7F\xA0]/u', '');
-        }
-        sanitizedArray[key] = value;
-    }
-    return sanitizedArray;
-}
