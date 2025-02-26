@@ -10,6 +10,8 @@ const requestUtility = require("../utility/request-utility");
 exports.getQuestionnaireInOpalDB = getQuestionnaireInOpalDB;
 exports.getQuestionnaireList = getQuestionnaireList;
 exports.getQuestionnaire = getQuestionnaire;
+exports.getQuestionnairePurpose = getQuestionnairePurpose;
+exports.getQuestionnaireUnreadNumber = getQuestionnaireUnreadNumber;
 exports.questionnaireSaveAnswer = questionnaireSaveAnswer;
 exports.questionnaireUpdateStatus = questionnaireUpdateStatus;
 
@@ -63,15 +65,27 @@ function getQuestionnaireInOpalDB(requestObject) {
  */
 function getQuestionnaireList(requestObject) {
 
+    if (!questionnaireValidation.validateQuestionnairePurpose(requestObject)) {
+        const paramErrMessage = "Error getting questionnaire list: the requestObject does not have the correct parameter purpose";
+        logger.log("error", paramErrMessage);
+        return Promise.reject(new Error(paramErrMessage));
+    }
+
     return OpalSQLQueryRunner.run(opalQueries.patientTableFieldsForUser(), [requestObject.UserID])
         .then(function (patientSerNumAndLanguageRow) {
 
             if (questionnaireValidation.validatePatientSerNumAndLanguage(patientSerNumAndLanguageRow)) {
+                const lastUpdated = requestObject.params.Date ? new Date(Number(requestObject.params.Date)) : 0;
                 // get questionnaire list
-                return questionnaires.getQuestionnaireList(patientSerNumAndLanguageRow[0]);
+                return questionnaires.getQuestionnaireList(
+                    patientSerNumAndLanguageRow[0],
+                    requestObject.Parameters.purpose,
+                    lastUpdated
+                );
             } else {
-                logger.log("error", "Error getting questionnaire list: No matching PatientSerNum or/and Language found in opalDB");
-                throw new Error('Error getting questionnaire list: No matching PatientSerNum or/and Language found in opalDB');
+                const questionnaireSerNumLanguageErrMessage = "Error getting questionnaire list: No matching PatientSerNum or/and Language found in opalDB";
+                logger.log("error", questionnaireSerNumLanguageErrMessage);
+                throw new Error(questionnaireSerNumLanguageErrMessage);
             }
         })
         .then(function (result) {
@@ -93,7 +107,7 @@ function getQuestionnaireList(requestObject) {
  */
 async function getQuestionnaire(requestObject) {
     // check argument
-    if (!questionnaireValidation.validatingPatientQuestionnaireSerNum(requestObject)) {
+    if (!questionnaireValidation.validatePatientQuestionnaireSerNum(requestObject)) {
         throw new Error('Error getting questionnaire: the requestObject does not have the required parameter qp_ser_num');
     }
     let language = await getQuestionnaireLanguage(requestObject);
@@ -102,6 +116,67 @@ async function getQuestionnaire(requestObject) {
     return {
         Data: await questionnaires.getQuestionnaire(language, requestObject.Parameters.qp_ser_num),
     };
+}
+
+/**
+ * getQuestionnairePurpose
+ * @desc Returns a promise containing the purpose of a given questionnaire.
+ * @param {object} requestObject
+ * @return {Promise} Returns a promise that contains the questionnaire purpose.
+ */
+function getQuestionnairePurpose(requestObject) {
+    if (!questionnaireValidation.validatePatientQuestionnaireSerNum(requestObject)) {
+        const paramErrMessage = "Error getting questionnaire purpose: the requestObject does not have the correct parameter qp_ser_num";
+        logger.log("error", paramErrMessage);
+        return Promise.reject(new Error(paramErrMessage));
+    }
+
+    return questionnaires.getQuestionnairePurpose(requestObject.Parameters.qp_ser_num)
+        .then(function (result) {
+            let obj = {};
+            obj.Data = result;
+            return obj;
+        })
+        .catch(function (error) {
+            logger.log("error", "Error getting questionnaire purpose", error);
+            throw new Error(error);
+        });
+}
+
+/**
+ * getQuestionnaireUnreadNumber
+ * @desc Returns a promise containing the number of unread (e.g. 'New') questionnaires of a given purpose for a particular user.
+ * @param {object} requestObject
+ * @return {Promise} Returns a promise that contains the number of unread questionnaires
+ */
+function getQuestionnaireUnreadNumber(requestObject) {
+
+    if (!questionnaireValidation.validateQuestionnairePurpose(requestObject)) {
+        const paramErrMessage = "Error getting number of unread questionnaires: the requestObject does not have the correct parameter purpose";
+        logger.log("error", paramErrMessage);
+        return Promise.reject(new Error(paramErrMessage));
+    }
+
+    return OpalSQLQueryRunner.run(opalQueries.getPatientSerNumFromUserID(), [requestObject.UserID])
+        .then(function (patientSerNum) {
+            if (questionnaireValidation.validatePatientSerNum(patientSerNum)) {
+                // get number of unread questionnaires
+                return questionnaires.getQuestionnaireUnreadNumber(patientSerNum[0], requestObject.Parameters.purpose);
+            } else {
+                const unreadNumberErrMessage = "Error getting number of unread questionnaires: No matching PatientSerNum found in opalDB";
+                logger.log("error", unreadNumberErrMessage);
+                throw new Error(unreadNumberErrMessage);
+            }
+        })
+        .then(function (result) {
+            let obj = {};
+            obj.Data = result;
+            return obj;
+        })
+        .catch(function (error) {
+            logger.log("error", "Error getting number of unread questionnaires", error);
+            throw new Error(error);
+        });
 }
 
 /*
@@ -134,7 +209,9 @@ async function questionnaireSaveAnswer(requestObject) {
 async function questionnaireUpdateStatus(requestObject) {
     // Validate the parameters
     if (!questionnaireValidation.validateParamUpdateStatus(requestObject)) {
-        throw new Error('Error updating status: the requestObject does not have the required parameters');
+        const paramErrMessage = "Error updating status: the requestObject does not have the required parameters";
+        logger.log("error", paramErrMessage);
+        throw new Error(paramErrMessage);
     }
 
     // 1. update the status in the answerQuestionnaire table in questionnaire DB
