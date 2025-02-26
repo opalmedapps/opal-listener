@@ -25,7 +25,6 @@ module.exports.CHECKIN_PATH = process.env.CHECKIN_PATH;
 module.exports.CHECKIN_ROOM = process.env.CHECKIN_ROOM;
 module.exports.LAB_RESULT_HISTORY = process.env.LAB_RESULT_HISTORY;
 module.exports.QUESTIONNAIRE_COMPLETED_PATH = process.env.QUESTIONNAIRE_COMPLETED_PATH;
-module.exports.MYSQL_DATABASE_REGISTRATION = process.env.MYSQL_DATABASE_REGISTRATION;
 module.exports.LATEST_STABLE_VERSION = process.env.LATEST_STABLE_VERSION;
 // ORMS settings API
 module.exports.ORMS_API_URL = process.env.ORMS_API_URL;
