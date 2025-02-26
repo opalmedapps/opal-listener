@@ -23,7 +23,7 @@ Copy your firebase admin key file in the `listener/firebase` directory located a
 > The content of this directory is ignore by versioning
 
 ##### Step 2 | App configuration
-Copy and rename `config_template.json` to `config.json`. Then edit the require fields. You should at least need to change these fields:
+Copy and rename `config_template.json` to `config.json`. Then edit the required fields. You should at least need to change these fields:
 ```
 MYSQL_USERNAME: "The database user name",
 MYSQL_PASSWORD: "The database password",
@@ -57,12 +57,12 @@ To build the Docker image and run the container, running the following command a
 docker compose up 
 ```
 
-The project also contains a `docker-compose.prod.ylm` This file is used to build an image and a container with an attached volume and a different start command. You can use this file should you want a none developpement set up. To use this file run the command:
+The project also contains a `docker-compose.prod.yml` This file is used to build an image and a container with an attached volume and a different start command. You can use this file should you want a non-developpement set up. To use this file run the command:
 ```
 docker compose -f docker-compose.prod.yml up --build
 ```
 
-> More informations about Docker compose can be found [here](https://docs.docker.com/compose/)
+> More information about Docker compose can be found [here](https://docs.docker.com/compose/)
 
 
 ### Installing with NodeJs
