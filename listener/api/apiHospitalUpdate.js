@@ -66,4 +66,3 @@ exports.studyUpdateStatus = function (requestObject)
 {
   sqlInterface.studyUpdateStatus(requestObject);
 };
-
