@@ -28,7 +28,8 @@ class PatientTestTypeResultsHandler extends ApiRequestHandler {
 		const testTypeSerNum = requestObject.parameters.testTypeSerNum;
 		const patient = await PatientTestTypeResultsHandler.getTargetPatient(requestObject);
 		const patientTests = new PatientTestResult(patient);
-		const latestPatientTestResultByType = await patientTests.getLatestTestResultByTestType(testTypeSerNum);
+		const userId = requestObject.meta.UserID;
+		const latestPatientTestResultByType = await patientTests.getLatestTestResultByTestType(userId, testTypeSerNum);
 		if(!latestPatientTestResultByType) return {"data": null};
 		const testValues = await patientTests.getTestResultValuesByTestType(testTypeSerNum);
 		const hasNumericValues = testValues.every(row=>row.testValueNumeric != null);
