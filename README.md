@@ -48,7 +48,8 @@ LATEST_STABLE_VERSION: "0.0.1"
 ```
 
 ```
-src/config/config.json
+.env (fill out missing fields according to the instructions)
+
 # FIREBASE_DATABASE_URL can be found in the web_config.txt file in your firebase folder
 FIREBASE_DATABASE_URL=
 # See comment below for FIREBASE_ADMIN_KEY_PATH
@@ -61,7 +62,7 @@ OPAL_BACKEND_AUTH_TOKEN=
 
 ```
 
-> ADMIN_KEY_PATH: If you intend to run the listener in Docker, use "/app/src/config/firebase/NAME_OF_YOUR_ADMIN_KEY_FILE.json".
+> FIREBASE_ADMIN_KEY_PATH: If you intend to run the listener in Docker, use "/app/src/config/firebase/NAME_OF_YOUR_ADMIN_KEY_FILE.json".
 > If you intend to run the listener using Node.js, use the absolute path to the Firebase admin key file on your computer (using forward slashes, not backslashes).
 
 > Leave all other variables blank by setting them to empty double quotes (for config.json only, all settings in .env must be non-blank): ""
@@ -80,7 +81,7 @@ npm install
 ###### Step 4.1 (option) | Running in Docker
 The project contains a `Dockerfile` and  `docker.compose.yml` files to build and run the app within a Docker container, either for a production-like setup or development using a local volume.
 
-Make sure you've filled out the `ADMIN_KEY_PATH` config with the correct value for running the listener in Docker.
+Make sure you've filled out the `FIREBASE_ADMIN_KEY_PATH` config with the correct value for running the listener in Docker.
 
 To build the Docker image and run the container, running the following command at the root of the project
 ```
@@ -95,7 +96,7 @@ docker compose -f docker-compose.prod.yml up --build
 > More information about Docker compose can be found [here](https://docs.docker.com/compose/)
 
 ###### Step 4.2 (option) | Running with Node.js
-Make sure you've filled out the `ADMIN_KEY_PATH` config with the correct value for running the listener with Node.js.
+Make sure you've filled out the `FIREBASE_ADMIN_KEY_PATH` config with the correct value for running the listener with Node.js.
 
 Run the following command at the root of the project.
 
