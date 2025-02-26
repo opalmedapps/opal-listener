@@ -550,7 +550,7 @@ exports.checkIn = async function (requestObject) {
 
 /**
  * @description Calls the system to check the patient in
- *              ORMS expects: mrn, site, room, checkin_type (APP/KIOSK/VWR/SMS)
+ *              ORMS expects: mrn, site, room, checkinType (APP/KIOSK/VWR/SMS)
  *              Source Systems typically expect: appointmentId, location
  *              Opal expects: source_system_id, source_database
  * Note: ORMS by default checkins all appointments for today for the patient. Opal backend & source system do single appointment checkin.
@@ -571,7 +571,7 @@ async function checkInToSystem(mrn, mrnSite, url, sourceSystemSerNum, sourceSyst
             "mrn": mrn,
             "site": mrnSite,
             "room": config.CHECKIN_ROOM,
-            "checkin_type": "APP",
+            "checkinType": "APP",
         };
     } else if (targetSystem === "SOURCE") {
         // Source does single appointment checkin
