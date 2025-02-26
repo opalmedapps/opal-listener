@@ -37,13 +37,13 @@ describe('sendmail()', function () {
     // create test account for etheral.email
     let testAccount = await nodemailer.createTestAccount();
 
-    let result = await sendMail(
-        testAccount,
-        'test@opalmedapps.ca',
-        'test',
-        'test email',
-        '<b>html test</b>'
-    );
+    let result = await sendMail({
+      SMTP_HOST: testAccount.smtp.host,
+      SMTP_PORT: testAccount.smtp.port,
+      SMTP_USERNAME: testAccount.user,
+      SMTP_PASSWORD: testAccount.pass,
+      SMTP_FROM: 'Opal sendmail test <test@opalmedapps.ca>',
+    }, 'test@opalmedapps.ca', 'test', 'test email', '<b>html test</b>');
 
     // verify that the response code is 250
     expect(result.response).to.be.a('string').and.satisfy(response => response.startsWith('250'));
