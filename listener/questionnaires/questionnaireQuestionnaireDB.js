@@ -76,7 +76,7 @@ async function getQuestionnaireList(opalPatientSerNumAndLanguage, userId, purpos
         patientSerNum,
         findPurposeId(purpose),
         opalPatientSerNumAndLanguage.Language,
-        possibleRespondentIds.join('|'),  // Possible respondent ids must be passed as a string
+        `|${possibleRespondentIds.join('|')}|`,  // Possible respondent ids must be passed as a string separated and framed by pipe characters
     ]
 
     let queryResult = await runQuery(questionnaireQueries.getQuestionnaireListQuery(), params);
