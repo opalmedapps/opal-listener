@@ -23,8 +23,8 @@ const ENVIRONMENT = {
     FEEDBACK_EMAIL_HOST: process.env.FEEDBACK_EMAIL_HOST,
     FEEDBACK_EMAIL_PORT: process.env.FEEDBACK_EMAIL_PORT,
     OPAL_CHECKIN_URL: process.env.OPAL_CHECKIN_URL,
-    ORMS_ENABLED: process.env.ORMS_ENABLED,
-    SOURCE_SYSTEM_SUPPORTS_CHECKIN: process.env.SOURCE_SYSTEM_SUPPORTS_CHECKIN,
+    ORMS_ENABLED: process.env.ORMS_ENABLED === '1',
+    SOURCE_SYSTEM_SUPPORTS_CHECKIN: process.env.SOURCE_SYSTEM_SUPPORTS_CHECKIN === '1',
 };
 
 /**
@@ -39,7 +39,7 @@ const ENVIRONMENT_ORMS = {
  * @description The list of .env variables for configuring the listener
  * that are required when SOURCE_SYSTEM_SUPPORTS_CHECKIN=1
  */
-const ENVIRONMENT_CHECKIN = {
+const ENVIRONMENT_SOURCE_SYSTEM_CHECKIN = {
     SOURCE_SYSTEM_CHECKIN_URL: process.env.SOURCE_SYSTEM_CHECKIN_URL,
 };
 
@@ -67,7 +67,7 @@ function validateEnvironment(processArr) {
 
 module.exports = {
     ENVIRONMENT,
-    ENVIRONMENT_CHECKIN,
+    ENVIRONMENT_SOURCE_SYSTEM_CHECKIN,
     ENVIRONMENT_ORMS,
     FIREBASE_CONFIG,
     validateEnvironment,

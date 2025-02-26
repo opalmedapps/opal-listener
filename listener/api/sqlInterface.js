@@ -578,7 +578,7 @@ async function checkInToSystem(mrn, mrnSite, url, sourceSystemSerNum, sourceSyst
         // Source does single appointment checkin
         data = {
             "appointmentId": sourceSystemID,
-            "location": config.FEEDBACK_EMAIL_PORT,
+            "location": config.CHECKIN_ROOM,
         };
     } else {
         // Opal does single appointment checkin
