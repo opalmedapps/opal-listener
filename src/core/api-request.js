@@ -37,7 +37,7 @@ class ApiRequest {
         legacyLogger.log('debug', 'API: Sending request to Opal API');
         const requestParams = parameters;
         requestParams.headers.Authorization = `Token ${configs.OPAL_BACKEND.AUTH_TOKEN}`;
-        requestParams.headers.UserId = userId;
+        requestParams.headers.appUserId = userId;
         requestParams.url = `${configs.OPAL_BACKEND.HOST}${parameters.url}`;
         if (parameters.data !== undefined) requestParams.data = parameters.data;
 
