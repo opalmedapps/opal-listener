@@ -21,7 +21,8 @@ class FileRequest {
      */
     getFileBase64() {
         return new Promise((resolve, reject) => {
-            request.get(this._url, function (error, response, body) {
+            // The url must be encoded to work with non-standard characters (such as French characters)
+            request.get(encodeURI(this._url), function (error, response, body) {
                 if (error) reject(error);
                 else if (response.statusCode === 200) {
                     let data = {
