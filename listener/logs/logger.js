@@ -1,6 +1,6 @@
 /*
  * Filename     :   logger.js
- * Description  :   This file intiliazes the logger for Opal.
+ * Description  :   This file initializes the logger for the listener.
  * Created by   :   David Herrera, Robert Maglieri
  * Date         :   22 Mar 2017
  * Copyright    :   Copyright 2016, HIG, All rights reserved.
@@ -10,7 +10,7 @@
 
 const {createLogger, format, transports} = require('winston');
 
-// Choose log level according to environement.
+// Choose log level according to the environment
 const LoggerLevel = process.env.NODE_ENV === 'production' ? 'info' : 'debug';
 
 // Set custom format for login.
@@ -20,7 +20,7 @@ const opalLogFormat = format.printf((info) => {
     return `${timestamp} - ${level.toUpperCase()}: ${message}${formattedData ? `: ${formattedData}` : ''}`;
 });
 
-// Format error data according to data type passed to the logger wraper
+// Format error data according to data type passed to the logger wrapper
 const formatErrorData = (data) => {
     if (typeof data === 'undefined') return '';
     else if (data instanceof Error) return `${data}${data.cause ? `: ${formatErrorData(data.cause)}` : ''}`;
@@ -47,13 +47,18 @@ const WinstonLogger = createLogger({
         new transports.Console({level: 'debug'})
     ],
     exceptionHandlers: [
-        // Log uncaught exceptions to a different file and console.
+        // Log uncaught exceptions to a different file and the console
         new transports.File({ filename: './listener/logs/opal-uncaughtExceptions.log'}),
-        new transports.Console({level: 'debug'})
-    ]
+        new transports.Console(),
+    ],
+    rejectionHandlers: [
+        // Log uncaught Promise rejections to a different file and the console
+        new transports.File({ filename: './listener/logs/opal-uncaughtExceptions.log'}),
+        new transports.Console(),
+    ],
 });
 
-// Wrappe logger to allow 3rd arguments to be of any type.
+// Wrap logger to allow 3rd arguments to be of any type
 const logWrapper = (level, message, data) => {
     WinstonLogger.log(level, message, {data: data});
 }
