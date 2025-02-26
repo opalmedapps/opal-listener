@@ -237,7 +237,7 @@ async function processSelectRequest(userId, category, patientSerNum, parameters)
                 UserID: userId,
             },
             params: {
-                Date: parameters.timestamp,
+                Date: parameters.Timestamp,
                 purpose: parameters.purpose,
                 Language: parameters.Language,
             },
