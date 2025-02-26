@@ -23,14 +23,13 @@ module.exports = {
  * @returns {Promise}
  */
 function requestFormatter({ key, request }) {
-
     return requestValidator.validate(key, request)
         .then(opalReq => {
             //opalReq of type, OpalRequest
 
             return apiRequest.processRequest(opalReq.toLegacy()).then((data) => {
                 let response = new opalResponseSuccess(data, opalReq);
-                
+
                 return response.toLegacy();
             }).catch((err) => {
                 let response = new opalResponseError(2, 'Server error, report the error to the hospital', opalReq, JSON.stringify(err));
