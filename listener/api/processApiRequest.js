@@ -34,11 +34,17 @@ const LEGACYAPI = {
     'QuestionnaireList': apiPatientUpdate.getQuestionnaireList,
     'Questionnaire': apiPatientUpdate.getQuestionnaire,
     'QuestionnairePurpose': apiPatientUpdate.getQuestionnairePurpose,
+    // TODO: move 'QuestionnaireNumberUnread' endpoint to the new back end APIs
     'QuestionnaireNumberUnread': apiPatientUpdate.getQuestionnaireUnreadNumber,
     'EducationalMaterialRating': apiHospitalUpdate.inputEducationalMaterialRating,
     'QuestionnaireSaveAnswer': apiHospitalUpdate.questionnaireSaveAnswer,
     'QuestionnaireUpdateStatus': apiHospitalUpdate.questionnaireUpdateStatus,
     'Read': apiHospitalUpdate.updateReadStatus,
+    // TODO: Modify/refactor 'Studies' endpoint so it takes into account 'TargetPatientID' parameter.
+    // Since the studies module is in the 'Chart tab' and contains patient data, the endpoint should
+    // identify the target patient of a request (chosen using the profile selector) and make sure that
+    // the current user has permission to access the target patient's data.
+    // One of the solutions is to move the endpoint to the 'requestMappings' in the 'sqlInterface'.
     'Studies': apiPatientUpdate.getStudies,
     'StudyQuestionnaires': apiPatientUpdate.getStudyQuestionnaires,
     'StudyUpdateStatus': apiHospitalUpdate.studyUpdateStatus,
