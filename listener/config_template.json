@@ -11,7 +11,7 @@
   "_CHECKIN_PATH_HINT": "https://OIE_SERVER.muhcad.muhcfrd.ca/Patient/CheckIn",
   "CHECKIN_ROOM": "",
   "_CHECKIN_ROOM_HINT": "OPAL PHONE APP",
-  "QUESTIONNAIRE_COMPLETED_PATH": "Path notified when a questionnaire is completed",
+  "QUESTIONNAIRE_COMPLETED_PATH": "OIE Path notified when a questionnaire is completed: https://<IP>/Questionnaire/Answered",
   "LAB_RESULT_HISTORY": "The URL to call to request the patient's lab results history upon registration",
   "LATEST_STABLE_VERSION": "",
   "ORMS": {

@@ -26,6 +26,7 @@ exports.registerPatient = async function(requestObject) {
 
         // Registration steps
         const patientLegacyId = await initializeBasicPatientRow(requestObject, registrationData);
+        await initializePatientMRNs(requestObject, registrationData, patientLegacyId);
         const uid = await getOrCreateFirebaseAccount(fields.accountExists, fields.email, fields.password);
         hashPassword(requestObject);
         let selfPatientSerNum = await initializeSelfPatient(requestObject, registrationData, patientLegacyId);
@@ -140,23 +141,33 @@ function validateRegistrationDataDetailed(registrationData) {
  * @returns {Promise<*>} Resolves to the legacy ID (PatientSerNum) of the new row, or of the old row if it already existed.
  */
 async function initializeBasicPatientRow(requestObject, registrationData) {
-    // Insert patient in OpalDB
     const isNewPatient = registrationData.patient.legacy_id === null;
     let patientLegacyId;
     if (isNewPatient) {
         logger.log('info', 'New patient detected; inserting into OpalDB.Patient');
         patientLegacyId = await insertPatient(requestObject, registrationData.patient);
+    }
+    else {
+        patientLegacyId = registrationData.patient.legacy_id;
+        logger.log('info', `Existing patient detected (PatientSerNum = ${patientLegacyId}); skipping insert into OpalDB');`);
+    }
+    return patientLegacyId;
+}
 
+/**
+ * @description Inserts the patient's MRNs in the database if it's a new patient.
+ * @param {object} requestObject The request object.
+ * @param {object} registrationData The detailed registration data sent from the backend.
+ * @param {number} patientLegacyId The patient's legacy ID (PatientSerNum).
+ */
+async function initializePatientMRNs(requestObject, registrationData, patientLegacyId) {
+    const isNewPatient = registrationData.patient.legacy_id === null;
+    if (isNewPatient) {
         logger.log('info', 'New patient detected; inserting into OpalDB.Patient_Hospital_Identifier');
         for (const hospital_patient of registrationData?.hospital_patients) {
             await insertPatientHospitalIdentifier(requestObject, hospital_patient, patientLegacyId);
         }
     }
-    else {
-        patientLegacyId = registrationData.patient.legacy_id;
-        logger.log('info', `Existing patient detected (PatientSerNum = ${patientLegacyId}); skipping inserts into OpalDB');`);
-    }
-    return patientLegacyId;
 }
 
 /**
@@ -233,7 +244,7 @@ async function initializeSelfPatient(requestObject, registrationData, patientLeg
  * @param {object} registrationData The detailed registration data sent from the backend.
  * @param {string} uid The user's Firebase UID.
  * @param {string} password The user's password.
- * @param {number} selfPatientSerNum The PatientSerNum that represents the user's "self" row in Patients.
+ * @param {number} selfPatientSerNum The PatientSerNum that represents the user's "self" row in the Patient table.
  * @returns {Promise<*>} Resolves to the legacy ID (UserSerNum) of the user in the Users table.
  */
 async function initializeUser(registrationData, uid, password, selfPatientSerNum) {
