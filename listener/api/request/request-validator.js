@@ -130,7 +130,7 @@ class RequestValidator {
 		let apiResponse;
 		try {
 			apiResponse = await ApiRequest.sendRequestToApi(request.meta.UserID, {
-				url: `/api/patients/legacy/${request.meta.TargetPatientID}/check_permissions`,
+				url: `/api/patients/legacy/${request.meta.TargetPatientID}/check-permissions`,
 				headers: {},
 			});
 			logger.log('info', `Permissions response received with status = ${apiResponse.status} for ${logDetails}`, apiResponse.data);
