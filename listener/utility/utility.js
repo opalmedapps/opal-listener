@@ -4,6 +4,10 @@ const nacl              = require('tweetnacl');
 const stablelibbase64   = require('@stablelib/base64');
 const crypto            = require('crypto');
 const Q                 = require('q');
+// parameters for pbkfd function
+const keySizeBits = 256; // Key size in bits for SHA-256
+const iterations = 600000;
+const keySizeBytes =  32;
 
 
 //crypto.DEFAULT_ENCODING = 'hex';
@@ -16,15 +20,15 @@ const Q                 = require('q');
  * @return {*}
  */
 exports.resolveEmptyResponse=function(data) {
-  var counter=0;
-  for (var key in data) {
-    if(data[key].length>0) {
-      counter++;
-      break;
+    var counter=0;
+    for (var key in data) {
+        if(data[key].length>0) {
+            counter++;
+            break;
+        }
     }
-  }
-  if(counter === 0) data = 'empty';
-  return data;
+    if(counter === 0) data = 'empty';
+    return data;
 };
 
 /**
@@ -34,21 +38,21 @@ exports.resolveEmptyResponse=function(data) {
  * @return Date
  */
 exports.toMYSQLString=function(date) {
-  let month = date.getMonth();
-  let day=date.getDate();
-  let hours=date.getHours();
-  let minutes=date.getMinutes();
-  let seconds=date.getSeconds();
+    let month = date.getMonth();
+    let day=date.getDate();
+    let hours=date.getHours();
+    let minutes=date.getMinutes();
+    let seconds=date.getSeconds();
 
-  month++;
+    month++;
 
-  if(hours<10) hours='0'+hours;
-  if(minutes<10) minutes='0'+minutes;
-  if(seconds<10) seconds='0'+seconds;
-  if (day<10) day='0'+day;
-  if (month<10) month='0'+month;
+    if(hours<10) hours='0'+hours;
+    if(minutes<10) minutes='0'+minutes;
+    if(seconds<10) seconds='0'+seconds;
+    if (day<10) day='0'+day;
+    if (month<10) month='0'+month;
 
-  return date.getFullYear()+'-'+month+'-'+day+' '+hours+':'+minutes+':'+seconds;
+    return date.getFullYear()+'-'+month+'-'+day+' '+hours+':'+minutes+':'+seconds;
 };
 
 
@@ -71,16 +75,14 @@ exports.unixToMYSQLTimestamp=function(time) {
  * @return {string}
  */
 exports.generatePBKDFHash = function(secret, salt) {
-  const keySizeBits = 256; // Key size in bits for SHA-256
-  const iterations = 600000;
 
-  const derivedKey = CryptoJS.PBKDF2(secret, salt, {
-    keySize: keySizeBits / 32,
-    iterations: iterations,
-    hasher: CryptoJS.algo.SHA256,
-  }).toString(CryptoJS.enc.Hex);
+    const derivedKey = CryptoJS.PBKDF2(secret, salt, {
+        keySize: keySizeBits / keySizeBytes,
+        iterations: iterations,
+        hasher: CryptoJS.algo.SHA256,
+    }).toString(CryptoJS.enc.Hex);
 
-  return derivedKey;
+    return derivedKey;
 };
 
 /**
@@ -93,29 +95,23 @@ exports.generatePBKDFHash = function(secret, salt) {
  * @notes link for NACL encryption documentation: https://tweetnacl.js.org/#/
  */
 exports.encrypt = function(object, secret, salt) {
-  let r = Q.defer();
-
-  const nonce = nacl.randomBytes(nacl.secretbox.nonceLength);
-
-  if (salt) {
-    const iterations = 600000;
-    const keySizeBytes = 32; // Key size in bytes for SHA-256
-
-    crypto.pbkdf2(secret, salt, iterations, keySizeBytes, 'sha256', (err, derivedKey) => {
-      if (err) {
-        r.reject(err);
-      } else {
-        const hexKey = derivedKey.toString('hex');
-        const truncatedKey = stablelibutf8.encode(hexKey.substring(0, nacl.secretbox.keyLength));
-        r.resolve(exports.encryptObject(object, truncatedKey, nonce));
-      }
-    });
-  } else {
-    secret = stablelibutf8.encode(secret.substring(0, nacl.secretbox.keyLength));
-    r.resolve(exports.encryptObject(object, secret, nonce));
-  }
-
-  return r.promise;
+    let r = Q.defer();
+    const nonce = nacl.randomBytes(nacl.secretbox.nonceLength);
+    if (salt) {
+        crypto.pbkdf2(secret, salt, iterations, keySizeBytes, 'sha256', (err, derivedKey) => {
+            if (err) {
+                r.reject(err);
+            } else {
+                const hexKey = derivedKey.toString('hex');
+                const truncatedKey = stablelibutf8.encode(hexKey.substring(0, nacl.secretbox.keyLength));
+                r.resolve(exports.encryptObject(object, truncatedKey, nonce));
+            }
+        });
+    } else {
+        secret = stablelibutf8.encode(secret.substring(0, nacl.secretbox.keyLength));
+        r.resolve(exports.encryptObject(object, secret, nonce));
+    }
+    return r.promise;
 };
 
 /**
@@ -128,81 +124,79 @@ exports.encrypt = function(object, secret, salt) {
  * @notes link for NACL encryption documentation: https://tweetnacl.js.org/#/
  */
 exports.decrypt = function(object, secret, salt) {
-  let r = Q.defer();
+    let r = Q.defer();
 
-  if (salt) {
-    const iterations = 600000;
-    const keySizeBytes = 32; // Key size in bytes for SHA-256
+    if (salt) {
 
-    crypto.pbkdf2(secret, salt, iterations, keySizeBytes, 'sha256', (err, derivedKey) => {
-      if (err) {
-        r.reject(err);
-      } else {
-        const hexKey = derivedKey.toString('hex');
-        const truncatedKey = stablelibutf8.encode(hexKey.substring(0, nacl.secretbox.keyLength));
+        crypto.pbkdf2(secret, salt, iterations, keySizeBytes, 'sha256', (err, derivedKey) => {
+            if (err) {
+                r.reject(err);
+            } else {
+                const hexKey = derivedKey.toString('hex');
+                const truncatedKey = stablelibutf8.encode(hexKey.substring(0, nacl.secretbox.keyLength));
 
-        let decrypted;
+                let decrypted;
+                try {
+                    decrypted = exports.decryptObject(object, truncatedKey);
+                    r.resolve(decrypted);
+                } catch (err) {
+                    r.reject(err);
+                }
+            }
+        });
+    } else {
         try {
-          decrypted = exports.decryptObject(object, truncatedKey);
-          r.resolve(decrypted);
+            var decrypted = exports.decryptObject(object, stablelibutf8.encode(secret.substring(0, nacl.secretbox.keyLength)));
+            r.resolve(decrypted);
         } catch (err) {
-          r.reject(err);
+            r.reject(err);
         }
-      }
-    });
-  } else {
-    try {
-      var decrypted = exports.decryptObject(object, stablelibutf8.encode(secret.substring(0, nacl.secretbox.keyLength)));
-      r.resolve(decrypted);
-    } catch (err) {
-      r.reject(err);
     }
-  }
 
-  return r.promise;
+    return r.promise;
 };
 
 //Encrypts an object, array, number, date or string
 exports.encryptObject=function(object,secret,nonce)
 {
-  if(typeof object === 'string')
-  {
-    object = stablelibbase64.encode(exports.concatUTF8Array(nonce, nacl.secretbox(stablelibutf8.encode(object),nonce,secret)));
-    return object;
-  }else{
-    for (let key in object) {
+    if(typeof object === 'string')
+    {
+        object = stablelibbase64.encode(exports.concatUTF8Array(nonce, nacl.secretbox(stablelibutf8.encode(object),nonce,secret)));
+        return object;
+    }else{
+        for (let key in object) {
 
-        // Don't encrypt the response code
-        if (key === 'Code') continue;
+            // Don't encrypt the response code
+            if (key === 'Code') continue;
 
-      if (typeof object[key] === 'object')
-      {
+            if (typeof object[key] === 'object')
+            {
 
-        if(object[key] instanceof Date )
-        {
-          object[key]=object[key].toISOString();
-          object[key] = stablelibbase64.encode(exports.concatUTF8Array(nonce, nacl.secretbox(stablelibutf8.encode(object[key]),nonce,secret)));
+                if(object[key] instanceof Date )
+                {
+                    object[key]=object[key].toISOString();
+                    object[key] = stablelibbase64.encode(exports.concatUTF8Array(nonce, nacl.secretbox(stablelibutf8.encode(object[key]),nonce,secret)));
 
-        }else{
-            exports.encryptObject(object[key],secret,nonce);
+                }else{
+                    exports.encryptObject(object[key],secret,nonce);
+                }
+
+            } else
+            {
+                if (typeof object[key] !=='string') {
+                    object[key]=String(object[key]);
+                }
+                object[key] = stablelibbase64.encode(exports.concatUTF8Array(nonce,nacl.secretbox(stablelibutf8.encode(object[key]),nonce,secret)));
+            }
         }
-
-      } else
-      {
-        if (typeof object[key] !=='string') {
-          object[key]=String(object[key]);
-        }
-        object[key] = stablelibbase64.encode(exports.concatUTF8Array(nonce,nacl.secretbox(stablelibutf8.encode(object[key]),nonce,secret)));
-      }
+        return object;
     }
-    return object;
-  }
 
 };
 
 exports.hash=function(input) {
     return CryptoJS.SHA512(input).toString();
-	// return CryptoJS.SHA256(input).toString();
+    // return CryptoJS.SHA256(input).toString();
 };
 
 //Decryption function, returns an object whose values are all strings
