@@ -4,6 +4,7 @@ on:
   push:
     paths:
       - 'firebase/dev/database.rules.json'
+# TODO restrict to main branch
 
 jobs:
   Testing:
