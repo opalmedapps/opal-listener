@@ -1,0 +1,12 @@
+name: Firebase Rules
+run-name: Working on deployment of Firebase rules 🚀
+on:
+  push:
+    paths:
+      - 'firebase/dev/database.rules.json'
+
+jobs:
+  Testing:
+    runs-on: ubuntu-latest
+    steps:
+      - run: echo "Testing detection of changes to firebase rules."
