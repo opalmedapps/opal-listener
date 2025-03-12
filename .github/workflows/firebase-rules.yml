@@ -24,7 +24,7 @@ jobs:
         working-directory: ./firebase/dev
         run: |
           echo ${{ secrets.DEV_GOOGLE_APPLICATION_CREDENTIALS }} > google-application-credentials.json
-          export GOOGLE_APPLICATION_CREDENTIALS="./google-application-credentials.json"
+          export GOOGLE_APPLICATION_CREDENTIALS=`readlink -f google-application-credentials.json`
       - name: Deploy Firebase rules
         working-directory: ./firebase/dev
         run: firebase deploy --only database
