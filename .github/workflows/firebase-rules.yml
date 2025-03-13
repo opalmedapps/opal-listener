@@ -28,5 +28,4 @@ jobs:
         working-directory: ./firebase/dev
         run: |
           echo $GOOGLE_APPLICATION_CREDENTIALS
-          cat $GOOGLE_APPLICATION_CREDENTIALS
           firebase deploy --only database
