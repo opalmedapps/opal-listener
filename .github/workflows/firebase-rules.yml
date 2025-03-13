@@ -20,11 +20,13 @@ jobs:
         run: |
           npm install -g firebase-tools
           firebase --version
-      - name: Read the Firebase service account needed to deploy to Firebase
-        working-directory: ./firebase/dev
+      - name: Read the service account needed to deploy to Firebase
         run: |
           echo "${{ secrets.DEV_GOOGLE_APPLICATION_CREDENTIALS }}" > google-application-credentials.json
-          export GOOGLE_APPLICATION_CREDENTIALS=`readlink -f google-application-credentials.json`
-      - name: Deploy Firebase rules
+          echo "GOOGLE_APPLICATION_CREDENTIALS=`readlink -f google-application-credentials.json`" >> $GITHUB_ENV
+      - name: Deploy rules to Firebase
         working-directory: ./firebase/dev
-        run: firebase deploy --only database
+        run: |
+          echo $GOOGLE_APPLICATION_CREDENTIALS
+          cat $GOOGLE_APPLICATION_CREDENTIALS
+          firebase deploy --only database
