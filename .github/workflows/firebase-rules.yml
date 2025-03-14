@@ -19,7 +19,7 @@ on:
 #          - other
 
 env:
-  ENVIRONMENT: qa
+  ENVIRONMENT: dev
 
 jobs:
   deploy:
@@ -44,6 +44,8 @@ jobs:
           firebase --version
 
       # Deployment of Firebase rules
+      - name: Copy rules file into the deployment directory
+        run: cp ./firebase/database.rules.json ./firebase/${{ env.ENVIRONMENT }}
       # Deployment implicitly uses a service account assigned to $GOOGLE_APPLICATION_CREDENTIALS below (from values defined in the GitHub project settings)
       # See: https://docs.github.com/en/actions/writing-workflows/choosing-what-your-workflow-does/workflow-commands-for-github-actions#setting-an-environment-variable
       # This service account provides permissions for editing Firebase rules
