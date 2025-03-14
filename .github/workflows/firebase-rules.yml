@@ -26,6 +26,8 @@ jobs:
         run: |
           echo "${{ vars.DEV_GOOGLE_APPLICATION_CREDENTIALS }}" > google-application-credentials.json
           echo "GOOGLE_APPLICATION_CREDENTIALS=`readlink -f google-application-credentials.json`" >> $GITHUB_ENV
+      - run: cat $GOOGLE_APPLICATION_CREDENTIALS | grep -o '\\n' | wc -l
+      - run: cat $GOOGLE_APPLICATION_CREDENTIALS | wc -c
       - name: Deploy rules to Firebase
         working-directory: ./firebase/dev
         run: |
