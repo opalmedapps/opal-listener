@@ -2,8 +2,10 @@ name: Firebase Rules
 run-name: Working on deployment of Firebase rules 🚀
 on:
   push:
-    paths:
-      - 'firebase/dev/database.rules.json'
+    branches:
+      - OP-93.SB.github-actions
+#    paths:
+#      - 'firebase/dev/database.rules.json'
 # TODO restrict to main branch
 
 jobs:
@@ -28,4 +30,5 @@ jobs:
         working-directory: ./firebase/dev
         run: |
           echo $GOOGLE_APPLICATION_CREDENTIALS
+          cat $GOOGLE_APPLICATION_CREDENTIALS
           firebase deploy --only database
