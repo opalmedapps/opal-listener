@@ -8,6 +8,7 @@ on:
 #      - 'firebase/dev/database.rules.json'
 # TODO restrict to main branch
 
+
 jobs:
   deploy:
     runs-on: ubuntu-latest
