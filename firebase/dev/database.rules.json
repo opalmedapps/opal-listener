@@ -1,7 +1,7 @@
 {
   "rules": {
     "___comment": {
-      ".read": "'IMPORTANT' == 'Testing - These rules are maintained in the opal-listener project; any changes you make in the Firebase Console will be overwritten.'",
+      ".read": "'IMPORTANT' == 'Testing (pipeline) - These rules are maintained in the opal-listener project; any changes you make in the Firebase Console will be overwritten.'",
       ".write": "false"
     },
     "dev3": {
