@@ -19,7 +19,7 @@ on:
 #          - other
 
 env:
-  ENVIRONMENT: dev
+  ENVIRONMENT: qa
 
 jobs:
   deploy:
