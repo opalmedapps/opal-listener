@@ -24,7 +24,7 @@ jobs:
           firebase --version
       - name: Read the service account needed to deploy to Firebase
         run: |
-          echo "${{ secrets.DEV_GOOGLE_APPLICATION_CREDENTIALS }}" > google-application-credentials.json
+          echo "${{ vars.DEV_GOOGLE_APPLICATION_CREDENTIALS }}" > google-application-credentials.json
           echo "GOOGLE_APPLICATION_CREDENTIALS=`readlink -f google-application-credentials.json`" >> $GITHUB_ENV
       - name: Deploy rules to Firebase
         working-directory: ./firebase/dev
