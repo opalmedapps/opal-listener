@@ -2,9 +2,9 @@ name: Firebase Rules
 run-name: Working on deployment of Firebase rules 🚀
 on:
   # TODO restrict to main branch
-#  push:
-#    branches:
-#      - OP-93.SB.github-actions
+  push:
+    branches:
+      - OP-93.SB.github-actions
 #    paths:
 #      - 'firebase/dev/database.rules.json'
 #  workflow_dispatch:
