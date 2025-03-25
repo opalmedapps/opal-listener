@@ -1,3 +1,9 @@
+# SPDX-FileCopyrightText: Copyright 2025 Opal Health Informatics Group at the Research Institute of the McGill University Health Centre <john.kildea@mcgill.ca>
+#
+# SPDX-License-Identifier: AGPL-3.0-or-later
+
+# This workflow is explained in `docs/source/ci-cd-workflows.md`; please keep that documentation file up to date when making changes here.
+
 name: Firebase Rules
 # Default to dev when running automatically (see also "env" below)
 run-name: Deploying Firebase rules for ${{ inputs.ENVIRONMENT || 'dev' }} 🚀
