@@ -7,10 +7,13 @@
       }
     }
   },
-  "strangler-fig": {
-    "title": "Strangler Fig"
+  "ci-cd-workflows": {
+    "title": "CI/CD Workflows"
   },
   "firebase-rules": {
     "title": "Firebase Rules"
+  },
+  "strangler-fig": {
+    "title": "Strangler Fig"
   }
 }
