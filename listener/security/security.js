@@ -5,7 +5,7 @@
 const logger = require('./../logs/logger');
 const firebase = require('firebase-admin');
 const keyDerivationCache = require('../../src/utility/key-derivation-cache');
-const Keyv = require('keyv');
+const { Keyv } = require('keyv');
 const { SessionKeyManager } = require('../../src/encryption/session-key-manager');
 const sqlInterface = require('./../api/sqlInterface.js');
 const utility = require('./../utility/utility.js');
