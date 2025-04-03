@@ -13,11 +13,9 @@ To manually deploy Firebase rules without using the pipeline, the Firebase CLI c
 Note that the CLI is installed during `npm install` (see `firebase-tools` in `package.json`). To deploy rules for any
 environment, execute the following steps:
 
-1. Run `firebase login` and follow the instructions on the terminal. To publish firebase rules, you must log into
+1. Run `firebase login` and follow the instructions on the terminal. To publish Firebase rules, you must log into
    an account that has access to the right project.
 
-2. Change directory into the folder of the target environment. For example, `cd firebase/dev`.
+2. Change directory into the `firebase` folder.
 
-3. Temporarily copy the file `../database.rules.json` into this directory (you can delete this copy when you're done).
-
-4. Run `firebase deploy --only database` to deploy the database rules from the directory you're currently in.
+3. Run `firebase deploy --only database` to deploy the rules defined in `database.rules.json`.
