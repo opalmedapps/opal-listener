@@ -64,6 +64,7 @@ jobs:
           echo '${{ secrets[format('{0}_GOOGLE_APPLICATION_CREDENTIALS', env.ENVIRONMENT_CAPS)] }}' > google-application-credentials.json
           echo "GOOGLE_APPLICATION_CREDENTIALS=`readlink -f google-application-credentials.json`" >> $GITHUB_ENV
       - name: Specify which Firebase project to use
+        working-directory: ./firebase
         run: firebase use ${{ vars[format('{0}_FIREBASE_PROJECT_ID', env.ENVIRONMENT_CAPS)] }}
       - name: Deploy rules to Firebase
         working-directory: ./firebase
