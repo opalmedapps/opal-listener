@@ -7,6 +7,7 @@ path = [
     ".vscode/extensions.json",
     "docs/jsdoc.config.json",
     "docs/source/config.json",
+    "firebase/.firebaserc",
     "firebase/database.rules.json",
     "firebase/firebase.json",
     "listener/educational-material/eduMaterialConfig.json",
