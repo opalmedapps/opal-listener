@@ -32,7 +32,7 @@ This will open a panel in which to provide inputs, such as which environment to 
 
 #### Configuration: Service Accounts
 
-Service accounts were created to give the pipeline the required permissions to publish Firebase rules.
+Service accounts were created to give the workflow the required permissions to publish Firebase rules.
 
 To create a new service account, follow these steps:
 
@@ -53,3 +53,9 @@ you can do so at https://console.cloud.google.com/iam-admin/iam (make sure to se
 Once created, service accounts can be made accessible to the workflow by adding them as
 [Repository Secrets for GitHub Actions](https://docs.github.com/en/actions/security-for-github-actions/security-guides/using-secrets-in-github-actions#creating-secrets-for-a-repository),
 and naming them in the format expected by the workflow, for example `DEV_GOOGLE_APPLICATION_CREDENTIALS`.
+
+#### Configuration: Project IDs
+
+To deploy rules to a given Firebase project, its `projectID` must be saved as a
+[Repository Variable for GitHub Actions](https://docs.github.com/en/actions/writing-workflows/choosing-what-your-workflow-does/store-information-in-variables#creating-configuration-variables-for-a-repository),
+for example `DEV_FIREBASE_PROJECT_ID`.
