@@ -10,11 +10,10 @@ run-name: Deploying Firebase rules for ${{ inputs.ENVIRONMENT || 'dev' }} 🚀
 on:
   # When the database rules are changed, automatically deploy to dev
   push:
-    # TODO testing
     branches:
-      - OP-93.SB.github-actions
-#    paths:
-#      - 'firebase/database.rules.json'
+      - main
+    paths:
+      - 'firebase/database.rules.json'
 
   # Offer a manual interface to deploy to all other environments as needed
   workflow_dispatch:
@@ -67,8 +66,6 @@ jobs:
         working-directory: ./firebase
         # Replace the <PROJECT-ID> placeholder with the project ID stored in a repository variable
         run: sed -i 's/<PROJECT-ID>/${{ vars[format('{0}_FIREBASE_PROJECT_ID', env.ENVIRONMENT_CAPS)] }}/' .firebaserc
-      - run: cat .firebaserc
-        working-directory: ./firebase
       - name: Deploy rules to Firebase
         working-directory: ./firebase
         run: firebase deploy --only database
