@@ -39,4 +39,3 @@ function Mail(){
 }
 
 module.exports = Mail;
-

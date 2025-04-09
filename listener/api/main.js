@@ -85,5 +85,3 @@ function requestLegacyWrapper(context, requestKey, requestObject) {
 function apiRequestFormatter(context, requestKey,requestObject) {
 	return  requestLegacyWrapper(context, requestKey, requestObject);
 }
-
-
