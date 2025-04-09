@@ -112,7 +112,7 @@ Version 1.8.0.0:
  - fix: update check-permissions endpoint
  - Revert "QSCCD-812 Temporary DEV/QA separation"
  - QSCCD-812 Temporary DEV/QA separation
- - QSCCD-664: Change queries to PatientDeviceIndentifier to save username and security question answer
+ - QSCCD-664: Change queries to PatientDeviceIdentifier to save username and security question answer
  - chore(deps): update dependency jsdoc to v4
  - fix: extract ser nums from rows so 'setCheckInUsername' query doesn't fail
  - fix: fix the query function for educational materials in listener (QSCCD-914)
@@ -147,7 +147,7 @@ Version 1.8.0.0:
  - feat: add api retrieve patient data from new backend (QSCCD-667)
  - Feat add api calls add and get firebase user to listener (QSCCD-666)
  - QSCCD-87: Save questionnaire respondentUsername in the database (!124)
- - QSCCD-461: Add missing field for multiple patient annoucements filtering
+ - QSCCD-461: Add missing field for multiple patient announcements filtering
  - QSCCD-427: Allow multiple possible salts (RAMQ, MRNs) for registration requests (!121)
  - Feat: Add request service to call registration apis in backend (QSCCD-565)
  - QSCCD-445: Cache encryption data in-memory for subsequent requests
@@ -353,7 +353,7 @@ Version 1.0.3.2:
  - Merge branch 'Issue_482' into staging
 
 Version 1.0.3.1:
- -     -- Add app verion to patient activity logging     -- block logging of LogPatientAction request
+ -     -- Add app version to patient activity logging     -- block logging of LogPatientAction request
 
 Version 1.0.3.0:
  - Log all requests in the PatientActivityLog
@@ -414,7 +414,7 @@ Version 1.0.1.2:
  - Merge branch 'hotfix-1.0.1.1'
 
 Version 1.0.1.1:
- - Modified the patient appointment query to use the getTranslation functino
+ - Modified the patient appointment query to use the getTranslation function
  -    --- Merging the changes from PreProdDev Merge branch 'PreProdDev'
  -    --- Images
  -    --- Adding Images

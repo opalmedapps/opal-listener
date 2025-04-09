@@ -14,7 +14,7 @@ SPDX-License-Identifier: AGPL-3.0-or-later
 
 ### Dependencies
 <!-- Link to dependent pull requests. Specify whether the MRs are just related, or require each other to run. Write N/A if there are none. -->
-- **App**: 
+- **App**:
 
 ### Acceptance Tests
 <!-- Put an x in the checkbox when done. -->

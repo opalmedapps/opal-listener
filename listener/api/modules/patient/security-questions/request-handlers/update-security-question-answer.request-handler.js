@@ -72,7 +72,7 @@ class UpdateSecurityQuestionAnswerRequestHandler extends ApiRequestHandler {
                     answer: questionAnswerArr[key].answer
                 });
             }
-            // reformat the array value to mathc data structure before and equal version 1.12.2
+            // reformat the array value to match data structure before and equal version 1.12.2
             await SecurityDjango.updateSecurityQuestionAndAnswerList(requestObject.meta.UserID, questionAnswerForLowerVersion);
         }
         // new data structure after version 1.12.2

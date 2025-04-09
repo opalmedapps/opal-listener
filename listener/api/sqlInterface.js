@@ -947,7 +947,7 @@ exports.setNewPassword = function(password, username) {
  *@module sqlInterface
  *@name inputEducationalMaterialRating
  *@require queries
- *@descrption Inputs educational material rating
+ *@description Inputs educational material rating
  *@parameter {string} patientSerNum SerNum in database for user that rated the material
  *@parameter {string} edumaterialSerNum serNum for educational material
  *@parameter {string} ratingValue value from 1 to 5 for educational material

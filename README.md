@@ -50,7 +50,7 @@ The project contains `Dockerfile` and  `docker-compose.yml` files to build an im
 To build the Docker image and run the container, running the following command at the root of the project
 
 ```shell
-docker compose up 
+docker compose up
 ```
 
 More information about Docker compose can be found on the [Docker Compose page](https://docs.docker.com/compose/).
