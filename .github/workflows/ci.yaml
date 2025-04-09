@@ -43,4 +43,4 @@ jobs:
       packages: write
     uses: opalmedapps/.github/.github/workflows/docker-build.yaml@main
     with:
-      test-command: node -p "require('/app/src/utility/version')"
+      test-command: node /app/src/utility/version
