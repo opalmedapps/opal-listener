@@ -3,9 +3,6 @@
 # SPDX-License-Identifier: AGPL-3.0-or-later
 
 [default.extend-words]
-muhc = "muhc"
-mch = "mch"
-# legacy models
 # part of SerNum
 ser = "ser"
 readby = "readby"
@@ -13,7 +10,7 @@ readby = "readby"
 tge = "tge"
 # not worth it to fix
 aggreement = "aggreement"
-# names in THIRDPART.md
+# name in THIRDPART.md
 childs = "childs"
 
 [default]

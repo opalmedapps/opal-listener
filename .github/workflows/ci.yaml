@@ -36,8 +36,8 @@ jobs:
     uses: opalmedapps/.github/.github/workflows/reuse.yaml@main
 
   build-image:
-    # needs:
-    #   - lint
+    needs:
+      - lint
     permissions:
       contents: read
       packages: write
