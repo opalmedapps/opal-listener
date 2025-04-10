@@ -73,7 +73,9 @@ jobs:
       - name: Specify which Firebase project to use
         working-directory: ./firebase
         # Replace the <PROJECT-ID> placeholder with the project ID from repository variables
-        run: sed -i 's/<PROJECT-ID>/${VAR_PROJECT_ID}/' .firebaserc
+        run: |
+          echo ${VAR_PROJECT_ID}
+          sed -i 's/<PROJECT-ID>/${VAR_PROJECT_ID}/' .firebaserc
         env:
           VAR_PROJECT_ID: ${{ vars[format('{0}_FIREBASE_PROJECT_ID', env.ENVIRONMENT_CAPS)] }}
       - name: Deploy rules to Firebase
