@@ -10,10 +10,11 @@ run-name: Deploying Firebase rules for ${{ inputs.ENVIRONMENT || 'dev' }} 🚀
 on:
   # When the database rules are changed, automatically deploy to dev
   push:
+    # TODO testing
     branches:
-      - main
-    paths:
-      - 'firebase/database.rules.json'
+      - OP-93.SB.github-actions
+#    paths:
+#      - 'firebase/database.rules.json'
 
   # Offer a manual interface to deploy to all other environments as needed
   workflow_dispatch:
