@@ -6,7 +6,7 @@
 
 const {createLogger, format, transports} = require('winston');
 
-// Choose log level according to environement.
+// Choose log level according to environment.
 const LoggerLevel = process.env.NODE_ENV === 'production' ? 'info' : 'debug';
 
 // Set custom format for login.
@@ -16,7 +16,7 @@ const opalLogFormat = format.printf((info) => {
     return `${timestamp} - ${level.toUpperCase()}: ${message}${formattedData ? `: ${formattedData}` : ''}`;
 });
 
-// Format error data according to data type passed to the logger wraper
+// Format error data according to data type passed to the logger wrapper
 const formatErrorData = (data) => {
     if (typeof data === 'undefined') return '';
     else if (data instanceof Error) return `${data}${data.cause ? `: ${formatErrorData(data.cause)}` : ''}`;
@@ -27,7 +27,7 @@ const formatErrorData = (data) => {
 
 // Initialize winston logger
 const WinstonLogger = createLogger({
-    // Silent logger when runing unit tests.
+    // Silent logger when running unit tests.
     silent: process.env.DISABLED_LOGGING === 'true',
     // Set level log level
     level: LoggerLevel,

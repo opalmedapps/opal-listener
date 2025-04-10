@@ -4,9 +4,9 @@
 // SPDX-License-Identifier: AGPL-3.0-or-later
 
 /**
- * @description Contains contants use to handle error from Django backend, legacy-listener, and new listerner structure.
+ * @description Contains constants use to handle error from Django backend, legacy-listener, and new listener structure.
  *              logMessage: is use by winston logger in the console and the log file.
- *              statusCode and clientMessage: are return to the app to give informations about the error to the client
+ *              statusCode and clientMessage: are return to the app to give information about the error to the client
  *              clientMessage: is associated to a Qplus translation to display the correct message.
  *              encrypt: In somecase we want to return an encryption error message that can't be encrypt
  *                       because of the error.

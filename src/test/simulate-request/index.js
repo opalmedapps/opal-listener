@@ -59,7 +59,7 @@ class SimulateRequest {
      * @description Upload a mock request to firebase to be picked up by the listener
      *              This file need to be run inside the docker container using the command:
      *              `docker exec -it opal-listener npm run simulateRequest`
-     *              It can also be use for in tests scripts using the instanciation of the class
+     *              It can also be use for in tests scripts using the instantiation of the class
      *              and passing the desired mock request
      *              `new SimulateRequest(DefaultRequestData);`
      *              Mock request data is located in `./mock-request.js`

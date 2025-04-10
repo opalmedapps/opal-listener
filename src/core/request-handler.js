@@ -44,7 +44,7 @@ class RequestHandler {
      * @description Handle requests with requestType 'api'. Then upload response ti Firebase
      *              Need to add timestamp after encryption to give a valid value to Firebase.
      * @param {string} requestType Firebase request unique identifier
-     * @param {object} snapshot Data snapshot from firebase or and formated error to be handle by the app.
+     * @param {object} snapshot Data snapshot from firebase or and formatted error to be handle by the app.
      */
     async processRequest(requestType, snapshot) {
         legacyLogger.log('debug', `API: Processing API request of type ${requestType}`);
