@@ -66,21 +66,16 @@ jobs:
         # See: https://docs.github.com/en/actions/writing-workflows/choosing-what-your-workflow-does/workflow-commands-for-github-actions#setting-an-environment-variable
         run: |
           echo "${SECRET_GOOGLE_APPLICATION_CREDENTIALS}" > google-application-credentials.json
-          echo "GOOGLE_APPLICATION_CREDENTIALS=`readlink -f google-application-credentials.json`" >> "$GITHUB_ENV"
+          echo "GOOGLE_APPLICATION_CREDENTIALS=$(readlink -f google-application-credentials.json)" >> "$GITHUB_ENV"
         env:
           # See: https://stackoverflow.com/questions/61255989/dynamically-retrieve-github-actions-secret
           SECRET_GOOGLE_APPLICATION_CREDENTIALS: ${{ secrets[format('{0}_GOOGLE_APPLICATION_CREDENTIALS', env.ENVIRONMENT_CAPS)] }} # zizmor: ignore[overprovisioned-secrets]
       - name: Specify which Firebase project to use
         working-directory: ./firebase
         # Replace the <PROJECT-ID> placeholder with the project ID from repository variables
-        run: |
-          echo ${VAR_PROJECT_ID}
-          sed -i "s/<PROJECT-ID>/${VAR_PROJECT_ID}/" .firebaserc
-          cat .firebaserc
+        run: sed -i "s/<PROJECT-ID>/${VAR_PROJECT_ID}/" .firebaserc
         env:
           VAR_PROJECT_ID: ${{ vars[format('{0}_FIREBASE_PROJECT_ID', env.ENVIRONMENT_CAPS)] }}
       - name: Deploy rules to Firebase
         working-directory: ./firebase
-        run: |
-          cat .firebaserc
-          firebase deploy --only database
+        run: firebase deploy --only database
