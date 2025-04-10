@@ -64,12 +64,10 @@ jobs:
       # This service account provides permissions for editing Firebase rules
       - name: Read the service account needed to deploy to Firebase
         # See: https://docs.github.com/en/actions/writing-workflows/choosing-what-your-workflow-does/workflow-commands-for-github-actions#setting-an-environment-variable
+        # See: https://stackoverflow.com/questions/61255989/dynamically-retrieve-github-actions-secret
         run: |
-          echo '${SECRET_GOOGLE_APPLICATION_CREDENTIALS}' > google-application-credentials.json
+          echo '${{ secrets[format('{0}_GOOGLE_APPLICATION_CREDENTIALS', env.ENVIRONMENT_CAPS)] }}' > google-application-credentials.json
           echo "GOOGLE_APPLICATION_CREDENTIALS=`readlink -f google-application-credentials.json`" >> "$GITHUB_ENV"
-        env:
-          # See: https://stackoverflow.com/questions/61255989/dynamically-retrieve-github-actions-secret
-          SECRET_GOOGLE_APPLICATION_CREDENTIALS: ${{ secrets[format('{0}_GOOGLE_APPLICATION_CREDENTIALS', env.ENVIRONMENT_CAPS)] }} # zizmor: ignore[overprovisioned-secrets]
       - name: Specify which Firebase project to use
         working-directory: ./firebase
         # Replace the <PROJECT-ID> placeholder with the project ID from repository variables
