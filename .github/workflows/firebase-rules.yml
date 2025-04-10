@@ -76,8 +76,11 @@ jobs:
         run: |
           echo ${VAR_PROJECT_ID}
           sed -i 's/<PROJECT-ID>/${VAR_PROJECT_ID}/' .firebaserc
+          cat .firebaserc
         env:
           VAR_PROJECT_ID: ${{ vars[format('{0}_FIREBASE_PROJECT_ID', env.ENVIRONMENT_CAPS)] }}
       - name: Deploy rules to Firebase
         working-directory: ./firebase
-        run: firebase deploy --only database
+        run: |
+          cat .firebaserc
+          firebase deploy --only database
