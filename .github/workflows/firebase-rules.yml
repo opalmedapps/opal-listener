@@ -60,8 +60,9 @@ jobs:
           firebase --version
 
       # Deploy Firebase rules
-      # Deployment implicitly uses a service account assigned to $GOOGLE_APPLICATION_CREDENTIALS below (from values defined in the GitHub project settings)
+      # Deployment via 'firebase deploy' implicitly uses a service account assigned to $GOOGLE_APPLICATION_CREDENTIALS below (from values defined in the GitHub project settings)
       # This service account provides permissions for editing Firebase rules
+      # See: https://firebase.google.com/docs/admin/setup#initialize_the_sdk_in_non-google_environments
       - name: Read the service account needed to deploy to Firebase
         # See: https://docs.github.com/en/actions/writing-workflows/choosing-what-your-workflow-does/workflow-commands-for-github-actions#setting-an-environment-variable
         run: |
