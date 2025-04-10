@@ -41,7 +41,7 @@ jobs:
     steps:
       # Setup
       - name: Convert environment to all caps
-        run: echo "ENVIRONMENT_CAPS=${ENVIRONMENT^^}" >> $GITHUB_ENV
+        run: echo "ENVIRONMENT_CAPS=${ENVIRONMENT^^}" >> "$GITHUB_ENV"
       - name: Print environment
         run: |
           echo "Environment: $ENVIRONMENT ($ENVIRONMENT_CAPS)"
@@ -66,7 +66,7 @@ jobs:
         # See: https://docs.github.com/en/actions/writing-workflows/choosing-what-your-workflow-does/workflow-commands-for-github-actions#setting-an-environment-variable
         run: |
           echo '${SECRET_GOOGLE_APPLICATION_CREDENTIALS}' > google-application-credentials.json
-          echo "GOOGLE_APPLICATION_CREDENTIALS=`readlink -f google-application-credentials.json`" >> $GITHUB_ENV
+          echo "GOOGLE_APPLICATION_CREDENTIALS=`readlink -f google-application-credentials.json`" >> "$GITHUB_ENV"
         env:
           # See: https://stackoverflow.com/questions/61255989/dynamically-retrieve-github-actions-secret
           SECRET_GOOGLE_APPLICATION_CREDENTIALS: ${{ secrets[format('{0}_GOOGLE_APPLICATION_CREDENTIALS', env.ENVIRONMENT_CAPS)] }} # zizmor: ignore[overprovisioned-secrets]
