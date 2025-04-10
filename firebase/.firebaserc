@@ -1,6 +1,6 @@
 {
   "projects": {
-    "default": "opal-prod"
+    "default": "<PROJECT-ID>"
   },
   "targets": {},
   "etags": {}

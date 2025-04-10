@@ -1,0 +1,82 @@
+# SPDX-FileCopyrightText: Copyright 2025 Opal Health Informatics Group at the Research Institute of the McGill University Health Centre <john.kildea@mcgill.ca>
+#
+# SPDX-License-Identifier: AGPL-3.0-or-later
+
+# This workflow is explained in `docs/source/ci-cd-workflows.md`; please keep that documentation file up to date when making changes here.
+
+name: Firebase Rules
+# Default to dev when running automatically (see also "env" below)
+run-name: Deploying Firebase rules for ${{ inputs.ENVIRONMENT || 'dev' }} 🚀
+on:
+  # When the database rules are changed, automatically deploy to dev
+  push:
+    branches:
+      - main
+    paths:
+      - 'firebase/database.rules.json'
+
+  # Offer a manual interface to deploy to all other environments as needed
+  workflow_dispatch:
+    inputs:
+      ENVIRONMENT:
+        description: 'Environment in which to deploy rules'
+        type: choice
+        required: true
+        default: 'dev'
+        options:
+          - dev
+          - prod
+
+permissions:
+  contents: read
+
+# Read the target environment from workflow_dispatch inputs, or default to dev
+env:
+  ENVIRONMENT: ${{ inputs.ENVIRONMENT || 'dev' }}
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    steps:
+      # Setup
+      - name: Convert environment to all caps
+        run: echo "ENVIRONMENT_CAPS=${ENVIRONMENT^^}" >> "$GITHUB_ENV"
+      - name: Print environment
+        run: |
+          echo "Environment: $ENVIRONMENT ($ENVIRONMENT_CAPS)"
+      - uses: actions/checkout@v4.2.2
+        with:
+          persist-credentials: false
+      - name: Use Node.js
+        uses: actions/setup-node@v4.3.0
+        with:
+          # renovate: datasource=node-version dependency=node
+          node-version: '22.14.0'
+      - name: Check npm installation
+        run: npm -v
+      - name: Install firebase-tools
+        run: |
+          npm install -g firebase-tools
+          firebase --version
+
+      # Deploy Firebase rules
+      # Deployment via 'firebase deploy' implicitly uses a service account assigned to $GOOGLE_APPLICATION_CREDENTIALS below (from values defined in the GitHub project settings)
+      # This service account provides permissions for editing Firebase rules
+      # See: https://firebase.google.com/docs/admin/setup#initialize_the_sdk_in_non-google_environments
+      - name: Read the service account needed to deploy to Firebase
+        # See: https://docs.github.com/en/actions/writing-workflows/choosing-what-your-workflow-does/workflow-commands-for-github-actions#setting-an-environment-variable
+        run: |
+          echo "${SECRET_GOOGLE_APPLICATION_CREDENTIALS}" > google-application-credentials.json
+          echo "GOOGLE_APPLICATION_CREDENTIALS=$(readlink -f google-application-credentials.json)" >> "$GITHUB_ENV"
+        env:
+          # See: https://stackoverflow.com/questions/61255989/dynamically-retrieve-github-actions-secret
+          SECRET_GOOGLE_APPLICATION_CREDENTIALS: ${{ secrets[format('{0}_GOOGLE_APPLICATION_CREDENTIALS', env.ENVIRONMENT_CAPS)] }} # zizmor: ignore[overprovisioned-secrets]
+      - name: Specify which Firebase project to use
+        working-directory: ./firebase
+        # Replace the <PROJECT-ID> placeholder with the project ID from repository variables
+        run: sed -i "s/<PROJECT-ID>/${VAR_PROJECT_ID}/" .firebaserc
+        env:
+          VAR_PROJECT_ID: ${{ vars[format('{0}_FIREBASE_PROJECT_ID', env.ENVIRONMENT_CAPS)] }}
+      - name: Deploy rules to Firebase
+        working-directory: ./firebase
+        run: firebase deploy --only database
