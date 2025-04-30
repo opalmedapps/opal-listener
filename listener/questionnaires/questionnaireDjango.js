@@ -26,7 +26,7 @@ class QuestionnaireDjango {
             },
             UserID: userId,
         };
-        logger.log('info', "API: Calling backend to get the caregiver's list of relationships");
+        logger.log('verbose', "API: Calling backend to get the caregiver's list of relationships");
         const response = await ApiRequest.makeRequest(requestParams);
         if (response.data) return response.data;
         else throw new Error('Failed to get caregiver relationships from the backend');

@@ -27,7 +27,7 @@ class SecurityDjango {
                 },
             },
         };
-        logger.log('info', "API: Calling backend to get random security question and answer for the user");
+        logger.log('verbose', "API: Calling backend to get random security question and answer for the user");
         const response = await ApiRequest.makeRequest(requestParams);
         if (response?.data) return response.data;
         else {
@@ -52,7 +52,7 @@ class SecurityDjango {
                 },
             },
         };
-        logger.log('info', "API: Calling backend to get all the active security questions");
+        logger.log('verbose', "API: Calling backend to get all the active security questions");
         const response = await ApiRequest.makeRequest(requestParams);
         if (response?.data) return response.data;
         else {
@@ -79,7 +79,7 @@ class SecurityDjango {
                 },
             },
         };
-        logger.log('info', "API: Calling backend to get a specific active security question");
+        logger.log('verbose', "API: Calling backend to get a specific active security question");
         const response = await ApiRequest.makeRequest(requestParams);
         if (response?.data) return response.data;
         else {
@@ -105,7 +105,7 @@ class SecurityDjango {
                 },
             },
         };
-        logger.log('info', "API: Calling backend to get a list of security questions for the user");
+        logger.log('verbose', "API: Calling backend to get a list of security questions for the user");
         const response = await ApiRequest.makeRequest(requestParams);
         if (response?.data) return response.data;
         else {
@@ -133,7 +133,7 @@ class SecurityDjango {
                 },
             },
         };
-        logger.log('info', "API: Calling backend to get a specific security question for the user");
+        logger.log('verbose', "API: Calling backend to get a specific security question for the user");
         const response = await ApiRequest.makeRequest(requestParams);
         if (response?.data) return response.data;
         else {
@@ -166,7 +166,7 @@ class SecurityDjango {
             };
             ApiRequest.makeRequest(requestParams);
         });
-        logger.log('info', "API: Calling backend to update security answers for the questions user provided");
+        logger.log('verbose', "API: Calling backend to update security answers for the questions user provided");
     }
 }
 

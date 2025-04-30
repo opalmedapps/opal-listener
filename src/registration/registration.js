@@ -37,13 +37,13 @@ class Registration {
 
         // On cache miss, call the API to get encryption info
         if (!await regCache.get(instanceSalt) || !await regCache.get(instanceSecret)) {
-            legacyLogger.log('info', 'Registration encryption data cache miss or TTL expired; fetching new data');
+            legacyLogger.log('verbose', 'Registration encryption data cache miss or TTL expired; fetching new data');
             const response = await ApiRequest.makeRequest(requestParams);
             return this.secretAndSaltFromResponse(response);
         }
 
         // Otherwise, on cache hit, retrieve encryption values from memory
-        legacyLogger.log('info', 'Loading registration encryption data from cache and resetting TTL');
+        legacyLogger.log('verbose', 'Loading registration encryption data from cache and resetting TTL');
         await regCache.set(
             instanceSalt,
             await regCache.get(instanceSalt),
@@ -105,7 +105,7 @@ class Registration {
         encryptionInfo.salt = salt;
 
         // Cache encryption info for the first time (once we know which salt was successful) or reset TTL
-        legacyLogger.log('info', 'Caching registration encryption data or resetting TTL');
+        legacyLogger.log('verbose', 'Caching registration encryption data or resetting TTL');
         await regCache.set(
             getInstanceSalt(context),
             encryptionInfo.salt,

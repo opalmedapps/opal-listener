@@ -283,7 +283,7 @@ exports.updateReadStatus = function(userId, parameters)
             [table, userId, table, serNum, parameters.Id],
         ).then(async () => {
             if (notificationType) {
-                logger.log('info', `Implicitly marking ${notificationType} notification as read.`);
+                logger.log('verbose', `Implicitly marking ${notificationType} notification as read.`);
                 await exports.runSqlQuery(
                     queries.implicitlyReadNotification(),
                     [userId, `"${userId}"`, parameters.Id, parameters.TargetPatientID, notificationType],

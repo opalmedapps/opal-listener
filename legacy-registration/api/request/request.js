@@ -118,7 +118,7 @@ class opalRequest {
 			headers: headers,
 			data: registerData,
 		};
-		logger.log('info', 'Calling API to register patient in the backend', url)
+		logger.log('verbose', 'Calling API to register patient in the backend', url)
 		const response = await this.axiosApi(requestParams);
 		return response.data;
 	}
@@ -165,7 +165,7 @@ class opalRequest {
 			url: url,
 			headers: headers,
 		};
-		logger.log('info', 'Calling API to determine if the user is an existing caregiver or not', url);
+		logger.log('verbose', 'Calling API to determine if the user is an existing caregiver or not', url);
 		const response = await this.axiosApi(requestParams);
 		if (!response) {
 			logger.log('error', 'API response error', response);

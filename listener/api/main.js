@@ -39,7 +39,7 @@ function requestFormatter(context, {key,request}) {
 			return processApiRequest.processRequest(opalReq).then((data)=>
 			{
 				logger.log('debug', 'Successfully processed request: ', data);
-				logger.log('info', 'Successfully processed request');
+				logger.log('verbose', 'Successfully processed request');
 				return (new OpalResponseSuccess(data, opalReq)).toLegacy();
 			}).catch((err)=>{
 				logger.log('error', 'Error processing request', err);

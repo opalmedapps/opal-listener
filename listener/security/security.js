@@ -36,7 +36,7 @@ exports.verifySecurityAnswer = async (context, requestKey, requestObject) => {
     // Special case used to set the request's UserID in the case of password reset requests
     await ensureUserIdAvailable(requestObject);
 
-    logger.log('info', `Verifying security answer for username ${requestObject?.UserID}`);
+    logger.log('verbose', `Verifying security answer for username ${requestObject?.UserID}`);
 
     // Get security info needed to verify the answer, including the cached answer from PatientDeviceIdentifier.
     let user = await getUserPatientSecurityInfo(requestKey, requestObject);
@@ -127,7 +127,7 @@ exports.resetPassword = async function(context, requestKey, requestObject) {
     // Special case used to set the request's UserID in the case of password reset requests
     await ensureUserIdAvailable(requestObject);
 
-    logger.log('info', `Running function resetPassword for username = ${requestObject.UserID}`);
+    logger.log('verbose', `Running function resetPassword for username = ${requestObject.UserID}`);
 
     // Get security info needed to set a new password
     let user = await getUserPatientSecurityInfo(requestKey, requestObject);
