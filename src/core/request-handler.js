@@ -35,7 +35,7 @@ class RequestHandler {
      * @param {string} requestType The Firebase branch on which to listen, representing a type of request.
      */
     listenForRequests(requestType) {
-        legacyLogger.log('debug', `API: Starting request listener on ${requestType}`);
+        legacyLogger.log('info', `API: Starting request listener on ${requestType}`);
         this.#databaseRef.child(requestType).off();
         this.#databaseRef.child(requestType).on('child_added', snapshot => this.processRequest(requestType, snapshot));
     }
