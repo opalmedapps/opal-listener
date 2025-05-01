@@ -89,8 +89,8 @@ async function handleTooManyAttempts(requestKey, requestObject, user) {
         await sqlInterface.resetSecurityAnswerAttempt(requestObject);
     }
     // If 5 failed attempts have been made, lock the user out for 5 minutes
-    else if (user.Attempt === 5) {
-        logger.log('verbose', `User ${requestObject?.UserID} has 5 security answer attempts`);
+    else if (user.Attempt >= 5) {
+        logger.log('verbose', `User ${requestObject?.UserID} has 5 invalid security answer attempts`);
         throw new OpalSecurityResponseError(CODE.TOO_MANY_ATTEMPTS, "Attempted and failed security answer 5 times", requestKey, requestObject);
     }
 }
