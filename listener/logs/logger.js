@@ -42,7 +42,7 @@ const WinstonLogger = createLogger({
     ),
     transports: [
         new transports.File({ filename:'./listener/logs/error.log', level: 'error'}),
-        new transports.Console({level: 'debug'})
+        new transports.Console()
     ],
     exceptionHandlers: [
         // Log uncaught exceptions to a different file and console.
