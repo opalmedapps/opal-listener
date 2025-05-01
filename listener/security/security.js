@@ -53,6 +53,11 @@ exports.verifySecurityAnswer = async (context, requestKey, requestObject) => {
     catch (error) {
         logger.log('error', 'Wrong security answer (from decryption failure); increasing security answer attempts', error);
         await sqlInterface.increaseSecurityAnswerAttempt(requestObject);
+        // the attempts are now increased to 5
+        if (user.Attempt === 4) {
+            logger.log('verbose', `Blocked user ${requestObject?.UserID} after reaching 5 invalid security answer attempts`);
+            await sqlInterface.setTimeoutSecurityAnswer(requestObject, requestObject.Timestamp);
+        }
         return new OpalSecurityResponseSuccess(answerNotVerified, requestKey, requestObject);
     }
 
@@ -84,9 +89,8 @@ async function handleTooManyAttempts(requestKey, requestObject, user) {
         await sqlInterface.resetSecurityAnswerAttempt(requestObject);
     }
     // If 5 failed attempts have been made, lock the user out for 5 minutes
-    else if (user.Attempt === 5) {
-        logger.log('verbose', `Blocking user after reaching 5 security answer attempts for username ${requestObject?.UserID}`);
-        if (user.TimeoutTimestamp == null) await sqlInterface.setTimeoutSecurityAnswer(requestObject, requestObject.Timestamp);
+    else if (user.Attempt >= 5) {
+        logger.log('verbose', `User ${requestObject?.UserID} has 5 invalid security answer attempts`);
         throw new OpalSecurityResponseError(CODE.TOO_MANY_ATTEMPTS, "Attempted and failed security answer 5 times", requestKey, requestObject);
     }
 }
