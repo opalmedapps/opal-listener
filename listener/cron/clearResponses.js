@@ -38,7 +38,7 @@ function clearResponses() {
             {
                 if(usersData[user][requestKey].hasOwnProperty('Timestamp')&&now-usersData[user][requestKey].Timestamp>300000)
                 {
-                    logger.log('info','Deleting leftover response on firebase', {
+                    logger.log('verbose','Deleting leftover response on firebase', {
                         request: requestKey
                     });
                     ref.child('users/'+user+'/'+requestKey).set(null);

@@ -55,7 +55,7 @@ exports.refresh = async function(requestObject) {
 
     // If there's a TargetPatientID, use it, otherwise get data for self
     let patientSerNum = requestObject.TargetPatientID ? requestObject.TargetPatientID : await sqlInterface.getSelfPatientSerNum(UserId);
-    logger.log('info', `Identified request target as PatientSerNum = ${patientSerNum}`);
+    logger.log('verbose', `Identified request target as PatientSerNum = ${patientSerNum}`);
 
     if (!fields) throw {Response:'error', Reason:"Undefined 'Fields' in Refresh request"};
     if (!Array.isArray(fields)) fields = [fields];
@@ -103,7 +103,7 @@ exports.getStudyQuestionnaires = function(requestObject) {
 // };
 
 exports.logActivity = function (requestObject) {
-    logger.log('info', 'User Activity', {
+    logger.log('verbose', 'User Activity', {
         deviceID:requestObject.DeviceId,
         userID:requestObject.UserID,
         request:requestObject.Request,

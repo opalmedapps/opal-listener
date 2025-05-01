@@ -234,7 +234,7 @@ async function questionnaireUpdateStatus(requestObject) {
     // Note that the notification will be marked as read for the self-user and all caregivers.
     const newStatusInt = parseInt(requestObject.Parameters.new_status);
     if (newStatusInt === questionnaireConfig.IN_PROGRESS_QUESTIONNAIRE_STATUS) {
-        logger.log('info', "Implicitly marking the questionnaire's notification as read.");
+        logger.log('verbose', "Implicitly marking the questionnaire's notification as read.");
 
         const questionnaire = await OpalSQLQueryRunner.run(
             opalQueries.getOpalDBQuestionnaire(),
@@ -252,7 +252,7 @@ async function questionnaireUpdateStatus(requestObject) {
             UserID: requestObject.UserID,
         };
 
-        logger.log('info', "API: Calling backend to get the user's list of caregivers.");
+        logger.log('verbose', "API: Calling backend to get the user's list of caregivers.");
         const response = await ApiRequest.makeRequest(requestParams);
         // Silently exit if lister cannot fetch the user's list of caregivers
         if (!response?.data) {
@@ -338,7 +338,7 @@ async function getQuestionnaireLanguage(requestObject) {
  * @throws Throws an error if caregiver does not have permissions to answer the questionnaire.
  */
 async function checkCaregiverPermissions(userId, patientSerNum) {
-    logger.log('info', "Checking if caregiver can answer questionnaire.");
+    logger.log('verbose', "Checking if caregiver can answer questionnaire.");
 
     let canAnswerPatientQuestionnaires = await QuestionnaireDjango.caregiverCanAnswerQuestionnaire(
         userId,

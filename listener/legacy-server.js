@@ -52,7 +52,7 @@ function listenForRequest(requestType){
     ref.child(requestType).on('child_added',
         function(snapshot){
             logger.log('debug', 'Received request from Firebase: ', snapshot.val());
-            logger.log('info', 'Received request from Firebase: ', snapshot.val().Request);
+            logger.log('verbose', 'Received request from Firebase: ', snapshot.val().Request);
             handleRequest(requestType,snapshot);
         },
         function(error){
@@ -105,7 +105,7 @@ function logResponse(response){
 			(response.Headers.RequestObject.Request === 'Refresh' ? ": " + response.Headers.RequestObject.Parameters.Fields.join(' ') : ""),
 			requestKey: response.Headers.RequestKey
 		});
-        logger.log('info', "Completed response", response.Headers.RequestObject.Request);
+        logger.log('verbose', "Completed response", response.Headers.RequestObject.Request);
 	}
 }
 
@@ -117,7 +117,7 @@ function logResponse(response){
  */
 function processRequest(context, headers){
 
-    logger.log('info', 'Processing request');
+    logger.log('verbose', 'Processing request');
 
     const r = q.defer();
     const requestKey = headers.key;

@@ -36,7 +36,7 @@ function clearRequests(){
         const requestData = snapshot.val();
         for (const requestKey in requestData) {
             if(requestData[requestKey].hasOwnProperty('Timestamp')&&now-requestData[requestKey].Timestamp>300000) {
-                logger.log('info', 'Deleting leftover request on firebase', {
+                logger.log('verbose', 'Deleting leftover request on firebase', {
                     requestKey: requestKey
                 });
                 ref.child('requests/' + requestKey).set(null);

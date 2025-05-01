@@ -125,16 +125,16 @@ class RequestValidator {
 		}
 
 		// Check user's permissions by calling Django's API endpoint (e.g., /check-permissions/)
-		logger.log('info', `Checking permissions for ${logDetails}, via API request to the backend`);
+		logger.log('verbose', `Checking permissions for ${logDetails}, via API request to the backend`);
 		let apiResponse;
 		try {
 			apiResponse = await ApiRequest.sendRequestToApi(request.meta.UserID, {
 				url: `/api/patients/legacy/${request.meta.TargetPatientID}/check-permissions/`,
 				headers: {},
 			});
-			logger.log('info', `Permissions response received with status = ${apiResponse.status} for ${logDetails}`, apiResponse.data);
+			logger.log('verbose', `Permissions response received with status = ${apiResponse.status} for ${logDetails}`, apiResponse.data);
 			if (apiResponse.status !== 200) throw apiResponse;
-			else logger.log('info', `Permission granted: response code 200, for ${logDetails}`);
+			else logger.log('verbose', `Permission granted: response code 200, for ${logDetails}`);
 		}
 		catch(axiosError) {
 			logger.log('error', 'Error during permissions validation', axiosError);

@@ -89,7 +89,7 @@ exports.processRequest=function(requestObject) {
     if (omitParametersFromLogs.hasOwnProperty(type) && omitParametersFromLogs[type](requestObject.params)) parametersString = 'OMITTED FROM LOGS';
 
     // Old requests
-    logger.log('info', `Processing request of type: '${type}', with params = ${parametersString}${target ? ', TargetPatientID = '+target : ''}`);
+    logger.log('verbose', `Processing request of type: '${type}', with params = ${parametersString}${target ? ', TargetPatientID = '+target : ''}`);
     if (LEGACYAPI.hasOwnProperty(type)) {
         return LEGACYAPI[type](requestObject.toLegacy());
     // New request format
