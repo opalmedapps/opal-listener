@@ -8,8 +8,6 @@ ser = "ser"
 readby = "readby"
 # SQL queries
 tge = "tge"
-# not worth it to fix
-aggreement = "aggreement"
 # name in THIRDPART.md
 childs = "childs"
 
