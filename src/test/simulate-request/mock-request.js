@@ -82,7 +82,7 @@ const requestRegistration = {
             securityQuestionText1: 'Question 1?',
             securityQuestionText2: 'Question 2?',
             securityQuestionText3: 'Question 3?',
-            termsandAggreementSign: '1',
+            termsAndAgreementSign: '1',
         },
     },
     Timestamp: '',
