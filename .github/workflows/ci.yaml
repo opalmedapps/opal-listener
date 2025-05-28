@@ -35,9 +35,63 @@ jobs:
   run-reuse-workflow:
     uses: opalmedapps/.github/.github/workflows/reuse.yaml@main
 
+  test-mocha:
+    runs-on: ubuntu-latest
+    steps:
+      # Setup
+      - uses: actions/checkout@v4.2.2
+        with:
+          persist-credentials: false
+      - name: Install dependencies
+        run: npm ci
+      - name: Print mocha version
+        run: npx mocha --version
+
+      # Run tests
+      - name: Run mocha
+        run: npx mocha --reporter json --reporter-option output=mocha-report.json './src/**/*.test.*' './listener/**/*.test.*' './legacy-registration/**/*.test.*'
+
+      # Format the output for GitHub
+      - name: Report test results for GitHub
+        uses: dorny/test-reporter@v2.1.0
+        # Run this step even if the previous step failed
+        if: ${{ !cancelled() }}
+        with:
+          # Name of the check run which will be created
+          name: Mocha Tests
+          path: mocha-report.json
+          reporter: mocha-json
+
+  coverage:
+    runs-on: ubuntu-latest
+    steps:
+      # Setup
+      - uses: actions/checkout@v4.2.2
+        with:
+          persist-credentials: false
+      - name: Install dependencies
+        run: npm ci
+
+      # Run coverage evaluation
+      - name: Run nyc / cobertura
+        run: |
+          npx nyc --all --reporter cobertura mocha './src/**/*.test.*' './listener/**/*.test.*' './legacy-registration/**/*.test.*'
+          npx nyc report
+
+      # Format the output for GitHub
+      - name: Report coverage results
+        uses: irongut/CodeCoverageSummary@v1.3.0
+        with:
+          filename: coverage/cobertura-coverage.xml
+          badge: true
+          fail_below_min: false
+          format: markdown
+          output: both
+      - name: Display the report as a job summary
+        run: cat code-coverage-results.md >> "$GITHUB_STEP_SUMMARY"
+
   build-image:
-    needs:
-      - lint
+    needs: [lint, test-mocha]
     permissions:
       contents: read
       packages: write
