@@ -1,0 +1,33 @@
+# SPDX-FileCopyrightText: Copyright (C) 2025 Opal Health Informatics Group at the Research Institute of the McGill University Health Centre <john.kildea@mcgill.ca>
+#
+# SPDX-License-Identifier: AGPL-3.0-or-later
+name: Build Docs
+
+on:
+  push:
+    branches:
+      - main
+    paths:
+      - 'docs/**'
+
+jobs:
+  build-docs:
+    runs-on: ubuntu-latest
+    steps:
+      # Setup
+      - uses: actions/checkout@v4.2.2
+        with:
+          persist-credentials: false
+      - name: Install dependencies
+        run: npm ci
+      - name: Print jsdoc version
+        run: npx jsdoc --version
+
+      # Build the docs
+      - name: Build the docs
+        run: npm run docs
+      - name: Archive output
+        uses: actions/upload-artifact@v4.6.2
+        with:
+          name: docs
+          path: docs/generated/
