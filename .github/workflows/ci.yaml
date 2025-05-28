@@ -52,12 +52,11 @@ jobs:
         run: npx mocha --reporter json --reporter-option output=mocha-report.json './src/**/*.test.*' './listener/**/*.test.*' './legacy-registration/**/*.test.*'
 
       # Format the output for GitHub
-      - name: Report test results for GitHub
+      - name: Report test results
         uses: dorny/test-reporter@v2.1.0
         # Run this step even if the previous step failed
         if: ${{ !cancelled() }}
         with:
-          # Name of the check run which will be created
           name: Mocha Tests
           path: mocha-report.json
           reporter: mocha-json
