@@ -7,8 +7,6 @@ on:
   push:
     branches:
       - main
-      # TODO testing
-      - SB.ci-cd-eslint
   pull_request:
   workflow_dispatch:
   merge_group:
