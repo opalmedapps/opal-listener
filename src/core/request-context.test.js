@@ -5,8 +5,8 @@
 
 require('../test/chai-setup');
 const { expect } = require('chai');
-const { RequestContext } = require('./request-context');
-const { REQUEST_TYPE } = require('../const');
+const RequestContext = require('./request-context.js');
+const REQUEST_TYPE = require('../const');
 
 const registrationRequestTypes = [
     REQUEST_TYPE.REGISTRATION,

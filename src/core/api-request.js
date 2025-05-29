@@ -6,9 +6,9 @@
 /**
  * @file relay request uploaded to firebase by the app to the Django backend.
  */
-const axios = require('axios');
-const { convert } = require('html-to-text');
-const legacyLogger = require('../../listener/logs/logger');
+import axios from 'axios';
+import { convert } from 'html-to-text';
+import legacyLogger from '../../listener/logs/logger.js';
 
 const configs = {
     BACKEND_HOST: process.env.BACKEND_HOST,
@@ -114,4 +114,4 @@ class ApiRequest {
     }
 }
 
-module.exports = ApiRequest;
+export default ApiRequest;

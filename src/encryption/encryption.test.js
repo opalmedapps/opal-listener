@@ -6,7 +6,7 @@
 require('../test/chai-setup');
 const { expect } = require('chai');
 const EncryptionUtilities = require('./encryption');
-const { RequestContext } = require('../core/request-context');
+const RequestContext = require('../core/request-context.js');
 
 const context = new RequestContext('test', {});
 

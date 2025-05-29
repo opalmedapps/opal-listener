@@ -6,7 +6,7 @@
 /**
  * @file Utility functions used to manage or compare semver version numbers.
  */
-const fs = require('fs');
+import fs from 'fs';
 
 class Version {
     // Constants
@@ -59,4 +59,4 @@ class Version {
     }
 }
 
-exports.Version = Version;
+export default Version;

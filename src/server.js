@@ -19,7 +19,7 @@ import legacyRegistrationServer from '../legacy-registration/legacy-server.js';
 import legacyLogger from '../listener/logs/logger.js';
 import RequestHandler from './core/request-handler.js';
 import { REQUEST_TYPE } from './const.js';
-import { Version } from './utility/version.js';
+import Version from './utility/version.js';
 
 // Raise AssertionError if environment variables are not set
 validateEnvironment(ENVIRONMENT);

@@ -17,8 +17,8 @@ const legacyLogger = require('../../../listener/logs/logger');
 const legacyOpalSqlRunner = require('../../../listener/sql/opal-sql-query-runner');
 const legacyUtility = require('../../../listener/utility/utility');
 const EncryptionUtilities = require('../../encryption/encryption');
-const { REQUEST_TYPE } = require('../../const');
-const { RequestContext } = require('../../core/request-context');
+const REQUEST_TYPE = require('../../const');
+const RequestContext = require('../../core/request-context.js');
 
 const firebaseConfig = {
     DATABASE_URL: process.env.FIREBASE_DATABASE_URL,

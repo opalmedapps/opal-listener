@@ -12,7 +12,7 @@ const { expect } = require('chai');
 
 const EncryptionUtilities = require('../encryption/encryption');
 const Registration = require('./registration');
-const { RequestContext } = require('../core/request-context');
+const RequestContext = require('../core/request-context.js');
 
 const context = new RequestContext('test', {});
 
