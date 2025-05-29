@@ -14,8 +14,8 @@ import {OpalSQLQueryRunner} from '../sql/opal-sql-query-runner.js';
 import testResults from './modules/test-results/api.js';
 import questionnaires from './modules/questionnaires/api.js';
 import { Patient } from './modules/patient/patient.js';
-import eduMaterialConfig from './../educational-material/eduMaterialConfig.json';
-import studiesConfig from './../studies/studiesConfig.json';
+// import eduMaterialConfig from './../educational-material/eduMaterialConfig.json';
+// import studiesConfig from './../studies/studiesConfig.json';
 import SecurityDjango from './../security/securityDjango.js';
 import Version from '../../src/utility/version.js';
 
