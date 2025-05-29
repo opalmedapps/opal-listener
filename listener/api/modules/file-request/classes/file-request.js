@@ -2,7 +2,7 @@
 //
 // SPDX-License-Identifier: AGPL-3.0-or-later
 
-const axios = require('axios');
+import axios from 'axios';
 
 /**
  * @description Class representing a request to a file from the internet.
@@ -37,4 +37,4 @@ class FileRequest {
     }
 }
 
-module.exports = {FileRequest};
+export default FileRequest;

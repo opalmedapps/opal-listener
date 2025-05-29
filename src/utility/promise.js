@@ -45,4 +45,4 @@ class PromiseUtility {
     }
 }
 
-module.exports = PromiseUtility;
+export default PromiseUtility;

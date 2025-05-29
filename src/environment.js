@@ -6,7 +6,7 @@
 /**
  * @file Provides environment validation and exposes environment configuration objects.
  */
-const assert = require('assert');
+import assert from 'assert';
 
 /**
  * @description The full list of required .env variables for configuring the listener
@@ -69,7 +69,7 @@ function validateEnvironment(processArr) {
     });
 }
 
-module.exports = {
+export {
     ENVIRONMENT,
     ENVIRONMENT_SOURCE_SYSTEM_CHECKIN,
     ENVIRONMENT_ORMS,

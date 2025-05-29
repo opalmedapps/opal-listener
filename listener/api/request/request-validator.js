@@ -5,19 +5,16 @@
 /**
 *  Opal Imports
 */
-const OpalRequest = require('./request');
-const {OpalResponseError} = require('../response/response-error');
-const sqlInterface = require('../sqlInterface');
-const utility = require('../../utility/utility');
-const { Version } = require('../../../src/utility/version');
-const logger = require('../../logs/logger');
-const config = require('../../config-adaptor');
-const ApiRequest = require('../../../src/core/api-request.js');
+import OpalRequest from './request.js';
+import OpalResponseError from '../response/response-error.js';
+import sqlInterface from '../sqlInterface.js';
+import utility from '../../utility/utility.js';
+import Version from '../../../src/utility/version.js';
+import logger from '../../logs/logger.js';
+import config from '../../config-adaptor.js';
+import ApiRequest from '../../../src/core/api-request.js';
+import q from 'q';
 
-/**
-* Library imports
-*/
-const q = require('q');
 /**
 * @class RequestValidator
 * @description Obtains request, decrypts
@@ -162,4 +159,5 @@ class RequestValidator {
 		}
 	}
 }
-module.exports = RequestValidator;
+
+export default RequestValidator;

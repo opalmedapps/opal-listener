@@ -2,61 +2,44 @@
 //
 // SPDX-License-Identifier: AGPL-3.0-or-later
 
-const sqlInterface = require('./sqlInterface.js');
-const logger = require('./../logs/logger.js');
-const questionnaires = require('./../questionnaires/questionnaireOpalDB.js');
+import sqlInterface from './sqlInterface.js';
+import logger from './../logs/logger.js';
+import questionnaires from './../questionnaires/questionnaireOpalDB.js';
 
-exports.omitParametersFromLogs = sqlInterface.omitParametersFromLogs;
+const omitParametersFromLogs = sqlInterface.omitParametersFromLogs;
 
 /**
  * This is for questionnaire V2 (inputting a single question's answer for 2019 qplus questionnaire front-end)
  * @param {object} requestObject
  * @returns {Promise}
  */
-exports.questionnaireSaveAnswer = questionnaires.questionnaireSaveAnswer;
+const questionnaireSaveAnswer = questionnaires.questionnaireSaveAnswer;
 
 /**
  * This is for questionnaire V2 (2019 qplus questionnaire front-end). Update the status of one questionnaire
  * @param {object} requestObject
  * @returns {Promise}
  */
-exports.questionnaireUpdateStatus = questionnaires.questionnaireUpdateStatus;
+const questionnaireUpdateStatus = questionnaires.questionnaireUpdateStatus;
 
-//Input feedback
-exports.inputFeedback=function(requestObject)
-{
-  return sqlInterface.inputFeedback(requestObject);
-};
+const inputFeedback = sqlInterface.inputFeedback;
 
-//User Account Change
-exports.accountChange = function (requestObject) {
-   return sqlInterface.updateAccountField(requestObject);
-};
+const accountChange = sqlInterface.updateAccountField;
 
-//Update Read Status
-exports.updateReadStatus=function(requestObject)
-{
+function updateReadStatus(requestObject) {
   requestObject.Parameters["TargetPatientID"] = requestObject.TargetPatientID;
   return sqlInterface.updateReadStatus(requestObject.UserID, requestObject.Parameters);
-};
+}
 
-//Update checkin
-exports.checkIn = function (requestObject) {
-    return sqlInterface.checkIn(requestObject);
-};
+const checkIn = sqlInterface.checkIn;
 
 //Update device token for push notifications
-exports.updateDeviceIdentifier= function(requestObject)
-{
+function updateDeviceIdentifier(requestObject) {
     logger.log('debug', 'update device identifier called at apiHospitalUpdate');
     return sqlInterface.updateDeviceIdentifier(requestObject);
-};
+}
 
-//Input rating for
-exports.inputEducationalMaterialRating= function(requestObject)
-{
-  return sqlInterface.inputEducationalMaterialRating(requestObject);
-};
+const inputEducationalMaterialRating = sqlInterface.inputEducationalMaterialRating;
 
 /**
  * @desc Get new notifications for the current user.
@@ -64,12 +47,20 @@ exports.inputEducationalMaterialRating= function(requestObject)
  * @param requestObject
  * @returns {*}
  */
-exports.getNewNotifications = function (requestObject) {
-    return sqlInterface.getNewNotifications(requestObject);
-};
+const getNewNotifications = sqlInterface.getNewNotifications;
 
-// Update study consent status
-exports.studyUpdateStatus = function (requestObject)
-{
-    return sqlInterface.studyUpdateStatus(requestObject);
-};
+const studyUpdateStatus = sqlInterface.studyUpdateStatus;
+
+export default {
+    omitParametersFromLogs,
+    questionnaireSaveAnswer,
+    questionnaireUpdateStatus,
+    inputFeedback,
+    accountChange,
+    updateReadStatus,
+    checkIn,
+    updateDeviceIdentifier,
+    inputEducationalMaterialRating,
+    getNewNotifications,
+    studyUpdateStatus,
+}

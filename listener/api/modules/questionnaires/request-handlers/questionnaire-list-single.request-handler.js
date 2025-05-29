@@ -2,14 +2,14 @@
 //
 // SPDX-License-Identifier: AGPL-3.0-or-later
 
-const { ApiRequestHandler } = require('../../../api-request-handler');
-const logger = require('../../../../logs/logger');
-const { param } = require('express-validator');
-const questionnaireOpalDB = require('../../../../questionnaires/questionnaireOpalDB');
-const questionnaireQuestionnaireDB = require('../../../../questionnaires/questionnaireQuestionnaireDB');
-const questionnaireConfig = require('../../../../questionnaires/questionnaireConfig.json');
-const utility = require('../../../../utility/utility');
-const { ValidationError } = require('../../../errors/validation-error');
+import ApiRequestHandler from '../../../api-request-handler.js';
+import logger from '../../../../logs/logger.js';
+import { param } from 'express-validator';
+import questionnaireOpalDB from '../../../../questionnaires/questionnaireOpalDB.js';
+import questionnaireQuestionnaireDB from '../../../../questionnaires/questionnaireQuestionnaireDB.js';
+import questionnaireConfig from '../../../../questionnaires/questionnaireConfig.json' with { type: "json" };
+import utility from '../../../../utility/utility.js';
+import ValidationError from '../../../errors/validation-error.js';
 
 const languages = ['FR', 'EN'];
 
@@ -64,4 +64,4 @@ class QuestionnaireListSingleHandler extends ApiRequestHandler {
     }
 }
 
-module.exports = QuestionnaireListSingleHandler;
+export default QuestionnaireListSingleHandler;

@@ -2,25 +2,17 @@
 //
 // SPDX-License-Identifier: AGPL-3.0-or-later
 
-const axios = require('axios');
-const questionnaireQueries = require('./questionnaireQueries.js');
-const questionnaires = require('./questionnaireQuestionnaireDB.js');
-const opalQueries = require('../sql/queries');
-const questionnaireValidation = require('./questionnaire.validate');
-const logger = require('./../logs/logger');
-const {OpalSQLQueryRunner} = require("../sql/opal-sql-query-runner");
-const config = require("../config-adaptor");
-const questionnaireConfig = require('./questionnaireConfig.json');
-const ApiRequest = require('../../src/core/api-request');
-const QuestionnaireDjango = require('./questionnaireDjango');
-
-exports.getQuestionnaireInOpalDB = getQuestionnaireInOpalDB;
-exports.getAnswerQuestionnaireIdFromSerNum = getAnswerQuestionnaireIdFromSerNum;
-exports.getQuestionnaireList = getQuestionnaireList;
-exports.getQuestionnaire = getQuestionnaire;
-exports.getQuestionnairePurpose = getQuestionnairePurpose;
-exports.questionnaireSaveAnswer = questionnaireSaveAnswer;
-exports.questionnaireUpdateStatus = questionnaireUpdateStatus;
+import axios from 'axios';
+import questionnaireQueries from './questionnaireQueries.js';
+import questionnaires from './questionnaireQuestionnaireDB.js';
+import opalQueries from '../sql/queries.js';
+import questionnaireValidation from './questionnaire.validate.js';
+import logger from './../logs/logger.js';
+import OpalSQLQueryRunner from '../sql/opal-sql-query-runner.js';
+import config from '../config-adaptor.js';
+import questionnaireConfig from './questionnaireConfig.json' with { type: "json" };
+import ApiRequest from '../../src/core/api-request.js';
+import QuestionnaireDjango from './questionnaireDjango.js';
 
 /*
 FUNCTIONS TO GET QUESTIONNAIRES (QUESTIONNAIRE V2)
@@ -349,4 +341,14 @@ async function checkCaregiverPermissions(userId, patientSerNum) {
         const errMsg = `The requested questionnaire cannot be completed by this user.`;
         throw new Error(errMsg, {cause: 'Not allowed'});
     }
+}
+
+export default {
+    getQuestionnaireInOpalDB,
+    getAnswerQuestionnaireIdFromSerNum,
+    getQuestionnaireList,
+    getQuestionnaire,
+    getQuestionnairePurpose,
+    questionnaireSaveAnswer,
+    questionnaireUpdateStatus,
 }

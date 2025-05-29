@@ -2,9 +2,7 @@
 //
 // SPDX-License-Identifier: AGPL-3.0-or-later
 
-/**  Library Imports **/
-const legacyListenerUtils = require('../../../listener/utility/utility');
-
+import legacyListenerUtils from '../../../listener/utility/utility.js';
 
 /**
      resolveEmptyResponse
@@ -12,7 +10,7 @@ const legacyListenerUtils = require('../../../listener/utility/utility');
      @param data
      @return {*}
  **/
-exports.resolveEmptyResponse = legacyListenerUtils.resolveEmptyResponse;
+const resolveEmptyResponse = legacyListenerUtils.resolveEmptyResponse;
 
 /**
      toMYSQLString
@@ -20,7 +18,7 @@ exports.resolveEmptyResponse = legacyListenerUtils.resolveEmptyResponse;
      @param date
      @return Date
  **/
-exports.toMYSQLString = legacyListenerUtils.toMYSQLString;
+const toMYSQLString = legacyListenerUtils.toMYSQLString;
 
 
 /**
@@ -29,7 +27,7 @@ exports.toMYSQLString = legacyListenerUtils.toMYSQLString;
      @param time
      @return {Date}
  **/
-exports.unixToMYSQLTimestamp = legacyListenerUtils.unixToMYSQLTimestamp;
+const unixToMYSQLTimestamp = legacyListenerUtils.unixToMYSQLTimestamp;
 
 /**
      encrypt
@@ -40,7 +38,7 @@ exports.unixToMYSQLTimestamp = legacyListenerUtils.unixToMYSQLTimestamp;
      @returns {Promise}
      @notes link for NACL encryption documentation: https://tweetnacl.js.org/#/
  **/
-exports.encrypt = legacyListenerUtils.encrypt;
+const encrypt = legacyListenerUtils.encrypt;
 
 /**
      decrypt
@@ -52,11 +50,22 @@ exports.encrypt = legacyListenerUtils.encrypt;
      @notes link for NACL encryption documentation: https://tweetnacl.js.org/#/
  **/
 
-exports.decrypt = legacyListenerUtils.decrypt;
+const decrypt = legacyListenerUtils.decrypt;
 
-exports.hash = legacyListenerUtils.hash;
+const hash = legacyListenerUtils.hash;
 
-exports.concatUTF8Array = legacyListenerUtils.concatUTF8Array;
+const concatUTF8Array = legacyListenerUtils.concatUTF8Array;
 
 //Create copy of object if no nested object
-exports.copyObject = legacyListenerUtils.copyObject;
+const copyObject = legacyListenerUtils.copyObject;
+
+export default {
+    resolveEmptyResponse,
+    toMYSQLString,
+    unixToMYSQLTimestamp,
+    encrypt,
+    decrypt,
+    hash,
+    concatUTF8Array,
+    copyObject,
+}

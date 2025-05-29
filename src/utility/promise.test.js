@@ -3,9 +3,9 @@
 //
 // SPDX-License-Identifier: AGPL-3.0-or-later
 
-require('../test/chai-setup');
-const { expect } = require('chai');
-const PromiseUtility = require('./promise');
+import '../test/chai-setup.js';
+import { expect } from 'chai';
+import PromiseUtility from './promise.js';
 
 describe('PromiseUtility', function () {
     describe('promiseAnyWithIndex', function () {

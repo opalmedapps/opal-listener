@@ -2,18 +2,19 @@
 //
 // SPDX-License-Identifier: AGPL-3.0-or-later
 
-const apiPatientUpdate      = require('./apiPatientUpdate.js');
-const apiHospitalUpdate     = require('./apiHospitalUpdate.js');
-const security              = require('./../security/security');
-const logger                = require('./../logs/logger');
+import apiPatientUpdate from './apiPatientUpdate.js';
+import apiHospitalUpdate from './apiHospitalUpdate.js';
+import security from './../security/security.js';
+import logger from './../logs/logger.js';
 
 // New API handlers
-const fileRequest = require("./modules/file-request");
-const general = require('./modules/general');
-const securityQuestions = require("./modules/patient/security-questions");
-const testResults = require("./modules/test-results");
+import fileRequest from './modules/file-request/api.js';
+import general from './modules/general/api.js';
+import securityQuestions from './modules/patient/security-questions/api.js';
+import testResults from './modules/test-results/api.js';
 
 const omitParametersFromLogs = apiHospitalUpdate.omitParametersFromLogs;
+const logPatientRequest = apiPatientUpdate.logPatientRequest;
 
 /**
  * API HANDLERS FOR GENERAL REQUESTS
@@ -59,7 +60,7 @@ const LEGACYAPI = {
  * API HANDLERS FOR SECURITY SPECIFIC REQUESTS
  * @type {{SecurityQuestion: *, SetNewPassword: *, VerifyAnswer: *}}
  */
-exports.securityAPI = {
+const securityAPI = {
     'SecurityQuestion': security.getSecurityQuestion,
     'SetNewPassword': security.resetPassword,
     'VerifyAnswer': security.verifySecurityAnswer,
@@ -82,7 +83,7 @@ const API = {
  * @param requestObject
  * @return {Promise}
  */
-exports.processRequest=function(requestObject) {
+function processRequest(requestObject) {
     const type = requestObject.type;
     const target = requestObject.meta.TargetPatientID;
     let parametersString = JSON.stringify(requestObject.params);
@@ -100,8 +101,10 @@ exports.processRequest=function(requestObject) {
         logger.log("error", `Invalid request type: ${type}`);
         return Promise.reject("Invalid request type");
     }
-};
+}
 
-exports.logPatientRequest = function(requestObject) {
-    return apiPatientUpdate.logPatientRequest(requestObject);
-};
+export default {
+    securityAPI,
+    processRequest,
+    logPatientRequest,
+}

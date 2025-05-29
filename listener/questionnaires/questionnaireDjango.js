@@ -6,8 +6,8 @@
  * @file Makes and interprets API calls to the Django backend, to get information used in the Questionnaire module.
  */
 
-const ApiRequest = require('../../src/core/api-request');
-const logger = require('../logs/logger');
+import ApiRequest from '../../src/core/api-request.js';
+import logger from '../logs/logger.js';
 
 class QuestionnaireDjango {
     /**
@@ -71,4 +71,4 @@ class QuestionnaireDjango {
     }
 }
 
-module.exports = QuestionnaireDjango;
+export default QuestionnaireDjango;

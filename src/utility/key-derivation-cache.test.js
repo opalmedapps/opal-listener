@@ -3,12 +3,12 @@
 //
 // SPDX-License-Identifier: AGPL-3.0-or-later
 
-require('../test/chai-setup');
-const { expect } = require('chai');
-const { Keyv } = require('keyv');
-const sinon = require('sinon');
-const crypto = require('crypto');
-const cache = require('./key-derivation-cache');
+import '../test/chai-setup.js';
+import { expect } from 'chai';
+import { Keyv } from 'keyv';
+import sinon from 'sinon';
+import crypto from 'crypto';
+import cache from './key-derivation-cache.js';
 
 describe('KeyDerivationCache', function () {
     const label = 'test-label';

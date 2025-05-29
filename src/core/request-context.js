@@ -3,9 +3,9 @@
 //
 // SPDX-License-Identifier: AGPL-3.0-or-later
 
-const legacyLogger = require('../../listener/logs/logger');
-const { REQUEST_TYPE } = require('../const');
-const { Version } = require('../utility/version');
+import legacyLogger from '../../listener/logs/logger.js';
+import { REQUEST_TYPE } from '../const.js';
+import Version from '../utility/version.js';
 
 /**
  * @description Object used to store all contextual information related to a single request from the Opal app.
@@ -106,4 +106,5 @@ class RequestContext {
         return cacheLabel;
     }
 }
-exports.RequestContext = RequestContext;
+
+export default RequestContext;

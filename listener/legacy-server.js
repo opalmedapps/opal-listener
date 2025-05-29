@@ -7,18 +7,20 @@
  * writes a response back to firebase.
  */
 
-const mainRequestApi    = require('./api/main.js');
-const processApi        = require('./api/processApiRequest');
-const admin             = require("firebase-admin");
-const utility           = require('./utility/utility.js');
-const q                 = require("q");
-const logger            = require('./logs/logger.js');
-const cp                = require('child_process');
-const OpalSecurityResponseError = require('./api/response/security-response-error');
-const OpalSecurityResponseSuccess = require('./api/response/security-response-success');
-const OpalResponse      = require('./api/response/response');
-const { RequestContext } = require('../src/core/request-context.js');
+import mainRequestApi from './api/main.js';
+import processApi from './api/processApiRequest.js';
+import admin from 'firebase-admin';
+import utility from './utility/utility.js';
+import q from 'q';
+import logger from './logs/logger.js';
+import cp from 'child_process';
+import OpalSecurityResponseError from './api/response/security-response-error.js';
+import OpalSecurityResponseSuccess from './api/response/security-response-success.js';
+import OpalResponse from './api/response/response.js';
+import RequestContext from '../src/core/request-context.js';
 
+// See: https://stackoverflow.com/questions/46745014/alternative-for-dirname-in-node-js-when-using-es6-modules
+const __dirname = import.meta.dirname;
 
 // NOTE: Listener launching steps have been moved to src/server.js
 
@@ -31,12 +33,11 @@ let ref;
 /**
  * @description Temporary function used to support the legacy structure of this file.
  *              Called by src/server.js to pass a Firebase database object to this file.
- * @param {Reference}} databaseRef The Firebase database reference to use.
+ * @param {Reference} databaseRef The Firebase database reference to use.
  */
 function setFirebaseConnection(databaseRef) {
     ref = databaseRef;
 }
-exports.setFirebaseConnection = setFirebaseConnection;
 
 /**
  * listenForRequest
@@ -59,7 +60,6 @@ function listenForRequest(requestType){
             logger.log('error', `Failed to read 'child_added' snapshot while listening to '${requestType}'`, error);
         });
 }
-exports.listenForRequest = listenForRequest;
 
 /**
  * handleRequest
@@ -88,7 +88,6 @@ function handleRequest(requestType, snapshot){
         uploadToFirebase(context, response);
     });
 }
-exports.handleRequest = handleRequest;
 
 /**
  * logResponse
@@ -187,8 +186,6 @@ function encryptResponse(context, response)
 		return Promise.resolve(response);
 	}
 }
-// Export for legacy-registration
-exports.encryptResponse = encryptResponse;
 
 /**
  * uploadToFirebase
@@ -299,8 +296,6 @@ function validateKeysForFirebase(objectToValidate) {
     } // Validate the next sub-object in the stack until there are none left
     return objectToValidate;
 }
-// Export for legacy-registration
-exports.validateKeysForFirebase = validateKeysForFirebase;
 
 /**
  * incrementStringParenthesisNumber
@@ -378,7 +373,6 @@ function spawnCronJobs(){
     spawnClearRequest();
     spawnClearResponses();
 }
-exports.spawnCronJobs = spawnCronJobs;
 
 /**
  * @name spawnClearRequest
@@ -429,4 +423,15 @@ function spawnClearResponses(){
     process.on('exit', function () {
         clearResponses.kill();
     });
+}
+
+export default {
+    setFirebaseConnection,
+    listenForRequest,
+    handleRequest,
+    spawnCronJobs,
+
+    // Exports for legacy-registration
+    encryptResponse,
+    validateKeysForFirebase,
 }

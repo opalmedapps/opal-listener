@@ -4,7 +4,7 @@
 
 // This file initializes the logger for Opal.
 
-const {createLogger, format, transports} = require('winston');
+import {createLogger, format, transports} from 'winston';
 
 // Choose log level according to environment.
 const defaultLoggerLevel = process.env.NODE_ENV === 'production' ? 'info' : 'debug';
@@ -58,7 +58,7 @@ const logWrapper = (level, message, data) => {
 
 WinstonLogger.log('info', `Initialized Winston with level: ${loggerLevel}`);
 
-module.exports = {
+export default {
     ...WinstonLogger,
     log: logWrapper,
-};
+}

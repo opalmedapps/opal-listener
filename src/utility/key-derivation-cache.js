@@ -7,9 +7,9 @@
  * @description Manages caching for the output of encryption key derivation functions (such as PBKDF2).
  *              This is done to limit the need to recompute the output, which is time-consuming.
  */
-const { Keyv } = require('keyv');
-const crypto = require('crypto');
-const legacyLogger = require('../../listener/logs/logger');
+import { Keyv } from 'keyv';
+import crypto from 'crypto';
+import legacyLogger from '../../listener/logs/logger.js';
 
 // Parameters for PBKDF2
 const iterations = 25000;
@@ -125,4 +125,4 @@ class KeyDerivationCache {
 }
 
 // Singleton
-module.exports = new KeyDerivationCache();
+export default new KeyDerivationCache();

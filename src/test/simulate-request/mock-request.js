@@ -7,7 +7,7 @@
 /**
  * @file unencrypted mock request
  */
-const CryptoJs = require('crypto-js');
+import CryptoJs from 'crypto-js';
 
 /**
  * Request for the new Django API
@@ -109,7 +109,7 @@ const requestData = {
     UserEmail: 'marge@opalmedapps.ca',
 };
 
-module.exports = {
+export default {
     requestRegistration,
     requestRegistrationApi,
     requestData,

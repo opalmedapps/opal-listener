@@ -2,6 +2,8 @@
 //
 // SPDX-License-Identifier: AGPL-3.0-or-later
 
-module.exports = {
-    'RequestFile':  require("./request-handlers/file.request-handler"),
-};
+import RequestFile from './request-handlers/file.request-handler.js';
+
+export default {
+    RequestFile,
+}

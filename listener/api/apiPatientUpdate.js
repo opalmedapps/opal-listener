@@ -2,13 +2,13 @@
 //
 // SPDX-License-Identifier: AGPL-3.0-or-later
 
-var Q = require('q');
-var sqlInterface = require('./sqlInterface.js');
-var utility = require('./../utility/utility.js');
-var queries = require('./../sql/queries.js');
-var logger = require('./../logs/logger.js');
-const questionnaires = require('./../questionnaires/questionnaireOpalDB.js');
-const { Version } = require('../../src/utility/version');
+import q from 'q';
+import sqlInterface from './sqlInterface.js';
+import utility from './../utility/utility.js';
+import queries from './../sql/queries.js';
+import logger from './../logs/logger.js';
+import questionnaires from './../questionnaires/questionnaireOpalDB.js';
+import Version from '../../src/utility/version.js';
 
 /**
  *@name login
@@ -17,7 +17,7 @@ const { Version } = require('../../src/utility/version');
  *@description 1.12.2 and prior: Queries and returns all patient data to be available at login.
  *             After 1.12.2: Doesn't do anything anymore, but was kept to record 'Login' in PatientActivityLog.
  */
-exports.login = async function(requestObject) {
+async function login(requestObject) {
     if (Version.versionLessOrEqual(requestObject.AppVersion, Version.version_1_12_2)) {
         let patientSerNum = await sqlInterface.getSelfPatientSerNum(requestObject.UserID);
         let loginData = await sqlInterface.getPatientTableFields(requestObject.UserID, patientSerNum, requestObject.Parameters.Fields, requestObject.Parameters);
@@ -36,7 +36,7 @@ exports.login = async function(requestObject) {
         // The only purpose of the login request is to record a timestamp in PatientActivityLog (done automatically in logPatientRequest)
         return Promise.resolve({ Response: "Login recorded" });
     }
-};
+}
 
 /**
  * @desc Retrieves patient data in a given set of categories. This function is called 'refresh' because it can be used
@@ -47,7 +47,7 @@ exports.login = async function(requestObject) {
  * @param [requestObject.Parameters.Timestamp] Optional date/time; if provided, only items with 'LastUpdated' after this time are returned.
  * @returns {Promise<*>}
  */
-exports.refresh = async function(requestObject) {
+async function refresh(requestObject) {
     let UserId = requestObject.UserID;
     let parameters = requestObject.Parameters;
     let fields = parameters.Fields;
@@ -64,19 +64,12 @@ exports.refresh = async function(requestObject) {
     rows.Data = utility.resolveEmptyResponse(rows.Data);
 
     return rows;
-};
+}
 
 // Get the contents of an educational material package.
-exports.getPackageContents = function(requestObject){
-    return sqlInterface.getPackageContents(requestObject);
-};
+const getPackageContents = sqlInterface.getPackageContents;
 
-//Get Document Content
-exports.getDocumentsContent=function(requestObject)
-{
-
-   return sqlInterface.getDocumentsContent(requestObject);
-};
+const getDocumentsContent = sqlInterface.getDocumentsContent;
 
 /**
 *@name getStudies
@@ -84,9 +77,7 @@ exports.getDocumentsContent=function(requestObject)
 *@param {object} requestObject
 *@returns {Promise}
 */
-exports.getStudies = function(requestObject) {
-    return sqlInterface.getStudies(requestObject);
-}
+const getStudies = sqlInterface.getStudies;
 
 /**
 *@name getStudyQuestionnaires
@@ -94,15 +85,9 @@ exports.getStudies = function(requestObject) {
 *@param {object} requestObject
 *@returns {Promise}
 */
-exports.getStudyQuestionnaires = function(requestObject) {
-    return sqlInterface.getStudyQuestionnaires(requestObject);
-}
+const getStudyQuestionnaires = sqlInterface.getStudyQuestionnaires;
 
-// exports.isTrustedDevice = function (requestObject) {
-//     return sqlInterface.isTrustedDevice(requestObject);
-// };
-
-exports.logActivity = function (requestObject) {
+function logActivity(requestObject) {
     logger.log('verbose', 'User Activity', {
         deviceID:requestObject.DeviceId,
         userID:requestObject.UserID,
@@ -110,23 +95,19 @@ exports.logActivity = function (requestObject) {
         activity:requestObject.Parameters.Activity,
         activityDetails: requestObject.Parameters.ActivityDetails
     });
-    return Q.resolve({Response:'success'});
-};
+    return q.resolve({Response:'success'});
+}
 
 // Log a patient action (clicked, scrolled to bottom, etc.).
-exports.logPatientAction = function(requestObject){
-    return sqlInterface.logPatientAction(requestObject);
-};
+const logPatientAction = sqlInterface.logPatientAction;
 
-exports.logPatientRequest = function(requestObject) {
-    return sqlInterface.addToActivityLog(requestObject);
-};
+const logPatientRequest = sqlInterface.addToActivityLog;
 
 // API call to log user out
-exports.logout = function(requestObject) {
+function logout(requestObject) {
     // For now, the only purpose of the logout request is to record a timestamp in PatientActivityLog (done separately in logPatientRequest)
     return Promise.resolve({Response: "Successful logout"});
-};
+}
 
 /**
  * For questionnaire V2 (2019 version of qplus questionnaire front-end). Getting the list of questionnaires belonging to a patient
@@ -134,7 +115,7 @@ exports.logout = function(requestObject) {
  * @param {object} requestObject
  * @returns {Promise}
  */
-exports.getQuestionnaireList = questionnaires.getQuestionnaireList;
+const getQuestionnaireList = questionnaires.getQuestionnaireList;
 
 /**
  * For questionnaire V2 (2019 version of qplus questionnaire front-end).
@@ -143,31 +124,48 @@ exports.getQuestionnaireList = questionnaires.getQuestionnaireList;
  * @param {object} requestObject
  * @returns {Promise}
  */
-exports.getQuestionnaireInOpalDB = questionnaires.getQuestionnaireInOpalDB;
+const getQuestionnaireInOpalDB = questionnaires.getQuestionnaireInOpalDB;
 
 /**
  * For questionnaire V2 (2019 version of qplus questionnaire front-end). Gets one questionnaire.
  * @param {object} requestObject
  * @returns {Promise}
  */
-exports.getQuestionnaire = questionnaires.getQuestionnaire;
+const getQuestionnaire = questionnaires.getQuestionnaire;
 
 /**
 * Gets the purpose of the current questionnaire.
 * @param {object} requestObject
 * @returns {Promise}
 */
-exports.getQuestionnairePurpose = questionnaires.getQuestionnairePurpose;
+const getQuestionnairePurpose = questionnaires.getQuestionnairePurpose;
 
 /**
  * @deprecated
  * @returns
  */
-exports.getPatientsForPatientsMembers = function ()
-{
+function getPatientsForPatientsMembers() {
   return new Promise((resolve, reject)=>{
       sqlInterface.runSqlQuery(queries.getPatientForPatientMembers(),[]).then((members)=>{
          resolve({Data:members});
       }).catch((err) => reject({Response:error, Reason:err}));
   });
-};
+}
+
+export default {
+    login,
+    refresh,
+    getPackageContents,
+    getDocumentsContent,
+    getStudies,
+    getStudyQuestionnaires,
+    logActivity,
+    logPatientAction,
+    logPatientRequest,
+    logout,
+    getQuestionnaireList,
+    getQuestionnaireInOpalDB,
+    getQuestionnaire,
+    getQuestionnairePurpose,
+    getPatientsForPatientsMembers,
+}

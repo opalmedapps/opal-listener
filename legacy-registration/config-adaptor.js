@@ -2,7 +2,9 @@
 //
 // SPDX-License-Identifier: AGPL-3.0-or-later
 
+import config from '../listener/config-adaptor.js';
+
 /**
  * Reuse legacy listener config adaptor.
  */
-module.exports = require('../listener/config-adaptor');
+export default config

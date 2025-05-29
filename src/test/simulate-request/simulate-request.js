@@ -7,18 +7,16 @@
 /**
  * @file Upload a mock request to firebase to simulate a request from the app.
  */
-require('dotenv').config();
-const path = require('path');
-const mysql = require('mysql');
-const fs = require('fs');
-const { Firebase } = require('../../firebase/firebase');
-const DefaultRequestData = require('./mock-request');
-const legacyLogger = require('../../../listener/logs/logger');
-const legacyOpalSqlRunner = require('../../../listener/sql/opal-sql-query-runner');
-const legacyUtility = require('../../../listener/utility/utility');
-const EncryptionUtilities = require('../../encryption/encryption');
-const { REQUEST_TYPE } = require('../../const');
-const { RequestContext } = require('../../core/request-context');
+import 'dotenv/config';
+import mysql from 'mysql';
+import Firebase from '../../firebase/firebase.js';
+import DefaultRequestData from './mock-request.js';
+import legacyLogger from '../../../listener/logs/logger.js';
+import legacyOpalSqlRunner from '../../../listener/sql/opal-sql-query-runner.js';
+import legacyUtility from '../../../listener/utility/utility.js';
+import EncryptionUtilities from '../../encryption/encryption.js';
+import { REQUEST_TYPE } from '../../const.js';
+import RequestContext from '../../core/request-context.js';
 
 const firebaseConfig = {
     DATABASE_URL: process.env.FIREBASE_DATABASE_URL,
@@ -76,13 +74,11 @@ class SimulateRequest {
 
     /**
      * @description Steps to encrypt and upload a request to Firebase.
-     *              1- Get the firebase admin key file path
-     *              2- Init the Firebase manager
-     *              3- Encrypt the data as the app would do
-     *              4- Upload the result to Firebase
+     *              1- Init the Firebase manager
+     *              2- Encrypt the data as the app would do
+     *              3- Upload the result to Firebase
      */
     async makeRequest() {
-        this.#firebaseConfig.ADMIN_KEY_PATH = await SimulateRequest.getFirebaseAdminKey();
         await this.initFirebase();
         if (this.#requestType === REQUEST_TYPE.REGISTRATION || this.#requestType === REQUEST_TYPE.REGISTRATION_LEGACY) {
             await this.encryptRegistrationRequest();
@@ -91,16 +87,6 @@ class SimulateRequest {
             await this.encryptApiRequest();
         }
         this.uploadToFirebase();
-    }
-
-    /**
-     * @description Scan "config/firebase" directory and return the admin key file path.
-     * @returns {object} File path for the firebase admin key.
-     */
-    static async getFirebaseAdminKey() {
-        const pathName = path.join(__dirname, '../../config');
-        const files = await fs.promises.readdir(pathName);
-        return `${pathName}/${files[0]}`;
     }
 
     /**
@@ -195,4 +181,4 @@ class SimulateRequest {
 // Create a new instance with a default mock request to be able to run the script via a npm command
 new SimulateRequest(DefaultRequestData.requestRegistrationApi);
 
-exports.SimulateRequest = SimulateRequest;
+export default SimulateRequest;

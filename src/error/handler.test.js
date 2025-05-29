@@ -4,10 +4,10 @@
 // SPDX-License-Identifier: AGPL-3.0-or-later
 
 /* eslint-disable mocha/no-setup-in-describe */
-require('../test/chai-setup');
-const { expect } = require('chai');
-const ErrorHandler = require('./handler');
-const { ERRORS } = require('./const');
+import '../test/chai-setup.js';
+import { expect } from 'chai';
+import ErrorHandler from './handler.js';
+import ERRORS from './const.js';
 
 describe('Error handler', function () {
     describe('getErrorResponse()', function () {

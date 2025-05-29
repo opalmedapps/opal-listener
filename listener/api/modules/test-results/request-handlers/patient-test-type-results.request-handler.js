@@ -2,12 +2,11 @@
 //
 // SPDX-License-Identifier: AGPL-3.0-or-later
 
-const {ValidationError} =require("../../../errors/validation-error");
-const {PatientTestResult} = require("../classes/patient-test-result");
-const {ApiRequestHandler} = require("../../../api-request-handler");
-const {Patient} = require("../../patient/patient");
-const {param} = require("express-validator");
-const logger = require("../../../../logs/logger");
+import ValidationError from '../../../errors/validation-error.js';
+import PatientTestResult from '../classes/patient-test-result.js';
+import ApiRequestHandler from '../../../api-request-handler.js';
+import {param} from 'express-validator';
+import logger from '../../../../logs/logger.js';
 
 class PatientTestTypeResultsHandler extends ApiRequestHandler {
 	/**
@@ -54,4 +53,4 @@ class PatientTestTypeResultsHandler extends ApiRequestHandler {
 	}
 }
 
-module.exports = PatientTestTypeResultsHandler;
+export default PatientTestTypeResultsHandler;

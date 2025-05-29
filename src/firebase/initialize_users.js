@@ -8,10 +8,9 @@
  * @file Utility for Firebase to initialize users.
  */
 /* eslint-disable import/no-unresolved */
-const { getAuth } = require('firebase-admin/auth');
-
-const { FIREBASE_CONFIG } = require('../environment');
-const { Firebase } = require('./firebase');
+import { getAuth } from 'firebase-admin/auth';
+import { FIREBASE_CONFIG } from '../environment.js';
+import Firebase from './firebase.js';
 
 const USER_RECORDS = [
     {

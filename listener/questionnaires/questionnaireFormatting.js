@@ -2,17 +2,11 @@
 //
 // SPDX-License-Identifier: AGPL-3.0-or-later
 
-const logger = require('../logs/logger.js');
-const questionnaireValidation = require('./questionnaire.validate');
-const questionnaireConfig = require('./questionnaireConfig.json');
-var utility = require('../utility/utility');
-const QuestionnaireDjango = require('./questionnaireDjango');
-
-exports.getQuestionAndTypeMap = getQuestionAndTypeMap;
-exports.formatAnswer = formatAnswer;
-exports.formatQuestionOptions = formatQuestionOptions;
-exports.formatQuestionnaire = formatQuestionnaire;
-exports.getAllowedRespondents = getAllowedRespondents;
+import logger from '../logs/logger.js';
+import questionnaireValidation from './questionnaire.validate.js';
+import questionnaireConfig from './questionnaireConfig.json' with { type: "json" };
+import utility from '../utility/utility.js';
+import QuestionnaireDjango from './questionnaireDjango.js';
 
 /**
  * getQuestionAndTypeMap
@@ -305,4 +299,12 @@ async function getAllowedRespondents(userId, patientSerNum) {
     if (!isSelf) allowedRespondents.push(questionnaireConfig.QUESTIONNAIRE_RESPONDENT_ID.CAREGIVER);
 
     return allowedRespondents;
+}
+
+export default {
+    getQuestionAndTypeMap,
+    formatAnswer,
+    formatQuestionOptions,
+    formatQuestionnaire,
+    getAllowedRespondents,
 }

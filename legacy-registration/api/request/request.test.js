@@ -2,9 +2,9 @@
 //
 // SPDX-License-Identifier: AGPL-3.0-or-later
 
-const { expect } = require('chai');
-const sinon = require('sinon');
-const opalRequest = require('./request');
+import { expect } from 'chai';
+import sinon from 'sinon';
+import opalRequest from './request.js';
 
 describe('opalRequest', function () {
 	describe('registrationRegister', function () {

@@ -2,10 +2,9 @@
 //
 // SPDX-License-Identifier: AGPL-3.0-or-later
 
-require('../../src/test/chai-setup');
-const { expect } = require('chai');
-
-const utility = require('../utility/utility.js');
+import '../../src/test/chai-setup.js';
+import { expect } from 'chai';
+import utility from '../utility/utility.js';
 
 describe('Legacy Utility', function () {
     describe('addSeveralToArray', function () {

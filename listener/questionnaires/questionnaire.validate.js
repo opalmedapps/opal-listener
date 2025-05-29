@@ -2,9 +2,9 @@
 //
 // SPDX-License-Identifier: AGPL-3.0-or-later
 
-const questionnaireConfig = require('./questionnaireConfig.json');
-const logger = require('./../logs/logger');
-const { Version } = require('../../src/utility/version');
+import questionnaireConfig from './questionnaireConfig.json' with { type: "json" };
+import logger from './../logs/logger.js';
+import Version from '../../src/utility/version.js';
 
 /**
  * ==============================================
@@ -361,4 +361,7 @@ function validateRadioButtonAnswer(answerArray) {
  * ==============================================
  */
 
-module.exports = {...questionnaireOpalDBValidation, ...questionnaireQuestionnaireDBValidation};
+export default {
+    ...questionnaireOpalDBValidation,
+    ...questionnaireQuestionnaireDBValidation
+}

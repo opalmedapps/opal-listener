@@ -2,7 +2,7 @@
 //
 // SPDX-License-Identifier: AGPL-3.0-or-later
 
-const OpalResponse = require('./response');
+import OpalResponse from './response.js';
 
 class OpalSecurityResponseSuccess {
     constructor(data, requestKey, requestObject) {
@@ -24,4 +24,4 @@ class OpalSecurityResponseSuccess {
     }
 }
 
-module.exports = OpalSecurityResponseSuccess;
+export default OpalSecurityResponseSuccess;

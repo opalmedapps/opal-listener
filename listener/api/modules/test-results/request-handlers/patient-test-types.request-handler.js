@@ -2,9 +2,8 @@
 //
 // SPDX-License-Identifier: AGPL-3.0-or-later
 
-const {PatientTestResult} = require("../classes/patient-test-result");
-const {ApiRequestHandler} = require("../../../api-request-handler");
-const {Patient} = require("../../patient/patient");
+import PatientTestResult from '../classes/patient-test-result.js';
+import ApiRequestHandler from '../../../api-request-handler.js';
 
 class PatientTestTypesHandler extends ApiRequestHandler {
 	/**
@@ -24,4 +23,5 @@ class PatientTestTypesHandler extends ApiRequestHandler {
 		};
 	}
 }
-module.exports = PatientTestTypesHandler;
+
+export default PatientTestTypesHandler;

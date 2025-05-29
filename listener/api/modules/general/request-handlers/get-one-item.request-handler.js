@@ -2,13 +2,13 @@
 //
 // SPDX-License-Identifier: AGPL-3.0-or-later
 
-const { ApiRequestHandler } = require('../../../api-request-handler');
-const logger = require('../../../../logs/logger');
-const { OpalSQLQueryRunner } = require('../../../../sql/opal-sql-query-runner');
-const { param } = require('express-validator');
-const sqlInterface = require('../../../sqlInterface');
-const utility = require('../../../../utility/utility');
-const { ValidationError } = require('../../../errors/validation-error');
+import ApiRequestHandler from '../../../api-request-handler.js';
+import logger from '../../../../logs/logger.js';
+import OpalSQLQueryRunner from '../../../../sql/opal-sql-query-runner.js';
+import { param } from 'express-validator';
+import sqlInterface from '../../../sqlInterface.js';
+import utility from '../../../../utility/utility.js';
+import ValidationError from '../../../errors/validation-error.js';
 
 class GetOneItemHandler extends ApiRequestHandler {
 
@@ -72,4 +72,4 @@ class GetOneItemHandler extends ApiRequestHandler {
     }
 }
 
-module.exports = GetOneItemHandler;
+export default GetOneItemHandler;

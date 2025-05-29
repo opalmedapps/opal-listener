@@ -2,12 +2,14 @@
 //
 // SPDX-License-Identifier: AGPL-3.0-or-later
 
+const queries = {};
+
 /**
  * @desc Query that returns patient table fields based on a PatientSerNum.
  * @deprecated Along with the Patient requestMapping in sqlInterface.
  * @returns {string} The query.
  */
-exports.patientTableFields=function()
+queries.patientTableFields=function()
 {
     /* Note: "" AS PatientId
      *       This was added to make the Account tab display nothing instead of the Patient's MRN
@@ -25,7 +27,7 @@ exports.patientTableFields=function()
  * @deprecated Uses of this query should be updated with better methods (e.g. using the Patient module).
  * @returns {string} The query.
  */
-exports.patientTableFieldsForUser = function() {
+queries.patientTableFieldsForUser = function() {
     return `SELECT p.PatientSerNum, p.TestUser, p.FirstName, p.LastName, p.TelNum, p.Email, p.Alias,
                    p.Language, p.EnableSMS, p.ProfileImage, p.SSN, p.AccessLevel
             FROM
@@ -40,7 +42,7 @@ exports.patientTableFieldsForUser = function() {
  * @deprecated;
  * @returns {string}
  */
-exports.patientDoctorTableFields=function()
+queries.patientDoctorTableFields=function()
 {
 	return "SELECT ifnull(D.FirstName, '') FirstName, ifnull(D.LastName, '') LastName, D.DoctorSerNum, PD.PrimaryFlag, PD.OncologistFlag, ifnull(D.Email, '') Email, ifnull(D.Phone, '') Phone, ifnull(D.ProfileImage, '') ProfileImage, ifnull(D.Address, '') Address,	ifnull(D.BIO_EN, '') Bio_EN, ifnull(D.BIO_FR, '') Bio_FR FROM Doctor D, PatientDoctor PD WHERE PD.PatientSerNum = ? AND D.DoctorSerNum = PD.DoctorSerNum AND (D.LastUpdated > ? OR PD.LastUpdated > ?);";
 };
@@ -156,7 +158,7 @@ function patientDocumentTableFields(selectOne=false) {
     `;
 }
 
-exports.getDocumentsContentQuery = function()
+queries.getDocumentsContentQuery = function()
 {
     return "SELECT Document.DocumentSerNum, " +
         "case " +
@@ -266,7 +268,7 @@ function patientEducationalMaterialTableFields(selectOne=false) {
     `;
 }
 
-exports.patientEducationalMaterialContents=function()
+queries.patientEducationalMaterialContents=function()
 {
     return "SELECT EducationalMaterialTOC.EducationalMaterialTOCSerNum ,EducationalMaterialTOC.OrderNum, EducationalMaterialTOC.ParentSerNum, EducationalMaterialTOC.EducationalMaterialControlSerNum, EduControl.EducationalMaterialType_EN, EduControl.EducationalMaterialType_FR, EduControl.Name_EN, EduControl.Name_FR, EduControl.URL_FR, EduControl.URL_EN FROM EducationalMaterialControl as EduControl, EducationalMaterialTOC WHERE EduControl.EducationalMaterialControlSerNum = EducationalMaterialTOC.EducationalMaterialControlSerNum AND EducationalMaterialTOC.ParentSerNum = ? ORDER BY OrderNum;";
 };
@@ -274,7 +276,7 @@ exports.patientEducationalMaterialContents=function()
  * @deprecated;
  * @returns {string}
  */
-exports.patientTasksTableFields=function()
+queries.patientTasksTableFields=function()
 {
     return "SELECT DISTINCT Patient.PatientAriaSer, " +
         "Alias.AliasName_EN AS TaskName_EN, " +
@@ -303,7 +305,7 @@ exports.patientTasksTableFields=function()
  * @desc Query that returns the studies assigned to a given patient.
  * @returns {string}
  */
-exports.patientStudyTableFields=function(){
+queries.patientStudyTableFields=function(){
     return `SELECT S.ID, S.title_EN, S.title_FR, S.description_EN, S.description_FR, S.investigator, S.email, S.phone, S.phoneExt, S.startDate, S.endDate, S.creationDate, PS.ID as patientStudyId, PS.consentStatus, PS.readStatus as ReadStatus, Q.QuestionnaireSerNum, QC.QuestionnaireName_EN, QC.QuestionnaireName_FR
             FROM study S, Patient P, patientStudy PS, Users U, QuestionnaireControl QC
             INNER JOIN Questionnaire Q ON QC.QuestionnaireControlSerNum = Q.QuestionnaireControlSerNum
@@ -315,11 +317,11 @@ exports.patientStudyTableFields=function(){
  * @desc Query that returns the questionnaires assigned to a given study.
  * @returns {string}
  */
-exports.getStudyQuestionnairesQuery = function(){
+queries.getStudyQuestionnairesQuery = function(){
     return "SELECT QS.questionnaireID, Q.DateAdded, QC.QuestionnaireName_EN, QC.QuestionnaireName_FR FROM questionnaireStudy QS, Questionnaire Q, QuestionnaireControl QC, study S WHERE S.ID = QS.studyID AND QC.QuestionnaireControlSerNum = Q.QuestionnaireControlSerNum AND Q.QuestionnaireSerNum = QS.questionnaireId AND S.ID = ?";
 }
 
-exports.getOpalDBQuestionnaire = function() {
+queries.getOpalDBQuestionnaire = function() {
     return `
     SELECT
         q.QuestionnaireSerNum AS QuestionnaireSerNum,
@@ -333,7 +335,7 @@ exports.getOpalDBQuestionnaire = function() {
  * @desc Query that returns User and Patient information used in security requests.
  * @returns {string} The query.
  */
-exports.getUserPatientSecurityInfo = function() {
+queries.getUserPatientSecurityInfo = function() {
     return `SELECT DISTINCT
                 pat.SSN,
                 pdi.SecurityAnswer,
@@ -351,7 +353,7 @@ exports.getUserPatientSecurityInfo = function() {
             ;`;
 };
 
-exports.increaseSecurityAnswerAttempt = function()
+queries.increaseSecurityAnswerAttempt = function()
 {
     return `UPDATE PatientDeviceIdentifier
             SET Attempt = Attempt + 1
@@ -364,7 +366,7 @@ exports.increaseSecurityAnswerAttempt = function()
  * @desc Resets the number of security answer attempts made for a user on a device to 0.
  * @returns {string}
  */
-exports.resetSecurityAnswerAttempt = function()
+queries.resetSecurityAnswerAttempt = function()
 {
     return `UPDATE PatientDeviceIdentifier
             SET Attempt = 0,
@@ -374,7 +376,7 @@ exports.resetSecurityAnswerAttempt = function()
             ;`;
 };
 
-exports.setTimeoutSecurityAnswer = function()
+queries.setTimeoutSecurityAnswer = function()
 {
     return `UPDATE PatientDeviceIdentifier
             SET TimeoutTimestamp = ?
@@ -383,7 +385,7 @@ exports.setTimeoutSecurityAnswer = function()
             ;`;
 };
 
-exports.setNewPassword=function()
+queries.setNewPassword=function()
 {
     return `UPDATE Users
             SET Password = ?
@@ -395,22 +397,22 @@ exports.setNewPassword=function()
  * @description Query that updates a patient's language based on their PatientSerNum.
  * @returns {string} The query.
  */
-exports.languageChange = function()
+queries.languageChange = function()
 {
     return `UPDATE Patient SET Language = ? WHERE PatientSerNum=?`;
 };
 
-exports.inputFeedback=function(UserSerNum, content)
+queries.inputFeedback=function(UserSerNum, content)
 {
     return "INSERT INTO Feedback (`FeedbackSerNum`,`PatientSerNum`,`FeedbackContent`,`AppRating`,`DateAdded`, `LastUpdated`) VALUES (NULL,?,?,?,NOW(),CURRENT_TIMESTAMP)";
 };
 
-exports.getPatientFromEmail=function()
+queries.getPatientFromEmail=function()
 {
     return "SELECT PatientSerNum FROM Patient WHERE Email = ?";
 };
 
-exports.logActivity=function()
+queries.logActivity=function()
 {
     return `INSERT INTO PatientActivityLog
                 (ActivitySerNum, Request, Parameters, TargetPatientId, Username, DeviceId, DateTime, LastUpdated, AppVersion)
@@ -425,14 +427,14 @@ exports.logActivity=function()
  *       by the fields RefTable and RefTableSerNum. ActionTime indicates the time of the action as reported by the app.
  * @returns {string}
  */
-exports.logPatientAction = function(){
+queries.logPatientAction = function(){
     return `INSERT INTO PatientActionLog
                (PatientSerNum, Action, RefTable, RefTableSerNum, ActionTime)
                VALUES (?, ?, ?, ?, ?)
             ;`
 };
 
-exports.userEncryption=function()
+queries.userEncryption=function()
 {
     return `SELECT
                 pdi.SecurityAnswer
@@ -443,7 +445,7 @@ exports.userEncryption=function()
             ;`;
 };
 
-exports.updateDeviceIdentifiers = function()
+queries.updateDeviceIdentifiers = function()
 {
     return `INSERT INTO PatientDeviceIdentifier(
                 Username,
@@ -465,7 +467,7 @@ exports.updateDeviceIdentifiers = function()
  * @desc Query that returns the contents of a specified education material package, at a single level of depth.
  * @returns {string}
  */
-exports.getPackageContents = function(){
+queries.getPackageContents = function(){
     return `SELECT EducationalMaterialPackageContent.OrderNum, EducationalMaterialControl.EducationalMaterialControlSerNum,
                    EducationalMaterialControl.ShareURL_EN, EducationalMaterialControl.ShareURL_FR,
                    EducationalMaterialControl.EducationalMaterialType_EN, EducationalMaterialControl.EducationalMaterialType_FR,
@@ -482,7 +484,7 @@ exports.getPackageContents = function(){
             ;`
 };
 
-exports.updateReadStatus=function()
+queries.updateReadStatus=function()
 {
     return `
         UPDATE ??
@@ -491,7 +493,7 @@ exports.updateReadStatus=function()
     `;
 };
 
-exports.updateConsentStatus = function()
+queries.updateConsentStatus = function()
 {
     return `
         UPDATE
@@ -510,12 +512,12 @@ exports.updateConsentStatus = function()
     `;
 };
 
-exports.insertEducationalMaterialRatingQuery=function()
+queries.insertEducationalMaterialRatingQuery=function()
 {
     return "INSERT INTO `EducationalMaterialRating`(`EducationalMaterialRatingSerNum`, `EducationalMaterialControlSerNum`, `PatientSerNum`, `Username`, `RatingValue`, `LastUpdated`) VALUES (NULL,?,?,?,?,NULL)";
 };
 
-exports.cacheSecurityAnswerFromDjango = () => {
+queries.cacheSecurityAnswerFromDjango = () => {
     return `UPDATE
                 PatientDeviceIdentifier
             SET
@@ -526,7 +528,7 @@ exports.cacheSecurityAnswerFromDjango = () => {
             ;`;
 }
 
-exports.setTrusted = function () {
+queries.setTrusted = function () {
     return `UPDATE PatientDeviceIdentifier
             SET Trusted = ?
             WHERE Username = ?
@@ -538,7 +540,7 @@ exports.setTrusted = function () {
  * @deprecated
  * @returns
  */
-exports.getPatientForPatientMembers = function() {
+queries.getPatientForPatientMembers = function() {
     return "SELECT FirstName, LastName, Email, Website, ProfileImage, Bio_EN, Bio_FR  FROM PatientsForPatientsPersonnel;";
 };
 
@@ -547,7 +549,7 @@ exports.getPatientForPatientMembers = function() {
  * @date 2021-02-26
  * @returns {string}
  */
-exports.getMRNs = function() {
+queries.getMRNs = function() {
     return `
         SELECT PHI.MRN, PHI.Hospital_Identifier_Type_Code FROM Patient_Hospital_Identifier PHI
         WHERE PHI.PatientSerNum = ?
@@ -564,7 +566,7 @@ exports.getMRNs = function() {
  * Queries PushNotifications to get notifications that correspond to a patient on today's date
  * @return {string}
  */
-exports.getPatientCheckinPushNotifications = function() {
+queries.getPatientCheckinPushNotifications = function() {
    return `
         Select PushNotification.PushNotificationSerNum
         From PushNotification
@@ -578,7 +580,7 @@ exports.getPatientCheckinPushNotifications = function() {
  * Get all of a user's checked in appointments on today's date
  * @return {string}
  */
-exports.getTodaysCheckedInAppointments = function() {
+queries.getTodaysCheckedInAppointments = function() {
    return `
         SELECT Appointment.AppointmentSerNum
         FROM Appointment
@@ -592,7 +594,7 @@ exports.getTodaysCheckedInAppointments = function() {
  * @description Set field CheckinUsername based on all the checked-in appointments on today's date
  * @date 2023-01-04
  */
-exports.setCheckInUsername = function () {
+queries.setCheckInUsername = function () {
     return "UPDATE Appointment SET CheckinUsername = ? WHERE AppointmentSerNum IN ?";
 };
 
@@ -602,7 +604,7 @@ exports.setCheckInUsername = function () {
  *       notifications), to cut down on the amount of data downloaded to the app.
  * @returns {string} The query.
  */
-exports.patientNotificationsTableFields=function()
+queries.patientNotificationsTableFields=function()
 {
     return `SELECT
                 p.PatientSerNum,
@@ -637,7 +639,7 @@ exports.patientNotificationsTableFields=function()
  * @deprecated Since QSCCD-125. This query is redundant to patientNotificationsTableFields.
  * @returns {string}
  */
-exports.getNewNotifications=function() {
+queries.getNewNotifications=function() {
     return `SELECT
                 Notification.NotificationSerNum,
                 Notification.DateAdded,
@@ -665,7 +667,7 @@ exports.getNewNotifications=function() {
     `;
 };
 
-exports.implicitlyReadNotification = function() {
+queries.implicitlyReadNotification = function() {
     return `
         UPDATE Notification
         SET ReadBy = JSON_ARRAY_APPEND(ReadBy, '$', ?), ReadStatus = 1
@@ -684,7 +686,7 @@ exports.implicitlyReadNotification = function() {
  * Fetch the SourceSystemID and SourceDatabaseSerNum for a patient for todays appointments.
  * @returns {array} List of ids and database names
  */
-exports.getAppointmentDetailsForPatient=function() {
+queries.getAppointmentDetailsForPatient=function() {
     return `SELECT
                 app.SourceSystemID,
                 app.SourceDatabaseSerNum
@@ -704,20 +706,22 @@ exports.getAppointmentDetailsForPatient=function() {
  *   2. One: returns a single item sent to a patient based on its SerNum.
  */
 
-exports.patientAnnouncementsAll = () => patientAnnouncementTableFields(false);
-exports.patientAnnouncementsOne = () => patientAnnouncementTableFields(true);
+queries.patientAnnouncementsAll = () => patientAnnouncementTableFields(false);
+queries.patientAnnouncementsOne = () => patientAnnouncementTableFields(true);
 
-exports.patientAppointmentsAll = () => patientAppointmentTableFields(false);
-exports.patientAppointmentsOne = () => patientAppointmentTableFields(true);
+queries.patientAppointmentsAll = () => patientAppointmentTableFields(false);
+queries.patientAppointmentsOne = () => patientAppointmentTableFields(true);
 
-exports.patientDiagnosesAll = () => patientDiagnosisTableFields(false);
-exports.patientDiagnosesOne = () => patientDiagnosisTableFields(true);
+queries.patientDiagnosesAll = () => patientDiagnosisTableFields(false);
+queries.patientDiagnosesOne = () => patientDiagnosisTableFields(true);
 
-exports.patientDocumentsAll = () => patientDocumentTableFields(false);
-exports.patientDocumentsOne = () => patientDocumentTableFields(true);
+queries.patientDocumentsAll = () => patientDocumentTableFields(false);
+queries.patientDocumentsOne = () => patientDocumentTableFields(true);
 
-exports.patientEducationalMaterialAll = () => patientEducationalMaterialTableFields(false);
-exports.patientEducationalMaterialOne = () => patientEducationalMaterialTableFields(true);
+queries.patientEducationalMaterialAll = () => patientEducationalMaterialTableFields(false);
+queries.patientEducationalMaterialOne = () => patientEducationalMaterialTableFields(true);
 
-exports.patientTxTeamMessagesAll = () => patientTxTeamMessageTableFields(false);
-exports.patientTxTeamMessagesOne = () => patientTxTeamMessageTableFields(true);
+queries.patientTxTeamMessagesAll = () => patientTxTeamMessageTableFields(false);
+queries.patientTxTeamMessagesOne = () => patientTxTeamMessageTableFields(true);
+
+export default queries
