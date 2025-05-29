@@ -12,4 +12,4 @@ export default {
     PatientTestTypeResults,
     PatientTestDates,
     PatientTestDateResults,
-};
+}

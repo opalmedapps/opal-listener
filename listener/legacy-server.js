@@ -33,7 +33,7 @@ let ref;
 /**
  * @description Temporary function used to support the legacy structure of this file.
  *              Called by src/server.js to pass a Firebase database object to this file.
- * @param {Reference}} databaseRef The Firebase database reference to use.
+ * @param {Reference} databaseRef The Firebase database reference to use.
  */
 function setFirebaseConnection(databaseRef) {
     ref = databaseRef;

@@ -8,10 +8,10 @@ const security              = require('./../security/security');
 const logger                = require('./../logs/logger');
 
 // New API handlers
-const fileRequest = require("./modules/file-request");
-const general = require('./modules/general');
-const securityQuestions = require("./modules/patient/security-questions");
-const testResults = require("./modules/test-results");
+const fileRequest = require("./modules/file-request/api.js");
+const general = require('./modules/general/api.js');
+const securityQuestions = require("./modules/patient/security-questions/api.js");
+const testResults = require("./modules/test-results/api.js");
 
 const omitParametersFromLogs = apiHospitalUpdate.omitParametersFromLogs;
 

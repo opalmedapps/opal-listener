@@ -6,4 +6,4 @@ import RequestFile from './request-handlers/file.request-handler.js';
 
 export default {
     RequestFile,
-};
+}

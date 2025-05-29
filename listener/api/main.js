@@ -18,7 +18,7 @@ import logger from '../logs/logger.js';
 export default {
 	requestFormatter,
 	apiRequestFormatter
-};
+}
 
 /**
  * requestFormatter
