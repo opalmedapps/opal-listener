@@ -8,7 +8,7 @@ const { param } = require('express-validator');
 const questionnaireOpalDB = require('../../../../questionnaires/questionnaireOpalDB');
 const questionnaireQuestionnaireDB = require('../../../../questionnaires/questionnaireQuestionnaireDB');
 const questionnaireConfig = require('../../../../questionnaires/questionnaireConfig.json');
-const utility = require('../../../../utility/utility');
+// const utility = require('../../../../utility/utility');
 const { ValidationError } = require('../../../errors/validation-error');
 
 const languages = ['FR', 'EN'];

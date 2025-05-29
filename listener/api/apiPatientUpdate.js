@@ -4,7 +4,7 @@
 
 var Q = require('q');
 var sqlInterface = require('./sqlInterface.js');
-var utility = require('./../utility/utility.js');
+// var utility = require('./../utility/utility.js');
 var queries = require('./../sql/queries.js');
 var logger = require('./../logs/logger.js');
 const questionnaires = require('./../questionnaires/questionnaireOpalDB.js');

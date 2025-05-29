@@ -5,7 +5,7 @@
 const logger = require('../logs/logger.js');
 const questionnaireValidation = require('./questionnaire.validate');
 const questionnaireConfig = require('./questionnaireConfig.json');
-var utility = require('../utility/utility');
+// const utility = require('../utility/utility');
 const QuestionnaireDjango = require('./questionnaireDjango');
 
 exports.getQuestionAndTypeMap = getQuestionAndTypeMap;

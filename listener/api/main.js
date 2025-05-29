@@ -8,7 +8,7 @@ import OpalResponseSuccess from './response/response-success.js';
 import {OpalResponseError} from './response/response-error.js';
 import RequestValidator from './request/request-validator.js';
 import logger from '../logs/logger.js';
-import ValidationError from './errors/validation-error.js';
+// import ValidationError from './errors/validation-error.js';
 
 /**
  * @namespace RequestFormatter

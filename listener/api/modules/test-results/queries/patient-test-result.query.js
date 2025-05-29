@@ -5,7 +5,7 @@
 const config = require('../../../../config-adaptor');
 const moment = require("moment");
 const mysql = require("mysql");
-const utility = require("./../../../../utility/utility.js");
+// const utility = require("./../../../../utility/utility.js");
 
 /**
  *  Class encapsulates all the queries pertaining the patient test results.

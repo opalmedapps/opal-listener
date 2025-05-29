@@ -7,7 +7,7 @@ const logger = require('../../../../logs/logger');
 const { OpalSQLQueryRunner } = require('../../../../sql/opal-sql-query-runner');
 const { param } = require('express-validator');
 const sqlInterface = require('../../../sqlInterface');
-const utility = require('../../../../utility/utility');
+// const utility = require('../../../../utility/utility');
 const { ValidationError } = require('../../../errors/validation-error');
 
 class GetOneItemHandler extends ApiRequestHandler {
