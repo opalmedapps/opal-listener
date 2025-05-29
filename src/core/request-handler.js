@@ -6,15 +6,15 @@
 /**
  * @file Listen and handle request uploaded to firebase by the app
  */
-const ApiRequest = require('./api-request');
-const Encryption = require('../encryption/encryption');
-const ErrorHandler = require('../error/handler');
-const { Firebase } = require('../firebase/firebase');
-const keyDerivationCache = require('../utility/key-derivation-cache');
-const legacyLogger = require('../../listener/logs/logger');
-const Registration = require('../registration/registration');
-const { REQUEST_TYPE, REGISTER_SEARCH_REQUEST_REGEX } = require('../const');
-const { RequestContext } = require('./request-context');
+import ApiRequest from './api-request.js';
+import Encryption from '../encryption/encryption.js';
+import ErrorHandler from '../error/handler.js';
+import Firebase from '../firebase/firebase.js';
+import keyDerivationCache from '../utility/key-derivation-cache.js';
+import legacyLogger from '../../listener/logs/logger.js';
+import Registration from '../registration/registration.js';
+import { REQUEST_TYPE, REGISTER_SEARCH_REQUEST_REGEX } from '../const.js';
+import RequestContext from './request-context.js';
 
 class RequestHandler {
     /**
@@ -159,4 +159,4 @@ class RequestHandler {
     }
 }
 
-exports.RequestHandler = RequestHandler;
+export default RequestHandler;
