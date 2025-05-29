@@ -2,10 +2,14 @@
 //
 // SPDX-License-Identifier: AGPL-3.0-or-later
 
-// Index for the module
-module.exports = {
-    'PatientTestTypes':  require("./request-handlers/patient-test-types.request-handler"),
-    'PatientTestTypeResults':  require("./request-handlers/patient-test-type-results.request-handler"),
-    'PatientTestDates':  require("./request-handlers/patient-test-collected-dates.request-handler"),
-    'PatientTestDateResults':  require("./request-handlers/patient-test-collected-date-results.request-handler"),
+import PatientTestTypes from './request-handlers/patient-test-types.request-handler.js';
+import PatientTestTypeResults from './request-handlers/patient-test-type-results.request-handler.js';
+import PatientTestDates from './request-handlers/patient-test-collected-dates.request-handler.js';
+import PatientTestDateResults from './request-handlers/patient-test-collected-date-results.request-handler.js';
+
+export default {
+    PatientTestTypes,
+    PatientTestTypeResults,
+    PatientTestDates,
+    PatientTestDateResults,
 };
