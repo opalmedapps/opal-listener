@@ -17,7 +17,7 @@ const { Patient } = require('./modules/patient/patient');
 const eduMaterialConfig = require('./../educational-material/eduMaterialConfig.json');
 const studiesConfig     = require('./../studies/studiesConfig.json');
 const SecurityDjango = require('./../security/securityDjango');
-const { Version } = require('../../src/utility/version');
+// const { Version } = require('../../src/utility/version.js');
 
 /******************************
  * MAPPINGS

@@ -4,7 +4,7 @@
 
 const questionnaireConfig = require('./questionnaireConfig.json');
 const logger = require('./../logs/logger');
-const { Version } = require('../../src/utility/version');
+// const { Version } = require('../../src/utility/version');
 
 /**
  * ==============================================

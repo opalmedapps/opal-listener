@@ -6,7 +6,7 @@ const legacyUtility = require('../../../listener/utility/utility.js');
 const logger = require('../../logs/logger.js');
 const opalRequest = require('./request.js');
 const opalResponseError = require('../response/responseError.js');
-const Registration = require('../../../src/registration/registration');
+// const Registration = require('../../../src/registration/registration.js');
 
 /**
 * @class RequestValidator

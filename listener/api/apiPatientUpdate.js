@@ -8,7 +8,7 @@ var utility = require('./../utility/utility.js');
 var queries = require('./../sql/queries.js');
 var logger = require('./../logs/logger.js');
 const questionnaires = require('./../questionnaires/questionnaireOpalDB.js');
-const { Version } = require('../../src/utility/version');
+// const { Version } = require('../../src/utility/version.js');
 
 /**
  *@name login

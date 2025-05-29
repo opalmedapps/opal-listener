@@ -6,7 +6,7 @@ const CryptoJS          = require('crypto-js');
 const stablelibutf8     = require('@stablelib/utf8');
 const nacl              = require('tweetnacl');
 const stablelibbase64   = require('@stablelib/base64');
-const keyDerivationCache = require('../../src/utility/key-derivation-cache');
+// const keyDerivationCache = require('../../src/utility/key-derivation-cache.js');
 
 /**
  * resolveEmptyResponse

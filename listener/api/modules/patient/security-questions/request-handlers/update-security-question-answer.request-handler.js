@@ -10,7 +10,7 @@ const opalQueries = require('../../../../../sql/queries');
 const logger = require("../../../../../logs/logger");
 const {param} = require("express-validator");
 const SecurityDjango = require("../../../../../security/securityDjango");
-const {Version} = require('../../../../../../src/utility/version');
+// const {Version} = require('../../../../../../src/utility/version.js');
 
 class UpdateSecurityQuestionAnswerRequestHandler extends ApiRequestHandler {
     /**

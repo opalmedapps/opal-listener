@@ -6,7 +6,7 @@
  * @file Makes and interprets API calls to the Django backend, to get information used in security-sensitive requests.
  */
 
-const ApiRequest = require('../../src/core/api-request');
+// const ApiRequest = require('../../src/core/api-request.js');
 const logger = require('../logs/logger');
 
 class SecurityDjango {

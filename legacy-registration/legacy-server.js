@@ -11,8 +11,8 @@ const admin = require('firebase-admin');
 const mainRequestApi = require('./api/main.js');
 const logger = require('../listener/logs/logger.js');
 const listenerLegacyServer = require('../listener/legacy-server');
-const { REQUEST_TYPE } = require('../src/const.js');
-const { RequestContext } = require('../src/core/request-context.js');
+// const REQUEST_TYPE = require('../src/const.js');
+// const RequestContext = require('../src/core/request-context.js');
 
 const q = require("q");
 

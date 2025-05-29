@@ -4,10 +4,10 @@
 
 const logger = require('./../logs/logger');
 const firebase = require('firebase-admin');
-const keyDerivationCache = require('../../src/utility/key-derivation-cache');
+// const keyDerivationCache = require('../../src/utility/key-derivation-cache.js');
 const sqlInterface = require('./../api/sqlInterface.js');
 const utility = require('./../utility/utility.js');
-const { Version } = require('../../src/utility/version');
+// const { Version } = require('../../src/utility/version.js');
 const OpalResponse = require('../api/response/response');
 const OpalSecurityResponseError = require('../api/response/security-response-error');
 const OpalSecurityResponseSuccess = require('../api/response/security-response-success');

@@ -11,7 +11,7 @@ const logger = require('./../logs/logger');
 const {OpalSQLQueryRunner} = require("../sql/opal-sql-query-runner");
 const config = require("../config-adaptor");
 const questionnaireConfig = require('./questionnaireConfig.json');
-const ApiRequest = require('../../src/core/api-request');
+// const ApiRequest = require('../../src/core/api-request.js');
 const QuestionnaireDjango = require('./questionnaireDjango');
 
 exports.getQuestionnaireInOpalDB = getQuestionnaireInOpalDB;

@@ -9,10 +9,10 @@ const OpalRequest = require('./request');
 const {OpalResponseError} = require('../response/response-error');
 const sqlInterface = require('../sqlInterface');
 const utility = require('../../utility/utility');
-const { Version } = require('../../../src/utility/version');
+// const { Version } = require('../../../src/utility/version.js');
 const logger = require('../../logs/logger');
 const config = require('../../config-adaptor');
-const ApiRequest = require('../../../src/core/api-request.js');
+// const ApiRequest = require('../../../src/core/api-request.js');
 
 /**
 * Library imports

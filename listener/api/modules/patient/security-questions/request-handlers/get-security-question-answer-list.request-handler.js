@@ -5,7 +5,7 @@
 const {ApiRequestHandler} = require("../../../../api-request-handler");
 const {Patient} = require("../../patient");
 const SecurityDjango = require("../../../../../security/securityDjango");
-const {Version} = require('../../../../../../src/utility/version');
+// const {Version} = require('../../../../../../src/utility/version.js');
 const logger = require("../../../../../logs/logger");
 
 class GetSecurityQuestionAnswerListRequestHandler extends ApiRequestHandler{
