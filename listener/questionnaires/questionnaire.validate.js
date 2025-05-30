@@ -2,7 +2,7 @@
 //
 // SPDX-License-Identifier: AGPL-3.0-or-later
 
-import questionnaireConfig from './questionnaireConfig.json';
+// import questionnaireConfig from './questionnaireConfig.json';
 import logger from './../logs/logger.js';
 import Version from '../../src/utility/version.js';
 

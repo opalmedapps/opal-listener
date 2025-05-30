@@ -5,7 +5,7 @@
 import q from 'q';
 import credentials from './../config-adaptor.js';
 import logger from './../logs/logger.js';
-import questionnaireConfig from './questionnaireConfig.json';
+// import questionnaireConfig from './questionnaireConfig.json';
 import questionnaireQueries from './questionnaireQueries.js';
 import questionnaireValidation from './questionnaire.validate.js';
 import format from './questionnaireFormatting.js';

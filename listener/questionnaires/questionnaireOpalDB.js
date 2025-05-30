@@ -10,7 +10,7 @@ import questionnaireValidation from './questionnaire.validate.js';
 import logger from './../logs/logger.js';
 import OpalSQLQueryRunner from '../sql/opal-sql-query-runner.js';
 import config from '../config-adaptor.js';
-import questionnaireConfig from './questionnaireConfig.json';
+// import questionnaireConfig from './questionnaireConfig.json';
 import ApiRequest from '../../src/core/api-request.js';
 import QuestionnaireDjango from './questionnaireDjango.js';
 

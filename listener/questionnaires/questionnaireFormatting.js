@@ -4,7 +4,7 @@
 
 import logger from '../logs/logger.js';
 import questionnaireValidation from './questionnaire.validate.js';
-import questionnaireConfig from './questionnaireConfig.json';
+// import questionnaireConfig from './questionnaireConfig.json';
 import utility from '../utility/utility.js';
 import QuestionnaireDjango from './questionnaireDjango.js';
 
