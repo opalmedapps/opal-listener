@@ -2,7 +2,7 @@
 //
 // SPDX-License-Identifier: AGPL-3.0-or-later
 
-import {ApiRequestHandler} from "../../../api-request-handler.js";
+import ApiRequestHandler from "../../../api-request-handler.js";
 import FileRequest from "../classes/file-request.js";
 import logger from "../../../../logs/logger.js";
 import {param} from "express-validator";
