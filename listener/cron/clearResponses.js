@@ -5,7 +5,7 @@
 
 const logger            = require('../logs/logger.js');
 const config            = require('../config-adaptor');
-const admin             = require("firebase-admin");
+const admin             = require('firebase-admin');
 
 // Initialize firebase connection
 const serviceAccount = require(config.FIREBASE_ADMIN_KEY);

@@ -8,17 +8,7 @@ import OpalResponseSuccess from './response/response-success.js';
 import OpalResponseError from './response/response-error.js';
 import RequestValidator from './request/request-validator.js';
 import logger from '../logs/logger.js';
-// import ValidationError from './errors/validation-error.js';
-
-/**
- * @namespace RequestFormatter
- * @description Module is in charge of taking a request, building response
- * @type {{requestFormatter: requestFormatter, apiRequestFormatter: apiRequestFormatter}}
- */
-export default {
-	requestFormatter,
-	apiRequestFormatter
-}
+import ValidationError from './errors/validation-error.js';
 
 /**
  * requestFormatter
@@ -84,4 +74,9 @@ function requestLegacyWrapper(context, requestKey, requestObject) {
  */
 function apiRequestFormatter(context, requestKey,requestObject) {
 	return  requestLegacyWrapper(context, requestKey, requestObject);
+}
+
+export default {
+    requestFormatter,
+    apiRequestFormatter
 }

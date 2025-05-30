@@ -369,7 +369,7 @@ function logPatientAction(requestObject) {
  * @name getStudies
  * @desc Gets patient studies based on UserID
  * @param {object} requestObject
- * @returns {promise}
+ * @returns {Promise}
  */
 async function getStudies(requestObject) {
     try {
@@ -390,7 +390,7 @@ async function getStudies(requestObject) {
  * @name getStudyQuestionnaires
  * @desc Gets study questionnaires based on studyID
  * @param {object} requestObject
- * @returns {promise}
+ * @returns {Promise}
  */
 async function getStudyQuestionnaires(requestObject) {
     try {
@@ -752,7 +752,7 @@ function inputFeedback(requestObject) {
  * @name updateDeviceIdentifiers
  * @description Updates the device identifier for a particular user and a particular device.
  * @input {object} Object containing the device identifiers
- * @returns {promise} Promise with success or failure.
+ * @returns {Promise} Promise with success or failure.
  */
 function updateDeviceIdentifier(requestObject, parameters) {
     let r = Q.defer();

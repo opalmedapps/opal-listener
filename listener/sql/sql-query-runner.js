@@ -4,8 +4,8 @@
 
 const fs = require('fs');
 const logger = require('../logs/logger');
-const mysql = require("mysql");
-const { ENVIRONMENT } = require("../../src/environment");
+const mysql = require('mysql');
+const { ENVIRONMENT } = require('../../src/environment');
 
 class SQLQueryRunner {
     #SQL_QUERY_POOL;

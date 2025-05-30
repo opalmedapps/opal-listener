@@ -4,7 +4,7 @@
 
 /**  Library Imports **/
 
-const admin = require("firebase-admin");
+const admin = require('firebase-admin');
 const logger = require('../../logs/logger.js');
 
 

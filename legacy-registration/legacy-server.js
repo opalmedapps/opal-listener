@@ -14,7 +14,7 @@ const listenerLegacyServer = require('../listener/legacy-server');
 // const REQUEST_TYPE = require('../src/const.js');
 // const RequestContext = require('../src/core/request-context.js');
 
-const q = require("q");
+const q = require('q');
 
 // NOTE: Listener launching steps have been moved to src/server.js
 

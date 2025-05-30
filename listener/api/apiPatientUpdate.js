@@ -67,14 +67,9 @@ async function refresh(requestObject) {
 }
 
 // Get the contents of an educational material package.
-function getPackageContents(requestObject) {
-    return sqlInterface.getPackageContents(requestObject);
-}
+const getPackageContents = sqlInterface.getPackageContents;
 
-//Get Document Content
-function getDocumentsContent(requestObject) {
-   return sqlInterface.getDocumentsContent(requestObject);
-}
+const getDocumentsContent = sqlInterface.getDocumentsContent;
 
 /**
 *@name getStudies
@@ -82,9 +77,7 @@ function getDocumentsContent(requestObject) {
 *@param {object} requestObject
 *@returns {Promise}
 */
-function getStudies(requestObject) {
-    return sqlInterface.getStudies(requestObject);
-}
+const getStudies = sqlInterface.getStudies;
 
 /**
 *@name getStudyQuestionnaires
@@ -92,9 +85,7 @@ function getStudies(requestObject) {
 *@param {object} requestObject
 *@returns {Promise}
 */
-function getStudyQuestionnaires(requestObject) {
-    return sqlInterface.getStudyQuestionnaires(requestObject);
-}
+const getStudyQuestionnaires = sqlInterface.getStudyQuestionnaires;
 
 function logActivity(requestObject) {
     logger.log('verbose', 'User Activity', {
@@ -108,13 +99,9 @@ function logActivity(requestObject) {
 }
 
 // Log a patient action (clicked, scrolled to bottom, etc.).
-function logPatientAction(requestObject) {
-    return sqlInterface.logPatientAction(requestObject);
-}
+const logPatientAction = sqlInterface.logPatientAction;
 
-function logPatientRequest(requestObject) {
-    return sqlInterface.addToActivityLog(requestObject);
-}
+const logPatientRequest = sqlInterface.addToActivityLog;
 
 // API call to log user out
 function logout(requestObject) {

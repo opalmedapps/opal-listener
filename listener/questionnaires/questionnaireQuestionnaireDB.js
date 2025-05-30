@@ -9,7 +9,7 @@ const questionnaireConfig = require('./questionnaireConfig.json');
 const questionnaireQueries = require('./questionnaireQueries.js');
 const questionnaireValidation = require('./questionnaire.validate');
 const format = require('./questionnaireFormatting');
-const SQLQueryRunner = require("../sql/sql-query-runner");
+const SQLQueryRunner = require('../sql/sql-query-runner');
 
 /**
  * @desc QuestionnaireDB connection parameters
@@ -49,7 +49,7 @@ FUNCTIONS TO GET QUESTIONNAIRES
  * @param {string} userId The Firebase username of the user requesting the questionnaires list (used to filter questionnaires by respondent).
  * @param {string} purpose string indicating the purpose of the questionnaire list requested. The purposes can be found in QUESTIONNAIRE_PURPOSE_ID_MAP of the questionnaireConfig.json file.
  * @param {Date} [lastUpdated] - If provided, only items with 'LastUpdated' after this time are returned.
- * @returns {promise}
+ * @returns {Promise}
  */
 async function getQuestionnaireList(opalPatientSerNumAndLanguage, userId, purpose, lastUpdated=0) {
     const patientSerNum = opalPatientSerNumAndLanguage.PatientSerNum;
@@ -132,7 +132,7 @@ function getQuestionnaire(language, answerQuestionnaire_Id) {
  * getQuestionnairePurpose
  * @desc this function gets the quetionnaire purpose of a given questionnaire.
  * @param {number} answerQuestionnaireId  The unique Id of the answerQuestionnaire table.
- * @returns {promise}
+ * @returns {Promise}
  */
 function getQuestionnairePurpose(answerQuestionnaireId) {
     let r = q.defer();
