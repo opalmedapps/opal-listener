@@ -3,7 +3,7 @@
 // SPDX-License-Identifier: AGPL-3.0-or-later
 
 import ValidationError from '../../../errors/validation-error.js';
-import {PatientTestResult} from '../classes/patient-test-result.js';
+import PatientTestResult from '../classes/patient-test-result.js';
 import ApiRequestHandler from '../../../api-request-handler.js';
 import {param} from 'express-validator';
 import logger from '../../../../logs/logger.js';

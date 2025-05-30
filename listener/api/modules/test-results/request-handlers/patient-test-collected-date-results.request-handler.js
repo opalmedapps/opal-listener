@@ -4,7 +4,7 @@
 
 import ValidationError from '../../../errors/validation-error.js';
 import ApiRequestHandler from '../../../api-request-handler.js';
-import {PatientTestResult} from '../classes/patient-test-result.js';
+import PatientTestResult from '../classes/patient-test-result.js';
 import {param} from 'express-validator';
 import logger from '../../../../logs/logger.js';
 

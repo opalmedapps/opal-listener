@@ -6,7 +6,7 @@
 *  Opal Imports
 */
 import OpalRequest from './request.js';
-import {OpalResponseError} from '../response/response-error.js';
+import OpalResponseError from '../response/response-error.js';
 import sqlInterface from '../sqlInterface.js';
 import utility from '../../utility/utility.js';
 import Version from '../../../src/utility/version.js';

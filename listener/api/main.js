@@ -5,7 +5,7 @@
 import q from 'q';
 import processApiRequest from './processApiRequest.js';
 import OpalResponseSuccess from './response/response-success.js';
-import {OpalResponseError} from './response/response-error.js';
+import OpalResponseError from './response/response-error.js';
 import RequestValidator from './request/request-validator.js';
 import logger from '../logs/logger.js';
 // import ValidationError from './errors/validation-error.js';
