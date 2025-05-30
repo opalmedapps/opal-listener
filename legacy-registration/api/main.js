@@ -2,23 +2,12 @@
 //
 // SPDX-License-Identifier: AGPL-3.0-or-later
 
-const q = require('q');
-const apiRequest = require('../api/apiRequest.js');
-const opalResponseSuccess = require('./response/responseSuccess.js');
-const opalResponseError = require('./response/responseError.js');
-const requestValidator = require('./request/requestValidator.js');
-const logger = require('../logs/logger.js');
-
-
-/**
- * @namespace RequestFormatter
- * @description Module is in charge of taking a request, building response
- * @type {{requestFormatter: requestFormatter, apiRequestFormatter: apiRequestFormatter}}
- */
-module.exports = {
-    requestFormatter,
-    apiRequestFormatter
-};
+import q from 'q';
+import apiRequest from '../api/apiRequest.js';
+import opalResponseSuccess from './response/responseSuccess.js';
+import opalResponseError from './response/responseError.js';
+import requestValidator from './request/requestValidator.js';
+import logger from '../logs/logger.js';
 
 /**
  * requestFormatter
@@ -77,4 +66,9 @@ function requestLegacyWrapper(context, requestKey, requestObject) {
  */
 function apiRequestFormatter(context, requestKey, requestObject) {
     return requestLegacyWrapper(context, requestKey, requestObject);
+}
+
+export default {
+    requestFormatter,
+    apiRequestFormatter,
 }
