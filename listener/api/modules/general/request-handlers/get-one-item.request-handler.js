@@ -4,7 +4,7 @@
 
 import ApiRequestHandler from '../../../api-request-handler.js';
 import logger from '../../../../logs/logger.js';
-import { OpalSQLQueryRunner } from '../../../../sql/opal-sql-query-runner.js';
+import OpalSQLQueryRunner from '../../../../sql/opal-sql-query-runner.js';
 import { param } from 'express-validator';
 import sqlInterface from '../../../sqlInterface.js';
 import utility from '../../../../utility/utility.js';

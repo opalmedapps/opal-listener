@@ -2,14 +2,14 @@
 //
 // SPDX-License-Identifier: AGPL-3.0-or-later
 
-var q = require('q');
-var credentials = require('./../config-adaptor');
-const logger = require('./../logs/logger');
-const questionnaireConfig = require('./questionnaireConfig.json');
-const questionnaireQueries = require('./questionnaireQueries.js');
-const questionnaireValidation = require('./questionnaire.validate');
-const format = require('./questionnaireFormatting');
-const SQLQueryRunner = require('../sql/sql-query-runner');
+import q from 'q';
+import credentials from './../config-adaptor.js';
+import logger from './../logs/logger.js';
+import questionnaireConfig from './questionnaireConfig.json';
+import questionnaireQueries from './questionnaireQueries.js';
+import questionnaireValidation from './questionnaire.validate.js';
+import format from './questionnaireFormatting.js';
+import SQLQueryRunner from '../sql/sql-query-runner.js';
 
 /**
  * @desc QuestionnaireDB connection parameters
@@ -30,13 +30,6 @@ let runQuery = (...args) => queryRunner.run(...args);
 /**
  * From this point is the new questionnaire front-end V2: 19-08-2019
  */
-
-exports.getQuestionnaireList = getQuestionnaireList;
-exports.getQuestionnaire = getQuestionnaire;
-exports.getQuestionnairePurpose= getQuestionnairePurpose;
-exports.saveAnswer = saveAnswer;
-exports.updateQuestionnaireStatusInQuestionnaireDB = updateQuestionnaireStatusInQuestionnaireDB;
-exports.getRespondentUsername = getRespondentUsername;
 
 /*
 FUNCTIONS TO GET QUESTIONNAIRES
@@ -478,4 +471,13 @@ async function getRespondentUsername(qp_ser_num) {
         logger.log("error", `Error getting the questionnaire respondent`, error);
         throw error;
     }
+}
+
+export default {
+    getQuestionnaireList,
+    getQuestionnaire,
+    getQuestionnairePurpose,
+    saveAnswer,
+    updateQuestionnaireStatusInQuestionnaireDB,
+    getRespondentUsername,
 }

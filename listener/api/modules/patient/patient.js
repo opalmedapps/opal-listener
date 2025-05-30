@@ -4,7 +4,7 @@
 
 import ValidationError from '../../errors/validation-error.js';
 import patientQueries from './patient.queries.js';
-import {OpalSQLQueryRunner} from '../../../sql/opal-sql-query-runner.js';
+import OpalSQLQueryRunner from '../../../sql/opal-sql-query-runner.js';
 import logger from '../../../logs/logger.js';
 
 class Patient {

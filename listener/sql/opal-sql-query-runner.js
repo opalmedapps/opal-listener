@@ -2,8 +2,8 @@
 //
 // SPDX-License-Identifier: AGPL-3.0-or-later
 
-const config = require('./../config-adaptor');
-const SQLQueryRunner = require('./sql-query-runner');
+import config from './../config-adaptor.js';
+import SQLQueryRunner from './sql-query-runner.js';
 
 /**
  * This class serves as a static class to query OpalDB, currently since the `sqlInterface.runSqlQuery` is pervasive
@@ -31,4 +31,4 @@ class OpalSQLQueryRunner {
 	static run = (...args) => OpalSQLQueryRunner.opalQueryInstance.run(...args);
 }
 
-module.exports = {OpalSQLQueryRunner};
+export default OpalSQLQueryRunner;
