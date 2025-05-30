@@ -7,10 +7,9 @@
  * @file Unit tests for the Versions class.
  */
 
-require('../test/chai-setup');
-const { expect } = require('chai');
-
-const { Version } = require('./version');
+import '../test/chai-setup.js';
+import { expect } from 'chai';
+import Version from './version.js';
 
 describe('Version', function () {
     describe('compareVersions', function () {

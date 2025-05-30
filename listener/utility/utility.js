@@ -100,7 +100,7 @@ async function decrypt(context, object, secret, salt) {
 function encryptObject(object, secret, nonce) {
     if(typeof object === 'string')
     {
-        object = stablelibbase64.encode(exports.concatUTF8Array(nonce, nacl.secretbox(stablelibutf8.encode(object),nonce,secret)));
+        object = stablelibbase64.encode(concatUTF8Array(nonce, nacl.secretbox(stablelibutf8.encode(object),nonce,secret)));
         return object;
     }else{
         for (let key in object) {
@@ -114,7 +114,7 @@ function encryptObject(object, secret, nonce) {
                 if(object[key] instanceof Date )
                 {
                     object[key]=object[key].toISOString();
-                    object[key] = stablelibbase64.encode(exports.concatUTF8Array(nonce, nacl.secretbox(stablelibutf8.encode(object[key]),nonce,secret)));
+                    object[key] = stablelibbase64.encode(concatUTF8Array(nonce, nacl.secretbox(stablelibutf8.encode(object[key]),nonce,secret)));
 
                 }else{
                     encryptObject(object[key],secret,nonce);
@@ -125,7 +125,7 @@ function encryptObject(object, secret, nonce) {
                 if (typeof object[key] !=='string') {
                     object[key]=String(object[key]);
                 }
-                object[key] = stablelibbase64.encode(exports.concatUTF8Array(nonce,nacl.secretbox(stablelibutf8.encode(object[key]),nonce,secret)));
+                object[key] = stablelibbase64.encode(concatUTF8Array(nonce,nacl.secretbox(stablelibutf8.encode(object[key]),nonce,secret)));
             }
         }
         return object;

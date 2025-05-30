@@ -2,8 +2,8 @@
 //
 // SPDX-License-Identifier: AGPL-3.0-or-later
 
-require('../../src/test/chai-setup');
-const { expect } = require('chai');
+import '../../src/test/chai-setup.js';
+import { expect } from 'chai';
 
 const utility = require('../utility/utility.js');
 

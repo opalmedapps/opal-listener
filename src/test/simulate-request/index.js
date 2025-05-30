@@ -7,18 +7,18 @@
 /**
  * @file Upload a mock request to firebase to simulate a request from the app.
  */
-require('dotenv').config();
-const path = require('path');
-const mysql = require('mysql');
-const fs = require('fs');
-const { Firebase } = require('../../firebase/firebase');
-const DefaultRequestData = require('./mock-request');
-const legacyLogger = require('../../../listener/logs/logger');
-const legacyOpalSqlRunner = require('../../../listener/sql/opal-sql-query-runner');
-const legacyUtility = require('../../../listener/utility/utility');
-const EncryptionUtilities = require('../../encryption/encryption');
-const REQUEST_TYPE = require('../../const');
-const RequestContext = require('../../core/request-context.js');
+import 'dotenv/config';
+import path from 'path';
+import mysql from 'mysql';
+import fs from 'fs';
+import Firebase from '../../firebase/firebase.js';
+import DefaultRequestData from './mock-request.js';
+import legacyLogger from '../../../listener/logs/logger.js';
+import legacyOpalSqlRunner from '../../../listener/sql/opal-sql-query-runner.js';
+import legacyUtility from '../../../listener/utility/utility.js';
+import EncryptionUtilities from '../../encryption/encryption.js';
+import { REQUEST_TYPE } from '../../const.js';
+import RequestContext from '../../core/request-context.js';
 
 const firebaseConfig = {
     DATABASE_URL: process.env.FIREBASE_DATABASE_URL,
@@ -195,4 +195,4 @@ class SimulateRequest {
 // Create a new instance with a default mock request to be able to run the script via a npm command
 new SimulateRequest(DefaultRequestData.requestRegistrationApi);
 
-exports.SimulateRequest = SimulateRequest;
+export default SimulateRequest;

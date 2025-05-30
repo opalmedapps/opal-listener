@@ -8,7 +8,7 @@
  */
 
 import expressValidator from 'express-validator';
-import { ValidationError } from './param-validator-error.js';
+import ValidationError from './param-validator-error.js';
 
 const { param, validationResult, ValidationChain } = expressValidator;
 
