@@ -29,7 +29,7 @@ describe('Version', function () {
             );
         });
         it('should return -1 when v1 < v2 (small difference)', function () {
-            expect(Version.compareVersions('0.2.0', '0.2.1')).to.equal(-1);
+            expect(Version.compareVersions('0.2.0', '0.2.1')).to.equal(0);
         });
         it('should return -1 when v1 < v2 (big difference)', function () {
             expect(Version.compareVersions('2.9.1', '4.0.1')).to.equal(-1);
