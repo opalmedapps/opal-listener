@@ -26,7 +26,7 @@ jobs:
         with:
           persist-credentials: false
       - name: Install GitHub Actions formatter
-        run: npm install eslint-formatter-gha@1.5.2 --no-save
+        run: npm install eslint-formatter-gha --no-save
       - name: Print eslint version
         run: npx eslint --version
       - name: Run eslint
