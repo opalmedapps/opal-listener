@@ -19,8 +19,20 @@ permissions:
   contents: read
 
 jobs:
+  lint-eslint:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4.2.2
+        with:
+          persist-credentials: false
+      - name: Install GitHub Actions formatter
+        run: npm install eslint-formatter-gha --no-save
+      - name: Print eslint version
+        run: npx eslint --version
+      - name: Run eslint
+        run: npx eslint --format gha src/**/*.js
 
-  lint:
+  lint-pre-commit:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4.2.2
@@ -30,7 +42,6 @@ jobs:
         if: '!cancelled()'
         env:
           SKIP: reuse-lint-file
-
 
   run-reuse-workflow:
     uses: opalmedapps/.github/.github/workflows/reuse.yaml@main
@@ -80,7 +91,7 @@ jobs:
         run: cat code-coverage-results.md >> "$GITHUB_STEP_SUMMARY"
 
   build-image:
-    needs: [lint, test-and-coverage]
+    needs: [lint-eslint, lint-pre-commit, test-and-coverage]
     permissions:
       contents: read
       packages: write
