@@ -21,7 +21,7 @@
     "arrow-parens": ["error", "as-needed"],
     "brace-style": ["error", "stroustrup"],
     "func-names": 0,
-    "import/extensions": 0,
+    "import/extensions": ["error", "ignorePackages"],
     "indent": ["error", 4],
     "linebreak-style": 0,
     "max-len": ["error", { "code": 120 }],
