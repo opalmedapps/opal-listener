@@ -7,6 +7,7 @@ SPDX-License-Identifier: AGPL-3.0-or-later
 # Listener
 
 [![CI](https://github.com/opalmedapps/opal-listener/actions/workflows/ci.yaml/badge.svg)](https://github.com/opalmedapps/opal-listener/actions/workflows/ci.yaml)
+[![Docs](https://img.shields.io/badge/docs-available-brightgreen.svg)](https://github.com/opalmedapps/opal-listener/actions/workflows/build-docs.yml)
 
 This is Opal's backend listener that facilitates communication between the user applications and the Opal PIE (typically running within a hospital network that cannot be accessed from the outside) via Firebase.
 
