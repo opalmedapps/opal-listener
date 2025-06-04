@@ -4,10 +4,10 @@
 
 import q from 'q';
 import sqlInterface from './sqlInterface.js';
-import utility from './../utility/utility.js';
-import queries from './../sql/queries.js';
-import logger from './../logs/logger.js';
-import questionnaires from './../questionnaires/questionnaireOpalDB.js';
+import utility from '../utility/utility.js';
+import queries from '../sql/queries.js';
+import logger from '../logs/logger.js';
+import questionnaires from '../questionnaires/questionnaireOpalDB.js';
 import Version from '../../src/utility/version.js';
 
 /**

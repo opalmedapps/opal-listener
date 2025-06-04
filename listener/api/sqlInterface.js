@@ -5,18 +5,18 @@
 import axios from 'axios';
 import filesystem from 'fs';
 import Q from 'q';
-import queries from './../sql/queries.js';
-import config from './../config-adaptor.js';
-import Mail from './../mailer/mailer.js';
-import utility from './../utility/utility.js';
-import logger from './../logs/logger.js';
+import queries from '../sql/queries.js';
+import config from '../config-adaptor.js';
+import Mail from '../mailer/mailer.js';
+import utility from '../utility/utility.js';
+import logger from '../logs/logger.js';
 import OpalSQLQueryRunner from '../sql/opal-sql-query-runner.js';
 import testResults from './modules/test-results/api.js';
 import questionnaires from './modules/questionnaires/api.js';
 import Patient from './modules/patient/patient.js';
-import eduMaterialConfig from './../educational-material/eduMaterialConfig.json' with { type: "json" };
-import studiesConfig from './../studies/studiesConfig.json' with { type: "json" };
-import SecurityDjango from './../security/securityDjango.js';
+import eduMaterialConfig from '../educational-material/eduMaterialConfig.json' with { type: "json" };
+import studiesConfig from '../studies/studiesConfig.json' with { type: "json" };
+import SecurityDjango from '../security/securityDjango.js';
 import Version from '../../src/utility/version.js';
 
 /******************************
@@ -257,33 +257,32 @@ async function processSelectRequest(userId, category, patientSerNum, parameters)
 /**
  * updateReadStatus
  * @desc Update read status for a table
- * @param userId
- * @param parameters
  * @return {Promise}
  */
-function updateReadStatus(userId, parameters) {
+function updateReadStatus(requestObject) {
     let r = Q.defer();
 
     let table, serNum;
+    let parameters = requestObject.Parameters;
 
     if (
         parameters
         && parameters.Field
         && parameters.Id
-        && parameters.TargetPatientID
+        && requestObject.TargetPatientID
         && requestMappings.hasOwnProperty(parameters.Field)
     ) {
         ({table, serNum, notificationType} = requestMappings[parameters.Field]);
 
         runSqlQuery(
             queries.updateReadStatus(),
-            [table, userId, table, serNum, parameters.Id],
+            [table, requestObject.UserID, table, serNum, parameters.Id],
         ).then(async () => {
             if (notificationType) {
                 logger.log('verbose', `Implicitly marking ${notificationType} notification as read.`);
                 await runSqlQuery(
                     queries.implicitlyReadNotification(),
-                    [userId, `"${userId}"`, parameters.Id, parameters.TargetPatientID, notificationType],
+                    [userId, `"${userId}"`, parameters.Id, requestObject.TargetPatientID, notificationType],
                 );
             }
             r.resolve({Response:'success'});

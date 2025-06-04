@@ -51,17 +51,6 @@ function toMYSQLString(date) {
 }
 
 /**
- * unixToMYSQLTimestamp
- * @desc Converts from milliseconds since 1970 to a mysql date
- * @param time
- * @return {Date}
- */
-function unixToMYSQLTimestamp(time) {
-    const date = new Date(time);
-    return toMYSQLString(date);
-}
-
-/**
  * @description Encrypts a response object.
  * @param {RequestContext} context The request context.
  * @param {Object} object The object to encrypt.
@@ -272,7 +261,6 @@ function addSeveralToArray(array, item, numTimes) {
 export default {
     resolveEmptyResponse,
     toMYSQLString,
-    unixToMYSQLTimestamp,
     encrypt,
     decrypt,
     encryptObject,

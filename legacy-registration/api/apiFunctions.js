@@ -2,7 +2,7 @@
 //
 // SPDX-License-Identifier: AGPL-3.0-or-later
 
-import firebaseFunction from '../api/firebase/firebaseFunctions.js';
+import firebaseFunction from './firebase/firebaseFunctions.js';
 import opalRequest from './request/request.js';
 import logger from '../logs/logger.js';
 

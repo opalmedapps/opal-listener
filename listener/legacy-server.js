@@ -428,7 +428,6 @@ function spawnClearResponses(){
 export default {
     setFirebaseConnection,
     listenForRequest,
-    handleRequest,
     spawnCronJobs,
 
     // Exports for legacy-registration

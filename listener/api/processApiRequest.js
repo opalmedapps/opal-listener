@@ -3,9 +3,10 @@
 // SPDX-License-Identifier: AGPL-3.0-or-later
 
 import apiPatientUpdate from './apiPatientUpdate.js';
-import apiHospitalUpdate from './apiHospitalUpdate.js';
-import security from './../security/security.js';
-import logger from './../logs/logger.js';
+import sqlInterface from './sqlInterface.js';
+import questionnaires from '../questionnaires/questionnaireOpalDB.js';
+import security from '../security/security.js';
+import logger from '../logs/logger.js';
 
 // New API handlers
 import fileRequest from './modules/file-request/api.js';
@@ -13,7 +14,7 @@ import general from './modules/general/api.js';
 import securityQuestions from './modules/patient/security-questions/api.js';
 import testResults from './modules/test-results/api.js';
 
-const omitParametersFromLogs = apiHospitalUpdate.omitParametersFromLogs;
+const omitParametersFromLogs = sqlInterface.omitParametersFromLogs;
 const logPatientRequest = apiPatientUpdate.logPatientRequest;
 
 /**
@@ -21,18 +22,18 @@ const logPatientRequest = apiPatientUpdate.logPatientRequest;
  * @type {Object}
  */
 const LEGACYAPI = {
-    'DeviceIdentifier': apiHospitalUpdate.updateDeviceIdentifier,
+    'DeviceIdentifier': sqlInterface.updateDeviceIdentifier,
     'Log': apiPatientUpdate.logActivity,
     'LogPatientAction': apiPatientUpdate.logPatientAction,
     'Login': apiPatientUpdate.login,
     'Logout': apiPatientUpdate.logout,
     'Refresh': apiPatientUpdate.refresh,
-    'AccountChange': apiHospitalUpdate.accountChange,
-    'Checkin': apiHospitalUpdate.checkIn,
+    'AccountChange': sqlInterface.updateAccountField,
+    'Checkin': sqlInterface.checkIn,
     'DocumentContent': apiPatientUpdate.getDocumentsContent,
-    'Feedback': apiHospitalUpdate.inputFeedback,
+    'Feedback': sqlInterface.inputFeedback,
     // Deprecated API entry: 'NotificationsNew', since QSCCD-125
-    'NotificationsNew': apiHospitalUpdate.getNewNotifications,
+    'NotificationsNew': sqlInterface.getNewNotifications,
     'EducationalPackageContents': apiPatientUpdate.getPackageContents,
     // Deprecated API entry: 'QuestionnaireInOpalDBFromSerNum', since QSCCD-1559
     'QuestionnaireInOpalDBFromSerNum': apiPatientUpdate.getQuestionnaireInOpalDB,
@@ -40,10 +41,10 @@ const LEGACYAPI = {
     'QuestionnaireList': apiPatientUpdate.getQuestionnaireList,
     'Questionnaire': apiPatientUpdate.getQuestionnaire,
     'QuestionnairePurpose': apiPatientUpdate.getQuestionnairePurpose,
-    'EducationalMaterialRating': apiHospitalUpdate.inputEducationalMaterialRating,
-    'QuestionnaireSaveAnswer': apiHospitalUpdate.questionnaireSaveAnswer,
-    'QuestionnaireUpdateStatus': apiHospitalUpdate.questionnaireUpdateStatus,
-    'Read': apiHospitalUpdate.updateReadStatus,
+    'EducationalMaterialRating': sqlInterface.inputEducationalMaterialRating,
+    'QuestionnaireSaveAnswer': questionnaires.questionnaireSaveAnswer,
+    'QuestionnaireUpdateStatus': questionnaires.questionnaireUpdateStatus,
+    'Read': sqlInterface.updateReadStatus,
     // TODO: Modify/refactor 'Studies' endpoint so it takes into account 'TargetPatientID' parameter.
     // Since the studies module is in the 'Chart tab' and contains patient data, the endpoint should
     // identify the target patient of a request (chosen using the profile selector) and make sure that
@@ -51,7 +52,7 @@ const LEGACYAPI = {
     // One of the solutions is to move the endpoint to the 'requestMappings' in the 'sqlInterface'.
     'Studies': apiPatientUpdate.getStudies,
     'StudyQuestionnaires': apiPatientUpdate.getStudyQuestionnaires,
-    'StudyUpdateStatus': apiHospitalUpdate.studyUpdateStatus,
+    'StudyUpdateStatus': sqlInterface.studyUpdateStatus,
     // Deprecated API entry: 'PFPMembers', since QSCCD-417
     'PFPMembers': apiPatientUpdate.getPatientsForPatientsMembers
 };

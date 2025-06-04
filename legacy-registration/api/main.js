@@ -3,7 +3,7 @@
 // SPDX-License-Identifier: AGPL-3.0-or-later
 
 import q from 'q';
-import apiRequest from '../api/apiRequest.js';
+import apiRequest from './apiRequest.js';
 import opalResponseSuccess from './response/responseSuccess.js';
 import opalResponseError from './response/responseError.js';
 import requestValidator from './request/requestValidator.js';
@@ -69,6 +69,5 @@ function apiRequestFormatter(context, requestKey, requestObject) {
 }
 
 export default {
-    requestFormatter,
     apiRequestFormatter,
 }

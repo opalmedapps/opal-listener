@@ -5,7 +5,7 @@
 // Module that send emails using node mailer
 
 import nodemailer from 'nodemailer';
-import config from './../config-adaptor.js';
+import config from '../config-adaptor.js';
 
 function Mail(){
 

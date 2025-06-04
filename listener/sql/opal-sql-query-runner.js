@@ -2,7 +2,7 @@
 //
 // SPDX-License-Identifier: AGPL-3.0-or-later
 
-import config from './../config-adaptor.js';
+import config from '../config-adaptor.js';
 import SQLQueryRunner from './sql-query-runner.js';
 
 /**

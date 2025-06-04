@@ -5,7 +5,7 @@
 import config from '../../../../config-adaptor.js';
 import moment from 'moment';
 import mysql from 'mysql';
-import utility from './../../../../utility/utility.js';
+import utility from '../../../../utility/utility.js';
 
 /**
  *  Class encapsulates all the queries pertaining the patient test results.

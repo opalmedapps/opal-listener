@@ -2,7 +2,7 @@
 //
 // SPDX-License-Identifier: AGPL-3.0-or-later
 
-import apiFunctionRequest from '../api/apiFunctions.js';
+import apiFunctionRequest from './apiFunctions.js';
 import logger from '../logs/logger.js';
 
 const API = {

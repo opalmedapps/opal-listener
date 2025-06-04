@@ -402,7 +402,7 @@ queries.languageChange = function()
     return `UPDATE Patient SET Language = ? WHERE PatientSerNum=?`;
 };
 
-queries.inputFeedback=function(UserSerNum, content)
+queries.inputFeedback = function()
 {
     return "INSERT INTO Feedback (`FeedbackSerNum`,`PatientSerNum`,`FeedbackContent`,`AppRating`,`DateAdded`, `LastUpdated`) VALUES (NULL,?,?,?,NOW(),CURRENT_TIMESTAMP)";
 };
