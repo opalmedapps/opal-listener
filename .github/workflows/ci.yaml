@@ -49,7 +49,7 @@ jobs:
   check-thirdparty-notice:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/check-thirdparty-notice
+      - uses: ./.github/actions/check-thirdparty-notice
         with:
           - PACKAGE_FILE: "package.json"
 
