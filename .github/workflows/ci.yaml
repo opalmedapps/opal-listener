@@ -46,6 +46,13 @@ jobs:
   run-reuse-workflow:
     uses: opalmedapps/.github/.github/workflows/reuse.yaml@main
 
+  check-thirdparty-notice:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/check-thirdparty-notice
+        with:
+          - PACKAGE_FILE: "package.json"
+
   test-and-coverage:
     runs-on: ubuntu-latest
     steps:
