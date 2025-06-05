@@ -55,7 +55,7 @@ runs:
         ARGS="${ARGS}${PIP_REQUIREMENTS:+ --pip $PIP_REQUIREMENTS}"
         ARGS="${ARGS}${ADDITIONAL_DEPENDENCIES:+ --additional-dependencies $ADDITIONAL_DEPENDENCIES}"
         echo "Arguments are \"$ARGS\""
-      with:
+      env:
         NPM: ${{ inputs.PACKAGE_FILE }}"
         COMPOSER: ${{ inputs.COMPOSER_FILE }}"
         PIP_REQUIREMENTS: ${{ inputs.PIP_REQUIREMENTS_FILES }}"
