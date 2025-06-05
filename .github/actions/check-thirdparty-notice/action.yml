@@ -1,0 +1,66 @@
+# SPDX-FileCopyrightText: Copyright (C) 2025 Opal Health Informatics Group at the Research Institute of the McGill University Health Centre <john.kildea@mcgill.ca>
+#
+# SPDX-License-Identifier: TBD
+
+# Ensures that declared project dependencies and the third-party notice in THIRDPARTY.md are in sync.
+# I.e., each dependency has to have a corresponding heading in the notice.
+# Warns about dependencies missing as well as dependencies that are declared in addition.
+#
+# Note: Currently only supports npm and composer.
+
+name: Check Thirdparty Notice
+description:
+
+inputs:
+  PACKAGE_FILE:
+    description: The filename of an npm package.json file (can be relative to the current working directory)
+    default: ""
+  COMPOSER_FILE:
+    description: The filename of a composer.json file (can be relative to the current working directory)
+    default: ""
+  PIP_REQUIREMENTS_FILES:
+    description: |
+      The filename(s) of a requirements file (can be relative to the current working directory).
+      If specifying more than one file, separate with spaces.
+    default: ""
+  ADDITIONAL_DEPENDENCIES:
+    description: |
+      Additional dependencies that are allowed to be listed in the third-party notice.
+      If specifying more than one package, separate with spaces.
+    default: ""
+
+runs:
+  using: "composite"
+  steps:
+    # Setup
+    # Clone the repo so the action has access to additional files
+    - uses: actions/checkout@v4.2.2
+      with:
+        persist-credentials: false
+    - name: Make sure a dependencies file path was provided
+      run: |
+        if [[ -z "$[[ inputs.package-file]]" ]] \
+        && [[ -z "$[[ inputs.composer-file ]]" ]] \
+        && [[ -z "$[[ inputs.pip-requirements-files ]]" ]]; then
+          echo "At least one of the inputs PACKAGE_FILE, COMPOSER_FILE or PIP_REQUIREMENTS_FILES must be provided";
+          false;
+        fi
+      shell: bash
+
+    - name: Compose the arguments to the script
+      run: |
+        ARGS=
+        ARGS="${ARGS}${NPM:+ --npm $NPM}"
+        ARGS="${ARGS}${COMPOSER:+ --composer $COMPOSER}"
+        ARGS="${ARGS}${PIP_REQUIREMENTS:+ --pip $PIP_REQUIREMENTS}"
+        ARGS="${ARGS}${ADDITIONAL_DEPENDENCIES:+ --additional-dependencies $ADDITIONAL_DEPENDENCIES}"
+        echo "Arguments are \"$ARGS\""
+      with:
+        NPM: ${{ inputs.PACKAGE_FILE }}"
+        COMPOSER: ${{ inputs.COMPOSER_FILE }}"
+        PIP_REQUIREMENTS: ${{ inputs.PIP_REQUIREMENTS_FILES }}"
+        ADDITIONAL_DEPENDENCIES: ${{ inputs.ADDITIONAL_DEPENDENCIES }}"
+      shell: bash
+
+    - name: Call the check_thirdparty_notice script
+      run: uv run ./check-thirdparty-notice/check_thirdparty_notice.py $ARGS
