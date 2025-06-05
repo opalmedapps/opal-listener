@@ -54,14 +54,14 @@ runs:
       shell: bash
 
     - name: Compose the arguments to the script
-      run: |
+      run: | # zizmor: ignore[github-env]
         ARGS=
         ARGS=${ARGS}${NPM:+ --npm $NPM}
         ARGS=${ARGS}${COMPOSER:+ --composer $COMPOSER}
         ARGS=${ARGS}${PIP_REQUIREMENTS:+ --pip $PIP_REQUIREMENTS}
         ARGS=${ARGS}${ADDITIONAL_DEPENDENCIES:+ --additional-dependencies $ADDITIONAL_DEPENDENCIES}
         echo "Arguments are: $ARGS"
-        echo ARGS="$ARGS" >> "$GITHUB_ENV" # zizmor: ignore[github-env]
+        echo ARGS="$ARGS" >> "$GITHUB_ENV"
       env:
         NPM: ${{ inputs.PACKAGE_FILE }}
         COMPOSER: ${{ inputs.COMPOSER_FILE }}
