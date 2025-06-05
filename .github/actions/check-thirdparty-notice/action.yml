@@ -39,12 +39,16 @@ runs:
         persist-credentials: false
     - name: Make sure a dependencies file path was provided
       run: |
-        if [[ -z "$[[ inputs.package-file]]" ]] \
-        && [[ -z "$[[ inputs.composer-file ]]" ]] \
-        && [[ -z "$[[ inputs.pip-requirements-files ]]" ]]; then
+        if [[ -z "PACKAGE_FILE" ]] \
+        && [[ -z "COMPOSER_FILE" ]] \
+        && [[ -z "PIP_REQUIREMENTS_FILES" ]]; then
           echo "At least one of the inputs PACKAGE_FILE, COMPOSER_FILE or PIP_REQUIREMENTS_FILES must be provided";
           false;
         fi
+      env:
+        PACKAGE_FILE: ${{ inputs.PACKAGE_FILE }}"
+        COMPOSER_FILE: ${{ inputs.COMPOSER_FILE }}"
+        PIP_REQUIREMENTS_FILES: ${{ inputs.PIP_REQUIREMENTS_FILES }}"
       shell: bash
 
     - name: Compose the arguments to the script
