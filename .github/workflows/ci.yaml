@@ -53,7 +53,7 @@ jobs:
     steps:
       - uses: ./.github/actions/check-thirdparty-notice
         with:
-          - PACKAGE_FILE: "package.json"
+          PACKAGE_FILE: "package.json"
 
   test-and-coverage:
     runs-on: ubuntu-latest
