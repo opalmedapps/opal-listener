@@ -56,10 +56,10 @@ runs:
     - name: Compose the arguments to the script
       run: |
         ARGS=
-        ARGS="${ARGS}${NPM:+ --npm $NPM}"
-        ARGS="${ARGS}${COMPOSER:+ --composer $COMPOSER}"
-        ARGS="${ARGS}${PIP_REQUIREMENTS:+ --pip $PIP_REQUIREMENTS}"
-        ARGS="${ARGS}${ADDITIONAL_DEPENDENCIES:+ --additional-dependencies $ADDITIONAL_DEPENDENCIES}"
+        ARGS=${ARGS}${NPM:+ --npm $NPM}
+        ARGS=${ARGS}${COMPOSER:+ --composer $COMPOSER}
+        ARGS=${ARGS}${PIP_REQUIREMENTS:+ --pip $PIP_REQUIREMENTS}
+        ARGS=${ARGS}${ADDITIONAL_DEPENDENCIES:+ --additional-dependencies $ADDITIONAL_DEPENDENCIES}
         echo "Arguments are: $ARGS"
         echo ARGS="$ARGS" >> "$GITHUB_ENV"
       env:
