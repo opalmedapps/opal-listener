@@ -69,5 +69,5 @@ runs:
       shell: bash
 
     - name: Call the check_thirdparty_notice script
-      run: uv run ./check-thirdparty-notice/check_thirdparty_notice.py $ARGS
+      run: uv run ./.github/actions/check-thirdparty-notice/check_thirdparty_notice.py $ARGS
       shell: bash
