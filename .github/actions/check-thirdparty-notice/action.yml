@@ -9,7 +9,7 @@
 # Note: Currently only supports npm and composer.
 
 name: Check Thirdparty Notice
-description:
+description: Ensures that declared project dependencies and the third-party notice in THIRDPARTY.md are in sync.
 
 inputs:
   PACKAGE_FILE:
