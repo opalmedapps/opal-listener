@@ -63,10 +63,10 @@ runs:
         echo "Arguments are: $ARGS"
         echo ARGS="$ARGS" >> "$GITHUB_ENV"
       env:
-        NPM: ${{ inputs.PACKAGE_FILE }}"
-        COMPOSER: ${{ inputs.COMPOSER_FILE }}"
-        PIP_REQUIREMENTS: ${{ inputs.PIP_REQUIREMENTS_FILES }}"
-        ADDITIONAL_DEPENDENCIES: ${{ inputs.ADDITIONAL_DEPENDENCIES }}"
+        NPM: ${{ inputs.PACKAGE_FILE }}
+        COMPOSER: ${{ inputs.COMPOSER_FILE }}
+        PIP_REQUIREMENTS: ${{ inputs.PIP_REQUIREMENTS_FILES }}
+        ADDITIONAL_DEPENDENCIES: ${{ inputs.ADDITIONAL_DEPENDENCIES }}
       shell: bash
 
     - name: Call the check_thirdparty_notice script
