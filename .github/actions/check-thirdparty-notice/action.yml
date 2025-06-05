@@ -37,6 +37,8 @@ runs:
     - uses: actions/checkout@v4.2.2
       with:
         persist-credentials: false
+    - name: Install uv
+      uses: astral-sh/setup-uv@v6.1.0
     - name: Make sure a dependencies file path was provided
       run: |
         if [[ -z "PACKAGE_FILE" ]] \
