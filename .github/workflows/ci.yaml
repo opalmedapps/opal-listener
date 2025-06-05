@@ -51,6 +51,10 @@ jobs:
   check-thirdparty-notice:
     runs-on: ubuntu-latest
     steps:
+      # TODO temp
+      - uses: actions/checkout@v4.2.2
+        with:
+          persist-credentials: false
       - uses: ./.github/actions/check-thirdparty-notice
         with:
           PACKAGE_FILE: "package.json"
