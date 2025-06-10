@@ -622,6 +622,71 @@ function getCheckedInAppointments(patientSerNum){
  */
 
 /**
+ * @description 1.12.2 and prior: Queries and returns all patient data to be available at login.
+ *             After 1.12.2: Doesn't do anything anymore, but was kept to record 'Login' in PatientActivityLog.
+ * @param requestObject The request object.
+ * @returns {Promise<*|{Response: string}>} Resolves to login data for versions <= 1.12.2,
+ *                                          or to a generic acknowledgement message otherwise.
+ */
+async function login(requestObject) {
+    if (Version.versionLessOrEqual(requestObject.AppVersion, Version.version_1_12_2)) {
+        let patientSerNum = await getSelfPatientSerNum(requestObject.UserID);
+        let loginData = await getPatientTableFields(requestObject.UserID, patientSerNum, requestObject.Parameters.Fields, requestObject.Parameters);
+
+        // Filter out notification types that break app version 1.12.2 (most importantly 'NewLabResult')
+        let appBreakingNotifications = ['NewLabResult', 'NewMessage', 'Other'];
+        if (Array.isArray(loginData?.Data?.Notifications)) {
+            loginData.Data.Notifications = loginData.Data.Notifications.filter(
+                notif => !appBreakingNotifications.includes(notif.NotificationType)
+            );
+        }
+
+        return loginData;
+    }
+    else {
+        // The only purpose of the login request is to record a timestamp in PatientActivityLog (done automatically in logPatientRequest)
+        return Promise.resolve({ Response: "Login recorded" });
+    }
+}
+
+/**
+ * @description For now, the only purpose of the logout request is to record a timestamp in PatientActivityLog (done separately in logPatientRequest).
+ * @param requestObject The request object.
+ * @returns {Promise<{Response: string}>} Resolves wth a generic acknowledgement message.
+ */
+function logout(requestObject) {
+    return Promise.resolve({Response: "Successful logout"});
+}
+
+/**
+ * @desc Retrieves patient data in a given set of categories. This function is called 'refresh' because it can be used
+ *       to fetch only fresh data after a certain timestamp.
+ * @param requestObject The request object.
+ * @param {string} requestObject.UserID The Firebase user ID that will be used to get data if no PatientSerNum is provided.
+ * @param {string[]} requestObject.Parameters.Fields The list of data categories from which to fetch data.
+ * @param [requestObject.Parameters.Timestamp] Optional date/time; if provided, only items with 'LastUpdated' after this time are returned.
+ * @returns {Promise<*>}
+ */
+async function refresh(requestObject) {
+    let UserId = requestObject.UserID;
+    let parameters = requestObject.Parameters;
+    let fields = parameters.Fields;
+    if (!parameters.purpose) parameters.purpose = 'clinical'; // Default to clinical for legacy requests by app version 1.12.2
+
+    // If there's a TargetPatientID, use it, otherwise get data for self
+    let patientSerNum = requestObject.TargetPatientID ? requestObject.TargetPatientID : await getSelfPatientSerNum(UserId);
+    logger.log('verbose', `Identified request target as PatientSerNum = ${patientSerNum}`);
+
+    if (!fields) throw {Response:'error', Reason:"Undefined 'Fields' in Refresh request"};
+    if (!Array.isArray(fields)) fields = [fields];
+
+    let rows = await getPatientTableFields(UserId, patientSerNum, fields, parameters);
+    rows.Data = utility.resolveEmptyResponse(rows.Data);
+
+    return rows;
+}
+
+/**
  * @description Retrieves a patient's MRNs (with their corresponding sites) based on their PatientSerNum.
  * @date 2021-02-26
  * @param patientSerNum
@@ -791,6 +856,17 @@ function updateDeviceIdentifier(requestObject, parameters) {
         r.reject({Response:'error', Reason: `${errorMessage}: ${error}`});
     });
     return r.promise;
+}
+
+function logActivity(requestObject) {
+    logger.log('verbose', 'User Activity', {
+        deviceID: requestObject.DeviceId,
+        userID: requestObject.UserID,
+        request: requestObject.Request,
+        activity: requestObject.Parameters.Activity,
+        activityDetails: requestObject.Parameters.ActivityDetails,
+    });
+    return Promise.resolve({Response:'success'});
 }
 
 /**
@@ -1205,6 +1281,17 @@ function setTrusted(requestObject) {
 }
 
 /**
+ * @deprecated
+ */
+function getPatientsForPatientsMembers() {
+    return new Promise((resolve, reject)=>{
+        runSqlQuery(queries.getPatientForPatientMembers(), []).then(members => {
+            resolve({ Data: members });
+        }).catch(err => reject({ Response:error, Reason:err }));
+    });
+}
+
+/**
  * NOTIFICATIONS FUNCTIONALITY
  * ========================================================================
  */
@@ -1272,7 +1359,7 @@ function assocNotificationsWithItems(notifications, requestObject){
 
         if(uniqueFields.length > 0) {
             // Refresh all the new data (should only be data that needs to be associated with notification)
-            refresh(uniqueFields, requestObject)
+            refreshData(uniqueFields, requestObject)
                 .then(results => {
                     if(!!results.Data){
 
@@ -1327,7 +1414,7 @@ function mapRefreshedDataToNotifications(results, notifications) {
 /**
  * @deprecated Since QSCCD-125
  */
-async function refresh (fields, requestObject) {
+async function refreshData(fields, requestObject) {
     let today = new Date();
     let timestamp = today.setHours(0,0,0,0);
     let patientSerNum = await getSelfPatientSerNum(requestObject.UserID);
@@ -1349,18 +1436,20 @@ async function getSelfPatientSerNum(userId) {
 export default {
     omitParametersFromLogs,
     getSqlApiMappings,
-    runSqlQuery,
-    getPatientTableFields,
     updateReadStatus,
     logPatientAction,
     getStudies,
     getStudyQuestionnaires,
     studyUpdateStatus,
     checkIn,
+    login,
+    logout,
+    refresh,
     getDocumentsContent,
     updateAccountField,
     inputFeedback,
     updateDeviceIdentifier,
+    logActivity,
     addToActivityLog,
     getEncryption,
     getPackageContents,
@@ -1372,6 +1461,6 @@ export default {
     inputEducationalMaterialRating,
     getSecurityQuestion,
     setTrusted,
+    getPatientsForPatientsMembers,
     getNewNotifications,
-    getSelfPatientSerNum,
 }

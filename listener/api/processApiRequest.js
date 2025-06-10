@@ -2,7 +2,6 @@
 //
 // SPDX-License-Identifier: AGPL-3.0-or-later
 
-import apiPatientUpdate from './apiPatientUpdate.js';
 import sqlInterface from './sqlInterface.js';
 import questionnaires from '../questionnaires/questionnaireOpalDB.js';
 import security from '../security/security.js';
@@ -15,7 +14,7 @@ import securityQuestions from './modules/patient/security-questions/api.js';
 import testResults from './modules/test-results/api.js';
 
 const omitParametersFromLogs = sqlInterface.omitParametersFromLogs;
-const logPatientRequest = apiPatientUpdate.logPatientRequest;
+const logPatientRequest = sqlInterface.addToActivityLog;
 
 /**
  * API HANDLERS FOR GENERAL REQUESTS
@@ -23,24 +22,24 @@ const logPatientRequest = apiPatientUpdate.logPatientRequest;
  */
 const LEGACYAPI = {
     'DeviceIdentifier': sqlInterface.updateDeviceIdentifier,
-    'Log': apiPatientUpdate.logActivity,
-    'LogPatientAction': apiPatientUpdate.logPatientAction,
-    'Login': apiPatientUpdate.login,
-    'Logout': apiPatientUpdate.logout,
-    'Refresh': apiPatientUpdate.refresh,
+    'Log': sqlInterface.logActivity,
+    'LogPatientAction': sqlInterface.logPatientAction,
+    'Login': sqlInterface.login,
+    'Logout': sqlInterface.logout,
+    'Refresh': sqlInterface.refresh,
     'AccountChange': sqlInterface.updateAccountField,
     'Checkin': sqlInterface.checkIn,
-    'DocumentContent': apiPatientUpdate.getDocumentsContent,
+    'DocumentContent': sqlInterface.getDocumentsContent,
     'Feedback': sqlInterface.inputFeedback,
     // Deprecated API entry: 'NotificationsNew', since QSCCD-125
     'NotificationsNew': sqlInterface.getNewNotifications,
-    'EducationalPackageContents': apiPatientUpdate.getPackageContents,
+    'EducationalPackageContents': sqlInterface.getPackageContents,
     // Deprecated API entry: 'QuestionnaireInOpalDBFromSerNum', since QSCCD-1559
-    'QuestionnaireInOpalDBFromSerNum': apiPatientUpdate.getQuestionnaireInOpalDB,
+    'QuestionnaireInOpalDBFromSerNum': questionnaires.getQuestionnaireInOpalDB,
     // Deprecated API entry: 'QuestionnaireList' is now accessed via sqlInterface's requestMappings (since QSCCD-230)
-    'QuestionnaireList': apiPatientUpdate.getQuestionnaireList,
-    'Questionnaire': apiPatientUpdate.getQuestionnaire,
-    'QuestionnairePurpose': apiPatientUpdate.getQuestionnairePurpose,
+    'QuestionnaireList': questionnaires.getQuestionnaireList,
+    'Questionnaire': questionnaires.getQuestionnaire,
+    'QuestionnairePurpose': questionnaires.getQuestionnairePurpose,
     'EducationalMaterialRating': sqlInterface.inputEducationalMaterialRating,
     'QuestionnaireSaveAnswer': questionnaires.questionnaireSaveAnswer,
     'QuestionnaireUpdateStatus': questionnaires.questionnaireUpdateStatus,
@@ -50,11 +49,11 @@ const LEGACYAPI = {
     // identify the target patient of a request (chosen using the profile selector) and make sure that
     // the current user has permission to access the target patient's data.
     // One of the solutions is to move the endpoint to the 'requestMappings' in the 'sqlInterface'.
-    'Studies': apiPatientUpdate.getStudies,
-    'StudyQuestionnaires': apiPatientUpdate.getStudyQuestionnaires,
+    'Studies': sqlInterface.getStudies,
+    'StudyQuestionnaires': sqlInterface.getStudyQuestionnaires,
     'StudyUpdateStatus': sqlInterface.studyUpdateStatus,
     // Deprecated API entry: 'PFPMembers', since QSCCD-417
-    'PFPMembers': apiPatientUpdate.getPatientsForPatientsMembers
+    'PFPMembers': sqlInterface.getPatientsForPatientsMembers
 };
 
 /**
