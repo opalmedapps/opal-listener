@@ -6,6 +6,7 @@
   },
   "extends": [
     "airbnb-base",
+    "plugin:import/recommended",
     "plugin:jsdoc/recommended",
     "plugin:mocha/recommended"
   ],
