@@ -27,30 +27,6 @@ function resolveEmptyResponse(data) {
 }
 
 /**
- * toMYSQLString
- * @desc Converts date object to mysql date
- * @param date
- * @return Date
- */
-function toMYSQLString(date) {
-    let month = date.getMonth();
-    let day=date.getDate();
-    let hours=date.getHours();
-    let minutes=date.getMinutes();
-    let seconds=date.getSeconds();
-
-    month++;
-
-    if(hours<10) hours='0'+hours;
-    if(minutes<10) minutes='0'+minutes;
-    if(seconds<10) seconds='0'+seconds;
-    if (day<10) day='0'+day;
-    if (month<10) month='0'+month;
-
-    return date.getFullYear()+'-'+month+'-'+day+' '+hours+':'+minutes+':'+seconds;
-}
-
-/**
  * @description Encrypts a response object.
  * @param {RequestContext} context The request context.
  * @param {Object} object The object to encrypt.
@@ -163,15 +139,6 @@ function splitNonce(str) {
     return [ar.slice(0,nacl.secretbox.nonceLength),ar.slice(nacl.secretbox.nonceLength)];
 }
 
-//Create copy of object if no nested object
-function copyObject(object) {
-    const copy = {};
-    for (const key in object) {
-        copy[key] = object[key];
-    }
-    return copy;
-}
-
 /**
  * htmlspecialchars_decode
  * @desc this is a helper function used to decode html encoding
@@ -260,14 +227,9 @@ function addSeveralToArray(array, item, numTimes) {
 
 export default {
     resolveEmptyResponse,
-    toMYSQLString,
     encrypt,
     decrypt,
-    encryptObject,
     hash,
-    decryptObject,
-    concatUTF8Array,
-    copyObject,
     htmlspecialchars_decode,
     stringifyShort,
     addSeveralToArray,

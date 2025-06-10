@@ -77,6 +77,5 @@ function apiRequestFormatter(context, requestKey,requestObject) {
 }
 
 export default {
-    requestFormatter,
     apiRequestFormatter
 }
