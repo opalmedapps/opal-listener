@@ -8,7 +8,7 @@
  */
 
 import admin from 'firebase-admin';
-import { param, Validator, ValidationChain } from '../utility/param-validator.js';
+import { param, ValidationChain, Validator } from '../utility/param-validator.js';
 
 class Firebase {
     /**

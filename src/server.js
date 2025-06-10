@@ -10,7 +10,7 @@
 import 'dotenv/config';
 
 import {
-    ENVIRONMENT, ENVIRONMENT_SOURCE_SYSTEM_CHECKIN, ENVIRONMENT_ORMS, FIREBASE_CONFIG, validateEnvironment,
+    ENVIRONMENT, ENVIRONMENT_ORMS, ENVIRONMENT_SOURCE_SYSTEM_CHECKIN, FIREBASE_CONFIG, validateEnvironment,
 } from './environment.js';
 
 import Firebase from './firebase/firebase.js';

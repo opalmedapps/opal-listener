@@ -13,7 +13,7 @@ import Firebase from '../firebase/firebase.js';
 import keyDerivationCache from '../utility/key-derivation-cache.js';
 import legacyLogger from '../../listener/logs/logger.js';
 import Registration from '../registration/registration.js';
-import { REQUEST_TYPE, REGISTER_SEARCH_REQUEST_REGEX } from '../const.js';
+import { REGISTER_SEARCH_REQUEST_REGEX, REQUEST_TYPE } from '../const.js';
 import RequestContext from './request-context.js';
 
 class RequestHandler {
