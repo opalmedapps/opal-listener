@@ -7,8 +7,6 @@ on:
   push:
     branches:
       - main
-      # TODO testing
-      - SB.check-thirdparty-notice
   pull_request:
   workflow_dispatch:
   merge_group:
@@ -54,8 +52,7 @@ jobs:
       - uses: actions/checkout@v4.2.2
         with:
           persist-credentials: false
-      # TODO testing
-      - uses: opalmedapps/actions/actions/check-thirdparty-notice@SB.check-thirdparty-notice
+      - uses: opalmedapps/actions/actions/check-thirdparty-notice@main
         with:
           package-file: './package.json'
 
