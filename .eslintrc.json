@@ -29,8 +29,7 @@
     "mocha/no-setup-in-describe": 0,
     "no-restricted-syntax": ["error", "ForInStatement", "LabeledStatement", "WithStatement"],
     "no-use-before-define": ["error", { "functions": false }],
-    "prefer-arrow-callback": 0,
-    "sort-imports": "error"
+    "prefer-arrow-callback": 0
   },
   "overrides": [
     {
