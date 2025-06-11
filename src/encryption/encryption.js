@@ -4,10 +4,10 @@
 // SPDX-License-Identifier: AGPL-3.0-or-later
 
 import cryptoJs from 'crypto-js';
-import mysql from 'mysql';
-import legacyOpalSqlRunner from '../../listener/sql/opal-sql-query-runner.js';
 import legacyLogger from '../../listener/logs/logger.js';
+import legacyOpalSqlRunner from '../../listener/sql/opal-sql-query-runner.js';
 import legacyUtility from '../../listener/utility/utility.js';
+import mysql from 'mysql';
 import PromiseUtility from '../utility/promise.js';
 import RequestContext from '../core/request-context.js';
 

@@ -4,8 +4,8 @@
 // SPDX-License-Identifier: AGPL-3.0-or-later
 
 import '../test/chai-setup.js';
-import { expect } from 'chai';
 import EncryptionUtilities from './encryption.js';
+import { expect } from 'chai';
 import RequestContext from '../core/request-context.js';
 
 const context = new RequestContext('test', {});

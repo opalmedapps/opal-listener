@@ -6,8 +6,8 @@
 /**
  * @file Gracefully handle error either coming from an api call or inside the listener.
  */
-import legacyLogger from '../../listener/logs/logger.js';
 import ERRORS from './const.js';
+import legacyLogger from '../../listener/logs/logger.js';
 
 class ErrorHandler {
     /**

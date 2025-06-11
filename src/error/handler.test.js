@@ -5,9 +5,9 @@
 
 /* eslint-disable mocha/no-setup-in-describe */
 import '../test/chai-setup.js';
-import { expect } from 'chai';
 import ErrorHandler from './handler.js';
 import ERRORS from './const.js';
+import { expect } from 'chai';
 
 describe('Error handler', function () {
     describe('getErrorResponse()', function () {

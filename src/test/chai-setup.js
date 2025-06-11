@@ -7,7 +7,7 @@
  * @file Setup file to import into each mocha test file. Reduces boilerplate code at the beginning of test files.
  */
 
-import chai from 'chai';
 import chaiAsPromised from 'chai-as-promised';
+import { use } from 'chai';
 
-chai.use(chaiAsPromised);
+use(chaiAsPromised);

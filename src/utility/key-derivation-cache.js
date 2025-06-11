@@ -7,8 +7,8 @@
  * @description Manages caching for the output of encryption key derivation functions (such as PBKDF2).
  *              This is done to limit the need to recompute the output, which is time-consuming.
  */
-import { Keyv } from 'keyv';
 import crypto from 'crypto';
+import { Keyv } from 'keyv';
 import legacyLogger from '../../listener/logs/logger.js';
 
 // Parameters for PBKDF2

@@ -7,8 +7,8 @@
  * @file Manages the connection to a Firebase realtime database.
  */
 
-import admin from 'firebase-admin';
 import { param, ValidationChain, Validator } from '../utility/param-validator.js';
+import admin from 'firebase-admin';
 
 class Firebase {
     /**

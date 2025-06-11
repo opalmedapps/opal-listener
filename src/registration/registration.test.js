@@ -8,8 +8,8 @@
  */
 
 import '../test/chai-setup.js';
-import { expect } from 'chai';
 import EncryptionUtilities from '../encryption/encryption.js';
+import { expect } from 'chai';
 import Registration from './registration.js';
 import RequestContext from '../core/request-context.js';
 

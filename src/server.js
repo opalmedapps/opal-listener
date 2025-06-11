@@ -14,11 +14,11 @@ import {
 } from './environment.js';
 
 import Firebase from './firebase/firebase.js';
-import legacyServer from '../listener/legacy-server.js';
-import legacyRegistrationServer from '../legacy-registration/legacy-server.js';
 import legacyLogger from '../listener/logs/logger.js';
-import RequestHandler from './core/request-handler.js';
+import legacyRegistrationServer from '../legacy-registration/legacy-server.js';
+import legacyServer from '../listener/legacy-server.js';
 import { REQUEST_TYPE } from './const.js';
+import RequestHandler from './core/request-handler.js';
 import Version from './utility/version.js';
 
 // Raise AssertionError if environment variables are not set

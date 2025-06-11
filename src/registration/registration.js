@@ -3,9 +3,9 @@
 //
 // SPDX-License-Identifier: AGPL-3.0-or-later
 
-import { Keyv } from 'keyv';
 import ApiRequest from '../core/api-request.js';
 import EncryptionUtilities from '../encryption/encryption.js';
+import { Keyv } from 'keyv';
 import legacyLogger from '../../listener/logs/logger.js';
 import RequestContext from '../core/request-context.js';
 

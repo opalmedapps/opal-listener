@@ -5,8 +5,8 @@
 
 /* eslint-disable consistent-return */
 import '../test/chai-setup.js';
-import { expect } from 'chai';
 import ApiRequest from './api-request.js';
+import { expect } from 'chai';
 
 describe('ApiRequest', function () {
     describe('makeRequest', function () {

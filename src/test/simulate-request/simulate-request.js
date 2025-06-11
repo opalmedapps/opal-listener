@@ -8,13 +8,13 @@
  * @file Upload a mock request to firebase to simulate a request from the app.
  */
 import 'dotenv/config';
-import mysql from 'mysql';
-import Firebase from '../../firebase/firebase.js';
 import DefaultRequestData from './mock-request.js';
+import EncryptionUtilities from '../../encryption/encryption.js';
+import Firebase from '../../firebase/firebase.js';
 import legacyLogger from '../../../listener/logs/logger.js';
 import legacyOpalSqlRunner from '../../../listener/sql/opal-sql-query-runner.js';
 import legacyUtility from '../../../listener/utility/utility.js';
-import EncryptionUtilities from '../../encryption/encryption.js';
+import mysql from 'mysql';
 import { REQUEST_TYPE } from '../../const.js';
 import RequestContext from '../../core/request-context.js';
 

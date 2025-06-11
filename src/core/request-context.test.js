@@ -5,8 +5,8 @@
 
 import '../test/chai-setup.js';
 import { expect } from 'chai';
-import RequestContext from './request-context.js';
 import { REQUEST_TYPE } from '../const.js';
+import RequestContext from './request-context.js';
 
 const registrationRequestTypes = [
     REQUEST_TYPE.REGISTRATION,
