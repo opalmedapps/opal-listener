@@ -1,4 +1,3 @@
-// eslint-disable-next-line max-len
 // SPDX-FileCopyrightText: Copyright 2022 Opal Health Informatics Group at the Research Institute of the McGill University Health Centre <john.kildea@mcgill.ca>
 //
 // SPDX-License-Identifier: AGPL-3.0-or-later
@@ -101,7 +100,6 @@ class Registration {
         );
         const decryptedRequest = result;
         // Save the salt that successfully decrypted the request (to be used to encrypt the response)
-        // eslint-disable-next-line no-param-reassign
         encryptionInfo.salt = salt;
 
         // Cache encryption info for the first time (once we know which salt was successful) or reset TTL

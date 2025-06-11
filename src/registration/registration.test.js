@@ -1,4 +1,3 @@
-// eslint-disable-next-line max-len
 // SPDX-FileCopyrightText: Copyright 2022 Opal Health Informatics Group at the Research Institute of the McGill University Health Centre <john.kildea@mcgill.ca>
 //
 // SPDX-License-Identifier: AGPL-3.0-or-later
@@ -197,6 +196,7 @@ describe('Registration', function () {
             try {
                 await Registration.decryptManySalts(context, obj, encryptionInfo);
             }
+            // eslint-disable-next-line no-unused-vars
             catch (error) {
                 // Suppress error (not the point of this test)
             }

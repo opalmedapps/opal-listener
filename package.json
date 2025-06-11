@@ -3,7 +3,7 @@
   "version": "1.0.0",
   "type": "module",
   "scripts": {
-    "lint": "eslint src/**/*.js",
+    "lint": "eslint",
     "docs": "run-script-os",
     "docs:nix": "./node_modules/.bin/jsdoc src README.md -c docs/jsdoc.config.json",
     "docs:windows": ".\\node_modules\\.bin\\jsdoc src README.md -c docs/jsdoc.config.json",
@@ -36,14 +36,15 @@
     "winston": "3.17.0"
   },
   "devDependencies": {
+    "@eslint/js": "9.28.0",
+    "@stylistic/eslint-plugin": "4.4.1",
     "chai": "4.5.0",
     "chai-as-promised": "7.1.2",
-    "eslint": "8.57.1",
-    "eslint-config-airbnb-base": "15.0.0",
     "eslint-plugin-import": "2.31.0",
-    "eslint-plugin-jsdoc": "50.6.3",
-    "eslint-plugin-mocha": "10.5.0",
+    "eslint-plugin-jsdoc": "50.8.0",
+    "eslint-plugin-mocha": "11.1.0",
     "firebase-tools": "13.29.1",
+    "globals": "16.2.0",
     "jsdoc": "4.0.4",
     "mocha": "11.1.0",
     "nyc": "17.1.0",
