@@ -7,7 +7,6 @@ import importPlugin from 'eslint-plugin-import';
 import js from '@eslint/js';
 import jsdoc from 'eslint-plugin-jsdoc';
 import mocha from 'eslint-plugin-mocha';
-// eslint-disable-next-line import/namespace, import/default, import/no-named-as-default, import/no-named-as-default-member
 import stylistic from '@stylistic/eslint-plugin';
 
 export default [
@@ -33,7 +32,7 @@ export default [
 
     // Main configuration
     {
-        files: ['src/**/*.js'],
+        files: ['**/*.js'],
         languageOptions: {
             ecmaVersion: 'latest',
             sourceType: 'module',
