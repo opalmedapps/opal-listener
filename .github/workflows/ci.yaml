@@ -19,18 +19,19 @@ permissions:
   contents: read
 
 jobs:
-  lint-eslint:
-    runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@v4.2.2
-        with:
-          persist-credentials: false
-      - name: Install GitHub Actions formatter
-        run: npm install eslint-formatter-gha --no-save
-      - name: Print eslint version
-        run: npx eslint --version
-      - name: Run eslint
-        run: npx eslint --format gha src/**/*.js
+  # TODO this job is temporarily suspended until eslint is upgraded to v9
+#  lint-eslint:
+#    runs-on: ubuntu-latest
+#    steps:
+#      - uses: actions/checkout@v4.2.2
+#        with:
+#          persist-credentials: false
+#      - name: Install GitHub Actions formatter
+#        run: npm install eslint-formatter-gha --no-save
+#      - name: Print eslint version
+#        run: npx eslint --version
+#      - name: Run eslint
+#        run: npx eslint --format gha src/**/*.js
 
   lint-pre-commit:
     runs-on: ubuntu-latest
