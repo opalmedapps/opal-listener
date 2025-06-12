@@ -19,29 +19,31 @@ const logPatientRequest = sqlInterface.addToActivityLog;
  * @type {Object}
  */
 const LEGACYAPI = {
-    'DeviceIdentifier': sqlInterface.updateDeviceIdentifier,
-    'Log': sqlInterface.logActivity,
-    'LogPatientAction': sqlInterface.logPatientAction,
-    'Login': sqlInterface.login,
-    'Logout': sqlInterface.logout,
-    'Refresh': sqlInterface.refresh,
     'AccountChange': sqlInterface.updateAccountField,
     'Checkin': sqlInterface.checkIn,
+    'DeviceIdentifier': sqlInterface.updateDeviceIdentifier,
     'DocumentContent': sqlInterface.getDocumentsContent,
+    'EducationalMaterialRating': sqlInterface.inputEducationalMaterialRating,
+    'EducationalPackageContents': sqlInterface.getPackageContents,
     'Feedback': sqlInterface.inputFeedback,
+    'Log': sqlInterface.logActivity,
+    'Login': sqlInterface.login,
+    'Logout': sqlInterface.logout,
+    'LogPatientAction': sqlInterface.logPatientAction,
     // Deprecated API entry: 'NotificationsNew', since QSCCD-125
     'NotificationsNew': sqlInterface.getNewNotifications,
-    'EducationalPackageContents': sqlInterface.getPackageContents,
+    // Deprecated API entry: 'PFPMembers', since QSCCD-417
+    'PFPMembers': sqlInterface.getPatientsForPatientsMembers,
+    'Questionnaire': questionnaires.getQuestionnaire,
     // Deprecated API entry: 'QuestionnaireInOpalDBFromSerNum', since QSCCD-1559
     'QuestionnaireInOpalDBFromSerNum': questionnaires.getQuestionnaireInOpalDB,
     // Deprecated API entry: 'QuestionnaireList' is now accessed via sqlInterface's requestMappings (since QSCCD-230)
     'QuestionnaireList': questionnaires.getQuestionnaireList,
-    'Questionnaire': questionnaires.getQuestionnaire,
     'QuestionnairePurpose': questionnaires.getQuestionnairePurpose,
-    'EducationalMaterialRating': sqlInterface.inputEducationalMaterialRating,
     'QuestionnaireSaveAnswer': questionnaires.questionnaireSaveAnswer,
     'QuestionnaireUpdateStatus': questionnaires.questionnaireUpdateStatus,
     'Read': sqlInterface.updateReadStatus,
+    'Refresh': sqlInterface.refresh,
     // TODO: Modify/refactor 'Studies' endpoint so it takes into account 'TargetPatientID' parameter.
     // Since the studies module is in the 'Chart tab' and contains patient data, the endpoint should
     // identify the target patient of a request (chosen using the profile selector) and make sure that
@@ -50,8 +52,6 @@ const LEGACYAPI = {
     'Studies': sqlInterface.getStudies,
     'StudyQuestionnaires': sqlInterface.getStudyQuestionnaires,
     'StudyUpdateStatus': sqlInterface.studyUpdateStatus,
-    // Deprecated API entry: 'PFPMembers', since QSCCD-417
-    'PFPMembers': sqlInterface.getPatientsForPatientsMembers
 };
 
 /**

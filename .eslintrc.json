@@ -6,7 +6,6 @@
   },
   "extends": [
     "airbnb-base",
-    "plugin:import/recommended",
     "plugin:jsdoc/recommended",
     "plugin:mocha/recommended"
   ],
@@ -22,7 +21,6 @@
     "arrow-parens": ["error", "as-needed"],
     "brace-style": ["error", "stroustrup"],
     "func-names": 0,
-    "import/extensions": ["error", "ignorePackages"],
     "indent": ["error", 4],
     "linebreak-style": 0,
     "max-len": ["error", { "code": 120 }],
@@ -30,11 +28,7 @@
     "mocha/no-setup-in-describe": 0,
     "no-restricted-syntax": ["error", "ForInStatement", "LabeledStatement", "WithStatement"],
     "no-use-before-define": ["error", { "functions": false }],
-    "prefer-arrow-callback": 0,
-    "sort-imports": ["error", {
-      "ignoreCase": true,
-      "ignoreDeclarationSort": true
-    }]
+    "prefer-arrow-callback": 0
   },
   "overrides": [
     {
