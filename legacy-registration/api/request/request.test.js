@@ -3,8 +3,8 @@
 // SPDX-License-Identifier: AGPL-3.0-or-later
 
 import { expect } from 'chai';
-import sinon from 'sinon';
 import opalRequest from './request.js';
+import sinon from 'sinon';
 
 describe('opalRequest', function () {
 	describe('registrationRegister', function () {

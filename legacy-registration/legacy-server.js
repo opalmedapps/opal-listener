@@ -4,11 +4,11 @@
 
 // This script listens for changes on registration/ in firebase, reads those changes and writes a response back to firebase.
 
-import q from 'q';
 import admin from 'firebase-admin';
-import mainRequestApi from './api/main.js';
-import logger from '../listener/logs/logger.js';
 import listenerLegacyServer from '../listener/legacy-server.js';
+import logger from '../listener/logs/logger.js';
+import mainRequestApi from './api/main.js';
+import q from 'q';
 import { REQUEST_TYPE } from '../src/const.js';
 import RequestContext from '../src/core/request-context.js';
 

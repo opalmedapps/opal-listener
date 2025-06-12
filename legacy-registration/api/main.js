@@ -2,12 +2,12 @@
 //
 // SPDX-License-Identifier: AGPL-3.0-or-later
 
-import q from 'q';
 import apiRequest from './apiRequest.js';
-import opalResponseSuccess from './response/responseSuccess.js';
-import opalResponseError from './response/responseError.js';
-import requestValidator from './request/requestValidator.js';
 import logger from '../logs/logger.js';
+import opalResponseError from './response/responseError.js';
+import opalResponseSuccess from './response/responseSuccess.js';
+import q from 'q';
+import requestValidator from './request/requestValidator.js';
 
 /**
  * requestFormatter
