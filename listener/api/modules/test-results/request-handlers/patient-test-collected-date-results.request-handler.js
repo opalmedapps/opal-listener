@@ -2,11 +2,11 @@
 //
 // SPDX-License-Identifier: AGPL-3.0-or-later
 
-import ValidationError from '../../../errors/validation-error.js';
 import ApiRequestHandler from '../../../api-request-handler.js';
-import PatientTestResult from '../classes/patient-test-result.js';
-import {param} from 'express-validator';
 import logger from '../../../../logs/logger.js';
+import {param} from 'express-validator';
+import PatientTestResult from '../classes/patient-test-result.js';
+import ValidationError from '../../../errors/validation-error.js';
 
 class PatientTestCollectedDateResultsHandler extends ApiRequestHandler {
 	/**

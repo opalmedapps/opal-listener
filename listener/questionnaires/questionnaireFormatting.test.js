@@ -4,10 +4,10 @@
 
 import '../../src/test/chai-setup.js';
 import { expect } from 'chai';
-import sinon from 'sinon';
 import format from './questionnaireFormatting.js';
 import questionnaireConfig from './questionnaireConfig.json' with { type: "json" };
 import QuestionnaireDjango from './questionnaireDjango.js';
+import sinon from 'sinon';
 
 // Values used as a questionnaire's respondent_id
 const PATIENT = questionnaireConfig.QUESTIONNAIRE_RESPONDENT_ID.PATIENT;

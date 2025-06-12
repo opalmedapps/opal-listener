@@ -2,10 +2,10 @@
 //
 // SPDX-License-Identifier: AGPL-3.0-or-later
 
+import { ENVIRONMENT } from '../../src/environment.js';
 import fs from 'fs';
 import logger from '../logs/logger.js';
 import mysql from 'mysql';
-import { ENVIRONMENT } from '../../src/environment.js';
 
 class SQLQueryRunner {
     #SQL_QUERY_POOL;

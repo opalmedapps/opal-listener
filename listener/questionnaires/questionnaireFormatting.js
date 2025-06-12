@@ -3,10 +3,10 @@
 // SPDX-License-Identifier: AGPL-3.0-or-later
 
 import logger from '../logs/logger.js';
-import questionnaireValidation from './questionnaire.validate.js';
 import questionnaireConfig from './questionnaireConfig.json' with { type: "json" };
-import utility from '../utility/utility.js';
 import QuestionnaireDjango from './questionnaireDjango.js';
+import questionnaireValidation from './questionnaire.validate.js';
+import utility from '../utility/utility.js';
 
 /**
  * getQuestionAndTypeMap

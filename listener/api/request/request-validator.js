@@ -5,15 +5,15 @@
 /**
 *  Opal Imports
 */
+import ApiRequest from '../../../src/core/api-request.js';
+import config from '../../config-adaptor.js';
+import logger from '../../logs/logger.js';
 import OpalRequest from './request.js';
 import OpalResponseError from '../response/response-error.js';
+import q from 'q';
 import sqlInterface from '../sqlInterface.js';
 import utility from '../../utility/utility.js';
 import Version from '../../../src/utility/version.js';
-import logger from '../../logs/logger.js';
-import config from '../../config-adaptor.js';
-import ApiRequest from '../../../src/core/api-request.js';
-import q from 'q';
 
 /**
 * @class RequestValidator

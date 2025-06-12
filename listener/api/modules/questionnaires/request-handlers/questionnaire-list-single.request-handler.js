@@ -5,9 +5,9 @@
 import ApiRequestHandler from '../../../api-request-handler.js';
 import logger from '../../../../logs/logger.js';
 import { param } from 'express-validator';
+import questionnaireConfig from '../../../../questionnaires/questionnaireConfig.json' with { type: "json" };
 import questionnaireOpalDB from '../../../../questionnaires/questionnaireOpalDB.js';
 import questionnaireQuestionnaireDB from '../../../../questionnaires/questionnaireQuestionnaireDB.js';
-import questionnaireConfig from '../../../../questionnaires/questionnaireConfig.json' with { type: "json" };
 import utility from '../../../../utility/utility.js';
 import ValidationError from '../../../errors/validation-error.js';
 

@@ -2,8 +2,8 @@
 //
 // SPDX-License-Identifier: AGPL-3.0-or-later
 
-import PatientTestResult from '../classes/patient-test-result.js';
 import ApiRequestHandler from '../../../api-request-handler.js';
+import PatientTestResult from '../classes/patient-test-result.js';
 
 class PatientTestTypesHandler extends ApiRequestHandler {
 	/**

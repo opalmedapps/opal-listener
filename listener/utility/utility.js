@@ -3,10 +3,10 @@
 // SPDX-License-Identifier: AGPL-3.0-or-later
 
 import CryptoJS from 'crypto-js';
-import stablelibutf8 from '@stablelib/utf8';
+import keyDerivationCache from '../../src/utility/key-derivation-cache.js';
 import nacl from 'tweetnacl';
 import stablelibbase64 from '@stablelib/base64';
-import keyDerivationCache from '../../src/utility/key-derivation-cache.js';
+import stablelibutf8 from '@stablelib/utf8';
 
 /**
  * resolveEmptyResponse

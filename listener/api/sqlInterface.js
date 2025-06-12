@@ -3,20 +3,20 @@
 // SPDX-License-Identifier: AGPL-3.0-or-later
 
 import axios from 'axios';
+import config from '../config-adaptor.js';
+import eduMaterialConfig from '../educational-material/eduMaterialConfig.json' with { type: "json" };
 import filesystem from 'fs';
+import logger from '../logs/logger.js';
+import Mail from '../mailer/mailer.js';
+import OpalSQLQueryRunner from '../sql/opal-sql-query-runner.js';
+import Patient from './modules/patient/patient.js';
 import Q from 'q';
 import queries from '../sql/queries.js';
-import config from '../config-adaptor.js';
-import Mail from '../mailer/mailer.js';
-import utility from '../utility/utility.js';
-import logger from '../logs/logger.js';
-import OpalSQLQueryRunner from '../sql/opal-sql-query-runner.js';
-import testResults from './modules/test-results/api.js';
 import questionnaires from './modules/questionnaires/api.js';
-import Patient from './modules/patient/patient.js';
-import eduMaterialConfig from '../educational-material/eduMaterialConfig.json' with { type: "json" };
-import studiesConfig from '../studies/studiesConfig.json' with { type: "json" };
 import SecurityDjango from '../security/securityDjango.js';
+import studiesConfig from '../studies/studiesConfig.json' with { type: "json" };
+import testResults from './modules/test-results/api.js';
+import utility from '../utility/utility.js';
 import Version from '../../src/utility/version.js';
 
 /******************************

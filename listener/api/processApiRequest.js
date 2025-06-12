@@ -2,15 +2,13 @@
 //
 // SPDX-License-Identifier: AGPL-3.0-or-later
 
-import sqlInterface from './sqlInterface.js';
-import questionnaires from '../questionnaires/questionnaireOpalDB.js';
-import security from '../security/security.js';
-import logger from '../logs/logger.js';
-
-// New API handlers
 import fileRequest from './modules/file-request/api.js';
 import general from './modules/general/api.js';
+import logger from '../logs/logger.js';
+import questionnaires from '../questionnaires/questionnaireOpalDB.js';
+import security from '../security/security.js';
 import securityQuestions from './modules/patient/security-questions/api.js';
+import sqlInterface from './sqlInterface.js';
 import testResults from './modules/test-results/api.js';
 
 const omitParametersFromLogs = sqlInterface.omitParametersFromLogs;

@@ -7,17 +7,17 @@
  * writes a response back to firebase.
  */
 
-import mainRequestApi from './api/main.js';
-import processApi from './api/processApiRequest.js';
 import admin from 'firebase-admin';
-import utility from './utility/utility.js';
-import q from 'q';
-import logger from './logs/logger.js';
 import cp from 'child_process';
+import logger from './logs/logger.js';
+import mainRequestApi from './api/main.js';
+import OpalResponse from './api/response/response.js';
 import OpalSecurityResponseError from './api/response/security-response-error.js';
 import OpalSecurityResponseSuccess from './api/response/security-response-success.js';
-import OpalResponse from './api/response/response.js';
+import processApi from './api/processApiRequest.js';
+import q from 'q';
 import RequestContext from '../src/core/request-context.js';
+import utility from './utility/utility.js';
 
 // See: https://stackoverflow.com/questions/46745014/alternative-for-dirname-in-node-js-when-using-es6-modules
 const __dirname = import.meta.dirname;

@@ -2,13 +2,13 @@
 //
 // SPDX-License-Identifier: AGPL-3.0-or-later
 
-import q from 'q';
 import credentials from '../config-adaptor.js';
+import format from './questionnaireFormatting.js';
 import logger from '../logs/logger.js';
+import q from 'q';
 import questionnaireConfig from './questionnaireConfig.json' with { type: "json" };
 import questionnaireQueries from './questionnaireQueries.js';
 import questionnaireValidation from './questionnaire.validate.js';
-import format from './questionnaireFormatting.js';
 import SQLQueryRunner from '../sql/sql-query-runner.js';
 
 /**

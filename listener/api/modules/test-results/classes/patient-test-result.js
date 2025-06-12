@@ -2,9 +2,9 @@
 //
 // SPDX-License-Identifier: AGPL-3.0-or-later
 
-import PatientTestResultQuery from '../queries/patient-test-result.query.js';
 import logger from '../../../../logs/logger.js';
 import OpalSQLQueryRunner from '../../../../sql/opal-sql-query-runner.js';
+import PatientTestResultQuery from '../queries/patient-test-result.query.js';
 
 class PatientTestResult {
 	/**

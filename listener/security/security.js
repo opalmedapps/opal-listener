@@ -2,15 +2,15 @@
 //
 // SPDX-License-Identifier: AGPL-3.0-or-later
 
-import logger from '../logs/logger.js';
 import firebase from 'firebase-admin';
 import keyDerivationCache from '../../src/utility/key-derivation-cache.js';
-import sqlInterface from '../api/sqlInterface.js';
-import utility from '../utility/utility.js';
-import Version from '../../src/utility/version.js';
+import logger from '../logs/logger.js';
 import OpalResponse from '../api/response/response.js';
 import OpalSecurityResponseError from '../api/response/security-response-error.js';
 import OpalSecurityResponseSuccess from '../api/response/security-response-success.js';
+import sqlInterface from '../api/sqlInterface.js';
+import utility from '../utility/utility.js';
+import Version from '../../src/utility/version.js';
 
 const FIVE_MINUTES = 300000;
 

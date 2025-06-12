@@ -2,10 +2,10 @@
 //
 // SPDX-License-Identifier: AGPL-3.0-or-later
 
-import ValidationError from '../../errors/validation-error.js';
-import patientQueries from './patient.queries.js';
-import OpalSQLQueryRunner from '../../../sql/opal-sql-query-runner.js';
 import logger from '../../../logs/logger.js';
+import OpalSQLQueryRunner from '../../../sql/opal-sql-query-runner.js';
+import patientQueries from './patient.queries.js';
+import ValidationError from '../../errors/validation-error.js';
 
 class Patient {
 	/**

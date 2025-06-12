@@ -3,13 +3,13 @@
 // SPDX-License-Identifier: AGPL-3.0-or-later
 
 import ApiRequestHandler from '../../../../api-request-handler.js';
-import Patient from '../../patient.js';
-import ValidationError from '../../../../errors/validation-error.js';
-import OpalSQLQueryRunner from '../../../../../sql/opal-sql-query-runner.js';
-import opalQueries from '../../../../../sql/queries.js';
 import logger from '../../../../../logs/logger.js';
+import opalQueries from '../../../../../sql/queries.js';
+import OpalSQLQueryRunner from '../../../../../sql/opal-sql-query-runner.js';
 import {param} from 'express-validator';
+import Patient from '../../patient.js';
 import SecurityDjango from '../../../../../security/securityDjango.js';
+import ValidationError from '../../../../errors/validation-error.js';
 import Version from '../../../../../../src/utility/version.js';
 
 class UpdateSecurityQuestionAnswerRequestHandler extends ApiRequestHandler {
