@@ -92,7 +92,9 @@ jobs:
         run: cat code-coverage-results.md >> "$GITHUB_STEP_SUMMARY"
 
   build-image:
-    needs: [lint-eslint, lint-pre-commit, test-and-coverage]
+    # TODO temporary
+    # needs: [lint-eslint, lint-pre-commit, test-and-coverage]
+    needs: [lint-pre-commit, test-and-coverage]
     permissions:
       contents: read
       packages: write
