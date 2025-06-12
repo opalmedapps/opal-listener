@@ -652,7 +652,7 @@ async function login(requestObject) {
 /**
  * @description For now, the only purpose of the logout request is to record a timestamp in PatientActivityLog (done separately in logPatientRequest).
  * @param requestObject The request object.
- * @returns {Promise<{Response: string}>} Resolves wth a generic acknowledgement message.
+ * @returns {Promise<{Response: string}>} Resolves with a generic acknowledgement message.
  */
 function logout(requestObject) {
     return Promise.resolve({Response: "Successful logout"});
