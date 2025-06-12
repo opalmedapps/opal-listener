@@ -6,7 +6,7 @@ SPDX-License-Identifier: AGPL-3.0-or-later
 
 # Listener
 
-[![pipeline status](https://gitlab.com/opalmedapps/opal-listener/badges/main/pipeline.svg)](https://gitlab.com/opalmedapps/opal-listener/-/commits/main)
+[![CI](https://github.com/opalmedapps/opal-listener/actions/workflows/ci.yaml/badge.svg)](https://github.com/opalmedapps/opal-listener/actions/workflows/ci.yaml)
 [![Docs](https://img.shields.io/badge/docs-available-brightgreen.svg)](https://github.com/opalmedapps/opal-listener/actions/workflows/build-docs.yml)
 
 This is Opal's backend listener that facilitates communication between the user applications and the Opal PIE (typically running within a hospital network that cannot be accessed from the outside) via Firebase.
@@ -20,7 +20,7 @@ These instructions will get you a copy of the project up and running on your loc
 These are the requirements to run the listener locally.
 
 1. [Docker](https://docs.docker.com/get-docker/)
-2. Have the [backend](https://gitlab.com/opalmedapps/backend) and [legacy databases](https://gitlab.com/opalmedapps/db-docker) running.
+2. Have the [new opal-admin](https://github.com/opalmedapps/opal-admin) and [legacy databases](https://github.com/opalmedapps/opal-db-management) running.
 3. Have your own [Firebase project set up](https://docs.opalmedapps.ca/development/setup/#create-a-new-firebase-project) and the Firebase admin key file saved.
 
 ### Installation
@@ -65,7 +65,7 @@ Note that the instructions below are for a local setup.
 On a server, certificate files may be stored in different locations.
 
 1. Copy your CA public key file (usually called `ca.pem`; generated when
-   [setting up SSL in db-docker](https://gitlab.com/opalmedapps/db-docker#running-the-databases-with-encrypted-connections))
+   [setting up SSL in db-docker](https://github.com/opalmedapps/opal-db-management#running-the-databases-with-encrypted-connections))
    to the `certs` folder.
 2. In the `.env` file under `--- SSL Configurations ---`, enable SSL and provide the path to this file.
 3. Restart your Docker container via `docker compose up` which forces the container to be recreated.
