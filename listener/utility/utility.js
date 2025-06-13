@@ -2,11 +2,11 @@
 //
 // SPDX-License-Identifier: AGPL-3.0-or-later
 
-const CryptoJS          = require('crypto-js');
-const stablelibutf8     = require('@stablelib/utf8');
-const nacl              = require('tweetnacl');
-const stablelibbase64   = require('@stablelib/base64');
-const keyDerivationCache = require('../../src/utility/key-derivation-cache');
+import CryptoJS from 'crypto-js';
+import keyDerivationCache from '../../src/utility/key-derivation-cache.js';
+import nacl from 'tweetnacl';
+import stablelibbase64 from '@stablelib/base64';
+import stablelibutf8 from '@stablelib/utf8';
 
 /**
  * resolveEmptyResponse
@@ -14,7 +14,7 @@ const keyDerivationCache = require('../../src/utility/key-derivation-cache');
  * @param data
  * @return {*}
  */
-exports.resolveEmptyResponse=function(data) {
+function resolveEmptyResponse(data) {
     var counter=0;
     for (var key in data) {
         if(data[key].length>0) {
@@ -24,43 +24,7 @@ exports.resolveEmptyResponse=function(data) {
     }
     if(counter === 0) data = 'empty';
     return data;
-};
-
-/**
- * toMYSQLString
- * @desc Converts date object to mysql date
- * @param date
- * @return Date
- */
-exports.toMYSQLString=function(date) {
-    let month = date.getMonth();
-    let day=date.getDate();
-    let hours=date.getHours();
-    let minutes=date.getMinutes();
-    let seconds=date.getSeconds();
-
-    month++;
-
-    if(hours<10) hours='0'+hours;
-    if(minutes<10) minutes='0'+minutes;
-    if(seconds<10) seconds='0'+seconds;
-    if (day<10) day='0'+day;
-    if (month<10) month='0'+month;
-
-    return date.getFullYear()+'-'+month+'-'+day+' '+hours+':'+minutes+':'+seconds;
-};
-
-
-/**
- * unixToMYSQLTimestamp
- * @desc Converts from milliseconds since 1970 to a mysql date
- * @param time
- * @return {Date}
- */
-exports.unixToMYSQLTimestamp=function(time) {
-    const date = new Date(time);
-    return exports.toMYSQLString(date);
-};
+}
 
 /**
  * @description Encrypts a response object.
@@ -71,14 +35,14 @@ exports.unixToMYSQLTimestamp=function(time) {
  * @param {string} [salt] Optional salt; if provided, it's used with the secret to derive an encryption key.
  * @returns {Promise<Object>} Resolves to the encrypted object.
  */
-exports.encrypt = async function(context, object, secret, salt) {
+async function encrypt(context, object, secret, salt) {
     const key = salt
         ? await keyDerivationCache.getKey(secret, salt, context.cacheLabel, context.useLegacyPBKDF2Settings)
         : secret;
     const truncatedKey = stablelibutf8.encode(key.substring(0, nacl.secretbox.keyLength));
     const nonce = nacl.randomBytes(nacl.secretbox.nonceLength);
-    return exports.encryptObject(object, truncatedKey, nonce);
-};
+    return encryptObject(object, truncatedKey, nonce);
+}
 
 /**
  * @description Decrypts a request object.
@@ -89,20 +53,19 @@ exports.encrypt = async function(context, object, secret, salt) {
  * @param {string} [salt] Optional salt; if provided, it's used with the secret to derive an encryption key.
  * @returns {Promise<Object>} Resolves to the decrypted object.
  */
-exports.decrypt = async function(context, object, secret, salt) {
+async function decrypt(context, object, secret, salt) {
     const key = salt
         ? await keyDerivationCache.getKey(secret, salt, context.cacheLabel, context.useLegacyPBKDF2Settings)
         : secret;
     const truncatedKey = stablelibutf8.encode(key.substring(0, nacl.secretbox.keyLength));
-    return exports.decryptObject(object, truncatedKey);
-};
+    return decryptObject(object, truncatedKey);
+}
 
 //Encrypts an object, array, number, date or string
-exports.encryptObject=function(object,secret,nonce)
-{
+function encryptObject(object, secret, nonce) {
     if(typeof object === 'string')
     {
-        object = stablelibbase64.encode(exports.concatUTF8Array(nonce, nacl.secretbox(stablelibutf8.encode(object),nonce,secret)));
+        object = stablelibbase64.encode(concatUTF8Array(nonce, nacl.secretbox(stablelibutf8.encode(object),nonce,secret)));
         return object;
     }else{
         for (let key in object) {
@@ -116,10 +79,10 @@ exports.encryptObject=function(object,secret,nonce)
                 if(object[key] instanceof Date )
                 {
                     object[key]=object[key].toISOString();
-                    object[key] = stablelibbase64.encode(exports.concatUTF8Array(nonce, nacl.secretbox(stablelibutf8.encode(object[key]),nonce,secret)));
+                    object[key] = stablelibbase64.encode(concatUTF8Array(nonce, nacl.secretbox(stablelibutf8.encode(object[key]),nonce,secret)));
 
                 }else{
-                    exports.encryptObject(object[key],secret,nonce);
+                    encryptObject(object[key],secret,nonce);
                 }
 
             } else
@@ -127,22 +90,20 @@ exports.encryptObject=function(object,secret,nonce)
                 if (typeof object[key] !=='string') {
                     object[key]=String(object[key]);
                 }
-                object[key] = stablelibbase64.encode(exports.concatUTF8Array(nonce,nacl.secretbox(stablelibutf8.encode(object[key]),nonce,secret)));
+                object[key] = stablelibbase64.encode(concatUTF8Array(nonce,nacl.secretbox(stablelibutf8.encode(object[key]),nonce,secret)));
             }
         }
         return object;
     }
+}
 
-};
-
-exports.hash=function(input) {
+function hash(input) {
     return CryptoJS.SHA512(input).toString();
     // return CryptoJS.SHA256(input).toString();
-};
+}
 
 //Decryption function, returns an object whose values are all strings
-exports.decryptObject=function(object,secret)
-{
+function decryptObject(object, secret) {
     if(typeof object ==='string')
     {
         let enc = splitNonce(object);
@@ -154,7 +115,7 @@ exports.decryptObject=function(object,secret)
         {
             if (typeof object[key]==='object')
             {
-                exports.decryptObject(object[key],secret);
+                decryptObject(object[key],secret);
             }else {
                 let enc = splitNonce(object[key]);
                 let dec = stablelibutf8.decode(nacl.secretbox.open(enc[1], enc[0], secret));
@@ -164,31 +125,19 @@ exports.decryptObject=function(object,secret)
         }
     }
     return object;
-};
+}
 
-exports.concatUTF8Array = function(a1,a2)
-{
+function concatUTF8Array(a1, a2) {
     let c = new Uint8Array(a1.length + a2.length);
     c.set(new Uint8Array(a1),0);
     c.set(new Uint8Array(a2), a1.length);
     return c;
-};
+}
 
-function splitNonce(str)
-{
+function splitNonce(str) {
     const ar = stablelibbase64.decode(str);
     return [ar.slice(0,nacl.secretbox.nonceLength),ar.slice(nacl.secretbox.nonceLength)];
 }
-
-//Create copy of object if no nested object
-exports.copyObject = function(object)
-{
-    const copy = {};
-    for (const key in object) {
-        copy[key] = object[key];
-    }
-    return copy;
-};
 
 /**
  * htmlspecialchars_decode
@@ -197,7 +146,7 @@ exports.copyObject = function(object)
  * @param quoteStyle
  * @returns {string} decoded string
  */
-exports.htmlspecialchars_decode = function (string, quoteStyle) {
+function htmlspecialchars_decode(string, quoteStyle) {
     var optTemp = 0;
     var i = 0;
     var noquotes = false;
@@ -240,14 +189,14 @@ exports.htmlspecialchars_decode = function (string, quoteStyle) {
     }
 
     return string.replace(/&amp;/g, '&');
-};
+}
 
 /**
  * @description Stringifies an object, while truncating any string or array that's too long to improve readability.
  * @param {Object} object - The object to stringify.
  * @returns {string} A shortened stringified version of the object.
  */
-exports.stringifyShort = object => {
+function stringifyShort(object) {
     const charThreshold = 1000; // The number of characters past which to truncate a string value
     const arrayThreshold = 300; // The number of elements past which to truncate an array value
     const charsToLeave = 100; // The number of characters to leave when truncating a string value
@@ -261,7 +210,7 @@ exports.stringifyShort = object => {
         }
         else return value;
     });
-};
+}
 
 /**
  * @description Adds an item several times at the end of an array (returns a new copy of the array).
@@ -270,8 +219,18 @@ exports.stringifyShort = object => {
  * @param {number} numTimes - The number of times to add the item.
  * @returns {Array} A copy of the original array, with the new items added.
  */
-exports.addSeveralToArray = (array, item, numTimes) => {
+function addSeveralToArray(array, item, numTimes) {
     let arrCopy = [...array];
     for (let i = 0; i < numTimes; i++) arrCopy.push(item);
     return arrCopy;
-};
+}
+
+export default {
+    resolveEmptyResponse,
+    encrypt,
+    decrypt,
+    hash,
+    htmlspecialchars_decode,
+    stringifyShort,
+    addSeveralToArray,
+}

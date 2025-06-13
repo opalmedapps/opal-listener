@@ -2,10 +2,10 @@
 //
 // SPDX-License-Identifier: AGPL-3.0-or-later
 
-const {ValidationError} = require("../../errors/validation-error");
-const patientQueries = require("./patient.queries");
-const {OpalSQLQueryRunner} = require("../../../sql/opal-sql-query-runner");
-const logger = require("../../../logs/logger");
+import logger from '../../../logs/logger.js';
+import OpalSQLQueryRunner from '../../../sql/opal-sql-query-runner.js';
+import patientQueries from './patient.queries.js';
+import ValidationError from '../../errors/validation-error.js';
 
 class Patient {
 	/**
@@ -64,4 +64,4 @@ class Patient {
 	}
 }
 
-module.exports = {Patient};
+export default Patient;

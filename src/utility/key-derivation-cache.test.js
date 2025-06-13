@@ -3,12 +3,12 @@
 //
 // SPDX-License-Identifier: AGPL-3.0-or-later
 
-require('../test/chai-setup');
-const { expect } = require('chai');
-const { Keyv } = require('keyv');
-const sinon = require('sinon');
-const crypto = require('crypto');
-const cache = require('./key-derivation-cache');
+import '../test/chai-setup.js';
+import { assert, spy } from 'sinon';
+import cache from './key-derivation-cache.js';
+import crypto from 'crypto';
+import { expect } from 'chai';
+import { Keyv } from 'keyv';
 
 describe('KeyDerivationCache', function () {
     const label = 'test-label';
@@ -18,8 +18,8 @@ describe('KeyDerivationCache', function () {
 
     beforeEach(function () {
         cache.clear();
-        cacheSet = sinon.spy(cache.cache, 'set');
-        pbkdf2 = sinon.spy(crypto, 'pbkdf2Sync');
+        cacheSet = spy(cache.cache, 'set');
+        pbkdf2 = spy(crypto, 'pbkdf2Sync');
     });
     afterEach(function () {
         cacheSet.restore();
@@ -42,16 +42,16 @@ describe('KeyDerivationCache', function () {
             });
             it('should generate a value the first time a label is accessed (cache miss)', async function () {
                 await cache.getKey('secret', 'salt', label, legacySetting);
-                sinon.assert.calledOnce(pbkdf2);
+                assert.calledOnce(pbkdf2);
             });
             it('should store the generated value the first time a label is accessed', async function () {
                 await cache.getKey('secret', 'salt', label, legacySetting);
-                sinon.assert.calledOnce(cacheSet);
+                assert.calledOnce(cacheSet);
             });
             it('should reuse a value if it was previously cached (cache hit)', async function () {
                 await cache.getKey('secret', 'salt', label, legacySetting);
                 await cache.getKey('secret', 'salt', label, legacySetting);
-                sinon.assert.calledOnce(pbkdf2); // Not called a second time because the cached value was used instead
+                assert.calledOnce(pbkdf2); // Not called a second time because the cached value was used instead
             });
             it('should read the same value back that was previously cached', async function () {
                 const key = await cache.getKey('secret', 'salt', label, legacySetting);
@@ -63,15 +63,15 @@ describe('KeyDerivationCache', function () {
                     // eslint-disable-next-line no-await-in-loop
                     await cache.getKey('secret', 'salt', label, legacySetting);
                 }
-                sinon.assert.calledOnce(pbkdf2); // Not called ten times, because the cached value was reused
+                assert.calledOnce(pbkdf2); // Not called ten times, because the cached value was reused
             });
             it('should generate a new value if no label is provided', async function () {
                 await cache.getKey('secret', 'salt', undefined, legacySetting);
-                sinon.assert.calledOnce(pbkdf2);
+                assert.calledOnce(pbkdf2);
             });
             it('should bypass the cache if no label is provided', async function () {
                 await cache.getKey('secret', 'salt', undefined, legacySetting);
-                sinon.assert.callCount(cacheSet, 0); // Bypassed the cache
+                assert.callCount(cacheSet, 0); // Bypassed the cache
             });
         });
     });
@@ -80,7 +80,7 @@ describe('KeyDerivationCache', function () {
             await cache.getKey('secret', 'salt', label, false);
             await cache.invalidate(label);
             await cache.getKey('secret', 'salt', label, false);
-            sinon.assert.calledTwice(pbkdf2); // Called a second time after the cached value was invalidated
+            assert.calledTwice(pbkdf2); // Called a second time after the cached value was invalidated
         });
     });
     describe('clear', function () {
@@ -90,7 +90,7 @@ describe('KeyDerivationCache', function () {
             await cache.clear();
             await cache.getKey('secret-1', 'salt', `${label}-1`, false);
             await cache.getKey('secret-2', 'salt', `${label}-2`, false);
-            sinon.assert.callCount(pbkdf2, 4); // Required both values to be regenerated, so four calls in total
+            assert.callCount(pbkdf2, 4); // Required both values to be regenerated, so four calls in total
         });
     });
 });

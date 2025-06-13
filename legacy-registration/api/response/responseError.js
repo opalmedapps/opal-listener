@@ -2,13 +2,7 @@
 //
 // SPDX-License-Identifier: AGPL-3.0-or-later
 
-/**  Library Imports **/
-
-const opalResponse = require('../../../listener/api/response/response');
-/**
- * @class opalResponseError;
- * @type {exports.opalResponseError}
- */
+import opalResponse from '../../../listener/api/response/response.js';
 
 class opalResponseError extends opalResponse {
 
@@ -24,4 +18,5 @@ class opalResponseError extends opalResponse {
 				}, EncryptionKey: this.reqObj.auth.pass, Salt: this.reqObj.auth.salt};
 	}
 }
-module.exports = opalResponseError;
+
+export default opalResponseError;

@@ -5,9 +5,9 @@
 
 /* eslint-disable no-new */
 /* eslint-disable consistent-return */
-require('../test/chai-setup');
-const { expect } = require('chai');
-const { RequestHandler } = require('./request-handler');
+import '../test/chai-setup.js';
+import { expect } from 'chai';
+import RequestHandler from './request-handler.js';
 
 describe('Request Handler', function () {
     describe('processRequest()', function () {

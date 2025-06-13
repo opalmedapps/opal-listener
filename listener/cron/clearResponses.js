@@ -2,34 +2,39 @@
 //
 // SPDX-License-Identifier: AGPL-3.0-or-later
 
+import admin from 'firebase-admin';
+import config from '../config-adaptor.js';
+import logger from '../logs/logger.js';
 
-const logger            = require('../logs/logger.js');
-const config            = require('../config-adaptor');
-const admin             = require("firebase-admin");
+init();
 
-// Initialize firebase connection
-const serviceAccount = require(config.FIREBASE_ADMIN_KEY);
-admin.initializeApp({
-    credential: admin.credential.cert(serviceAccount),
-    databaseURL: config.DATABASE_URL
-});
+async function init() {
+    const { default: serviceAccount } = await import(config.FIREBASE_ADMIN_KEY, { with: { type: 'json' } });
 
-// Get reference to correct data element
-const db = admin.database();
-const ref = db.ref(config.FIREBASE_ROOT_BRANCH);
+    // Initialize firebase connection
+    admin.initializeApp({
+        credential: admin.credential.cert(serviceAccount),
+        databaseURL: config.DATABASE_URL
+    });
 
-process.send('Clear Response Cron Successfully Initialized');
+    // Get reference to correct data element
+    const db = admin.database();
+    const ref = db.ref(config.FIREBASE_ROOT_BRANCH);
 
-// Periodically clear requests that are still on Firebase
-setInterval(function(){
-    clearResponses();
-}, 300000);
+    process.send('Clear Response Cron Successfully Initialized');
+
+    // Periodically clear requests that are still on Firebase
+    setInterval(function(){
+        clearResponses(ref);
+    }, 300000);
+}
 
 /**
  * clearTimeoutRequests
  * @desc Erase response data on firebase in case the response has not been processed
+ * @param ref The Firebase reference from which to clear data.
  */
-function clearResponses() {
+function clearResponses(ref) {
     ref.child('users').once('value').then(function(snapshot){
         const now = (new Date()).getTime();
         const usersData = snapshot.val();

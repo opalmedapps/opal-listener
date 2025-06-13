@@ -2,8 +2,8 @@
 //
 // SPDX-License-Identifier: AGPL-3.0-or-later
 
-const { ApiRequestHandler } = require('../../../api-request-handler');
-const questionnaireQuestionnaireDB = require('../../../../questionnaires/questionnaireQuestionnaireDB');
+import ApiRequestHandler from '../../../api-request-handler.js';
+import questionnaireQuestionnaireDB from '../../../../questionnaires/questionnaireQuestionnaireDB.js';
 
 class QuestionnaireListHandler extends ApiRequestHandler {
     /**
@@ -32,4 +32,4 @@ class QuestionnaireListHandler extends ApiRequestHandler {
     }
 }
 
-module.exports = QuestionnaireListHandler;
+export default QuestionnaireListHandler;
