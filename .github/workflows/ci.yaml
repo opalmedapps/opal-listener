@@ -46,6 +46,17 @@ jobs:
   run-reuse-workflow:
     uses: opalmedapps/.github/.github/workflows/reuse.yaml@main
 
+  check-thirdparty-notice:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4.2.2
+        with:
+          persist-credentials: false
+      # TODO testing
+      - uses: opalmedapps/actions/actions/check-thirdparty-notice@SB.uv-cache-warning
+        with:
+          package-file: './package.json'
+
   test-and-coverage:
     runs-on: ubuntu-latest
     steps:
