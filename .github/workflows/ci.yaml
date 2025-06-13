@@ -60,10 +60,9 @@ jobs:
         run: npx mocha --version
 
       # Run coverage evaluation
-      - name: Run nyc / cobertura
+      - name: Run c8 / cobertura
         run: |
-          npx nyc --all --reporter cobertura mocha --reporter json --reporter-option output=mocha-report.json './src/**/*.test.*' './listener/**/*.test.*' './legacy-registration/**/*.test.*'
-          npx nyc report
+          npx c8 --all --reporter cobertura mocha --reporter json --reporter-option output=mocha-report.json './src/**/*.test.*' './listener/**/*.test.*' './legacy-registration/**/*.test.*'
 
       # Format the test output for GitHub
       - name: Report test results
