@@ -5,7 +5,7 @@
 
 import cryptoJs from 'crypto-js';
 import legacyLogger from '../../listener/logs/logger.js';
-import legacyOpalSqlRunner from '../../listener/sql/opal-sql-query-runner.js';
+import OpalSQLQueryRunner from '../../listener/sql/opal-sql-query-runner.js';
 import legacyUtility from '../../listener/utility/utility.js';
 import mysql from 'mysql';
 import PromiseUtility from '../utility/promise.js';
@@ -161,7 +161,7 @@ class EncryptionUtilities {
         `, [userId, deviceId]);
 
         try {
-            const response = await legacyOpalSqlRunner.OpalSQLQueryRunner.run(query);
+            const response = await OpalSQLQueryRunner.run(query);
             return response[0].SecurityAnswer;
         }
         catch (error) {

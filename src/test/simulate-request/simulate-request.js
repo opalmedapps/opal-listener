@@ -12,7 +12,7 @@ import DefaultRequestData from './mock-request.js';
 import EncryptionUtilities from '../../encryption/encryption.js';
 import Firebase from '../../firebase/firebase.js';
 import legacyLogger from '../../../listener/logs/logger.js';
-import legacyOpalSqlRunner from '../../../listener/sql/opal-sql-query-runner.js';
+import OpalSQLQueryRunner from '../../../listener/sql/opal-sql-query-runner.js';
 import legacyUtility from '../../../listener/utility/utility.js';
 import mysql from 'mysql';
 import { REQUEST_TYPE } from '../../const.js';
@@ -123,7 +123,7 @@ class SimulateRequest {
      * @description Encrypt mock request using listener encryption utilities.
      */
     async encryptApiRequest() {
-        const sqlResponse = await legacyOpalSqlRunner.OpalSQLQueryRunner.run(
+        const sqlResponse = await OpalSQLQueryRunner.run(
             SimulateRequest.getDeviceIdAndAnswer(this.#testUsername),
         );
         const hash = EncryptionUtilities.hash(this.#requestData.UserID);
