@@ -2,11 +2,11 @@
 //
 // SPDX-License-Identifier: AGPL-3.0-or-later
 
-const {ApiRequestHandler} = require("../../../api-request-handler");
-const {FileRequest} = require("../classes/file-request");
-const logger = require("../../../../logs/logger");
-const {param} = require("express-validator");
-const {ValidationError} = require("../../../errors/validation-error");
+import ApiRequestHandler from '../../../api-request-handler.js';
+import FileRequest from '../classes/file-request.js';
+import logger from '../../../../logs/logger.js';
+import {param} from 'express-validator';
+import ValidationError from '../../../errors/validation-error.js';
 
 class FileRequestHandler extends ApiRequestHandler {
 
@@ -37,4 +37,4 @@ class FileRequestHandler extends ApiRequestHandler {
     }
 }
 
-module.exports = FileRequestHandler;
+export default FileRequestHandler;

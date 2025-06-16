@@ -3,11 +3,11 @@
 //
 // SPDX-License-Identifier: AGPL-3.0-or-later
 
-const { Keyv } = require('keyv');
-const ApiRequest = require('../core/api-request');
-const EncryptionUtilities = require('../encryption/encryption');
-const legacyLogger = require('../../listener/logs/logger');
-const { RequestContext } = require('../core/request-context');
+import ApiRequest from '../core/api-request.js';
+import EncryptionUtilities from '../encryption/encryption.js';
+import { Keyv } from 'keyv';
+import legacyLogger from '../../listener/logs/logger.js';
+import RequestContext from '../core/request-context.js';
 
 const regCache = new Keyv({ namespace: 'registration' });
 regCache.on('error', err => legacyLogger.log(
@@ -121,4 +121,4 @@ class Registration {
     }
 }
 
-module.exports = Registration;
+export default Registration;

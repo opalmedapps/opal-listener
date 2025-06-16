@@ -7,8 +7,10 @@
  * @file Provides functions used to validate input or object parameters.
  */
 
-const { param, validationResult, ValidationChain } = require('express-validator');
-const { ValidationError } = require('./param-validator-error');
+import expressValidator from 'express-validator';
+import ValidationError from './param-validator-error.js';
+
+const { param, validationResult, ValidationChain } = expressValidator;
 
 class Validator {
     /**
@@ -28,8 +30,9 @@ class Validator {
     }
 }
 
-exports.Validator = Validator;
-
-// Export other express-validator components alongside Validator to shorten imports in files that use this utility.
-exports.param = param;
-exports.ValidationChain = ValidationChain;
+export {
+    Validator,
+    // Export other express-validator components alongside Validator to shorten imports in files that use this utility.
+    param,
+    ValidationChain,
+};

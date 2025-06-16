@@ -2,64 +2,63 @@
 //
 // SPDX-License-Identifier: AGPL-3.0-or-later
 
-const apiPatientUpdate      = require('./apiPatientUpdate.js');
-const apiHospitalUpdate     = require('./apiHospitalUpdate.js');
-const security              = require('./../security/security');
-const logger                = require('./../logs/logger');
+import fileRequest from './modules/file-request/api.js';
+import general from './modules/general/api.js';
+import logger from '../logs/logger.js';
+import questionnaires from '../questionnaires/questionnaireOpalDB.js';
+import security from '../security/security.js';
+import securityQuestions from './modules/patient/security-questions/api.js';
+import sqlInterface from './sqlInterface.js';
+import testResults from './modules/test-results/api.js';
 
-// New API handlers
-const fileRequest = require("./modules/file-request");
-const general = require('./modules/general');
-const securityQuestions = require("./modules/patient/security-questions");
-const testResults = require("./modules/test-results");
-
-const omitParametersFromLogs = apiHospitalUpdate.omitParametersFromLogs;
+const omitParametersFromLogs = sqlInterface.omitParametersFromLogs;
+const logPatientRequest = sqlInterface.addToActivityLog;
 
 /**
  * API HANDLERS FOR GENERAL REQUESTS
  * @type {Object}
  */
 const LEGACYAPI = {
-    'DeviceIdentifier': apiHospitalUpdate.updateDeviceIdentifier,
-    'Log': apiPatientUpdate.logActivity,
-    'LogPatientAction': apiPatientUpdate.logPatientAction,
-    'Login': apiPatientUpdate.login,
-    'Logout': apiPatientUpdate.logout,
-    'Refresh': apiPatientUpdate.refresh,
-    'AccountChange': apiHospitalUpdate.accountChange,
-    'Checkin': apiHospitalUpdate.checkIn,
-    'DocumentContent': apiPatientUpdate.getDocumentsContent,
-    'Feedback': apiHospitalUpdate.inputFeedback,
+    'AccountChange': sqlInterface.updateAccountField,
+    'Checkin': sqlInterface.checkIn,
+    'DeviceIdentifier': sqlInterface.updateDeviceIdentifier,
+    'DocumentContent': sqlInterface.getDocumentsContent,
+    'EducationalMaterialRating': sqlInterface.inputEducationalMaterialRating,
+    'EducationalPackageContents': sqlInterface.getPackageContents,
+    'Feedback': sqlInterface.inputFeedback,
+    'Log': sqlInterface.logActivity,
+    'Login': sqlInterface.login,
+    'Logout': sqlInterface.logout,
+    'LogPatientAction': sqlInterface.logPatientAction,
     // Deprecated API entry: 'NotificationsNew', since QSCCD-125
-    'NotificationsNew': apiHospitalUpdate.getNewNotifications,
-    'EducationalPackageContents': apiPatientUpdate.getPackageContents,
+    'NotificationsNew': sqlInterface.getNewNotifications,
+    // Deprecated API entry: 'PFPMembers', since QSCCD-417
+    'PFPMembers': sqlInterface.getPatientsForPatientsMembers,
+    'Questionnaire': questionnaires.getQuestionnaire,
     // Deprecated API entry: 'QuestionnaireInOpalDBFromSerNum', since QSCCD-1559
-    'QuestionnaireInOpalDBFromSerNum': apiPatientUpdate.getQuestionnaireInOpalDB,
+    'QuestionnaireInOpalDBFromSerNum': questionnaires.getQuestionnaireInOpalDB,
     // Deprecated API entry: 'QuestionnaireList' is now accessed via sqlInterface's requestMappings (since QSCCD-230)
-    'QuestionnaireList': apiPatientUpdate.getQuestionnaireList,
-    'Questionnaire': apiPatientUpdate.getQuestionnaire,
-    'QuestionnairePurpose': apiPatientUpdate.getQuestionnairePurpose,
-    'EducationalMaterialRating': apiHospitalUpdate.inputEducationalMaterialRating,
-    'QuestionnaireSaveAnswer': apiHospitalUpdate.questionnaireSaveAnswer,
-    'QuestionnaireUpdateStatus': apiHospitalUpdate.questionnaireUpdateStatus,
-    'Read': apiHospitalUpdate.updateReadStatus,
+    'QuestionnaireList': questionnaires.getQuestionnaireList,
+    'QuestionnairePurpose': questionnaires.getQuestionnairePurpose,
+    'QuestionnaireSaveAnswer': questionnaires.questionnaireSaveAnswer,
+    'QuestionnaireUpdateStatus': questionnaires.questionnaireUpdateStatus,
+    'Read': sqlInterface.updateReadStatus,
+    'Refresh': sqlInterface.refresh,
     // TODO: Modify/refactor 'Studies' endpoint so it takes into account 'TargetPatientID' parameter.
     // Since the studies module is in the 'Chart tab' and contains patient data, the endpoint should
     // identify the target patient of a request (chosen using the profile selector) and make sure that
     // the current user has permission to access the target patient's data.
     // One of the solutions is to move the endpoint to the 'requestMappings' in the 'sqlInterface'.
-    'Studies': apiPatientUpdate.getStudies,
-    'StudyQuestionnaires': apiPatientUpdate.getStudyQuestionnaires,
-    'StudyUpdateStatus': apiHospitalUpdate.studyUpdateStatus,
-    // Deprecated API entry: 'PFPMembers', since QSCCD-417
-    'PFPMembers': apiPatientUpdate.getPatientsForPatientsMembers
+    'Studies': sqlInterface.getStudies,
+    'StudyQuestionnaires': sqlInterface.getStudyQuestionnaires,
+    'StudyUpdateStatus': sqlInterface.studyUpdateStatus,
 };
 
 /**
  * API HANDLERS FOR SECURITY SPECIFIC REQUESTS
  * @type {{SecurityQuestion: *, SetNewPassword: *, VerifyAnswer: *}}
  */
-exports.securityAPI = {
+const securityAPI = {
     'SecurityQuestion': security.getSecurityQuestion,
     'SetNewPassword': security.resetPassword,
     'VerifyAnswer': security.verifySecurityAnswer,
@@ -82,7 +81,7 @@ const API = {
  * @param requestObject
  * @return {Promise}
  */
-exports.processRequest=function(requestObject) {
+function processRequest(requestObject) {
     const type = requestObject.type;
     const target = requestObject.meta.TargetPatientID;
     let parametersString = JSON.stringify(requestObject.params);
@@ -100,8 +99,10 @@ exports.processRequest=function(requestObject) {
         logger.log("error", `Invalid request type: ${type}`);
         return Promise.reject("Invalid request type");
     }
-};
+}
 
-exports.logPatientRequest = function(requestObject) {
-    return apiPatientUpdate.logPatientRequest(requestObject);
-};
+export default {
+    securityAPI,
+    processRequest,
+    logPatientRequest,
+}

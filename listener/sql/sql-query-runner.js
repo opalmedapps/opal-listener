@@ -2,10 +2,10 @@
 //
 // SPDX-License-Identifier: AGPL-3.0-or-later
 
-const fs = require('fs');
-const logger = require('../logs/logger');
-const mysql = require("mysql");
-const { ENVIRONMENT } = require("../../src/environment");
+import { ENVIRONMENT } from '../../src/environment.js';
+import fs from 'fs';
+import logger from '../logs/logger.js';
+import mysql from 'mysql';
 
 class SQLQueryRunner {
     #SQL_QUERY_POOL;
@@ -121,4 +121,5 @@ class SQLQueryRunner {
         });
     };
 }
-module.exports = SQLQueryRunner;
+
+export default SQLQueryRunner;

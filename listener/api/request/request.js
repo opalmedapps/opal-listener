@@ -2,9 +2,6 @@
 //
 // SPDX-License-Identifier: AGPL-3.0-or-later
 
-/**
- *
- */
 class OpalRequest {
 	constructor(reqObj, key, salt='', pass=''){
 		this.type = reqObj.Request;
@@ -30,8 +27,6 @@ class OpalRequest {
 	}
 }
 
-module.exports = OpalRequest;
-
 class RequestMeta {
 	constructor({DeviceId, UserID, TargetPatientID, Timestamp, UserEmail, AppVersion}) {
 		this.DeviceId = DeviceId;
@@ -42,3 +37,5 @@ class RequestMeta {
 		this.AppVersion = AppVersion;
 	}
 }
+
+export default OpalRequest;

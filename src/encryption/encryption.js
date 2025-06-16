@@ -3,13 +3,13 @@
 //
 // SPDX-License-Identifier: AGPL-3.0-or-later
 
-const cryptoJs = require('crypto-js');
-const mysql = require('mysql');
-const legacyOpalSqlRunner = require('../../listener/sql/opal-sql-query-runner');
-const legacyLogger = require('../../listener/logs/logger');
-const legacyUtility = require('../../listener/utility/utility');
-const PromiseUtility = require('../utility/promise');
-const { RequestContext } = require('../core/request-context');
+import cryptoJs from 'crypto-js';
+import legacyLogger from '../../listener/logs/logger.js';
+import OpalSQLQueryRunner from '../../listener/sql/opal-sql-query-runner.js';
+import legacyUtility from '../../listener/utility/utility.js';
+import mysql from 'mysql';
+import PromiseUtility from '../utility/promise.js';
+import RequestContext from '../core/request-context.js';
 
 class EncryptionUtilities {
     /**
@@ -161,7 +161,7 @@ class EncryptionUtilities {
         `, [userId, deviceId]);
 
         try {
-            const response = await legacyOpalSqlRunner.OpalSQLQueryRunner.run(query);
+            const response = await OpalSQLQueryRunner.run(query);
             return response[0].SecurityAnswer;
         }
         catch (error) {
@@ -170,4 +170,4 @@ class EncryptionUtilities {
     }
 }
 
-module.exports = EncryptionUtilities;
+export default EncryptionUtilities;

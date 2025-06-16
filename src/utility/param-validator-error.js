@@ -7,7 +7,7 @@
  * @file Error class used by param-validator; wrapper for errors returned by express-validator.
  */
 
-const { Result } = require('express-validator');
+import { Result } from 'express-validator';
 
 class ValidationError extends Error {
     /**
@@ -20,4 +20,4 @@ class ValidationError extends Error {
     }
 }
 
-exports.ValidationError = ValidationError;
+export default ValidationError;

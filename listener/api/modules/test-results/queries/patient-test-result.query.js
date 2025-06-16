@@ -2,10 +2,10 @@
 //
 // SPDX-License-Identifier: AGPL-3.0-or-later
 
-const config = require('../../../../config-adaptor');
-const moment = require("moment");
-const mysql = require("mysql");
-const utility = require("./../../../../utility/utility.js");
+import config from '../../../../config-adaptor.js';
+import moment from 'moment';
+import mysql from 'mysql';
+import utility from '../../../../utility/utility.js';
 
 /**
  *  Class encapsulates all the queries pertaining the patient test results.
@@ -249,4 +249,4 @@ class PatientTestResultQuery {
 	}
 }
 
-module.exports = {PatientTestResultQuery};
+export default PatientTestResultQuery;

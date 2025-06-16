@@ -7,18 +7,19 @@
  * @file Entry point used to launch the listener.
  */
 
-require('dotenv').config();
+import 'dotenv/config';
 
-const {
-    ENVIRONMENT, ENVIRONMENT_SOURCE_SYSTEM_CHECKIN, ENVIRONMENT_ORMS, FIREBASE_CONFIG, validateEnvironment,
-} = require('./environment');
-const { Firebase } = require('./firebase/firebase');
-const legacyServer = require('../listener/legacy-server');
-const legacyRegistrationServer = require('../legacy-registration/legacy-server');
-const legacyLogger = require('../listener/logs/logger');
-const { RequestHandler } = require('./core/request-handler');
-const { REQUEST_TYPE } = require('./const');
-const { Version } = require('./utility/version');
+import {
+    ENVIRONMENT, ENVIRONMENT_ORMS, ENVIRONMENT_SOURCE_SYSTEM_CHECKIN, FIREBASE_CONFIG, validateEnvironment,
+} from './environment.js';
+
+import Firebase from './firebase/firebase.js';
+import legacyLogger from '../listener/logs/logger.js';
+import legacyRegistrationServer from '../legacy-registration/legacy-server.js';
+import legacyServer from '../listener/legacy-server.js';
+import { REQUEST_TYPE } from './const.js';
+import RequestHandler from './core/request-handler.js';
+import Version from './utility/version.js';
 
 // Raise AssertionError if environment variables are not set
 validateEnvironment(ENVIRONMENT);

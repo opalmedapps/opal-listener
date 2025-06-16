@@ -7,8 +7,8 @@
  * @file Manages the connection to a Firebase realtime database.
  */
 
-const admin = require('firebase-admin');
-const { param, Validator, ValidationChain } = require('../utility/param-validator');
+import { param, ValidationChain, Validator } from '../utility/param-validator.js';
+import admin from 'firebase-admin';
 
 class Firebase {
     /**
@@ -96,4 +96,4 @@ class Firebase {
     }
 }
 
-exports.Firebase = Firebase;
+export default Firebase;

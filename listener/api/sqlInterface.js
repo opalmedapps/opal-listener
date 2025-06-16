@@ -2,22 +2,22 @@
 //
 // SPDX-License-Identifier: AGPL-3.0-or-later
 
-const axios             = require('axios');
-const filesystem        = require('fs');
-const Q                 = require('q');
-const queries           = require('./../sql/queries.js');
-const config            = require('./../config-adaptor');
-const Mail              = require('./../mailer/mailer.js');
-const utility           = require('./../utility/utility');
-const logger            = require('./../logs/logger');
-const {OpalSQLQueryRunner} = require("../sql/opal-sql-query-runner");
-const testResults       = require("./modules/test-results");
-const questionnaires    = require("./modules/questionnaires");
-const { Patient } = require('./modules/patient/patient');
-const eduMaterialConfig = require('./../educational-material/eduMaterialConfig.json');
-const studiesConfig     = require('./../studies/studiesConfig.json');
-const SecurityDjango = require('./../security/securityDjango');
-const { Version } = require('../../src/utility/version');
+import axios from 'axios';
+import config from '../config-adaptor.js';
+import eduMaterialConfig from '../educational-material/eduMaterialConfig.json' with { type: "json" };
+import filesystem from 'fs';
+import logger from '../logs/logger.js';
+import Mail from '../mailer/mailer.js';
+import OpalSQLQueryRunner from '../sql/opal-sql-query-runner.js';
+import Patient from './modules/patient/patient.js';
+import Q from 'q';
+import queries from '../sql/queries.js';
+import questionnaires from './modules/questionnaires/api.js';
+import SecurityDjango from '../security/securityDjango.js';
+import studiesConfig from '../studies/studiesConfig.json' with { type: "json" };
+import testResults from './modules/test-results/api.js';
+import utility from '../utility/utility.js';
+import Version from '../../src/utility/version.js';
 
 /******************************
  * MAPPINGS
@@ -165,8 +165,6 @@ const omitParametersFromLogs = {
     UpdateSecurityQuestionAnswer: () => true,
     VerifyAnswer: () => true,
 }
-exports.omitParametersFromLogs = omitParametersFromLogs;
-
 
 //////////////////////////////////////////////////////////////////
 
@@ -178,9 +176,9 @@ exports.omitParametersFromLogs = omitParametersFromLogs;
  * getSqlApiMapping
  * @return {Object}
  */
-exports.getSqlApiMappings = function() {
+function getSqlApiMappings() {
     return requestMappings;
-};
+}
 
 /**
  * runSqlQuery function runs query, its kept due to the many references
@@ -190,7 +188,7 @@ exports.getSqlApiMappings = function() {
  * @param processRawFunction
  * @return {Promise}
  */
-exports.runSqlQuery = OpalSQLQueryRunner.run;
+const runSqlQuery = OpalSQLQueryRunner.run;
 
 /**
  * @desc Fetches and returns data for the given patient in an array of categories from requestMappings.
@@ -203,7 +201,7 @@ exports.runSqlQuery = OpalSQLQueryRunner.run;
  * @param {string} [parameters.purpose] Optional parameter that is used to filter questionnaires and educational materials by purpose. By default is set to "clinical" to support the old versions of the app.
  * @return {Promise}
  */
-exports.getPatientTableFields = async function(userId, patientSerNum, arrayTables, parameters) {
+async function getPatientTableFields(userId, patientSerNum, arrayTables, parameters) {
     // Validate the arrayTables
     let invalidCategory = arrayTables.find(e => !requestMappings.hasOwnProperty(e));
     if (invalidCategory) throw {Response: 'error', Reason: `Incorrect refresh parameter: ${invalidCategory}`};
@@ -216,7 +214,7 @@ exports.getPatientTableFields = async function(userId, patientSerNum, arrayTable
         Data: responseMapping,
         Response: 'success',
     };
-};
+}
 
 /**
  * @desc Processes a request for data in one of the categories of requestMappings.
@@ -251,7 +249,7 @@ async function processSelectRequest(userId, category, patientSerNum, parameters)
     else if (mapping.hasOwnProperty('sql')) {
         let paramArray = mapping.needUserId ? [`"${userId}"`, patientSerNum] : [patientSerNum];
         paramArray = utility.addSeveralToArray(paramArray, date, mapping.numberOfLastUpdated);
-        return await exports.runSqlQuery(mapping.sql, paramArray, mapping.processFunction);
+        return await runSqlQuery(mapping.sql, paramArray, mapping.processFunction);
     }
     else throw new Error(`requestMapping for '${category}' does not have the necessary properties to complete the request`);
 }
@@ -259,34 +257,31 @@ async function processSelectRequest(userId, category, patientSerNum, parameters)
 /**
  * updateReadStatus
  * @desc Update read status for a table
- * @param userId
- * @param parameters
  * @return {Promise}
  */
-exports.updateReadStatus = function(userId, parameters)
-{
+function updateReadStatus(requestObject) {
     let r = Q.defer();
 
-    let table, serNum;
+    let parameters = requestObject.Parameters;
 
     if (
         parameters
         && parameters.Field
         && parameters.Id
-        && parameters.TargetPatientID
+        && requestObject.TargetPatientID
         && requestMappings.hasOwnProperty(parameters.Field)
     ) {
-        ({table, serNum, notificationType} = requestMappings[parameters.Field]);
+        let {table, serNum, notificationType} = requestMappings[parameters.Field];
 
-        exports.runSqlQuery(
+        runSqlQuery(
             queries.updateReadStatus(),
-            [table, userId, table, serNum, parameters.Id],
+            [table, requestObject.UserID, table, serNum, parameters.Id],
         ).then(async () => {
             if (notificationType) {
                 logger.log('verbose', `Implicitly marking ${notificationType} notification as read.`);
-                await exports.runSqlQuery(
+                await runSqlQuery(
                     queries.implicitlyReadNotification(),
-                    [userId, `"${userId}"`, parameters.Id, parameters.TargetPatientID, notificationType],
+                    [userId, `"${userId}"`, parameters.Id, requestObject.TargetPatientID, notificationType],
                 );
             }
             r.resolve({Response:'success'});
@@ -298,7 +293,7 @@ exports.updateReadStatus = function(userId, parameters)
         r.reject({Response: 'error', Reason: 'Invalid read status field'});
     }
     return r.promise;
-};
+}
 
 /**
  * logPatientAction
@@ -316,8 +311,7 @@ exports.updateReadStatus = function(userId, parameters)
  *                                            as reported by the app.
  * @returns {*}
  */
-exports.logPatientAction = function(requestObject){
-
+function logPatientAction(requestObject) {
     let r = Q.defer();
 
     // Check that the correct parameters are given.
@@ -344,7 +338,7 @@ exports.logPatientAction = function(requestObject){
 
                 // Log the patient action in the database.
                 let queryParameters = [patientSerNum, Action, RefTable, RefTableSerNum, ActionTime];
-                exports.runSqlQuery(queries.logPatientAction(),queryParameters).then(()=>{
+                runSqlQuery(queries.logPatientAction(),queryParameters).then(()=>{
 
                     // Done logging the action successfully.
                     r.resolve({Response:'success'});
@@ -367,17 +361,17 @@ exports.logPatientAction = function(requestObject){
         });
     }
     return r.promise;
-};
+}
 
 /**
  * @name getStudies
  * @desc Gets patient studies based on UserID
  * @param {object} requestObject
- * @returns {promise}
+ * @returns {Promise}
  */
-exports.getStudies = async function(requestObject) {
+async function getStudies(requestObject) {
     try {
-        let rows = await exports.runSqlQuery(queries.patientStudyTableFields(), [requestObject.UserID]);
+        let rows = await runSqlQuery(queries.patientStudyTableFields(), [requestObject.UserID]);
 
         rows.forEach(
             (row, id, arr) => arr[id].consentStatus = studiesConfig.STUDY_CONSENT_STATUS_MAP[arr[id].consentStatus]
@@ -388,17 +382,17 @@ exports.getStudies = async function(requestObject) {
         return {Response: 'success', Data: data};
     }
     catch (error) { throw {Response: 'error', Reason: error}; }
-};
+}
 
 /**
  * @name getStudyQuestionnaires
  * @desc Gets study questionnaires based on studyID
  * @param {object} requestObject
- * @returns {promise}
+ * @returns {Promise}
  */
-exports.getStudyQuestionnaires = async function(requestObject) {
+async function getStudyQuestionnaires(requestObject) {
     try {
-        let rows = await exports.runSqlQuery(
+        let rows = await runSqlQuery(
             queries.getStudyQuestionnairesQuery(),
             [requestObject.Parameters.studyID]
         );
@@ -406,8 +400,7 @@ exports.getStudyQuestionnaires = async function(requestObject) {
         return {Response: 'success', Data: rows};
     }
     catch (error) { throw {Response: 'error', Reason: error}; }
-};
-
+}
 
 /**
  * @name studyUpdateStatus
@@ -415,7 +408,7 @@ exports.getStudyQuestionnaires = async function(requestObject) {
  * @param {object} requestObject
  * @return {Promise}
  */
-exports.studyUpdateStatus = async function(requestObject) {
+async function studyUpdateStatus(requestObject) {
     try {
         let parameters = requestObject.Parameters;
         if (parameters && parameters.questionnaire_id && parameters.status) {
@@ -426,7 +419,7 @@ exports.studyUpdateStatus = async function(requestObject) {
                 key => studiesConfig.STUDY_CONSENT_STATUS_MAP[key] === parameters.status
             );
 
-            await exports.runSqlQuery(
+            await runSqlQuery(
                 queries.updateConsentStatus(),
                 [statusNumber, parameters.questionnaire_id, requestObject.UserID]
             );
@@ -437,7 +430,7 @@ exports.studyUpdateStatus = async function(requestObject) {
         }
     }
     catch (error) { throw {Response: 'error', Reason: error}; }
-};
+}
 
 /**
  * CHECKIN FUNCTIONALITY
@@ -455,7 +448,7 @@ exports.studyUpdateStatus = async function(requestObject) {
  * @param requestObject
  * @return {Promise}
  */
-exports.checkIn = async function (requestObject) {
+async function checkIn(requestObject) {
     try {
         // If there's a TargetPatientID, use it, otherwise get data for self
         let patientSerNum = requestObject.TargetPatientID ? requestObject.TargetPatientID : await getSelfPatientSerNum(requestObject.UserID);
@@ -550,7 +543,7 @@ exports.checkIn = async function (requestObject) {
         });
         throw {Response: 'error', Reason: error};
     }
-};
+}
 
 /**
  * @description Calls the system to check the patient in
@@ -605,7 +598,7 @@ async function checkInToSystem(mrn, mrnSite, url, sourceSystemSerNum, sourceSyst
  * @returns {Promise<*>} Resolves with the appointment source details, or rejects with an error if not found.
 */
 function getAppointmentDetailsForPatient(patientSerNum) {
-    return exports.runSqlQuery(queries.getAppointmentDetailsForPatient(), [patientSerNum]);
+    return runSqlQuery(queries.getAppointmentDetailsForPatient(), [patientSerNum]);
 }
 
 
@@ -617,7 +610,7 @@ function getAppointmentDetailsForPatient(patientSerNum) {
  */
 function getCheckedInAppointments(patientSerNum){
     return new Promise((resolve, reject) => {
-        exports.runSqlQuery(queries.getTodaysCheckedInAppointments(), [patientSerNum])
+        runSqlQuery(queries.getTodaysCheckedInAppointments(), [patientSerNum])
             .then(rows => resolve({Response:'success', Data: rows}))
             .catch(err => reject({Response: 'error', Reason: err}));
     })
@@ -628,13 +621,78 @@ function getCheckedInAppointments(patientSerNum){
  */
 
 /**
+ * @description 1.12.2 and prior: Queries and returns all patient data to be available at login.
+ *             After 1.12.2: Doesn't do anything anymore, but was kept to record 'Login' in PatientActivityLog.
+ * @param requestObject The request object.
+ * @returns {Promise<*|{Response: string}>} Resolves to login data for versions <= 1.12.2,
+ *                                          or to a generic acknowledgement message otherwise.
+ */
+async function login(requestObject) {
+    if (Version.versionLessOrEqual(requestObject.AppVersion, Version.version_1_12_2)) {
+        let patientSerNum = await getSelfPatientSerNum(requestObject.UserID);
+        let loginData = await getPatientTableFields(requestObject.UserID, patientSerNum, requestObject.Parameters.Fields, requestObject.Parameters);
+
+        // Filter out notification types that break app version 1.12.2 (most importantly 'NewLabResult')
+        let appBreakingNotifications = ['NewLabResult', 'NewMessage', 'Other'];
+        if (Array.isArray(loginData?.Data?.Notifications)) {
+            loginData.Data.Notifications = loginData.Data.Notifications.filter(
+                notif => !appBreakingNotifications.includes(notif.NotificationType)
+            );
+        }
+
+        return loginData;
+    }
+    else {
+        // The only purpose of the login request is to record a timestamp in PatientActivityLog (done automatically in logPatientRequest)
+        return Promise.resolve({ Response: "Login recorded" });
+    }
+}
+
+/**
+ * @description For now, the only purpose of the logout request is to record a timestamp in PatientActivityLog (done separately in logPatientRequest).
+ * @param requestObject The request object.
+ * @returns {Promise<{Response: string}>} Resolves with a generic acknowledgement message.
+ */
+function logout(requestObject) {
+    return Promise.resolve({Response: "Successful logout"});
+}
+
+/**
+ * @desc Retrieves patient data in a given set of categories. This function is called 'refresh' because it can be used
+ *       to fetch only fresh data after a certain timestamp.
+ * @param requestObject The request object.
+ * @param {string} requestObject.UserID The Firebase user ID that will be used to get data if no PatientSerNum is provided.
+ * @param {string[]} requestObject.Parameters.Fields The list of data categories from which to fetch data.
+ * @param [requestObject.Parameters.Timestamp] Optional date/time; if provided, only items with 'LastUpdated' after this time are returned.
+ * @returns {Promise<*>}
+ */
+async function refresh(requestObject) {
+    let UserId = requestObject.UserID;
+    let parameters = requestObject.Parameters;
+    let fields = parameters.Fields;
+    if (!parameters.purpose) parameters.purpose = 'clinical'; // Default to clinical for legacy requests by app version 1.12.2
+
+    // If there's a TargetPatientID, use it, otherwise get data for self
+    let patientSerNum = requestObject.TargetPatientID ? requestObject.TargetPatientID : await getSelfPatientSerNum(UserId);
+    logger.log('verbose', `Identified request target as PatientSerNum = ${patientSerNum}`);
+
+    if (!fields) throw {Response:'error', Reason:"Undefined 'Fields' in Refresh request"};
+    if (!Array.isArray(fields)) fields = [fields];
+
+    let rows = await getPatientTableFields(UserId, patientSerNum, fields, parameters);
+    rows.Data = utility.resolveEmptyResponse(rows.Data);
+
+    return rows;
+}
+
+/**
  * @description Retrieves a patient's MRNs (with their corresponding sites) based on their PatientSerNum.
  * @date 2021-02-26
  * @param patientSerNum
  * @returns {Promise<*>} Rows with the patient's MRN information (multiple MRNs).
  */
 async function getMRNs(patientSerNum) {
-    let rows = await exports.runSqlQuery(queries.getMRNs(), [patientSerNum]);
+    let rows = await runSqlQuery(queries.getMRNs(), [patientSerNum]);
 
     if (rows.length === 0) throw "No MRN found for PatientSerNum "+patientSerNum+" in Patient_Hospital_Identifier";
     else return rows;
@@ -647,7 +705,7 @@ async function getMRNs(patientSerNum) {
  * @param appointmentSerNumArray
  */
 async function setCheckInUsername(requestObject, appointmentSerNumArray) {
-    await exports.runSqlQuery(queries.setCheckInUsername(), [requestObject.UserID, [appointmentSerNumArray]]);
+    await runSqlQuery(queries.setCheckInUsername(), [requestObject.UserID, [appointmentSerNumArray]]);
 }
 
 /**
@@ -656,20 +714,20 @@ async function setCheckInUsername(requestObject, appointmentSerNumArray) {
  * @param requestObject
  * @return {Promise}
  */
-exports.getDocumentsContent = async function(requestObject) {
+async function getDocumentsContent(requestObject) {
     let documentList = requestObject.Parameters;
     let patientSerNum = requestObject.TargetPatientID ? requestObject.TargetPatientID : await getSelfPatientSerNum(requestObject.UserID);
     logger.log('verbose', `Fetching document contents for DocumentSerNums ${JSON.stringify(documentList)}`);
 
     if (!Array.isArray(documentList)) throw 'Request parameter is not an array';
-    let rows = await exports.runSqlQuery(queries.getDocumentsContentQuery(), [[documentList], patientSerNum]);
+    let rows = await runSqlQuery(queries.getDocumentsContentQuery(), [[documentList], patientSerNum]);
     if (rows.length === 0) throw "Document not found";
     let documents = await LoadDocuments(rows);
     return {
         Response: 'success',
         Data: documents.length === 1 ? documents[0] : documents,
     };
-};
+}
 
 /**
  * @description Updates a user account field to a new value.
@@ -680,7 +738,7 @@ exports.getDocumentsContent = async function(requestObject) {
  * @param {string} requestObject.Parameters.NewValue The field's new value.
  * @returns {Promise<{Response: string}>} Resolves if the field was successfully updated, or rejects with an error.
  */
-exports.updateAccountField = async requestObject => {
+async function updateAccountField(requestObject) {
     // Validate input
     const email = requestObject.UserEmail;
     const uid = requestObject.UserID;
@@ -697,22 +755,22 @@ exports.updateAccountField = async requestObject => {
         // Hash the password before storing it
         const hashedPassword = utility.hash(newValue);
 
-        await exports.runSqlQuery(queries.setNewPassword(), [hashedPassword, uid]);
+        await runSqlQuery(queries.setNewPassword(), [hashedPassword, uid]);
         delete requestObject.Parameters.NewValue;
     }
     else if (field === 'Language') {
-        await exports.runSqlQuery(queries.languageChange(), [newValue, patient.PatientSerNum]);
+        await runSqlQuery(queries.languageChange(), [newValue, patient.PatientSerNum]);
     }
     else throw `Invalid 'FieldToChange' parameter: ${field}`;
     return { Response: 'success' };
-};
+}
 
 /**
  * @name inputFeedback
  * @description Manages feedback content for the app, sends feedback to pfp committee if directed there.
  * @param requestObject
  */
-exports.inputFeedback = function(requestObject) {
+function inputFeedback(requestObject) {
     let r = Q.defer();
     let email = requestObject.UserEmail;
     if(!email) r.reject({Response:'error',Reason:`Invalid parameter email`});
@@ -724,7 +782,7 @@ exports.inputFeedback = function(requestObject) {
 
         if((!type||!feedback)) r.reject({Response:'error',Reason:`Invalid parameter type`});
         feedback = feedback.replace(/[\u0100-\uffff]/g, match => `[u+${match.codePointAt(0).toString(16)}]`);
-        exports.runSqlQuery(queries.inputFeedback(),[patient.PatientSerNum, feedback, appRating])
+        runSqlQuery(queries.inputFeedback(),[patient.PatientSerNum, feedback, appRating])
             .then(()=>{
 	            let replyTo = null;
 	            let email;
@@ -750,17 +808,16 @@ exports.inputFeedback = function(requestObject) {
             });
     });
     return r.promise;
-};
+}
 
 /**
  * @module sqlInterface
  * @name updateDeviceIdentifiers
  * @description Updates the device identifier for a particular user and a particular device.
  * @input {object} Object containing the device identifiers
- * @returns {promise} Promise with success or failure.
+ * @returns {Promise} Promise with success or failure.
  */
-exports.updateDeviceIdentifier = function(requestObject, parameters) {
-
+function updateDeviceIdentifier(requestObject, parameters) {
     let r = Q.defer();
 
     logger.log('debug', `in update device id with : ${JSON.stringify(requestObject)}`);
@@ -783,7 +840,7 @@ exports.updateDeviceIdentifier = function(requestObject, parameters) {
 
     let email = requestObject.UserEmail;
     getPatientFromEmail(email).then(() => {
-        exports.runSqlQuery(queries.updateDeviceIdentifiers(),[requestObject.UserID, requestObject.DeviceId, identifiers.registrationId, deviceType, appVersion, identifiers.registrationId])
+        runSqlQuery(queries.updateDeviceIdentifiers(),[requestObject.UserID, requestObject.DeviceId, identifiers.registrationId, deviceType, appVersion, identifiers.registrationId])
             .then(() => {
                 logger.log('debug', 'successfully updated device identifiers');
                 r.resolve({Response:'success'});
@@ -798,15 +855,25 @@ exports.updateDeviceIdentifier = function(requestObject, parameters) {
         r.reject({Response:'error', Reason: `${errorMessage}: ${error}`});
     });
     return r.promise;
-};
+}
+
+function logActivity(requestObject) {
+    logger.log('verbose', 'User Activity', {
+        deviceID: requestObject.DeviceId,
+        userID: requestObject.UserID,
+        request: requestObject.Request,
+        activity: requestObject.Parameters.Activity,
+        activityDetails: requestObject.Parameters.ActivityDetails,
+    });
+    return Promise.resolve({Response:'success'});
+}
 
 /**
  * @name addToActivityLog
  * @desc Adding action to activity log
  * @param {OpalRequest}requestObject
  */
-exports.addToActivityLog=function(requestObject)
-{
+function addToActivityLog(requestObject) {
     let r = Q.defer();
 
     let {Request, UserID, DeviceId, AppVersion, TargetPatientID, Parameters} = requestObject;
@@ -822,7 +889,7 @@ exports.addToActivityLog=function(requestObject)
 
     // Ignore LogPatientAction to avoid double-logging --> Refer to table PatientActionLog
     if (Request !== "LogPatientAction") {
-        exports.runSqlQuery(queries.logActivity(),[Request, Parameters, TargetPatientID, UserID, DeviceId, AppVersion])
+        runSqlQuery(queries.logActivity(),[Request, Parameters, TargetPatientID, UserID, DeviceId, AppVersion])
         .then(()=>{
             logger.log('verbose', "Success logging request of type: "+Request);
             r.resolve({Response:'success'});
@@ -835,7 +902,7 @@ exports.addToActivityLog=function(requestObject)
         r.resolve({Response:'success', Reason:'Skip logging; already logged'});
     }
     return r.promise;
-};
+}
 
 /**
  * getEncryption
@@ -843,10 +910,9 @@ exports.addToActivityLog=function(requestObject)
  * @param requestObject
  * @return {Promise}
  */
-exports.getEncryption=function(requestObject)
-{
-    return exports.runSqlQuery(queries.userEncryption(),[requestObject.UserID, requestObject.DeviceId]);
-};
+function getEncryption(requestObject) {
+    return runSqlQuery(queries.userEncryption(),[requestObject.UserID, requestObject.DeviceId]);
+}
 
 /**
  * getPackageContents
@@ -864,7 +930,7 @@ exports.getEncryption=function(requestObject)
  *                                                                  the contents.
  * @returns {*}
  */
-exports.getPackageContents = function(requestObject){
+function getPackageContents(requestObject) {
     let r = Q.defer();
     // Check that the correct parameters are given.
     let {EducationalMaterialControlSerNum} = requestObject.Parameters;
@@ -874,7 +940,7 @@ exports.getPackageContents = function(requestObject){
     else{
         // If the correct parameters were given, get the package contents.
         let queryParameters = [EducationalMaterialControlSerNum];
-        exports.runSqlQuery(queries.getPackageContents(),queryParameters).then((rows)=>{
+        runSqlQuery(queries.getPackageContents(),queryParameters).then((rows)=>{
 
             // Done getting the package contents.
             // Now, the contents must be processed like any other educational material to attach the tables of contents.
@@ -893,25 +959,25 @@ exports.getPackageContents = function(requestObject){
         });
     }
     return r.promise;
-};
+}
 
 /**
  * @name increaseSecurityAnswerAttempt
  * @description Increase security answer attempt by one
  * @param requestObject
  */
-exports.increaseSecurityAnswerAttempt = function(requestObject) {
-    return exports.runSqlQuery(queries.increaseSecurityAnswerAttempt(),[requestObject.UserID, requestObject.DeviceId]);
-};
+function increaseSecurityAnswerAttempt(requestObject) {
+    return runSqlQuery(queries.increaseSecurityAnswerAttempt(),[requestObject.UserID, requestObject.DeviceId]);
+}
 
 /**
  * @name resetSecurityAnswerAttempt
  * @description Sets the security answer attempt to zero
  * @param requestObject
  */
-exports.resetSecurityAnswerAttempt = function(requestObject) {
-    return exports.runSqlQuery(queries.resetSecurityAnswerAttempt(),[requestObject.UserID, requestObject.DeviceId]);
-};
+function resetSecurityAnswerAttempt(requestObject) {
+    return runSqlQuery(queries.resetSecurityAnswerAttempt(),[requestObject.UserID, requestObject.DeviceId]);
+}
 
 /**
  * @name setTimeoutSecurityAnswer
@@ -919,18 +985,18 @@ exports.resetSecurityAnswerAttempt = function(requestObject) {
  * @param requestObject
  * @param timestamp
  */
-exports.setTimeoutSecurityAnswer = function(requestObject, timestamp) {
-    return exports.runSqlQuery(queries.setTimeoutSecurityAnswer(),[new Date(timestamp), requestObject.UserID, requestObject.DeviceId]);
-};
+function setTimeoutSecurityAnswer(requestObject, timestamp) {
+    return runSqlQuery(queries.setTimeoutSecurityAnswer(),[new Date(timestamp), requestObject.UserID, requestObject.DeviceId]);
+}
 
 /**
  * @desc Gets and returns User and Patient fields used in security requests, such as password resets and verifying security answers.
  * @param {object} requestObject A security request object.
  * @return {Promise} Resolves to rows containing the user and patient's security information.
  */
-exports.getUserPatientSecurityInfo = requestObject => {
-    return exports.runSqlQuery(queries.getUserPatientSecurityInfo(),[requestObject.UserID, requestObject.DeviceId]);
-};
+function getUserPatientSecurityInfo(requestObject) {
+    return runSqlQuery(queries.getUserPatientSecurityInfo(),[requestObject.UserID, requestObject.DeviceId]);
+}
 
 /**
  * setNewPassword
@@ -939,9 +1005,9 @@ exports.getUserPatientSecurityInfo = requestObject => {
  * @param patientSerNum
  * @return {Promise}
  */
-exports.setNewPassword = function(password, username) {
-    return exports.runSqlQuery(queries.setNewPassword(),[password, username]);
-};
+function setNewPassword(password, username) {
+    return runSqlQuery(queries.setNewPassword(),[password, username]);
+}
 
 /**
  *@module sqlInterface
@@ -952,15 +1018,14 @@ exports.setNewPassword = function(password, username) {
  *@parameter {string} edumaterialSerNum serNum for educational material
  *@parameter {string} ratingValue value from 1 to 5 for educational material
  */
-exports.inputEducationalMaterialRating = function(requestObject)
-{
+function inputEducationalMaterialRating(requestObject) {
     let r = Q.defer();
     let {EducationalMaterialControlSerNum, PatientSerNum, RatingValue} = requestObject.Parameters;
     if(!EducationalMaterialControlSerNum||!PatientSerNum||!RatingValue) {
         r.reject({Response:'error',Reason:'Invalid Parameters'});
     }
 
-    exports.runSqlQuery(queries.insertEducationalMaterialRatingQuery(),
+    runSqlQuery(queries.insertEducationalMaterialRatingQuery(),
         [EducationalMaterialControlSerNum, PatientSerNum, requestObject.UserID, RatingValue])
         .then(()=>{
             r.resolve({Response:'success'});
@@ -968,7 +1033,7 @@ exports.inputEducationalMaterialRating = function(requestObject)
             r.reject({Response:'error',Reason:err});
         });
     return r.promise;
-};
+}
 
 /**
  * @description Gets a user's self PatientSerNum based on their email.
@@ -976,7 +1041,7 @@ exports.inputEducationalMaterialRating = function(requestObject)
  * @return {Promise<{PatientSerNum: number}>} Resolves to an object containing the user's PatientSerNum.
  */
 async function getPatientFromEmail(email) {
-    let rows = await exports.runSqlQuery(queries.getPatientFromEmail(), [email]);
+    let rows = await runSqlQuery(queries.getPatientFromEmail(), [email]);
     if (rows.length === 0) throw {
         Response: 'error',
         Reason: `Patient not found using email: ${email}`,
@@ -1092,7 +1157,7 @@ function getEducationalMaterialTableOfContents(rows)
     {
         var array=[];
         for (var i = 0; i < rows.length; i++) {
-            array.push(exports.runSqlQuery(queries.patientEducationalMaterialContents(), [rows[i].EducationalMaterialControlSerNum]));
+            array.push(runSqlQuery(queries.patientEducationalMaterialContents(), [rows[i].EducationalMaterialControlSerNum]));
         }
         Q.all(array).then(function(results)
         {
@@ -1152,7 +1217,7 @@ function getEducationTableOfContents(rows)
         }
     }
     for (let l = 0; l < rows.length; l++) {
-        promises.push(exports.runSqlQuery(queries.patientEducationalMaterialContents(),[rows[l].EducationalMaterialControlSerNum] ));
+        promises.push(runSqlQuery(queries.patientEducationalMaterialContents(),[rows[l].EducationalMaterialControlSerNum] ));
     }
     Q.all(promises).then(function(results) {
             rows.forEach(row => {
@@ -1179,12 +1244,12 @@ var LoadAttachments = function (rows ) {
 
 };
 
-exports.getSecurityQuestion = async function (requestObject) {
+async function getSecurityQuestion(requestObject) {
     try {
         let apiResponse = await SecurityDjango.getRandomSecurityQuestionAnswer(requestObject.UserID);
         if (apiResponse.question === '' || apiResponse.answer === '') throw "API call returned a blank question or answer";
 
-        await exports.runSqlQuery(queries.cacheSecurityAnswerFromDjango(), [apiResponse.answer, requestObject.DeviceId, requestObject.UserID]);
+        await runSqlQuery(queries.cacheSecurityAnswerFromDjango(), [apiResponse.answer, requestObject.DeviceId, requestObject.UserID]);
 
         // Security question format read by the app has changed after 1.12.2
         if (Version.versionLessOrEqual(requestObject.AppVersion, Version.version_1_12_2)) return {
@@ -1207,13 +1272,23 @@ exports.getSecurityQuestion = async function (requestObject) {
         logger.log('error', errMsg, error);
         throw new Error(errMsg);
     }
-};
+}
 
-exports.setTrusted = function(requestObject)
-{
+function setTrusted(requestObject) {
     let trusted = requestObject?.Parameters?.Trusted === "true" ? 1 : 0;
-    return exports.runSqlQuery(queries.setTrusted(),[trusted, requestObject.UserID, requestObject.DeviceId]);
-};
+    return runSqlQuery(queries.setTrusted(),[trusted, requestObject.UserID, requestObject.DeviceId]);
+}
+
+/**
+ * @deprecated
+ */
+function getPatientsForPatientsMembers() {
+    return new Promise((resolve, reject)=>{
+        runSqlQuery(queries.getPatientForPatientMembers(), []).then(members => {
+            resolve({ Data: members });
+        }).catch(err => reject({ Response:error, Reason:err }));
+    });
+}
 
 /**
  * NOTIFICATIONS FUNCTIONALITY
@@ -1226,12 +1301,12 @@ exports.setTrusted = function(requestObject)
  * @param {object} requestObject the request
  * @returns {Promise} Returns a promise that contains the notification data
  */
-exports.getNewNotifications = function(requestObject){
+function getNewNotifications(requestObject) {
     let r = Q.defer();
 
     let lastUpdated = new Date(Number(requestObject.Parameters.LastUpdated));
 
-    exports.runSqlQuery(queries.getNewNotifications(), [requestObject.UserID, requestObject.UserID, lastUpdated, lastUpdated])
+    runSqlQuery(queries.getNewNotifications(), [requestObject.UserID, requestObject.UserID, lastUpdated, lastUpdated])
         .then(rows => {
             if(rows.length > 0){
                 assocNotificationsWithItems(rows, requestObject)
@@ -1244,7 +1319,7 @@ exports.getNewNotifications = function(requestObject){
         });
 
     return r.promise
-};
+}
 
 /**
  * Takes in a list of notifications and the original requestObject and returns a list of tuples that contains the notifications
@@ -1283,7 +1358,7 @@ function assocNotificationsWithItems(notifications, requestObject){
 
         if(uniqueFields.length > 0) {
             // Refresh all the new data (should only be data that needs to be associated with notification)
-            refresh(uniqueFields, requestObject)
+            refreshData(uniqueFields, requestObject)
                 .then(results => {
                     if(!!results.Data){
 
@@ -1338,12 +1413,12 @@ function mapRefreshedDataToNotifications(results, notifications) {
 /**
  * @deprecated Since QSCCD-125
  */
-async function refresh (fields, requestObject) {
+async function refreshData(fields, requestObject) {
     let today = new Date();
     let timestamp = today.setHours(0,0,0,0);
     let patientSerNum = await getSelfPatientSerNum(requestObject.UserID);
 
-    let rows = await exports.getPatientTableFields(requestObject.UserID, patientSerNum, fields, {Timestamp: timestamp});
+    let rows = await getPatientTableFields(requestObject.UserID, patientSerNum, fields, {Timestamp: timestamp});
     rows.Data = utility.resolveEmptyResponse(rows.Data);
     return rows;
 }
@@ -1356,4 +1431,35 @@ async function refresh (fields, requestObject) {
 async function getSelfPatientSerNum(userId) {
     return (await Patient.getPatientByUsername(userId)).patientSerNum;
 }
-exports.getSelfPatientSerNum = getSelfPatientSerNum;
+
+export default {
+    omitParametersFromLogs,
+    getSqlApiMappings,
+    updateReadStatus,
+    logPatientAction,
+    getStudies,
+    getStudyQuestionnaires,
+    studyUpdateStatus,
+    checkIn,
+    login,
+    logout,
+    refresh,
+    getDocumentsContent,
+    updateAccountField,
+    inputFeedback,
+    updateDeviceIdentifier,
+    logActivity,
+    addToActivityLog,
+    getEncryption,
+    getPackageContents,
+    increaseSecurityAnswerAttempt,
+    resetSecurityAnswerAttempt,
+    setTimeoutSecurityAnswer,
+    getUserPatientSecurityInfo,
+    setNewPassword,
+    inputEducationalMaterialRating,
+    getSecurityQuestion,
+    setTrusted,
+    getPatientsForPatientsMembers,
+    getNewNotifications,
+}

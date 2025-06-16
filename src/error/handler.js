@@ -6,8 +6,8 @@
 /**
  * @file Gracefully handle error either coming from an api call or inside the listener.
  */
-const legacyLogger = require('../../listener/logs/logger');
-const { ERRORS } = require('./const');
+import ERRORS from './const.js';
+import legacyLogger from '../../listener/logs/logger.js';
 
 class ErrorHandler {
     /**
@@ -40,4 +40,4 @@ class ErrorHandler {
     }
 }
 
-module.exports = ErrorHandler;
+export default ErrorHandler;

@@ -2,13 +2,12 @@
 //
 // SPDX-License-Identifier: AGPL-3.0-or-later
 
-require('../../src/test/chai-setup');
-const { expect } = require('chai');
-const sinon = require('sinon');
-
-const format = require('./questionnaireFormatting');
-const questionnaireConfig = require('./questionnaireConfig.json');
-const QuestionnaireDjango = require('./questionnaireDjango');
+import '../../src/test/chai-setup.js';
+import { expect } from 'chai';
+import format from './questionnaireFormatting.js';
+import questionnaireConfig from './questionnaireConfig.json' with { type: "json" };
+import QuestionnaireDjango from './questionnaireDjango.js';
+import sinon from 'sinon';
 
 // Values used as a questionnaire's respondent_id
 const PATIENT = questionnaireConfig.QUESTIONNAIRE_RESPONDENT_ID.PATIENT;

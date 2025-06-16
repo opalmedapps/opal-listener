@@ -6,7 +6,8 @@
 /**
  * @file Utility functions used to manage or compare semver version numbers.
  */
-const fs = require('fs');
+import fs from 'fs';
+import legacyLogger from '../../listener/logs/logger.js';
 
 class Version {
     // Constants
@@ -54,9 +55,10 @@ class Version {
             return fs.readFileSync('./VERSION').toString().trim();
         }
         catch (error) {
+            legacyLogger.log('error', 'Unable to read listener version', error);
             return undefined;
         }
     }
 }
 
-exports.Version = Version;
+export default Version;
