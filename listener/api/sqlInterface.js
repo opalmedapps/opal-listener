@@ -262,7 +262,6 @@ async function processSelectRequest(userId, category, patientSerNum, parameters)
 function updateReadStatus(requestObject) {
     let r = Q.defer();
 
-    let table, serNum;
     let parameters = requestObject.Parameters;
 
     if (
@@ -272,7 +271,7 @@ function updateReadStatus(requestObject) {
         && requestObject.TargetPatientID
         && requestMappings.hasOwnProperty(parameters.Field)
     ) {
-        ({table, serNum, notificationType} = requestMappings[parameters.Field]);
+        let {table, serNum, notificationType} = requestMappings[parameters.Field];
 
         runSqlQuery(
             queries.updateReadStatus(),
