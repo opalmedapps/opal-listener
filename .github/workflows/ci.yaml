@@ -52,8 +52,7 @@ jobs:
       - uses: actions/checkout@v4.2.2
         with:
           persist-credentials: false
-      # TODO testing
-      - uses: opalmedapps/actions/actions/check-thirdparty-notice@SB.uv-cache-warning
+      - uses: opalmedapps/actions/actions/check-thirdparty-notice@main
         with:
           package-file: './package.json'
 
