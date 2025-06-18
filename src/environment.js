@@ -21,8 +21,6 @@ const ENVIRONMENT = {
     BACKEND_REGISTRATION_AUTH_TOKEN: process.env.BACKEND_REGISTRATION_AUTH_TOKEN,
     DATA_CACHE_TIME_TO_LIVE_MINUTES: process.env.DATA_CACHE_TIME_TO_LIVE_MINUTES,
     DATABASE_USE_SSL: process.env.DATABASE_USE_SSL,
-    SSL_CA: process.env.SSL_CA,
-    QUESTIONNAIRE_COMPLETED_URL: process.env.QUESTIONNAIRE_COMPLETED_URL,
     FEEDBACK_EMAIL: process.env.FEEDBACK_EMAIL,
     FEEDBACK_EMAIL_HOST: process.env.FEEDBACK_EMAIL_HOST,
     FEEDBACK_EMAIL_PORT: process.env.FEEDBACK_EMAIL_PORT,
@@ -32,11 +30,18 @@ const ENVIRONMENT = {
 };
 
 /**
+ * @description The list of env variables for configuring the listener that are required when DATABASE_USE_SSL=1
+*/
+const ENVIRONMENT_DATABASE_SSL = {
+    SSL_CA: process.env.SSL_CA,
+};
+/**
  * @description The list of .env variables for configuring the listener that are required when ORMS_ENABLED=1
- */
+*/
 const ENVIRONMENT_ORMS = {
     CHECKIN_ROOM: process.env.CHECKIN_ROOM,
     ORMS_CHECKIN_URL: process.env.ORMS_CHECKIN_URL,
+    QUESTIONNAIRE_COMPLETED_URL: process.env.QUESTIONNAIRE_COMPLETED_URL,
 };
 
 /**
@@ -71,6 +76,7 @@ function validateEnvironment(processArr) {
 
 module.exports = {
     ENVIRONMENT,
+    ENVIRONMENT_DATABASE_SSL,
     ENVIRONMENT_SOURCE_SYSTEM_CHECKIN,
     ENVIRONMENT_ORMS,
     FIREBASE_CONFIG,

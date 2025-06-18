@@ -10,7 +10,8 @@
 require('dotenv').config();
 
 const {
-    ENVIRONMENT, ENVIRONMENT_SOURCE_SYSTEM_CHECKIN, ENVIRONMENT_ORMS, FIREBASE_CONFIG, validateEnvironment,
+    ENVIRONMENT, ENVIRONMENT_DATABASE_SSL, ENVIRONMENT_SOURCE_SYSTEM_CHECKIN, ENVIRONMENT_ORMS, FIREBASE_CONFIG,
+    validateEnvironment,
 } = require('./environment');
 const { Firebase } = require('./firebase/firebase');
 const legacyServer = require('../listener/legacy-server');
@@ -22,6 +23,10 @@ const { Version } = require('./utility/version');
 
 // Raise AssertionError if environment variables are not set
 validateEnvironment(ENVIRONMENT);
+
+if (ENVIRONMENT.DATABASE_USE_SSL) {
+    validateEnvironment([ENVIRONMENT_DATABASE_SSL]);
+}
 
 if (ENVIRONMENT.ORMS_ENABLED) {
     validateEnvironment(ENVIRONMENT_ORMS);
