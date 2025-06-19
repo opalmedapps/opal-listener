@@ -10,18 +10,23 @@
 require('dotenv').config();
 
 const {
-    ENVIRONMENT, ENVIRONMENT_SOURCE_SYSTEM_CHECKIN, ENVIRONMENT_ORMS, FIREBASE_CONFIG, validateEnvironment,
+    ENVIRONMENT, ENVIRONMENT_DATABASE_SSL, ENVIRONMENT_SOURCE_SYSTEM_CHECKIN, ENVIRONMENT_ORMS, FIREBASE_CONFIG,
+    validateEnvironment,
 } = require('./environment');
 const { Firebase } = require('./firebase/firebase');
-const legacyServer = require('../listener/legacy-server');
-const legacyRegistrationServer = require('../legacy-registration/legacy-server');
 const legacyLogger = require('../listener/logs/logger');
-const { RequestHandler } = require('./core/request-handler');
 const { REQUEST_TYPE } = require('./const');
 const { Version } = require('./utility/version');
 
-// Raise AssertionError if environment variables are not set
+// Validate environment before importing modules that use env variables on import
+// E.g., SQL Query Runner establishes the connection on import,
+// if the DB connection requires SSL but SSL_CA is undefined there will be an error.
+// It gets imported indirectly via the below modules.
 validateEnvironment(ENVIRONMENT);
+
+if (ENVIRONMENT.DATABASE_USE_SSL) {
+    validateEnvironment(ENVIRONMENT_DATABASE_SSL);
+}
 
 if (ENVIRONMENT.ORMS_ENABLED) {
     validateEnvironment(ENVIRONMENT_ORMS);
@@ -30,6 +35,10 @@ if (ENVIRONMENT.ORMS_ENABLED) {
 if (ENVIRONMENT.SOURCE_SYSTEM_SUPPORTS_CHECKIN) {
     validateEnvironment(ENVIRONMENT_SOURCE_SYSTEM_CHECKIN);
 }
+
+const legacyServer = require('../listener/legacy-server');
+const legacyRegistrationServer = require('../legacy-registration/legacy-server');
+const { RequestHandler } = require('./core/request-handler');
 
 launch().then(() => {
     legacyLogger.log('info', 'LISTENER LAUNCHED SUCCESSFULLY');

@@ -21,7 +21,7 @@ class SQLQueryRunner {
         // Add SSL parameters if SSL is enabled
         this.#DB_CREDENTIALS = {
             ...databaseCredentials,
-            ...(ENVIRONMENT.DATABASE_USE_SSL === '1' ? {
+            ...(ENVIRONMENT.DATABASE_USE_SSL ? {
                 ssl: {
                     ca: this.readSSLCAFile(),
                     rejectUnauthorized: true,
@@ -92,7 +92,7 @@ class SQLQueryRunner {
             }
             this.#SQL_QUERY_POOL.getConnection(function (err, connection) {
                 logger.log('debug', `Grabbed SQL connection to ${dbName}: ${connection}, `
-                    + `with SSL ${ENVIRONMENT.DATABASE_USE_SSL === '1' ? 'enabled' : 'disabled'}`);
+                    + `with SSL ${ENVIRONMENT.DATABASE_USE_SSL ? 'enabled' : 'disabled'}`);
                 if (err) {
                     logger.log('error', `Failed to establish database connection`, err);
                     reject(connectionErrorMsg);
