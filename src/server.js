@@ -18,7 +18,10 @@ const legacyLogger = require('../listener/logs/logger');
 const { REQUEST_TYPE } = require('./const');
 const { Version } = require('./utility/version');
 
-// Raise AssertionError if environment variables are not set
+// Validate environment before importing modules that use env variables on import
+// E.g., SQL Query Runner establishes the connection on import,
+// if the DB connection requires SSL but SSL_CA is undefined there will be an error.
+// It gets imported indirectly via the below modules.
 validateEnvironment(ENVIRONMENT);
 
 if (ENVIRONMENT.DATABASE_USE_SSL) {
