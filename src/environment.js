@@ -31,13 +31,13 @@ const ENVIRONMENT = {
 
 /**
  * @description The list of env variables for configuring the listener that are required when DATABASE_USE_SSL=1
-*/
+ */
 const ENVIRONMENT_DATABASE_SSL = {
     SSL_CA: process.env.SSL_CA,
 };
 /**
  * @description The list of .env variables for configuring the listener that are required when ORMS_ENABLED=1
-*/
+ */
 const ENVIRONMENT_ORMS = {
     CHECKIN_ROOM: process.env.CHECKIN_ROOM,
     ORMS_CHECKIN_URL: process.env.ORMS_CHECKIN_URL,

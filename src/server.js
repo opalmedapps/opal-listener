@@ -14,18 +14,19 @@ const {
     validateEnvironment,
 } = require('./environment');
 const { Firebase } = require('./firebase/firebase');
-const legacyServer = require('../listener/legacy-server');
-const legacyRegistrationServer = require('../legacy-registration/legacy-server');
 const legacyLogger = require('../listener/logs/logger');
-const { RequestHandler } = require('./core/request-handler');
 const { REQUEST_TYPE } = require('./const');
 const { Version } = require('./utility/version');
+
+const legacyServer = require('../listener/legacy-server');
+const legacyRegistrationServer = require('../legacy-registration/legacy-server');
+const { RequestHandler } = require('./core/request-handler');
 
 // Raise AssertionError if environment variables are not set
 validateEnvironment(ENVIRONMENT);
 
 if (ENVIRONMENT.DATABASE_USE_SSL) {
-    validateEnvironment([ENVIRONMENT_DATABASE_SSL]);
+    validateEnvironment(ENVIRONMENT_DATABASE_SSL);
 }
 
 if (ENVIRONMENT.ORMS_ENABLED) {
