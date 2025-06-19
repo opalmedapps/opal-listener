@@ -18,10 +18,6 @@ const legacyLogger = require('../listener/logs/logger');
 const { REQUEST_TYPE } = require('./const');
 const { Version } = require('./utility/version');
 
-const legacyServer = require('../listener/legacy-server');
-const legacyRegistrationServer = require('../legacy-registration/legacy-server');
-const { RequestHandler } = require('./core/request-handler');
-
 // Raise AssertionError if environment variables are not set
 validateEnvironment(ENVIRONMENT);
 
@@ -36,6 +32,10 @@ if (ENVIRONMENT.ORMS_ENABLED) {
 if (ENVIRONMENT.SOURCE_SYSTEM_SUPPORTS_CHECKIN) {
     validateEnvironment(ENVIRONMENT_SOURCE_SYSTEM_CHECKIN);
 }
+
+const legacyServer = require('../listener/legacy-server');
+const legacyRegistrationServer = require('../legacy-registration/legacy-server');
+const { RequestHandler } = require('./core/request-handler');
 
 launch().then(() => {
     legacyLogger.log('info', 'LISTENER LAUNCHED SUCCESSFULLY');
