@@ -263,33 +263,6 @@ queries.patientEducationalMaterialContents=function()
 {
     return "SELECT EducationalMaterialTOC.EducationalMaterialTOCSerNum ,EducationalMaterialTOC.OrderNum, EducationalMaterialTOC.ParentSerNum, EducationalMaterialTOC.EducationalMaterialControlSerNum, EduControl.EducationalMaterialType_EN, EduControl.EducationalMaterialType_FR, EduControl.Name_EN, EduControl.Name_FR, EduControl.URL_FR, EduControl.URL_EN FROM EducationalMaterialControl as EduControl, EducationalMaterialTOC WHERE EduControl.EducationalMaterialControlSerNum = EducationalMaterialTOC.EducationalMaterialControlSerNum AND EducationalMaterialTOC.ParentSerNum = ? ORDER BY OrderNum;";
 };
-/**
- * @deprecated;
- * @returns {string}
- */
-queries.patientTasksTableFields=function()
-{
-    return "SELECT DISTINCT Patient.PatientAriaSer, " +
-        "Alias.AliasName_EN AS TaskName_EN, " +
-        "Alias.AliasName_FR AS TaskName_FR, " +
-        "Alias.AliasDescription_EN AS TaskDescription_EN, " +
-        "Alias.AliasDescription_FR AS TaskDescription_FR, " +
-        "Task.DueDateTime, " +
-        "emc.URL_EN, " +
-        "emc.URL_FR " +
-        "" +
-        "FROM Patient " +
-        "" +
-        "INNER JOIN Task ON Task.PatientSerNum = Patient.PatientSerNum " +
-        "INNER JOIN AliasExpression ON AliasExpression.AliasExpressionSerNum = Task.AliasExpressionSerNum " +
-        "INNER JOIN Alias ON Alias.AliasSerNum = AliasExpression.AliasSerNum " +
-        "LEFT JOIN EducationalMaterialControl emc ON emc.EducationalMaterialControlSerNum = Alias.EducationalMaterialControlSerNum " +
-        "" +
-        "WHERE " +
-        "Task.PatientSerNum = ? " +
-        "AND (Task.LastUpdated > ? OR Alias.LastUpdated > ?) " +
-        "ORDER BY Task.DueDateTime ASC;";
-};
 
 /**
  * patientStudyTableFields

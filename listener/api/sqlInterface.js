@@ -86,13 +86,6 @@ const requestMappings =
             serNum: 'NotificationSerNum',
             needUserId: true,
         },
-        /**
-         * Deprecated: 'Tasks'
-         */
-        'Tasks': {
-            sql: queries.patientTasksTableFields(),
-            numberOfLastUpdated: 2,
-        },
         'TxTeamMessages': {
             sql: queries.patientTxTeamMessagesAll(),
             sqlSingleItem: queries.patientTxTeamMessagesOne(),
