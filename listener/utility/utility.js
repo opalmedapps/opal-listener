@@ -6,7 +6,7 @@ import CryptoJS from 'crypto-js';
 import keyDerivationCache from '../../src/utility/key-derivation-cache.js';
 import nacl from 'tweetnacl';
 import { encode as encodeBase64, decode as decodeBase64 } from '@stablelib/base64';
-import stablelibutf8 from '@stablelib/utf8';
+import { encode as encodeUTF8, decode as decodeUTF8 } from '@stablelib/utf8';
 
 /**
  * resolveEmptyResponse
@@ -39,7 +39,7 @@ async function encrypt(context, object, secret, salt) {
     const key = salt
         ? await keyDerivationCache.getKey(secret, salt, context.cacheLabel, context.useLegacyPBKDF2Settings)
         : secret;
-    const truncatedKey = stablelibutf8.encode(key.substring(0, nacl.secretbox.keyLength));
+    const truncatedKey = encodeUTF8(key.substring(0, nacl.secretbox.keyLength));
     const nonce = nacl.randomBytes(nacl.secretbox.nonceLength);
     return encryptObject(object, truncatedKey, nonce);
 }
@@ -57,7 +57,7 @@ async function decrypt(context, object, secret, salt) {
     const key = salt
         ? await keyDerivationCache.getKey(secret, salt, context.cacheLabel, context.useLegacyPBKDF2Settings)
         : secret;
-    const truncatedKey = stablelibutf8.encode(key.substring(0, nacl.secretbox.keyLength));
+    const truncatedKey = encodeUTF8(key.substring(0, nacl.secretbox.keyLength));
     return decryptObject(object, truncatedKey);
 }
 
@@ -65,7 +65,7 @@ async function decrypt(context, object, secret, salt) {
 function encryptObject(object, secret, nonce) {
     if(typeof object === 'string')
     {
-        object = encodeBase64(concatUTF8Array(nonce, nacl.secretbox(stablelibutf8.encode(object),nonce,secret)));
+        object = encodeBase64(concatUTF8Array(nonce, nacl.secretbox(encodeUTF8(object),nonce,secret)));
         return object;
     }else{
         for (let key in object) {
@@ -79,7 +79,7 @@ function encryptObject(object, secret, nonce) {
                 if(object[key] instanceof Date )
                 {
                     object[key]=object[key].toISOString();
-                    object[key] = encodeBase64(concatUTF8Array(nonce, nacl.secretbox(stablelibutf8.encode(object[key]),nonce,secret)));
+                    object[key] = encodeBase64(concatUTF8Array(nonce, nacl.secretbox(encodeUTF8(object[key]),nonce,secret)));
 
                 }else{
                     encryptObject(object[key],secret,nonce);
@@ -90,7 +90,7 @@ function encryptObject(object, secret, nonce) {
                 if (typeof object[key] !=='string') {
                     object[key]=String(object[key]);
                 }
-                object[key] = encodeBase64(concatUTF8Array(nonce,nacl.secretbox(stablelibutf8.encode(object[key]),nonce,secret)));
+                object[key] = encodeBase64(concatUTF8Array(nonce,nacl.secretbox(encodeUTF8(object[key]),nonce,secret)));
             }
         }
         return object;
@@ -107,7 +107,7 @@ function decryptObject(object, secret) {
     if(typeof object ==='string')
     {
         let enc = splitNonce(object);
-        let object = stablelibutf8.decode(nacl.secretbox.open(enc[1],enc[0],secret));
+        let object = decodeUTF8(nacl.secretbox.open(enc[1],enc[0],secret));
         if(object === null) throw new Error('Encryption failed');
 
     }else{
@@ -118,7 +118,7 @@ function decryptObject(object, secret) {
                 decryptObject(object[key],secret);
             }else {
                 let enc = splitNonce(object[key]);
-                let dec = stablelibutf8.decode(nacl.secretbox.open(enc[1], enc[0], secret));
+                let dec = decodeUTF8(nacl.secretbox.open(enc[1], enc[0], secret));
                 if(dec === null) throw new Error('Encryption failed');
                 object[key] = dec;
             }
