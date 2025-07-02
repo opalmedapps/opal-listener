@@ -537,14 +537,6 @@ queries.setTrusted = function () {
 };
 
 /**
- * @deprecated
- * @returns
- */
-queries.getPatientForPatientMembers = function() {
-    return "SELECT FirstName, LastName, Email, Website, ProfileImage, Bio_EN, Bio_FR  FROM PatientsForPatientsPersonnel;";
-};
-
-/**
  * @description Retrieves all of a patient's MRNs from the Patient_Hospital_Identifier table
  * @date 2021-02-26
  * @returns {string}

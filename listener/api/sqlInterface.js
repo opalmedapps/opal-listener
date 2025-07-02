@@ -1280,17 +1280,6 @@ function setTrusted(requestObject) {
 }
 
 /**
- * @deprecated
- */
-function getPatientsForPatientsMembers() {
-    return new Promise((resolve, reject)=>{
-        runSqlQuery(queries.getPatientForPatientMembers(), []).then(members => {
-            resolve({ Data: members });
-        }).catch(err => reject({ Response:error, Reason:err }));
-    });
-}
-
-/**
  * @desc Gets the PatientSerNum associated with the given user (by Firebase userId).
  * @param userId The Firebase userId of the user.
  * @returns {Promise<*>} Resolves with the PatientSerNum of the user, or rejects with an error if not found.
@@ -1327,5 +1316,4 @@ export default {
     inputEducationalMaterialRating,
     getSecurityQuestion,
     setTrusted,
-    getPatientsForPatientsMembers,
 }
