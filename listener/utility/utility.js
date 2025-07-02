@@ -5,7 +5,7 @@
 import CryptoJS from 'crypto-js';
 import keyDerivationCache from '../../src/utility/key-derivation-cache.js';
 import nacl from 'tweetnacl';
-import stablelibbase64 from '@stablelib/base64';
+import { encode as encodeBase64, decode as decodeBase64 } from '@stablelib/base64';
 import stablelibutf8 from '@stablelib/utf8';
 
 /**
@@ -65,7 +65,7 @@ async function decrypt(context, object, secret, salt) {
 function encryptObject(object, secret, nonce) {
     if(typeof object === 'string')
     {
-        object = stablelibbase64.encode(concatUTF8Array(nonce, nacl.secretbox(stablelibutf8.encode(object),nonce,secret)));
+        object = encodeBase64(concatUTF8Array(nonce, nacl.secretbox(stablelibutf8.encode(object),nonce,secret)));
         return object;
     }else{
         for (let key in object) {
@@ -79,7 +79,7 @@ function encryptObject(object, secret, nonce) {
                 if(object[key] instanceof Date )
                 {
                     object[key]=object[key].toISOString();
-                    object[key] = stablelibbase64.encode(concatUTF8Array(nonce, nacl.secretbox(stablelibutf8.encode(object[key]),nonce,secret)));
+                    object[key] = encodeBase64(concatUTF8Array(nonce, nacl.secretbox(stablelibutf8.encode(object[key]),nonce,secret)));
 
                 }else{
                     encryptObject(object[key],secret,nonce);
@@ -90,7 +90,7 @@ function encryptObject(object, secret, nonce) {
                 if (typeof object[key] !=='string') {
                     object[key]=String(object[key]);
                 }
-                object[key] = stablelibbase64.encode(concatUTF8Array(nonce,nacl.secretbox(stablelibutf8.encode(object[key]),nonce,secret)));
+                object[key] = encodeBase64(concatUTF8Array(nonce,nacl.secretbox(stablelibutf8.encode(object[key]),nonce,secret)));
             }
         }
         return object;
@@ -135,7 +135,7 @@ function concatUTF8Array(a1, a2) {
 }
 
 function splitNonce(str) {
-    const ar = stablelibbase64.decode(str);
+    const ar = decodeBase64(str);
     return [ar.slice(0,nacl.secretbox.nonceLength),ar.slice(nacl.secretbox.nonceLength)];
 }
 
