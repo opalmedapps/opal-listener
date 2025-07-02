@@ -74,4 +74,4 @@ const ERRORS = {
     },
 };
 
-exports.ERRORS = ERRORS;
+export default ERRORS;

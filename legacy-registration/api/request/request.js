@@ -2,13 +2,9 @@
 //
 // SPDX-License-Identifier: AGPL-3.0-or-later
 
-/**
- *
- *
- */
-require('dotenv').config();
-const axios = require('axios');
-const logger = require('../../../listener/logs/logger');
+import 'dotenv/config';
+import axios from 'axios';
+import logger from '../../../listener/logs/logger.js';
 
 const env = {
 	BACKEND_HOST: process.env.BACKEND_HOST,
@@ -16,7 +12,6 @@ const env = {
 };
 
 class opalRequest {
-
 	constructor(reqObj, key, salt='', pass=''){
 		this.type = reqObj.Request;
 		this.parameters = reqObj.Parameters;
@@ -175,4 +170,4 @@ class opalRequest {
 	}
 }
 
-module.exports = opalRequest;
+export default opalRequest;

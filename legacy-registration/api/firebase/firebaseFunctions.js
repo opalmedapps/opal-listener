@@ -2,14 +2,11 @@
 //
 // SPDX-License-Identifier: AGPL-3.0-or-later
 
-/**  Library Imports **/
-
-const admin = require("firebase-admin");
-const logger = require('../../logs/logger.js');
-
+import admin from 'firebase-admin';
+import logger from '../../logs/logger.js';
 
 // Function to create firebase account
-exports.createFirebaseAccount = async function (userEmail, userPassword) {
+async function createFirebaseAccount(userEmail, userPassword) {
     const response = await admin.auth().createUser({
         email: userEmail,
         password: userPassword
@@ -18,22 +15,28 @@ exports.createFirebaseAccount = async function (userEmail, userPassword) {
         logger.log('debug',`Successfully created new firebase user account and this is the unique Id: ${response.uid}`);
     }
     return response?.uid;
-};
+}
 
 // Function to get firebase account by email
-exports.getFirebaseAccountByEmail = async function (userEmail) {
+async function getFirebaseAccountByEmail(userEmail) {
     const response = await admin.auth().getUserByEmail(userEmail);
     if (response?.uid) {
         logger.log('debug', `Successfully got firebase user account and this is the unique Id: ${response.uid}`);
     }
     return response?.uid;
-};
+}
 
 // Function to get firebase account by encoded login id token
-exports.getFirebaseAccountByIdToken = async function (idToken) {
+async function getFirebaseAccountByIdToken(idToken) {
     const response = await admin.auth().verifyIdToken(idToken);
     if (response?.uid) {
         logger.log('debug', `Successfully got firebase user account and this is the unique Id: ${response.uid}`);
     }
     return response;
-};
+}
+
+export default {
+    createFirebaseAccount,
+    getFirebaseAccountByEmail,
+    getFirebaseAccountByIdToken,
+}

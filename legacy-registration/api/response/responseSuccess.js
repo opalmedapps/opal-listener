@@ -2,13 +2,8 @@
 //
 // SPDX-License-Identifier: AGPL-3.0-or-later
 
-/**  Library Imports **/
+import opalResponse from '../../../listener/api/response/response.js';
 
-const opalResponse = require('../../../listener/api/response/response');
-/**
- * @class opalResponseSuccess
- *
- */
 class opalResponseSuccess extends opalResponse {
     constructor(data, reqObj) {
         super(3, data, reqObj);
@@ -22,4 +17,5 @@ class opalResponseSuccess extends opalResponse {
         return this.data;
     }
 }
-module.exports = opalResponseSuccess;
+
+export default opalResponseSuccess;

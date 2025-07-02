@@ -23,4 +23,4 @@ class OpalSecurityResponseError {
     }
 }
 
-module.exports = OpalSecurityResponseError;
+export default OpalSecurityResponseError;

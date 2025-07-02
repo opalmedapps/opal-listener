@@ -3,10 +3,10 @@
 //
 // SPDX-License-Identifier: AGPL-3.0-or-later
 
-require('../test/chai-setup');
-const { expect } = require('chai');
-const EncryptionUtilities = require('./encryption');
-const { RequestContext } = require('../core/request-context');
+import '../test/chai-setup.js';
+import EncryptionUtilities from './encryption.js';
+import { expect } from 'chai';
+import RequestContext from '../core/request-context.js';
 
 const context = new RequestContext('test', {});
 

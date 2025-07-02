@@ -2,14 +2,14 @@
 //
 // SPDX-License-Identifier: AGPL-3.0-or-later
 
-var q = require('q');
-var credentials = require('./../config-adaptor');
-const logger = require('./../logs/logger');
-const questionnaireConfig = require('./questionnaireConfig.json');
-const questionnaireQueries = require('./questionnaireQueries.js');
-const questionnaireValidation = require('./questionnaire.validate');
-const format = require('./questionnaireFormatting');
-const SQLQueryRunner = require("../sql/sql-query-runner");
+import credentials from '../config-adaptor.js';
+import format from './questionnaireFormatting.js';
+import logger from '../logs/logger.js';
+import q from 'q';
+import questionnaireConfig from './questionnaireConfig.json' with { type: "json" };
+import questionnaireQueries from './questionnaireQueries.js';
+import questionnaireValidation from './questionnaire.validate.js';
+import SQLQueryRunner from '../sql/sql-query-runner.js';
 
 /**
  * @desc QuestionnaireDB connection parameters
@@ -31,13 +31,6 @@ let runQuery = (...args) => queryRunner.run(...args);
  * From this point is the new questionnaire front-end V2: 19-08-2019
  */
 
-exports.getQuestionnaireList = getQuestionnaireList;
-exports.getQuestionnaire = getQuestionnaire;
-exports.getQuestionnairePurpose= getQuestionnairePurpose;
-exports.saveAnswer = saveAnswer;
-exports.updateQuestionnaireStatusInQuestionnaireDB = updateQuestionnaireStatusInQuestionnaireDB;
-exports.getRespondentUsername = getRespondentUsername;
-
 /*
 FUNCTIONS TO GET QUESTIONNAIRES
  */
@@ -49,7 +42,7 @@ FUNCTIONS TO GET QUESTIONNAIRES
  * @param {string} userId The Firebase username of the user requesting the questionnaires list (used to filter questionnaires by respondent).
  * @param {string} purpose string indicating the purpose of the questionnaire list requested. The purposes can be found in QUESTIONNAIRE_PURPOSE_ID_MAP of the questionnaireConfig.json file.
  * @param {Date} [lastUpdated] - If provided, only items with 'LastUpdated' after this time are returned.
- * @returns {promise}
+ * @returns {Promise}
  */
 async function getQuestionnaireList(opalPatientSerNumAndLanguage, userId, purpose, lastUpdated=0) {
     const patientSerNum = opalPatientSerNumAndLanguage.PatientSerNum;
@@ -132,7 +125,7 @@ function getQuestionnaire(language, answerQuestionnaire_Id) {
  * getQuestionnairePurpose
  * @desc this function gets the quetionnaire purpose of a given questionnaire.
  * @param {number} answerQuestionnaireId  The unique Id of the answerQuestionnaire table.
- * @returns {promise}
+ * @returns {Promise}
  */
 function getQuestionnairePurpose(answerQuestionnaireId) {
     let r = q.defer();
@@ -478,4 +471,13 @@ async function getRespondentUsername(qp_ser_num) {
         logger.log("error", `Error getting the questionnaire respondent`, error);
         throw error;
     }
+}
+
+export default {
+    getQuestionnaireList,
+    getQuestionnaire,
+    getQuestionnairePurpose,
+    saveAnswer,
+    updateQuestionnaireStatusInQuestionnaireDB,
+    getRespondentUsername,
 }

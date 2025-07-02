@@ -7,12 +7,11 @@
  * @file Unit tests for the Registration class.
  */
 
-require('../test/chai-setup');
-const { expect } = require('chai');
-
-const EncryptionUtilities = require('../encryption/encryption');
-const Registration = require('./registration');
-const { RequestContext } = require('../core/request-context');
+import '../test/chai-setup.js';
+import EncryptionUtilities from '../encryption/encryption.js';
+import { expect } from 'chai';
+import Registration from './registration.js';
+import RequestContext from '../core/request-context.js';
 
 const context = new RequestContext('test', {});
 

@@ -2,11 +2,7 @@
 //
 // SPDX-License-Identifier: AGPL-3.0-or-later
 
-const OpalResponse = require('./response');
-/**
- * @class OpalResponseError;
- * @type {exports.OpalResponseError}
- */
+import OpalResponse from './response.js';
 
 class OpalResponseError extends OpalResponse {
 
@@ -28,4 +24,5 @@ class OpalResponseError extends OpalResponse {
 		};
 	}
 }
-module.exports = {OpalResponseError};
+
+export default OpalResponseError;

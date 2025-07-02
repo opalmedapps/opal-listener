@@ -2,11 +2,8 @@
 //
 // SPDX-License-Identifier: AGPL-3.0-or-later
 
-/**  Library Imports **/
-
-const apiFunctionRequest = require('../api/apiFunctions.js');
-const logger = require('../logs/logger.js');
-
+import apiFunctionRequest from './apiFunctions.js';
+import logger from '../logs/logger.js';
 
 const API = {
     'RegisterPatient': apiFunctionRequest.registerPatient,
@@ -20,7 +17,7 @@ const API = {
      @param requestObject
      @return {Promise}
  **/
-exports.processRequest = async function (requestObject) {
+async function processRequest(requestObject) {
     const type = requestObject.Request;
 
     if (!API.hasOwnProperty(type)) {
@@ -35,4 +32,8 @@ exports.processRequest = async function (requestObject) {
         logger.log('error', error);
         throw { Response: 'error', Reason: error };
     }
-};
+}
+
+export default {
+    processRequest,
+}

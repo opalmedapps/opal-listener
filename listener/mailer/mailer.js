@@ -4,9 +4,8 @@
 
 // Module that send emails using node mailer
 
-'use strict';
-const nodemailer = require('nodemailer');
-const config = require('./../config-adaptor');
+import config from '../config-adaptor.js';
+import nodemailer from 'nodemailer';
 
 function Mail(){
 
@@ -38,4 +37,4 @@ function Mail(){
 
 }
 
-module.exports = Mail;
+export default Mail;

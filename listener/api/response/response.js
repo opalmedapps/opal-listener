@@ -2,10 +2,6 @@
 //
 // SPDX-License-Identifier: AGPL-3.0-or-later
 
-/**
- * @class OpalResponseSuccess
- *
- */
 class OpalResponse {
 
     /**
@@ -27,4 +23,4 @@ class OpalResponse {
     }
 }
 
-module.exports = OpalResponse;
+export default OpalResponse;

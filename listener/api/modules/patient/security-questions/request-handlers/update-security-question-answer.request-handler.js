@@ -2,15 +2,15 @@
 //
 // SPDX-License-Identifier: AGPL-3.0-or-later
 
-const {ApiRequestHandler} = require("../../../../api-request-handler");
-const {Patient} = require("../../patient");
-const {ValidationError} = require("../../../../errors/validation-error");
-const {OpalSQLQueryRunner} = require("../../../../../sql/opal-sql-query-runner");
-const opalQueries = require('../../../../../sql/queries');
-const logger = require("../../../../../logs/logger");
-const {param} = require("express-validator");
-const SecurityDjango = require("../../../../../security/securityDjango");
-const {Version} = require('../../../../../../src/utility/version');
+import ApiRequestHandler from '../../../../api-request-handler.js';
+import logger from '../../../../../logs/logger.js';
+import opalQueries from '../../../../../sql/queries.js';
+import OpalSQLQueryRunner from '../../../../../sql/opal-sql-query-runner.js';
+import {param} from 'express-validator';
+import Patient from '../../patient.js';
+import SecurityDjango from '../../../../../security/securityDjango.js';
+import ValidationError from '../../../../errors/validation-error.js';
+import Version from '../../../../../../src/utility/version.js';
 
 class UpdateSecurityQuestionAnswerRequestHandler extends ApiRequestHandler {
     /**
@@ -88,4 +88,4 @@ class UpdateSecurityQuestionAnswerRequestHandler extends ApiRequestHandler {
     }
 }
 
-module.exports = UpdateSecurityQuestionAnswerRequestHandler;
+export default UpdateSecurityQuestionAnswerRequestHandler;

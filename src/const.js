@@ -12,7 +12,7 @@ const REQUEST_TYPE = {
 
 const REGISTER_SEARCH_REQUEST_REGEX = /^\/api\/registration\/[a-zA-Z0-9]{12}\/$/;
 
-module.exports = {
+export {
     REQUEST_TYPE,
     REGISTER_SEARCH_REQUEST_REGEX,
 };

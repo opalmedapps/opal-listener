@@ -2,10 +2,9 @@
 //
 // SPDX-License-Identifier: AGPL-3.0-or-later
 
-const {PatientTestResultQuery} = require("../queries/patient-test-result.query");
-const logger = require("../../../../logs/logger");
-const {OpalSQLQueryRunner} = require("../../../../sql/opal-sql-query-runner");
-
+import logger from '../../../../logs/logger.js';
+import OpalSQLQueryRunner from '../../../../sql/opal-sql-query-runner.js';
+import PatientTestResultQuery from '../queries/patient-test-result.query.js';
 
 class PatientTestResult {
 	/**
@@ -135,4 +134,4 @@ class PatientTestResult {
 	}
 }
 
-module.exports = {PatientTestResult};
+export default PatientTestResult;

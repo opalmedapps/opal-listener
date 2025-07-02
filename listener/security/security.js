@@ -2,15 +2,15 @@
 //
 // SPDX-License-Identifier: AGPL-3.0-or-later
 
-const logger = require('./../logs/logger');
-const firebase = require('firebase-admin');
-const keyDerivationCache = require('../../src/utility/key-derivation-cache');
-const sqlInterface = require('./../api/sqlInterface.js');
-const utility = require('./../utility/utility.js');
-const { Version } = require('../../src/utility/version');
-const OpalResponse = require('../api/response/response');
-const OpalSecurityResponseError = require('../api/response/security-response-error');
-const OpalSecurityResponseSuccess = require('../api/response/security-response-success');
+import firebase from 'firebase-admin';
+import keyDerivationCache from '../../src/utility/key-derivation-cache.js';
+import logger from '../logs/logger.js';
+import OpalResponse from '../api/response/response.js';
+import OpalSecurityResponseError from '../api/response/security-response-error.js';
+import OpalSecurityResponseSuccess from '../api/response/security-response-success.js';
+import sqlInterface from '../api/sqlInterface.js';
+import utility from '../utility/utility.js';
+import Version from '../../src/utility/version.js';
 
 const FIVE_MINUTES = 300000;
 
@@ -32,7 +32,7 @@ const passwordResetSuccess = { PasswordReset: "true" };
  *                                                 is correct or not. The returned object indicates via 'AnswerVerified'
  *                                                 whether the user's provided answer was correct or incorrect.
  */
-exports.verifySecurityAnswer = async (context, requestKey, requestObject) => {
+async function verifySecurityAnswer(context, requestKey, requestObject) {
     // Special case used to set the request's UserID in the case of password reset requests
     await ensureUserIdAvailable(requestObject);
 
@@ -71,7 +71,7 @@ exports.verifySecurityAnswer = async (context, requestKey, requestObject) => {
     await sqlInterface.setTrusted(requestObject);
     await sqlInterface.resetSecurityAnswerAttempt(requestObject);
     return new OpalSecurityResponseSuccess(answerVerified, requestKey, requestObject);
-};
+}
 
 /**
  * @desc Helper function used by verifySecurityAnswer to handle behavior related to too many security answer attempts.
@@ -127,7 +127,7 @@ function confirmValidSecurityAnswer(unencryptedParams, requestObject, user) {
  * @returns {Promise<OpalSecurityResponseSuccess>} Resolves if the password was successfully changed,
  *                                                 or rejects with an OpalSecurityResponseError.
  */
-exports.resetPassword = async function(context, requestKey, requestObject) {
+async function resetPassword(context, requestKey, requestObject) {
     // Special case used to set the request's UserID in the case of password reset requests
     await ensureUserIdAvailable(requestObject);
 
@@ -155,7 +155,7 @@ exports.resetPassword = async function(context, requestKey, requestObject) {
         logger.log('error', errMsg, err);
         throw new OpalSecurityResponseError(CODE.SERVER_ERROR, errMsg, requestKey, requestObject);
     }
-};
+}
 
 /**
  * @desc Gets a security question from the backend to be shown to the user, and caches their answer for use in the listener.
@@ -167,7 +167,7 @@ exports.resetPassword = async function(context, requestKey, requestObject) {
  * @returns {Promise<OpalSecurityResponseSuccess>} Resolves to an object containing the security question,
  *                                                 or rejects with an OpalSecurityResponseError.
  */
-exports.getSecurityQuestion = async function(context, requestKey, requestObject) {
+async function getSecurityQuestion(context, requestKey, requestObject) {
     let unencrypted = await utility.decrypt(context, requestObject.Parameters, utility.hash("none"));
     logger.log('debug', `Unencrypted: ${JSON.stringify(unencrypted)}`);
 
@@ -191,7 +191,7 @@ exports.getSecurityQuestion = async function(context, requestKey, requestObject)
         logger.log('error', errMsg, error);
         throw new OpalSecurityResponseError(CODE.SERVER_ERROR, errMsg, requestKey, requestObject);
     }
-};
+}
 
 /**
  * @desc Helper function used to get the user/patient information required for any security request in this file.
@@ -238,4 +238,10 @@ async function ensureUserIdAvailable(requestObject) {
     let userRecord = await firebase.auth().getUserByEmail(requestObject.UserEmail);
     requestObject.UserID = userRecord?.uid;
     if (!requestObject.UserID) throw 'Failed to look up and set UserID value using the firebase admin tool; no value returned';
+}
+
+export default {
+    verifySecurityAnswer,
+    resetPassword,
+    getSecurityQuestion,
 }

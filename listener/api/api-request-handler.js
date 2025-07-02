@@ -2,8 +2,8 @@
 //
 // SPDX-License-Identifier: AGPL-3.0-or-later
 
-const { Patient } = require('./modules/patient/patient');
-const { validationResult } = require('express-validator');
+import Patient from './modules/patient/patient.js';
+import { validationResult } from 'express-validator';
 
 /**
  * This class serves as an interface for any api request handler (for any request in the front-end)
@@ -52,4 +52,5 @@ class ApiRequestHandler {
             await Patient.getPatientByUsername(requestObject.meta.UserID);
     }
 }
-module.exports = {ApiRequestHandler};
+
+export default ApiRequestHandler;

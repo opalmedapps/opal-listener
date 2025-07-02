@@ -2,11 +2,11 @@
 //
 // SPDX-License-Identifier: AGPL-3.0-or-later
 
-const legacyUtility = require('../../../listener/utility/utility.js');
-const logger = require('../../logs/logger.js');
-const opalRequest = require('./request.js');
-const opalResponseError = require('../response/responseError.js');
-const Registration = require('../../../src/registration/registration');
+import legacyUtility from '../../../listener/utility/utility.js';
+import logger from '../../logs/logger.js';
+import opalRequest from './request.js';
+import opalResponseError from '../response/responseError.js';
+import Registration from '../../../src/registration/registration.js';
 
 /**
 * @class RequestValidator
@@ -77,4 +77,5 @@ class RequestValidator {
         return { isValid: isValid, errors: errors }
     }
 }
-module.exports = RequestValidator;
+
+export default RequestValidator;

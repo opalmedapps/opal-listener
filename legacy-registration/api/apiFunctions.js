@@ -2,11 +2,9 @@
 //
 // SPDX-License-Identifier: AGPL-3.0-or-later
 
-/**  Library Imports **/
-
-var firebaseFunction = require('../api/firebase/firebaseFunctions.js');
-const opalRequest = require('./request/request.js');
-const logger = require('../logs/logger.js');
+import firebaseFunction from './firebase/firebaseFunctions.js';
+import logger from '../logs/logger.js';
+import opalRequest from './request/request.js';
 
 /**
  * @description check the user is caregiver or not
@@ -14,7 +12,7 @@ const logger = require('../logs/logger.js');
  * @returns {status: number}
  * @throws Throws an error if a required field is not present in the given request.
  */
-exports.isCaregiverAlreadyRegistered = async function(requestObject) {
+async function isCaregiverAlreadyRegistered(requestObject) {
     const token = requestObject?.Parameters?.Fields?.token;
 
     try {
@@ -31,7 +29,7 @@ exports.isCaregiverAlreadyRegistered = async function(requestObject) {
 
         return { Data: error };
     }
-};
+}
 
 /**
  * @description check email exists in firebase or not
@@ -39,7 +37,7 @@ exports.isCaregiverAlreadyRegistered = async function(requestObject) {
  * @returns { Data: object}
  * @throws Throws an error if a required field is not present in the given request.
  */
-exports.checkEmailExistsInFirebase = async function(requestObject) {
+async function checkEmailExistsInFirebase(requestObject) {
     try {
         logger.log('info', `Checking user account for email: ${requestObject?.Parameters?.Fields?.email}`);
 
@@ -53,7 +51,7 @@ exports.checkEmailExistsInFirebase = async function(requestObject) {
 
         return { Data: error };
     }
-};
+}
 
 /**
  * @description Register a patient
@@ -61,7 +59,7 @@ exports.checkEmailExistsInFirebase = async function(requestObject) {
  * @returns {Data: Array}
  * @throws Throws an error if a required field is not present in the given request.
  */
-exports.registerPatient = async function(requestObject) {
+async function registerPatient(requestObject) {
     const fields = requestObject?.Parameters?.Fields;
     try {
         // Verify User existence
@@ -95,7 +93,7 @@ exports.registerPatient = async function(requestObject) {
         // Avoid showing error details to frontend
         throw 'Error during patient registration. See internal logs for details.';
     }
-};
+}
 
 /**
  * @description Verify if the incoming registration request is for a new or existing user
@@ -282,4 +280,10 @@ function formatRegisterData(requestObject, firebaseUsername, email, isExistingUs
         };
     }
     return registerData;
+}
+
+export default {
+    isCaregiverAlreadyRegistered,
+    checkEmailExistsInFirebase,
+    registerPatient,
 }

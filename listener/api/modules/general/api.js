@@ -2,6 +2,8 @@
 //
 // SPDX-License-Identifier: AGPL-3.0-or-later
 
-module.exports = {
-    'GetOneItem': require('./request-handlers/get-one-item.request-handler.js'),
-};
+import GetOneItem from './request-handlers/get-one-item.request-handler.js';
+
+export default {
+    GetOneItem,
+}

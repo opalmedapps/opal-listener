@@ -11,12 +11,13 @@ This file stores all queries related to the questionnaire system
  * Queries for the OpalDB
  * ==============================================
  */
+const queries = {};
 
 /**
  * @deprecated Since QSCCD-1559, in released versions after 1.12.2.
  * @returns {string}
  */
-exports.getQuestionnaireInOpalDBFromSerNum = function () {
+queries.getQuestionnaireInOpalDBFromSerNum = function () {
     return `SELECT
                 q.QuestionnaireSerNum AS questionnaireSerNum,
                 q.QuestionnaireControlSerNum AS questionnaireControlSerNum,
@@ -32,7 +33,7 @@ exports.getQuestionnaireInOpalDBFromSerNum = function () {
  * @description Query that looks up the answerQuestionnaireId corresponding to a given QuestionnaireSerNum.
  * @returns {string} The query.
  */
-exports.getAnswerQuestionnaireIdFromSerNum = () => {
+queries.getAnswerQuestionnaireIdFromSerNum = () => {
     return `SELECT q.PatientQuestionnaireDBSerNum AS answerQuestionnaireId
             FROM Questionnaire q
             WHERE q.QuestionnaireSerNum = ?
@@ -40,7 +41,7 @@ exports.getAnswerQuestionnaireIdFromSerNum = () => {
     `
 };
 
-exports.updateQuestionnaireStatus = function () {
+queries.updateQuestionnaireStatus = function () {
     return "UPDATE Questionnaire SET CompletedFlag= ?, CompletionDate= CURRENT_TIMESTAMP WHERE PatientQuestionnaireDBSerNum = ?;";
 };
 
@@ -51,19 +52,19 @@ exports.updateQuestionnaireStatus = function () {
  * ==============================================
  */
 
-exports.getQuestionnaireListQuery = function () {
+queries.getQuestionnaireListQuery = function () {
     return "CALL getQuestionnaireList(?,?,?,?);";
 }
 
-exports.getQuestionnaireQuery = function () {
+queries.getQuestionnaireQuery = function () {
     return "call getQuestionnaireInfo(?,?);";
 }
 
-exports.getQuestionOptionsQuery = function () {
+queries.getQuestionOptionsQuery = function () {
     return "CALL getQuestionOptions(?, ?, ?);";
 }
 
-exports.getQuestionnairePurposeQuery = function () {
+queries.getQuestionnairePurposeQuery = function () {
     return `SELECT d.content as purpose
         FROM dictionary d, purpose p, answerQuestionnaire aq LEFT JOIN questionnaire q ON q.ID = aq.questionnaireId
             WHERE d.contentId = p.title
@@ -72,42 +73,44 @@ exports.getQuestionnairePurposeQuery = function () {
                 AND aq.ID = ?;`
 }
 
-exports.saveAnswerQuery = function () {
+queries.saveAnswerQuery = function () {
     return "call saveAnswer(?,?,?,?,?,?,?,?);";
 }
 
-exports.insertAnswerTextbox = function () {
+queries.insertAnswerTextbox = function () {
     return "INSERT INTO answerTextBox (answerId, value) VALUES (?, ?)";
 }
 
-exports.insertAnswerSlider = function () {
+queries.insertAnswerSlider = function () {
     return "INSERT INTO answerSlider (answerId, value) VALUES (?, ?)";
 }
 
-exports.insertAnswerRadioButton = function () {
+queries.insertAnswerRadioButton = function () {
     return "INSERT INTO answerRadioButton (answerId, value) VALUES (?,?);";
 }
 
-exports.insertAnswerTime = function () {
+queries.insertAnswerTime = function () {
     return "INSERT INTO answerTime (answerId, value) VALUES (?, ?)";
 }
 
-exports.insertAnswerDate = function () {
+queries.insertAnswerDate = function () {
     return "INSERT INTO answerDate (answerId, value) VALUES (?, ?)";
 }
 
-exports.insertAnswerLabel = function () {
+queries.insertAnswerLabel = function () {
     return "INSERT INTO answerLabel (answerId, selected, posX, posY, intensity, value) VALUES ";
 }
 
-exports.insertAnswerCheckbox = function () {
+queries.insertAnswerCheckbox = function () {
     return "INSERT INTO answerCheckbox (answerId, value) VALUES ";
 }
 
-exports.updateAnswerQuestionnaireStatus = function () {
+queries.updateAnswerQuestionnaireStatus = function () {
     return "call updateAnswerQuestionnaireStatus(?,?,?,?,?);";
 }
 
-exports.getAnswerQuestionnaireRespondent = function () {
+queries.getAnswerQuestionnaireRespondent = function () {
     return "SELECT respondentUsername FROM answerQuestionnaire WHERE ID = ?;";
 }
+
+export default queries

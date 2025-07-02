@@ -4,17 +4,13 @@
 
 // This script listens for changes on registration/ in firebase, reads those changes and writes a response back to firebase.
 
-/**  Library Imports **/
-
-const admin = require('firebase-admin');
-
-const mainRequestApi = require('./api/main.js');
-const logger = require('../listener/logs/logger.js');
-const listenerLegacyServer = require('../listener/legacy-server');
-const { REQUEST_TYPE } = require('../src/const.js');
-const { RequestContext } = require('../src/core/request-context.js');
-
-const q = require("q");
+import admin from 'firebase-admin';
+import listenerLegacyServer from '../listener/legacy-server.js';
+import logger from '../listener/logs/logger.js';
+import mainRequestApi from './api/main.js';
+import q from 'q';
+import { REQUEST_TYPE } from '../src/const.js';
+import RequestContext from '../src/core/request-context.js';
 
 // NOTE: Listener launching steps have been moved to src/server.js
 
@@ -34,7 +30,6 @@ let ref;
     db = firebase.database;
     ref = db.ref(firebase.root + '/registration');
 }
-exports.setFirebaseConnection = setFirebaseConnection;
 
 /** FUNCTIONS **/
 
@@ -58,7 +53,6 @@ function listenForRequest(requestType) {
             logError(error);
         });
 }
-exports.listenForRequest = listenForRequest;
 
 /**
      handleRequest
@@ -195,4 +189,9 @@ function completeRequest(headers, key) {
         .catch(function (error) {
             logger.log('error', 'Error writing to firebase', { error: error });
         });
+}
+
+export default {
+    setFirebaseConnection,
+    listenForRequest,
 }

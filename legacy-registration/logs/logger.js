@@ -2,7 +2,9 @@
 //
 // SPDX-License-Identifier: AGPL-3.0-or-later
 
+import logger from '../../listener/logs/logger.js';
+
 /**
  * Reuse the logger from the legacy listener as it is newer.
  */
-module.exports = require('../../listener/logs/logger.js')
+export default logger

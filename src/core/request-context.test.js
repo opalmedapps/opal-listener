@@ -3,10 +3,10 @@
 //
 // SPDX-License-Identifier: AGPL-3.0-or-later
 
-require('../test/chai-setup');
-const { expect } = require('chai');
-const { RequestContext } = require('./request-context');
-const { REQUEST_TYPE } = require('../const');
+import '../test/chai-setup.js';
+import { expect } from 'chai';
+import { REQUEST_TYPE } from '../const.js';
+import RequestContext from './request-context.js';
 
 const registrationRequestTypes = [
     REQUEST_TYPE.REGISTRATION,

@@ -2,11 +2,10 @@
 //
 // SPDX-License-Identifier: AGPL-3.0-or-later
 
-const {ApiRequestHandler} = require("../../../../api-request-handler");
-const {Patient} = require("../../patient");
-const SecurityDjango = require("../../../../../security/securityDjango");
-const {Version} = require('../../../../../../src/utility/version');
-const logger = require("../../../../../logs/logger");
+import ApiRequestHandler from '../../../../api-request-handler.js';
+import Patient from '../../patient.js';
+import SecurityDjango from '../../../../../security/securityDjango.js';
+import Version from '../../../../../../src/utility/version.js';
 
 class GetSecurityQuestionAnswerListRequestHandler extends ApiRequestHandler{
     /**
@@ -77,4 +76,4 @@ class GetSecurityQuestionAnswerListRequestHandler extends ApiRequestHandler{
     }
 }
 
-module.exports = GetSecurityQuestionAnswerListRequestHandler;
+export default GetSecurityQuestionAnswerListRequestHandler;
