@@ -10,19 +10,23 @@
 import 'dotenv/config';
 
 import {
-    ENVIRONMENT, ENVIRONMENT_ORMS, ENVIRONMENT_SOURCE_SYSTEM_CHECKIN, FIREBASE_CONFIG, validateEnvironment,
+    ENVIRONMENT, ENVIRONMENT_DATABASE_SSL, ENVIRONMENT_ORMS, ENVIRONMENT_SOURCE_SYSTEM_CHECKIN, FIREBASE_CONFIG, validateEnvironment,
 } from './environment.js';
 
 import Firebase from './firebase/firebase.js';
 import legacyLogger from '../listener/logs/logger.js';
-import legacyRegistrationServer from '../legacy-registration/legacy-server.js';
-import legacyServer from '../listener/legacy-server.js';
 import { REQUEST_TYPE } from './const.js';
-import RequestHandler from './core/request-handler.js';
 import Version from './utility/version.js';
 
-// Raise AssertionError if environment variables are not set
+// Validate environment before importing modules that use env variables on import
+// E.g., SQL Query Runner establishes the connection on import,
+// if the DB connection requires SSL but SSL_CA is undefined there will be an error.
+// It gets imported indirectly via the below modules.
 validateEnvironment(ENVIRONMENT);
+
+if (ENVIRONMENT.DATABASE_USE_SSL) {
+    validateEnvironment(ENVIRONMENT_DATABASE_SSL);
+}
 
 if (ENVIRONMENT.ORMS_ENABLED) {
     validateEnvironment(ENVIRONMENT_ORMS);
@@ -31,6 +35,10 @@ if (ENVIRONMENT.ORMS_ENABLED) {
 if (ENVIRONMENT.SOURCE_SYSTEM_SUPPORTS_CHECKIN) {
     validateEnvironment(ENVIRONMENT_SOURCE_SYSTEM_CHECKIN);
 }
+
+import legacyRegistrationServer from '../legacy-registration/legacy-server.js';
+import legacyServer from '../listener/legacy-server.js';
+import RequestHandler from './core/request-handler.js';
 
 launch().then(() => {
     legacyLogger.log('info', 'LISTENER LAUNCHED SUCCESSFULLY');
