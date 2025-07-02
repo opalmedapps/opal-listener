@@ -1,4 +1,3 @@
-// eslint-disable-next-line max-len
 // SPDX-FileCopyrightText: Copyright 2022 Opal Health Informatics Group at the Research Institute of the McGill University Health Centre <john.kildea@mcgill.ca>
 //
 // SPDX-License-Identifier: AGPL-3.0-or-later
@@ -10,7 +9,12 @@
 import 'dotenv/config';
 
 import {
-    ENVIRONMENT, ENVIRONMENT_DATABASE_SSL, ENVIRONMENT_ORMS, ENVIRONMENT_SOURCE_SYSTEM_CHECKIN, FIREBASE_CONFIG, validateEnvironment,
+    ENVIRONMENT,
+    ENVIRONMENT_DATABASE_SSL,
+    ENVIRONMENT_ORMS,
+    ENVIRONMENT_SOURCE_SYSTEM_CHECKIN,
+    FIREBASE_CONFIG,
+    validateEnvironment,
 } from './environment.js';
 
 import Firebase from './firebase/firebase.js';
@@ -36,6 +40,8 @@ if (ENVIRONMENT.SOURCE_SYSTEM_SUPPORTS_CHECKIN) {
     validateEnvironment(ENVIRONMENT_SOURCE_SYSTEM_CHECKIN);
 }
 
+/* eslint-disable import/first */
+// eslint-disable-next-line sort-imports
 import legacyRegistrationServer from '../legacy-registration/legacy-server.js';
 import legacyServer from '../listener/legacy-server.js';
 import RequestHandler from './core/request-handler.js';

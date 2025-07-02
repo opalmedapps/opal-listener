@@ -3,7 +3,6 @@ version = 1
 
 [[annotations]]
 path = [
-    ".eslintrc.json",
     ".vscode/extensions.json",
     "docs/jsdoc.config.json",
     "docs/source/config.json",
@@ -13,7 +12,6 @@ path = [
     "listener/educational-material/eduMaterialConfig.json",
     "listener/studies/studiesConfig.json",
     "package.json",
-    "src/test/.eslintrc.json",
 ]
 precedence = "override"
 SPDX-FileCopyrightText = "Copyright (C) 2022 Opal Health Informatics Group at the Research Institute of the McGill University Health Centre <john.kildea@mcgill.ca>"

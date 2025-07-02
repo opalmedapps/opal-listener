@@ -81,10 +81,9 @@ In this case, provide a certificate bundle that includes this certificate, make 
 #### ESLint
 
 This project uses ESLint to statically analyze its source code. It has been configured to only analyze new files in the
-context of strangler fig (i.e. to ignore files in the `listener` folder).
+context of strangler fig (i.e. to ignore legacy files in the `listener` and `legacy-registration` folders).
 
-The rules for this project use the [Airbnb JavaScript Style Guide](https://github.com/airbnb/javascript)
-as a base, with additional rules set based on our preferred style and convention.
+For a full list of the ESLint plugins and rules configured in this project, see [eslint.config.js](./eslint.config.js).
 
 Follow the steps below to enable ESLint in your IDE.
 

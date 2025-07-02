@@ -1,4 +1,3 @@
-// eslint-disable-next-line max-len
 // SPDX-FileCopyrightText: Copyright 2022 Opal Health Informatics Group at the Research Institute of the McGill University Health Centre <john.kildea@mcgill.ca>
 //
 // SPDX-License-Identifier: AGPL-3.0-or-later
@@ -12,9 +11,9 @@ import DefaultRequestData from './mock-request.js';
 import EncryptionUtilities from '../../encryption/encryption.js';
 import Firebase from '../../firebase/firebase.js';
 import legacyLogger from '../../../listener/logs/logger.js';
-import OpalSQLQueryRunner from '../../../listener/sql/opal-sql-query-runner.js';
 import legacyUtility from '../../../listener/utility/utility.js';
 import mysql from 'mysql';
+import OpalSQLQueryRunner from '../../../listener/sql/opal-sql-query-runner.js';
 import { REQUEST_TYPE } from '../../const.js';
 import RequestContext from '../../core/request-context.js';
 
