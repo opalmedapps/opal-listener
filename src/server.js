@@ -9,7 +9,12 @@
 import 'dotenv/config';
 
 import {
-    ENVIRONMENT, ENVIRONMENT_DATABASE_SSL, ENVIRONMENT_ORMS, ENVIRONMENT_SOURCE_SYSTEM_CHECKIN, FIREBASE_CONFIG, validateEnvironment,
+    ENVIRONMENT,
+    ENVIRONMENT_DATABASE_SSL,
+    ENVIRONMENT_ORMS,
+    ENVIRONMENT_SOURCE_SYSTEM_CHECKIN,
+    FIREBASE_CONFIG,
+    validateEnvironment,
 } from './environment.js';
 
 import Firebase from './firebase/firebase.js';
@@ -35,6 +40,8 @@ if (ENVIRONMENT.SOURCE_SYSTEM_SUPPORTS_CHECKIN) {
     validateEnvironment(ENVIRONMENT_SOURCE_SYSTEM_CHECKIN);
 }
 
+/* eslint-disable import/first */
+// eslint-disable-next-line sort-imports
 import legacyRegistrationServer from '../legacy-registration/legacy-server.js';
 import legacyServer from '../listener/legacy-server.js';
 import RequestHandler from './core/request-handler.js';

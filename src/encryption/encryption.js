@@ -4,9 +4,9 @@
 
 import cryptoJs from 'crypto-js';
 import legacyLogger from '../../listener/logs/logger.js';
-import OpalSQLQueryRunner from '../../listener/sql/opal-sql-query-runner.js';
 import legacyUtility from '../../listener/utility/utility.js';
 import mysql from 'mysql';
+import OpalSQLQueryRunner from '../../listener/sql/opal-sql-query-runner.js';
 import PromiseUtility from '../utility/promise.js';
 import RequestContext from '../core/request-context.js';
 
