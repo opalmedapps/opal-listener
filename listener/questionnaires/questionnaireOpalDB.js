@@ -31,50 +31,6 @@ async function getAnswerQuestionnaireIdFromSerNum(questionnaireSerNum) {
 }
 
 /**
- * getQuestionnaireList
- * @desc Returns a promise containing the questionnaire list for a particular user. Used for the new questionnaire 2019
- * @deprecated Since QSCCD-230
- * @param {object} requestObject
- * @return {Promise} Returns a promise that contains a list of questionnaire data
- */
-function getQuestionnaireList(requestObject) {
-
-    if (!questionnaireValidation.validateQuestionnairePurpose(requestObject)) {
-        const paramErrMessage = "Error getting questionnaire list: the requestObject does not have the correct parameter purpose";
-        logger.log("error", paramErrMessage);
-        return Promise.reject(new Error(paramErrMessage));
-    }
-
-    return OpalSQLQueryRunner.run(opalQueries.patientTableFieldsForUser(), [requestObject.UserID])
-        .then(function (patientSerNumAndLanguageRow) {
-
-            if (questionnaireValidation.validatePatientSerNumAndLanguage(patientSerNumAndLanguageRow)) {
-                const lastUpdated = requestObject.params?.Date ? new Date(Number(requestObject.params.Date)) : 0;
-                // get questionnaire list
-                return questionnaires.getQuestionnaireList(
-                    patientSerNumAndLanguageRow[0],
-                    requestObject.UserID,
-                    requestObject.Parameters.purpose,
-                    lastUpdated
-                );
-            } else {
-                const questionnaireSerNumLanguageErrMessage = "Error getting questionnaire list: No matching PatientSerNum or/and Language found in opalDB";
-                logger.log("error", questionnaireSerNumLanguageErrMessage);
-                throw new Error(questionnaireSerNumLanguageErrMessage);
-            }
-        })
-        .then(function (result) {
-            let obj = {};
-            obj.Data = result;
-            return obj;
-        })
-        .catch(function (error) {
-            logger.log("error", "Error getting questionnaire list", error);
-            throw new Error(error);
-        });
-}
-
-/**
  * getQuestionnaire
  * @desc Returns a promise containing the questionnaires and answers. Used for new questionnaire 2019
  * @param {object} requestObject the request
@@ -307,7 +263,6 @@ async function checkCaregiverPermissions(userId, patientSerNum) {
 
 export default {
     getAnswerQuestionnaireIdFromSerNum,
-    getQuestionnaireList,
     getQuestionnaire,
     getQuestionnairePurpose,
     questionnaireSaveAnswer,

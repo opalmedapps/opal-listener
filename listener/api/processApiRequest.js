@@ -31,8 +31,6 @@ const LEGACYAPI = {
     'Logout': sqlInterface.logout,
     'LogPatientAction': sqlInterface.logPatientAction,
     'Questionnaire': questionnaires.getQuestionnaire,
-    // Deprecated API entry: 'QuestionnaireList' is now accessed via sqlInterface's requestMappings (since QSCCD-230)
-    'QuestionnaireList': questionnaires.getQuestionnaireList,
     'QuestionnairePurpose': questionnaires.getQuestionnairePurpose,
     'QuestionnaireSaveAnswer': questionnaires.questionnaireSaveAnswer,
     'QuestionnaireUpdateStatus': questionnaires.questionnaireUpdateStatus,
