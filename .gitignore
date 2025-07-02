@@ -90,6 +90,3 @@ credentials.js
 
 # Atom ftp configuration
 .ftpconfig
-
-# Ignore the Doctors folder
-Doctors/

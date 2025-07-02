@@ -39,15 +39,6 @@ queries.patientTableFieldsForUser = function() {
 };
 
 /**
- * @deprecated;
- * @returns {string}
- */
-queries.patientDoctorTableFields=function()
-{
-	return "SELECT ifnull(D.FirstName, '') FirstName, ifnull(D.LastName, '') LastName, D.DoctorSerNum, PD.PrimaryFlag, PD.OncologistFlag, ifnull(D.Email, '') Email, ifnull(D.Phone, '') Phone, ifnull(D.ProfileImage, '') ProfileImage, ifnull(D.Address, '') Address,	ifnull(D.BIO_EN, '') Bio_EN, ifnull(D.BIO_FR, '') Bio_FR FROM Doctor D, PatientDoctor PD WHERE PD.PatientSerNum = ? AND D.DoctorSerNum = PD.DoctorSerNum AND (D.LastUpdated > ? OR PD.LastUpdated > ?);";
-};
-
-/**
  * @desc Query that returns the patient's diagnoses.
  * @param {boolean} [selectOne] If provided, only one diagnosis with a specific SerNum is returned.
  * @returns {string} The query.

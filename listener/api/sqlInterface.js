@@ -33,7 +33,7 @@ import Version from '../../src/utility/version.js';
  *                   by a request handler there.
  *              Note: either format can have an optional 'processFunction' attribute, which is run on the result before returning it.
  *
- * Deprecated: {Doctors: {sql, processFunction: loadImageDoctor, numberOfLastUpdated: number}, Tasks: {sql, numberOfLastUpdated: number}}
+ * Deprecated: {Tasks: {sql, numberOfLastUpdated: number}}
  */
 const requestMappings =
     {
@@ -53,14 +53,6 @@ const requestMappings =
             serNum: 'DocumentSerNum',
             needUserId: true,
             notificationType: ["Document", "UpdDocument"],
-        },
-        /**
-         * Deprecated: 'Doctors'
-         */
-        'Doctors': {
-            sql: queries.patientDoctorTableFields(),
-            processFunction: loadImageDoctor,
-            numberOfLastUpdated: 2,
         },
         'Diagnosis': {
             sql: queries.patientDiagnosesAll(),
@@ -1080,32 +1072,6 @@ function LoadDocuments(rows) {
         }
     }
     return defer.promise;
-}
-
-/**
- * loadImageDoctor
- * @deprecated
- * @desc loads a doctor's image fetched from DB
- * @param rows
- * @return {Promise}
- */
-function loadImageDoctor(rows){
-    const deferred = Q.defer();
-    for (const key in rows){
-        if((typeof rows[key].ProfileImage !=="undefined" )&&rows[key].ProfileImage){
-            const n = rows[key].ProfileImage.lastIndexOf(".");
-            rows[key].DocumentType=rows[key].ProfileImage.substring(n + 1, rows[key].ProfileImage.length);
-			/* 2019-02-27 YM : Try to load the image file and if no image then return empty image string */
-			try {
-				rows[key].ProfileImage=filesystem.readFileSync(config.DOCTOR_PATH + rows[key].ProfileImage,'base64' );
-			} catch(err) {
-				rows[key].ProfileImage= '';
-			}
-
-        }
-    }
-    deferred.resolve(rows);
-    return deferred.promise;
 }
 
 /**
