@@ -19,44 +19,6 @@ FUNCTIONS TO GET QUESTIONNAIRES (QUESTIONNAIRE V2)
  */
 
 /**
- * getQuestionnaireInOpalDB
- * @desc Returns a promise containing the questionnaire's general information stored in OpalDB. Used for the new questionnaire 2019
- * @deprecated Since QSCCD-1559, in released versions after 1.12.2.
- * @param {object} requestObject
- * @returns {Promise} object containing the questionnaire's general information stored in OpalDB
- */
-function getQuestionnaireInOpalDB(requestObject) {
-    return new Promise(function(resolve, reject) {
-        if (!questionnaireValidation.validateQuestionnaireSerNum(requestObject)) {
-
-            const paramErrMessage = "Error getting questionnaire data stored in OpalDB: the requestObject does not have the required parameters";
-            logger.log("error", paramErrMessage);
-            reject(new Error(paramErrMessage));
-
-        } else {
-            OpalSQLQueryRunner.run(questionnaireQueries.getQuestionnaireInOpalDBFromSerNum(), [requestObject.Parameters.questionnaireSerNum])
-                .then(function (rows) {
-                    if (rows.length !== 1) {
-
-                        const questionnaireSerNumErrMessage = `Error getting questionnaire data stored in OpalDB: the questionnaireSerNum ${requestObject.Parameters.questionnaireSerNum} does not have exactly one matching questionnaire`;
-                        logger.log("error", questionnaireSerNumErrMessage);
-                        reject(new Error(questionnaireSerNumErrMessage));
-
-                    } else {
-                        let obj = {};
-                        obj.Data = rows[0];
-                        resolve(obj);
-                    }
-                })
-                .catch(function (error) {
-                    logger.log("error", "Error getting questionnaire data stored in OpalDB", error);
-                    reject(error);
-                });
-        }
-    });
-}
-
-/**
  * @description Looks up the answerQuestionnaireId corresponding to a given QuestionnaireSerNum.
  * @param questionnaireSerNum The SerNum of the questionnaire to find.
  * @throws {string} Throws an error message if the questionnaire is not found.
@@ -344,7 +306,6 @@ async function checkCaregiverPermissions(userId, patientSerNum) {
 }
 
 export default {
-    getQuestionnaireInOpalDB,
     getAnswerQuestionnaireIdFromSerNum,
     getQuestionnaireList,
     getQuestionnaire,

@@ -18,7 +18,6 @@ const questionnaireOpalDBValidation = {
     'validateParamSaveAnswer': validateParamSaveAnswer,
     'validateParamUpdateStatus': validateParamUpdateStatus,
     'validateQuestionnairePurpose': validateQuestionnairePurpose,
-    'validateQuestionnaireSerNum': validateQuestionnaireSerNum,
 };
 
 /**
@@ -112,18 +111,6 @@ function validateQuestionnairePurpose(requestObject) {
         requestObject?.Parameters?.purpose &&
         questionnaireConfig.QUESTIONNAIRE_PURPOSE_ID_MAP.hasOwnProperty(requestObject.Parameters.purpose.toUpperCase())
     );
-}
-
-/**
- * @name validateQuestionnaireSerNum
- * @desc validating the parameter questionnaireSerNum sent from the front-end
- * @deprecated Since QSCCD-1559, in released versions after 1.12.2.
- * @param {object} requestObject object sent from the front-end
- * @returns {boolean} true if the questionnaireSerNum parameter exists and is in correct format, false otherwise
- */
-function validateQuestionnaireSerNum(requestObject) {
-    return (requestObject.hasOwnProperty('Parameters') && requestObject.Parameters.hasOwnProperty('questionnaireSerNum')
-        && !isNaN(requestObject.Parameters.questionnaireSerNum) && parseInt(requestObject.Parameters.questionnaireSerNum) !== 0);
 }
 
 /**
