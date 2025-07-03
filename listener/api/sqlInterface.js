@@ -37,14 +37,6 @@ import Version from '../../src/utility/version.js';
  */
 const requestMappings =
     {
-        /**
-         * Deprecated: 'Patient'
-         */
-        'Patient': {
-            sql: queries.patientTableFields(),
-            processFunction: loadProfileImagePatient,
-            numberOfLastUpdated: 0,
-        },
         'Documents': {
             sql: queries.patientDocumentsAll(),
             sqlSingleItem: queries.patientDocumentsOne(),
@@ -1065,29 +1057,6 @@ function LoadDocuments(rows) {
         }
     }
     return defer.promise;
-}
-
-/**
- * loadProfileImagePatient
- * @desc formats patient image to base64
- * @deprecated Along with the Patient requestMapping in sqlInterface.
- * @param rows
- * @return {Promise}
- */
-function loadProfileImagePatient(rows){
-    const deferred = Q.defer();
-
-    if(rows[0]&&rows[0].ProfileImage && rows[0].ProfileImage!=='') {
-        const buffer = new Buffer(rows[0].ProfileImage, 'hex');
-        const base64Buffer = buffer.toString('base64');
-        rows[0].DocumentType='jpg';
-        rows[0].ProfileImage=base64Buffer;
-        deferred.resolve(rows);
-    }else{
-        deferred.resolve(rows);
-    }
-
-    return deferred.promise;
 }
 
 /**
