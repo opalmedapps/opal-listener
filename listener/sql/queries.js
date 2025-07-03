@@ -5,24 +5,6 @@
 const queries = {};
 
 /**
- * @desc Query that returns patient table fields based on a PatientSerNum.
- * @deprecated Along with the Patient requestMapping in sqlInterface.
- * @returns {string} The query.
- */
-queries.patientTableFields=function()
-{
-    /* Note: "" AS PatientId
-     *       This was added to make the Account tab display nothing instead of the Patient's MRN
-     *       The PatientId attribute can be removed after qplus PR #829 is merged
-     * -SB */
-    return `SELECT p.PatientSerNum, p.TestUser, p.FirstName, p.LastName, p.TelNum, "" AS PatientId, p.Email, p.Alias,
-                   p.Language, p.EnableSMS, p.ProfileImage, p.SSN, p.AccessLevel
-            FROM Patient p
-            WHERE p.PatientSerNum = ?
-            ;`
-};
-
-/**
  * @desc Query that returns patient table fields based on a user's Username.
  * @deprecated Uses of this query should be updated with better methods (e.g. using the Patient module).
  * @returns {string} The query.
