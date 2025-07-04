@@ -23,7 +23,7 @@
     "crypto-js": "4.2.0",
     "dotenv": "16.4.7",
     "express-validator": "7.2.1",
-    "firebase-admin": "13.1.0",
+    "firebase-admin": "13.4.0",
     "html-to-text": "9.0.5",
     "keyv": "5.3.4",
     "moment": "2.30.1",
