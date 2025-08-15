@@ -100,7 +100,12 @@ class RequestHandler {
                 // Make sure that encrypt is false if we didn't encrypt, to give the right info to the frontend
                 finalResponse.encrypt = false;
             }
-            await this.sendResponse(finalResponse, snapshot.key, encryptionInfo?.userId, requestType);
+            await this.sendResponse(
+                finalResponse,
+                snapshot.key,
+                encryptionInfo?.userId || context?.userId,
+                requestType,
+            );
         }
 
         this.clearRequest(requestType, snapshot.key);
