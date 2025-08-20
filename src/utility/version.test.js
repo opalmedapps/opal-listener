@@ -8,6 +8,8 @@
 
 import '../test/chai-setup.js';
 import { expect } from 'chai';
+import fs from 'fs';
+import sinon from 'sinon';
 import Version from './version.js';
 
 describe('Version', function () {
@@ -91,6 +93,29 @@ describe('Version', function () {
         });
         it('should return true when lesser', function () {
             expect(Version.versionLessOrEqual('0.1.0', '1.0.0')).to.be.true;
+        });
+    });
+
+    describe('getListenerVersion', function() {
+        it('should read a version number in the correct format', function() {
+            const version = Version.getListenerVersion();
+            const regex = /^\d+$/
+
+            // The first and last character should not be periods
+            expect(version.charAt(0)).to.not.equal('.', 'Version number should not start with a period');
+            expect(version.charAt(version.length - 1)).to.not.equal('.', 'Version number should not end with a period');
+
+            // All other characters between periods should be digits
+            const versionParts = version.split('.');
+            versionParts.forEach(part => {
+                expect(regex.test(part), `Version number should contain only digits and periods; "${part}" is not a sequence of one or more digits`).to.be.true;
+            })
+        });
+        it('should return undefined if reading the version file fails', function() {
+            const stub = sinon.stub(fs, 'readFileSync');
+            stub.throws();
+            const version = Version.getListenerVersion();
+            expect(version).to.be.undefined;
         });
     });
 });
