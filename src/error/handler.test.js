@@ -13,6 +13,10 @@ describe('Error handler', function () {
             const result = ErrorHandler.getErrorResponse('NOT_A_REAL_ERROR_CODE');
             return expect(result.data.errorMessage).to.equal('UNEXPECTED_ERROR');
         });
+        it('Should return an unexpected error when given undefined', function () {
+            const result = ErrorHandler.getErrorResponse(undefined);
+            return expect(result.data.errorMessage).to.equal('UNEXPECTED_ERROR');
+        });
         Object.keys(ERRORS).forEach(item => {
             it(`Should return ${ERRORS[item].statusCode}: ${item}`, function () {
                 const error = new Error(item);
