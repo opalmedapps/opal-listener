@@ -8,19 +8,22 @@ import { Keyv } from 'keyv';
 import legacyLogger from '../../listener/logs/logger.js';
 import RequestContext from '../core/request-context.js';
 
-const regCache = new Keyv({ namespace: 'registration' });
-regCache.on('error', err => legacyLogger.log(
-    'error',
-    'KeyV registration data cache error',
-    err,
-));
-
 // We bind the snapshot branch name to dedicated salt and secret keys for this regCache instance
 // This allows to keep a dedicated datacache for each unique registration code hash
 const getInstanceSalt = context => `salt-${context.branchName}`;
 const getInstanceSecret = context => `secret-${context.branchName}`;
 
 class Registration {
+    static regCache = new Keyv({ namespace: 'registration' });
+
+    static {
+        this.regCache.on('error', err => legacyLogger.log(
+            'error',
+            'KeyV registration data cache error',
+            err,
+        ));
+    }
+
     static async getEncryptionValues(context) {
         const requestParams = {
             Parameters: {
@@ -35,7 +38,7 @@ class Registration {
         const instanceSecret = getInstanceSecret(context);
 
         // On cache miss, call the API to get encryption info
-        if (!await regCache.get(instanceSalt) || !await regCache.get(instanceSecret)) {
+        if (!await this.regCache.get(instanceSalt) || !await this.regCache.get(instanceSecret)) {
             legacyLogger.log('verbose', 'Registration encryption data cache miss or TTL expired; fetching new data');
             const response = await ApiRequest.makeRequest(requestParams);
             return this.secretAndSaltFromResponse(response);
@@ -43,19 +46,19 @@ class Registration {
 
         // Otherwise, on cache hit, retrieve encryption values from memory
         legacyLogger.log('verbose', 'Loading registration encryption data from cache and resetting TTL');
-        await regCache.set(
+        await this.regCache.set(
             instanceSalt,
-            await regCache.get(instanceSalt),
+            await this.regCache.get(instanceSalt),
             process.env.DATA_CACHE_TIME_TO_LIVE_MINUTES * 60 * 1000,
         );
-        await regCache.set(
+        await this.regCache.set(
             instanceSecret,
-            await regCache.get(instanceSecret),
+            await this.regCache.get(instanceSecret),
             process.env.DATA_CACHE_TIME_TO_LIVE_MINUTES * 60 * 1000,
         );
         return {
-            salt: await regCache.get(instanceSalt),
-            secret: await regCache.get(instanceSecret),
+            salt: await this.regCache.get(instanceSalt),
+            secret: await this.regCache.get(instanceSecret),
         };
     }
 
@@ -104,12 +107,12 @@ class Registration {
 
         // Cache encryption info for the first time (once we know which salt was successful) or reset TTL
         legacyLogger.log('verbose', 'Caching registration encryption data or resetting TTL');
-        await regCache.set(
+        await this.regCache.set(
             getInstanceSalt(context),
             encryptionInfo.salt,
             process.env.DATA_CACHE_TIME_TO_LIVE_MINUTES * 60 * 1000,
         );
-        await regCache.set(
+        await this.regCache.set(
             getInstanceSecret(context),
             encryptionInfo.secret,
             process.env.DATA_CACHE_TIME_TO_LIVE_MINUTES * 60 * 1000,

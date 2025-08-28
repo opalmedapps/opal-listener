@@ -11,9 +11,13 @@ import EncryptionUtilities from '../encryption/encryption.js';
 import { expect } from 'chai';
 import Registration from './registration.js';
 import RequestContext from '../core/request-context.js';
+import sinon from 'sinon';
+import logger from '../../listener/logs/logger.js';
+import ApiRequest from "../core/api-request.js";
 
 const context = new RequestContext('test', {});
-
+let loggerSpy;
+let apiRequestStub;
 const originalObj = {
     Request: 'test',
     Parameters: {
@@ -23,6 +27,52 @@ const originalObj = {
 const secret = 'secret';
 
 describe('Registration', function () {
+    before(function() {
+        loggerSpy = sinon.spy(logger, 'log');
+        apiRequestStub = sinon.stub(ApiRequest, 'makeRequest');
+        apiRequestStub.returns({
+            data: {
+                code: "A0AAAAAAAAAA",
+                status: "NEW",
+                patient: {
+                    ramq: "AAAA11111111",
+                },
+                hospital_patients: [
+                    {
+                        mrn: "9999999",
+                        is_active: true,
+                    }
+                ]
+            }
+        });
+    });
+
+    describe('events', function() {
+        it('should log any error that occurs in the cache during execution', function() {
+            Registration.regCache.emit('error', 'test');
+            sinon.assert.calledWith(loggerSpy, 'error', 'KeyV registration data cache error', 'test');
+        });
+    });
+
+    describe('getEncryptionValues', function() {
+        it('should call the API on cache miss', async function() {
+            apiRequestStub.resetHistory();
+            let context = new RequestContext('Test', {});
+            await Registration.getEncryptionValues(context);
+            sinon.assert.calledOnce(apiRequestStub);
+        });
+        it('should not call the API on cache hit', async function() {
+            apiRequestStub.resetHistory();
+            let context = new RequestContext('Test', {
+                BranchName: 'unit-test'
+            });
+            await Registration.regCache.set('salt-unit-test', 'test');
+            await Registration.regCache.set('secret-unit-test', 'test');
+            await Registration.getEncryptionValues(context);
+            sinon.assert.notCalled(apiRequestStub);
+        });
+    });
+
     describe('secretAndSaltFromResponse', function () {
         it('should throw an ENCRYPTION_SALT error when no salt is found', async function () {
             const response = {
@@ -205,6 +255,11 @@ describe('Registration', function () {
                 salt: ['wrong1', 'wrong2', 'wrong3'],
             });
         });
+    });
+
+    after(function() {
+        loggerSpy.restore();
+        apiRequestStub.restore();
     });
 });
 
