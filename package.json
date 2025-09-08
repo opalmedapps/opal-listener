@@ -45,7 +45,7 @@
     "firebase-tools": "14.12.1",
     "globals": "16.3.0",
     "jsdoc": "4.0.4",
-    "mocha": "11.7.1",
+    "mocha": "11.7.2",
     "nyc": "17.1.0",
     "run-script-os": "1.1.6",
     "sinon": "21.0.0"
