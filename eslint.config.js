@@ -5,7 +5,7 @@
 import globals from 'globals';
 import importPlugin from 'eslint-plugin-import';
 import js from '@eslint/js';
-import jsdoc from 'eslint-plugin-jsdoc';
+import { jsdoc } from 'eslint-plugin-jsdoc';
 import mocha from 'eslint-plugin-mocha';
 import stylistic from '@stylistic/eslint-plugin';
 
@@ -21,7 +21,7 @@ export default [
     // Plugin configurations
     importPlugin.flatConfigs.recommended,
     js.configs.recommended,
-    jsdoc.configs['flat/recommended'],
+    jsdoc({ config: 'flat/recommended' }),
     mocha.configs.recommended,
     stylistic.configs.customize({
         indent: 4,
