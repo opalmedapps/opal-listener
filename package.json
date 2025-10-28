@@ -19,7 +19,7 @@
     "@stablelib/base64": "2.0.1",
     "@stablelib/utf8": "2.0.1",
     "axios": "1.12.2",
-    "cross-env": "10.0.0",
+    "cross-env": "10.1.0",
     "crypto-js": "4.2.0",
     "dotenv": "17.2.2",
     "express-validator": "7.2.1",
