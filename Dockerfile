@@ -36,6 +36,7 @@ ARG NODE_ENV="production"
 ENV NODE_ENV="${NODE_ENV}"
 
 COPY --from=dependencies /app/node_modules ./node_modules
+COPY ./package.json ./
 
 # Copy all code sources
 COPY ./listener ./listener
