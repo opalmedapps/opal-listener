@@ -12,6 +12,8 @@
     ":separateMultipleMajorReleases",
     // https://docs.renovatebot.com/presets-default/#maintainlockfilesmonthly
     ":maintainLockFilesMonthly",
+    // https://docs.renovatebot.com/presets-security/#securityminimumreleaseagenpm
+    "security:minimumReleaseAgeNpm",
     // set timezone to local one to ensure schedules are run
     // https://docs.renovatebot.com/configuration-options/#timezone
     ":timezone(America/Toronto)",
