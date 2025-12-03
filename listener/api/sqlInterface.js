@@ -1142,9 +1142,9 @@ function LoadDicomImgs(rows){
             var files =  filesystem.readdirSync(folderpath);
             var numFiles = files.length;
 
-            files.forEach(function(file){
+            var bufferArray;
 
-                var bufferArray;
+            files.forEach(function(file){
 
                 // If file is DICOM image
                 if (file.includes(".dcm")) {
@@ -1295,7 +1295,7 @@ function LoadDicoms(rows) {
                 var modality = dicomData.string('x00080060'); // RTPLAN or RTSTRUCT
 
                 if (modality === 'RTPLAN'){ // BEAM 3D RECONSTRUCTION AND TEXT PARAMETER EXTRACTION
-                    hasRtPlan = true;
+                    hasRTPlan = true;
                     data.hasMLC = false; // true if plan uses multileaf collimators (MLC)
 
                     data.patientPosition = dicomData.elements.x300a0180.items[0].dataSet.string('x00185100'); // Patient Position: "HFS", "FFS", etc.
