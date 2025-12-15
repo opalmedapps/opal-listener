@@ -1,0 +1,7 @@
+# Allow version pinning by reference
+# See: https://docs.zizmor.sh/audits/#unpinned-uses
+rules:
+  unpinned-uses:
+    config:
+      policies:
+        "*": ref-pin
