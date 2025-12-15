@@ -22,7 +22,7 @@ jobs:
   lint-eslint:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v6.0.0
+      - uses: actions/checkout@v6.0.1
         with:
           persist-credentials: false
       - name: Install GitHub Actions formatter
@@ -35,7 +35,7 @@ jobs:
   lint-pre-commit:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v6.0.0
+      - uses: actions/checkout@v6.0.1
         with:
           persist-credentials: false
       - uses: mschoettle/pre-commit-action@v4.2.3
@@ -49,7 +49,7 @@ jobs:
   check-thirdparty-notice:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v6.0.0
+      - uses: actions/checkout@v6.0.1
         with:
           persist-credentials: false
       - uses: opalmedapps/actions/actions/check-thirdparty-notice@main
@@ -60,7 +60,7 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       # Setup
-      - uses: actions/checkout@v6.0.0
+      - uses: actions/checkout@v6.0.1
         with:
           persist-credentials: false
       - name: Install dependencies
