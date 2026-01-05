@@ -97,6 +97,8 @@ class EncryptionUtilities {
                 },
             });
         }
+        /* c8 ignore next */
+        // Uncovered branch at this line caused by issues with coverage of 'finally' blocks; see: https://github.com/bcoe/c8/issues/229
         finally {
             // Restore the cacheLabel
             context.cacheLabel = cacheLabel;
