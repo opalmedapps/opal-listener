@@ -8,7 +8,7 @@
     "docs:nix": "./node_modules/.bin/jsdoc src README.md -c docs/jsdoc.config.json",
     "docs:windows": ".\\node_modules\\.bin\\jsdoc src README.md -c docs/jsdoc.config.json",
     "test": "cross-env DISABLE_LOGGING=true mocha './src/**/*.test.*' './listener/**/*.test.*' './legacy-registration/**/*.test.*'",
-    "coverage": "nyc mocha './src/**/*.test.*' './listener/**/*.test.*' './legacy-registration/**/*.test.*'",
+    "coverage": "npx c8 --all mocha ./src/**/*.test.* ./listener/**/*.test.* ./legacy-registration/**/*.test.*",
     "start": "node src/server.js",
     "watch": "nodemon src/server.js",
     "watch:docker": "nodemon -L src/server.js",
