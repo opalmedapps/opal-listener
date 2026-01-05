@@ -5,7 +5,7 @@
 # install dependencies in separate stage to keep node_modules out of app directory
 # npm ci does not seem to be customizable on where to install node_modules/
 # see: https://nickjanetakis.com/blog/best-practices-around-production-ready-web-apps-with-docker-compose#customizing-where-package-dependencies-get-installed
-FROM node:22.18.0-alpine3.22 AS dependencies
+FROM node:24.12.0-alpine3.23 AS dependencies
 
 ARG NODE_ENV="production"
 ENV NODE_ENV="${NODE_ENV}"
@@ -27,7 +27,7 @@ COPY package-lock.json ./
 # see: https://docs.npmjs.com/cli/v9/commands/npm-ci#omit
 RUN npm ci
 
-FROM node:22.18.0-alpine3.22
+FROM node:24.12.0-alpine3.23
 
 USER node
 WORKDIR /app
@@ -35,7 +35,7 @@ WORKDIR /app
 ARG NODE_ENV="production"
 ENV NODE_ENV="${NODE_ENV}"
 
-COPY --from=dependencies /app/node_modules /node_modules
+COPY --from=dependencies /app/node_modules ./node_modules
 COPY ./package*.json ./
 
 # Copy all code sources
@@ -43,5 +43,6 @@ COPY ./listener ./listener
 COPY ./legacy-registration ./legacy-registration
 COPY ./src ./src
 COPY ./VERSION ./VERSION
+COPY ./LICENSE ./LICENSE
 
 CMD [ "npm", "run", "start" ]
