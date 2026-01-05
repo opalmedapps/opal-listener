@@ -75,7 +75,7 @@ jobs:
 
       # Format the test output for GitHub
       - name: Report test results
-        uses: dorny/test-reporter@v2.3.0
+        uses: dorny/test-reporter@v2.5.0
         # Run this step even if the previous step failed
         if: ${{ !cancelled() }}
         with:
