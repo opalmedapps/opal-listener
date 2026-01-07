@@ -26,18 +26,25 @@ const requiredPropertiesRegistration = [
 ];
 
 describe('Registration', function () {
-    describe('export', function() {
-        Object.entries(RequestData).forEach(function([mockRequestName, mockRequest]) {
-            it(`should export '${mockRequestName}' with all required properties`, function() {
+    describe('export', function () {
+        Object.entries(RequestData).forEach(([mockRequestName, mockRequest]) => {
+            it(`should export '${mockRequestName}' with all required properties`, function () {
                 // Build the full list of required properties depending on the type of request
                 let requiredProperties = [];
                 requiredProperties.push(...requiredPropertiesBase);
-                if (['API', 'LEGACY'].includes(mockRequest.RequestType)) requiredProperties.push(...requiredPropertiesApp);
-                else if (['REGISTRATION', 'REGISTRATION_LEGACY'].includes(mockRequest.RequestType)) requiredProperties.push(...requiredPropertiesRegistration);
+                if (['API', 'LEGACY'].includes(mockRequest.RequestType)) {
+                    requiredProperties.push(...requiredPropertiesApp);
+                }
+                else if (['REGISTRATION', 'REGISTRATION_LEGACY'].includes(mockRequest.RequestType)) {
+                    requiredProperties.push(...requiredPropertiesRegistration);
+                }
 
                 // Check that all required properties are present
-                requiredProperties.forEach(function(property) {
-                    expect(mockRequest, `'${mockRequestName}' is missing a required property`).to.have.property(property);
+                requiredProperties.forEach(property => {
+                    expect(
+                        mockRequest,
+                        `'${mockRequestName}' is missing a required property`,
+                    ).to.have.property(property);
                 });
             });
         });

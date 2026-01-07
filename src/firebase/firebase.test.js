@@ -13,8 +13,8 @@ import Firebase from './firebase.js';
 import sinon from 'sinon';
 import ValidationError from '../utility/param-validator-error.js';
 
-describe('Firebase', function() {
-    before(function() {
+describe('Firebase', function () {
+    before(function () {
         sinon.stub(admin.credential, 'cert');
         let initializeAppStub = sinon.stub(admin, 'initializeApp');
         initializeAppStub.returns({
@@ -27,67 +27,67 @@ describe('Firebase', function() {
         });
     });
 
-    describe('init', function() {
-        it('should fail when DATABASE_URL config is missing', function() {
+    describe('init', function () {
+        it('should fail when DATABASE_URL config is missing', function () {
             const firebase = new Firebase(buildConfigObject(undefined, 'path', 'root'));
             return expect(firebase.init()).to.be.rejectedWith(ValidationError);
         });
 
-        it('should fail when DATABASE_URL config is empty', function() {
+        it('should fail when DATABASE_URL config is empty', function () {
             const firebase = new Firebase(buildConfigObject('', 'path', 'root'));
             return expect(firebase.init()).to.be.rejectedWith(ValidationError);
         });
 
-        it('should fail when DATABASE_URL config is not a url', function() {
+        it('should fail when DATABASE_URL config is not a url', function () {
             const firebase = new Firebase(buildConfigObject('not a url', 'path', 'root'));
             return expect(firebase.init()).to.be.rejectedWith(ValidationError);
         });
 
-        it('should fail when ADMIN_KEY_PATH config is missing', function() {
+        it('should fail when ADMIN_KEY_PATH config is missing', function () {
             const firebase = new Firebase(buildConfigObject('https://www.google.ca/', undefined, 'root'));
             return expect(firebase.init()).to.be.rejectedWith(ValidationError);
         });
 
-        it('should fail when ADMIN_KEY_PATH config is empty', function() {
+        it('should fail when ADMIN_KEY_PATH config is empty', function () {
             const firebase = new Firebase(buildConfigObject('https://www.google.ca/', '', 'root'));
             return expect(firebase.init()).to.be.rejectedWith(ValidationError);
         });
 
-        it('should fail when ROOT_BRANCH config is missing', function() {
+        it('should fail when ROOT_BRANCH config is missing', function () {
             const firebase = new Firebase(buildConfigObject('https://www.google.ca/', 'path', undefined));
             return expect(firebase.init()).to.be.rejectedWith(ValidationError);
         });
 
-        it('should fail when ROOT_BRANCH config is empty', function() {
+        it('should fail when ROOT_BRANCH config is empty', function () {
             const firebase = new Firebase(buildConfigObject('https://www.google.ca/', 'path', ''));
             return expect(firebase.init()).to.be.rejectedWith(ValidationError);
         });
 
-        it('should succeed when given non-failing arguments', function() {
+        it('should succeed when given non-failing arguments', function () {
             const firebase = new Firebase(buildConfigObject('https://www.google.ca/', 'path', 'root'));
             return expect(firebase.init()).to.be.fulfilled;
         });
     });
 
-    describe('getDataBaseRef', function() {
+    describe('getDataBaseRef', function () {
         // Used for test coverage
-        it('should succeed when called', async function() {
+        it('should succeed when called', async function () {
             const firebase = new Firebase(buildConfigObject('https://www.google.ca/', 'path', 'root'));
             await firebase.init();
             return expect(firebase.getDataBaseRef).to.be.ok;
         });
     });
 
-    describe('getDatabaseTimeStamp', function() {
+    describe('getDatabaseTimeStamp', function () {
         // Used for test coverage
-        it('should succeed when called', async function() {
+        it('should succeed when called', async function () {
             return expect(Firebase.getDatabaseTimeStamp).to.be.ok;
         });
     });
 
-    describe('enableLogging', function() {
+    describe('enableLogging', function () {
         // Used for test coverage
-        it('should succeed when called', async function() {
+        it('should succeed when called', async function () {
             return expect(() => Firebase.enableLogging(true)).to.not.throw();
         });
     });

@@ -96,10 +96,10 @@ describe('Version', function () {
         });
     });
 
-    describe('getListenerVersion', function() {
-        it('should read a version number in the correct format', function() {
+    describe('getListenerVersion', function () {
+        it('should read a version number in the correct format', function () {
             const version = Version.getListenerVersion();
-            const regex = /^\d+$/
+            const regex = /^\d+$/;
 
             // The first and last character should not be periods
             expect(version.charAt(0)).to.not.equal('.', 'Version number should not start with a period');
@@ -108,10 +108,14 @@ describe('Version', function () {
             // All other characters between periods should be digits
             const versionParts = version.split('.');
             versionParts.forEach(part => {
-                expect(regex.test(part), `Version number should contain only digits and periods; "${part}" is not a sequence of one or more digits`).to.be.true;
-            })
+                expect(
+                    regex.test(part),
+                    'Version number should contain only digits and periods; '
+                    + `"${part}" is not a sequence of one or more digits`,
+                ).to.be.true;
+            });
         });
-        it('should return undefined if reading the version file fails', function() {
+        it('should return undefined if reading the version file fails', function () {
             const stub = sinon.stub(fs, 'readFileSync');
             stub.throws();
             const version = Version.getListenerVersion();
