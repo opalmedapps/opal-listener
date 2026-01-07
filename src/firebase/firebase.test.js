@@ -10,13 +10,13 @@ import '../test/chai-setup.js';
 import admin from 'firebase-admin';
 import { expect } from 'chai';
 import Firebase from './firebase.js';
-import sinon from 'sinon';
+import { stub } from 'sinon';
 import ValidationError from '../utility/param-validator-error.js';
 
 describe('Firebase', function () {
     before(function () {
-        sinon.stub(admin.credential, 'cert');
-        let initializeAppStub = sinon.stub(admin, 'initializeApp');
+        stub(admin.credential, 'cert');
+        let initializeAppStub = stub(admin, 'initializeApp');
         initializeAppStub.returns({
             database: () => {
                 return {

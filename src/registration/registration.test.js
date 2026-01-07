@@ -7,13 +7,13 @@
  */
 
 import '../test/chai-setup.js';
+import { assert, spy, stub } from 'sinon';
 import ApiRequest from '../core/api-request.js';
 import EncryptionUtilities from '../encryption/encryption.js';
 import { expect } from 'chai';
 import logger from '../../listener/logs/logger.js';
 import Registration from './registration.js';
 import RequestContext from '../core/request-context.js';
-import sinon from 'sinon';
 
 const context = new RequestContext('test', {});
 let loggerSpy;
@@ -28,8 +28,8 @@ const secret = 'secret';
 
 describe('Registration', function () {
     before(function () {
-        loggerSpy = sinon.spy(logger, 'log');
-        apiRequestStub = sinon.stub(ApiRequest, 'makeRequest');
+        loggerSpy = spy(logger, 'log');
+        apiRequestStub = stub(ApiRequest, 'makeRequest');
         apiRequestStub.returns({
             data: {
                 code: 'A0AAAAAAAAAA',
@@ -50,7 +50,7 @@ describe('Registration', function () {
     describe('events', function () {
         it('should log any error that occurs in the cache during execution', function () {
             Registration.regCache.emit('error', 'test');
-            sinon.assert.calledWith(loggerSpy, 'error', 'KeyV registration data cache error', 'test');
+            assert.calledWith(loggerSpy, 'error', 'KeyV registration data cache error', 'test');
         });
     });
 
@@ -59,7 +59,7 @@ describe('Registration', function () {
             apiRequestStub.resetHistory();
             let context = new RequestContext('Test', {});
             await Registration.getEncryptionValues(context);
-            sinon.assert.calledOnce(apiRequestStub);
+            assert.calledOnce(apiRequestStub);
         });
         it('should not call the API on cache hit', async function () {
             apiRequestStub.resetHistory();
@@ -69,7 +69,7 @@ describe('Registration', function () {
             await Registration.regCache.set('salt-unit-test', 'test');
             await Registration.regCache.set('secret-unit-test', 'test');
             await Registration.getEncryptionValues(context);
-            sinon.assert.notCalled(apiRequestStub);
+            assert.notCalled(apiRequestStub);
         });
     });
 

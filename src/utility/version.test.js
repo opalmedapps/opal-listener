@@ -9,7 +9,7 @@
 import '../test/chai-setup.js';
 import { expect } from 'chai';
 import fs from 'fs';
-import sinon from 'sinon';
+import { stub } from 'sinon';
 import Version from './version.js';
 
 describe('Version', function () {
@@ -116,8 +116,8 @@ describe('Version', function () {
             });
         });
         it('should return undefined if reading the version file fails', function () {
-            const stub = sinon.stub(fs, 'readFileSync');
-            stub.throws();
+            const readFileSync = stub(fs, 'readFileSync');
+            readFileSync.throws();
             const version = Version.getListenerVersion();
             expect(version).to.be.undefined;
         });

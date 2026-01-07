@@ -9,7 +9,7 @@ import { expect } from 'chai';
 import legacyUtility from '../../listener/utility/utility.js';
 import OpalSQLQueryRunner from '../../listener/sql/opal-sql-query-runner.js';
 import RequestContext from '../core/request-context.js';
-import sinon from 'sinon';
+import { stub } from 'sinon';
 
 const context = new RequestContext('test', {
     UserID: 'test-id',
@@ -28,7 +28,7 @@ describe('EncryptionUtilities', function () {
             return expect(encryptedData.username).to.not.equal(data);
         });
         it('should wrap unexpected errors as generic encryption errors', async function () {
-            encryptStub = sinon.stub(legacyUtility, 'encrypt');
+            encryptStub = stub(legacyUtility, 'encrypt');
             encryptStub.throws();
             let promise = EncryptionUtilities.encryptResponse(context, 'test', 'secret', 'salt');
             return expect(promise).to.be.rejectedWith('ENCRYPTION');
@@ -64,7 +64,7 @@ describe('EncryptionUtilities', function () {
         }];
 
         before(function () {
-            queryStub = sinon.stub(OpalSQLQueryRunner, 'run');
+            queryStub = stub(OpalSQLQueryRunner, 'run');
             queryStub.returns(queryData);
         });
         it("should return the user's hashed user ID as the secret value", async function () {
