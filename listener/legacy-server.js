@@ -8,6 +8,7 @@
  */
 
 import admin from 'firebase-admin';
+import config from './config-adaptor.js';
 import cp from 'child_process';
 import logger from './logs/logger.js';
 import mainRequestApi from './api/main.js';
@@ -156,13 +157,54 @@ function processRequest(context, headers){
 
         logger.log('debug', 'Processing general request');
         mainRequestApi.apiRequestFormatter(context, requestKey, requestObject)
-            .then(function(results){
+            .then(function(results) {
+                try {
+                    // Add translated attributes based on the user's language; for example, add Description alongside Description_EN and Description_FR
+                    translateContent(results, context.acceptLanguage, config.FALLBACK_LANGUAGE);
+                }
+                catch (error) {
+                    logger.log('error', 'Translation error', error);
+                }
 
                 logger.log('debug', `results: ${utility.stringifyShort(results)}`);
                 r.resolve(results);
             })
     }
     return r.promise;
+}
+
+/**
+ * @description Translates content in place inside of an object, recursively at deeper levels, by looking for keys ending in _EN, _FR, etc.
+ *              New keys are then added alongside the existing ones, with copies of the data in the user's chosen language.
+ *              For example, given the keys Description_EN and Description_FR and an acceptLanguage of EN,
+ *              a new key Description will be created with the same value as Description_EN.
+ * @param {object} object The object to translate.
+ * @param {string} acceptLanguage The user's app language.
+ * @param {string} fallbackLanguage A system-defined fallback language to use when the user's app language is not available for the data.
+ */
+function translateContent(object, acceptLanguage, fallbackLanguage) {
+    const hasLanguageSuffix = key => key.match(/^.+_[A-Z]{2}$/);
+
+    if (Array.isArray(object)) {
+        for (let element of object) {
+            translateContent(element, acceptLanguage, fallbackLanguage);
+        }
+    }
+    else if (typeof object === 'object' && object !== null) {
+        for (const [key, value] of Object.entries(object)) {
+            if (hasLanguageSuffix(key)) {
+                // Parse the language tag away from the end of the key; for example, Description_EN becomes Description
+                let keyBase = key.slice(0, -3);
+
+                // Pick which value to use: the one for the acceptLanguage, if it exists, otherwise, the fallbackLanguage
+                if (object.hasOwnProperty(`${keyBase}_${acceptLanguage}`)) object[keyBase] = object[`${keyBase}_${acceptLanguage}`];
+                else if (object.hasOwnProperty(`${keyBase}_${fallbackLanguage}`)) object[keyBase] = object[`${keyBase}_${fallbackLanguage}`];
+                else throw `Translation error; an attribute in the format '${keyBase}_XX' does not exist for either the accept language (${acceptLanguage}) or the fallback language (${fallbackLanguage})`;
+            }
+
+            translateContent(value, acceptLanguage, fallbackLanguage);
+        }
+    }
 }
 
 /**
