@@ -30,8 +30,6 @@ const LEGACYAPI = {
     'Login': sqlInterface.login,
     'Logout': sqlInterface.logout,
     'LogPatientAction': sqlInterface.logPatientAction,
-    // Deprecated API entry: 'NotificationsNew', since QSCCD-125
-    'NotificationsNew': sqlInterface.getNewNotifications,
     // Deprecated API entry: 'PFPMembers', since QSCCD-417
     'PFPMembers': sqlInterface.getPatientsForPatientsMembers,
     'Questionnaire': questionnaires.getQuestionnaire,
