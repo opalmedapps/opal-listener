@@ -14,22 +14,6 @@ This file stores all queries related to the questionnaire system
 const queries = {};
 
 /**
- * @deprecated Since QSCCD-1559, in released versions after 1.12.2.
- * @returns {string}
- */
-queries.getQuestionnaireInOpalDBFromSerNum = function () {
-    return `SELECT
-                q.QuestionnaireSerNum AS questionnaireSerNum,
-                q.QuestionnaireControlSerNum AS questionnaireControlSerNum,
-                q.PatientQuestionnaireDBSerNum AS answerQuestionnaireId,
-                q.CompletedFlag AS completedFlag,
-                q.CompletionDate AS completionDate,
-                q.LastUpdated AS lastUpdated
-            FROM Questionnaire q
-            WHERE q.QuestionnaireSerNum = ?;`
-};
-
-/**
  * @description Query that looks up the answerQuestionnaireId corresponding to a given QuestionnaireSerNum.
  * @returns {string} The query.
  */
