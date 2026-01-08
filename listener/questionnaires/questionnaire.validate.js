@@ -14,10 +14,8 @@ import Version from '../../src/utility/version.js';
 
 const questionnaireOpalDBValidation = {
     'validatePatientQuestionnaireSerNum': validatePatientQuestionnaireSerNum,
-    'validatePatientSerNumAndLanguage': validatePatientSerNumAndLanguage,
     'validateParamSaveAnswer': validateParamSaveAnswer,
     'validateParamUpdateStatus': validateParamUpdateStatus,
-    'validateQuestionnairePurpose': validateQuestionnairePurpose,
 };
 
 /**
@@ -29,23 +27,6 @@ const questionnaireOpalDBValidation = {
 function validatePatientQuestionnaireSerNum(requestObject) {
     return (requestObject.hasOwnProperty('Parameters') && requestObject.Parameters.hasOwnProperty('qp_ser_num')
         && requestObject.Parameters.qp_ser_num !== null && !isNaN(requestObject.Parameters.qp_ser_num));
-}
-
-/**
- * @name validatePatientSerNumAndLanguage
- * @deprecated Since QSCCD-91
- * @desc validate the whether there is a patientSerNum and language returned from the OpalDB
- * @param {array} queryResponse The response directly from the OpalDB
- * @returns {boolean} true if the response is valid, false otherwise
- */
-function validatePatientSerNumAndLanguage(queryResponse) {
-    return (queryResponse.length === 1
-        && queryResponse[0].hasOwnProperty('PatientSerNum')
-        && queryResponse[0].hasOwnProperty('Language')
-        && queryResponse[0].PatientSerNum !== undefined
-        && queryResponse[0].PatientSerNum !== null
-        && queryResponse[0].Language !== undefined
-        && queryResponse[0].Language !== null);
 }
 
 /**
@@ -92,25 +73,6 @@ function validateParamUpdateStatus(requestObject) {
         !isNaN(parseInt(requestObject.Parameters.answerQuestionnaire_id)),
     ];
     return requirements.every(requirement => requirement);
-}
-
-/**
- * @name validateQuestionnairePurpose
- * @desc validation function for the questionnaire purpose
- * @param {object} requestObject
- * @returns {boolean} true if the requestObject contain the purpose with the correct format, false otherwise
- */
-function validateQuestionnairePurpose(requestObject) {
-    // Compatibility fix for versions 1.12.2 and older that do not provide a purpose
-    if (Version.versionLessOrEqual(requestObject.AppVersion, Version.version_1_12_2)) {
-        requestObject.Parameters = {};
-        requestObject.Parameters.purpose = 'clinical';
-    }
-
-    return (
-        requestObject?.Parameters?.purpose &&
-        questionnaireConfig.QUESTIONNAIRE_PURPOSE_ID_MAP.hasOwnProperty(requestObject.Parameters.purpose.toUpperCase())
-    );
 }
 
 /**
