@@ -28,13 +28,14 @@ class OpalRequest {
 }
 
 class RequestMeta {
-	constructor({DeviceId, UserID, TargetPatientID, Timestamp, UserEmail, AppVersion}) {
+	constructor({DeviceId, UserID, TargetPatientID, Timestamp, UserEmail, AppVersion, 'Accept-Language': AcceptLanguage}) {
 		this.DeviceId = DeviceId;
 		this.UserID = UserID;
 		this.TargetPatientID = TargetPatientID;
 		this.Timestamp = Timestamp;
 		this.UserEmail = UserEmail;
 		this.AppVersion = AppVersion;
+		this.AcceptLanguage = AcceptLanguage;
 	}
 }
 

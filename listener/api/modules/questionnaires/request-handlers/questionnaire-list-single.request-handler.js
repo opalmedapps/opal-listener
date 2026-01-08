@@ -3,6 +3,7 @@
 // SPDX-License-Identifier: AGPL-3.0-or-later
 
 import ApiRequestHandler from '../../../api-request-handler.js';
+import config from '../../../../config-adaptor.js';
 import logger from '../../../../logs/logger.js';
 import { param } from 'express-validator';
 import questionnaireConfig from '../../../../questionnaires/questionnaireConfig.json' with { type: "json" };
@@ -11,12 +12,9 @@ import questionnaireQuestionnaireDB from '../../../../questionnaires/questionnai
 import utility from '../../../../utility/utility.js';
 import ValidationError from '../../../errors/validation-error.js';
 
-const languages = ['FR', 'EN'];
-
 class QuestionnaireListSingleHandler extends ApiRequestHandler {
 
     static validators = [
-        param('language', `Must provide a valid language string among [${languages}]`).isIn(languages),
         param("serNum", 'Must provide a positive integer serNum').isInt({ gt: 0 }),
     ];
 
@@ -35,14 +33,16 @@ class QuestionnaireListSingleHandler extends ApiRequestHandler {
 
         const patientSerNum = requestObject.meta.TargetPatientID;
         const userId = requestObject.meta.UserID;
-        const userLanguage = requestObject.params.language;
         const questionnaireSerNum = requestObject.params.serNum;
         const allPurposes = Object.keys(questionnaireConfig.QUESTIONNAIRE_PURPOSE_ID_MAP);
         const errorMessage = (message) => `${message} for userId = ${userId} accessing patient with PatientSerNum = ${patientSerNum}`;
 
+        // Translate based on the user's language, if available; otherwise, use the fallback language
+        const language = ['EN', 'FR'].includes(requestObject.meta.AcceptLanguage) ? requestObject.meta.AcceptLanguage : config.FALLBACK_LANGUAGE;
+
         const patientInfoSubset = {
             PatientSerNum: patientSerNum,
-            Language: userLanguage,
+            Language: language,
         };
 
         // Get the questionnaire's answerQuestionnaireId (qp_ser_num) to be able to look it up in QuestionnaireDB
