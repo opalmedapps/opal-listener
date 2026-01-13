@@ -10,6 +10,9 @@ import legacyLogger from '../../listener/logs/logger.js';
 
 class Version {
     // Constants
+    // Add constants for app versions here; for example, to provide different behavior for app versions after 1.0.0, add the following:
+    // static version_1_0_0 = '1.0.0';
+    // You can then compare versions as follows: if (Version.versionGreaterThan(requestObject.AppVersion, Version.version_1_0_0)) ...
     static version_1_12_2 = '1.12.2';
 
     // Functions
