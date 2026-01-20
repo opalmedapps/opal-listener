@@ -77,9 +77,14 @@ class RequestHandler {
             // Process the request
             const apiResponse = await ApiRequest.makeRequest(decryptedRequest);
 
-            // Temporary: until all requests have been updated to serve translated data, translate some attributes here
-            // For example, add checkininstruction alongside checkininstruction_en and checkininstruction_fr
-            Translation.translateContent(apiResponse, context.acceptLanguage, config.FALLBACK_LANGUAGE);
+            try {
+                // Temporary: until all requests have been updated to serve translated data, translate some attributes here
+                // For example, add checkininstruction alongside checkininstruction_en and checkininstruction_fr
+                Translation.translateContent(apiResponse, context.acceptLanguage, config.FALLBACK_LANGUAGE);
+            }
+            catch (error) {
+                legacyLogger.log('error', 'Translation error', error);
+            }
 
             // Encrypt and upload response
             const encryptedResponse = await Encryption.encryptResponse(
