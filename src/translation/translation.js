@@ -13,6 +13,9 @@ class Translation {
      * @param {string} fallbackLanguage A system-defined fallback language to use when the user's app language is not available for the data.
      */
     static translateContent (object, acceptLanguage, fallbackLanguage) {
+        // If one of the language parameters wasn't provided, skip execution of this function
+        if (!acceptLanguage || !fallbackLanguage) return;
+
         // Find two-letter language suffixes (with certain exceptions: _id)
         const hasLanguageSuffix = key => key.match(/^.+_[a-zA-Z]{2}$/) && !key.match(/^.+_id$/);
         const acceptLanguageLower = acceptLanguage.toLowerCase();
