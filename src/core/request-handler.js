@@ -78,7 +78,7 @@ class RequestHandler {
             const apiResponse = await ApiRequest.makeRequest(decryptedRequest);
 
             try {
-                // Temporary: until all requests have been updated to serve translated data, translate some attributes here
+                // Temporary: until all requests have been updated to serve translated data, translate some attributes
                 // For example, add checkininstruction alongside checkininstruction_en and checkininstruction_fr
                 Translation.translateContent(apiResponse, context.acceptLanguage, config.FALLBACK_LANGUAGE);
             }
