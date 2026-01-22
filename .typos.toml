@@ -19,6 +19,7 @@ extend-ignore-identifiers-re = [
 
 [files]
 extend-exclude = [
+    "CHANGES",
     "opal/tests/sql/*.sql",
     "**/locale/fr/**/*.po",
 ]
