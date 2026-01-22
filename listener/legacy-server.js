@@ -8,6 +8,7 @@
  */
 
 import admin from 'firebase-admin';
+import config from './config-adaptor.js';
 import cp from 'child_process';
 import logger from './logs/logger.js';
 import mainRequestApi from './api/main.js';
@@ -17,6 +18,7 @@ import OpalSecurityResponseSuccess from './api/response/security-response-succes
 import processApi from './api/processApiRequest.js';
 import q from 'q';
 import RequestContext from '../src/core/request-context.js';
+import Translation from '../src/translation/translation.js';
 import utility from './utility/utility.js';
 
 // See: https://stackoverflow.com/questions/46745014/alternative-for-dirname-in-node-js-when-using-es6-modules
@@ -156,7 +158,14 @@ function processRequest(context, headers){
 
         logger.log('debug', 'Processing general request');
         mainRequestApi.apiRequestFormatter(context, requestKey, requestObject)
-            .then(function(results){
+            .then(function(results) {
+                try {
+                    // Add translated attributes based on the user's language; for example, add Description alongside Description_EN and Description_FR
+                    Translation.translateContent(results, context.acceptLanguage, config.FALLBACK_LANGUAGE);
+                }
+                catch (error) {
+                    logger.log('error', 'Translation error', error);
+                }
 
                 logger.log('debug', `results: ${utility.stringifyShort(results)}`);
                 r.resolve(results);

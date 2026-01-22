@@ -198,16 +198,17 @@ const runSqlQuery = OpalSQLQueryRunner.run;
  * @param {object} parameters The parameters provided with the request.
  * @param [parameters.Timestamp] Optional date/time; if provided, only items with 'LastUpdated' after this time are returned.
  *                    If not provided, all data is returned (a default value of 0 is used to query the database).
+ * @param {string} language The two-letter uppercase code representing the user's app language.
  * @param {string} [parameters.purpose] Optional parameter that is used to filter questionnaires and educational materials by purpose. By default is set to "clinical" to support the old versions of the app.
  * @return {Promise}
  */
-async function getPatientTableFields(userId, patientSerNum, arrayTables, parameters) {
+async function getPatientTableFields(userId, patientSerNum, arrayTables, parameters, language) {
     // Validate the arrayTables
     let invalidCategory = arrayTables.find(e => !requestMappings.hasOwnProperty(e));
     if (invalidCategory) throw {Response: 'error', Reason: `Incorrect refresh parameter: ${invalidCategory}`};
 
     logger.log('verbose', `Processing select requests in the following categories: ${JSON.stringify(arrayTables)}`);
-    let response = await Promise.all(arrayTables.map(category => processSelectRequest(userId, category, patientSerNum, parameters)));
+    let response = await Promise.all(arrayTables.map(category => processSelectRequest(userId, category, patientSerNum, parameters, language)));
     // Arrange the return object with categories as keys and each corresponding response as a value
     let responseMapping = Object.fromEntries(arrayTables.map((category, i) => [category, response[i]]));
     return {
@@ -225,9 +226,10 @@ async function getPatientTableFields(userId, patientSerNum, arrayTables, paramet
  * @param {object} parameters The parameters provided with the request.
  * @param [parameters.timestamp] Optional date/time; if provided, only items with 'LastUpdated' after this time are returned.
  * @param {string} [parameters.purpose] Optional parameter that is used to filter questionnaires and educational materials by purpose. By default is set to "clinical" to support the old versions of the app.
+ * @param {string} language The two-letter uppercase code representing the user's app language.
  * @returns {Promise<*>}
  */
-async function processSelectRequest(userId, category, patientSerNum, parameters) {
+async function processSelectRequest(userId, category, patientSerNum, parameters, language) {
     const mapping = requestMappings[category];
     let date = parameters.Timestamp ? new Date(Number(parameters.Timestamp)) : new Date(0);
 
@@ -235,6 +237,7 @@ async function processSelectRequest(userId, category, patientSerNum, parameters)
     if (mapping.hasOwnProperty('module')) {
         let result = await mapping.module[category].handleRequest({
             meta: {
+                AcceptLanguage: language,
                 TargetPatientID: patientSerNum,
                 UserID: userId,
             },
@@ -661,6 +664,7 @@ function logout(requestObject) {
  * @desc Retrieves patient data in a given set of categories. This function is called 'refresh' because it can be used
  *       to fetch only fresh data after a certain timestamp.
  * @param requestObject The request object.
+ * @param {string} requestObject.AcceptLanguage The user's app language.
  * @param {string} requestObject.UserID The Firebase user ID that will be used to get data if no PatientSerNum is provided.
  * @param {string[]} requestObject.Parameters.Fields The list of data categories from which to fetch data.
  * @param [requestObject.Parameters.Timestamp] Optional date/time; if provided, only items with 'LastUpdated' after this time are returned.
@@ -670,6 +674,7 @@ async function refresh(requestObject) {
     let UserId = requestObject.UserID;
     let parameters = requestObject.Parameters;
     let fields = parameters.Fields;
+    let language = requestObject.AcceptLanguage;
     if (!parameters.purpose) parameters.purpose = 'clinical'; // Default to clinical for legacy requests by app version 1.12.2
 
     // If there's a TargetPatientID, use it, otherwise get data for self
@@ -679,7 +684,7 @@ async function refresh(requestObject) {
     if (!fields) throw {Response:'error', Reason:"Undefined 'Fields' in Refresh request"};
     if (!Array.isArray(fields)) fields = [fields];
 
-    let rows = await getPatientTableFields(UserId, patientSerNum, fields, parameters);
+    let rows = await getPatientTableFields(UserId, patientSerNum, fields, parameters, language);
     rows.Data = utility.resolveEmptyResponse(rows.Data);
 
     return rows;

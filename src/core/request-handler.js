@@ -8,12 +8,14 @@
 import { REGISTER_SEARCH_REQUEST_REGEX, REQUEST_TYPE } from '../const.js';
 import ApiRequest from './api-request.js';
 import Encryption from '../encryption/encryption.js';
+import { ENVIRONMENT } from '../environment.js';
 import ErrorHandler from '../error/handler.js';
 import Firebase from '../firebase/firebase.js';
 import keyDerivationCache from '../utility/key-derivation-cache.js';
 import legacyLogger from '../../listener/logs/logger.js';
 import Registration from '../registration/registration.js';
 import RequestContext from './request-context.js';
+import Translation from '../translation/translation.js';
 
 class RequestHandler {
     /**
@@ -71,6 +73,15 @@ class RequestHandler {
 
             // Process the request
             const apiResponse = await ApiRequest.makeRequest(decryptedRequest);
+
+            try {
+                // Temporary: until all requests have been updated to serve translated data, translate some attributes
+                // For example, add checkininstruction alongside checkininstruction_en and checkininstruction_fr
+                Translation.translateContent(apiResponse, context.acceptLanguage, ENVIRONMENT.FALLBACK_LANGUAGE);
+            }
+            catch (error) {
+                legacyLogger.log('error', 'Translation error', error);
+            }
 
             // Encrypt and upload response
             const encryptedResponse = await Encryption.encryptResponse(
