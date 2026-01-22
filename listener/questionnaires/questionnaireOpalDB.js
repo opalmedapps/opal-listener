@@ -116,6 +116,7 @@ function getQuestionnaireList(requestObject) {
  * getQuestionnaire
  * @desc Returns a promise containing the questionnaires and answers. Used for new questionnaire 2019
  * @param {object} requestObject the request
+ * @param {string} requestObject.AcceptLanguage The user's app language.
  * @returns {Promise} Returns a promise that contains the questionnaire data
  */
 async function getQuestionnaire(requestObject) {
@@ -178,6 +179,7 @@ FUNCTIONS TO SAVE ANSWERS (QUESTIONNAIRE V2)
  * @name questionnaireSaveAnswer
  * @desc Saves the answer to one question in the database.
  * @param {object} requestObject The request object.
+ * @param {string} requestObject.AcceptLanguage The user's app language.
  * @returns {Promise} Resolves to an object containing a 'success' response or rejects with an error.
  */
 async function questionnaireSaveAnswer(requestObject) {

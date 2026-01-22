@@ -17,7 +17,7 @@ import RequestContext from './request-context.js';
 import Translation from '../translation/translation.js';
 
 const config = {
-    FALLBACK_LANGUAGE: process.env.FALLBACK_LANGUAGE,
+    FALLBACK_LANGUAGE: process.env.FALLBACK_LANGUAGE.toUpperCase(),
 };
 
 class RequestHandler {

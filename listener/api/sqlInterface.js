@@ -664,6 +664,7 @@ function logout(requestObject) {
  * @desc Retrieves patient data in a given set of categories. This function is called 'refresh' because it can be used
  *       to fetch only fresh data after a certain timestamp.
  * @param requestObject The request object.
+ * @param {string} requestObject.AcceptLanguage The user's app language.
  * @param {string} requestObject.UserID The Firebase user ID that will be used to get data if no PatientSerNum is provided.
  * @param {string[]} requestObject.Parameters.Fields The list of data categories from which to fetch data.
  * @param [requestObject.Parameters.Timestamp] Optional date/time; if provided, only items with 'LastUpdated' after this time are returned.

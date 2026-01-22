@@ -35,7 +35,7 @@ class RequestMeta {
 		this.Timestamp = Timestamp;
 		this.UserEmail = UserEmail;
 		this.AppVersion = AppVersion;
-		this.AcceptLanguage = AcceptLanguage;
+		this.AcceptLanguage = AcceptLanguage.toUpperCase();
 	}
 }
 
