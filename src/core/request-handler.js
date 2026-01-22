@@ -6,9 +6,9 @@
  * @file Listen and handle request uploaded to firebase by the app
  */
 import { REGISTER_SEARCH_REQUEST_REGEX, REQUEST_TYPE } from '../const.js';
-import { ENVIRONMENT } from '../environment.js';
 import ApiRequest from './api-request.js';
 import Encryption from '../encryption/encryption.js';
+import { ENVIRONMENT } from '../environment.js';
 import ErrorHandler from '../error/handler.js';
 import Firebase from '../firebase/firebase.js';
 import keyDerivationCache from '../utility/key-derivation-cache.js';
