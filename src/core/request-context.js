@@ -64,7 +64,7 @@ class RequestContext {
         this.userId = requestObject.UserID;
         this.deviceId = requestObject.DeviceId;
         this.branchName = requestObject.BranchName;
-        this.acceptLanguage = requestObject['Accept-Language'].toUpperCase();
+        this.acceptLanguage = requestObject['Accept-Language']?.toUpperCase();
 
         // Label (key) under which to cache encryption information related to this request
         this.cacheLabel = this.#buildCacheLabel();

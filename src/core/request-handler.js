@@ -6,6 +6,7 @@
  * @file Listen and handle request uploaded to firebase by the app
  */
 import { REGISTER_SEARCH_REQUEST_REGEX, REQUEST_TYPE } from '../const.js';
+import { ENVIRONMENT } from '../environment.js';
 import ApiRequest from './api-request.js';
 import Encryption from '../encryption/encryption.js';
 import ErrorHandler from '../error/handler.js';
@@ -15,10 +16,6 @@ import legacyLogger from '../../listener/logs/logger.js';
 import Registration from '../registration/registration.js';
 import RequestContext from './request-context.js';
 import Translation from '../translation/translation.js';
-
-const config = {
-    FALLBACK_LANGUAGE: process.env.FALLBACK_LANGUAGE.toUpperCase(),
-};
 
 class RequestHandler {
     /**
@@ -80,7 +77,7 @@ class RequestHandler {
             try {
                 // Temporary: until all requests have been updated to serve translated data, translate some attributes
                 // For example, add checkininstruction alongside checkininstruction_en and checkininstruction_fr
-                Translation.translateContent(apiResponse, context.acceptLanguage, config.FALLBACK_LANGUAGE);
+                Translation.translateContent(apiResponse, context.acceptLanguage, ENVIRONMENT.FALLBACK_LANGUAGE);
             }
             catch (error) {
                 legacyLogger.log('error', 'Translation error', error);
