@@ -8,6 +8,7 @@
 
 import '../test/chai-setup.js';
 import { assert, spy, stub } from 'sinon';
+import { clone } from '../test/test-utilities.js';
 import ApiRequest from '../core/api-request.js';
 import EncryptionUtilities from '../encryption/encryption.js';
 import { expect } from 'chai';
@@ -262,13 +263,3 @@ describe('Registration', function () {
         apiRequestStub.restore();
     });
 });
-
-/**
- * @description Helper function that clones an object to encrypt. This is needed because encryption is done in place
- *              and alters the original object. To later compare to the original value, we need to encrypt a copy.
- * @param {object} obj The object to clone (must be parsable by JSON.stringify).
- * @returns {object} The cloned copy of the object.
- */
-function clone(obj) {
-    return JSON.parse(JSON.stringify(obj));
-}

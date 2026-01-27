@@ -26,6 +26,7 @@ const ENVIRONMENT = {
     OPAL_CHECKIN_URL: process.env.OPAL_CHECKIN_URL,
     ORMS_ENABLED: process.env.ORMS_ENABLED === '1',
     SOURCE_SYSTEM_SUPPORTS_CHECKIN: process.env.SOURCE_SYSTEM_SUPPORTS_CHECKIN === '1',
+    FALLBACK_LANGUAGE: process.env.FALLBACK_LANGUAGE?.toUpperCase(),
 };
 
 /**

@@ -1,3 +1,285 @@
+Version 1.12.0.1:
+ - chore: exclude CHANGES from typo-checking (#582)
+
+Version 1.12.0.0:
+ - feat: add support for multilingual app UI (#581)
+ - chore(deps): lock file maintenance (#574)
+ - chore(deps): update dependency globals to v17 (#573)
+ - chore(deps): update dorny/test-reporter action to v2.5.0 (#572)
+ - chore(deps): update dependency firebase-tools to v15 (#571)
+ - fix(deps): update dependency nodemailer to v7.0.12 (#570)
+ - chore(deps): update dependency chai to v6.2.2 (#569)
+ - chore(deps): update dependency sinon to v21.0.1 (#568)
+ - chore(deps): lock file maintenance (#567)
+ - chore(deps): update pre-commit hooks (#566)
+ - chore(deps): update dependency @eslint/js to v9.39.2 (#565)
+ - chore(deps): update pre-commit hooks (#559)
+ - chore(deps): update actions/setup-node action to v6.1.0 (#558)
+ - chore(deps): update actions/checkout action to v6.0.1 (#555)
+ - chore(deps): update actions/upload-artifact action to v6 (#564)
+ - build(deps): update node.js to v24.12.0-alpine3.23 (#557)
+ - fix(deps): update dependency winston to v3.19.0 (#563)
+ - chore(deps): update dependency eslint-plugin-jsdoc to v61.5.0 (#562)
+ - build(deps): update node.js to v24.12.0 (#561)
+ - chore(deps): update pre-commit hooks to v6 (major) (#560)
+ - fix(deps): update dependency keyv to v5.5.5 (#556)
+ - build: copy node_modules to the working directory (#553)
+ - chore: improve Renovate config (#554)
+ - fix(deps): update dependency firebase-admin to v13.6.0 (#547)
+ - chore(deps): update eslint (minor) (#546)
+ - chore(deps): update dorny/test-reporter action to v2.3.0 (#545)
+ - fix(deps): update dependency nodemon to v3.1.11 (#544)
+ - fix(deps): update dependency express-validator to v7.3.1 (#543)
+ - chore(deps): update dependency firebase-tools to v14.27.0 (#551)
+ - fix(deps): update dependency nodemailer to v7.0.11 [security] (#552)
+ - chore(deps): update actions/checkout action to v6 (#548)
+ - fix(deps): update dependency keyv to v5.5.4 (#542)
+ - chore(deps): update dependency mocha to v11.7.5 (#541)
+ - chore: npm audit fix (#540)
+ - chore(deps): update dependency globals to v16.5.0 (#534)
+ - chore(deps): update actions/upload-artifact action to v5 (#537)
+ - chore(deps): update actions/checkout action to v5.0.1 (#538)
+ - chore(deps): update dependency chai to v6.2.1 (#539)
+ - chore(deps): update actions/setup-node action to v6 (#536)
+ - chore(deps): update eslint (minor) (#533)
+ - chore(deps): update dependency firebase-tools to v14.25.0 (#531)
+ - fix(deps): update dependency axios to v1.13.2 (#530)
+ - fix(deps): update dependency nodemailer to v7.0.10 (#529)
+ - build(deps): update node.js to v24 (#535)
+ - chore(deps): update dependency jsdoc to v4.0.5 (#527)
+ - chore(deps): update dependency eslint-plugin-jsdoc to v61 (#526)
+ - chore(deps): update dependency firebase-tools to v14.22.0 (#525)
+ - build(deps): update dependency node to v22.21.0 (#524)
+ - fix(deps): update dependency cross-env to v10.1.0 (#516)
+ - fix(deps): update dependency express-validator to v7.3.0 (#523)
+ - fix(deps): update dependency nodemailer to v7.0.7 [security] (#521)
+ - chore(deps): update eslint (minor) (#515)
+ - fix(deps): update dependency winston to v3.18.3 (#517)
+ - chore(deps): update dependency eslint-plugin-jsdoc to v60 (#520)
+ - fix(deps): update dependency dotenv to v17.2.3 (#513)
+ - fix(deps): update dependency axios to v1.12.2 (#512)
+ - chore: update package-lock.json (#522)
+ - chore(deps): update dependency mocha to v11.7.4 (#511)
+ - chore(deps): update dependency firebase-tools to v14.17.0 (#510)
+ - build(deps): update node.js to v22.20.0 (#509)
+ - chore(deps): update dependency globals to v16.4.0 (#506)
+ - fix(deps): update dependency keyv to v5.5.3 (#505)
+ - fix(deps): update dependency axios to v1.12.0 [security] (#504)
+ - chore(deps): update dependency eslint-plugin-jsdoc to v57 (#508)
+ - chore(deps): update actions/setup-node action to v5 (#502)
+ - fix(deps): update dependency firebase-admin to v13.5.0 (#501)
+ - fix(deps): update dependency nodemailer to v7.0.6 (#499)
+ - chore(deps): update dependency chai to v6 (#496)
+ - build(deps): update node.js to v22.19.0 (#500)
+ - fix(deps): update dependency dotenv to v17.2.2 (#498)
+ - chore(deps): update eslint (#495)
+ - chore(deps): update dependency chai-as-promised to v8.0.2 (#493)
+ - chore(deps): update dependency mocha to v11.7.2 (#497)
+ - chore(deps): update dependency eslint-plugin-jsdoc to v54.1.1 (#494)
+ - chore(deps): update dependency chai to v5.3.3 (#492)
+ - chore: npm audit fix (#491)
+ - chore(deps): update dependency firebase-tools to v14.12.1 (#490)
+ - chore(deps): update dependency @stylistic/eslint-plugin to v5.2.3 (#481)
+ - chore(deps): update dependency @eslint/js to v9.33.0 (#482)
+ - chore(deps): update actions/checkout action to v5 (#484)
+ - chore(deps): update dependency eslint-plugin-jsdoc to v54 (#487)
+ - chore(deps): update dependency chai to v5.3.1 (#489)
+ - fix: address missing error responses for the app (#486)
+ - fix(deps): update dependency cross-env to v10 (#478)
+ - chore(deps): update dependency eslint-plugin-jsdoc to v52 (#477)
+ - fix(deps): update dependency axios to v1.11.0 (#476)
+ - fix(deps): update dependency dotenv to v17.2.1 (#475)
+ - fix(deps): update dependency keyv to v5.5.0 (#473)
+ - chore(deps): update eslint (#472)
+ - chore(deps): update dependency firebase-tools to v14.11.2 (#479)
+ - build(deps): update node.js to v22.18.0 (#480)
+ - chore(deps): update dependency firebase-tools to v14.10.1 (#470)
+ - fix(deps): update dependency dotenv to v17.2.0 (#469)
+ - chore(deps): update dependency @eslint/js to v9.31.0 (#468)
+ - chore(deps): update dorny/test-reporter action to v2.1.1 (#467)
+ - chore(deps): update dependency chai to v5.2.1 (#466)
+ - chore(deps): update dependency eslint-plugin-jsdoc to v51.3.4 (#438)
+ - fix(deps): update dependency nodemailer to v7.0.5 (#465)
+ - chore(deps): uninstall node-cron (#464)
+ - fix(deps): update dependency nodemailer to v7 (#463)
+ - fix(deps): update dependency firebase-admin to v13.4.0 (#458)
+ - chore(deps): update dependency firebase-tools to v14 (#459)
+ - chore(deps): update dependency sinon to v21 (#460)
+ - chore(deps): update dependency mocha to v11.7.1 (#457)
+ - fix(deps): update dependency dotenv to v17 (#461)
+ - fix(deps): update dependency axios to v1.10.0 (#454)
+ - build(deps): update node.js to v22.17.0-alpine3.22 (#453)
+ - fix(deps): update dependency keyv to v5.3.4 (#456)
+ - fix(deps): update dependency @stablelib/utf8 to v2 (#452)
+ - fix(deps): update dependency @stablelib/base64 to v2 (#451)
+ - chore(deps): update dependency chai-as-promised to v8 (#450)
+ - chore(deps): update dependency chai to v5 (#449)
+ - fix(deps): update dependency nodemon to v3.1.10 (#441)
+ - chore(deps): update actions/setup-node action to v4.4.0 (#446)
+ - build(deps): update node.js to v22.17.0 (#445)
+ - fix(deps): update dependency nodemailer to v6.10.1 (#440)
+ - chore(deps): update dependency sinon to v19.0.5 (#439)
+ - chore(deps): update dependency firebase-tools to v13.35.1 (#436)
+ - fix(deps): update dependency eslint to v9.30.1 (#448)
+ - refactor: restructure the project with ECMAScript module syntax (#444)
+ - fix: make all optional env variables only required when needed (#447)
+ - ci: call action to check thirdparty notice (#442)
+ - chore: improve weekly Renovate schedule to ensure it is run
+ - chore: remove firebase users init script (#433)
+ - ci: delete .gitlab-ci.yml file (#432)
+ - ci: add workflow to build docs (#431)
+ - ci: add jobs to run mocha and calculate coverage (#430)
+ - ci: add job to run eslint (#429)
+ - fix: fix request parameter typo for "agreement" (#428)
+ - fix(deps): update dependency axios to v1.9.0 (#427)
+ - fix: increase log level to verbose for request processing (#425)
+ - fix: block user after 5 failed security answer verification attempts (#424)
+ - ci: add workflow to deploy Firebase rules (#419)
+ - ci: add pre-commit hooks and CI jobs (#420)
+ - build(deps): update docker docker tag to v28.0.1 (#418)
+ - fix(data): change email address of new demo user again
+ - build(deps): update docker docker tag to v28
+ - chore: change email for bobby jones user
+ - build(deps): update node.js to v22.14.0
+ - chore: allow to keep non-test users when initializing Firebase users
+ - fix(deps): update dependency firebase-admin to v13.1.0
+ - chore: add copyright and licence headers to each file
+ - chore: update license file
+ - build(deps): update docker docker tag to v27.5.1
+ - build(deps): update node.js to v22.13.1
+ - chore(deps): update dependency eslint-plugin-jsdoc to v50.6.3
+ - chore(deps): update dependency mocha to v11.1.0
+ - fix(deps): update dependency nodemailer to v6.10.0
+ - refactor: improve environment variable naming and don't require environment variables when the feature is disabled
+ - build(deps): update docker docker tag to v27.4.1
+ - build(deps): update node.js to v22.13.0
+ - fix(deps): update dependency moment to v2.30.1
+ - fix(deps): update dependency keyv to v5.2.3
+ - fix(deps): update dependency express-validator to v7.2.1
+ - fix(deps): update dependency firebase-admin to v13
+ - chore(deps): update dependency sinon to v19
+ - chore(deps): update dependency mocha to v11
+ - chore(deps): update dependency eslint-plugin-jsdoc to v50
+ - chore(deps): update dependency firebase-tools to v13.29.1
+ - fix(deps): update dependency nodemon to v3.1.9
+ - fix(deps): update dependency keyv to v5
+ - build(deps): update docker docker tag to v27.4.0
+ - fix(deps): update dependency nodemailer to v6.9.16
+ - fix(deps): update dependency dotenv to v16.4.7
+ - fix(deps): update dependency axios to v1.7.9
+ - chore(deps): update dependency sinon to v18.0.1
+ - fix(deps): uninstall unused dependency chai-datetime
+ - chore(deps): update dependency jsdoc to v4.0.4
+ - build(deps): update node.js to v22 and alpine to v3.21
+ - chore(config): migrate renovate config
+ - chore(deps): update dependency firebase-tools to v13.29.0
+ - fix(deps): update dependency winston to v3.14.2
+ - fix(deps): update dependency firebase-admin to v12.4.0
+ - build(deps): update docker docker tag to v27.2.1
+ - chore(deps): update eslint
+ - fix: refactor and improve password updates' error handling
+ - docs: add thirdparty notice
+ - fix: enforce authenticated 'UserEmail' request parameter via Firebase rules
+ - refactor: Update checkin process to fix race condition and call each checkin system independently
+ - chore: npm audit fix
+ - fix: remove filter of the deleted appointment in the query
+ - refactor: update AppointmentAriaSer to SourceSystemID
+ - fix: broken link for firebase setup
+ - chore(deps): update dependency firebase-tools to v13.16.0
+ - chore(deps): update dependency mocha to v10.7.3
+ - chore(deps): update dependency chai to v4.5.0
+ - chore(deps): update dependency nyc to v17
+ - fix(deps): update dependency express-validator to v7
+ - fix: fix typo in Timestamp parameter
+ - fix: change the post call url
+ - chore: npm audit fix
+ - fix(deps): update dependency axios to v1.7.7
+ - chore: improve Renovate config
+ - fix: fix issue with questionnaire title display language
+ - feat: add Rory O'Brien as a user to firebase script
+ - fix: update the sample env hospital code to A6
+ - chore: add Firebase user to mimick user registered at another institution
+ - fix(deps): update dependency nodemailer to v6.9.14
+ - chore(deps): update dependency firebase-tools to v13.14.2
+ - fix: properly handle existing user at a different institution
+ - fix(deps): update dependency nodemon to v3.1.4
+ - fix(deps): update dependency winston to v3.13.1
+ - fix(deps): update dependency firebase-admin to v12.3.0
+ - build(deps): update docker docker tag to v27
+ - chore(deps): update dependency firebase-tools to v13.14.1
+ - build(deps): update node.js to v20.16.0
+ - fix: token variable not defined
+ - fix: modify updateDeviceIdentifiers query to receive PatientDeviceIdentifier updates
+ - fix: add missing logger import in questionnaireFormatting.js
+ - feat: add step to verify questionnaire blocking status
+ - fix(deps): update alpine to v3.20
+ - chore(deps): fix vulnerabilities via `npm audit fix`
+ - feat: add functionality for returning labs read statuses
+ - build: fix dependency installation for linuxmusl-arm64
+ - build(deps): update node.js to v20.14.0
+ - chore(deps): update dependency firebase-tools to v13.11.2
+ - fix: remove deprecated 'request' package
+ - ci: prevent secret detection from running on the npm cache
+ - feat: delete confirmation-email related functions and files
+ - feat: create Laurie firebase user
+ - chore: delete deprecated QuestionnaireNumberUnread request
+ - fix(deps): update dependency firebase-admin to v12.1.1
+ - chore(deps): update dependency firebase-tools to v13.10.1
+ - fix(deps): update dependency nodemon to v3.1.1
+ - fix(deps): update dependency axios to v1.7.2
+ - chore(deps): update dependency firebase-tools to v13.10.0
+ - docs: update README with current instructions and only focus on containerized version
+ - chore(deps): update dependency sinon to v18
+ - chore(deps): update dependency firebase-tools to v13.9.0
+ - build(deps): update docker docker tag to v26.1.3
+ - fix(deps): update dependency axios to v1.7.1
+ - fix: properly read status code from response
+ - feat: cache output of PBKDF2
+ - build(deps): update docker docker tag to v26.1.2
+ - build(deps): update node.js to v20.13.1
+ - chore(deps): update dependency chai-as-promised to v7.1.2
+ - chore(deps): update dependency firebase-tools to v13.8.3
+ - fix: remove registration logic and only call backend
+ - fix(deps): update dependency firebase-admin to v12.1.0
+ - chore(deps): update dependency jsdoc to v4.0.3
+ - build(deps): update node.js to v20.12.2
+ - build(deps): update docker docker tag to v26.1.1
+ - fix: add a placeholder appointment Resource to fix v1.12.2 login
+ - feat: add request to check whether a caregiver is already registered at the same institution
+ - fix: convert collectedatetime to utc time format
+ - fix: fix implicitlyReadNotification query usage with double quotes for json_contains func
+ - feat: check caregiver permissions for answering questionnaires on behalf of the patient
+ - fix handling of undefined parameters to allow insert to PAL table for login/out
+ - fix: prevent duplicate usernames in Notification.readBy
+ - fix(deps): update dependency winston to v3.13.0
+ - build(deps): update node.js to v20.12.0
+ - fix: remove call to getLevel when determining hospital map for appointment
+ - build(deps): update docker docker tag to v26
+ - chore(deps): update dependency mocha to v10.4.0
+ - chore(deps): update dependency firebase-tools to v13.6.0
+ - fix(deps): update dependency nodemailer to v6.9.13
+ - build(deps): update docker docker tag to v25.0.5
+ - fix: remove joining resourceappointment when retrieving appointments
+ - fix: update markTestResultsAsRead query for avoiding duplicates in ReadBy field
+ - fix(deps): update dependency axios to v1
+ - fix: use ReadBy field in the lab results queries
+ - fix: remove no latin characters in feedback
+ - fix(deps): update dependency winston to v3.12.0
+ - fix(deps): update dependency nodemailer to v6.9.11
+ - feat: mark test results as read
+ - feat: implicitly read notifications
+ - chore(deps): update dependency firebase-tools to v13.4.0
+ - fix(deps): update dependency nodemon to v3.1.0
+ - feat: implicitly mark questionnaire notifications as read
+ - ci: add SAST scanning
+ - ci: add container scanning
+ - fix: reassign Dev and Staging Firebase projects
+ - fix(deps): update dependency nodemailer to v6.9.10
+ - fix(deps): update dependency firebase-admin to v12
+ - chore(deps): update dependency firebase-tools to v13.3.1
+ - refactor: remove heartbeat feature
+ - fix: print response data when logging a response error
+
 # SPDX-FileCopyrightText: Copyright 2018 Opal Health Informatics Group at the Research Institute of the McGill University Health Centre <john.kildea@mcgill.ca>
 #
 # SPDX-License-Identifier: AGPL-3.0-or-later

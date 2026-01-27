@@ -116,6 +116,7 @@ function getQuestionnaireList(requestObject) {
  * getQuestionnaire
  * @desc Returns a promise containing the questionnaires and answers. Used for new questionnaire 2019
  * @param {object} requestObject the request
+ * @param {string} requestObject.AcceptLanguage The user's app language.
  * @returns {Promise} Returns a promise that contains the questionnaire data
  */
 async function getQuestionnaire(requestObject) {
@@ -124,8 +125,10 @@ async function getQuestionnaire(requestObject) {
         throw new Error('Error getting questionnaire: the requestObject does not have the required parameter qp_ser_num');
     }
 
+    // Translate based on the user's language, if available; otherwise, use the fallback language
+    const language = ['EN', 'FR'].includes(requestObject.AcceptLanguage) ? requestObject.AcceptLanguage : config.FALLBACK_LANGUAGE;
+
     const patientSerNum = Number(requestObject.TargetPatientID);
-    let language = await getQuestionnaireLanguage(requestObject);
     // get questionnaire belonging to that qp_ser_num
     let result = await questionnaires.getQuestionnaire(language, requestObject.Parameters.qp_ser_num);
     if (result.status !== questionnaireConfig.COMPLETED_QUESTIONNAIRE_STATUS) {
@@ -176,6 +179,7 @@ FUNCTIONS TO SAVE ANSWERS (QUESTIONNAIRE V2)
  * @name questionnaireSaveAnswer
  * @desc Saves the answer to one question in the database.
  * @param {object} requestObject The request object.
+ * @param {string} requestObject.AcceptLanguage The user's app language.
  * @returns {Promise} Resolves to an object containing a 'success' response or rejects with an error.
  */
 async function questionnaireSaveAnswer(requestObject) {
@@ -188,7 +192,8 @@ async function questionnaireSaveAnswer(requestObject) {
 
     await checkCaregiverPermissions(requestObject.UserID, patientSerNum);
 
-    let language = await getQuestionnaireLanguage(requestObject);
+    // Translate based on the user's language, if available; otherwise, use the fallback language
+    const language = ['EN', 'FR'].includes(requestObject.AcceptLanguage) ? requestObject.AcceptLanguage : config.FALLBACK_LANGUAGE;
 
     await questionnaires.saveAnswer(language, requestObject.Parameters, requestObject.AppVersion, requestObject.UserID);
     return {Response: 'success'};
@@ -302,23 +307,6 @@ async function questionnaireUpdateStatus(requestObject) {
     }
 
     return {Response: 'success'};
-}
-
-/**
- * @desc Gets the questionnaire language from the request object, or if not found, from OpalDB (legacy way).
- * @param requestObject The request object to check for a language parameter.
- * @returns {Promise<string>} Resolves to the questionnaire language or throws an error if not found.
- */
-async function getQuestionnaireLanguage(requestObject) {
-    try {
-        // The second method using a query is deprecated and will eventually be removed
-        return requestObject.Parameters?.language
-            || (await OpalSQLQueryRunner.run(opalQueries.patientTableFieldsForUser(), [requestObject.UserID]))[0].Language;
-    }
-    catch (error) {
-        logger.log('error', 'Error getting questionnaire language', error);
-        throw new Error('No language was provided in the request or found in OpalDB');
-    }
 }
 
 /**

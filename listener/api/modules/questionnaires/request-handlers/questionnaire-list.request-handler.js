@@ -3,6 +3,7 @@
 // SPDX-License-Identifier: AGPL-3.0-or-later
 
 import ApiRequestHandler from '../../../api-request-handler.js';
+import config from '../../../../config-adaptor.js';
 import questionnaireQuestionnaireDB from '../../../../questionnaires/questionnaireQuestionnaireDB.js';
 
 class QuestionnaireListHandler extends ApiRequestHandler {
@@ -16,12 +17,13 @@ class QuestionnaireListHandler extends ApiRequestHandler {
         const patient = await QuestionnaireListHandler.getTargetPatient(requestObject);
         const userId = requestObject.meta.UserID;
         const purpose = requestObject.params?.purpose;
-        // Ideally, use the language provided by the user in the request. If not found, use the language of the patient.
-        const userLanguage = requestObject.params.Language || patient.language;
+
+        // Translate based on the user's language, if available; otherwise, use the fallback language
+        const language = ['EN', 'FR'].includes(requestObject.meta.AcceptLanguage) ? requestObject.meta.AcceptLanguage : config.FALLBACK_LANGUAGE;
 
         const patientInfoSubset = {
             PatientSerNum: patient.patientSerNum,
-            Language: userLanguage,
+            Language: language,
         };
         return {
             data: {
