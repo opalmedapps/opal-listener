@@ -78,7 +78,7 @@ jobs:
         # See: https://unix.stackexchange.com/questions/263653/extract-value-from-xml
         # See: https://stackoverflow.com/questions/35634255/invalid-arithmetic-operator-when-doing-floating-point-math-in-bash
         run: |
-          line_rate=$( cat cobertura-coverage.xml | grep -Po '(?<=name="opal-listener.src" line-rate=")([0-9.]+)' )
+          line_rate=$( cat coverage/cobertura-coverage.xml | grep -Po '(?<=name="opal-listener.src" line-rate=")([0-9.]+)' )
           line_rate_percent=$( echo "$line_rate 100" | awk '{print $1 * $2}' | cut -d "." -f 1 )
           echo "$line_rate_percent"
 
