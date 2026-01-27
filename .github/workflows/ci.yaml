@@ -73,6 +73,15 @@ jobs:
         run: |
           npx c8 --all --reporter cobertura mocha --reporter json --reporter-option output=mocha-report.json './src/**/*.test.*' './listener/**/*.test.*' './legacy-registration/**/*.test.*'
 
+      # Read coverage value for the non-legacy part of the listener (`src` folder only)
+      - name: Read `src` coverage
+        # See: https://unix.stackexchange.com/questions/263653/extract-value-from-xml
+        # See: https://stackoverflow.com/questions/35634255/invalid-arithmetic-operator-when-doing-floating-point-math-in-bash
+        run: |
+          line_rate=$( cat cobertura-coverage.xml | grep -Po '(?<=name="opal-listener.src" line-rate=")([0-9.]+)' )
+          line_rate_percent=$( echo "$line_rate 100" | awk '{print $1 * $2}' | cut -d "." -f 1 )
+          echo "$line_rate_percent"
+
       # Format the test output for GitHub
       - name: Report test results
         uses: dorny/test-reporter@v2.5.0
