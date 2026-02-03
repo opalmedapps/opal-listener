@@ -8,8 +8,8 @@
 
 import '../test/chai-setup.js';
 import { assert, spy, stub } from 'sinon';
-import { clone } from '../test/test-utilities.js';
 import ApiRequest from '../core/api-request.js';
+import { clone } from '../test/test-utilities.js';
 import EncryptionUtilities from '../encryption/encryption.js';
 import { expect } from 'chai';
 import logger from '../../listener/logs/logger.js';
