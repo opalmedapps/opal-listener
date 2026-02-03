@@ -82,7 +82,7 @@ jobs:
         run: |
           line_rate=$( grep -Po '(?<=name="opal-listener.src" line-rate=")([0-9.]+)' < coverage/cobertura-coverage.xml )
           line_rate_percent=$( echo "$line_rate 100" | awk '{print $1 * $2}' | cut -d "." -f 1 )
-          echo "$line_rate_percent"
+          echo "LINE_RATE_PERCENT=$line_rate_percent" >> "$GITHUB_ENV"
 
       # Format the test output for GitHub
       - name: Report test results
@@ -112,9 +112,7 @@ jobs:
         run: |
           line_number=$( grep -n 'Code Coverage' code-coverage-results.md | cut -d ":" -f 1 )
           next_line_number=$(( line_number + 1 ))
-          coverage_badge="\![Code Coverage](https://img.shields.io/badge/Code%20Coverage%20(non%20legacy)-${line_rate_percent}%25-yellow?style=flat)"
-          echo $line_rate_percent
-          echo $coverage_badge
+          coverage_badge="\![Code Coverage](https://img.shields.io/badge/Code%20Coverage%20(non%20legacy)-${LINE_RATE_PERCENT}%25-yellow?style=flat)"
           awk -i inplace -v line="$next_line_number" -v content="$coverage_badge" 'NR==line{print content} 1' code-coverage-results.md
       - name: Add the coverage report to the job summary
         # Run this step even if a previous step failed
