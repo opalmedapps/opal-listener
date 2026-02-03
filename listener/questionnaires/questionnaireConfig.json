@@ -18,7 +18,8 @@
         "QUALITY": 3,
         "CONSENT": 4,
         "CLERICAL": 5,
-        "OPAL": 6
+        "OPAL": 6,
+        "ONCE-ONLY": 7
     },
     "QUESTIONNAIRE_RESPONDENT_ID": {
         "PATIENT": 1,
