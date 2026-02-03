@@ -75,6 +75,8 @@ jobs:
 
       # Read coverage value for the non-legacy part of the listener (`src` folder only)
       - name: Read `src` coverage
+        # Run this step even if a previous step failed
+        if: ${{ !cancelled() }}
         # See: https://unix.stackexchange.com/questions/263653/extract-value-from-xml
         # See: https://stackoverflow.com/questions/35634255/invalid-arithmetic-operator-when-doing-floating-point-math-in-bash
         run: |
@@ -82,19 +84,10 @@ jobs:
           line_rate_percent=$( echo "$line_rate 100" | awk '{print $1 * $2}' | cut -d "." -f 1 )
           echo "$line_rate_percent"
 
-      # Write non-legacy coverage value to the report file
-      - name: Write `src` coverage value to coverage report
-        # See: https://askubuntu.com/questions/1295790/how-to-use-awk-to-edit-a-specifc-line-set-by-a-variable-awk-nr-i-inplace-and
-        run: |
-          line_number=$( grep -n 'Code Coverage' code-coverage-results.md | cut -d ":" -f 1 )
-          next_line_number=$(( line_number + 1 ))
-          coverage_badge="\![Code Coverage](https://img.shields.io/badge/Code%20Coverage%20(non%20legacy)-${line_rate_percent}%25-yellow?style=flat)"
-          awk -i inplace -v line="$next_line_number" -v content="$coverage_badge" 'NR==line{print content} 1' code-coverage-results.md
-
       # Format the test output for GitHub
       - name: Report test results
         uses: dorny/test-reporter@v2.5.0
-        # Run this step even if the previous step failed
+        # Run this step even if a previous step failed
         if: ${{ !cancelled() }}
         with:
           name: Mocha Tests
@@ -104,7 +97,7 @@ jobs:
       # Format the coverage output for GitHub
       - name: Report coverage results
         uses: irongut/CodeCoverageSummary@v1.3.0
-        # Run this step even if the previous step failed
+        # Run this step even if a previous step failed
         if: ${{ !cancelled() }}
         with:
           filename: coverage/cobertura-coverage.xml
@@ -112,8 +105,17 @@ jobs:
           fail_below_min: false
           format: markdown
           output: both
+      - name: Write `src` coverage value to coverage report
+        # Run this step even if a previous step failed
+        if: ${{ !cancelled() }}
+        # See: https://askubuntu.com/questions/1295790/how-to-use-awk-to-edit-a-specifc-line-set-by-a-variable-awk-nr-i-inplace-and
+        run: |
+          line_number=$( grep -n 'Code Coverage' code-coverage-results.md | cut -d ":" -f 1 )
+          next_line_number=$(( line_number + 1 ))
+          coverage_badge="\![Code Coverage](https://img.shields.io/badge/Code%20Coverage%20(non%20legacy)-${line_rate_percent}%25-yellow?style=flat)"
+          awk -i inplace -v line="$next_line_number" -v content="$coverage_badge" 'NR==line{print content} 1' code-coverage-results.md
       - name: Add the coverage report to the job summary
-        # Run this step even if the previous step failed
+        # Run this step even if a previous step failed
         if: ${{ !cancelled() }}
         run: cat code-coverage-results.md >> "$GITHUB_STEP_SUMMARY"
 
