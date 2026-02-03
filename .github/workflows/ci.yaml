@@ -87,8 +87,8 @@ jobs:
         # See: https://askubuntu.com/questions/1295790/how-to-use-awk-to-edit-a-specifc-line-set-by-a-variable-awk-nr-i-inplace-and
         run: |
           line_number=$( grep -n 'Code Coverage' code-coverage-results.md | cut -d ":" -f 1 )
-          next_line_number=$(( $line_number + 1 ))
-          coverage_badge="\![Code Coverage](https://img.shields.io/badge/Code%20Coverage%20(non%20legacy)-$line_rate_percent%25-yellow?style=flat)"
+          next_line_number=$(( line_number + 1 ))
+          coverage_badge="\![Code Coverage](https://img.shields.io/badge/Code%20Coverage%20(non%20legacy)-${line_rate_percent}%25-yellow?style=flat)"
           awk -i inplace -v line="$next_line_number" -v content="$coverage_badge" 'NR==line{print content} 1' code-coverage-results.md
 
       # Format the test output for GitHub
