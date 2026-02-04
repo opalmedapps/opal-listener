@@ -8,4 +8,7 @@ rules:
   unpinned-uses:
     config:
       policies:
-        "*": ref-pin
+        actions/*: ref-pin
+        dorny/test-reporter: ref-pin
+        irongut/CodeCoverageSummary: ref-pin
+        opalmedapps/*: ref-pin
