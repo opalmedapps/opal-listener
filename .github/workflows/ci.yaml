@@ -22,7 +22,7 @@ jobs:
   lint-eslint:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v6.0.2
+      - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
         with:
           persist-credentials: false
       - name: Install GitHub Actions formatter
@@ -35,7 +35,7 @@ jobs:
   lint-pre-commit:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v6.0.2
+      - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
         with:
           persist-credentials: false
       - uses: j178/prek-action@564dda4cfa5e96aafdc4a5696c4bf7b46baae5ac # v1.1.0
@@ -52,7 +52,7 @@ jobs:
   check-thirdparty-notice:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v6.0.2
+      - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
         with:
           persist-credentials: false
       - uses: opalmedapps/actions/actions/check-thirdparty-notice@main
@@ -63,7 +63,7 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       # Setup
-      - uses: actions/checkout@v6.0.2
+      - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
         with:
           persist-credentials: false
       - name: Install dependencies
@@ -78,7 +78,7 @@ jobs:
 
       # Format the test output for GitHub
       - name: Report test results
-        uses: dorny/test-reporter@v2.5.0
+        uses: dorny/test-reporter@b082adf0eced0765477756c2a610396589b8c637 # v2.5.0
         # Run this step even if the previous step failed
         if: ${{ !cancelled() }}
         with:
@@ -88,7 +88,7 @@ jobs:
 
       # Format the coverage output for GitHub
       - name: Report coverage results
-        uses: irongut/CodeCoverageSummary@v1.3.0
+        uses: irongut/CodeCoverageSummary@51cc3a756ddcd398d447c044c02cb6aa83fdae95 # v1.3.0
         # Run this step even if the previous step failed
         if: ${{ !cancelled() }}
         with:
