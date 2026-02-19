@@ -1,6 +1,6 @@
-**By submitting this merge request, I confirm the following:**
+**By submitting this pull request, I confirm the following:**
 
-* [ ] The merge request title follows the [conventional commits convention](https://www.conventionalcommits.org/en/v1.0.0/#summary).
+* [ ] The pull request title follows the [conventional commits convention](https://www.conventionalcommits.org/en/v1.0.0/#summary).
 
 ### Changes
 <!-- Summary of the changes in this PR. -->
