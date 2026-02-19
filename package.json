@@ -18,7 +18,7 @@
   "dependencies": {
     "@stablelib/base64": "2.0.1",
     "@stablelib/utf8": "2.1.0",
-    "axios": "1.13.4",
+    "axios": "1.13.5",
     "cross-env": "10.1.0",
     "crypto-js": "4.2.0",
     "dotenv": "17.2.3",
