@@ -14,6 +14,10 @@
     ":maintainLockFilesWeekly",
     // https://docs.renovatebot.com/presets-security/#securityminimumreleaseagenpm
     "security:minimumReleaseAgeNpm",
+    // https://docs.renovatebot.com/presets-default/#configmigration
+    ":configMigration",
+    // https://docs.renovatebot.com/presets-helpers/#helperspingithubactiondigeststosemver
+    "helpers:pinGitHubActionDigestsToSemver",
     // set timezone to local one to ensure schedules are run
     // https://docs.renovatebot.com/configuration-options/#timezone
     ":timezone(America/Toronto)",

@@ -77,6 +77,9 @@ class ApiRequest {
         const errorData = !error.response ? null : ApiRequest.filterOutHTML(error.response.data);
         let opalError;
         switch (errorCode) {
+            case 400:
+                opalError = 'BAD_REQUEST';
+                break;
             case 404:
                 opalError = 'API_NOT_FOUND';
                 break;

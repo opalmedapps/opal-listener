@@ -11,6 +11,12 @@
  *                       because of the error.
  */
 const ERRORS = {
+    BAD_REQUEST: {
+        statusCode: 400,
+        logMessage: 'Server would not process request due to client error',
+        clientMessage: 'BAD_REQUEST',
+        encrypt: false,
+    },
     SNAPSHOT_VALIDATION: {
         statusCode: 400,
         logMessage: 'Firebase snapshot invalid',

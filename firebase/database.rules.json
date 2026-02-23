@@ -81,6 +81,10 @@
               ".write": "true"
             }
           }
+        },
+        "orms": {
+          ".write": "true",
+          ".read": "true"
         }
       }
     }

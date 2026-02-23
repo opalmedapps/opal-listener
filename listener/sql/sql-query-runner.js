@@ -108,6 +108,7 @@ class SQLQueryRunner {
                     if (err) {
                         logger.log("error", `Failed to execute query: ${que.sql}`, err);
                         reject(err);
+                        return;
                     }
                     logger.log('info', `Successfully performed query: ${que.sql}`);
                     if (typeof rows !== 'undefined') {
