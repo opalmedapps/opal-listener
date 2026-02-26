@@ -284,7 +284,7 @@ function updateReadStatus(requestObject) {
                 logger.log('verbose', `Implicitly marking ${notificationType} notification as read.`);
                 await runSqlQuery(
                     queries.implicitlyReadNotification(),
-                    [userId, `"${userId}"`, parameters.Id, requestObject.TargetPatientID, notificationType],
+                    [requestObject.UserID, `"${requestObject.UserID}"`, parameters.Id, requestObject.TargetPatientID, notificationType],
                 );
             }
             r.resolve({Response:'success'});
