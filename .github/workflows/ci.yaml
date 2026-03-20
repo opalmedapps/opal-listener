@@ -148,7 +148,10 @@ jobs:
       # Run tests in the legacy part of the listener, and get a coverage report for the next job
       - name: Run tests
         run: |
-          npx c8 --reporter cobertura --all --exclude src --exclude eslint.config.js mocha --reporter json --reporter-option output=mocha-report.json './listener/**/*.test.*' './legacy-registration/**/*.test.*'
+          npx c8 --reporter cobertura $FLAGS mocha --reporter json --reporter-option output=mocha-report.json $PATHS
+        env:
+          FLAGS: --all --exclude src --exclude eslint.config.js
+          PATHS: './listener/**/*.test.*' './legacy-registration/**/*.test.*'
 
       # Format the test output for GitHub
       - name: Report test results
