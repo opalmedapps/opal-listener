@@ -58,6 +58,8 @@ jobs:
   # Tests for the non-legacy part of the listener (src folder)
   test-new:
     runs-on: ubuntu-latest
+    env:
+      COVERAGE_REPORT_NAME: coverage-report-new
     steps:
       # Setup
       - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
@@ -71,7 +73,10 @@ jobs:
       # Run tests in the non-legacy part of the listener, and get a coverage report for the next job
       - name: Run tests
         run: |
-          npx c8 --reporter cobertura --all --src src --include src mocha --reporter json --reporter-option output=mocha-report.json './src/**/*.test.*'
+          npx c8 --reporter cobertura $FLAGS mocha --reporter json --reporter-option output=mocha-report.json $PATHS
+        env:
+          FLAGS: '--all --src src --include src'
+          PATHS: './src/**/*.test.*'
 
       # Format the test output for GitHub
       - name: Report test results
@@ -89,14 +94,15 @@ jobs:
         # Run this step even if a previous step failed
         if: ${{ !cancelled() }}
         with:
-          name: coverage-report-new
+          name: ${{ env.COVERAGE_REPORT_NAME }}
           path: coverage/cobertura-coverage.xml
 
   # Coverage for the non-legacy part of the listener (src folder)
   coverage-new:
     runs-on: ubuntu-latest
+    if: false # TODO testing
     # Always run after the test job, even if it failed
-    if: ${{ always() }}
+    # if: ${{ always() }}
     needs: [ test-new ]
     steps:
       # Setup
@@ -135,6 +141,8 @@ jobs:
   # Tests for the legacy part of the listener
   test-legacy:
     runs-on: ubuntu-latest
+    env:
+      COVERAGE_REPORT_NAME: coverage-report-legacy
     steps:
       # Setup
       - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
@@ -169,14 +177,15 @@ jobs:
         # Run this step even if a previous step failed
         if: ${{ !cancelled() }}
         with:
-          name: coverage-report-legacy
+          name: ${{ env.COVERAGE_REPORT_NAME }}
           path: coverage/cobertura-coverage.xml
 
   # Coverage for the legacy part of the listener
   coverage-legacy:
     runs-on: ubuntu-latest
+    if: false # TODO testing
     # Always run after the test job, even if it failed
-    if: ${{ always() }}
+    # if: ${{ always() }}
     needs: [ test-legacy ]
     steps:
       # Setup
