@@ -172,7 +172,7 @@ jobs:
 
   build-image:
     if: false # TODO testing
-    needs: [lint-eslint, lint-pre-commit, test-and-coverage-legacy]
+    needs: [lint-eslint, lint-pre-commit, coverage]
     permissions:
       contents: read
       packages: write
