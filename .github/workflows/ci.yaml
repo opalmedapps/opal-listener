@@ -144,13 +144,6 @@ jobs:
           name: ${{ matrix.COVERAGE_REPORT_NAME }}
           run-id: ${{ github.run_id }}
           github-token: ${{ secrets.GITHUB_TOKEN }}
-      - run: |
-          mkdir coverage
-          mv cobertura-coverage.xml coverage/cobertura-coverage.xml
-
-      # Print full coverage details in the job logs
-      - name: Coverage report details
-        run: npx c8 report
 
       # Format the coverage output for GitHub
       - name: Report coverage results
@@ -158,7 +151,7 @@ jobs:
         # Run this step even if a previous step failed
         if: ${{ !cancelled() }}
         with:
-          filename: coverage/cobertura-coverage.xml
+          filename: cobertura-coverage.xml
           badge: true
           fail_below_min: false
           format: markdown
