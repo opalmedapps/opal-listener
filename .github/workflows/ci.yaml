@@ -58,9 +58,9 @@ jobs:
   test:
     runs-on: ubuntu-latest
     strategy:
+      # Continue the matrix even if one part fails; e.g. continue running new tests even if there's a failure in legacy tests
+      fail-fast: false
       matrix:
-        # Continue the matrix even if one part fails; e.g. continue running new tests even if there's a failure in legacy tests
-        fail-fast: false
         part: [ new, legacy ]
         include:
           # Tests for the non-legacy part of the listener (src folder)
