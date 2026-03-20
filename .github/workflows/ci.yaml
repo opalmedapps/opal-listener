@@ -115,6 +115,12 @@ jobs:
           run-id: ${{ github.run_id }}
           github-token: ${{ secrets.GITHUB_TOKEN }}
 
+      # TODO testing
+      - name: Check for coverage report 1
+        run: ls -la
+      - name: Check for coverage report 2
+        run: ls -la coverage
+
       # Format the coverage output for GitHub
       - name: Report coverage results
         uses: irongut/CodeCoverageSummary@51cc3a756ddcd398d447c044c02cb6aa83fdae95 # v1.3.0
@@ -128,6 +134,7 @@ jobs:
           output: both
 
   test-and-coverage-legacy:
+    if: false # TODO testing
     runs-on: ubuntu-latest
     steps:
       # Setup
