@@ -67,17 +67,6 @@ jobs:
         run: |
           npx c8 --all --reporter cobertura mocha --reporter json --reporter-option output=mocha-report.json './src/**/*.test.*' './listener/**/*.test.*' './legacy-registration/**/*.test.*'
 
-      # Read coverage value for the non-legacy part of the listener (`src` folder only)
-      - name: Read `src` coverage
-        # Run this step even if a previous step failed
-        if: ${{ !cancelled() }}
-        # See: https://unix.stackexchange.com/questions/263653/extract-value-from-xml
-        # See: https://stackoverflow.com/questions/35634255/invalid-arithmetic-operator-when-doing-floating-point-math-in-bash
-        run: |
-          line_rate=$( grep -Po '(?<=name="opal-listener.src" line-rate=")([0-9.]+)' < coverage/cobertura-coverage.xml )
-          line_rate_percent=$( echo "$line_rate 100" | awk '{print $1 * $2}' | cut -d "." -f 1 )
-          echo "LINE_RATE_PERCENT=$line_rate_percent" >> "$GITHUB_ENV"
-
       # Format the test output for GitHub
       - name: Report test results
         uses: dorny/test-reporter@b082adf0eced0765477756c2a610396589b8c637 # v2.5.0
@@ -99,15 +88,6 @@ jobs:
           fail_below_min: false
           format: markdown
           output: both
-      - name: Write `src` coverage value to coverage report
-        # Run this step even if a previous step failed
-        if: ${{ !cancelled() }}
-        # See: https://askubuntu.com/questions/1295790/how-to-use-awk-to-edit-a-specifc-line-set-by-a-variable-awk-nr-i-inplace-and
-        run: |
-          line_number=$( grep -n 'Code Coverage' code-coverage-results.md | cut -d ":" -f 1 )
-          next_line_number=$(( line_number + 1 ))
-          coverage_badge="\![Code Coverage](https://img.shields.io/badge/Code%20Coverage%20(non%20legacy)-${LINE_RATE_PERCENT}%25-yellow?style=flat)"
-          awk -i inplace -v line="$next_line_number" -v content="$coverage_badge" 'NR==line{print content} 1' code-coverage-results.md
       - name: Add the coverage report to the job summary
         # Run this step even if a previous step failed
         if: ${{ !cancelled() }}
