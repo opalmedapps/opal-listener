@@ -65,7 +65,7 @@ jobs:
         include:
           # Tests for the non-legacy part of the listener (src folder)
           - part: new
-            COVERAGE_FLAGS: '-all --src src --include src'
+            COVERAGE_FLAGS: '--all --src src --include src'
             TEST_PATHS: './src/**/*.test.*'
             COVERAGE_REPORT_NAME: coverage-report-new
           # Tests for the legacy part of the listener
