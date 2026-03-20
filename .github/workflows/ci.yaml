@@ -126,6 +126,10 @@ jobs:
           fail_below_min: false
           format: markdown
           output: both
+      - name: Add the coverage report to the job summary
+        # Run this step even if a previous step failed
+        if: ${{ !cancelled() }}
+        run: cat code-coverage-results.md >> "$GITHUB_STEP_SUMMARY"
 
   test-and-coverage-legacy:
     if: false # TODO testing
