@@ -13,7 +13,7 @@ describe('Legacy Utility', function () {
             let item = "e";
             let amount = 4;
             let newArr = utility.addSeveralToArray(arr, item, amount);
-            expect(newArr).to.have.members(['a', 'b', 'c', 'd', 'e', 'e', 'e', 'test failure']);
+            expect(newArr).to.have.members(['a', 'b', 'c', 'd', 'e', 'e', 'e', 'e']);
         });
 
         it('should not alter the original array', function() {
