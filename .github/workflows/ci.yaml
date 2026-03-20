@@ -111,7 +111,7 @@ jobs:
     if: false # TODO testing
     # Always run after the test job, even if it failed
     # if: ${{ always() }}
-    needs: [ test-new ]
+    needs: [ test ]
     steps:
       # Setup
       - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
@@ -152,7 +152,7 @@ jobs:
     if: false # TODO testing
     # Always run after the test job, even if it failed
     # if: ${{ always() }}
-    needs: [ test-legacy ]
+    needs: [ test ]
     steps:
       # Setup
       - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
