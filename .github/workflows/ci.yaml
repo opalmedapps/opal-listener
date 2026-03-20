@@ -150,8 +150,8 @@ jobs:
         run: |
           npx c8 --reporter cobertura $FLAGS mocha --reporter json --reporter-option output=mocha-report.json $PATHS
         env:
-          FLAGS: --all --exclude src --exclude eslint.config.js
-          PATHS: './listener/**/*.test.*' './legacy-registration/**/*.test.*'
+          FLAGS: '--all --exclude src --exclude eslint.config.js'
+          PATHS: './listener/**/*.test.* ./legacy-registration/**/*.test.*'
 
       # Format the test output for GitHub
       - name: Report test results
