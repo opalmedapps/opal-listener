@@ -87,6 +87,9 @@ jobs:
       - name: Run tests
         run: |
           npx c8 --reporter cobertura $COVERAGE_FLAGS mocha --reporter json --reporter-option output=mocha-report.json $TEST_PATHS
+        env:
+          COVERAGE_FLAGS: ${{ matrix.COVERAGE_FLAGS }}
+          TEST_PATHS: ${{ matrix.TEST_PATHS }}
 
       # Format the test output for GitHub
       - name: Report test results
