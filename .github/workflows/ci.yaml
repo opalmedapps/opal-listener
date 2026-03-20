@@ -110,6 +110,90 @@ jobs:
           name: ${{ matrix.COVERAGE_REPORT_NAME }}
           path: coverage/cobertura-coverage.xml
 
+
+  # TODO DEBUG
+  test-debug-no-quotes:
+    runs-on: ubuntu-latest
+    steps:
+      # Setup
+      - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
+        with:
+          persist-credentials: false
+      - name: Install dependencies
+        run: npm ci
+      - name: Print mocha version
+        run: npx mocha --version
+
+      # Run tests and get a coverage report for the next job
+      - name: Run tests
+        run: |
+          npx c8 --reporter cobertura --all --src src --include src mocha --reporter json --reporter-option output=mocha-report.json ./src/**/*.test.*
+
+      # Format the test output for GitHub
+      - name: Report test results
+        uses: dorny/test-reporter@b082adf0eced0765477756c2a610396589b8c637 # v2.5.0
+        # Run this step even if a previous step failed
+        if: ${{ !cancelled() }}
+        with:
+          name: Mocha Tests
+          path: mocha-report.json
+          reporter: mocha-json
+
+  test-debug-single-quotes:
+    runs-on: ubuntu-latest
+    steps:
+      # Setup
+      - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
+        with:
+          persist-credentials: false
+      - name: Install dependencies
+        run: npm ci
+      - name: Print mocha version
+        run: npx mocha --version
+
+      # Run tests and get a coverage report for the next job
+      - name: Run tests
+        run: |
+          npx c8 --reporter cobertura --all --src src --include src mocha --reporter json --reporter-option output=mocha-report.json './src/**/*.test.*'
+
+      # Format the test output for GitHub
+      - name: Report test results
+        uses: dorny/test-reporter@b082adf0eced0765477756c2a610396589b8c637 # v2.5.0
+        # Run this step even if a previous step failed
+        if: ${{ !cancelled() }}
+        with:
+          name: Mocha Tests
+          path: mocha-report.json
+          reporter: mocha-json
+
+  test-debug-double-quotes:
+    runs-on: ubuntu-latest
+    steps:
+      # Setup
+      - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
+        with:
+          persist-credentials: false
+      - name: Install dependencies
+        run: npm ci
+      - name: Print mocha version
+        run: npx mocha --version
+
+      # Run tests and get a coverage report for the next job
+      - name: Run tests
+        run: |
+          npx c8 --reporter cobertura --all --src src --include src mocha --reporter json --reporter-option output=mocha-report.json "./src/**/*.test.*"
+
+      # Format the test output for GitHub
+      - name: Report test results
+        uses: dorny/test-reporter@b082adf0eced0765477756c2a610396589b8c637 # v2.5.0
+        # Run this step even if a previous step failed
+        if: ${{ !cancelled() }}
+        with:
+          name: Mocha Tests
+          path: mocha-report.json
+          reporter: mocha-json
+
+
   coverage:
     runs-on: ubuntu-latest
     # Always run after the test jobs, even if some tests failed
