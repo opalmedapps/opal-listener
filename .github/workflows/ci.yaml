@@ -54,7 +54,79 @@ jobs:
         with:
           package-file: './package.json'
 
-  test-and-coverage:
+  # Tests for the non-legacy part of the listener (src folder)
+  test:
+    runs-on: ubuntu-latest
+    steps:
+      # Setup
+      - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
+        with:
+          persist-credentials: false
+      - name: Install dependencies
+        run: npm ci
+      - name: Print mocha version
+        run: npx mocha --version
+
+      # Run tests in the non-legacy part of the listener, and get a coverage report for the next job
+      - name: Run tests
+        run: |
+          npx c8 --reporter cobertura --all --src src --include src mocha --reporter json --reporter-option output=mocha-report.json './src/**/*.test.*'
+
+      # Format the test output for GitHub
+      - name: Report test results
+        uses: dorny/test-reporter@b082adf0eced0765477756c2a610396589b8c637 # v2.5.0
+        # Run this step even if a previous step failed
+        if: ${{ !cancelled() }}
+        with:
+          name: Mocha Tests
+          path: mocha-report.json
+          reporter: mocha-json
+
+      # Pass the coverage report to the next job
+      - name: Archive coverage report
+        uses: actions/upload-artifact@bbbca2ddaa5d8feaa63e36b76fdaad77386f024f # v7.0.0
+        # Run this step even if a previous step failed
+        if: ${{ !cancelled() }}
+        with:
+          name: coverage-report
+          path: coverage/cobertura-coverage.xml
+
+  coverage:
+    runs-on: ubuntu-latest
+    # Always run after the test job, even if it failed
+    if: ${{ always() }}
+    needs: [ test ]
+    steps:
+      # Setup
+      - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
+        with:
+          persist-credentials: false
+      - name: Install dependencies
+        run: npm ci
+      - name: Print c8 version
+        run: npx c8 --version
+
+      # Download the coverage report from the previous job
+      - name: Download coverage report
+        uses: actions/download-artifact@3e5f45b2cfb9172054b4087a40e8e0b5a5461e7c # v8.0.1
+        with:
+          name: coverage-report
+          run-id: ${{ github.run_id }}
+          github-token: ${{ secrets.GITHUB_TOKEN }}
+
+      # Format the coverage output for GitHub
+      - name: Report coverage results
+        uses: irongut/CodeCoverageSummary@51cc3a756ddcd398d447c044c02cb6aa83fdae95 # v1.3.0
+        # Run this step even if a previous step failed
+        if: ${{ !cancelled() }}
+        with:
+          filename: coverage/cobertura-coverage.xml
+          badge: true
+          fail_below_min: false
+          format: markdown
+          output: both
+
+  test-and-coverage-legacy:
     runs-on: ubuntu-latest
     steps:
       # Setup
@@ -99,7 +171,7 @@ jobs:
 
   build-image:
     if: false # TODO testing
-    needs: [lint-eslint, lint-pre-commit, test-and-coverage]
+    needs: [lint-eslint, lint-pre-commit, test-and-coverage-legacy]
     permissions:
       contents: read
       packages: write

@@ -29,7 +29,7 @@ describe('Version', function () {
             );
         });
         it('should return -1 when v1 < v2 (small difference)', function () {
-            expect(Version.compareVersions('0.2.0', '0.2.1')).to.equal('test failure');
+            expect(Version.compareVersions('0.2.0', '0.2.1')).to.equal(-1);
         });
         it('should return -1 when v1 < v2 (big difference)', function () {
             expect(Version.compareVersions('2.9.1', '4.0.1')).to.equal(-1);
@@ -38,7 +38,7 @@ describe('Version', function () {
             expect(Version.compareVersions('2.9.9', '2.9.9')).to.equal(0);
         });
         it('should return 0 when v1 = v2 (version 0.0.0)', function () {
-            expect(Version.compareVersions('0.0.0', '0.0.0')).to.equal('test failure');
+            expect(Version.compareVersions('0.0.0', '0.0.0')).to.equal(0);
         });
         it('should return 1 when v1 > v2 (small difference)', function () {
             expect(Version.compareVersions('1.13.1', '1.12.1')).to.equal(1);
