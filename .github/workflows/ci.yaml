@@ -66,12 +66,12 @@ jobs:
           # Tests for the non-legacy part of the listener (src folder)
           - part: new
             COVERAGE_FLAGS: '--all --src src --include src'
-            TEST_PATHS: './src/**/*.test.*'
+            TEST_PATH_GLOB: './src/**/*.test.*'
             COVERAGE_REPORT_NAME: coverage-report-new
           # Tests for the legacy part of the listener
           - part: legacy
             COVERAGE_FLAGS: '--all --exclude src --exclude eslint.config.js'
-            TEST_PATHS: './listener/**/*.test.* ./legacy-registration/**/*.test.*'
+            TEST_PATH_GLOB: './{listener,legacy-registration}/**/*.test.*'
             COVERAGE_REPORT_NAME: coverage-report-legacy
     steps:
       # Setup
@@ -86,10 +86,10 @@ jobs:
       # Run tests and get a coverage report for the next job
       - name: Run tests
         run: |
-          npx c8 --reporter cobertura $COVERAGE_FLAGS mocha --reporter json --reporter-option output=mocha-report.json "$TEST_PATHS"
+          npx c8 --reporter cobertura $COVERAGE_FLAGS mocha --reporter json --reporter-option output=mocha-report.json "$TEST_PATH_GLOB"
         env:
           COVERAGE_FLAGS: ${{ matrix.COVERAGE_FLAGS }}
-          TEST_PATHS: ${{ matrix.TEST_PATHS }}
+          TEST_PATH_GLOB: ${{ matrix.TEST_PATH_GLOB }}
 
       # Format the test output for GitHub
       - name: Report test results
