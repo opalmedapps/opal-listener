@@ -3,13 +3,13 @@
 // SPDX-License-Identifier: AGPL-3.0-or-later
 
 import '../test/chai-setup.js';
-import ApiRequest from './api-request.js';
 import { assert, stub } from 'sinon';
+import ApiRequest from './api-request.js';
 import Encryption from '../encryption/encryption.js';
 import { expect } from 'chai';
-import RequestHandler from './request-handler.js';
-import { REQUEST_TYPE } from '../const.js';
 import Registration from '../registration/registration.js';
+import { REQUEST_TYPE } from '../const.js';
+import RequestHandler from './request-handler.js';
 
 describe('Request Handler', function () {
     describe('constructor', function () {
@@ -29,7 +29,7 @@ describe('Request Handler', function () {
                 getDataBaseRef: {
                     child: () => {
                         return {
-                            set: () => {}
+                            set: () => {},
                         };
                     },
                 },
@@ -66,7 +66,7 @@ describe('Request Handler', function () {
             encryptionValuesStub.restore();
             decryptionStub.restore();
             apiStub.restore();
-        })
+        });
     });
     describe('validateSnapshot', function () {
         it("should throw an error if snapshot has no 'key' attribute", function () {
