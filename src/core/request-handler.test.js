@@ -3,26 +3,82 @@
 // SPDX-License-Identifier: AGPL-3.0-or-later
 
 import '../test/chai-setup.js';
+import ApiRequest from './api-request.js';
+import { assert, stub } from 'sinon';
+import Encryption from '../encryption/encryption.js';
 import { expect } from 'chai';
 import RequestHandler from './request-handler.js';
+import { REQUEST_TYPE } from '../const.js';
+import Registration from '../registration/registration.js';
 
 describe('Request Handler', function () {
-    describe('processRequest()', function () {
-        it('Should throw error when trying to process request when Firebase is not initialize', function () {
+    describe('constructor', function () {
+        it('should fail when Firebase is not initialized', function () {
             return expect(new RequestHandler({})).to.throw;
         });
     });
+    describe('processRequest', function () {
+        let handler;
+        let encryptionValuesStub;
+        let decryptionStub;
+        let apiStub;
+        let snapshot;
+
+        before(function () {
+            handler = new RequestHandler({
+                getDataBaseRef: {
+                    child: () => {
+                        return {
+                            set: () => {}
+                        };
+                    },
+                },
+            });
+            const request = {
+                UserID: 'User',
+                DeviceId: 'Device',
+                BranchName: 'Branch',
+            };
+            encryptionValuesStub = stub(Registration, 'getEncryptionValues');
+            encryptionValuesStub.returns({
+                secret: 'secret',
+                salt: 'salt',
+            });
+            decryptionStub = stub(Encryption, 'decryptRequest');
+            decryptionStub.returns(request);
+            apiStub = stub(ApiRequest, 'makeRequest');
+            apiStub.returns({});
+            const snapshotPrototype = {};
+            snapshot = Object.create(snapshotPrototype);
+            snapshot.val = () => request;
+            snapshot.key = 'key';
+        });
+
+        it('should execute without errors in a success case', async function () {
+            await handler.processRequest(REQUEST_TYPE.REGISTRATION, snapshot);
+
+            // TODO cover other function calls
+            assert.calledOnce(encryptionValuesStub);
+            assert.calledOnce(decryptionStub);
+        });
+
+        after(function () {
+            encryptionValuesStub.restore();
+            decryptionStub.restore();
+            apiStub.restore();
+        })
+    });
     describe('validateSnapshot', function () {
-        it("Should throw an error if snapshot has no 'key' attribute", function () {
+        it("should throw an error if snapshot has no 'key' attribute", function () {
             return expect(() => RequestHandler.validateSnapshot({ Request: '' })).to.throw('SNAPSHOT_VALIDATION');
         });
-        it('Should throw an error if snapshot is empty', function () {
+        it('should throw an error if snapshot is empty', function () {
             return expect(() => RequestHandler.validateSnapshot({})).to.throw('SNAPSHOT_VALIDATION');
         });
-        it('Should throw an error if snapshot is undefined', function () {
+        it('should throw an error if snapshot is undefined', function () {
             return expect(() => RequestHandler.validateSnapshot(undefined)).to.throw('SNAPSHOT_VALIDATION');
         });
-        it('Should throw an error if snapshot is not an object', function () {
+        it('should throw an error if snapshot is not an object', function () {
             return expect(() => RequestHandler.validateSnapshot('test')).to.throw('SNAPSHOT_VALIDATION');
         });
     });
