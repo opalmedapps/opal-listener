@@ -69,7 +69,7 @@ jobs:
 
       # Format the test output for GitHub
       - name: Report test results
-        uses: dorny/test-reporter@b082adf0eced0765477756c2a610396589b8c637 # v2.5.0
+        uses: dorny/test-reporter@df6247429542221bc30d46a036ee47af1102c451 # v2.7.0
         # Run this step even if the previous step failed
         if: ${{ !cancelled() }}
         with:
