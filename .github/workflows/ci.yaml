@@ -27,6 +27,14 @@ jobs:
       - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
         with:
           persist-credentials: false
+      - name: Use Node.js
+        uses: actions/setup-node@53b83947a5a98c8d113130e565377fae1a50d02f # v6.3.0
+        with:
+          # renovate: datasource=node-version dependency=node
+          node-version: '24.14.1'
+          cache: 'npm'
+      - name: Install dependencies
+        run: npm ci
       - name: Install GitHub Actions formatter
         run: npm install eslint-formatter-gha --no-save
       - name: Print eslint version
@@ -78,6 +86,12 @@ jobs:
       - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
         with:
           persist-credentials: false
+      - name: Use Node.js
+        uses: actions/setup-node@53b83947a5a98c8d113130e565377fae1a50d02f # v6.3.0
+        with:
+          # renovate: datasource=node-version dependency=node
+          node-version: '24.14.1'
+          cache: 'npm'
       - name: Install dependencies
         run: npm ci
       - name: Print mocha version
@@ -86,7 +100,7 @@ jobs:
       # Run tests and get a coverage report for the next job
       - name: Run tests
         run: |
-          npx c8 --reporter cobertura $COVERAGE_FLAGS mocha --reporter json --reporter-option output=mocha-report.json "$TEST_PATH_GLOB"
+          npx c8 --reporter cobertura "$COVERAGE_FLAGS" mocha --reporter json --reporter-option output=mocha-report.json "$TEST_PATH_GLOB"
         env:
           COVERAGE_FLAGS: ${{ matrix.COVERAGE_FLAGS }}
           TEST_PATH_GLOB: ${{ matrix.TEST_PATH_GLOB }}
@@ -132,6 +146,12 @@ jobs:
       - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
         with:
           persist-credentials: false
+      - name: Use Node.js
+        uses: actions/setup-node@53b83947a5a98c8d113130e565377fae1a50d02f # v6.3.0
+        with:
+          # renovate: datasource=node-version dependency=node
+          node-version: '24.14.1'
+          cache: 'npm'
       - name: Install dependencies
         run: npm ci
       - name: Print c8 version

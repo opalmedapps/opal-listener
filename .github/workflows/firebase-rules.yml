@@ -52,6 +52,7 @@ jobs:
         with:
           # renovate: datasource=node-version dependency=node
           node-version: '24.14.1'
+          cache: 'npm'
       - name: Check npm installation
         run: npm -v
       - name: Install firebase-tools
