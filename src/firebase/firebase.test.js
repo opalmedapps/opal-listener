@@ -70,7 +70,6 @@ describe('Firebase', function () {
     });
 
     describe('getDataBaseRef', function () {
-        // Used for test coverage
         it('should succeed when called', async function () {
             const firebase = new Firebase(buildConfigObject('https://www.google.ca/', 'path', 'root'));
             await firebase.init();
@@ -79,14 +78,12 @@ describe('Firebase', function () {
     });
 
     describe('getDatabaseTimeStamp', function () {
-        // Used for test coverage
         it('should succeed when called', async function () {
             return expect(Firebase.getDatabaseTimeStamp).to.be.ok;
         });
     });
 
     describe('enableLogging', function () {
-        // Used for test coverage
         it('should succeed when called', async function () {
             return expect(() => Firebase.enableLogging(true)).to.not.throw();
         });
