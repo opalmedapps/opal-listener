@@ -100,7 +100,7 @@ jobs:
       # Run tests and get a coverage report for the next job
       - name: Run tests
         run: |
-          npx c8 --reporter cobertura "$COVERAGE_FLAGS" mocha --reporter json --reporter-option output=mocha-report.json "$TEST_PATH_GLOB"
+          npx c8 --reporter cobertura "$COVERAGE_FLAGS[@]" mocha --reporter json --reporter-option output=mocha-report.json "$TEST_PATH_GLOB"
         env:
           COVERAGE_FLAGS: ${{ matrix.COVERAGE_FLAGS }}
           TEST_PATH_GLOB: ${{ matrix.TEST_PATH_GLOB }}
