@@ -15,6 +15,10 @@ const configs = {
     BACKEND_REGISTRATION_AUTH_TOKEN: process.env.BACKEND_REGISTRATION_AUTH_TOKEN,
 };
 class ApiRequest {
+    // Needed to allow stubs during testing
+    // See: https://github.com/sinonjs/sinon/issues/562
+    static axios = axios;
+
     /**
      * @description Take the validated request uploaded to Firebase and send the Parameters field
      * which represents the axios request to the Django backend. Use legacy server to format the request
@@ -58,7 +62,7 @@ class ApiRequest {
         if (parameters.params !== undefined) requestParams.params = parameters.params;
 
         try {
-            return await axios(requestParams);
+            return await ApiRequest.axios(requestParams);
         }
         catch (error) {
             return ApiRequest.handleApiError(error);
@@ -87,6 +91,7 @@ class ApiRequest {
                 opalError = 'API_UNALLOWED';
                 break;
             case 'ECONNREFUSED':
+            case 'ECONNRESET':
                 opalError = 'API_NOT_AVAILABLE';
                 break;
             default:
