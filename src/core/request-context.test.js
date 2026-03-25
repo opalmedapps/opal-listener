@@ -71,6 +71,12 @@ describe('RequestContext', function () {
                 });
                 expect(context.useLegacyPBKDF2Settings).to.be.false;
             });
+            it('should convert the Accept-Language header to uppercase when provided', function () {
+                const context = new RequestContext(requestType, {
+                    'Accept-Language': 'en',
+                });
+                expect(context.acceptLanguage).to.equal('EN');
+            });
         });
     });
 });
