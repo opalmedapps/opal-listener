@@ -65,7 +65,7 @@ describe('SQLQueryRunner', function() {
 
         afterEach(function() {
             loggerSpy.resetHistory();
-        })
+        });
 
         after(function() {
             loggerSpy.restore();

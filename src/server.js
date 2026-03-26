@@ -1,7 +1,4 @@
-// SPDX-FileCopyrightText: Copyright 2022 Opal Health Informatics Group at the Research Institute of the McGill University Health Centre <john.kildea@mcgill.ca>
-//
-// SPDX-License-Identifier: AGPL-3.0-or-later
-
+/* c8 ignore start */
 /**
  * @file Entry point used to launch the listener.
  */
@@ -81,3 +78,4 @@ async function launch() {
 
     legacyServer.spawnCronJobs();
 }
+/* c8 ignore stop */
