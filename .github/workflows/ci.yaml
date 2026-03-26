@@ -137,9 +137,11 @@ jobs:
           # Coverage for the non-legacy part of the listener (src folder)
           - part: new
             COVERAGE_REPORT_NAME: coverage-report-new
+            FAIL_BELOW_100: true
           # Coverage for the legacy part of the listener
           - part: legacy
             COVERAGE_REPORT_NAME: coverage-report-legacy
+            FAIL_BELOW_100: false
     steps:
       # Setup
       - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
@@ -172,7 +174,8 @@ jobs:
         with:
           filename: cobertura-coverage.xml
           badge: true
-          fail_below_min: false
+          fail_below_min: ${{ matrix.FAIL_BELOW_100 }}
+          thresholds: '100 100'
           format: markdown
           output: both
       - name: Add the coverage report to the job summary
