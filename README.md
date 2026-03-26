@@ -122,15 +122,17 @@ npm test
 
 ### Using the request simulator
 
-It is possible to simulate a request from the Opal app, for testing, by using the simulate request script. There are two way to do so:
+It is possible to simulate a request from the Opal app, for testing, by using the simulate request script.
+There are two ways to do so:
 
-Using the npm script `simulateRequest` which will use the default request data specified in the file `src/test/simulate-request/mock-request.js`
+Calling the npm script `simulateRequest` which will use the default request data specified in the file `src/test/simulate-request/mock-request.js`,
 or
-Instantiate the `SimulateRequest` class and pass the mock request as an argument `new SimulateRequest(MockRequestData);`.
+instantiating the `SimulateRequest` class and passing the mock request as an argument: `new SimulateRequest(MockRequestData);`.
 
-Note that the mock request data need to have the same structure as `src/test/simulate-request/mock-request.js`.
+Note that the mock request needs to have the same structure as those found in `mock-request.js`.
 
 You also need to specify the correct firebase `UserID` that is linked to your local development setup and database.
+This is done automatically in the requests from `mock-request.js`, using the environment variable `TEST_ACCOUNT_FIREBASE_UID`.
 
 ## Built With
 

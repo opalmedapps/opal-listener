@@ -7,14 +7,18 @@
  */
 
 import '../test/chai-setup.js';
+import { assert, spy, stub } from 'sinon';
+import ApiRequest from '../core/api-request.js';
 import { clone } from '../test/test-utilities.js';
 import EncryptionUtilities from '../encryption/encryption.js';
 import { expect } from 'chai';
+import logger from '../../listener/logs/logger.js';
 import Registration from './registration.js';
 import RequestContext from '../core/request-context.js';
 
 const context = new RequestContext('test', {});
-
+let loggerSpy;
+let apiRequestStub;
 const originalObj = {
     Request: 'test',
     Parameters: {
@@ -24,6 +28,52 @@ const originalObj = {
 const secret = 'secret';
 
 describe('Registration', function () {
+    before(function () {
+        loggerSpy = spy(logger, 'log');
+        apiRequestStub = stub(ApiRequest, 'makeRequest');
+        apiRequestStub.returns({
+            data: {
+                code: 'A0AAAAAAAAAA',
+                status: 'NEW',
+                patient: {
+                    ramq: 'AAAA11111111',
+                },
+                hospital_patients: [
+                    {
+                        mrn: '9999999',
+                        is_active: true,
+                    },
+                ],
+            },
+        });
+    });
+
+    describe('events', function () {
+        it('should log any error that occurs in the cache during execution', function () {
+            Registration.regCache.emit('error', 'test');
+            assert.calledWith(loggerSpy, 'error', 'KeyV registration data cache error', 'test');
+        });
+    });
+
+    describe('getEncryptionValues', function () {
+        it('should call the API on cache miss', async function () {
+            apiRequestStub.resetHistory();
+            let context = new RequestContext('Test', {});
+            await Registration.getEncryptionValues(context);
+            assert.calledOnce(apiRequestStub);
+        });
+        it('should not call the API on cache hit', async function () {
+            apiRequestStub.resetHistory();
+            let context = new RequestContext('Test', {
+                BranchName: 'unit-test',
+            });
+            await Registration.regCache.set('salt-unit-test', 'test');
+            await Registration.regCache.set('secret-unit-test', 'test');
+            await Registration.getEncryptionValues(context);
+            assert.notCalled(apiRequestStub);
+        });
+    });
+
     describe('secretAndSaltFromResponse', function () {
         it('should throw an ENCRYPTION_SALT error when no salt is found', async function () {
             const response = {
@@ -206,5 +256,10 @@ describe('Registration', function () {
                 salt: ['wrong1', 'wrong2', 'wrong3'],
             });
         });
+    });
+
+    after(function () {
+        loggerSpy.restore();
+        apiRequestStub.restore();
     });
 });

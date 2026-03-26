@@ -11,6 +11,7 @@ path = [
     "firebase/firebase.json",
     "listener/educational-material/eduMaterialConfig.json",
     "listener/studies/studiesConfig.json",
+    "src/server.js",
     "package.json",
 ]
 precedence = "override"
