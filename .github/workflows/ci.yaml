@@ -41,17 +41,14 @@ jobs:
         run: npx eslint --format gha
 
   lint-pre-commit:
-    if: false # TODO testing
     uses: opalmedapps/actions/.github/workflows/prek.yaml@main
     with:
       skip: reuse-lint-file
 
   run-reuse-workflow:
-    if: false # TODO testing
     uses: opalmedapps/.github/.github/workflows/reuse.yaml@main
 
   check-thirdparty-notice:
-    if: false # TODO testing
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
@@ -184,7 +181,6 @@ jobs:
         run: cat code-coverage-results.md >> "$GITHUB_STEP_SUMMARY"
 
   build-image:
-    if: false # TODO testing
     needs: [lint-eslint, lint-pre-commit, coverage]
     permissions:
       contents: read
