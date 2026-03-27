@@ -6,6 +6,8 @@
   "$schema": "https://docs.renovatebot.com/renovate-schema.json",
   "extends": [
     "config:recommended",
+    // Require dashboard approvals: https://docs.renovatebot.com/presets-default/#dependencydashboardapproval
+    ":dependencyDashboardApproval",
     // https://docs.renovatebot.com/presets-default/#pinallexceptpeerdependencies
     ":pinAllExceptPeerDependencies",
     // https://docs.renovatebot.com/presets-default/#separatemultiplemajorreleases
@@ -28,7 +30,7 @@
   // Extra rules for node images. See: https://github.com/renovatebot/renovate/discussions/29501
   // Ensure that node docker versioning doesn't interfere with the custom managers.
   "ignorePresets": ["workarounds:nodeDockerVersioning"],
-  "assignees": ["staceybeard"],
+  "assignees": [],
   "labels": ["dependencies"],
   // Only rebase existing MRs when the branch is conflicted
   // This avoids getting spammed by updates to existing MRs
@@ -52,9 +54,5 @@
       "matchPackageNames": ["firebase-tools"],
       "schedule": ["* * 1 * *"],
     },
-  ],
-  // get weekly updates to lighten load
-  "schedule": [
-    "* * * * 1",
   ],
 }
