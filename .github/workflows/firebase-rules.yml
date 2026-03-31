@@ -36,7 +36,9 @@ env:
 
 jobs:
   deploy:
-    environment: ${{ inputs.ENVIRONMENT || 'dev' }}
+    environment:
+      name: ${{ inputs.ENVIRONMENT || 'dev' }}
+      deployment: false
     runs-on: ubuntu-latest
     steps:
       # Setup
