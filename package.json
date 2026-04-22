@@ -42,7 +42,7 @@
     "eslint-plugin-import": "2.32.0",
     "eslint-plugin-jsdoc": "62.9.0",
     "eslint-plugin-mocha": "11.2.0",
-    "firebase-tools": "15.13.0",
+    "firebase-tools": "15.14.0",
     "globals": "17.4.0",
     "jsdoc": "4.0.5",
     "mocha": "11.7.5",
